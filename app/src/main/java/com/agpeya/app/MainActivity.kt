@@ -1,0 +1,170 @@
+package com.agpeya.app
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import com.agpeya.app.data.Language
+import com.agpeya.app.ui.strings.AmharicStrings
+import com.agpeya.app.ui.strings.EnglishStrings
+import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.strings.Strings
+import java.util.Locale
+import androidx.navigation.NavController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.agpeya.app.data.SettingsRepository
+import com.agpeya.app.data.ThemeChoice
+import com.agpeya.app.reminders.ReminderScheduler
+import com.agpeya.app.ui.bookmarks.BookmarksScreen
+import com.agpeya.app.ui.common.Tab
+import com.agpeya.app.ui.customize.CustomizeHourScreen
+import com.agpeya.app.ui.customize.CustomizeHoursScreen
+import com.agpeya.app.ui.home.HomeScreen
+import com.agpeya.app.ui.modes.ModeEditorScreen
+import com.agpeya.app.ui.modes.ModesScreen
+import com.agpeya.app.ui.reading.ReadingScreen
+import com.agpeya.app.ui.search.SearchScreen
+import com.agpeya.app.ui.settings.AboutScreen
+import com.agpeya.app.ui.settings.SettingsScreen
+import com.agpeya.app.ui.theme.AgpeyaTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        val deepLinkHourId = intent?.getStringExtra(ReminderScheduler.EXTRA_HOUR_ID)
+        setContent {
+            val themeChoice by SettingsRepository.theme(this).collectAsState(initial = ThemeChoice.SYSTEM)
+            val language by SettingsRepository.language(this).collectAsState(initial = Language.SYSTEM)
+            AgpeyaTheme(themeChoice = themeChoice) {
+                CompositionLocalProvider(LocalStrings provides stringsFor(language)) {
+                    AgpeyaNavHost(deepLinkHourId = deepLinkHourId)
+                }
+            }
+        }
+    }
+}
+
+fun stringsFor(language: Language): Strings = when (language) {
+    Language.AMHARIC -> AmharicStrings
+    Language.ENGLISH -> EnglishStrings
+    Language.SYSTEM -> if (Locale.getDefault().language == "am") AmharicStrings else EnglishStrings
+}
+
+/** Switch bottom-nav tabs preserving each tab's state. */
+private fun NavController.switchTab(tab: Tab) {
+    navigate(tab.route) {
+        popUpTo(Tab.HOME.route) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
+
+@Composable
+private fun AgpeyaNavHost(deepLinkHourId: String?) {
+    val navController = rememberNavController()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val scope = rememberCoroutineScope()
+    // Wait until we know whether onboarding is done so the start destination is
+    // correct from the first frame (no flash of Home before the intro).
+    val onboarded by SettingsRepository.onboarded(context).collectAsState(initial = null as Boolean?)
+
+    LaunchedEffect(deepLinkHourId) {
+        if (deepLinkHourId != null) navController.navigate("reading/$deepLinkHourId")
+    }
+
+    val ready = onboarded ?: return
+    NavHost(
+        navController = navController,
+        startDestination = if (ready) Tab.HOME.route else "intro",
+    ) {
+        composable("intro") {
+            com.agpeya.app.ui.intro.IntroScreen(
+                onDone = {
+                    scope.launch { SettingsRepository.setOnboarded(context) }
+                    navController.navigate(Tab.HOME.route) {
+                        popUpTo("intro") { inclusive = true }
+                    }
+                },
+            )
+        }
+        composable(Tab.HOME.route) {
+            HomeScreen(
+                onOpenHour = { hourId -> navController.navigate("reading/$hourId") },
+                onOpenModes = { navController.navigate("modes") },
+                onSelectTab = navController::switchTab,
+            )
+        }
+        composable(Tab.SEARCH.route) {
+            SearchScreen(
+                onSelectTab = navController::switchTab,
+                onOpenResult = { hourId, index -> navController.navigate("reading/$hourId?section=$index") },
+            )
+        }
+        composable(Tab.BOOKMARKS.route) {
+            BookmarksScreen(
+                onSelectTab = navController::switchTab,
+                onOpen = { hourId, index -> navController.navigate("reading/$hourId?section=$index") },
+            )
+        }
+        composable(Tab.SETTINGS.route) {
+            SettingsScreen(
+                onSelectTab = navController::switchTab,
+                onOpenModes = { navController.navigate("modes") },
+                onOpenCustomize = { navController.navigate("customize") },
+                onOpenAbout = { navController.navigate("about") },
+            )
+        }
+        composable(
+            route = "reading/{hourId}?section={section}",
+            arguments = listOf(
+                navArgument("hourId") { type = NavType.StringType },
+                navArgument("section") { type = NavType.IntType; defaultValue = -1 },
+            ),
+        ) { backStackEntry ->
+            ReadingScreen(
+                hourId = backStackEntry.arguments?.getString("hourId") ?: "morning",
+                initialSectionIndex = backStackEntry.arguments?.getInt("section") ?: -1,
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable("modes") {
+            ModesScreen(
+                onBack = { navController.popBackStack() },
+                onEditMode = { modeId -> navController.navigate("mode/$modeId") },
+                onOpenBatteryHelp = { navController.navigate("battery") },
+            )
+        }
+        composable("battery") {
+            com.agpeya.app.ui.settings.BatteryHelpScreen(onBack = { navController.popBackStack() })
+        }
+        composable("mode/{modeId}") { backStackEntry ->
+            val modeId = backStackEntry.arguments?.getString("modeId") ?: return@composable
+            ModeEditorScreen(modeId = modeId, onBack = { navController.popBackStack() })
+        }
+        composable("customize") {
+            CustomizeHoursScreen(
+                onBack = { navController.popBackStack() },
+                onOpenHour = { hourId -> navController.navigate("customize/$hourId") },
+            )
+        }
+        composable("customize/{hourId}") { backStackEntry ->
+            val hourId = backStackEntry.arguments?.getString("hourId") ?: return@composable
+            CustomizeHourScreen(hourId = hourId, onBack = { navController.popBackStack() })
+        }
+        composable("about") {
+            AboutScreen(onBack = { navController.popBackStack() })
+        }
+    }
+}
