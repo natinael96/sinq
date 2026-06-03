@@ -1,0 +1,636 @@
+package com.agpeya.app.ui.reading
+
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.view.WindowManager
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.FormatColorReset
+import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.SwapHoriz
+import androidx.compose.material.icons.outlined.SwapVert
+import androidx.compose.ui.draw.clip
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.BaselineShift
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.agpeya.app.data.ContentRepository
+import com.agpeya.app.data.HighlightRepository
+import com.agpeya.app.data.LayoutRepository
+import com.agpeya.app.data.PrayerLayout
+import com.agpeya.app.data.ReadingMode
+import com.agpeya.app.data.SettingsRepository
+import com.agpeya.app.data.UserDataRepository
+import com.agpeya.app.model.Bookmark
+import com.agpeya.app.model.Hour
+import com.agpeya.app.model.HourLayout
+import com.agpeya.app.model.Section
+import com.agpeya.app.ui.theme.Abyssinica
+import kotlinx.coroutines.launch
+
+private val FONT_STEPS_SP = listOf(17, 19, 22, 25, 29)
+
+private fun Context.findActivity(): Activity? {
+    var c: Context? = this
+    while (c is ContextWrapper) {
+        if (c is Activity) return c
+        c = c.baseContext
+    }
+    return null
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ReadingScreen(hourId: String, initialSectionIndex: Int = -1, onBack: () -> Unit) {
+    val context = LocalContext.current
+    val hour by produceState<Hour?>(initialValue = null, hourId) {
+        value = ContentRepository.hour(context, hourId)
+    }
+    val fontStep by SettingsRepository.fontStep(context)
+        .collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
+    val readingMode by SettingsRepository.readingMode(context)
+        .collectAsState(initial = ReadingMode.VERTICAL)
+    val keepScreenOn by SettingsRepository.keepScreenOn(context).collectAsState(initial = true)
+    val bookmarks by UserDataRepository.bookmarks(context).collectAsState(initial = emptyList())
+    val bookmarkedIds = remember(bookmarks) { bookmarks.map { it.sectionId }.toSet() }
+    val layout by LayoutRepository.layout(context, hourId).collectAsState(initial = HourLayout())
+    val highlights by HighlightRepository.highlights(context).collectAsState(initial = emptyMap())
+
+    var showContents by remember { mutableStateOf(false) }
+    // Verse currently chosen for highlighting (shows the colour palette); null = none.
+    var selectedVerseKey by remember { mutableStateOf<String?>(null) }
+    // Apply the user's per-hour customization (show/hide + reorder).
+    val sections = remember(hour, layout) {
+        hour?.let { PrayerLayout.visible(it.sections, layout) }.orEmpty()
+    }
+    val listState = rememberLazyListState()
+    val pagerState = rememberPagerState(pageCount = { sections.size })
+    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState()
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
+    val s = com.agpeya.app.ui.strings.LocalStrings.current
+
+    // The section we want kept in view; shared across both readers so the
+    // position survives a mode switch.
+    var anchor by remember(hourId) { mutableIntStateOf(-1) }
+
+    // Record recent + decide the initial anchor once content is ready.
+    LaunchedEffect(hour, sections.size) {
+        val h = hour ?: return@LaunchedEffect
+        if (sections.isEmpty()) return@LaunchedEffect
+        UserDataRepository.recordRecent(context, h.id)
+        // A search/bookmark target is an index into the full section list; translate
+        // it to the displayed (customized) list by section id.
+        anchor = if (initialSectionIndex >= 0) {
+            val targetId = h.sections.getOrNull(initialSectionIndex)?.id
+            sections.indexOfFirst { it.id == targetId }.takeIf { it >= 0 } ?: 0
+        } else {
+            UserDataRepository.savedPosition(context, h.id).coerceIn(0, sections.size - 1)
+        }
+    }
+
+    // Scroll whichever reader is currently active to the anchor. Keyed on
+    // readingMode so a mode switch re-runs this against the now-composed reader
+    // (calling scrollToPage on an un-composed pager would suspend forever).
+    LaunchedEffect(readingMode, anchor, sections.size) {
+        if (anchor < 0 || sections.isEmpty()) return@LaunchedEffect
+        val target = anchor.coerceIn(0, sections.size - 1)
+        if (readingMode == ReadingMode.VERTICAL) listState.scrollToItem(target)
+        else pagerState.scrollToPage(target)
+    }
+
+    // Keep-screen-on while this screen is visible.
+    val view = LocalView.current
+    DisposableEffect(keepScreenOn) {
+        val window = context.findActivity()?.window
+        if (keepScreenOn) window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        else window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        onDispose { window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
+    }
+
+    // Persist scroll position on leave.
+    DisposableEffect(hourId, readingMode) {
+        onDispose {
+            val index = if (readingMode == ReadingMode.VERTICAL) listState.firstVisibleItemIndex
+            else pagerState.currentPage
+            scope.launch { UserDataRepository.savePosition(context, hourId, index) }
+        }
+    }
+
+    fun toggleBookmark(section: Section, index: Int) {
+        val h = hour ?: return
+        scope.launch {
+            UserDataRepository.toggleBookmark(
+                context,
+                Bookmark(
+                    hourId = h.id,
+                    hourName = h.name,
+                    sectionId = section.id,
+                    sectionIndex = index,
+                    title = section.title,
+                    subtitle = section.subtitle,
+                ),
+            )
+        }
+    }
+
+    Scaffold(
+        // Collapsing app bar only makes sense for vertical reading; in paged mode the
+        // nested-scroll connection can swallow the pager's swipes, so leave it off.
+        modifier = if (readingMode == ReadingMode.VERTICAL) {
+            Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+        } else {
+            Modifier
+        },
+        topBar = {
+            TopAppBar(
+                title = { Text(hour?.name ?: "", style = MaterialTheme.typography.titleLarge) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
+                    }
+                },
+                actions = {
+                    TextButton(
+                        onClick = { scope.launch { SettingsRepository.setFontStep(context, fontStep - 1) } },
+                        enabled = fontStep > 0,
+                    ) { Text("A−") }
+                    TextButton(
+                        onClick = { scope.launch { SettingsRepository.setFontStep(context, fontStep + 1) } },
+                        enabled = fontStep < FONT_STEPS_SP.lastIndex,
+                    ) { Text("A+") }
+                    IconButton(onClick = {
+                        // Capture the current position, then switch the mode. The
+                        // anchor effect scrolls the newly-composed reader to it.
+                        anchor = if (readingMode == ReadingMode.VERTICAL) {
+                            listState.firstVisibleItemIndex
+                        } else {
+                            pagerState.currentPage
+                        }
+                        scope.launch {
+                            SettingsRepository.setReadingMode(
+                                context,
+                                if (readingMode == ReadingMode.VERTICAL) ReadingMode.HORIZONTAL
+                                else ReadingMode.VERTICAL,
+                            )
+                        }
+                    }) {
+                        Icon(
+                            imageVector = if (readingMode == ReadingMode.VERTICAL) Icons.Outlined.SwapHoriz
+                            else Icons.Outlined.SwapVert,
+                            contentDescription = s.readingModeToggle,
+                        )
+                    }
+                    IconButton(onClick = { showContents = true }) {
+                        Icon(Icons.Outlined.Menu, contentDescription = s.contents)
+                    }
+                },
+                scrollBehavior = scrollBehavior,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    scrolledContainerColor = MaterialTheme.colorScheme.background,
+                ),
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.background,
+    ) { innerPadding ->
+        Box(Modifier.fillMaxSize()) {
+            AnimatedVisibility(visible = sections.isNotEmpty(), enter = fadeIn(tween(350))) {
+                val onVerseTap: (String) -> Unit = { selectedVerseKey = it }
+                when (readingMode) {
+                    ReadingMode.VERTICAL -> VerticalReader(
+                        sections, listState, bodyFontSp, innerPadding, bookmarkedIds,
+                        ::toggleBookmark, highlights, onVerseTap,
+                    )
+                    ReadingMode.HORIZONTAL -> PagedReader(
+                        sections, pagerState, bodyFontSp, innerPadding, bookmarkedIds,
+                        ::toggleBookmark, highlights, onVerseTap,
+                    )
+                }
+            }
+            HighlightBar(
+                visible = selectedVerseKey != null,
+                currentColor = selectedVerseKey?.let { highlights[it] },
+                onPick = { colorKey ->
+                    val key = selectedVerseKey
+                    selectedVerseKey = null
+                    if (key != null) scope.launch { HighlightRepository.setHighlight(context, key, colorKey) }
+                },
+                onDismiss = { selectedVerseKey = null },
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
+        }
+    }
+
+    if (showContents) {
+        ModalBottomSheet(onDismissRequest = { showContents = false }, sheetState = sheetState) {
+            ContentsSheet(
+                sections = sections,
+                onSelect = { index ->
+                    scope.launch {
+                        sheetState.hide()
+                        showContents = false
+                        when (readingMode) {
+                            ReadingMode.VERTICAL -> listState.animateScrollToItem(index)
+                            ReadingMode.HORIZONTAL -> pagerState.animateScrollToPage(index)
+                        }
+                    }
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun VerticalReader(
+    sections: List<Section>,
+    listState: androidx.compose.foundation.lazy.LazyListState,
+    bodyFontSp: Int,
+    innerPadding: PaddingValues,
+    bookmarkedIds: Set<String>,
+    onToggleBookmark: (Section, Int) -> Unit,
+    highlights: Map<String, String>,
+    onVerseTap: (String) -> Unit,
+) {
+    LazyColumn(
+        state = listState,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding),
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+    ) {
+        items(sections.size, key = { sections[it].id }) { index ->
+            val section = sections[index]
+            if (section.part != null && sections.getOrNull(index - 1)?.part != section.part) {
+                PartHeader(section.part)
+            }
+            SectionView(
+                section = section,
+                bodyFontSp = bodyFontSp,
+                isBookmarked = section.id in bookmarkedIds,
+                onToggleBookmark = { onToggleBookmark(section, index) },
+                highlights = highlights,
+                onVerseTap = onVerseTap,
+            )
+        }
+        item { Spacer(Modifier.height(56.dp)) }
+    }
+}
+
+@Composable
+private fun PagedReader(
+    sections: List<Section>,
+    pagerState: androidx.compose.foundation.pager.PagerState,
+    bodyFontSp: Int,
+    innerPadding: PaddingValues,
+    bookmarkedIds: Set<String>,
+    onToggleBookmark: (Section, Int) -> Unit,
+    highlights: Map<String, String>,
+    onVerseTap: (String) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding),
+    ) {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.weight(1f),
+            key = { sections[it].id },
+        ) { page ->
+            val section = sections[page]
+            // LazyColumn (not Column+verticalScroll) so verse taps register inside
+            // the pager — the scroll Column was consuming them.
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp),
+            ) {
+                item {
+                    section.part?.let { part ->
+                        Spacer(Modifier.height(12.dp))
+                        Text(
+                            text = part,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                    SectionView(
+                        section = section,
+                        bodyFontSp = bodyFontSp,
+                        isBookmarked = section.id in bookmarkedIds,
+                        onToggleBookmark = { onToggleBookmark(section, page) },
+                        highlights = highlights,
+                        onVerseTap = onVerseTap,
+                    )
+                    Spacer(Modifier.height(48.dp))
+                }
+            }
+        }
+        Text(
+            text = "${geezNumeral(pagerState.currentPage + 1)} / ${geezNumeral(sections.size)}",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp),
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Composable
+private fun ContentsSheet(sections: List<Section>, onSelect: (Int) -> Unit) {
+    LazyColumn(
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        item {
+            Text(
+                com.agpeya.app.ui.strings.LocalStrings.current.contents,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(8.dp))
+        }
+        items(sections.size) { index ->
+            val section = sections[index]
+            if (section.part != null && sections.getOrNull(index - 1)?.part != section.part) {
+                Spacer(Modifier.height(12.dp))
+                Text(section.part, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                Spacer(Modifier.height(4.dp))
+            }
+            Text(
+                text = section.title,
+                style = MaterialTheme.typography.titleMedium.copy(fontFamily = Abyssinica),
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onSelect(index) }
+                    .padding(vertical = 10.dp),
+            )
+        }
+        item { Spacer(Modifier.height(36.dp)) }
+    }
+}
+
+@Composable
+private fun PartHeader(part: String) {
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Spacer(Modifier.height(44.dp))
+        Text(
+            text = part,
+            style = MaterialTheme.typography.titleLarge.copy(fontFamily = Abyssinica),
+            color = MaterialTheme.colorScheme.secondary,
+        )
+        Spacer(Modifier.height(6.dp))
+        HorizontalDivider(modifier = Modifier.width(56.dp), thickness = 2.dp, color = MaterialTheme.colorScheme.secondary)
+    }
+}
+
+@Composable
+private fun SectionView(
+    section: Section,
+    bodyFontSp: Int,
+    isBookmarked: Boolean,
+    onToggleBookmark: () -> Unit,
+    highlights: Map<String, String>,
+    onVerseTap: (String) -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Spacer(Modifier.height(40.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = section.title,
+                style = MaterialTheme.typography.titleLarge.copy(fontFamily = Abyssinica),
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+            )
+            IconButton(onClick = onToggleBookmark) {
+                Icon(
+                    imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                    contentDescription = com.agpeya.app.ui.strings.LocalStrings.current.bookmarkAction,
+                    tint = if (isBookmarked) MaterialTheme.colorScheme.secondary
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        section.subtitle?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = Abyssinica),
+                fontStyle = FontStyle.Italic,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        HorizontalDivider(modifier = Modifier.width(32.dp), thickness = 1.dp, color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f))
+        Spacer(Modifier.height(16.dp))
+        VerseText(
+            section = section,
+            bodyFontSp = bodyFontSp,
+            highlights = highlights,
+            onVerseTap = onVerseTap,
+        )
+    }
+}
+
+@Composable
+private fun VerseText(
+    section: Section,
+    bodyFontSp: Int,
+    highlights: Map<String, String>,
+    onVerseTap: (String) -> Unit,
+) {
+    val markerColor = MaterialTheme.colorScheme.secondary
+    val style = MaterialTheme.typography.bodyLarge.copy(
+        fontFamily = Abyssinica,
+        fontSize = bodyFontSp.sp,
+        lineHeight = (bodyFontSp * 1.85f).sp,
+    )
+    // One Text per verse so each carries its own highlight background and tap
+    // target. (No SelectionContainer — it would swallow the verse taps.)
+    Column(Modifier.fillMaxWidth()) {
+        section.verses.forEachIndexed { i, verse ->
+                val verseNumber = section.firstVerse + i
+                val verseKey = HighlightRepository.verseKey(section.id, verseNumber)
+                val bg = highlightColor(highlights[verseKey])
+                val annotated = remember(verse, verseNumber, markerColor, bodyFontSp) {
+                    buildAnnotatedString {
+                        withStyle(
+                            SpanStyle(
+                                color = markerColor,
+                                fontSize = (bodyFontSp * 0.58f).sp,
+                                baselineShift = BaselineShift.Superscript,
+                            )
+                        ) { append(geezNumeral(verseNumber)) }
+                        append(" ")
+                        append(verse)
+                    }
+                }
+                Text(
+                    text = annotated,
+                    style = style,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(bg)
+                        .pointerInput(verseKey) {
+                            detectTapGestures(onTap = { onVerseTap(verseKey) })
+                        }
+                        .padding(horizontal = 6.dp, vertical = 3.dp),
+                )
+            }
+        }
+}
+
+/** Semi-transparent highlight tints that read well on both light and dark backgrounds. */
+private fun highlightColor(key: String?): androidx.compose.ui.graphics.Color = when (key) {
+    "yellow" -> androidx.compose.ui.graphics.Color(0x55E8C46B)
+    "green" -> androidx.compose.ui.graphics.Color(0x554CAF50)
+    "blue" -> androidx.compose.ui.graphics.Color(0x552196F3)
+    "pink" -> androidx.compose.ui.graphics.Color(0x55E0529C)
+    else -> androidx.compose.ui.graphics.Color.Transparent
+}
+
+@Composable
+private fun HighlightBar(
+    visible: Boolean,
+    currentColor: String?,
+    onPick: (String?) -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    androidx.compose.animation.AnimatedVisibility(
+        visible = visible,
+        modifier = modifier,
+        enter = androidx.compose.animation.slideInVertically { it } + fadeIn(),
+        exit = androidx.compose.animation.slideOutVertically { it } + androidx.compose.animation.fadeOut(),
+    ) {
+        val s = com.agpeya.app.ui.strings.LocalStrings.current
+        androidx.compose.material3.Surface(
+            shadowElevation = 8.dp,
+            color = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                HighlightRepository.COLOR_KEYS.forEach { key ->
+                    val selected = key == currentColor
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(highlightSwatch(key))
+                            .then(
+                                if (selected) Modifier.border(2.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
+                                else Modifier
+                            )
+                            .clickable { onPick(key) },
+                    )
+                }
+                Spacer(Modifier.weight(1f))
+                IconButton(onClick = { onPick(null) }) {
+                    Icon(
+                        Icons.Outlined.FormatColorReset,
+                        contentDescription = s.removeHighlight,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                IconButton(onClick = onDismiss) {
+                    Icon(
+                        Icons.Outlined.Close,
+                        contentDescription = s.contents,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun highlightSwatch(key: String?): androidx.compose.ui.graphics.Color = when (key) {
+    "yellow" -> androidx.compose.ui.graphics.Color(0xFFE8C46B)
+    "green" -> androidx.compose.ui.graphics.Color(0xFF4CAF50)
+    "blue" -> androidx.compose.ui.graphics.Color(0xFF2196F3)
+    "pink" -> androidx.compose.ui.graphics.Color(0xFFE0529C)
+    else -> androidx.compose.ui.graphics.Color.Gray
+}
