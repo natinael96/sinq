@@ -1,0 +1,165 @@
+package com.agpeya.app.reminders
+
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
+import android.content.Context
+import android.content.Intent
+import android.media.AudioAttributes
+import android.media.MediaPlayer
+import android.media.RingtoneManager
+import android.os.Build
+import android.os.Handler
+import android.os.IBinder
+import android.os.Looper
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
+import androidx.core.app.NotificationCompat
+import com.agpeya.app.R
+import com.agpeya.app.data.AlarmAlert
+import com.agpeya.app.data.AlarmSound
+import com.agpeya.app.data.SettingsRepository
+import com.agpeya.app.stringsFor
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+
+/**
+ * Foreground service that turns a reminder into a real ringing alarm: it plays
+ * the device alarm sound on a loop, vibrates, and posts a full-screen-intent
+ * notification that launches [AlarmActivity] over the lock screen. It stops
+ * when the user dismisses it or after [TIMEOUT_MS].
+ */
+class AlarmService : Service() {
+
+    private var player: MediaPlayer? = null
+    private var vibrator: Vibrator? = null
+    private val handler = Handler(Looper.getMainLooper())
+    private val autoStop = Runnable { stopSelf() }
+
+    override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action == ACTION_DISMISS) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
+        val hourId = intent?.getStringExtra(ReminderScheduler.EXTRA_HOUR_ID) ?: "morning"
+        val hourName = intent?.getStringExtra(ReminderScheduler.EXTRA_HOUR_NAME) ?: ""
+
+        ensureChannel()
+        startForeground(NOTIFICATION_ID, buildNotification(hourId, hourName))
+        startRinging()
+        handler.postDelayed(autoStop, TIMEOUT_MS)
+        return START_STICKY
+    }
+
+    private fun startRinging() {
+        val alert = SettingsRepository.alarmAlertBlocking(this)
+        val wantSound = alert == AlarmAlert.SOUND_VIBRATE || alert == AlarmAlert.SOUND_ONLY
+        val wantVibrate = alert == AlarmAlert.SOUND_VIBRATE || alert == AlarmAlert.VIBRATE_ONLY
+
+        if (wantSound) {
+            val type = when (SettingsRepository.alarmSoundBlocking(this)) {
+                AlarmSound.ALARM -> RingtoneManager.TYPE_ALARM
+                AlarmSound.RINGTONE -> RingtoneManager.TYPE_RINGTONE
+                AlarmSound.NOTIFICATION -> RingtoneManager.TYPE_NOTIFICATION
+            }
+            val uri = RingtoneManager.getActualDefaultRingtoneUri(this, type)
+                ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            runCatching {
+                player = MediaPlayer().apply {
+                    setAudioAttributes(
+                        AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_ALARM)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .build()
+                    )
+                    setDataSource(this@AlarmService, uri)
+                    isLooping = true
+                    prepare()
+                    start()
+                }
+            }
+        }
+
+        if (wantVibrate) {
+            val vib = if (Build.VERSION.SDK_INT >= 31) {
+                (getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+            } else {
+                @Suppress("DEPRECATION")
+                getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            }
+            vibrator = vib
+            val pattern = longArrayOf(0, 600, 800)
+            vib.vibrate(VibrationEffect.createWaveform(pattern, 0))
+        }
+    }
+
+    private fun buildNotification(hourId: String, hourName: String): android.app.Notification {
+        val fullScreen = PendingIntent.getActivity(
+            this,
+            1,
+            Intent(this, AlarmActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                putExtra(ReminderScheduler.EXTRA_HOUR_ID, hourId)
+                putExtra(ReminderScheduler.EXTRA_HOUR_NAME, hourName)
+            },
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+        val dismiss = PendingIntent.getService(
+            this,
+            2,
+            Intent(this, AlarmService::class.java).setAction(ACTION_DISMISS),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+        val s = stringsFor(runBlocking { SettingsRepository.language(this@AlarmService).first() })
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(s.itsTime)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setOngoing(true)
+            .setAutoCancel(false)
+            .setFullScreenIntent(fullScreen, true)
+            .setContentIntent(fullScreen)
+            .addAction(0, s.dismiss, dismiss)
+            .build()
+    }
+
+    private fun ensureChannel() {
+        val nm = getSystemService(NotificationManager::class.java)
+        if (nm.getNotificationChannel(CHANNEL_ID) == null) {
+            nm.createNotificationChannel(
+                NotificationChannel(CHANNEL_ID, "የጸሎት ማንቂያ", NotificationManager.IMPORTANCE_HIGH).apply {
+                    description = "Prayer alarm"
+                    setSound(null, null) // sound is played by the service on the alarm stream
+                    enableVibration(false)
+                }
+            )
+        }
+    }
+
+    override fun onDestroy() {
+        handler.removeCallbacks(autoStop)
+        runCatching { player?.stop() }
+        player?.release()
+        player = null
+        vibrator?.cancel()
+        super.onDestroy()
+    }
+
+    companion object {
+        const val CHANNEL_ID = "prayer_alarms"
+        const val ACTION_DISMISS = "com.agpeya.app.ALARM_DISMISS"
+        private const val NOTIFICATION_ID = 7001
+        private const val TIMEOUT_MS = 60_000L
+
+        fun dismiss(context: Context) {
+            context.startService(
+                Intent(context, AlarmService::class.java).setAction(ACTION_DISMISS)
+            )
+        }
+    }
+}
