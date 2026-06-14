@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Adaptive-icon foreground: gold cross, centered within the 108dp safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#E8C46B"
+        android:pathData="M50,30h8v16h16v8h-16v24h-8v-24h-16v-8h16z" />
+</vector>
