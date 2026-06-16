@@ -37,6 +37,18 @@ object LayoutRepository {
         }
     }
 
+    suspend fun addPsalm(context: Context, hourId: String, number: Int) {
+        update(context, hourId) {
+            if (number in it.added) it else it.copy(added = it.added + number)
+        }
+    }
+
+    suspend fun removePsalm(context: Context, hourId: String, number: Int) {
+        update(context, hourId) {
+            it.copy(added = it.added - number, hidden = it.hidden - "ps_$number", order = it.order - "ps_$number")
+        }
+    }
+
     suspend fun reset(context: Context, hourId: String) {
         context.layoutDataStore.edit { prefs ->
             val map = decode(prefs[KEY]) - hourId
@@ -55,16 +67,20 @@ object LayoutRepository {
 /** Pure helpers for applying an [HourLayout] to an hour's sections. */
 object PrayerLayout {
 
-    /** All sections in the user's order (newly added sections appended), hidden included. */
-    fun ordered(sections: List<Section>, layout: HourLayout): List<Section> {
-        if (layout.order.isEmpty()) return sections
-        val byId = sections.associateBy { it.id }
+    /**
+     * Combine an hour's own sections with the user-added psalms, in the user's
+     * order (anything not explicitly ordered is appended). Hidden included.
+     */
+    fun ordered(sections: List<Section>, addedPsalms: List<Section>, layout: HourLayout): List<Section> {
+        val all = sections + addedPsalms
+        if (layout.order.isEmpty()) return all
+        val byId = all.associateBy { it.id }
         val inOrder = layout.order.mapNotNull { byId[it] }
-        val rest = sections.filter { it.id !in layout.order }
+        val rest = all.filter { it.id !in layout.order }
         return inOrder + rest
     }
 
-    /** Sections to actually display: ordered and with hidden ones removed. */
-    fun visible(sections: List<Section>, layout: HourLayout): List<Section> =
-        ordered(sections, layout).filter { it.id !in layout.hidden }
+    /** Sections to actually display: combined, ordered, and with hidden ones removed. */
+    fun visible(sections: List<Section>, addedPsalms: List<Section>, layout: HourLayout): List<Section> =
+        ordered(sections, addedPsalms, layout).filter { it.id !in layout.hidden }
 }

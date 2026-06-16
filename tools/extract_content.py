@@ -201,6 +201,32 @@ def main() -> None:
     (OUT / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\nTOTAL      {total_sections} sections  {total_chars} chars -> {OUT}")
 
+    # Full Psalter (all 150) so users can add any psalm to any hour.
+    psalter = build_psalter(books)
+    (OUT / "psalms.json").write_text(json.dumps(psalter, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    print(f"PSALTER    {len(psalter['psalms'])} psalms -> psalms.json")
+
+
+def build_psalter(books: dict) -> dict:
+    psalms_book = books["psalms"]
+    out = []
+    for ch in psalms_book["chapters"]:
+        num = int(ch["chapter"])
+        superscription = (ch["sections"][0].get("title") or "").strip() or None
+        verses = [v["text"].strip() for v in chapter_verses(ch)]
+        out.append({
+            "id": f"ps_{num}",
+            "number": num,
+            "orderIndex": num,
+            "type": "psalm",
+            "title": f"መዝሙር {geez(num)}",
+            "subtitle": superscription,
+            "reference": f"Ps {num}",
+            "firstVerse": 1,
+            "verses": verses,
+        })
+    return {"psalms": out}
+
 
 if __name__ == "__main__":
     sys.exit(main())

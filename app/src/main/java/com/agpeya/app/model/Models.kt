@@ -21,8 +21,10 @@ data class Hour(
 @Serializable
 data class Section(
     val id: String,
-    val orderIndex: Int,
+    val orderIndex: Int = 0,
     val type: String,
+    /** Psalm number, for psalter entries; null for other sections. */
+    val number: Int? = null,
     val title: String,
     val subtitle: String? = null,
     val reference: String? = null,
@@ -42,7 +44,12 @@ data class Section(
 data class HourLayout(
     val order: List<String> = emptyList(),
     val hidden: Set<String> = emptySet(),
+    /** Psalm numbers the user added to this hour (rendered as extra sections). */
+    val added: List<Int> = emptyList(),
 )
+
+@Serializable
+data class Psalter(val psalms: List<Section>)
 
 /** A saved bookmark — a snapshot so the bookmarks list renders without rescanning content. */
 @Serializable

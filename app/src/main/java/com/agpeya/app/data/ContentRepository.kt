@@ -19,6 +19,22 @@ object ContentRepository {
     @Volatile
     private var cache: List<Hour>? = null
 
+    @Volatile
+    private var psalterCache: List<com.agpeya.app.model.Section>? = null
+
+    /** All 150 psalms, ordered by number — used by the "add psalm" picker. */
+    suspend fun psalter(context: Context): List<com.agpeya.app.model.Section> =
+        psalterCache ?: withContext(Dispatchers.IO) {
+            val assets = context.applicationContext.assets
+            val loaded = json.decodeFromString<com.agpeya.app.model.Psalter>(
+                assets.open("content/psalms.json").readBytes().decodeToString()
+            ).psalms
+            loaded.also { psalterCache = it }
+        }
+
+    suspend fun psalm(context: Context, number: Int): com.agpeya.app.model.Section? =
+        psalter(context).find { it.number == number }
+
     suspend fun hours(context: Context): List<Hour> =
         cache ?: withContext(Dispatchers.IO) {
             load(context.applicationContext).also { cache = it }
