@@ -8,40 +8,57 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.agpeya.app.data.ThemeChoice
 
-// Fixed brand palette (decision D6: no dynamic color).
-// Deep indigo + warm gold accent; candidate from D5 mockups, easy to swap here.
-private val Indigo = Color(0xFF2E2A5C)
-private val IndigoLight = Color(0xFF4A4486)
-private val Gold = Color(0xFFB8923E)
-private val Parchment = Color(0xFFFAF6EE)
-private val NightSurface = Color(0xFF141320)
-private val NightText = Color(0xFFE6E1D8)
+// Green & gold identity (decision: reference-inspired restyle).
+// Deep liturgical green carries the ground; gold is the voice of what matters —
+// counts, streaks, verse numbers, your place. Sage marks completed states.
+private val GreenDeep = Color(0xFF0E3B31)   // light-theme primary / brand green
+private val GreenCard = Color(0xFF124136)   // dark-theme hero card
+private val GreenGroundDark = Color(0xFF0B3129)
+private val GreenSurfaceDark = Color(0xFF10382F)
+private val GreenVariantDark = Color(0xFF1B4A3E)
+private val GoldDark = Color(0xFFE4BC5A)    // gold on dark ground
+private val GoldLight = Color(0xFFA67F2E)   // deeper gold for light ground
+private val Ivory = Color(0xFFF2EDDE)
+private val IvoryGround = Color(0xFFEFEDE2)
+private val IvorySurface = Color(0xFFF7F5EB)
+private val IvoryVariant = Color(0xFFE3E0D1)
+private val InkLight = Color(0xFF1D2B24)
+private val MutedLight = Color(0xFF5D6B60)
+private val MutedDark = Color(0xFF9DBBAD)
 
 private val LightColors = lightColorScheme(
-    primary = Indigo,
-    onPrimary = Color.White,
-    secondary = Gold,
-    onSecondary = Color.White,
-    background = Parchment,
-    onBackground = Color(0xFF1C1A14),
-    surface = Color.White,
-    onSurface = Color(0xFF1C1A14),
-    surfaceVariant = Color(0xFFF0EAD9),
-    onSurfaceVariant = Color(0xFF4A463C),
+    primary = GreenDeep,
+    onPrimary = Ivory,
+    primaryContainer = Color(0xFFD8E2D6),
+    onPrimaryContainer = InkLight,
+    secondary = GoldLight,
+    onSecondary = Ivory,
+    secondaryContainer = Color(0xFFEADFC0),
+    onSecondaryContainer = Color(0xFF3E2F0D),
+    background = IvoryGround,
+    onBackground = InkLight,
+    surface = IvorySurface,
+    onSurface = InkLight,
+    surfaceVariant = IvoryVariant,
+    onSurfaceVariant = MutedLight,
 )
 
-// Dark theme is a flagship feature (D5): night hours are prayed in the dark.
+// The primary look: immersive deep green, ivory ink, gold accents.
 private val DarkColors = darkColorScheme(
-    primary = IndigoLight,
-    onPrimary = Color.White,
-    secondary = Gold,
-    onSecondary = Color.Black,
-    background = NightSurface,
-    onBackground = NightText,
-    surface = Color(0xFF1D1B2C),
-    onSurface = NightText,
-    surfaceVariant = Color(0xFF262438),
-    onSurfaceVariant = Color(0xFFB5B0A4),
+    primary = GreenCard,
+    onPrimary = Ivory,
+    primaryContainer = Color(0xFF1A5748),
+    onPrimaryContainer = Ivory,
+    secondary = GoldDark,
+    onSecondary = Color(0xFF123829),
+    secondaryContainer = Color(0xFF4F3F17),
+    onSecondaryContainer = Ivory,
+    background = GreenGroundDark,
+    onBackground = Ivory,
+    surface = GreenSurfaceDark,
+    onSurface = Ivory,
+    surfaceVariant = GreenVariantDark,
+    onSurfaceVariant = MutedDark,
 )
 
 @Composable

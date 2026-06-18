@@ -50,7 +50,7 @@ fun AboutScreen(onBack: () -> Unit) {
                 .padding(horizontal = 24.dp),
         ) {
             Spacer(Modifier.height(8.dp))
-            Para("ጸሎት", MaterialTheme.typography.headlineMedium)
+            Para("ስንቅ", MaterialTheme.typography.headlineMedium)
             Para(s.aboutTagline)
             Section(s.aboutSourceTitle)
             Para(s.aboutSourceBody)

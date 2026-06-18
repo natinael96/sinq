@@ -35,7 +35,7 @@ import kotlinx.coroutines.launch
 fun IntroScreen(onDone: () -> Unit) {
     val s = LocalStrings.current
     val pages = listOf(
-        Triple("ጸሎት", s.introTitle, s.introBody),
+        Triple("ስንቅ", s.introTitle, s.introBody),
         Triple(null, s.introOfflineTitle, s.introOfflineBody),
         Triple(null, s.introRemindersTitle, s.introRemindersBody),
     )
