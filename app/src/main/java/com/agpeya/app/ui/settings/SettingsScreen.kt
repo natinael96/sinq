@@ -193,7 +193,7 @@ fun SettingsScreen(
             }
 
             item {
-                SettingsLink(s.customizePrayers, onOpenCustomize)
+                SettingsLink(s.manageHours, onOpenCustomize)
                 SettingsLink(s.reminderModes, onOpenModes)
                 SettingsLink(s.about, onOpenAbout)
             }

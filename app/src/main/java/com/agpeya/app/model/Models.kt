@@ -51,6 +51,22 @@ data class HourLayout(
 @Serializable
 data class Psalter(val psalms: List<Section>)
 
+/** A user-created prayer hour. Its content is the psalms added via [HourLayout]. */
+@Serializable
+data class CustomHour(val id: String, val name: String)
+
+/**
+ * User configuration of the hour list: created hours, display order, hidden
+ * hours, and name overrides (which work for built-in hours too).
+ */
+@Serializable
+data class HoursConfig(
+    val custom: List<CustomHour> = emptyList(),
+    val order: List<String> = emptyList(),
+    val hidden: Set<String> = emptySet(),
+    val names: Map<String, String> = emptyMap(),
+)
+
 /** A saved bookmark — a snapshot so the bookmarks list renders without rescanning content. */
 @Serializable
 data class Bookmark(

@@ -68,7 +68,7 @@ fun ModeEditorScreen(modeId: String, onBack: () -> Unit) {
         .collectAsState(initial = ModesState(ModesRepository.BUILT_IN_ID, emptyList()))
     val mode = state.modes.find { it.id == modeId }
     val hours by produceState<List<Hour>>(initialValue = emptyList()) {
-        value = ContentRepository.hours(context)
+        value = com.agpeya.app.data.HoursRepository.visibleHours(context)
     }
     val hourNames = remember(hours) { hours.associate { it.id to it.name } }
     var editing by remember { mutableStateOf<ReminderEntry?>(null) }

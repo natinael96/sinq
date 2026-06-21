@@ -3,7 +3,7 @@ package com.agpeya.app.reminders
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.agpeya.app.data.ContentRepository
+import com.agpeya.app.data.HoursRepository
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -23,7 +23,7 @@ class SystemEventsReceiver : BroadcastReceiver() {
                 Thread {
                     runBlocking {
                         val names = runCatching {
-                            ContentRepository.hours(context).associate { it.id to it.name }
+                            HoursRepository.visibleHours(context).associate { it.id to it.name }
                         }.getOrDefault(emptyMap())
                         ReminderScheduler.rescheduleAll(context, names)
                     }

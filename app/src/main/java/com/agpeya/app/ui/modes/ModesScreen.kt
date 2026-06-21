@@ -57,7 +57,7 @@ fun ModesScreen(onBack: () -> Unit, onEditMode: (String) -> Unit, onOpenBatteryH
     var deleteCandidate by remember { mutableStateOf<PrayerMode?>(null) }
 
     suspend fun reschedule() {
-        val names = ContentRepository.hours(context).associate { it.id to it.name }
+        val names = com.agpeya.app.data.HoursRepository.visibleHours(context).associate { it.id to it.name }
         ReminderScheduler.rescheduleAll(context, names)
     }
 

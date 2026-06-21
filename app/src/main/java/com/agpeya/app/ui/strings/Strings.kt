@@ -99,6 +99,15 @@ interface Strings {
     val reminderReached: String
     val itsTime: String
     val openShort: String
+    val addPsalm: String
+    val choosePsalm: String
+    val remove: String
+    val manageHours: String
+    val newHour: String
+    val hourNameLabel: String
+    val rename: String
+    val manageHoursIntro: String
+
 
     // First-launch intro
     val introTitle: String
@@ -218,6 +227,15 @@ object AmharicStrings : Strings {
     override val reminderReached = "የጸሎት ሰዓት ደርሷል"
     override val itsTime = "ጊዜው ደርሷል"
     override val openShort = "ክፈት"
+    override val addPsalm = "መዝሙር ጨምር"
+    override val choosePsalm = "መዝሙር ምረጥ"
+    override val remove = "አስወግድ"
+    override val manageHours = "ሰዓታት አስተካክል"
+    override val newHour = "አዲስ ሰዓት"
+    override val hourNameLabel = "የሰዓቱ ስም"
+    override val rename = "ስም ቀይር"
+    override val manageHoursIntro = "ሰዓታትን ይጨምሩ፣ ስም ይቀይሩ፣ ደርድሩ ወይም ይደብቁ። ክፍሎችን ለማስተካከል ሰዓቱን ይንኩ።"
+
 
     override val introTitle = "እንኳን ደህና መጡ"
     override val introBody = "የጸሎት ሰዓታት — መዝሙራትና ወንጌላት በአንድ ቦታ።"
@@ -334,6 +352,15 @@ object EnglishStrings : Strings {
     override val reminderReached = "It is time to pray"
     override val itsTime = "It's time"
     override val openShort = "Open"
+    override val addPsalm = "Add psalm"
+    override val choosePsalm = "Choose a psalm"
+    override val remove = "Remove"
+    override val manageHours = "Manage hours"
+    override val newHour = "New hour"
+    override val hourNameLabel = "Hour name"
+    override val rename = "Rename"
+    override val manageHoursIntro = "Add, rename, reorder or hide hours. Tap an hour to edit its sections."
+
 
     override val introTitle = "Welcome"
     override val introBody = "The hours of prayer — psalms and gospels, in one place."

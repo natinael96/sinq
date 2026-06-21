@@ -29,7 +29,6 @@ import com.agpeya.app.reminders.ReminderScheduler
 import com.agpeya.app.ui.bookmarks.BookmarksScreen
 import com.agpeya.app.ui.common.Tab
 import com.agpeya.app.ui.customize.CustomizeHourScreen
-import com.agpeya.app.ui.customize.CustomizeHoursScreen
 import com.agpeya.app.ui.home.HomeScreen
 import com.agpeya.app.ui.modes.ModeEditorScreen
 import com.agpeya.app.ui.modes.ModesScreen
@@ -85,6 +84,7 @@ private fun AgpeyaNavHost(deepLinkHourId: String?) {
     }
 
     val ready = onboarded ?: return
+
     NavHost(
         navController = navController,
         startDestination = if (ready) Tab.HOME.route else "intro",
@@ -154,9 +154,9 @@ private fun AgpeyaNavHost(deepLinkHourId: String?) {
             ModeEditorScreen(modeId = modeId, onBack = { navController.popBackStack() })
         }
         composable("customize") {
-            CustomizeHoursScreen(
+            com.agpeya.app.ui.hours.ManageHoursScreen(
                 onBack = { navController.popBackStack() },
-                onOpenHour = { hourId -> navController.navigate("customize/$hourId") },
+                onEditHour = { hourId -> navController.navigate("customize/$hourId") },
             )
         }
         composable("customize/{hourId}") { backStackEntry ->
