@@ -21,6 +21,36 @@ object ReminderScheduler {
     const val EXTRA_ENTRY_ID = "entryId"
     const val EXTRA_HOUR_ID = "hourId"
     const val EXTRA_HOUR_NAME = "hourName"
+    const val EXTRA_SNOOZE = "snooze"
+    const val SNOOZE_MINUTES = 10
+
+    /** Schedule a one-shot alarm [SNOOZE_MINUTES] from now for the same hour. */
+    fun snooze(context: Context, hourId: String, hourName: String) {
+        val at = LocalDateTime.now().plusMinutes(SNOOZE_MINUTES.toLong())
+        val triggerAt = at.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        val intent = Intent(context, AlarmReceiver::class.java).apply {
+            action = "com.agpeya.app.SNOOZE"
+            data = android.net.Uri.parse("agpeya://snooze/$hourId")
+            putExtra(EXTRA_ENTRY_ID, "snooze_$hourId")
+            putExtra(EXTRA_HOUR_ID, hourId)
+            putExtra(EXTRA_HOUR_NAME, hourName)
+            putExtra(EXTRA_SNOOZE, true)
+        }
+        val pi = PendingIntent.getBroadcast(
+            context, "snooze_$hourId".hashCode(), intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+        val showPi = PendingIntent.getActivity(
+            context, 0, Intent(context, MainActivity::class.java),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+        val am = context.getSystemService(AlarmManager::class.java)
+        try {
+            am.setAlarmClock(AlarmManager.AlarmClockInfo(triggerAt, showPi), pi)
+        } catch (_: SecurityException) {
+            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
+        }
+    }
 
     /** Next fire time for an entry, strictly after [now]. */
     fun nextOccurrence(entry: ReminderEntry, now: LocalDateTime): LocalDateTime? {

@@ -60,6 +60,11 @@ class AlarmActivity : ComponentActivity() {
                 CompositionLocalProvider(LocalStrings provides strings) {
                     AlarmScreen(
                         hourName = hourName,
+                        onSnooze = {
+                            ReminderScheduler.snooze(this, hourId, hourName)
+                            AlarmService.dismiss(this)
+                            finish()
+                        },
                         onDismiss = {
                             AlarmService.dismiss(this)
                             finish()
@@ -81,18 +86,24 @@ class AlarmActivity : ComponentActivity() {
     }
 }
 
-// Minimal cream alarm screen — light background, dark text.
-private val AlarmCream = Color(0xFFFAF6EE)
-private val AlarmInk = Color(0xFF2E2A5C)
-private val AlarmMuted = Color(0xFF8A8472)
+// Green & gold alarm screen — deep liturgical green ground, gold action.
+private val AlarmGround = Color(0xFF0B3129)
+private val AlarmGold = Color(0xFFE4BC5A)
+private val AlarmIvory = Color(0xFFF2EDDE)
+private val AlarmOnGold = Color(0xFF123829)
 
 @Composable
-private fun AlarmScreen(hourName: String, onDismiss: () -> Unit, onOpen: () -> Unit) {
+private fun AlarmScreen(
+    hourName: String,
+    onSnooze: () -> Unit,
+    onDismiss: () -> Unit,
+    onOpen: () -> Unit,
+) {
     val s = LocalStrings.current
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(AlarmCream),
+            .background(AlarmGround),
     ) {
         Column(
             modifier = Modifier
@@ -104,7 +115,7 @@ private fun AlarmScreen(hourName: String, onDismiss: () -> Unit, onOpen: () -> U
             Text(
                 text = s.itsTime,
                 style = MaterialTheme.typography.headlineMedium,
-                color = AlarmInk,
+                color = AlarmIvory,
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(64.dp))
@@ -112,16 +123,23 @@ private fun AlarmScreen(hourName: String, onDismiss: () -> Unit, onOpen: () -> U
                 onClick = onOpen,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = AlarmInk,
-                    contentColor = Color.White,
+                    containerColor = AlarmGold,
+                    contentColor = AlarmOnGold,
                 ),
             ) { Text(s.openShort) }
+            Spacer(Modifier.height(12.dp))
+            OutlinedButton(
+                onClick = onSnooze,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("${s.snooze} · ${ReminderScheduler.SNOOZE_MINUTES}'", color = AlarmIvory)
+            }
             Spacer(Modifier.height(12.dp))
             OutlinedButton(
                 onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text(s.dismiss, color = AlarmInk)
+                Text(s.dismiss, color = AlarmIvory)
             }
         }
     }

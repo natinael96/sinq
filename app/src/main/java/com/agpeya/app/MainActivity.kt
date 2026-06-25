@@ -79,11 +79,13 @@ private fun AgpeyaNavHost(deepLinkHourId: String?) {
     // correct from the first frame (no flash of Home before the intro).
     val onboarded by SettingsRepository.onboarded(context).collectAsState(initial = null as Boolean?)
 
-    LaunchedEffect(deepLinkHourId) {
-        if (deepLinkHourId != null) navController.navigate("reading/$deepLinkHourId")
-    }
-
     val ready = onboarded ?: return
+
+    // Deep link from a fired alarm. Gated on `ready` so it never runs before the
+    // NavHost graph below is composed (navigating earlier crashes the app).
+    LaunchedEffect(ready, deepLinkHourId) {
+        if (ready && deepLinkHourId != null) navController.navigate("reading/$deepLinkHourId")
+    }
 
     NavHost(
         navController = navController,

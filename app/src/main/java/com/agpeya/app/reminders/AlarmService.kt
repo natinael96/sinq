@@ -48,6 +48,12 @@ class AlarmService : Service() {
         val hourId = intent?.getStringExtra(ReminderScheduler.EXTRA_HOUR_ID) ?: "morning"
         val hourName = intent?.getStringExtra(ReminderScheduler.EXTRA_HOUR_NAME) ?: ""
 
+        if (intent?.action == ACTION_SNOOZE) {
+            ReminderScheduler.snooze(this, hourId, hourName)
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
         ensureChannel()
         startForeground(NOTIFICATION_ID, buildNotification(hourId, hourName))
         startRinging()
@@ -114,6 +120,15 @@ class AlarmService : Service() {
             Intent(this, AlarmService::class.java).setAction(ACTION_DISMISS),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
+        val snooze = PendingIntent.getService(
+            this,
+            3,
+            Intent(this, AlarmService::class.java).setAction(ACTION_SNOOZE).apply {
+                putExtra(ReminderScheduler.EXTRA_HOUR_ID, hourId)
+                putExtra(ReminderScheduler.EXTRA_HOUR_NAME, hourName)
+            },
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
         val s = stringsFor(runBlocking { SettingsRepository.language(this@AlarmService).first() })
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
@@ -124,6 +139,7 @@ class AlarmService : Service() {
             .setAutoCancel(false)
             .setFullScreenIntent(fullScreen, true)
             .setContentIntent(fullScreen)
+            .addAction(0, s.snooze, snooze)
             .addAction(0, s.dismiss, dismiss)
             .build()
     }
@@ -153,6 +169,7 @@ class AlarmService : Service() {
     companion object {
         const val CHANNEL_ID = "prayer_alarms"
         const val ACTION_DISMISS = "com.agpeya.app.ALARM_DISMISS"
+        const val ACTION_SNOOZE = "com.agpeya.app.ALARM_SNOOZE"
         private const val NOTIFICATION_ID = 7001
         private const val TIMEOUT_MS = 60_000L
 

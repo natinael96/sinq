@@ -19,6 +19,18 @@ class AlarmReceiver : BroadcastReceiver() {
         val hourId = intent.getStringExtra(ReminderScheduler.EXTRA_HOUR_ID) ?: return
         val hourName = intent.getStringExtra(ReminderScheduler.EXTRA_HOUR_NAME) ?: hourId
 
+        // A snoozed alarm fires once, unconditionally — no active-entry check, no chaining.
+        if (intent.getBooleanExtra(ReminderScheduler.EXTRA_SNOOZE, false)) {
+            ContextCompat.startForegroundService(
+                context,
+                Intent(context, AlarmService::class.java).apply {
+                    putExtra(ReminderScheduler.EXTRA_HOUR_ID, hourId)
+                    putExtra(ReminderScheduler.EXTRA_HOUR_NAME, hourName)
+                },
+            )
+            return
+        }
+
         val stillActive = runBlocking {
             val entry = ModesRepository.current(context).activeMode
                 ?.entries?.find { it.id == entryId && it.enabled }
