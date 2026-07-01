@@ -120,6 +120,15 @@ private fun AgpeyaNavHost(deepLinkHourId: String?) {
                 onOpen = { hourId, index -> navController.navigate("reading/$hourId?section=$index") },
             )
         }
+        composable(Tab.STREAK.route) {
+            com.agpeya.app.ui.habits.StreakScreen(
+                onSelectTab = navController::switchTab,
+                onManageHabits = { navController.navigate("habits") },
+            )
+        }
+        composable("habits") {
+            com.agpeya.app.ui.habits.ManageHabitsScreen(onBack = { navController.popBackStack() })
+        }
         composable(Tab.SETTINGS.route) {
             SettingsScreen(
                 onSelectTab = navController::switchTab,

@@ -11,7 +11,26 @@ interface Strings {
     val tabHome: String
     val tabSearch: String
     val tabBookmarks: String
+    val tabStreak: String
     val tabSettings: String
+
+    val streaksTitle: String
+    val currentStreakLabel: String
+    val todayLabel: String
+    val habitsHeader: String
+    val habitPrayer: String
+    val habitChurch: String
+    val habitProstrate: String
+    val habitBible: String
+    val manageHabits: String
+    val manageHabitsIntro: String
+    val newHabit: String
+    val habitNameLabel: String
+    val less: String
+    val more: String
+    val streakCurrent: String
+    val streakBest: String
+    fun daysUnit(n: Int): String
 
     val nowPrayer: String
     val continueReading: String
@@ -133,6 +152,17 @@ interface Strings {
 
     /** Day-of-week short labels, Monday..Sunday (ISO order). */
     val dayLabels: List<String>
+
+    /** Full weekday names, Monday..Sunday (ISO order). */
+    val weekdayNames: List<String>
+
+    /** Ethiopian month names, መስከረም..ጳጉሜን (1..13). */
+    val ethMonths: List<String>
+
+    /** Ethiopian era suffix (ዓ.ም). */
+    val eraSuffix: String
+
+    fun habitsCount(n: Int): String
 }
 
 object AmharicStrings : Strings {
@@ -140,7 +170,26 @@ object AmharicStrings : Strings {
     override val tabHome = "ቤት"
     override val tabSearch = "ፍለጋ"
     override val tabBookmarks = "ምልክቶች"
+    override val tabStreak = "ጉዞ"
     override val tabSettings = "ቅንብር"
+
+    override val streaksTitle = "ጉዞ"
+    override val currentStreakLabel = "የአሁኑ ጉዞ"
+    override val todayLabel = "ዛሬ"
+    override val habitsHeader = "ልማዶች"
+    override val habitPrayer = "ጸሎት"
+    override val habitChurch = "ቤተ ክርስቲያን"
+    override val habitProstrate = "ስግደት"
+    override val habitBible = "የዕለት ንባብ"
+    override val manageHabits = "ልማዶች አስተካክል"
+    override val manageHabitsIntro = "ልማዶችን ይጨምሩ፣ ስም ይቀይሩ፣ ደርድሩ ወይም ይደብቁ።"
+    override val newHabit = "አዲስ ልማድ"
+    override val habitNameLabel = "የልማዱ ስም"
+    override val less = "ያነሰ"
+    override val more = "የበዛ"
+    override val streakCurrent = "አሁን"
+    override val streakBest = "ከፍተኛ"
+    override fun daysUnit(n: Int) = "$n ቀናት"
 
     override val nowPrayer = "የአሁኑ ሰዓት ጸሎት"
     override val continueReading = "ቀጥል"
@@ -259,6 +308,13 @@ object AmharicStrings : Strings {
     override val remindersNotFiringTitle = "ማስታወሻ አይሰራም?"
 
     override val dayLabels = listOf("ሰ", "ማ", "ረ", "ሐ", "ዓ", "ቅ", "እ")
+    override val weekdayNames = listOf("ሰኞ", "ማክሰኞ", "ረቡዕ", "ሐሙስ", "ዓርብ", "ቅዳሜ", "እሑድ")
+    override val ethMonths = listOf(
+        "መስከረም", "ጥቅምት", "ኅዳር", "ታኅሣሥ", "ጥር", "የካቲት",
+        "መጋቢት", "ሚያዝያ", "ግንቦት", "ሰኔ", "ሐምሌ", "ነሐሴ", "ጳጉሜን",
+    )
+    override val eraSuffix = "ዓ.ም"
+    override fun habitsCount(n: Int) = "$n ልማዶች"
 }
 
 object EnglishStrings : Strings {
@@ -266,7 +322,26 @@ object EnglishStrings : Strings {
     override val tabHome = "Home"
     override val tabSearch = "Search"
     override val tabBookmarks = "Bookmarks"
+    override val tabStreak = "Streak"
     override val tabSettings = "Settings"
+
+    override val streaksTitle = "Streaks"
+    override val currentStreakLabel = "Current streak"
+    override val todayLabel = "Today"
+    override val habitsHeader = "Habits"
+    override val habitPrayer = "Prayer"
+    override val habitChurch = "Church"
+    override val habitProstrate = "Prostration"
+    override val habitBible = "Daily Bible"
+    override val manageHabits = "Manage habits"
+    override val manageHabitsIntro = "Add, rename, reorder or hide habits."
+    override val newHabit = "New habit"
+    override val habitNameLabel = "Habit name"
+    override val less = "Less"
+    override val more = "More"
+    override val streakCurrent = "now"
+    override val streakBest = "best"
+    override fun daysUnit(n: Int) = "$n days"
 
     override val nowPrayer = "Prayer for now"
     override val continueReading = "Continue"
@@ -385,6 +460,13 @@ object EnglishStrings : Strings {
     override val remindersNotFiringTitle = "Reminders not firing?"
 
     override val dayLabels = listOf("M", "T", "W", "T", "F", "S", "S")
+    override val weekdayNames = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+    override val ethMonths = listOf(
+        "Meskerem", "Tikimt", "Hidar", "Tahsas", "Tir", "Yekatit",
+        "Megabit", "Miyazya", "Ginbot", "Sene", "Hamle", "Nehase", "Pagume",
+    )
+    override val eraSuffix = "EC"
+    override fun habitsCount(n: Int) = "$n habits"
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { AmharicStrings }

@@ -1,0 +1,217 @@
+package com.agpeya.app.ui.habits
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.agpeya.app.data.HabitsRepository
+import com.agpeya.app.ui.common.EthiopianDate
+import com.agpeya.app.ui.strings.LocalStrings
+import java.time.LocalDate
+
+private val CELL = 13.dp
+private val GAP = 1.5.dp
+private val COL = 16.dp // CELL + 2*GAP
+
+/** Nothing can be logged before Hamle 1, 2018 EC — the app's first day. */
+private val APP_EPOCH_EC = EthiopianDate(2018, 11, 1)
+
+/**
+ * Calendar heatmap of one Ethiopian year: month labels above, weekday labels
+ * on the left, and an EC-year switcher below. The grid clips to
+ * [APP_EPOCH_EC .. today].
+ */
+@Composable
+fun EthiopianYearHeatmap(
+    records: Map<String, Set<String>>,
+    today: LocalDate,
+    modifier: Modifier = Modifier,
+    onDayTap: (LocalDate) -> Unit,
+) {
+    val s = LocalStrings.current
+    val currentEc = remember(today) { EthiopianDate.from(today).year }
+    var ecYear by remember { mutableIntStateOf(currentEc) }
+
+    val earliest = remember { APP_EPOCH_EC.toGregorian() }
+    val start = remember(ecYear) {
+        maxOf(EthiopianDate(ecYear, 1, 1).toGregorian(), earliest)
+    }
+    val end = remember(ecYear, today) {
+        minOf(EthiopianDate(ecYear + 1, 1, 1).toGregorian().minusDays(1), today)
+    }
+
+    // Week columns, Monday-aligned, covering [start..end].
+    val weeks = remember(start, end) {
+        val firstCol = start.minusDays((start.dayOfWeek.value - 1).toLong())
+        val list = mutableListOf<List<LocalDate>>()
+        var col = firstCol
+        while (!col.isAfter(end)) {
+            list.add((0..6).map { col.plusDays(it.toLong()) })
+            col = col.plusWeeks(1)
+        }
+        list
+    }
+
+    val empty = MaterialTheme.colorScheme.surfaceVariant
+    val gold = MaterialTheme.colorScheme.secondary
+    fun cellColor(date: LocalDate): Color {
+        if (date.isBefore(start) || date.isAfter(end)) return Color.Transparent
+        return when (HabitsRepository.dayCount(records, date)) {
+            0 -> empty
+            1 -> gold.copy(alpha = 0.30f)
+            2 -> gold.copy(alpha = 0.50f)
+            3 -> gold.copy(alpha = 0.75f)
+            else -> gold
+        }
+    }
+
+    // Month label spans: consecutive columns grouped by the EC month of their
+    // first in-range day.
+    val monthSpans = remember(weeks, start, end) {
+        val spans = mutableListOf<Pair<Int, Int>>() // (ecMonth, columns)
+        var lastMonth = -1
+        weeks.forEach { week ->
+            val anchor = week.firstOrNull { !it.isBefore(start) && !it.isAfter(end) }
+            val m = anchor?.let { EthiopianDate.from(it).month } ?: lastMonth
+            if (m == lastMonth && spans.isNotEmpty()) {
+                val (mm, c) = spans.removeAt(spans.size - 1)
+                spans.add(mm to c + 1)
+            } else {
+                spans.add(m to 1)
+                lastMonth = m
+            }
+        }
+        spans
+    }
+
+    val scroll = rememberScrollState()
+    LaunchedEffect(weeks.size, ecYear) {
+        if (ecYear == currentEc) scroll.scrollTo(scroll.maxValue) else scroll.scrollTo(0)
+    }
+
+    Column(modifier) {
+        Row {
+            // Weekday labels (fixed), offset below the month-label row.
+            Column(Modifier.padding(top = 16.dp)) {
+                s.dayLabels.forEach { d ->
+                    Box(Modifier.height(COL).width(16.dp), contentAlignment = Alignment.Center) {
+                        Text(
+                            d,
+                            style = MaterialTheme.typography.labelMedium.copy(fontSize = 8.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.width(4.dp))
+            Column(Modifier.horizontalScroll(scroll)) {
+                // Month labels
+                Row(Modifier.height(16.dp)) {
+                    monthSpans.forEach { (m, cols) ->
+                        Text(
+                            text = if (m in 1..13) s.ethMonths[m - 1] else "",
+                            style = MaterialTheme.typography.labelMedium.copy(fontSize = 8.5.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Clip,
+                            softWrap = false,
+                            modifier = Modifier.width(COL * cols),
+                        )
+                    }
+                }
+                // Grid
+                Row {
+                    weeks.forEach { week ->
+                        Column {
+                            week.forEach { date ->
+                                val inRange = !date.isBefore(start) && !date.isAfter(end)
+                                Spacer(
+                                    Modifier
+                                        .padding(GAP)
+                                        .size(CELL)
+                                        .clip(RoundedCornerShape(2.dp))
+                                        .background(cellColor(date))
+                                        .then(
+                                            if (inRange) Modifier.clickable { onDayTap(date) }
+                                            else Modifier
+                                        ),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Legend
+        Spacer(Modifier.height(10.dp))
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(s.less, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            listOf(empty, gold.copy(alpha = 0.30f), gold.copy(alpha = 0.50f), gold.copy(alpha = 0.75f), gold).forEach { c ->
+                Spacer(Modifier.padding(GAP).size(CELL).clip(RoundedCornerShape(2.dp)).background(c))
+            }
+            Text(s.more, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+
+        // Year switcher
+        Spacer(Modifier.height(4.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(onClick = { ecYear-- }, enabled = ecYear > APP_EPOCH_EC.year) {
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                    contentDescription = null,
+                    tint = if (ecYear > APP_EPOCH_EC.year) MaterialTheme.colorScheme.onSurface
+                    else MaterialTheme.colorScheme.surfaceVariant,
+                )
+            }
+            Text(
+                text = "$ecYear ${s.eraSuffix}",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            IconButton(onClick = { ecYear++ }, enabled = ecYear < currentEc) {
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = if (ecYear < currentEc) MaterialTheme.colorScheme.onSurface
+                    else MaterialTheme.colorScheme.surfaceVariant,
+                )
+            }
+        }
+    }
+}

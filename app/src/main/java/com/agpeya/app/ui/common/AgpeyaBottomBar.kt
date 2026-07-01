@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
@@ -32,6 +33,7 @@ enum class Tab(val route: String, val icon: ImageVector) {
     HOME("home", Icons.Outlined.Home),
     SEARCH("search", Icons.Outlined.Search),
     BOOKMARKS("bookmarks", Icons.Outlined.Bookmarks),
+    STREAK("streak", Icons.Outlined.LocalFireDepartment),
     SETTINGS("settings", Icons.Outlined.Settings),
 }
 
@@ -44,6 +46,7 @@ fun AgpeyaBottomBar(current: Tab, onSelect: (Tab) -> Unit) {
             Tab.HOME -> s.tabHome
             Tab.SEARCH -> s.tabSearch
             Tab.BOOKMARKS -> s.tabBookmarks
+            Tab.STREAK -> s.tabStreak
             Tab.SETTINGS -> s.tabSettings
         }
     }

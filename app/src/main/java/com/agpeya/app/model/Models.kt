@@ -67,6 +67,27 @@ data class HoursConfig(
     val names: Map<String, String> = emptyMap(),
 )
 
+/** Prayer-rope (መቁጠሪያ) counter: total taps and the loop length. */
+@Serializable
+data class CounterState(val total: Int = 0, val target: Int = 41)
+
+/** A trackable daily practice. Built-in habits have stable ids; custom ones carry a name. */
+@Serializable
+data class Habit(val id: String, val name: String, val isBuiltIn: Boolean = false)
+
+/**
+ * Habit-tracking state: user-created habits, display order, hidden ids, name
+ * overrides, and the daily completion records ("yyyy-MM-dd" -> completed ids).
+ */
+@Serializable
+data class HabitsState(
+    val custom: List<Habit> = emptyList(),
+    val order: List<String> = emptyList(),
+    val hidden: Set<String> = emptySet(),
+    val names: Map<String, String> = emptyMap(),
+    val records: Map<String, Set<String>> = emptyMap(),
+)
+
 /** A saved bookmark — a snapshot so the bookmarks list renders without rescanning content. */
 @Serializable
 data class Bookmark(
