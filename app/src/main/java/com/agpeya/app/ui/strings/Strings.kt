@@ -34,6 +34,7 @@ interface Strings {
 
     val nowPrayer: String
     val continueReading: String
+    val hoursHeader: String
 
     val contents: String
     val readingModeToggle: String
@@ -193,6 +194,7 @@ object AmharicStrings : Strings {
 
     override val nowPrayer = "የአሁኑ ሰዓት ጸሎት"
     override val continueReading = "ቀጥል"
+    override val hoursHeader = "ሰዓታት"
 
     override val contents = "ይዘት"
     override val readingModeToggle = "የንባብ ሁነታ"
@@ -345,6 +347,7 @@ object EnglishStrings : Strings {
 
     override val nowPrayer = "Prayer for now"
     override val continueReading = "Continue"
+    override val hoursHeader = "Hours"
 
     override val contents = "Contents"
     override val readingModeToggle = "Reading mode"

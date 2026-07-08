@@ -37,6 +37,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Close
@@ -46,6 +47,8 @@ import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material.icons.outlined.SwapVert
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -109,11 +112,21 @@ private fun Context.findActivity(): Activity? {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReadingScreen(hourId: String, initialSectionIndex: Int = -1, onBack: () -> Unit) {
+fun ReadingScreen(
+    hourId: String,
+    initialSectionIndex: Int = -1,
+    onBack: () -> Unit,
+    onSwitchHour: (String) -> Unit = {},
+) {
     val context = LocalContext.current
     val hour by produceState<Hour?>(initialValue = null, hourId) {
-        value = ContentRepository.hour(context, hourId)
+        value = com.agpeya.app.data.HoursRepository.hourById(context, hourId)
     }
+    // All hours for the title dropdown (switch prayer without going back).
+    val allHours by produceState<List<Hour>>(initialValue = emptyList()) {
+        value = com.agpeya.app.data.HoursRepository.visibleHours(context)
+    }
+    var hourMenu by remember { mutableStateOf(false) }
     val fontStep by SettingsRepository.fontStep(context)
         .collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
     val readingMode by SettingsRepository.readingMode(context)
@@ -127,9 +140,14 @@ fun ReadingScreen(hourId: String, initialSectionIndex: Int = -1, onBack: () -> U
     var showContents by remember { mutableStateOf(false) }
     // Verse currently chosen for highlighting (shows the colour palette); null = none.
     var selectedVerseKey by remember { mutableStateOf<String?>(null) }
-    // Apply the user's per-hour customization (show/hide + reorder).
-    val sections = remember(hour, layout) {
-        hour?.let { PrayerLayout.visible(it.sections, layout) }.orEmpty()
+    // Apply the user's per-hour customization (show/hide, reorder, added psalms).
+    val sections by produceState(emptyList<Section>(), hour, layout) {
+        val h = hour
+        value = if (h == null) emptyList()
+        else {
+            val extras = layout.added.mapNotNull { ContentRepository.psalm(context, it) }
+            PrayerLayout.visible(h.sections, extras, layout)
+        }
     }
     val listState = rememberLazyListState()
     val pagerState = rememberPagerState(pageCount = { sections.size })
@@ -213,7 +231,28 @@ fun ReadingScreen(hourId: String, initialSectionIndex: Int = -1, onBack: () -> U
         },
         topBar = {
             TopAppBar(
-                title = { Text(hour?.name ?: "", style = MaterialTheme.typography.titleLarge) },
+                title = {
+                    Box {
+                        Row(
+                            modifier = Modifier.clickable { hourMenu = true },
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(hour?.name ?: "", style = MaterialTheme.typography.titleLarge)
+                            Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
+                        }
+                        DropdownMenu(expanded = hourMenu, onDismissRequest = { hourMenu = false }) {
+                            allHours.forEach { h ->
+                                DropdownMenuItem(
+                                    text = { Text(h.name, style = MaterialTheme.typography.titleMedium) },
+                                    onClick = {
+                                        hourMenu = false
+                                        if (h.id != hourId) onSwitchHour(h.id)
+                                    },
+                                )
+                            }
+                        }
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
@@ -474,7 +513,7 @@ private fun SectionView(
             Text(
                 text = section.title,
                 style = MaterialTheme.typography.titleLarge.copy(fontFamily = Abyssinica),
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.secondary,
                 textAlign = TextAlign.Center,
             )
             IconButton(onClick = onToggleBookmark) {

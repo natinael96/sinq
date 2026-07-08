@@ -148,6 +148,11 @@ private fun AgpeyaNavHost(deepLinkHourId: String?) {
                 hourId = backStackEntry.arguments?.getString("hourId") ?: "morning",
                 initialSectionIndex = backStackEntry.arguments?.getInt("section") ?: -1,
                 onBack = { navController.popBackStack() },
+                onSwitchHour = { id ->
+                    navController.navigate("reading/$id") {
+                        popUpTo("reading/{hourId}?section={section}") { inclusive = true }
+                    }
+                },
             )
         }
         composable("modes") {
