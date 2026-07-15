@@ -36,12 +36,20 @@ class AlarmService : Service() {
     private var player: MediaPlayer? = null
     private var vibrator: Vibrator? = null
     private val handler = Handler(Looper.getMainLooper())
-    private val autoStop = Runnable { stopSelf() }
+    private val autoStop = Runnable {
+        postDonePrompt() // timed out unanswered — still worth asking
+        stopSelf()
+    }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
+    private var activeHourId: String? = null
+    private var activeHourName: String = ""
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_DISMISS) {
+            // The alarm was answered — follow up asking whether the prayer happened.
+            postDonePrompt()
             stopSelf()
             return START_NOT_STICKY
         }
@@ -49,16 +57,45 @@ class AlarmService : Service() {
         val hourName = intent?.getStringExtra(ReminderScheduler.EXTRA_HOUR_NAME) ?: ""
 
         if (intent?.action == ACTION_SNOOZE) {
+            activeHourId = null // snooze re-rings later; no done-prompt yet
             ReminderScheduler.snooze(this, hourId, hourName)
             stopSelf()
             return START_NOT_STICKY
         }
 
+        activeHourId = hourId
+        activeHourName = hourName
         ensureChannel()
         startForeground(NOTIFICATION_ID, buildNotification(hourId, hourName))
         startRinging()
         handler.postDelayed(autoStop, TIMEOUT_MS)
         return START_STICKY
+    }
+
+    /** Quiet notification after the alarm ends: "Done?" with a Yes action that marks the hour. */
+    private fun postDonePrompt() {
+        val hourId = activeHourId ?: return
+        activeHourId = null
+        val s = stringsFor(runBlocking { SettingsRepository.language(this@AlarmService).first() })
+        val notifId = DONE_NOTIFICATION_BASE + hourId.hashCode() % 1000
+        val yes = PendingIntent.getBroadcast(
+            this,
+            notifId,
+            Intent(this, MarkDoneReceiver::class.java).apply {
+                putExtra(ReminderScheduler.EXTRA_HOUR_ID, hourId)
+                putExtra(MarkDoneReceiver.EXTRA_NOTIFICATION_ID, notifId)
+            },
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+        // Discreet on purpose — like the alarm itself, no prayer wording.
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(s.donePrompt)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
+            .addAction(0, s.yesAction, yes)
+            .build()
+        getSystemService(NotificationManager::class.java).notify(notifId, notification)
     }
 
     private fun startRinging() {
@@ -171,6 +208,7 @@ class AlarmService : Service() {
         const val ACTION_DISMISS = "com.agpeya.app.ALARM_DISMISS"
         const val ACTION_SNOOZE = "com.agpeya.app.ALARM_SNOOZE"
         private const val NOTIFICATION_ID = 7001
+        private const val DONE_NOTIFICATION_BASE = 7100
         private const val TIMEOUT_MS = 60_000L
 
         fun dismiss(context: Context) {

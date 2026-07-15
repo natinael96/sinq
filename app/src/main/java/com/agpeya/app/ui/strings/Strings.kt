@@ -119,6 +119,8 @@ interface Strings {
     val reminderReached: String
     val itsTime: String
     val openShort: String
+    val donePrompt: String
+    val yesAction: String
     val snooze: String
     val addPsalm: String
     val choosePsalm: String
@@ -279,6 +281,8 @@ object AmharicStrings : Strings {
     override val reminderReached = "የጸሎት ሰዓት ደርሷል"
     override val itsTime = "ጊዜው ደርሷል"
     override val openShort = "ክፈት"
+    override val donePrompt = "ጨርሰዋል?"
+    override val yesAction = "አዎ"
     override val snooze = "አሳድር"
     override val addPsalm = "መዝሙር ጨምር"
     override val choosePsalm = "መዝሙር ምረጥ"
@@ -432,6 +436,8 @@ object EnglishStrings : Strings {
     override val reminderReached = "It is time to pray"
     override val itsTime = "It's time"
     override val openShort = "Open"
+    override val donePrompt = "Done?"
+    override val yesAction = "Yes"
     override val snooze = "Snooze"
     override val addPsalm = "Add psalm"
     override val choosePsalm = "Choose a psalm"

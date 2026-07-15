@@ -48,6 +48,10 @@
             android:exported="false" />
 
         <receiver
+            android:name=".reminders.MarkDoneReceiver"
+            android:exported="false" />
+
+        <receiver
             android:name=".reminders.SystemEventsReceiver"
             android:exported="false">
             <intent-filter>

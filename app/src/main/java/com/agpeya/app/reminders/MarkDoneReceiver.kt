@@ -1,0 +1,35 @@
+package com.agpeya.app.reminders
+
+import android.app.NotificationManager
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import com.agpeya.app.data.HabitsRepository
+import kotlinx.coroutines.runBlocking
+import java.time.LocalDate
+
+/**
+ * Handles the "Done?" follow-up notification's Yes action: marks the prayed
+ * hour on today's streak record and dismisses the notification.
+ */
+class MarkDoneReceiver : BroadcastReceiver() {
+
+    override fun onReceive(context: Context, intent: Intent) {
+        val hourId = intent.getStringExtra(ReminderScheduler.EXTRA_HOUR_ID) ?: return
+        val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+        runBlocking {
+            HabitsRepository.markDone(
+                context,
+                LocalDate.now().toString(),
+                HabitsRepository.hourHabitId(hourId),
+            )
+        }
+        if (notificationId != -1) {
+            context.getSystemService(NotificationManager::class.java).cancel(notificationId)
+        }
+    }
+
+    companion object {
+        const val EXTRA_NOTIFICATION_ID = "notificationId"
+    }
+}
