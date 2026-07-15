@@ -69,6 +69,22 @@ class HabitStreakTest {
     }
 
     @Test
+    fun `heatmap level scales with the possible maximum`() {
+        // 12 trackables: 3 done is a quarter-day (level 2), not near-max.
+        assertEquals(0, HabitsRepository.level(0, 12))
+        assertEquals(1, HabitsRepository.level(1, 12))
+        assertEquals(2, HabitsRepository.level(3, 12))
+        assertEquals(3, HabitsRepository.level(6, 12))
+        assertEquals(4, HabitsRepository.level(9, 12))
+        assertEquals(4, HabitsRepository.level(12, 12))
+        // 4 trackables behaves like the old fixed scale.
+        assertEquals(2, HabitsRepository.level(1, 4))
+        assertEquals(4, HabitsRepository.level(4, 4))
+        // Degenerate max never divides by zero; any activity still shows.
+        assertEquals(4, HabitsRepository.level(1, 0))
+    }
+
+    @Test
     fun `day count reflects number of habits`() {
         val records = mapOf(d(0) to setOf("prayer", "bible", "church"))
         assertEquals(3, HabitsRepository.dayCount(records, today))

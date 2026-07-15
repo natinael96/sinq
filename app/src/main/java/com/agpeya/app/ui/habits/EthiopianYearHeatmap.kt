@@ -56,6 +56,7 @@ private val APP_EPOCH_EC = EthiopianDate(2018, 11, 1)
 fun EthiopianYearHeatmap(
     records: Map<String, Set<String>>,
     today: LocalDate,
+    maxPossible: Int,
     modifier: Modifier = Modifier,
     onDayTap: (LocalDate) -> Unit,
 ) {
@@ -63,13 +64,11 @@ fun EthiopianYearHeatmap(
     val currentEc = remember(today) { EthiopianDate.from(today).year }
     var ecYear by remember { mutableIntStateOf(currentEc) }
 
-    val earliest = remember { APP_EPOCH_EC.toGregorian() }
-    val start = remember(ecYear) {
-        maxOf(EthiopianDate(ecYear, 1, 1).toGregorian(), earliest)
-    }
-    val end = remember(ecYear, today) {
-        minOf(EthiopianDate(ecYear + 1, 1, 1).toGregorian().minusDays(1), today)
-    }
+    // The whole Ethiopian year, መስከረም 1 → ጳጉሜን end. Future days render as
+    // faint placeholders so the year's shape is always visible.
+    val start = remember(ecYear) { EthiopianDate(ecYear, 1, 1).toGregorian() }
+    val end = remember(ecYear) { EthiopianDate(ecYear + 1, 1, 1).toGregorian().minusDays(1) }
+    val lastLogged = remember(end, today) { minOf(end, today) }
 
     // Week columns, Monday-aligned, covering [start..end].
     val weeks = remember(start, end) {
@@ -87,7 +86,8 @@ fun EthiopianYearHeatmap(
     val gold = MaterialTheme.colorScheme.secondary
     fun cellColor(date: LocalDate): Color {
         if (date.isBefore(start) || date.isAfter(end)) return Color.Transparent
-        return when (HabitsRepository.dayCount(records, date)) {
+        if (date.isAfter(today)) return empty.copy(alpha = 0.35f) // future day
+        return when (HabitsRepository.level(HabitsRepository.dayCount(records, date), maxPossible)) {
             0 -> empty
             1 -> gold.copy(alpha = 0.30f)
             2 -> gold.copy(alpha = 0.50f)
@@ -117,7 +117,15 @@ fun EthiopianYearHeatmap(
 
     val scroll = rememberScrollState()
     LaunchedEffect(weeks.size, ecYear) {
-        if (ecYear == currentEc) scroll.scrollTo(scroll.maxValue) else scroll.scrollTo(0)
+        if (ecYear == currentEc && weeks.isNotEmpty()) {
+            // Scroll so today's column is in view (the year now extends past today).
+            val todayIndex = weeks.indexOfFirst { week -> week.any { it == today } }
+                .takeIf { it >= 0 } ?: weeks.lastIndex
+            val fraction = todayIndex.toFloat() / weeks.lastIndex.coerceAtLeast(1)
+            scroll.scrollTo((scroll.maxValue * fraction).toInt())
+        } else {
+            scroll.scrollTo(0)
+        }
     }
 
     Column(modifier) {
@@ -155,7 +163,7 @@ fun EthiopianYearHeatmap(
                     weeks.forEach { week ->
                         Column {
                             week.forEach { date ->
-                                val inRange = !date.isBefore(start) && !date.isAfter(end)
+                                val inRange = !date.isBefore(start) && !date.isAfter(lastLogged)
                                 Spacer(
                                     Modifier
                                         .padding(GAP)

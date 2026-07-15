@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.agpeya.app.data.ContentRepository
 import com.agpeya.app.data.HabitsRepository
 import com.agpeya.app.data.HoursRepository
@@ -59,6 +60,9 @@ import com.agpeya.app.ui.habits.habitName
 import com.agpeya.app.ui.strings.LocalStrings
 import java.time.LocalDate
 import java.time.LocalTime
+
+/** Synthetic id for the Home aggregate prayer dot; resolves to the ጸሎት label. */
+private const val PRAYER_AGGREGATE_ID = "prayer"
 
 @Composable
 fun HomeScreen(
@@ -80,8 +84,14 @@ fun HomeScreen(
 
     val habitState by HabitsRepository.state(context).collectAsState(initial = HabitsState())
     val today = remember { LocalDate.now() }
-    val habitIds = HabitsRepository.orderedHabitIds(habitState, includeHidden = false)
+    // Prayer shows as one aggregate dot on Home (lit when any hour was prayed);
+    // the per-hour breakdown lives on the Streak screen.
     val doneToday = habitState.records[today.toString()] ?: emptySet()
+    val prayedAnyHour = doneToday.any { it.startsWith("hour_") }
+    val habitIds = remember(habitState, prayedAnyHour) {
+        listOf(PRAYER_AGGREGATE_ID) + HabitsRepository.orderedHabitIds(habitState, includeHidden = false)
+    }
+    val doneWithAggregate = if (prayedAnyHour) doneToday + PRAYER_AGGREGATE_ID else doneToday
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -127,10 +137,12 @@ fun HomeScreen(
                 Spacer(Modifier.height(10.dp))
                 TodayCard(
                     habitIds = habitIds,
-                    doneToday = doneToday,
+                    doneToday = doneWithAggregate,
                     habitState = habitState,
                     records = habitState.records,
                     today = today,
+                    // Real trackables: visible hours + habits (aggregate dot excluded).
+                    maxPossible = hours.size + (habitIds.size - 1),
                     onClick = { onSelectTab(Tab.STREAK) },
                 )
                 Spacer(Modifier.height(24.dp))
@@ -217,6 +229,7 @@ private fun TodayCard(
     habitState: HabitsState,
     records: Map<String, Set<String>>,
     today: LocalDate,
+    maxPossible: Int,
     onClick: () -> Unit,
 ) {
     val s = LocalStrings.current
@@ -266,10 +279,12 @@ private fun TodayCard(
                             Spacer(Modifier.height(6.dp))
                             Text(
                                 habitName(id, habitState, s),
-                                style = MaterialTheme.typography.labelMedium,
+                                // Smaller + two lines so long names (e.g. "Prostration")
+                                // fit on narrow screens instead of truncating.
+                                style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.sp, lineHeight = 13.sp),
                                 color = if (done) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center,
-                                maxLines = 1,
+                                maxLines = 2,
                             )
                         }
                     }
@@ -281,6 +296,7 @@ private fun TodayCard(
             HabitHeatmap(
                 records = records,
                 today = today,
+                maxPossible = maxPossible,
                 weeksBack = 14,
                 showLegend = false,
                 cell = 9.dp,

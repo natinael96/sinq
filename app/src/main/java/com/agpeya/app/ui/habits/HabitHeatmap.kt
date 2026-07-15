@@ -33,6 +33,7 @@ import java.time.LocalDate
 fun HabitHeatmap(
     records: Map<String, Set<String>>,
     today: LocalDate,
+    maxPossible: Int,
     modifier: Modifier = Modifier,
     weeksBack: Long = 52,
     showLegend: Boolean = true,
@@ -55,7 +56,7 @@ fun HabitHeatmap(
     val primary = MaterialTheme.colorScheme.secondary
     fun cellColor(date: LocalDate): Color {
         if (date.isAfter(today)) return Color.Transparent
-        return when (HabitsRepository.dayCount(records, date)) {
+        return when (HabitsRepository.level(HabitsRepository.dayCount(records, date), maxPossible)) {
             0 -> empty
             1 -> primary.copy(alpha = 0.30f)
             2 -> primary.copy(alpha = 0.50f)

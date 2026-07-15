@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -63,11 +65,13 @@ fun StreakScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
     val hours by androidx.compose.runtime.produceState(emptyList<com.agpeya.app.model.Hour>()) {
         value = com.agpeya.app.data.HoursRepository.visibleHours(context)
     }
-    // Each prayer hour tracks separately, followed by the other habits.
-    val trackables = remember(hours, state, s) {
-        hours.map { HabitsRepository.hourHabitId(it.id) to it.name } +
-            HabitsRepository.orderedHabitIds(state, includeHidden = false).map { it to habitName(it, state, s) }
+    // Prayer hours group under a collapsible ጸሎት header; other habits are flat.
+    // Hours hidden in Manage Hours are already filtered out by visibleHours.
+    val hourItems = remember(hours) { hours.map { HabitsRepository.hourHabitId(it.id) to it.name } }
+    val habitItems = remember(state, s) {
+        HabitsRepository.orderedHabitIds(state, includeHidden = false).map { it to habitName(it, state, s) }
     }
+    var prayersExpanded by remember { mutableStateOf(false) }
     val overall = HabitsRepository.overallCurrentStreak(state.records, today)
     var selectedDay by remember { mutableStateOf<LocalDate?>(null) }
 
@@ -108,37 +112,60 @@ fun StreakScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                 Spacer(Modifier.height(4.dp))
             }
 
-            items(trackables.size, key = { trackables[it].first }) { i ->
-                val (id, name) = trackables[i]
-                val done = id in (state.records[todayKey] ?: emptySet())
-                val streak = HabitsRepository.currentStreak(state.records, id, today)
+            item {
+                // ጸሎት group header: expand/collapse the per-hour rows.
+                val doneHours = hourItems.count { it.first in (state.records[todayKey] ?: emptySet()) }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { scope.launch { HabitsRepository.toggle(context, todayKey, id) } }
+                        .clickable { prayersExpanded = !prayersExpanded }
                         .padding(vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
-                        imageVector = if (done) Icons.Filled.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
+                        imageVector = if (prayersExpanded) Icons.Filled.KeyboardArrowDown
+                        else Icons.AutoMirrored.Filled.KeyboardArrowRight,
                         contentDescription = null,
-                        tint = if (done) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(Modifier.width(16.dp))
                     Text(
-                        text = name,
+                        text = s.habitPrayer,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.weight(1f),
                     )
-                    if (streak > 0) {
-                        Text(
-                            text = streak.toString(),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.secondary,
-                        )
-                    }
+                    Text(
+                        text = "$doneHours/${hourItems.size}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (doneHours > 0) MaterialTheme.colorScheme.secondary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
+            }
+
+            if (prayersExpanded) {
+                items(hourItems.size, key = { hourItems[it].first }) { i ->
+                    val (id, name) = hourItems[i]
+                    CheckRow(
+                        name = name,
+                        done = id in (state.records[todayKey] ?: emptySet()),
+                        streak = HabitsRepository.currentStreak(state.records, id, today),
+                        indented = true,
+                        onToggle = { scope.launch { HabitsRepository.toggle(context, todayKey, id) } },
+                    )
+                }
+            }
+
+            items(habitItems.size, key = { habitItems[it].first }) { i ->
+                val (id, name) = habitItems[i]
+                CheckRow(
+                    name = name,
+                    done = id in (state.records[todayKey] ?: emptySet()),
+                    streak = HabitsRepository.currentStreak(state.records, id, today),
+                    indented = false,
+                    onToggle = { scope.launch { HabitsRepository.toggle(context, todayKey, id) } },
+                )
             }
 
             item {
@@ -146,6 +173,7 @@ fun StreakScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                 EthiopianYearHeatmap(
                     records = state.records,
                     today = today,
+                    maxPossible = hourItems.size + habitItems.size,
                     modifier = Modifier.fillMaxWidth(),
                     onDayTap = { selectedDay = it },
                 )
@@ -163,24 +191,36 @@ fun StreakScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                 Spacer(Modifier.height(4.dp))
             }
 
-            items(trackables.size, key = { "stat_${trackables[it].first}" }) { i ->
-                val (id, name) = trackables[i]
-                val now = HabitsRepository.currentStreak(state.records, id, today)
-                val best = HabitsRepository.longestStreak(state.records, id)
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 10.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(name, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
-                    Text(
-                        text = "${s.streakCurrent} $now · ${s.streakBest} $best",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+            item {
+                StatRow(
+                    name = s.habitPrayer,
+                    now = HabitsRepository.prayerCurrentStreak(state.records, today),
+                    best = HabitsRepository.prayerLongestStreak(state.records),
+                    indented = false,
+                    s = s,
+                )
+            }
+            if (prayersExpanded) {
+                items(hourItems.size, key = { "stat_${hourItems[it].first}" }) { i ->
+                    val (id, name) = hourItems[i]
+                    StatRow(
+                        name = name,
+                        now = HabitsRepository.currentStreak(state.records, id, today),
+                        best = HabitsRepository.longestStreak(state.records, id),
+                        indented = true,
+                        s = s,
                     )
                 }
+            }
+            items(habitItems.size, key = { "stat_${habitItems[it].first}" }) { i ->
+                val (id, name) = habitItems[i]
+                StatRow(
+                    name = name,
+                    now = HabitsRepository.currentStreak(state.records, id, today),
+                    best = HabitsRepository.longestStreak(state.records, id),
+                    indented = false,
+                    s = s,
+                )
             }
 
             item {
@@ -203,5 +243,62 @@ fun StreakScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                 Spacer(Modifier.height(24.dp))
             }
         }
+    }
+}
+
+@Composable
+private fun CheckRow(
+    name: String,
+    done: Boolean,
+    streak: Int,
+    indented: Boolean,
+    onToggle: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onToggle)
+            .padding(vertical = 12.dp)
+            .padding(start = if (indented) 40.dp else 0.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = if (done) Icons.Filled.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
+            contentDescription = null,
+            tint = if (done) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.width(16.dp))
+        Text(
+            text = name,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.weight(1f),
+        )
+        if (streak > 0) {
+            Text(
+                text = streak.toString(),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.secondary,
+            )
+        }
+    }
+}
+
+@Composable
+private fun StatRow(name: String, now: Int, best: Int, indented: Boolean, s: Strings) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp)
+            .padding(start = if (indented) 40.dp else 0.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(name, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
+        Text(
+            text = "${s.streakCurrent} $now · ${s.streakBest} $best",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }

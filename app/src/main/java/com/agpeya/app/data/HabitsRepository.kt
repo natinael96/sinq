@@ -103,6 +103,23 @@ object HabitsRepository {
     fun dayCount(records: Map<String, Set<String>>, date: LocalDate): Int = done(records, date).size
 
     /**
+     * Heatmap intensity level 0..4, proportional to how much of the possible
+     * day was completed (count / maxPossible), so the scale stays meaningful
+     * however many hours and habits are being tracked. Any activity at all
+     * registers at least level 1; a fully completed day is level 4.
+     */
+    fun level(count: Int, maxPossible: Int): Int {
+        if (count <= 0) return 0
+        val fraction = count.toFloat() / maxPossible.coerceAtLeast(1)
+        return when {
+            fraction >= 0.75f -> 4
+            fraction >= 0.50f -> 3
+            fraction >= 0.25f -> 2
+            else -> 1
+        }
+    }
+
+    /**
      * Consecutive completed days ending today — or yesterday if today isn't yet
      * marked, so the streak doesn't visibly reset mid-day. Breaks on a gap.
      */
@@ -119,6 +136,33 @@ object HabitsRepository {
     /** Longest run of consecutive calendar days the habit was completed, ever. */
     fun longestStreak(records: Map<String, Set<String>>, habitId: String): Int {
         val dates = records.filterValues { habitId in it }.keys
+            .mapNotNull { runCatching { LocalDate.parse(it) }.getOrNull() }
+            .sorted()
+        if (dates.isEmpty()) return 0
+        var best = 1
+        var run = 1
+        for (i in 1 until dates.size) {
+            if (dates[i] == dates[i - 1].plusDays(1)) run++ else run = 1
+            if (run > best) best = run
+        }
+        return best
+    }
+
+    /** Prayer aggregate: consecutive days with at least one hour prayed. */
+    fun prayerCurrentStreak(records: Map<String, Set<String>>, today: LocalDate): Int {
+        fun prayed(d: LocalDate) = done(records, d).any { it.startsWith("hour_") }
+        var cursor = if (prayed(today)) today else today.minusDays(1)
+        var count = 0
+        while (prayed(cursor)) {
+            count++
+            cursor = cursor.minusDays(1)
+        }
+        return count
+    }
+
+    /** Prayer aggregate: longest run of days with at least one hour prayed. */
+    fun prayerLongestStreak(records: Map<String, Set<String>>): Int {
+        val dates = records.filterValues { set -> set.any { it.startsWith("hour_") } }.keys
             .mapNotNull { runCatching { LocalDate.parse(it) }.getOrNull() }
             .sorted()
         if (dates.isEmpty()) return 0
