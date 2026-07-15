@@ -83,6 +83,8 @@ object ReminderScheduler {
 
         for (entry in active.entries) {
             if (!entry.enabled) continue
+            // Hidden hours don't ring: hourNames is built from the visible hours.
+            if (entry.hourId !in hourNames) continue
             val at = nextOccurrence(entry, now) ?: continue
             scheduleAt(app, alarmManager, entry, hourNames[entry.hourId] ?: entry.hourId, at)
             scheduled += entry.id

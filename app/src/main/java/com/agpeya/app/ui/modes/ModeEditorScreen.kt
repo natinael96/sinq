@@ -139,7 +139,11 @@ fun ModeEditorScreen(modeId: String, onBack: () -> Unit) {
                 }
             }
             items(
-                mode.entries.sortedWith(compareBy({ it.hour }, { it.minute })),
+                // Hidden hours are synced out: their entries don't show here
+                // (and the scheduler skips them too).
+                mode.entries
+                    .filter { it.hourId in hourNames }
+                    .sortedWith(compareBy({ it.hour }, { it.minute })),
                 key = { it.id },
             ) { entry ->
                 EntryRow(

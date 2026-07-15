@@ -25,8 +25,11 @@ object HoursRepository {
     private val KEY = stringPreferencesKey("hours_config_json")
     private val json = Json { ignoreUnknownKeys = true }
 
+    /** ሌሊት 9 ሰዓት (veil) ships hidden; users opt in via Manage Hours. */
+    private val DEFAULT = HoursConfig(hidden = setOf("veil"))
+
     private fun decode(raw: String?): HoursConfig =
-        raw?.let { runCatching { json.decodeFromString<HoursConfig>(it) }.getOrNull() } ?: HoursConfig()
+        raw?.let { runCatching { json.decodeFromString<HoursConfig>(it) }.getOrNull() } ?: DEFAULT
 
     fun config(context: Context): Flow<HoursConfig> =
         context.hoursDataStore.data.map { decode(it[KEY]) }

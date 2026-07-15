@@ -25,7 +25,7 @@ HOUR_META = {
     "vespers":  {"order": 4, "name": "ጸሎተ ሰርክ",        "translit": "Tselote Serk",    "timeHint": "ምሽት"},
     "compline": {"order": 5, "name": "ጸሎተ ንዋም",        "translit": "Tselote Nwam",    "timeHint": "ከመኝታ በፊት"},
     "midnight": {"order": 6, "name": "ጸሎተ መንፈቀ ሌሊት", "translit": "Menfeqe Lelit",   "timeHint": "እኩለ ሌሊት"},
-    "veil":     {"order": 7, "name": "ጸሎተ ሥውር",        "translit": "Tselote Sewur",   "timeHint": "ከንዋም በኋላ"},
+    "veil":     {"order": 7, "name": "ሌሊት 9 ሰዓት",       "translit": "Lelit 9 Se'at",   "timeHint": "ከንዋም በኋላ"},
 }
 
 WATCH_NAMES = {"watch1": "ክፍል ፩", "watch2": "ክፍል ፪", "watch3": "ክፍል ፫"}
