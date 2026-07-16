@@ -18,9 +18,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,6 +57,20 @@ fun AboutScreen(onBack: () -> Unit) {
         ) {
             Spacer(Modifier.height(8.dp))
             Para("ስንቅ", MaterialTheme.typography.headlineMedium)
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val version = remember {
+                runCatching {
+                    context.packageManager.getPackageInfo(context.packageName, 0).versionName
+                }.getOrNull() ?: ""
+            }
+            if (version.isNotBlank()) {
+                Text(
+                    "v$version",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(12.dp))
+            }
             Para(s.aboutTagline)
             Section(s.aboutSourceTitle)
             Para(s.aboutSourceBody)
@@ -58,6 +78,19 @@ fun AboutScreen(onBack: () -> Unit) {
             Para(s.aboutFontBody)
             Section(s.aboutPrivacyTitle)
             Para(s.aboutPrivacyBody)
+            Spacer(Modifier.height(56.dp))
+            // A small truth, thinly set.
+            Text(
+                text = "powered by 2 ቡና",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.Light,
+                    fontStyle = FontStyle.Italic,
+                    letterSpacing = 1.5.sp,
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
             Spacer(Modifier.height(32.dp))
         }
     }
