@@ -132,6 +132,14 @@ interface Strings {
     val manageHoursIntro: String
 
 
+    // Profile (local only)
+    val profileSection: String
+    val yourNameLabel: String
+    val christianNameLabel: String
+    val introNameTitle: String
+    val introNameBody: String
+    fun greeting(name: String): String
+
     // First-launch intro
     val introTitle: String
     val introBody: String
@@ -294,6 +302,13 @@ object AmharicStrings : Strings {
     override val manageHoursIntro = "ሰዓታትን ይጨምሩ፣ ስም ይቀይሩ፣ ደርድሩ ወይም ይደብቁ። ክፍሎችን ለማስተካከል ሰዓቱን ይንኩ።"
 
 
+    override val profileSection = "መገለጫ"
+    override val yourNameLabel = "ስም"
+    override val christianNameLabel = "የክርስትና ስም (አማራጭ)"
+    override val introNameTitle = "ማን እንበልዎ?"
+    override val introNameBody = "ስምዎ በስልክዎ ላይ ብቻ ይቀመጣል።"
+    override fun greeting(name: String) = "ሰላም፣ $name"
+
     override val introTitle = "እንኳን ደህና መጡ"
     override val introBody = "የጸሎት ሰዓታት — መዝሙራትና ወንጌላት በአንድ ቦታ።"
     override val introOfflineTitle = "ከበይነመረብ ውጭ"
@@ -448,6 +463,13 @@ object EnglishStrings : Strings {
     override val rename = "Rename"
     override val manageHoursIntro = "Add, rename, reorder or hide hours. Tap an hour to edit its sections."
 
+
+    override val profileSection = "Profile"
+    override val yourNameLabel = "Name"
+    override val christianNameLabel = "Baptismal name (optional)"
+    override val introNameTitle = "What should we call you?"
+    override val introNameBody = "Your name is stored only on this phone."
+    override fun greeting(name: String) = "Selam, $name"
 
     override val introTitle = "Welcome"
     override val introBody = "The hours of prayer — psalms and gospels, in one place."

@@ -193,6 +193,23 @@ fun SettingsScreen(
             }
 
             item {
+                Text(
+                    text = s.profileSection,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.secondary,
+                )
+                val profileName by SettingsRepository.profileName(context).collectAsState(initial = "")
+                val christianName by SettingsRepository.christianName(context).collectAsState(initial = "")
+                EditableRow(s.yourNameLabel, profileName) { v ->
+                    scope.launch { SettingsRepository.setProfileName(context, v) }
+                }
+                EditableRow(s.christianNameLabel, christianName) { v ->
+                    scope.launch { SettingsRepository.setChristianName(context, v) }
+                }
+                Spacer(Modifier.height(16.dp))
+            }
+
+            item {
                 SettingsLink(s.manageHours, onOpenCustomize)
                 SettingsLink(s.reminderModes, onOpenModes)
                 SettingsLink(s.about, onOpenAbout)
@@ -242,6 +259,51 @@ private fun <T> DropdownSetting(
                 )
             }
         }
+    }
+}
+
+/** Label + current value; tapping opens a dialog with a single text field. */
+@Composable
+private fun EditableRow(label: String, value: String, onSave: (String) -> Unit) {
+    var editing by remember { mutableStateOf(false) }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { editing = true }
+            .padding(vertical = 14.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(label, style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = value.ifBlank { "—" },
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+    if (editing) {
+        val s = com.agpeya.app.ui.strings.LocalStrings.current
+        var text by remember(value) { mutableStateOf(value) }
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { editing = false },
+            title = { Text(label) },
+            text = {
+                androidx.compose.material3.OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    singleLine = true,
+                )
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    onSave(text)
+                    editing = false
+                }) { Text(s.save) }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { editing = false }) { Text(s.cancel) }
+            },
+        )
     }
 }
 

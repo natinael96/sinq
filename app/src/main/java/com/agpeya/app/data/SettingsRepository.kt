@@ -32,6 +32,8 @@ object SettingsRepository {
     private val KEY_ALARM_ALERT = stringPreferencesKey("alarm_alert")
     private val KEY_ALARM_SOUND = stringPreferencesKey("alarm_sound")
     private val KEY_ONBOARDED = booleanPreferencesKey("onboarded")
+    private val KEY_NAME = stringPreferencesKey("profile_name")
+    private val KEY_CHRISTIAN_NAME = stringPreferencesKey("profile_christian_name")
 
     const val DEFAULT_FONT_STEP = 1
 
@@ -106,6 +108,21 @@ object SettingsRepository {
         runCatching {
             kotlinx.coroutines.runBlocking { alarmSound(context).first() }
         }.getOrDefault(AlarmSound.ALARM)
+
+    // Local profile — never leaves the device (the app has no network access).
+    fun profileName(context: Context): Flow<String> =
+        context.settingsDataStore.data.map { it[KEY_NAME] ?: "" }
+
+    suspend fun setProfileName(context: Context, value: String) {
+        context.settingsDataStore.edit { it[KEY_NAME] = value.trim() }
+    }
+
+    fun christianName(context: Context): Flow<String> =
+        context.settingsDataStore.data.map { it[KEY_CHRISTIAN_NAME] ?: "" }
+
+    suspend fun setChristianName(context: Context, value: String) {
+        context.settingsDataStore.edit { it[KEY_CHRISTIAN_NAME] = value.trim() }
+    }
 
     fun onboarded(context: Context): Flow<Boolean> =
         context.settingsDataStore.data.map { it[KEY_ONBOARDED] ?: false }

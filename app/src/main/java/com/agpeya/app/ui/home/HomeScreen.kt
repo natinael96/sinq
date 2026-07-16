@@ -111,12 +111,24 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column {
+                        val profileName by com.agpeya.app.data.SettingsRepository.profileName(context)
+                            .collectAsState(initial = "")
+                        val christianName by com.agpeya.app.data.SettingsRepository.christianName(context)
+                            .collectAsState(initial = "")
+                        val callName = christianName.ifBlank { profileName }
                         Text("ስንቅ", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
                         Text(
                             text = com.agpeya.app.ui.common.formatEthiopian(today, s),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                        if (callName.isNotBlank()) {
+                            Text(
+                                text = s.greeting(callName),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.secondary,
+                            )
+                        }
                     }
                     IconButton(onClick = onOpenModes) {
                         Icon(Icons.Outlined.Notifications, contentDescription = s.reminderModes, tint = MaterialTheme.colorScheme.onSurfaceVariant)
