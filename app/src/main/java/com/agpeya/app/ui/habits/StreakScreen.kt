@@ -18,6 +18,7 @@ import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -40,6 +41,7 @@ import com.agpeya.app.ui.common.AgpeyaBottomBar
 import com.agpeya.app.ui.common.Tab
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.strings.Strings
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -86,7 +88,33 @@ fun StreakScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
             contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
         ) {
             item {
-                Text(s.streaksTitle, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(s.streaksTitle, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
+                    androidx.compose.material3.IconButton(onClick = {
+                        scope.launch {
+                            val pName = com.agpeya.app.data.SettingsRepository.profileName(context).first()
+                            val cName = com.agpeya.app.data.SettingsRepository.christianName(context).first()
+                            StreakShare.share(
+                                context = context,
+                                records = state.records,
+                                today = today,
+                                name = cName.ifBlank { pName },
+                                maxPossible = hourItems.size + habitItems.size,
+                                s = s,
+                            )
+                        }
+                    }) {
+                        Icon(
+                            androidx.compose.material.icons.Icons.Outlined.Share,
+                            contentDescription = s.shareAction,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
                 Spacer(Modifier.height(16.dp))
                 Surface(
                     modifier = Modifier.fillMaxWidth(),

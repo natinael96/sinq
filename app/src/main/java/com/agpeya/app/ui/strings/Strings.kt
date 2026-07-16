@@ -121,6 +121,7 @@ interface Strings {
     val openShort: String
     val donePrompt: String
     val yesAction: String
+    val shareAction: String
     val snooze: String
     val addPsalm: String
     val choosePsalm: String
@@ -291,6 +292,7 @@ object AmharicStrings : Strings {
     override val openShort = "ክፈት"
     override val donePrompt = "ጨርሰዋል?"
     override val yesAction = "አዎ"
+    override val shareAction = "አጋራ"
     override val snooze = "አሳድር"
     override val addPsalm = "መዝሙር ጨምር"
     override val choosePsalm = "መዝሙር ምረጥ"
@@ -453,6 +455,7 @@ object EnglishStrings : Strings {
     override val openShort = "Open"
     override val donePrompt = "Done?"
     override val yesAction = "Yes"
+    override val shareAction = "Share"
     override val snooze = "Snooze"
     override val addPsalm = "Add psalm"
     override val choosePsalm = "Choose a psalm"
