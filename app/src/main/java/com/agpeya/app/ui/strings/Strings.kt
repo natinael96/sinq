@@ -122,6 +122,15 @@ interface Strings {
     val donePrompt: String
     val yesAction: String
     val shareAction: String
+
+    // Psalter page + Home library row
+    val psalterTitle: String
+    val wholePsalter: String
+    val dailyPsalms: String
+    val comingSoon: String
+    val zewotrTselot: String
+    val wudaseMariam: String
+    fun psalmRange(from: Int, to: Int): String
     val snooze: String
     val addPsalm: String
     val choosePsalm: String
@@ -293,6 +302,14 @@ object AmharicStrings : Strings {
     override val donePrompt = "ጨርሰዋል?"
     override val yesAction = "አዎ"
     override val shareAction = "አጋራ"
+
+    override val psalterTitle = "መዝሙረ ዳዊት"
+    override val wholePsalter = "ሙሉ"
+    override val dailyPsalms = "የዕለቱ"
+    override val comingSoon = "በቅርቡ..."
+    override val zewotrTselot = "ዘወትር ጸሎት"
+    override val wudaseMariam = "ውዳሴ ማርያም"
+    override fun psalmRange(from: Int, to: Int) = "መዝሙር $from–$to"
     override val snooze = "አሳድር"
     override val addPsalm = "መዝሙር ጨምር"
     override val choosePsalm = "መዝሙር ምረጥ"
@@ -456,6 +473,14 @@ object EnglishStrings : Strings {
     override val donePrompt = "Done?"
     override val yesAction = "Yes"
     override val shareAction = "Share"
+
+    override val psalterTitle = "መዝሙረ ዳዊት"
+    override val wholePsalter = "All"
+    override val dailyPsalms = "Today's"
+    override val comingSoon = "Coming soon..."
+    override val zewotrTselot = "ዘወትር ጸሎት"
+    override val wudaseMariam = "ውዳሴ ማርያም"
+    override fun psalmRange(from: Int, to: Int) = "Psalms $from–$to"
     override val snooze = "Snooze"
     override val addPsalm = "Add psalm"
     override val choosePsalm = "Choose a psalm"

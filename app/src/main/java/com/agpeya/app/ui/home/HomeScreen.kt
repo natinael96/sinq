@@ -70,6 +70,7 @@ fun HomeScreen(
     onOpenHour: (String) -> Unit,
     onOpenSearch: () -> Unit,
     onOpenBookmarks: () -> Unit,
+    onOpenPsalter: () -> Unit,
     onSelectTab: (Tab) -> Unit,
 ) {
     val context = LocalContext.current
@@ -186,6 +187,33 @@ fun HomeScreen(
                     }
                     Spacer(Modifier.height(24.dp))
                 }
+            }
+
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    LibraryButton(
+                        label = s.psalterTitle,
+                        enabled = true,
+                        comingSoon = null,
+                        onClick = onOpenPsalter,
+                        modifier = Modifier.weight(1f),
+                    )
+                    LibraryButton(
+                        label = s.zewotrTselot,
+                        enabled = false,
+                        comingSoon = s.comingSoon,
+                        onClick = {},
+                        modifier = Modifier.weight(1f),
+                    )
+                    LibraryButton(
+                        label = s.wudaseMariam,
+                        enabled = false,
+                        comingSoon = s.comingSoon,
+                        onClick = {},
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+                Spacer(Modifier.height(24.dp))
             }
 
             item {
@@ -329,6 +357,51 @@ private fun TodayCard(
                 cell = 9.dp,
                 gap = 2.dp,
             )
+        }
+    }
+}
+
+/** Small library card: active (gold-titled) or muted with a coming-soon caption. */
+@Composable
+private fun LibraryButton(
+    label: String,
+    enabled: Boolean,
+    comingSoon: String?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surface,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant),
+        modifier = modifier,
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, lineHeight = 15.sp),
+                color = if (enabled) MaterialTheme.colorScheme.onBackground
+                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+            )
+            if (comingSoon != null) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = comingSoon,
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontSize = 10.sp,
+                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    maxLines = 1,
+                )
+            }
         }
     }
 }

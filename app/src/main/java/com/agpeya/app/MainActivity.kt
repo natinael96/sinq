@@ -106,6 +106,7 @@ private fun AgpeyaNavHost(deepLinkHourId: String?) {
                 onOpenHour = { hourId -> navController.navigate("reading/$hourId") },
                 onOpenSearch = { navController.navigate("search") },
                 onOpenBookmarks = { navController.navigate("bookmarks") },
+                onOpenPsalter = { navController.navigate("psalter") },
                 onSelectTab = navController::switchTab,
             )
         }
@@ -120,6 +121,9 @@ private fun AgpeyaNavHost(deepLinkHourId: String?) {
                 onBack = { navController.popBackStack() },
                 onOpen = { hourId, index -> navController.navigate("reading/$hourId?section=$index") },
             )
+        }
+        composable("psalter") {
+            com.agpeya.app.ui.psalter.PsalterScreen(onBack = { navController.popBackStack() })
         }
         composable(Tab.STREAK.route) {
             com.agpeya.app.ui.habits.StreakScreen(
