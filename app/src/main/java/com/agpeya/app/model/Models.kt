@@ -32,6 +32,8 @@ data class Section(
     val part: String? = null,
     /** Bible verse number of verses[0] — gospel passages start mid-chapter. */
     val firstVerse: Int = 1,
+    /** Stanza headings shown above a verse, keyed by verse number — Psalm 118's acrostic letters. */
+    val verseHeaders: Map<Int, String> = emptyMap(),
     val verses: List<String>,
 )
 

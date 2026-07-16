@@ -119,11 +119,27 @@ private fun AgpeyaNavHost(deepLinkHourId: String?) {
         composable("bookmarks") {
             BookmarksScreen(
                 onBack = { navController.popBackStack() },
-                onOpen = { hourId, index -> navController.navigate("reading/$hourId?section=$index") },
+                onOpen = { hourId, index ->
+                    // Psalter bookmarks live under a pseudo hour id and open the
+                    // Psalter screen, not the hour reader.
+                    if (hourId == com.agpeya.app.ui.psalter.PSALTER_BOOKMARK_ID) {
+                        navController.navigate("psalter?section=$index")
+                    } else {
+                        navController.navigate("reading/$hourId?section=$index")
+                    }
+                },
             )
         }
-        composable("psalter") {
-            com.agpeya.app.ui.psalter.PsalterScreen(onBack = { navController.popBackStack() })
+        composable(
+            route = "psalter?section={section}",
+            arguments = listOf(
+                navArgument("section") { type = NavType.IntType; defaultValue = -1 },
+            ),
+        ) { backStackEntry ->
+            com.agpeya.app.ui.psalter.PsalterScreen(
+                initialPsalmIndex = backStackEntry.arguments?.getInt("section") ?: -1,
+                onBack = { navController.popBackStack() },
+            )
         }
         composable(Tab.STREAK.route) {
             com.agpeya.app.ui.habits.StreakScreen(

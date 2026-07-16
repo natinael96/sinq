@@ -60,11 +60,42 @@ def chapter_verses(ch: dict) -> list[dict]:
     return out
 
 
-def psalm_section(psalms_book: dict, hour_id: str, order: int, num: int) -> dict:
-    ch = chapter(psalms_book, num)
-    superscription = (ch["sections"][0].get("title") or "").strip() or None
+def psalm118_clean(psalms_book: dict) -> tuple[list[str], list[str]]:
+    """Split the acrostic letter names out of Psalm 118's verse text.
+
+    In the source, the first letter (Aleph) is the section title and each
+    following letter is glued onto the end of the preceding stanza's last
+    verse. Returns (clean verses, 22 letters) where letters[k] heads verses
+    8k+1..8k+8.
+    """
+    ch = chapter(psalms_book, 118)
     verses = [v["text"].strip() for v in chapter_verses(ch)]
-    return {
+    assert len(verses) == 176, f"Psalm 118 expected 176 verses, got {len(verses)}"
+    first = (ch["sections"][0].get("title") or "").strip().rstrip("።").strip()
+    assert first, "Psalm 118 missing the Aleph section title"
+    letters = [first]
+    for st in range(1, 22):
+        i = st * 8 - 1  # last verse of stanza `st` (0-based)
+        text, _, letter = verses[i].rpartition(" ")
+        assert text and 1 <= len(letter) <= 5, f"unexpected stanza letter {letter!r} at verse {i + 1}"
+        verses[i] = text
+        letters.append(letter)
+    return verses, letters
+
+
+def psalm_content(psalms_book: dict, num: int) -> tuple[list[str], str | None, dict[str, str] | None]:
+    """(verses, subtitle, verseHeaders) for one psalm, with 118's acrostic split out."""
+    ch = chapter(psalms_book, num)
+    if num == 118:
+        verses, letters = psalm118_clean(psalms_book)
+        return verses, None, {str(k * 8 + 1): letters[k] for k in range(22)}
+    superscription = (ch["sections"][0].get("title") or "").strip() or None
+    return [v["text"].strip() for v in chapter_verses(ch)], superscription, None
+
+
+def psalm_section(psalms_book: dict, hour_id: str, order: int, num: int) -> dict:
+    verses, superscription, headers = psalm_content(psalms_book, num)
+    section = {
         "id": f"{hour_id}_ps{num}",
         "orderIndex": order,
         "type": "psalm",
@@ -74,14 +105,16 @@ def psalm_section(psalms_book: dict, hour_id: str, order: int, num: int) -> dict
         "firstVerse": 1,
         "verses": verses,
     }
+    if headers:
+        section["verseHeaders"] = headers
+    return section
 
 
 def psalm118_stanzas(psalms_book: dict, hour_id: str, order: int, from_st: int, to_st: int) -> list[dict]:
-    ch = chapter(psalms_book, 118)
-    verses = chapter_verses(ch)
-    assert len(verses) == 176, f"Psalm 118 expected 176 verses, got {len(verses)}"
+    verses, letters = psalm118_clean(psalms_book)
     sections = []
     for st in range(from_st, to_st + 1):
+        first = (st - 1) * 8 + 1
         chunk = verses[(st - 1) * 8: st * 8]
         sections.append({
             "id": f"{hour_id}_ps118_s{st}",
@@ -89,9 +122,12 @@ def psalm118_stanzas(psalms_book: dict, hour_id: str, order: int, from_st: int, 
             "type": "psalm",
             "title": f"መዝሙር ፻፲፰ — {geez(st)}",
             "subtitle": None,
-            "reference": f"Ps 118:{(st - 1) * 8 + 1}-{st * 8}",
-            "firstVerse": (st - 1) * 8 + 1,
-            "verses": [v["text"].strip() for v in chunk],
+            "reference": f"Ps 118:{first}-{st * 8}",
+            "firstVerse": first,
+            # The acrostic letter renders as a stanza heading above the verses,
+            # matching how the full psalm shows in the Psalter.
+            "verseHeaders": {str(first): letters[st - 1]},
+            "verses": chunk,
         })
         order += 1
     return sections
@@ -212,9 +248,8 @@ def build_psalter(books: dict) -> dict:
     out = []
     for ch in psalms_book["chapters"]:
         num = int(ch["chapter"])
-        superscription = (ch["sections"][0].get("title") or "").strip() or None
-        verses = [v["text"].strip() for v in chapter_verses(ch)]
-        out.append({
+        verses, superscription, headers = psalm_content(psalms_book, num)
+        psalm = {
             "id": f"ps_{num}",
             "number": num,
             "orderIndex": num,
@@ -224,7 +259,10 @@ def build_psalter(books: dict) -> dict:
             "reference": f"Ps {num}",
             "firstVerse": 1,
             "verses": verses,
-        })
+        }
+        if headers:
+            psalm["verseHeaders"] = headers
+        out.append(psalm)
     return {"psalms": out}
 
 

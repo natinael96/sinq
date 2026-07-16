@@ -7,14 +7,7 @@ import android.view.WindowManager
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,28 +17,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.FormatColorReset
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material.icons.outlined.SwapVert
-import androidx.compose.ui.draw.clip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -74,17 +56,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.agpeya.app.data.ContentRepository
 import com.agpeya.app.data.HighlightRepository
 import com.agpeya.app.data.LayoutRepository
@@ -498,178 +473,5 @@ private fun PartHeader(part: String) {
     }
 }
 
-@Composable
-private fun SectionView(
-    section: Section,
-    bodyFontSp: Int,
-    isBookmarked: Boolean,
-    onToggleBookmark: () -> Unit,
-    highlights: Map<String, String>,
-    onVerseTap: (String) -> Unit,
-) {
-    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Spacer(Modifier.height(40.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = section.title,
-                style = MaterialTheme.typography.titleLarge.copy(fontFamily = Abyssinica),
-                color = MaterialTheme.colorScheme.secondary,
-                textAlign = TextAlign.Center,
-            )
-            IconButton(onClick = onToggleBookmark) {
-                Icon(
-                    imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-                    contentDescription = com.agpeya.app.ui.strings.LocalStrings.current.bookmarkAction,
-                    tint = if (isBookmarked) MaterialTheme.colorScheme.secondary
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-        section.subtitle?.let {
-            Text(
-                text = it,
-                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = Abyssinica),
-                fontStyle = FontStyle.Italic,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-            )
-        }
-        Spacer(Modifier.height(8.dp))
-        HorizontalDivider(modifier = Modifier.width(32.dp), thickness = 1.dp, color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f))
-        Spacer(Modifier.height(16.dp))
-        VerseText(
-            section = section,
-            bodyFontSp = bodyFontSp,
-            highlights = highlights,
-            onVerseTap = onVerseTap,
-        )
-    }
-}
-
-@Composable
-private fun VerseText(
-    section: Section,
-    bodyFontSp: Int,
-    highlights: Map<String, String>,
-    onVerseTap: (String) -> Unit,
-) {
-    val markerColor = MaterialTheme.colorScheme.secondary
-    val style = MaterialTheme.typography.bodyLarge.copy(
-        fontFamily = Abyssinica,
-        fontSize = bodyFontSp.sp,
-        lineHeight = (bodyFontSp * 1.85f).sp,
-    )
-    // One Text per verse so each carries its own highlight background and tap
-    // target. (No SelectionContainer — it would swallow the verse taps.)
-    Column(Modifier.fillMaxWidth()) {
-        section.verses.forEachIndexed { i, verse ->
-                val verseNumber = section.firstVerse + i
-                val verseKey = HighlightRepository.verseKey(section.id, verseNumber)
-                val bg = highlightColor(highlights[verseKey])
-                val annotated = remember(verse, verseNumber, markerColor, bodyFontSp) {
-                    buildAnnotatedString {
-                        withStyle(
-                            SpanStyle(
-                                color = markerColor,
-                                fontSize = (bodyFontSp * 0.58f).sp,
-                                baselineShift = BaselineShift.Superscript,
-                            )
-                        ) { append(geezNumeral(verseNumber)) }
-                        append(" ")
-                        append(verse)
-                    }
-                }
-                Text(
-                    text = annotated,
-                    style = style,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(bg)
-                        .pointerInput(verseKey) {
-                            detectTapGestures(onTap = { onVerseTap(verseKey) })
-                        }
-                        .padding(horizontal = 6.dp, vertical = 3.dp),
-                )
-            }
-        }
-}
-
-/** Semi-transparent highlight tints that read well on both light and dark backgrounds. */
-private fun highlightColor(key: String?): androidx.compose.ui.graphics.Color = when (key) {
-    "yellow" -> androidx.compose.ui.graphics.Color(0x55E8C46B)
-    "green" -> androidx.compose.ui.graphics.Color(0x554CAF50)
-    "blue" -> androidx.compose.ui.graphics.Color(0x552196F3)
-    "pink" -> androidx.compose.ui.graphics.Color(0x55E0529C)
-    else -> androidx.compose.ui.graphics.Color.Transparent
-}
-
-@Composable
-private fun HighlightBar(
-    visible: Boolean,
-    currentColor: String?,
-    onPick: (String?) -> Unit,
-    onDismiss: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    androidx.compose.animation.AnimatedVisibility(
-        visible = visible,
-        modifier = modifier,
-        enter = androidx.compose.animation.slideInVertically { it } + fadeIn(),
-        exit = androidx.compose.animation.slideOutVertically { it } + androidx.compose.animation.fadeOut(),
-    ) {
-        val s = com.agpeya.app.ui.strings.LocalStrings.current
-        androidx.compose.material3.Surface(
-            shadowElevation = 8.dp,
-            color = MaterialTheme.colorScheme.surface,
-            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                HighlightRepository.COLOR_KEYS.forEach { key ->
-                    val selected = key == currentColor
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(highlightSwatch(key))
-                            .then(
-                                if (selected) Modifier.border(2.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
-                                else Modifier
-                            )
-                            .clickable { onPick(key) },
-                    )
-                }
-                Spacer(Modifier.weight(1f))
-                IconButton(onClick = { onPick(null) }) {
-                    Icon(
-                        Icons.Outlined.FormatColorReset,
-                        contentDescription = s.removeHighlight,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                IconButton(onClick = onDismiss) {
-                    Icon(
-                        Icons.Outlined.Close,
-                        contentDescription = s.contents,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-        }
-    }
-}
-
-private fun highlightSwatch(key: String?): androidx.compose.ui.graphics.Color = when (key) {
-    "yellow" -> androidx.compose.ui.graphics.Color(0xFFE8C46B)
-    "green" -> androidx.compose.ui.graphics.Color(0xFF4CAF50)
-    "blue" -> androidx.compose.ui.graphics.Color(0xFF2196F3)
-    "pink" -> androidx.compose.ui.graphics.Color(0xFFE0529C)
-    else -> androidx.compose.ui.graphics.Color.Gray
-}
+// SectionView, VerseText, and HighlightBar live in SectionUi.kt — shared with
+// the Psalter screen.
