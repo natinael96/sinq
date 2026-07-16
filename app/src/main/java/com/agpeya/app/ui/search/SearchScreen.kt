@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -38,7 +39,7 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-    onSelectTab: (Tab) -> Unit,
+    onBack: () -> Unit,
     onOpenResult: (hourId: String, sectionIndex: Int) -> Unit,
 ) {
     val context = LocalContext.current
@@ -57,7 +58,19 @@ fun SearchScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        bottomBar = { AgpeyaBottomBar(current = Tab.SEARCH, onSelect = onSelectTab) },
+        topBar = {
+            androidx.compose.material3.TopAppBar(
+                title = { Text(s.tabSearch, style = MaterialTheme.typography.titleLarge) },
+                navigationIcon = {
+                    androidx.compose.material3.IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
+                    }
+                },
+                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                ),
+            )
+        },
     ) { innerPadding ->
         Column(
             modifier = Modifier

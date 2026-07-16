@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.BookmarkRemove
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,9 +33,10 @@ import com.agpeya.app.ui.common.AgpeyaBottomBar
 import com.agpeya.app.ui.common.Tab
 import kotlinx.coroutines.launch
 
-@Composable
+@androidx.compose.runtime.Composable
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 fun BookmarksScreen(
-    onSelectTab: (Tab) -> Unit,
+    onBack: () -> Unit,
     onOpen: (hourId: String, sectionIndex: Int) -> Unit,
 ) {
     val context = LocalContext.current
@@ -45,7 +47,19 @@ fun BookmarksScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        bottomBar = { AgpeyaBottomBar(current = Tab.BOOKMARKS, onSelect = onSelectTab) },
+        topBar = {
+            androidx.compose.material3.TopAppBar(
+                title = { Text(s.bookmarksTitle, style = MaterialTheme.typography.titleLarge) },
+                navigationIcon = {
+                    androidx.compose.material3.IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
+                    }
+                },
+                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                ),
+            )
+        },
     ) { innerPadding ->
         if (bookmarks.isEmpty()) {
             Column(
@@ -78,14 +92,6 @@ fun BookmarksScreen(
                 .padding(innerPadding),
             contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
         ) {
-            item {
-                Text(
-                    text = s.bookmarksTitle,
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-                Spacer(Modifier.height(8.dp))
-            }
             grouped.forEach { (hour, items) ->
                 item(key = "h_${hour.first}") {
                     Spacer(Modifier.height(16.dp))

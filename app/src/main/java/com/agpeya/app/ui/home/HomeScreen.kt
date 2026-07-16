@@ -23,8 +23,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.LocalFireDepartment
-import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -67,7 +68,8 @@ private const val PRAYER_AGGREGATE_ID = "prayer"
 @Composable
 fun HomeScreen(
     onOpenHour: (String) -> Unit,
-    onOpenModes: () -> Unit,
+    onOpenSearch: () -> Unit,
+    onOpenBookmarks: () -> Unit,
     onSelectTab: (Tab) -> Unit,
 ) {
     val context = LocalContext.current
@@ -130,8 +132,21 @@ fun HomeScreen(
                             )
                         }
                     }
-                    IconButton(onClick = onOpenModes) {
-                        Icon(Icons.Outlined.Notifications, contentDescription = s.reminderModes, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Row {
+                        IconButton(onClick = onOpenSearch) {
+                            Icon(
+                                Icons.Outlined.Search,
+                                contentDescription = s.tabSearch,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        IconButton(onClick = onOpenBookmarks) {
+                            Icon(
+                                Icons.Outlined.Bookmarks,
+                                contentDescription = s.bookmarksTitle,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
                 }
                 Spacer(Modifier.height(16.dp))

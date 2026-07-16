@@ -104,19 +104,20 @@ private fun AgpeyaNavHost(deepLinkHourId: String?) {
         composable(Tab.HOME.route) {
             HomeScreen(
                 onOpenHour = { hourId -> navController.navigate("reading/$hourId") },
-                onOpenModes = { navController.navigate("modes") },
+                onOpenSearch = { navController.navigate("search") },
+                onOpenBookmarks = { navController.navigate("bookmarks") },
                 onSelectTab = navController::switchTab,
             )
         }
-        composable(Tab.SEARCH.route) {
+        composable("search") {
             SearchScreen(
-                onSelectTab = navController::switchTab,
+                onBack = { navController.popBackStack() },
                 onOpenResult = { hourId, index -> navController.navigate("reading/$hourId?section=$index") },
             )
         }
-        composable(Tab.BOOKMARKS.route) {
+        composable("bookmarks") {
             BookmarksScreen(
-                onSelectTab = navController::switchTab,
+                onBack = { navController.popBackStack() },
                 onOpen = { hourId, index -> navController.navigate("reading/$hourId?section=$index") },
             )
         }

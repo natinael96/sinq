@@ -12,11 +12,10 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocalFireDepartment
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -31,8 +30,6 @@ import com.agpeya.app.ui.strings.LocalStrings
 
 enum class Tab(val route: String, val icon: ImageVector) {
     HOME("home", Icons.Outlined.Home),
-    SEARCH("search", Icons.Outlined.Search),
-    BOOKMARKS("bookmarks", Icons.Outlined.Bookmarks),
     STREAK("streak", Icons.Outlined.LocalFireDepartment),
     SETTINGS("settings", Icons.Outlined.Settings),
 }
@@ -44,8 +41,6 @@ fun AgpeyaBottomBar(current: Tab, onSelect: (Tab) -> Unit) {
     val label: (Tab) -> String = {
         when (it) {
             Tab.HOME -> s.tabHome
-            Tab.SEARCH -> s.tabSearch
-            Tab.BOOKMARKS -> s.tabBookmarks
             Tab.STREAK -> s.tabStreak
             Tab.SETTINGS -> s.tabSettings
         }
@@ -67,21 +62,29 @@ fun AgpeyaBottomBar(current: Tab, onSelect: (Tab) -> Unit) {
                 Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceAround,
             ) {
                 Tab.entries.forEach { tab ->
                     val selected = tab == current
                     val tint = if (selected) MaterialTheme.colorScheme.secondary
                     else MaterialTheme.colorScheme.onSurfaceVariant
+                    // Equal share of the width on every screen size; labels never wrap.
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
+                            .weight(1f)
                             .clip(RoundedCornerShape(14.dp))
                             .clickable { if (!selected) onSelect(tab) }
-                            .padding(horizontal = 10.dp, vertical = 4.dp),
+                            .padding(vertical = 4.dp),
                     ) {
                         Icon(tab.icon, contentDescription = label(tab), tint = tint)
-                        Text(label(tab), style = MaterialTheme.typography.labelMedium, color = tint)
+                        Text(
+                            label(tab),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = tint,
+                            maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis,
+                        )
                     }
                 }
             }
