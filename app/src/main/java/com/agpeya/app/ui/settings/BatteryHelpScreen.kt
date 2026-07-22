@@ -35,6 +35,7 @@ fun BatteryHelpScreen(onBack: () -> Unit) {
     val s = LocalStrings.current
     val context = LocalContext.current
 
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
