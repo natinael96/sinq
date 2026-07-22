@@ -9,7 +9,9 @@
     <!-- Auto-granted; lets a prayer-alarm app fire exact alarms (setAlarmClock). -->
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <!-- Alarm-clock FGS type: apps holding USE_EXACT_ALARM are the documented
+         eligible case for systemExempted (mediaPlayback was a policy mismatch). -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
 
     <application
         android:allowBackup="true"
@@ -41,7 +43,7 @@
         <service
             android:name=".reminders.AlarmService"
             android:exported="false"
-            android:foregroundServiceType="mediaPlayback" />
+            android:foregroundServiceType="systemExempted" />
 
         <receiver
             android:name=".reminders.AlarmReceiver"

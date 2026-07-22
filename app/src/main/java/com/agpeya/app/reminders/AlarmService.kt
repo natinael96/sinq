@@ -16,7 +16,9 @@ import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.content.pm.ServiceInfo
 import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
 import com.agpeya.app.R
 import com.agpeya.app.data.AlarmAlert
 import com.agpeya.app.data.AlarmSound
@@ -66,10 +68,16 @@ class AlarmService : Service() {
         activeHourId = hourId
         activeHourName = hourName
         ensureChannel()
-        startForeground(NOTIFICATION_ID, buildNotification(hourId, hourName))
+        ServiceCompat.startForeground(
+            this,
+            NOTIFICATION_ID,
+            buildNotification(hourId, hourName),
+            if (Build.VERSION.SDK_INT >= 34) ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED else 0,
+        )
         startRinging()
         handler.postDelayed(autoStop, TIMEOUT_MS)
-        return START_STICKY
+        // NOT_STICKY: a system restart would replay a null intent and ring "morning" spuriously.
+        return START_NOT_STICKY
     }
 
     /** Quiet notification after the alarm ends: "Done?" with a Yes action that marks the hour. */
@@ -167,6 +175,10 @@ class AlarmService : Service() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
         val s = stringsFor(runBlocking { SettingsRepository.language(this@AlarmService).first() })
+        // Android 14+ can revoke full-screen-intent permission; fall back to the
+        // heads-up notification (contentIntent still opens the alarm screen).
+        val canFullScreen = Build.VERSION.SDK_INT < 34 ||
+            getSystemService(NotificationManager::class.java).canUseFullScreenIntent()
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(s.itsTime)
@@ -174,7 +186,7 @@ class AlarmService : Service() {
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setOngoing(true)
             .setAutoCancel(false)
-            .setFullScreenIntent(fullScreen, true)
+            .apply { if (canFullScreen) setFullScreenIntent(fullScreen, true) }
             .setContentIntent(fullScreen)
             .addAction(0, s.snooze, snooze)
             .addAction(0, s.dismiss, dismiss)

@@ -1,0 +1,50 @@
+name: Release
+
+# Pushing a tag like v0.2.2 builds a signed release APK + AAB and attaches
+# them to a GitHub Release. Signing comes from repo secrets (see README):
+#   KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Decode signing keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > sinq-upload.jks
+
+      - name: Build signed release APK + AAB
+        env:
+          SINQ_KEYSTORE_FILE: sinq-upload.jks
+          SINQ_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          SINQ_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          SINQ_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease bundleRelease --no-daemon
+
+      - name: Rename artifacts
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk "Sinq-${GITHUB_REF_NAME}.apk"
+          cp app/build/outputs/bundle/release/app-release.aab "Sinq-${GITHUB_REF_NAME}.aab"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            Sinq-*.apk
+            Sinq-*.aab
+          generate_release_notes: true
