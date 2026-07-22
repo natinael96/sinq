@@ -1,9 +1,14 @@
-# Agpeya (አግፔያ) Android App — Detailed Master Plan
+# Sinq (ስንቅ) Android App — Detailed Master Plan
 
 > Ethiopian Orthodox Hours of Prayer app, fully in Amharic.
 > Solo developer learning Kotlin + Android while building.
 > Target: V1 on Google Play in ~12 weeks.
 > This document is the single source of truth. When tempted to add scope, re-read §1.3.
+
+> **Renamed 2026-07-16:** the app is now **Sinq (ስንቅ — "provisions for the journey")**; repo:
+> [github.com/natinael96/---sinq](https://github.com/natinael96/---sinq). Where "Agpeya" appears
+> below it refers to the prayer book itself (and the built-in reminder mode named after it), not
+> the app. The `com.agpeya.app` applicationId is a permanent contract and does not change.
 
 ---
 
