@@ -15,3 +15,13 @@
 -keepclassmembers class com.agpeya.app.**$$serializer {
     *** INSTANCE;
 }
+
+# DataStore Preferences stores string-sets (bookmarks, streak records, scheduled
+# ids…) through a bundled protobuf-lite. Its generated messages resolve fields
+# reflectively by their original name (e.g. StringSet.strings_); R8 field
+# renaming makes that lookup fail at runtime ("Field strings_ ... not found").
+# Keep the datastore tree — including the repackaged protobuf — intact.
+-keep class androidx.datastore.** { *; }
+-keepclassmembers class * extends androidx.datastore.preferences.protobuf.GeneratedMessageLite {
+    <fields>;
+}

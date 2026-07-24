@@ -29,8 +29,8 @@ android {
         //   0.MINOR.PATCH — PATCH for fixes/small tweaks, MINOR for new features.
         //   1.0.0 is reserved for the first public (Play) release.
         //   versionCode increments by 1 on EVERY update, no exceptions.
-        versionCode = 8
-        versionName = "0.2.3" // deep-link, content-crash, alarm main-thread-IO fixes
+        versionCode = 9
+        versionName = "0.2.4" // R8 keep rules for DataStore protobuf (release-crash fix)
     }
 
     signingConfigs {
