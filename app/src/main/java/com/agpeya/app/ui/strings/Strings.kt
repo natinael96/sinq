@@ -166,6 +166,15 @@ interface Strings {
     val introOfflineBody: String
     val introRemindersTitle: String
     val introRemindersBody: String
+    val introStreakTitle: String
+    val introStreakBody: String
+    val introPsalterTitle: String
+    val introPsalterBody: String
+    val tutorial: String
+    val tutorialAskTitle: String
+    val tutorialAskBody: String
+    val showTutorial: String
+    val gotIt: String
     val getStarted: String
     val next: String
     val skip: String
@@ -352,6 +361,15 @@ object AmharicStrings : Strings {
     override val introOfflineBody = "ሙሉ በሙሉ ከመስመር ውጭ ይሰራል። ምንም መረጃ አይሰበሰብም።"
     override val introRemindersTitle = "ማስታወሻዎች"
     override val introRemindersBody = "የራስዎን የጸሎት ሰዓታት ይምረጡ፤ በሚፈልጉት ጊዜ ያስታውሱ።"
+    override val introStreakTitle = "ተከታታይነት"
+    override val introStreakBody = "የጸሎትዎንና የልማዶችዎን ተከታታይነት በየቀኑ ይከታተሉ።"
+    override val introPsalterTitle = "መዝሙረ ዳዊት"
+    override val introPsalterBody = "ሁሉም 150 መዝሙራት — በየቀኑ ተከፋፍለው፣ ሁልጊዜ ከመስመር ውጭ።"
+    override val tutorial = "እንዴት እንደሚሠራ"
+    override val tutorialAskTitle = "አጭር ማብራሪያ ይፈልጋሉ?"
+    override val tutorialAskBody = "ዋና ዋና ባህሪያትን በፍጥነት እናሳይዎ።"
+    override val showTutorial = "አሳየኝ"
+    override val gotIt = "ገባኝ"
     override val getStarted = "ጀምር"
     override val next = "ቀጥል"
     override val skip = "ዝለል"
@@ -532,6 +550,15 @@ object EnglishStrings : Strings {
     override val introOfflineBody = "Fully offline. No data is collected, ever."
     override val introRemindersTitle = "Reminders"
     override val introRemindersBody = "Choose your own times and be reminded when you want."
+    override val introStreakTitle = "Streaks"
+    override val introStreakBody = "Track your prayer and habit streak day by day."
+    override val introPsalterTitle = "The Psalter"
+    override val introPsalterBody = "All 150 psalms — divided by day and always offline."
+    override val tutorial = "How it works"
+    override val tutorialAskTitle = "Want a quick tour?"
+    override val tutorialAskBody = "We'll show you the main features in a few taps."
+    override val showTutorial = "Show me"
+    override val gotIt = "Got it"
     override val getStarted = "Get started"
     override val next = "Next"
     override val skip = "Skip"

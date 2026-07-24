@@ -225,6 +225,7 @@ private fun AgpeyaNavHost(
                 onSelectTab = navController::switchTab,
                 onOpenModes = { navController.navigate("modes") },
                 onOpenCustomize = { navController.navigate("customize") },
+                onOpenTutorial = { navController.navigate("tutorial") },
                 onOpenAbout = { navController.navigate("about") },
             )
         }
@@ -269,6 +270,9 @@ private fun AgpeyaNavHost(
         composable("customize/{hourId}") { backStackEntry ->
             val hourId = backStackEntry.arguments?.getString("hourId") ?: return@composable
             CustomizeHourScreen(hourId = hourId, onBack = { navController.popBackStack() })
+        }
+        composable("tutorial") {
+            com.agpeya.app.ui.intro.TutorialScreen(onDone = { navController.popBackStack() })
         }
         composable("about") {
             AboutScreen(onBack = { navController.popBackStack() })

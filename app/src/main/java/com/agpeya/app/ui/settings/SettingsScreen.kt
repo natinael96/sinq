@@ -46,6 +46,7 @@ fun SettingsScreen(
     onSelectTab: (Tab) -> Unit,
     onOpenModes: () -> Unit,
     onOpenCustomize: () -> Unit,
+    onOpenTutorial: () -> Unit,
     onOpenAbout: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -242,6 +243,7 @@ fun SettingsScreen(
             item {
                 SettingsLink(s.manageHours, onOpenCustomize)
                 SettingsLink(s.reminderModes, onOpenModes)
+                SettingsLink(s.tutorial, onOpenTutorial)
                 SettingsLink(s.about, onOpenAbout)
             }
         }
