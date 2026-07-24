@@ -51,6 +51,8 @@ interface Strings {
     val streakChannelName: String
     val settingsStreakReminder: String
     val settingsStreakReminderDesc: String
+    val notifDisabledTitle: String
+    val notifDisabledBody: String
 
     val bookmarksTitle: String
     val noBookmarksTitle: String
@@ -238,6 +240,8 @@ object AmharicStrings : Strings {
     override val streakChannelName = "የሌሊት ማስታወሻ"
     override val settingsStreakReminder = "የሌሊት ማስታወሻ"
     override val settingsStreakReminderDesc = "በ21፡30 ዛሬን እንድትሞላ ያስታውስሃል"
+    override val notifDisabledTitle = "ማሳወቂያዎች ጠፍተዋል"
+    override val notifDisabledBody = "ማንቂያዎችህ እንዲደርሱህ የመተግበሪያውን ማሳወቂያዎች ከቅንብሮች አብራ።"
 
     override val bookmarksTitle = "ምልክቶች"
     override val noBookmarksTitle = "ገና ምልክት አላደረጉም"
@@ -416,6 +420,8 @@ object EnglishStrings : Strings {
     override val streakChannelName = "Nightly reminder"
     override val settingsStreakReminder = "Nightly streak reminder"
     override val settingsStreakReminderDesc = "A 9:30 PM nudge to fill in today"
+    override val notifDisabledTitle = "Notifications are off"
+    override val notifDisabledBody = "Turn on notifications in settings so your reminders can reach you."
 
     override val bookmarksTitle = "Bookmarks"
     override val noBookmarksTitle = "No bookmarks yet"

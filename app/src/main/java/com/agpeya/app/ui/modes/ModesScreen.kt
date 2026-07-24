@@ -24,6 +24,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -83,6 +84,22 @@ fun ModesScreen(onBack: () -> Unit, onEditMode: (String) -> Unit, onOpenBatteryH
                 .padding(innerPadding),
             contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
         ) {
+            // Re-read on each (re)composition, so returning from settings reflects a change.
+            val notificationsEnabled =
+                androidx.core.app.NotificationManagerCompat.from(context).areNotificationsEnabled()
+            if (!notificationsEnabled) {
+                item {
+                    NotificationsOffBanner(
+                        onOpenSettings = {
+                            context.startActivity(
+                                android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                    .putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName),
+                            )
+                        },
+                    )
+                    Spacer(Modifier.height(12.dp))
+                }
+            }
             items(state.modes, key = { it.id }) { mode ->
                 ModeRow(
                     mode = mode,
@@ -152,6 +169,33 @@ fun ModesScreen(onBack: () -> Unit, onEditMode: (String) -> Unit, onOpenBatteryH
                 TextButton(onClick = { deleteCandidate = null }) { Text(s.cancel) }
             },
         )
+    }
+}
+
+/** Shown on the Modes screen when the OS has notifications switched off for the app. */
+@Composable
+private fun NotificationsOffBanner(onOpenSettings: () -> Unit) {
+    val s = com.agpeya.app.ui.strings.LocalStrings.current
+    Surface(
+        color = MaterialTheme.colorScheme.errorContainer,
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text(
+                s.notifDisabledTitle,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                s.notifDisabledBody,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+            )
+            Spacer(Modifier.height(4.dp))
+            TextButton(onClick = onOpenSettings) { Text(s.openSettings) }
+        }
     }
 }
 

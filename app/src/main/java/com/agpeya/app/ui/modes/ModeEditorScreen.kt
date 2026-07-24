@@ -74,9 +74,13 @@ fun ModeEditorScreen(modeId: String, onBack: () -> Unit) {
     var editing by remember { mutableStateOf<ReminderEntry?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    var showNotifDenied by remember { mutableStateOf(false) }
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { /* result handled by the system; alarms work either way, notification needs grant */ }
+    ) { granted ->
+        // Alarms still fire the full-screen intent; only the notification needs the grant.
+        if (!granted) showNotifDenied = true
+    }
 
     fun ensureNotificationPermission() {
         if (Build.VERSION.SDK_INT >= 33 &&
@@ -175,6 +179,26 @@ fun ModeEditorScreen(modeId: String, onBack: () -> Unit) {
             }
             item { Spacer(Modifier.height(40.dp)) }
         }
+    }
+
+    if (showNotifDenied) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showNotifDenied = false },
+            title = { Text(s.notifDisabledTitle) },
+            text = { Text(s.notifDisabledBody) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showNotifDenied = false
+                    context.startActivity(
+                        android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                            .putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName),
+                    )
+                }) { Text(s.openSettings) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showNotifDenied = false }) { Text(s.cancel) }
+            },
+        )
     }
 
     editing?.let { entry ->
