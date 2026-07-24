@@ -1,6 +1,7 @@
 package com.agpeya.app.data
 
 import android.content.Context
+import android.util.Log
 import com.agpeya.app.model.Hour
 import com.agpeya.app.model.Manifest
 import kotlinx.coroutines.Dispatchers
@@ -14,6 +15,8 @@ import kotlinx.serialization.json.Json
  */
 object ContentRepository {
 
+    private const val TAG = "ContentRepository"
+
     private val json = Json { ignoreUnknownKeys = true }
 
     @Volatile
@@ -26,9 +29,12 @@ object ContentRepository {
     suspend fun psalter(context: Context): List<com.agpeya.app.model.Section> =
         psalterCache ?: withContext(Dispatchers.IO) {
             val assets = context.applicationContext.assets
-            val loaded = json.decodeFromString<com.agpeya.app.model.Psalter>(
-                assets.open("content/psalms.json").readBytes().decodeToString()
-            ).psalms
+            val loaded = runCatching {
+                json.decodeFromString<com.agpeya.app.model.Psalter>(
+                    assets.open("content/psalms.json").readBytes().decodeToString()
+                ).psalms
+            }.onFailure { Log.e(TAG, "Failed to load psalms.json", it) }
+                .getOrDefault(emptyList())
             loaded.also { psalterCache = it }
         }
 
@@ -43,17 +49,20 @@ object ContentRepository {
     suspend fun hour(context: Context, hourId: String): Hour? =
         hours(context).find { it.id == hourId }
 
-    private fun load(context: Context): List<Hour> {
+    private fun load(context: Context): List<Hour> = runCatching {
         val assets = context.assets
         val manifest = json.decodeFromString<Manifest>(
             assets.open("content/manifest.json").readBytes().decodeToString()
         )
-        return manifest.hours.map { entry ->
-            json.decodeFromString<Hour>(
-                assets.open("content/${entry.file}").readBytes().decodeToString()
-            )
+        // A single corrupt hour file is skipped rather than sinking the whole app.
+        manifest.hours.mapNotNull { entry ->
+            runCatching {
+                json.decodeFromString<Hour>(
+                    assets.open("content/${entry.file}").readBytes().decodeToString()
+                )
+            }.onFailure { Log.e(TAG, "Failed to load hour ${entry.file}", it) }.getOrNull()
         }.sortedBy { it.orderIndex }
-    }
+    }.onFailure { Log.e(TAG, "Failed to load manifest.json", it) }.getOrDefault(emptyList())
 
     /** Which hour fits the current time of day — drives the Home suggestion. */
     fun suggestedHourId(hourOfDay: Int): String = when (hourOfDay) {

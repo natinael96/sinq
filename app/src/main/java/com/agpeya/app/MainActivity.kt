@@ -1,5 +1,6 @@
 package com.agpeya.app
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,6 +10,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import com.agpeya.app.data.Language
@@ -39,19 +41,40 @@ import com.agpeya.app.ui.settings.SettingsScreen
 import com.agpeya.app.ui.theme.AgpeyaTheme
 
 class MainActivity : ComponentActivity() {
+
+    // The hour to deep-link to from a fired alarm. Observable so a warm launch
+    // (onNewIntent, singleTask reuses this instance) reaches the NavHost too.
+    private val pendingDeepLinkHourId = mutableStateOf<String?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val deepLinkHourId = intent?.getStringExtra(ReminderScheduler.EXTRA_HOUR_ID)
+        consumeDeepLink(intent)
         setContent {
             val themeChoice by SettingsRepository.theme(this).collectAsState(initial = ThemeChoice.SYSTEM)
             val language by SettingsRepository.language(this).collectAsState(initial = Language.SYSTEM)
             AgpeyaTheme(themeChoice = themeChoice) {
                 CompositionLocalProvider(LocalStrings provides stringsFor(language)) {
-                    AgpeyaNavHost(deepLinkHourId = deepLinkHourId)
+                    AgpeyaNavHost(
+                        deepLinkHourId = pendingDeepLinkHourId.value,
+                        onDeepLinkHandled = { pendingDeepLinkHourId.value = null },
+                    )
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        consumeDeepLink(intent)
+    }
+
+    /** Read the deep-link extra and strip it, so a rotation can't replay it. */
+    private fun consumeDeepLink(intent: Intent?) {
+        val hourId = intent?.getStringExtra(ReminderScheduler.EXTRA_HOUR_ID) ?: return
+        pendingDeepLinkHourId.value = hourId
+        intent.removeExtra(ReminderScheduler.EXTRA_HOUR_ID)
     }
 }
 
@@ -71,7 +94,7 @@ private fun NavController.switchTab(tab: Tab) {
 }
 
 @Composable
-private fun AgpeyaNavHost(deepLinkHourId: String?) {
+private fun AgpeyaNavHost(deepLinkHourId: String?, onDeepLinkHandled: () -> Unit) {
     val navController = rememberNavController()
     val context = androidx.compose.ui.platform.LocalContext.current
     val scope = rememberCoroutineScope()
@@ -83,8 +106,12 @@ private fun AgpeyaNavHost(deepLinkHourId: String?) {
 
     // Deep link from a fired alarm. Gated on `ready` so it never runs before the
     // NavHost graph below is composed (navigating earlier crashes the app).
+    // Consume it once so it isn't re-navigated on the next recomposition.
     LaunchedEffect(ready, deepLinkHourId) {
-        if (ready && deepLinkHourId != null) navController.navigate("reading/$deepLinkHourId")
+        if (ready && deepLinkHourId != null) {
+            navController.navigate("reading/$deepLinkHourId")
+            onDeepLinkHandled()
+        }
     }
 
     NavHost(

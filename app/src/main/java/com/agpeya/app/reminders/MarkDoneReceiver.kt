@@ -17,16 +17,24 @@ class MarkDoneReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val hourId = intent.getStringExtra(ReminderScheduler.EXTRA_HOUR_ID) ?: return
         val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
-        runBlocking {
-            HabitsRepository.markDone(
-                context,
-                LocalDate.now().toString(),
-                HabitsRepository.hourHabitId(hourId),
-            )
-        }
         if (notificationId != -1) {
             context.getSystemService(NotificationManager::class.java).cancel(notificationId)
         }
+        // markDone writes DataStore — do it off the main thread.
+        val pending = goAsync()
+        Thread {
+            try {
+                runBlocking {
+                    HabitsRepository.markDone(
+                        context,
+                        LocalDate.now().toString(),
+                        HabitsRepository.hourHabitId(hourId),
+                    )
+                }
+            } finally {
+                pending.finish()
+            }
+        }.start()
     }
 
     companion object {

@@ -31,25 +31,36 @@ class AlarmReceiver : BroadcastReceiver() {
             return
         }
 
-        val stillActive = runBlocking {
-            val entry = ModesRepository.current(context).activeMode
-                ?.entries?.find { it.id == entryId && it.enabled }
-            if (entry != null) {
-                ReminderScheduler.scheduleNext(context, entry, hourName)
-                true
-            } else {
-                ModesRepository.setScheduledIds(context, ModesRepository.scheduledIds(context) - entryId)
-                false
+        // DataStore reads off the main thread; goAsync keeps the receiver alive for them.
+        val pending = goAsync()
+        Thread {
+            try {
+                val stillActive = runBlocking {
+                    val entry = ModesRepository.current(context).activeMode
+                        ?.entries?.find { it.id == entryId && it.enabled }
+                    if (entry != null) {
+                        ReminderScheduler.scheduleNext(context, entry, hourName)
+                        true
+                    } else {
+                        ModesRepository.setScheduledIds(
+                            context,
+                            ModesRepository.scheduledIds(context) - entryId,
+                        )
+                        false
+                    }
+                }
+                if (stillActive) {
+                    ContextCompat.startForegroundService(
+                        context,
+                        Intent(context, AlarmService::class.java).apply {
+                            putExtra(ReminderScheduler.EXTRA_HOUR_ID, hourId)
+                            putExtra(ReminderScheduler.EXTRA_HOUR_NAME, hourName)
+                        },
+                    )
+                }
+            } finally {
+                pending.finish()
             }
-        }
-        if (!stillActive) return
-
-        ContextCompat.startForegroundService(
-            context,
-            Intent(context, AlarmService::class.java).apply {
-                putExtra(ReminderScheduler.EXTRA_HOUR_ID, hourId)
-                putExtra(ReminderScheduler.EXTRA_HOUR_NAME, hourName)
-            },
-        )
+        }.start()
     }
 }

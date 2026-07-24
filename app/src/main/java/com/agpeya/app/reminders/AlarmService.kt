@@ -22,8 +22,10 @@ import androidx.core.app.ServiceCompat
 import com.agpeya.app.R
 import com.agpeya.app.data.AlarmAlert
 import com.agpeya.app.data.AlarmSound
+import com.agpeya.app.data.Language
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.stringsFor
+import com.agpeya.app.ui.strings.Strings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
@@ -35,7 +37,10 @@ import kotlinx.coroutines.runBlocking
  */
 class AlarmService : Service() {
 
+    @Volatile
     private var player: MediaPlayer? = null
+
+    @Volatile
     private var vibrator: Vibrator? = null
     private val handler = Handler(Looper.getMainLooper())
     private val autoStop = Runnable {
@@ -68,14 +73,35 @@ class AlarmService : Service() {
         activeHourId = hourId
         activeHourName = hourName
         ensureChannel()
+        // startForeground must be called promptly and can't block on disk, so the
+        // provisional notification uses system-locale strings (no DataStore read).
         ServiceCompat.startForeground(
             this,
             NOTIFICATION_ID,
-            buildNotification(hourId, hourName),
+            buildNotification(hourId, hourName, stringsFor(Language.SYSTEM)),
             if (Build.VERSION.SDK_INT >= 34) ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED else 0,
         )
-        startRinging()
         handler.postDelayed(autoStop, TIMEOUT_MS)
+        // Read prefs off the main thread, then ring and (if the user overrode the
+        // language) refine the notification.
+        Thread {
+            val alert = SettingsRepository.alarmAlertBlocking(this)
+            val sound = SettingsRepository.alarmSoundBlocking(this)
+            val language = runCatching {
+                runBlocking { SettingsRepository.language(this@AlarmService).first() }
+            }.getOrDefault(Language.SYSTEM)
+            startRinging(alert, sound)
+            if (language != Language.SYSTEM) {
+                handler.post {
+                    if (activeHourId == hourId) {
+                        getSystemService(NotificationManager::class.java).notify(
+                            NOTIFICATION_ID,
+                            buildNotification(hourId, hourName, stringsFor(language)),
+                        )
+                    }
+                }
+            }
+        }.start()
         // NOT_STICKY: a system restart would replay a null intent and ring "morning" spuriously.
         return START_NOT_STICKY
     }
@@ -84,35 +110,42 @@ class AlarmService : Service() {
     private fun postDonePrompt() {
         val hourId = activeHourId ?: return
         activeHourId = null
-        val s = stringsFor(runBlocking { SettingsRepository.language(this@AlarmService).first() })
-        val notifId = DONE_NOTIFICATION_BASE + hourId.hashCode() % 1000
-        val yes = PendingIntent.getBroadcast(
-            this,
-            notifId,
-            Intent(this, MarkDoneReceiver::class.java).apply {
-                putExtra(ReminderScheduler.EXTRA_HOUR_ID, hourId)
-                putExtra(MarkDoneReceiver.EXTRA_NOTIFICATION_ID, notifId)
-            },
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-        )
-        // Discreet on purpose — like the alarm itself, no prayer wording.
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(s.donePrompt)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setAutoCancel(true)
-            .addAction(0, s.yesAction, yes)
-            .build()
-        getSystemService(NotificationManager::class.java).notify(notifId, notification)
+        val app = applicationContext
+        // Read the language off the main thread; the service may be stopping.
+        Thread {
+            val s = stringsFor(
+                runCatching {
+                    runBlocking { SettingsRepository.language(app).first() }
+                }.getOrDefault(Language.SYSTEM),
+            )
+            val notifId = DONE_NOTIFICATION_BASE + hourId.hashCode() % 1000
+            val yes = PendingIntent.getBroadcast(
+                app,
+                notifId,
+                Intent(app, MarkDoneReceiver::class.java).apply {
+                    putExtra(ReminderScheduler.EXTRA_HOUR_ID, hourId)
+                    putExtra(MarkDoneReceiver.EXTRA_NOTIFICATION_ID, notifId)
+                },
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+            )
+            // Discreet on purpose — like the alarm itself, no prayer wording.
+            val notification = NotificationCompat.Builder(app, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setContentTitle(s.donePrompt)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true)
+                .addAction(0, s.yesAction, yes)
+                .build()
+            app.getSystemService(NotificationManager::class.java).notify(notifId, notification)
+        }.start()
     }
 
-    private fun startRinging() {
-        val alert = SettingsRepository.alarmAlertBlocking(this)
+    private fun startRinging(alert: AlarmAlert, sound: AlarmSound) {
         val wantSound = alert == AlarmAlert.SOUND_VIBRATE || alert == AlarmAlert.SOUND_ONLY
         val wantVibrate = alert == AlarmAlert.SOUND_VIBRATE || alert == AlarmAlert.VIBRATE_ONLY
 
         if (wantSound) {
-            val type = when (SettingsRepository.alarmSoundBlocking(this)) {
+            val type = when (sound) {
                 AlarmSound.ALARM -> RingtoneManager.TYPE_ALARM
                 AlarmSound.RINGTONE -> RingtoneManager.TYPE_RINGTONE
                 AlarmSound.NOTIFICATION -> RingtoneManager.TYPE_NOTIFICATION
@@ -148,7 +181,7 @@ class AlarmService : Service() {
         }
     }
 
-    private fun buildNotification(hourId: String, hourName: String): android.app.Notification {
+    private fun buildNotification(hourId: String, hourName: String, s: Strings): android.app.Notification {
         val fullScreen = PendingIntent.getActivity(
             this,
             1,
@@ -174,7 +207,6 @@ class AlarmService : Service() {
             },
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
-        val s = stringsFor(runBlocking { SettingsRepository.language(this@AlarmService).first() })
         // Android 14+ can revoke full-screen-intent permission; fall back to the
         // heads-up notification (contentIntent still opens the alarm screen).
         val canFullScreen = Build.VERSION.SDK_INT < 34 ||

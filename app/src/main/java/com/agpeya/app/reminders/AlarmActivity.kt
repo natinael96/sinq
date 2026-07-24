@@ -21,18 +21,19 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.MainActivity
+import com.agpeya.app.data.Language
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.stringsFor
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.AgpeyaTheme
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 
 /** Full-screen alarm shown when a reminder fires — over the lock screen. */
 class AlarmActivity : ComponentActivity() {
@@ -53,11 +54,14 @@ class AlarmActivity : ComponentActivity() {
 
         val hourId = intent.getStringExtra(ReminderScheduler.EXTRA_HOUR_ID) ?: "morning"
         val hourName = intent.getStringExtra(ReminderScheduler.EXTRA_HOUR_NAME) ?: ""
-        val strings = stringsFor(runBlocking { SettingsRepository.language(this@AlarmActivity).first() })
 
         setContent {
+            // Collected as a flow (initial = SYSTEM) so no blocking DataStore read
+            // happens on the main thread while the alarm screen comes up.
+            val language by SettingsRepository.language(this)
+                .collectAsState(initial = Language.SYSTEM)
             AgpeyaTheme {
-                CompositionLocalProvider(LocalStrings provides strings) {
+                CompositionLocalProvider(LocalStrings provides stringsFor(language)) {
                     AlarmScreen(
                         hourName = hourName,
                         onSnooze = {
