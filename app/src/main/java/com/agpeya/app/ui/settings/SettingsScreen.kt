@@ -53,6 +53,7 @@ fun SettingsScreen(
     val s = com.agpeya.app.ui.strings.LocalStrings.current
     val theme by SettingsRepository.theme(context).collectAsState(initial = ThemeChoice.SYSTEM)
     val keepOn by SettingsRepository.keepScreenOn(context).collectAsState(initial = true)
+    val streakReminder by SettingsRepository.streakReminder(context).collectAsState(initial = true)
     val language by SettingsRepository.language(context).collectAsState(initial = com.agpeya.app.data.Language.SYSTEM)
     val alarmAlert by SettingsRepository.alarmAlert(context)
         .collectAsState(initial = com.agpeya.app.data.AlarmAlert.SOUND_VIBRATE)
@@ -145,6 +146,35 @@ fun SettingsScreen(
                     Switch(
                         checked = keepOn,
                         onCheckedChange = { scope.launch { SettingsRepository.setKeepScreenOn(context, it) } },
+                    )
+                }
+                Spacer(Modifier.height(16.dp))
+            }
+
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(s.settingsStreakReminder, style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            s.settingsStreakReminderDesc,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Switch(
+                        checked = streakReminder,
+                        onCheckedChange = { on ->
+                            scope.launch {
+                                SettingsRepository.setStreakReminder(context, on)
+                                com.agpeya.app.reminders.StreakReminderScheduler.sync(context, on)
+                            }
+                        },
                     )
                 }
                 Spacer(Modifier.height(16.dp))

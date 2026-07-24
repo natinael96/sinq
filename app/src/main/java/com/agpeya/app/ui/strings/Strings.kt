@@ -44,6 +44,13 @@ interface Strings {
 
     val searchHint: String
     val noResults: String
+    val recentSearches: String
+    val clearAction: String
+    val streakReminderTitle: String
+    val streakReminderBody: String
+    val streakChannelName: String
+    val settingsStreakReminder: String
+    val settingsStreakReminderDesc: String
 
     val bookmarksTitle: String
     val noBookmarksTitle: String
@@ -222,8 +229,15 @@ object AmharicStrings : Strings {
     override val highlight = "አድምቅ"
     override val removeHighlight = "ማድመቅ አስወግድ"
 
-    override val searchHint = "በጸሎቶች ውስጥ ፈልግ"
+    override val searchHint = "በጸሎቶችና በመዝሙራት ውስጥ ፈልግ"
     override val noResults = "ምንም አልተገኘም"
+    override val recentSearches = "የቅርብ ጊዜ ፍለጋዎች"
+    override val clearAction = "አጽዳ"
+    override val streakReminderTitle = "ዛሬን መዝግብ"
+    override val streakReminderBody = "የዛሬን ጸሎትና ልማድ ሳትሞላ እንዳትተኛ"
+    override val streakChannelName = "የሌሊት ማስታወሻ"
+    override val settingsStreakReminder = "የሌሊት ማስታወሻ"
+    override val settingsStreakReminderDesc = "በ21፡30 ዛሬን እንድትሞላ ያስታውስሃል"
 
     override val bookmarksTitle = "ምልክቶች"
     override val noBookmarksTitle = "ገና ምልክት አላደረጉም"
@@ -393,8 +407,15 @@ object EnglishStrings : Strings {
     override val highlight = "Highlight"
     override val removeHighlight = "Remove highlight"
 
-    override val searchHint = "Search the prayers"
+    override val searchHint = "Search prayers & psalms"
     override val noResults = "Nothing found"
+    override val recentSearches = "Recent searches"
+    override val clearAction = "Clear"
+    override val streakReminderTitle = "Log today"
+    override val streakReminderBody = "Mark today's prayers and habits before bed"
+    override val streakChannelName = "Nightly reminder"
+    override val settingsStreakReminder = "Nightly streak reminder"
+    override val settingsStreakReminderDesc = "A 9:30 PM nudge to fill in today"
 
     override val bookmarksTitle = "Bookmarks"
     override val noBookmarksTitle = "No bookmarks yet"

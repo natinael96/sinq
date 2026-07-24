@@ -4,6 +4,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.agpeya.app.data.HoursRepository
+import com.agpeya.app.data.SettingsRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -26,6 +28,13 @@ class SystemEventsReceiver : BroadcastReceiver() {
                             HoursRepository.visibleHours(context).associate { it.id to it.name }
                         }.getOrDefault(emptyMap())
                         ReminderScheduler.rescheduleAll(context, names)
+                        // Re-arm the nightly streak nudge too, if it's enabled.
+                        runCatching {
+                            StreakReminderScheduler.sync(
+                                context,
+                                SettingsRepository.streakReminder(context).first(),
+                            )
+                        }
                     }
                     pending.finish()
                 }.start()

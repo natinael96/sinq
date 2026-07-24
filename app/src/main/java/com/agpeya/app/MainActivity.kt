@@ -28,6 +28,8 @@ import androidx.navigation.navArgument
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.data.ThemeChoice
 import com.agpeya.app.reminders.ReminderScheduler
+import com.agpeya.app.reminders.StreakReminderScheduler
+import kotlinx.coroutines.flow.first
 import com.agpeya.app.ui.bookmarks.BookmarksScreen
 import com.agpeya.app.ui.common.Tab
 import com.agpeya.app.ui.customize.CustomizeHourScreen
@@ -46,6 +48,9 @@ class MainActivity : ComponentActivity() {
     // (onNewIntent, singleTask reuses this instance) reaches the NavHost too.
     private val pendingDeepLinkHourId = mutableStateOf<String?>(null)
 
+    // Set when opened from the nightly streak-reminder notification.
+    private val pendingOpenStreak = mutableStateOf(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -58,6 +63,8 @@ class MainActivity : ComponentActivity() {
                     AgpeyaNavHost(
                         deepLinkHourId = pendingDeepLinkHourId.value,
                         onDeepLinkHandled = { pendingDeepLinkHourId.value = null },
+                        openStreak = pendingOpenStreak.value,
+                        onStreakHandled = { pendingOpenStreak.value = false },
                     )
                 }
             }
@@ -70,11 +77,17 @@ class MainActivity : ComponentActivity() {
         consumeDeepLink(intent)
     }
 
-    /** Read the deep-link extra and strip it, so a rotation can't replay it. */
+    /** Read the notification extras and strip them, so a rotation can't replay them. */
     private fun consumeDeepLink(intent: Intent?) {
-        val hourId = intent?.getStringExtra(ReminderScheduler.EXTRA_HOUR_ID) ?: return
-        pendingDeepLinkHourId.value = hourId
-        intent.removeExtra(ReminderScheduler.EXTRA_HOUR_ID)
+        intent ?: return
+        intent.getStringExtra(ReminderScheduler.EXTRA_HOUR_ID)?.let {
+            pendingDeepLinkHourId.value = it
+            intent.removeExtra(ReminderScheduler.EXTRA_HOUR_ID)
+        }
+        if (intent.getBooleanExtra(StreakReminderScheduler.EXTRA_OPEN_STREAK, false)) {
+            pendingOpenStreak.value = true
+            intent.removeExtra(StreakReminderScheduler.EXTRA_OPEN_STREAK)
+        }
     }
 }
 
@@ -94,7 +107,12 @@ private fun NavController.switchTab(tab: Tab) {
 }
 
 @Composable
-private fun AgpeyaNavHost(deepLinkHourId: String?, onDeepLinkHandled: () -> Unit) {
+private fun AgpeyaNavHost(
+    deepLinkHourId: String?,
+    onDeepLinkHandled: () -> Unit,
+    openStreak: Boolean,
+    onStreakHandled: () -> Unit,
+) {
     val navController = rememberNavController()
     val context = androidx.compose.ui.platform.LocalContext.current
     val scope = rememberCoroutineScope()
@@ -104,6 +122,16 @@ private fun AgpeyaNavHost(deepLinkHourId: String?, onDeepLinkHandled: () -> Unit
 
     val ready = onboarded ?: return
 
+    // Arm the nightly streak reminder if enabled (idempotent — reuses one alarm).
+    LaunchedEffect(ready) {
+        if (ready) {
+            com.agpeya.app.reminders.StreakReminderScheduler.sync(
+                context,
+                SettingsRepository.streakReminder(context).first(),
+            )
+        }
+    }
+
     // Deep link from a fired alarm. Gated on `ready` so it never runs before the
     // NavHost graph below is composed (navigating earlier crashes the app).
     // Consume it once so it isn't re-navigated on the next recomposition.
@@ -111,6 +139,14 @@ private fun AgpeyaNavHost(deepLinkHourId: String?, onDeepLinkHandled: () -> Unit
         if (ready && deepLinkHourId != null) {
             navController.navigate("reading/$deepLinkHourId")
             onDeepLinkHandled()
+        }
+    }
+
+    // Opened from the streak-reminder notification → jump to the Streak tab.
+    LaunchedEffect(ready, openStreak) {
+        if (ready && openStreak) {
+            navController.switchTab(Tab.STREAK)
+            onStreakHandled()
         }
     }
 
@@ -140,7 +176,14 @@ private fun AgpeyaNavHost(deepLinkHourId: String?, onDeepLinkHandled: () -> Unit
         composable("search") {
             SearchScreen(
                 onBack = { navController.popBackStack() },
-                onOpenResult = { hourId, index -> navController.navigate("reading/$hourId?section=$index") },
+                onOpenResult = { result ->
+                    when (result.source) {
+                        com.agpeya.app.search.AmharicSearch.Source.HOUR ->
+                            navController.navigate("reading/${result.targetId}?section=${result.targetIndex}")
+                        com.agpeya.app.search.AmharicSearch.Source.PSALTER ->
+                            navController.navigate("psalter?section=${result.targetIndex}")
+                    }
+                },
             )
         }
         composable("bookmarks") {

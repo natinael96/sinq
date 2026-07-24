@@ -18,10 +18,12 @@ private val Context.userDataStore by preferencesDataStore(name = "user_data")
 object UserDataRepository {
 
     private const val MAX_RECENTS = 4
+    private const val MAX_RECENT_SEARCHES = 8
 
     private val KEY_BOOKMARKS = stringPreferencesKey("bookmarks_json")
     private val KEY_RECENTS = stringPreferencesKey("recents_json")
     private val KEY_PROGRESS = stringPreferencesKey("progress_json")
+    private val KEY_RECENT_SEARCHES = stringPreferencesKey("recent_searches_json")
 
     private val json = Json { ignoreUnknownKeys = true }
     private val bookmarkListSerializer = ListSerializer(Bookmark.serializer())
@@ -77,6 +79,32 @@ object UserDataRepository {
             val next = (listOf(hourId) + current.filterNot { it == hourId }).take(MAX_RECENTS)
             prefs[KEY_RECENTS] = json.encodeToString(stringListSerializer, next)
         }
+    }
+
+    // ---- Recent searches (most recent first) ----
+
+    fun recentSearches(context: Context): Flow<List<String>> =
+        context.userDataStore.data.map { prefs ->
+            prefs[KEY_RECENT_SEARCHES]?.let {
+                runCatching { json.decodeFromString(stringListSerializer, it) }.getOrNull()
+            } ?: emptyList()
+        }
+
+    suspend fun addRecentSearch(context: Context, query: String) {
+        val q = query.trim()
+        if (q.isEmpty()) return
+        context.userDataStore.edit { prefs ->
+            val current = prefs[KEY_RECENT_SEARCHES]?.let {
+                runCatching { json.decodeFromString(stringListSerializer, it) }.getOrNull()
+            } ?: emptyList()
+            val next = (listOf(q) + current.filterNot { it.equals(q, ignoreCase = true) })
+                .take(MAX_RECENT_SEARCHES)
+            prefs[KEY_RECENT_SEARCHES] = json.encodeToString(stringListSerializer, next)
+        }
+    }
+
+    suspend fun clearRecentSearches(context: Context) {
+        context.userDataStore.edit { it.remove(KEY_RECENT_SEARCHES) }
     }
 
     // ---- Scroll memory (hourId -> section index) ----

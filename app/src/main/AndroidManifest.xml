@@ -53,6 +53,10 @@
             android:name=".reminders.MarkDoneReceiver"
             android:exported="false" />
 
+        <receiver
+            android:name=".reminders.StreakReminderReceiver"
+            android:exported="false" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

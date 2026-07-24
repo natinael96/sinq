@@ -34,6 +34,7 @@ object SettingsRepository {
     private val KEY_ONBOARDED = booleanPreferencesKey("onboarded")
     private val KEY_NAME = stringPreferencesKey("profile_name")
     private val KEY_CHRISTIAN_NAME = stringPreferencesKey("profile_christian_name")
+    private val KEY_STREAK_REMINDER = booleanPreferencesKey("streak_reminder")
 
     const val DEFAULT_FONT_STEP = 1
 
@@ -122,6 +123,14 @@ object SettingsRepository {
 
     suspend fun setChristianName(context: Context, value: String) {
         context.settingsDataStore.edit { it[KEY_CHRISTIAN_NAME] = value.trim() }
+    }
+
+    /** Nightly nudge (~21:30) to fill in today's streak. On by default. */
+    fun streakReminder(context: Context): Flow<Boolean> =
+        context.settingsDataStore.data.map { it[KEY_STREAK_REMINDER] ?: true }
+
+    suspend fun setStreakReminder(context: Context, value: Boolean) {
+        context.settingsDataStore.edit { it[KEY_STREAK_REMINDER] = value }
     }
 
     fun onboarded(context: Context): Flow<Boolean> =
