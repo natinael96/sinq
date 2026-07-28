@@ -9,14 +9,51 @@ Fill this in before any content entry. No content ships without §3 completed.
 - Underlying Amharic translation/edition: ______ (👤 confirm — orthography suggests an older standard translation)
 
 ## 2. Rights status
-- ⚠ 80-weahadu repo has **NO LICENSE file** (checked via GitHub API 2026-06-12)
-- ☐ 👤 Contacted EOTCOpenSource (GitHub issue / email) asking to add a license or grant permission — date: ______ outcome: ______
+- ☑ 80-weahadu now carries a LICENSE (added upstream 2026-07-28): **CC BY-NC-ND 4.0**
+  — commit `c419216` added MIT, immediately superseded by `f1b2786` "Update license from MIT to Creative Commons".
+  The operative terms are Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International.
+  Those two commits touched `LICENSE` only; the Bible data is byte-identical.
+- ☑ Sinq accepts the NC condition — the app is open source and will **not** be commercialized
+  (confirmed by maintainer 2026-07-28). No ads, no IAP, no subscriptions, no in-app donations
+  for as long as this text ships. There is currently no billing/ads/analytics dependency in the project.
 - ☐ Underlying Bible translation rights checked (the repo's text has its own provenance): ______
+  ⚠ **Still open.** EOTCOpenSource applying a license does not establish that they hold rights to the
+  underlying Amharic translation. Orthography suggests an older standard translation (possibly public
+  domain), but this is unverified. Ask upstream which edition the text was digitized from.
 - Fallback if unresolved: another public-domain Amharic Bible text, or church-provided text
 
+### 2a. ND compliance — how the pipeline stays inside the license
+CC BY-NC-ND permits reproducing the material "in whole or in part" and including it unmodified in a
+Collection; it forbids *sharing Adapted Material*. Selecting psalms and gospels per hour and bundling
+them in the app is a Collection, and `tools/extract_content.py` copies verse text verbatim
+(`v["text"].strip()`) — so the normal path is fine.
+
+One exception to keep an eye on: `psalm118_clean()` rewrites stanza-final verses to peel the acrostic
+letter off the end of the verse text, because the source glues it there. This is the only place the
+pipeline alters licensed text. It is defensible as a technical correction of a data-encoding artifact
+(CC 4.0 §2(a)(4) allows technical modifications), and the change is disclosed in the app's attribution,
+but the clean fix is to correct the encoding upstream in 80-weahadu and drop the local transform.
+- ☐ 👤 PR filed upstream to fix Psalm 118 acrostic encoding — date: ______ outcome: ______
+
 ## 3. Sign-off
-- Rights cleared in writing: ☐ yes — evidence stored at: ______________
-- Attribution line for the app About page: ______________________________________
+- Rights cleared in writing: ☑ yes, for the compilation — upstream LICENSE file at
+  https://github.com/EOTCOpenSource/80-weahadu/blob/main/LICENSE (CC BY-NC-ND 4.0).
+  ☐ Provenance of the underlying translation — still outstanding, see §2.
+- Attribution line for the app About page (shipped in `Strings.kt` → `EnglishStrings.aboutSourceBody`;
+  the About page renders in English only, regardless of the app's language setting, so the licence
+  notice always reads exactly as worded here):
+
+  > Psalms and gospels are drawn from the 80-weahadu open-source Amharic Bible by EOTCOpenSource
+  > (github.com/EOTCOpenSource/80-weahadu), used under the Creative Commons
+  > Attribution-NonCommercial-NoDerivatives 4.0 International licence
+  > (creativecommons.org/licenses/by-nc-nd/4.0). Passages are selected and arranged into the hours of
+  > prayer; the verse text is reproduced unchanged, except that the acrostic letters of Psalm 118 are
+  > shown as stanza headings. Provided as-is, without warranties.
+
+  This satisfies CC 4.0 §3(a)(1): creator, licence notice + URI, link to the material, statement of
+  changes, and warranty disclaimer.
+- ☑ No Amharic translation of the attribution is needed — the About page is English-only by design
+  (decided 2026-07-28), which also avoids a translated licence notice drifting from the original wording.
 
 ## 4. Reviewer (proofreading)
 - Name/role (priest, deacon, fluent reader): ______________

@@ -110,6 +110,10 @@ Issues and pull requests are welcome — especially corrections to prayer text m
 
 ## License & Content
 
-- **Code:** license not yet finalized.
-- **Prayer text:** extracted from the 80-weahadu Amharic Bible; licensing of that source is being resolved. Until it is settled, treat the bundled text as *not* freely redistributable.
-- **Font:** [Abyssinica SIL](https://software.sil.org/abyssinica/), under the SIL Open Font License.
+The code and the bundled prayer text are under **different licenses**. If you fork this repo, that distinction matters — the content does not inherit the code's license.
+
+- **Code:** license not yet finalized. *(Pick one before 1.0 — see the note below.)*
+- **Prayer text:** the 80-weahadu Amharic Bible by [EOTCOpenSource](https://github.com/EOTCOpenSource/80-weahadu), used under [**CC BY-NC-ND 4.0**](https://creativecommons.org/licenses/by-nc-nd/4.0/). Passages are selected and arranged into the hours of prayer; verse text is reproduced unchanged, except that the acrostic letters of Psalm 118 are rendered as stanza headings. This means the bundled content under `app/src/main/assets/content/` **may not be used commercially, and may not be redistributed in modified form** — by this project or by anyone forking it. Sinq is and will remain non-commercial: no ads, no in-app purchases, no subscriptions.
+- **Font:** [Abyssinica SIL](https://software.sil.org/abyssinica/) and Noto Sans Ethiopic, under the [SIL Open Font License 1.1](docs/AbyssinicaSIL-OFL.txt).
+
+> **Note on choosing a code license:** a permissive code license (MIT/Apache-2.0) is fine and does not conflict with the content terms, as long as this section keeps the split explicit. Full rights record: [docs/CONTENT_RIGHTS.md](docs/CONTENT_RIGHTS.md).

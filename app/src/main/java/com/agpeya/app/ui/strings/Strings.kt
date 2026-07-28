@@ -83,13 +83,8 @@ interface Strings {
     val soundRingtone: String
     val soundNotification: String
 
-    val aboutTagline: String
-    val aboutSourceTitle: String
-    val aboutSourceBody: String
-    val aboutFontTitle: String
-    val aboutFontBody: String
-    val aboutPrivacyTitle: String
-    val aboutPrivacyBody: String
+    // The About page body is deliberately not part of this interface — it ships in English only,
+    // so it lives on EnglishStrings alone. `about` above is the Settings row label and stays translated.
 
     val modesTitle: String
     val startFromAgpeya: String
@@ -281,14 +276,6 @@ object AmharicStrings : Strings {
     override val soundRingtone = "የስልክ ድምፅ"
     override val soundNotification = "ማሳወቂያ"
 
-    override val aboutTagline = "የኦርቶዶክስ ተዋሕዶ የጸሎት ሰዓታት — ሙሉ በሙሉ ከበይነመረብ ውጭ የሚሰራ።"
-    override val aboutSourceTitle = "የጽሑፍ ምንጭ"
-    override val aboutSourceBody = "መዝሙራትና ወንጌላት ከ80-weahadu ክፍት ምንጭ የአማርኛ መጽሐፍ ቅዱስ የተወሰዱ ናቸው።"
-    override val aboutFontTitle = "ቅርጸ-ቁምፊ"
-    override val aboutFontBody = "Abyssinica SIL እና Noto Sans Ethiopic — በ SIL Open Font License 1.1።"
-    override val aboutPrivacyTitle = "ግላዊነት"
-    override val aboutPrivacyBody = "ይህ መተግበሪያ ምንም መረጃ አይሰበስብም። ምንም የበይነመረብ ፍቃድ የለውም።"
-
     override val modesTitle = "የማንቂያ ሁነታዎች"
     override val startFromAgpeya = "ከነባር ጀምር"
     override val startEmpty = "ባዶ ጀምር"
@@ -470,13 +457,20 @@ object EnglishStrings : Strings {
     override val soundRingtone = "Ringtone"
     override val soundNotification = "Notification"
 
-    override val aboutTagline = "The Orthodox Tewahedo hours of prayer — fully offline."
-    override val aboutSourceTitle = "Text source"
-    override val aboutSourceBody = "Psalms and gospels are drawn from the 80-weahadu open-source Amharic Bible."
-    override val aboutFontTitle = "Fonts"
-    override val aboutFontBody = "Abyssinica SIL and Noto Sans Ethiopic — under the SIL Open Font License 1.1."
-    override val aboutPrivacyTitle = "Privacy"
-    override val aboutPrivacyBody = "This app collects no data and has no internet permission."
+    // About page body — English only, by design; see the note in the Strings interface.
+    val aboutTagline = "The Orthodox Tewahedo hours of prayer — fully offline."
+    val aboutSourceTitle = "Text source"
+    val aboutSourceBody =
+        "Psalms and gospels are drawn from the 80-weahadu open-source Amharic Bible by EOTCOpenSource — " +
+            "github.com/EOTCOpenSource/80-weahadu — used under the Creative Commons " +
+            "Attribution-NonCommercial-NoDerivatives 4.0 International licence — " +
+            "creativecommons.org/licenses/by-nc-nd/4.0. Passages are selected and arranged into the hours " +
+            "of prayer; the verse text is reproduced unchanged, except that the acrostic letters of " +
+            "Psalm 118 are shown as stanza headings. Provided as-is, without warranties."
+    val aboutFontTitle = "Fonts"
+    val aboutFontBody = "Abyssinica SIL and Noto Sans Ethiopic — under the SIL Open Font License 1.1."
+    val aboutPrivacyTitle = "Privacy"
+    val aboutPrivacyBody = "This app collects no data and has no internet permission."
 
     override val modesTitle = "Reminder modes"
     override val startFromAgpeya = "Start from default"
