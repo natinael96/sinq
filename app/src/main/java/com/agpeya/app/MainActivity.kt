@@ -207,6 +207,7 @@ private fun AgpeyaNavHost(
                 onOpenSearch = { navController.navigate("search") },
                 onOpenBookmarks = { navController.navigate("bookmarks") },
                 onOpenPsalter = { navController.navigate("psalter") },
+                onOpenWudase = { navController.navigate("wudase") },
                 onOpenGitsawe = { navController.navigate("gitsawe") },
                 onSelectTab = navController::switchTab,
             )

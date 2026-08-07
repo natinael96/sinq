@@ -44,6 +44,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -265,36 +266,30 @@ private fun EntryTitle(title: String) {
     )
 }
 
-/** A numbered narrative paragraph: Ge'ez numeral in the gutter, justified prose. */
+/** A numbered narrative paragraph: inline gold Ge'ez numeral, justified prose
+ *  spanning the full width so the text block stays centered on the page. */
 @Composable
 private fun NarrativePara(number: Int, text: String, fontSp: Int) {
-    Row(
+    Text(
+        text = buildAnnotatedString {
+            withStyle(
+                SpanStyle(
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = (fontSp * 0.85f).sp,
+                ),
+            ) { append(geezNumeral(number)) }
+            append("  ")
+            append(text)
+        },
+        style = MaterialTheme.typography.bodyLarge.copy(
+            fontFamily = Abyssinica,
+            fontSize = fontSp.sp,
+            lineHeight = (fontSp * 1.9f).sp,
+        ),
+        color = MaterialTheme.colorScheme.onBackground,
+        textAlign = TextAlign.Justify,
         modifier = Modifier.fillMaxWidth().padding(bottom = 18.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Text(
-            text = geezNumeral(number),
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontFamily = Abyssinica,
-                fontSize = (fontSp * 0.85f).sp,
-                lineHeight = (fontSp * 1.9f).sp,
-            ),
-            color = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.width(24.dp),
-            textAlign = TextAlign.End,
-        )
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontFamily = Abyssinica,
-                fontSize = fontSp.sp,
-                lineHeight = (fontSp * 1.9f).sp,
-            ),
-            color = MaterialTheme.colorScheme.onBackground,
-            textAlign = TextAlign.Justify,
-            modifier = Modifier.weight(1f),
-        )
-    }
+    )
 }
 
 /** The centered "አርኬ" heading above the hymn. */
