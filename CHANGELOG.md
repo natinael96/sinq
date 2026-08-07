@@ -7,6 +7,23 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.5.0] — 2026-08-07
+
+_versionCode 15 · synaxarium reader reformat & bookmarkable scripture_
+
+### Added
+- **Bookmark scripture.** The scripture-quote entries within the ስንክሳር and the
+  library's Bible reader now carry a bookmark toggle; saved passages land in the
+  existing Bookmarks screen and reopen where they came from.
+- **Closing ጸሎት.** The fixed synaxarium closing prayer is now appended once at
+  the end of every day, set apart in its own card, with the holy names in red.
+
+### Changed
+- **Synaxarium reader reformatted.** Each commemoration's paragraphs are numbered
+  with Ge'ez numerals and given real spacing; the **አርኬ** hymn is set apart as
+  centered red italic verse; the editorial emojis that prefixed lines in the
+  source (❖ ✍️ 📌 📖 …) are stripped at render time, leaving the Ge'ez untouched.
+
 ## [0.4.0] — 2026-08-07
 
 _versionCode 14 · ስንክሳር & daily reminder_
