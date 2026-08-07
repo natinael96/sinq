@@ -2,7 +2,7 @@
 
 **The Ethiopian Orthodox Tewahedo Book of Hours (ሰዓታት) for Android — Amharic-first, beautiful, and fully offline.**
 
-![Version](https://img.shields.io/badge/version-0.4.0-0E3B31)
+![Version](https://img.shields.io/github/v/tag/natinael96/sinq?label=version&color=0E3B31)
 ![Platform](https://img.shields.io/badge/platform-Android%208.0%2B-E4BC5A)
 ![UI](https://img.shields.io/badge/UI-Jetpack%20Compose-0E3B31)
 
