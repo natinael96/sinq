@@ -1,0 +1,242 @@
+[
+ {
+  "name": "1st Week",
+  "amharicName": "አንደኛ ሳምንት",
+  "key": "1_1st_week",
+  "feast": "1st_tsige"
+ },
+ {
+  "name": "2nd Week",
+  "amharicName": "ኹለተኛ ሳምንት",
+  "key": "1_2nd_week",
+  "feast": "1st_tsige"
+ },
+ {
+  "name": "3nd Week",
+  "amharicName": "ሦሥተኛ ሳምንት",
+  "key": "1_3rd_week",
+  "feast": "1st_tsige"
+ },
+ {
+  "name": "4nd Week",
+  "amharicName": "አራተኛ ሳምንት",
+  "key": "1_4rd_week",
+  "feast": "1st_tsige"
+ },
+ {
+  "name": "5th Week",
+  "amharicName": "አምስተኛ ሳምንት",
+  "key": "1_5th_week",
+  "feast": "1st_tsige"
+ },
+ {
+  "name": "6th Week",
+  "amharicName": "ስድስተኛ ሳምንት",
+  "key": "1_6th_week",
+  "feast": "1st_tsige"
+ },
+ {
+  "name": "Sreate Negs",
+  "amharicName": "ሥርዓተ ነግሥ",
+  "key": "st_abuye_tikmt_negs",
+  "feast": "st_abuye_tikimt"
+ },
+ {
+  "name": "Sreate Wazema (Eve)",
+  "amharicName": "ሥርዓተ ዋዜማ",
+  "key": "st_aregawi_tikmt_eve",
+  "feast": "st_aregawi_tikimt"
+ },
+ {
+  "name": "Sreate Negs",
+  "amharicName": "ሥርዓተ ነግሥ",
+  "key": "st_aregawi_tikmt_negs",
+  "feast": "st_aregawi_tikimt"
+ },
+ {
+  "name": "Sreate Wazema (Eve)",
+  "amharicName": "ሥርዓተ ዋዜማ",
+  "key": "st_stephen_tikimt_eve",
+  "feast": "st_stephen_tikimt"
+ },
+ {
+  "name": "Sreate Negs",
+  "amharicName": "ሥርዓተ ነግሥ",
+  "key": "st_stephen_tikimt_negs",
+  "feast": "st_stephen_tikimt"
+ },
+ {
+  "name": "Sreate Wazema (Eve)",
+  "amharicName": "ሥርዓተ ዋዜማ",
+  "key": "st_medhanealem_tikimt_eve",
+  "feast": "st_medhanealem_tikimt"
+ },
+ {
+  "name": "Sreate Negs",
+  "amharicName": "ሥርዓተ ነግሥ",
+  "key": "st_medhanealem_tikimt_negs",
+  "feast": "st_medhanealem_tikimt"
+ },
+ {
+  "name": "Sreate Wazema (Eve)",
+  "amharicName": "ሥርዓተ ዋዜማ",
+  "key": "qusquam_hidar_eve",
+  "feast": "qusquam_hidar"
+ },
+ {
+  "name": "Sreate Negs",
+  "amharicName": "ሥርዓተ ነግሥ",
+  "key": "qusquam_hidar_negs",
+  "feast": "qusquam_hidar"
+ },
+ {
+  "name": "Sreate Wazema (Eve)",
+  "amharicName": "ሥርዓተ ዋዜማ",
+  "key": "st_georege_hidar_eve",
+  "feast": "st_georege_hidar"
+ },
+ {
+  "name": "Sreate Negs",
+  "amharicName": "ሥርዓተ ነግሥ",
+  "key": "st_georege_hidar_negs",
+  "feast": "st_georege_hidar"
+ },
+ {
+  "name": "Sreate Wazema (Eve)",
+  "amharicName": "ሥርዓተ ዋዜማ",
+  "key": "st_hanna_hidar_eve",
+  "feast": "st_hanna_hidar"
+ },
+ {
+  "name": "Sreate Negs",
+  "amharicName": "ሥርዓተ ነግሥ",
+  "key": "st_hanna_hidar_negs",
+  "feast": "st_hanna_hidar"
+ },
+ {
+  "name": "Sreate Wazema (Eve)",
+  "amharicName": "ሥርዓተ ዋዜማ",
+  "key": "st_michael_hidar_eve",
+  "feast": "st_michael_hidar"
+ },
+ {
+  "name": "Sreate Negs",
+  "amharicName": "ሥርዓተ ነግሥ",
+  "key": "st_michael_hidar_negs",
+  "feast": "st_michael_hidar"
+ },
+ {
+  "name": "Sreate Wazema (Eve)",
+  "amharicName": "ሥርዓተ ዋዜማ",
+  "key": "hidar_tsion_eve",
+  "feast": "hidar_tsion"
+ },
+ {
+  "name": "Sreate Negs",
+  "amharicName": "ሥርዓተ ነግሥ",
+  "key": "hidar_tsion_negs",
+  "feast": "hidar_tsion"
+ },
+ {
+  "name": "Sreate Wazema (Eve)",
+  "amharicName": "ሥርዓተ ዋዜማ",
+  "key": "st_merkorewos_hidar_eve",
+  "feast": "st_merkorewos_hidar"
+ },
+ {
+  "name": "Sreate Negs",
+  "amharicName": "ሥርዓተ ነግሥ",
+  "key": "st_merkorewos_hidar_negs",
+  "feast": "st_merkorewos_hidar"
+ },
+ {
+  "name": "Sreate Mahlet",
+  "amharicName": "ሥርዓተ ማኅሌት",
+  "key": "nebiy_elias_tahsas_eve",
+  "feast": "nebiy_elias_tahsas"
+ },
+ {
+  "name": "Sreate Wazema (Eve)",
+  "amharicName": "ሥርዓተ ዋዜማ",
+  "key": "beata_tahsas_eve",
+  "feast": "beata_tahsas"
+ },
+ {
+  "name": "Sreate Mahlet",
+  "amharicName": "ሥርዓተ ማኅሌት",
+  "key": "beata_tahsas_negs",
+  "feast": "beata_tahsas"
+ },
+ {
+  "name": "Sreate Mahlet",
+  "amharicName": "ሥርዓተ ማኅሌት",
+  "key": "st_arsema_tahsas_negs",
+  "feast": "st_arsema_tahsas"
+ },
+ {
+  "name": "Sreate Wazema (Eve)",
+  "amharicName": "ሥርዓተ ዋዜማ",
+  "key": "mar_samuel_tahsas_eve",
+  "feast": "mar_samuel_tahsas"
+ },
+ {
+  "name": "Sreate Mahlet",
+  "amharicName": "ሥርዓተ ማኅሌት",
+  "key": "mar_samuel_tahsas_negs",
+  "feast": "mar_samuel_tahsas"
+ },
+ {
+  "name": "Sreate Wazema (Eve)",
+  "amharicName": "ሥርዓተ ዋዜማ",
+  "key": "st_gebriel_tahsas_eve",
+  "feast": "st_gebriel_tahsas"
+ },
+ {
+  "name": "Sreate Mahlet",
+  "amharicName": "ሥርዓተ ማኅሌት",
+  "key": "st_gebriel_tahsas_negs",
+  "feast": "st_gebriel_tahsas"
+ },
+ {
+  "name": "Sreate Wazema (Eve)",
+  "amharicName": "ሥርዓተ ዋዜማ",
+  "key": "st_teklehaymanot_tahsas_eve",
+  "feast": "st_teklehaymanot_tahsas"
+ },
+ {
+  "name": "Sreate Mahlet",
+  "amharicName": "ሥርዓተ ማኅሌት",
+  "key": "st_teklehaymanot_tahsas_negs",
+  "feast": "st_teklehaymanot_tahsas"
+ },
+ {
+  "name": "Sreate Mahlet",
+  "amharicName": "ሥርዓተ ማኅሌት",
+  "key": "st_estifanos_tir_negs",
+  "feast": "st_estifanos_tir"
+ },
+ {
+  "name": "Sreate Mahlet",
+  "amharicName": "ሥርዓተ ማኅሌት",
+  "key": "astereyo_maryam_tir_negs",
+  "feast": "astereyo_maryam_tir"
+ },
+ {
+  "name": "Sreate Mahlet",
+  "amharicName": "ሥርዓተ ማኅሌት",
+  "key": "easter_sub_feast",
+  "feast": "easter"
+ },
+ {
+  "name": "Sreate Wazema (Eve)",
+  "amharicName": "ሥርዓተ ዋዜማ",
+  "key": "stGeorge_miyazya_eve",
+  "feast": "miyazya_stGeorge"
+ },
+ {
+  "name": "Sreate Negs",
+  "amharicName": "ሥርዓተ ነግሥ",
+  "key": "stGeorge_miyazya_negs",
+  "feast": "miyazya_stGeorge"
+ }
+]

@@ -1,0 +1,3750 @@
+[
+ {
+  "season": "neneweTsom",
+  "week": 1,
+  "part": null,
+  "raw": "01-neneweTsom",
+  "movable": true,
+  "title": "ዘነነዌ ሰኑይ",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ወኢትትኀጐሉ እምፍኖተ ጽድቅ። ሶበ ነደት ፍጡነ መዓቱ። ብፁዓን ኲሎሙ እለ ተወከሉ ቦቱ",
+      "amharic": "ተግሣጹን ተቀበሉ ጌታ እንዳይቈጣ እናንተም በመንገድ እንዳትጠፉ፥ ቍጣው ፈጥና ትነድዳለችና። በእርሱ የታመኑ ሁሉ የተመሰገኑ ናቸው።",
+      "english": "Kiss the Son, lest he be angry, and ye perish from the way, when his wrath is kindled but a little. Blessed are all they that put their trust in him."
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 2,
+      "start": 12,
+      "end": 13
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "እጓለ እመ ሕያው በምንትኑ ዘትትዋሥኦ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ሮሜ ሰዎች",
+      "chapter": 2,
+      "start": 1,
+      "end": 17
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ንዑ ይእዜኒ አብዕልት እንዘ ትግዕሩ"
+     },
+     "verse": {
+      "bookTitle": "የያዕቆብ መልዕክት",
+      "chapter": 5,
+      "start": 1,
+      "end": 10
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወሰሚዖሙ ተከሥተ ልቦሙ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 2,
+      "start": 37
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወእምዝ አውሥእዎ ሰብእ"
+     },
+     "verse": {
+      "bookTitle": "የማርቆስ ወንጌል",
+      "chapter": 12,
+      "start": 38,
+      "end": 43
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘእግዚእነ"
+   ]
+  }
+ },
+ {
+  "season": "abiyTsom",
+  "week": 1,
+  "part": null,
+  "raw": "01-abiyTsom",
+  "movable": true,
+  "title": "ዘወረደ ዘዐቢይ ጾም",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ተቀነዩ ለእግዚአብሔር በፍርሃት። ወተሐሠዩ ሎቱ በረዓድ። አጽንዕዋ ለጥበብ ከመ ኢይትመዐዕ እግዚአብሔር።",
+      "amharic": "ለእግዚአብሔር በፍርሃት ተገዙ፥ በረዓድም ደስ ይበላችሁ። ተግሣጹን ተቀበሉ ጌታ እንዳይቈጣ እናንተም በመንገድ እንዳትጠፉ፥ ቍጣው ፈጥና ትነድዳለችና። በእርሱ የታመኑ ሁሉ የተመሰገኑ ናቸው።",
+      "english": "Serve the LORD with fear, and rejoice with trembling. Kiss the Son, lest he be angry, and ye perish from the way, when his wrath is kindled but a little.Blessed are all they that put their trust in him."
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 2,
+      "start": 11,
+      "end": 12
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ተዘከሩ መኳንንቲክሙ ዘነገሩክሙ ቃለ እግዚአብሔር"
+     },
+     "verse": {
+      "bookTitle": "ወደ ዕብራውያን ሰዎች",
+      "chapter": 13,
+      "start": 7,
+      "end": 17
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወበእንተ ዝንቱ ይቤ"
+     },
+     "verse": {
+      "bookTitle": "የያዕቆብ መልዕክት",
+      "chapter": 4,
+      "start": 6
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወእምድኅረ ኅዳጥ መዋዕል"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 25,
+      "start": 13
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወአውሥአ እግዚእ ኢየሱስ ወይቤሎ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 3,
+      "start": 10,
+      "end": 25
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘእግዚእነ (ነአኲተከ)"
+   ]
+  }
+ },
+ {
+  "season": "abiyTsom",
+  "week": 2,
+  "part": null,
+  "raw": "02-abiyTsom",
+  "movable": true,
+  "title": "ቅድስት ዘዐቢይ ጾም",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "እግዚአብሔርሰ ሰማያተ ገብረ። አሚን ወሠናይት ቅድሜሁ። ቅድስት ወዕበየ ስብሐት ውስተ መቅደሱ።",
+      "amharic": "እግዚአብሔር ግን ሰማያትን ሠራ። ምስጋናና ውበት በፊቱ፥ ቅዱስነትና ግርማ በመቅደሱ ውስጥ ናቸው።",
+      "english": "but the LORD made the heavens. Honour and majesty are before him: strength and beauty are in his sanctuary."
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 95,
+      "start": 5,
+      "end": 6
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወይእዜኒ አኃዊነ ንነግረክሙ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ተሰሎንቄ ሰዎች ፩",
+      "chapter": 4,
+      "start": 1,
+      "end": 13
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወይእዜኒ ቅንቱ ሐቌ ልብክሙ"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልዕክት ፩",
+      "chapter": 1,
+      "start": 13
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወእንዘ ይሔሊ ጴጥሮስ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 10,
+      "start": 17,
+      "end": 30
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወሶበ ትጸውሙ ኢትኩኑ"
+     },
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 6,
+      "start": 17,
+      "end": 25
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘኤጲፋንዮስ"
+   ]
+  }
+ },
+ {
+  "season": "abiyTsom",
+  "week": 3,
+  "part": null,
+  "raw": "03-abiyTsom",
+  "movable": true,
+  "title": "ምኲራብ ዘዐቢይ ጾም",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "እስመ ቅንዐተ ቤትከ በልዐኒ። ትዕይርቶሙ ለእለ ይትዔየሩከ ወድቀ ላዕሌየ። ወቀፃዕክዋ በጾም ለነፍስየ።",
+      "amharic": "የቤትህ ቅንዓት በልታኛለችና፥ የሚሰድቡህም ስድብ በላዬ ወድቆአልና። ነፍሴን በጾም አስመረርሁአት",
+      "english": "For the zeal of thine house hath eaten me up; and the reproaches of them that reproached thee are fallen upon me. When I wept, and chastened my soul with fasting,"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 68,
+      "start": 9,
+      "end": 10
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ዑቁ እንከ አልቦ ዘይግእዘክሙ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ቈላስይስ ሰዎች",
+      "chapter": 2,
+      "start": 16
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ምንተ ይበቊዕ አኃዊነ"
+     },
+     "verse": {
+      "bookTitle": "የያዕቆብ መልዕክት",
+      "chapter": 2,
+      "start": 14
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወሀሎ ፩ ብእሲ በሀገረ ቂሣርያ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 10,
+      "start": 1,
+      "end": 9
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወእምድኅረ ዝንቱ ወረዱ ቅፍረናሆም"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 2,
+      "start": 12
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘእግዚእነ (ነአኲተከ)"
+   ]
+  }
+ },
+ {
+  "season": "abiyTsom",
+  "week": 4,
+  "part": null,
+  "raw": "04-abiyTsom",
+  "movable": true,
+  "title": "መጻጉዕ ዘዐቢይ ጾም",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "እግዚአብሔር ይረድኦ ውስተ አራተ ሕማሙ። ወይመይጥ ሎቱ ኲሎ ምስካቤሁ እምደዌሁ። አንሰ እቤ እግዚኦ ተሣሃለኒ።",
+      "english": "The LORD will strengthen him upon the bed of languishing: thou wilt make all his bed in his sickness. I said, LORD, be merciful unto me: heal my soul; for I have sinned against thee.",
+      "amharic": "እግዚአብሔር በደዌው አልጋ ሳለ ይረዳዋል፤ መኝታውን ሁሉ በበሽታው ጊዜ ያነጥፍለታል። እኔስ። አቤቱ ማረኝ፤ አንተን በድያለሁና ነፍሴን ፈውሳት አልሁ።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 40,
+      "start": 3,
+      "end": 4
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ቁሙ እንከ ወኢትሑሩ ዳግመ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ገላትያ ሰዎች",
+      "chapter": 5,
+      "start": 1
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወእመቦ ዘይደዊ እምኔክሙ"
+     },
+     "verse": {
+      "bookTitle": "የያዕቆብ መልዕክት",
+      "chapter": 5,
+      "start": 14
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወዐርጉ ምኲራበ ጴጥሮስ ወዮሐንስ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 3,
+      "start": 1,
+      "end": 12,
+      "endText": "ወሶበ ርእዮሙ"
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወእምድኅረዝ ኮነ በበዓሎሙ ለአይሁድ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 5,
+      "start": 1,
+      "endText": "አማን አማን"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘእግዚእነ (ነአኲተከ)"
+   ]
+  }
+ },
+ {
+  "season": "abiyTsom",
+  "week": 5,
+  "part": null,
+  "raw": "05-abiyTsom",
+  "movable": true,
+  "title": "ደብረ ዘይት ዘዐቢይ ጾም",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "እግዚአብሔርሰ ገሃደ ይመጽእ። ወአምላክነሂ ኢያረምም። እሳት ይነድድ ቅድሜሁ።",
+      "amharic": "አምላካችን ይመጣል ዝምም አይልም፤ እሳት በፊት ይቃጠላል፥ በዙሪያውም ብዙ ዐውሎ አለ።",
+      "english": "Our God shall come, and shall not keep silence: a fire shall devour before him, and it shall be very tempestuous round about him."
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 49,
+      "start": 3,
+      "end": 4
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወንፈቅድ ታእምሩ አኃዊነ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ተሰሎንቄ ሰዎች ፩",
+      "chapter": 4,
+      "start": 13
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወይእዜኒ ሰማይ ወምድር"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልዕክት ፪",
+      "chapter": 3,
+      "start": 7,
+      "end": 15,
+      "endText": "ወትእግስቱሰ"
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወአመ ኀሙስ ዕለት ወረደ ሐናንያ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 24,
+      "start": 1,
+      "end": 22,
+      "endText": "ወፊልክስሰ"
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወወፂኦ ኢየሱስ እምቤተ መቅደስ"
+     },
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 24,
+      "start": 1,
+      "end": 36,
+      "endText": "ወበእንተ"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘአትናቴዎስ"
+   ]
+  }
+ },
+ {
+  "season": "abiyTsom",
+  "week": 6,
+  "part": null,
+  "raw": "06-abiyTsom",
+  "movable": true,
+  "title": "ገብር ኄር",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ከመ እንግር ፈቃደከ መከርኩ አምላኪየ። ወሕግከኒ በማዕከለ ከርሥየ። ዜኖኩ ጽድቀከ በማኅበር ዐቢይ።",
+      "amharic": "አምላኬ ሆይ፥ ፈቃድህን ለማድረግ ወደድሁ፥ ሕግህም በልቤ ውስጥ ነው። በታላቅ ጉባኤ ጽድቅን አወራሁ፤",
+      "english": "I delight to do thy will, O my God: yea, thy law is within my heart. I have preached righteousness in the great congregation:"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 39,
+      "start": 8,
+      "end": 9
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወአንተ ወልድየ ጽናዕ በጸጋሁ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ጢሞቴዎስ ፪",
+      "chapter": 2,
+      "start": 1,
+      "end": 16,
+      "endText": "ወለነገረ ርኲሳን"
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወለእለኒ ይትለሐቁ እምኔክሙ"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልዕክት ፪",
+      "chapter": 5,
+      "start": 1,
+      "end": 12,
+      "endText": "ምስለ ሰልዋኖስ"
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወእንዘ ጉቡአን እሙንቱ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 1,
+      "start": 6,
+      "end": 9,
+      "endText": "ወዘንተ እንዘ"
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "እስመ ከመ ብእሲ ዘይነግድ"
+     },
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 25,
+      "start": 14,
+      "end": 31,
+      "endText": "ወአመ ይመጽእ"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘባስልዮስ"
+   ]
+  }
+ },
+ {
+  "season": "abiyTsom",
+  "week": 7,
+  "part": null,
+  "raw": "07-abiyTsom",
+  "movable": true,
+  "title": "ኒቆዲሞስ",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ሐወጽከኒ ሌሊተ ወፈተንኮ ለልብየ። አመከርከኒ ወኢተረክበ ዓመፃ በላዕሌየ። ከመ ኢይንብብ አፉየ ግብረ እጓለ እመ ሕያው።",
+      "amharic": "ልቤን ፈተንኸው በሌሊትም ጐበኘኸኝ፤ ፈተንኸኝ፥ ምንም አላገኘህብኝም። የሰውን ሥራ አፌ እንዳይናገር ፈቃዴ ነው፤",
+      "english": "Thou hast proved mine heart; thou hast visited me in the night; thou hast tried me, and shalt find nothing; I am purposed that my mouth shall not transgress. Concerning the works of men, by the word of thy lips I have kept me from the paths of the destroyer."
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 16,
+      "start": 3,
+      "end": 4
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ኢተአምሩኑ አኃዊነ ሕገ ንነግረክሙ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ሮሜ ሰዎች",
+      "chapter": 7,
+      "start": 1,
+      "end": 12
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወአልቦ ፍርሃት ውስተ ተፋቅሮትነ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ መልዕክት ፩",
+      "chapter": 4,
+      "start": 18
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወተንሥአ ፩ እምውስተ ዐውድ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 5,
+      "start": 34
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወሀሎ ፩ ብእሲ እምፈሪሳውያን"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 3,
+      "start": 1,
+      "end": 12,
+      "endText": "ወሶበ እንዘ"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘእግዝእትነ (ጎሥዐ)"
+   ]
+  }
+ },
+ {
+  "season": "abiyTsom",
+  "week": 7,
+  "part": 5,
+  "raw": "07-abiyTsom-05",
+  "movable": true,
+  "title": "ዘዓርብ ተፍጻሜተ ጾመ ፵ ዘውእቱ ተፅዒኖ",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ወኢይትቃወመከ መንበረ ዐመፃ። ዘይፈጥር ፃማ ዲበ ትእዛዝ። ወይንዕዋ ለነፍሰ ጻድቅ።",
+      "english": "Shall the throne of iniquity have fellowship with thee, which frameth mischief by a law? They gather themselves together against the soul of the righteous",
+      "amharic": "በሕግ ላይ ዓመፅን የሚሠራ የዓመፅ ዙፋን ከአንተ ጋር አንድ ይሆናልን? የጻድቅን ነፍስ ያደቡባታል፥"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 93,
+      "start": 20,
+      "end": 21
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወብነ ሊቀ ካህናት ዐቢይ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ዕብራውያን ሰዎች",
+      "chapter": 4,
+      "start": 14
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወከማሁ አንትሙሂ ወራዙት ተኰነኑ"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልዕክት ፩",
+      "chapter": 5,
+      "start": 5
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወእምዝ ተፈጺሞ ዝንቱ ሐለየ ጳውሎስ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 19,
+      "start": 21
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወጸዊሞ መዋዕለ ፵ መዓልተ ወ፵ ሌሌተ"
+     },
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 4,
+      "start": 2,
+      "end": 12,
+      "endText": "ወሰሚዖ ኢየሱስ"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘጎርጎርዮስ እኅወ ባስልዮስ"
+   ]
+  }
+ },
+ {
+  "season": "abiyTsom",
+  "week": 8,
+  "part": null,
+  "raw": "08-abiyTsom",
+  "movable": true,
+  "title": "ዘሆሳዕና",
+  "negh": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ተፈሣሕኩ እስመ ይቤሉኒ ቤተ እግዚአብሔር ነሐውር። ወቆማ እገሪነ ውስተ አዕጻድኪ ኢየሩሳሌም። ኢየሩሳሌም ሕንፅት ከመ ሀገር።",
+      "english": "I was glad when they said unto me, Let us go into the house of the LORD. Our feet shall stand within thy gates, O Jerusalem.",
+      "amharic": "ወደ እግዚአብሔር ቤት እንሄድ ባሉኝ ጊዜ ደስ አለኝ። ኢየሩሳሌም ሆይ፥ እግሮቻችን በአደባባይሽ ቆሙ።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 121,
+      "start": 1,
+      "end": 2
+     }
+    },
+    {
+     "text": {
+      "geez": "ትሴብሖ ኢየሩሳሌም ለእግዚአብሔር። ወሰብሒዮ ለአምላክኪ ጽዮን። እስመ አጽንዐ መናሥግተ ኆኃትኪ።",
+      "english": "Praise the LORD, O Jerusalem; praise thy God, O Zion. For he hath strengthened the bars of thy gates; he hath blessed thy children within thee.",
+      "amharic": "ኢየሩሳሌም ሆይ፥ እግዚአብሔርን አመስግኚ፥ ጽዮንም ሆይ፥ ለአምላክሽ እልል በዪ፤ የደጆችሽን መወርወሪያ አጽንቶአልና፥ ልጆችንም በውስጥሽ ባርኮአልና።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 146,
+      "start": 13,
+      "end": 14
+     }
+    },
+    {
+     "text": {
+      "geez": "ግበሩ በዓለ በትፍሥሕት በኀበ እለ ያስተሐምምዎ። እስከ አቅርንቲሁ ለምሥዋዕ። አምላኪየ አንተ እገኒ ለከ።",
+      "english": "Bind the sacrifice with cords, even unto the horns of the altar. Thou art my God, and I will praise thee: thou art my God, I will exalt thee.",
+      "amharic": "እስከ መሠዊያው ቀንዶች ድረስ የበዓሉን መሥዋዕት በገመድ እሰሩት። አንተ አምላኬ ነህ አመሰግንህማለሁ።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 117,
+      "start": 27,
+      "end": 28
+     }
+    },
+    {
+     "text": {
+      "geez": "ሀቡ አኰቴተ ለእግዚአብሔር። ላዕለ እስራኤል ዐቢይ ስብሐቲሁ። ወኃይሉኒ እስከ ደመናት።",
+      "english": "Ascribe ye strength unto God: his excellency is over Israel, and his strength is in the clouds.",
+      "amharic": "ለእግዚአብሔር ክብርን ስጡ፤ ግርማው በእስራኤል ላይ፥ ኃይሉም በደመናት ላይ ነው።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 67,
+      "start": 34,
+      "end": 35
+     }
+    },
+    {
+     "text": {
+      "geez": "ዘምሩ ለእግዚአብሔር ዘየኀድር ውስተ ጽዮን። ወንግርዎሙ ለአሕዛብ ምግባሮ። እስመ ተዘከረ ዘይትኀሠሥ ደሞሙ።",
+      "english": "Sing praises to the LORD, which dwelleth in Zion: declare among the people his doings. When he maketh inquisition for blood, he remembereth them: he forgetteth not the cry of the humble.",
+      "amharic": "በጽዮን ለሚኖር ለእግዚአብሔር ዘምሩ፥ በአሕዛብም መካከል አደራረጉን ንገሩ፤ ደማቸውን የሚመራመር እርሱ አስቦአልና፥ የድሆችንም ጩኸት አልረሳምና።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 9,
+      "start": 11,
+      "end": 12
+     }
+    },
+    {
+     "text": {
+      "geez": "እምስራቀ ፀሐይ እስከነ ዐረብ። ወእምጽዮን ሥነ ስብሐቲሁ። እግዚአብሔርሰ ገሃደ ይመጽእ።",
+      "english": "The mighty God, even the LORD, hath spoken, and called the earth from the rising of the sun unto the going down thereof. Out of Zion, the perfection of beauty, God hath shined.",
+      "amharic": "የአማልክት አምላክ እግዚአብሔር ተናገረ፥ ከፀሓይም መውጫ ጀምሮ እስከ መግቢያዋ ድረስ ምድርን ጠራት። ከክብሩ ውበት ከጽዮን እግዚአብሔር ግልጥ ሆኖ ይመጣል።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 49,
+      "start": 1,
+      "end": 2
+     }
+    },
+    {
+     "text": {
+      "geez": "ንፍሑ ቀርነ በዕለተ ሠርቅ። በእምርት ዕለት በዓልነ። እስመ ሥርዓትይ ለእስራኤል ውእቱ።",
+      "english": "Blow up the trumpet in the new moon, in the time appointed, on our solemn feast day. For this was a statute for Israel",
+      "amharic": "በመባቻ ቀን በከፍተኛው በዓላችን ቀን መለከትን ንፉ፤ ለእስራኤል ሥርዓቱ ነውና"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 80,
+      "start": 3,
+      "end": 4
+     }
+    },
+    {
+     "text": {
+      "geez": "ቡሩክ ዘይመጽእ በስመ እግዚአብሔር። ባረክናክሙ እምቤተ እግዚአብሔር። እግዚአብሔር እግዚእ አስተርአየ ለነ።",
+      "english": "Blessed be he that cometh in the name of the LORD: we have blessed you out of the house of the LORD. God is the LORD, which hath shewed us light:",
+      "amharic": "በእግዚአብሔር ስም የሚመጣ ቡሩክ ነው፤ ከእግዚአብሔር ቤት መረቅናችሁ። እግዚአብሔር አምላክ ነው፥ ለእኛም በራልን፤"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 117,
+      "start": 1,
+      "end": 2
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወእንዘ ይወፅዕ እምኢያሪሆ"
+     },
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 20,
+      "start": 29
+     }
+    },
+    {
+     "text": {
+      "geez": "ወቦኡ ኢያሪሆ"
+     },
+     "verse": {
+      "bookTitle": "የማርቆስ ወንጌል",
+      "chapter": 10,
+      "start": 46
+     }
+    },
+    {
+     "text": {
+      "geez": "ወእምዝ አልጺቆሙ ኢያሪሆ"
+     },
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 18,
+      "start": 30
+     }
+    },
+    {
+     "text": {
+      "geez": "ወቀሪቦ ኢየሩሳሊኤም በጽሐ ቤተ ፋጌ"
+     },
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 21,
+      "start": 1,
+      "end": 26,
+      "endText": "ወበጺሖ"
+     }
+    }
+   ]
+  },
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "እምአፈ ደቂቅ ወሕጻናት አስተዳሎከ ስብሐተ። በእንተ ጸላዒ። ከመ ትንሥቶ ለጸላዒ ወለገፋዒ።",
+      "english": "Out of the mouth of babes and sucklings hast thou ordained strength because of thine enemies, that thou mightest still the enemy and the avenger.",
+      "amharic": "ከሕፃናትና ከሚጠቡ ልጆች አፍ ምስጋናን አዘጋጀህ ስለ ጠላትህ፥ ጠላትንና ቂመኛን ለማጥፋት።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 8,
+      "start": 2,
+      "end": 3
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወክርስቶስ ከዊኖ ሊቀ ካህናት"
+     },
+     "verse": {
+      "bookTitle": "ወደ ዕብራውያን ሰዎች",
+      "chapter": 9,
+      "start": 11
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወእመሰ ክርስቶስ ተሰቅለ በሥጋሁ"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልዕክት ፩",
+      "chapter": 4,
+      "start": 1,
+      "end": 12,
+      "endText": "አኃዊነ"
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወእምድኅረ ፫ ወርኅ ዐረግነ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 28,
+      "start": 11
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወአውሥአ ወይቤሎሙ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 5,
+      "start": 11,
+      "end": 31,
+      "endText": "ወእመሰ ለልየ"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘጎርጎርዮስ እኅወ ባስልዮስ"
+   ]
+  }
+ },
+ {
+  "season": "holy_thursday",
+  "week": null,
+  "part": null,
+  "raw": "ዘጸሎተ ሐሙስ",
+  "movable": true,
+  "title": "ዘጸሎተ ሐሙስ",
+  "negh": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ትነዝኀኒ በአዛብ ወእነጽሕ። ተሐፅበኒ እምበረድ ወእጻዐዱ። ታሰምዐኒ በትፍሥሕት ወሐሴት",
+      "english": "Purge me with hyssop, and I shall be clean: wash me, and I shall be whiter than snow. Make me to hear joy and gladness;",
+      "amharic": "በሂሶጵ እርጨኝ፥ እነጻማለሁ፤ እጠበኝ፥ ከበረዶም ይልቅ ነጭ እሆናለሁ። ሐሤትንና ደስታን አሰማኝ፥"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 50,
+      "start": 7,
+      "end": 8
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "-"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 13,
+      "start": 1,
+      "end": 19
+     }
+    }
+   ]
+  },
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ወሰራዕከ ማዕደ በቅድሜየ። በአንጻሪሆሙ ለእለ ይሣቅዩኒ። ወአፅሐድከ በቅብዕ ርእስየ።",
+      "english": "Thou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over.",
+      "amharic": "በፊቴ ገበታን አዘጋጀህልኝ በጠላቶቼ ፊት ለፊት ራሴን በዘይት ቀባህ፥ ጽዋዬም የተረፈ ነው።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 22,
+      "start": 4,
+      "end": 5
+     }
+    },
+    {
+     "text": {
+      "geez": "ዘይሴሰይ እክልየ አንሥአ ሰኲናሁ ላዕሌየ። አንተ እግዚኦ ተሣሃለኒ። ወአንሥአኒ እፍድዮሙ።",
+      "english": "Yea, mine own familiar friend, in whom I trusted, which did eat of my bread, hath lifted up his heel against me. But thou, O LORD, be merciful unto me, and raise me up, that I may requite them.",
+      "amharic": "ደግሞ የሰላሜ ሰው የታመንሁበት እንጀራዬን የበላ በእኔ ላይ ተረከዙን አነሣ። አንተ ግን አቤቱ፥ ማረኝ እመልስላቸውም ዘንድ አስነሣኝ።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 40,
+      "start": 9,
+      "end": 10
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "-"
+     },
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች ፩",
+      "chapter": 11,
+      "start": 23,
+      "end": 34
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "-"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልዕክት ፩",
+      "chapter": 2,
+      "start": 11,
+      "end": 25
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "-"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 10,
+      "start": 34,
+      "end": 43
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "-"
+     },
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 26,
+      "start": 20,
+      "end": 29
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘኤጲፋንዮስ"
+   ]
+  }
+ },
+ {
+  "season": "genaTsom",
+  "week": 1,
+  "part": 1,
+  "raw": "01-genaTsom-01",
+  "movable": true,
+  "title": "፩ኛ",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ኢትዝክር ለነ አበሳነ ዘትካት። ፍጡነ ይርከበነ ሣህልከ እግዚኦ። እስመ ተመንደብነ ፈድፋደ።",
+      "amharic": "የቀደመውን በደላችንን አታስብብን፥ ምሕረትህ በቶሎ ታግኘን፥ እጅግ ተቸግረናልና።",
+      "english": "O remember not against us former iniquities: let thy tender mercies speedily prevent us: for we are brought very low."
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 78,
+      "start": 8,
+      "end": 9
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወሶበ እንዘ ፀሩ ንሕነ ለእግዚአብሔር"
+     },
+     "verse": {
+      "bookTitle": "ወደ ሮሜ ሰዎች",
+      "chapter": 5,
+      "start": 10
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ደቂቅየ ዘንተ እጽሕፍ ለክሙ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ መልዕክት ፩",
+      "chapter": 2,
+      "start": 1,
+      "end": 18,
+      "endText": "ደቂቅየ ዛቲ ሰዓት"
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወይቤ ስምዑ አኃዊነ ወአበዊነ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 22,
+      "start": 1,
+      "end": 12,
+      "endText": "ወሀሎ ፩ ብእሲ"
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወሶበሂ ትጼልዩ ኢትኩኑ ከመ መደልዋን"
+     },
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 6,
+      "start": 5,
+      "end": 16,
+      "endText": "ወሶበ"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘእግዚእነ"
+   ]
+  }
+ },
+ {
+  "season": "genaTsom",
+  "week": 1,
+  "part": 2,
+  "raw": "01-genaTsom-02",
+  "movable": true,
+  "title": "፪ኛ",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ኲሎ ዘፈቀደ ገብረ እግዚአብሔር። በሰማይኒ ወበምድርኒ። በባሕርኒ ወበኲሉ ቀላያት።",
+      "amharic": "በሰማይና በምድር በባሕርና በጥልቆች ሁሉ፥ እግዚአብሔር የወደደውን ሁሉ አደረገ።",
+      "english": "Whatsoever the LORD pleased, that did he in heaven, and in earth, in the seas, and all deep places."
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 134,
+      "start": 6,
+      "end": 7
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "አኣኲትዎ ለእግዚአብሔር"
+     },
+     "verse": {
+      "bookTitle": "ወደ ቈላስይስ ሰዎች",
+      "chapter": 1,
+      "start": 12
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወይእዜኒ ቅንቱ ሐቈ ልበክሙ"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልዕክት ፩",
+      "chapter": 1,
+      "start": 12,
+      "end": 21,
+      "endText": "ወይእዜኒ"
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወእምዝ ተፈጺሞ ዝንቱ ሐለየ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 19,
+      "start": 21
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወበእንተ ዝንቱ ይስድድዎ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 5,
+      "start": 16,
+      "end": 28,
+      "endText": "ወበእንተ ዝንቱ"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘአትናቴዎስ"
+   ]
+  }
+ },
+ {
+  "season": "genaTsom",
+  "week": 1,
+  "part": 3,
+  "raw": "01-genaTsom-03",
+  "movable": true,
+  "title": "፫ኛ",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ቅረቡ ኀቤሁ ወያበርህ ለክሙ። ወኢይትኀፈር ገጽክሙ። ዝንቱ ነዳይ ጸርሐ ወእግዚአብሔር ሰምዖ።",
+      "amharic": "ወደ እርሱ ቅረቡ ያበራላችሁማል፥ ፊታችሁም አያፍርም። ይህ ችግረኛ ጮኸ፥ እግዚአብሔርም ሰማው፥ ከመከራውም ሁሉ አዳነው።",
+      "english": "They looked unto him, and were lightened: and their faces were not ashamed. This poor man cried, and the LORD heard him, and saved him out of all his troubles."
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 33,
+      "start": 5,
+      "end": 6
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ዑቁ እንከ ኢትዕበይዎ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ዕብራውያን ሰዎች",
+      "chapter": 12,
+      "start": 25
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወናሁ አሕማርኒ ዘመጠነዝ አካሎን"
+     },
+     "verse": {
+      "bookTitle": "የያዕቆብ መልዕክት",
+      "chapter": 3,
+      "start": 4,
+      "end": 13,
+      "endText": "ወመኑ ጠቢብ"
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወአመ ሰቡዕ መዋዕል ርእይዎ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 21,
+      "start": 27
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወዐርገ ውስተ ሐመር"
+     },
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 8,
+      "start": 23
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘእግዚእነ"
+   ]
+  }
+ },
+ {
+  "season": "genaTsom",
+  "week": 1,
+  "part": 4,
+  "raw": "01-genaTsom-04",
+  "movable": true,
+  "title": "፬ኛ",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ደቂቀ እጓለ እመሕያው እስከ ማእዜኑ ታከብዱ ልበክሙ።  ለምንት ታፈቅሩ ከንቶ ወተሐሱ ሐሰተ። አእምሩ ከመ ተሰብሐ እግዚአብሔር በጻድቁ።",
+      "amharic": "እናንት የሰው ልጆች፥ እስከ መቼ ድረስ ልባችሁን ታከብዳላችሁ? ከንቱ ነገርንስ ስለምን ትወዳላችሁ? ሐሰትንስ ለምን ትናገራላችሁ? እግዚአብሔር በጻድቁ እንደ ተገለጠ እወቁ፤",
+      "english": "O ye sons of men, how long will ye turn my glory into shame? how long will ye love vanity, and seek after leasing? Selah. But know that the LORD hath set apart him that is godly for himself:"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 4,
+      "start": 2,
+      "end": 3
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወአነሂ ሶበ መጻእኩ ኀቤክሙ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች ፩",
+      "chapter": 2,
+      "start": 1
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ኲሉ ዘየአምን ከመ ኢየሱስ ውእቱ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ መልዕክት ፩",
+      "chapter": 5,
+      "start": 1,
+      "end": 6,
+      "endText": "ወከመ"
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወተንሥአ ፩ እም ውስተ ዐውድ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 5,
+      "start": 31
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወእንዘ የሐልፍ እምሕየ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 9,
+      "start": 1
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘእግዚእነ"
+   ]
+  }
+ },
+ {
+  "season": "genaTsom",
+  "week": 1,
+  "part": 5,
+  "raw": "01-genaTsom-05",
+  "movable": true,
+  "title": "፭ኛ",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ለነዳያኒሃኒ አጸግቦሙ ሕይወተ። ወለካህናቲሃኒ አለብሶሙ ሕይወተ። ወጻድቃኒከ ትፍስሕተ ይትፌሥሑ።",
+      "amharic": "ድሆችዋንም እንጀራ አጠግባለሁ። ካህናቶችዋንም ደኅንነትን አለብሳቸዋለሁ፥ ቅዱሳኖችዋም እጅግ ደስ ይላቸዋል።",
+      "english": "I will satisfy her poor with bread. I will also clothe her priests with salvation: and her saints shall shout aloud for joy."
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 131,
+      "start": 15,
+      "end": 16
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወእምከመሰ ንሜሕር ለባዕድ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች ፩",
+      "chapter": 15,
+      "start": 12,
+      "end": 33,
+      "endText": "ኢያስሕቱክሙ"
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወዕለቱሰ ለእግዚአብሔር ግብተ ትመጽእ"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልዕክት ፪",
+      "chapter": 3,
+      "start": 10
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወይእዜኒ ዕቀቡ ርእሰክሙ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 20,
+      "start": 28
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ኢትፍራህ ኦ ንዑስ መርዔት"
+     },
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 12,
+      "start": 32,
+      "end": 41,
+      "endText": "ወይቤሎ ጴጥሮስ"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘአትናቴዎስ"
+   ]
+  }
+ },
+ {
+  "season": "genaTsom",
+  "week": 2,
+  "part": null,
+  "raw": "02-genaTsom",
+  "movable": true,
+  "title": "ከ፯ እስከ ፲፫ ታኅሣሥ ስብከት ይባላል።",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ፈኑ እዴከ እምአርያም። አድኅነኒ ወባልሐኒ እማይ ብዙኅ። ወእምእዴሆሙ ለደቂቀ ነኪር።",
+      "amharic": "እጅህን ከአርያም ላክ አድነኝም ከብዙ ውኆች፥ አፋቸውም ምናምንን ከሚናገር፥ ቀኛቸው የሐሰት ቀኝ ከሆነ፥ ከባዕድ ልጆች እጅ አስጥለኝ።",
+      "english": "Send thine hand from above; rid me, and deliver me out of great waters, from the hand of strange children;"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 140,
+      "start": 7,
+      "end": 8
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "በብዙኅ ነገር ወበብዙኅ መክፈልት"
+     },
+     "verse": {
+      "bookTitle": "ወደ ዕብራውያን ሰዎች",
+      "chapter": 1,
+      "start": 1
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወዛቲ ይእቲ አኃውየ አአምር"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልዕክት ፪",
+      "chapter": 3,
+      "start": 1,
+      "end": 10,
+      "endText": "ወዕለቱሰ ለእግዚአብሔር"
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወይእዜኒ አኀውየ አአምር"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 3,
+      "start": 17
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወበሣኒታ ፈቀደ ይሑር ገሊላ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 1,
+      "start": 44
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘእግዚእነ"
+   ]
+  }
+ },
+ {
+  "season": "genaTsom",
+  "week": 3,
+  "part": null,
+  "raw": "03-genaTsom",
+  "movable": true,
+  "title": "ከ፲፬ እስከ ፳ ታኅሣሥ፡ ብርሃን ይባላል።",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ፈኑ ብርሃነከ ወጽድቀከ። እማንቱ ይምርሓኒ ወይሰዳኒ ደብረ መቅደስከ። ወውስተ አብያቲከ እግዚኦ።",
+      "amharic": "ብርሃንህንና እውነትህን ላክ፤ እነርሱ ይምሩኝ፥ ወደ ቅድስናህ ተራራና ወደ ማደሪያህ ይውሰዱኝ።",
+      "english": "O send out thy light and thy truth: let them lead me; let them bring me unto thy holy hill, and to thy tabernacles."
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 42,
+      "start": 3,
+      "end": 4
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወዘኒ ተአምሩ ከመ በጽሐ ጊዜሁ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ሮሜ ሰዎች",
+      "chapter": 13,
+      "start": 11
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ንዜንወክሙ በእንተ ውእቱ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ መልእክት ፩",
+      "chapter": 1,
+      "start": 1
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወእንዘ አሐውር ሀገረ ደማስቆ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 26,
+      "start": 12,
+      "end": 19,
+      "endText": "ወይእዜኒ ኦ"
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ቀዳሚሁ ቃል ውእቱ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 1,
+      "start": 1,
+      "end": 19
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘአትናቴዎስ"
+   ]
+  }
+ },
+ {
+  "season": "genaTsom",
+  "week": 4,
+  "part": null,
+  "raw": "04-genaTsom",
+  "movable": true,
+  "title": "ከ፳፩ እስከ ፳፯ ታኅሣሥ ኖላዊ ይባላል።",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ኖላዊሆሙ ለእስራኤል አጽምዕ። ዘይርዕዮሙ ከመ አባግዐ ዮሴፍ። ዘይነብር ላዕለ ኪሩቤል አስተርአየ።",
+      "amharic": "ዮሴፍን እንደ መንጋ የምትመራ፥ የእስራኤል ጠባቂ ሆይ፥ አድምጥ፤ በኪሩቤል ላይ የምትቀመጥ፥ ተገለጥ።",
+      "english": "Give ear, O Shepherd of Israel, thou that leadest Joseph like a flock; thou that dwellest between the cherubims, shine forth."
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 79,
+      "start": 1,
+      "end": 2
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወኢትርሥዑ አኃዊነ ምሒረ ነዳያን"
+     },
+     "verse": {
+      "bookTitle": "ወደ ዕብራውያን ሰዎች",
+      "chapter": 13,
+      "start": 16
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወበእንተ ዝንቱ ተጸዋዕክሙ"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት ፩",
+      "chapter": 2,
+      "start": 21
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወተሰምዐ ዝ ነገር በአብያተ ክርስቲያናት"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 11,
+      "start": 22
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "አማን አማን እብለክሙ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 10,
+      "start": 1,
+      "end": 22,
+      "endText": "ወኮነ በውእቱ"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘእግዚእነ"
+   ]
+  }
+ },
+ {
+  "season": "lidet",
+  "week": 1,
+  "part": null,
+  "raw": "01-lidet",
+  "movable": true,
+  "title": "፩ኛ",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ወአነሂ በኲርየ እሬስዮ። ወልዑል ውእቱ እምነገሥተ ምድር። ወለዓለም አዐቅብ ሎቱ ሣህልየ።",
+      "amharic": "እኔም ደግሞ በኵሬ አደርገዋለሁ፥ ከምድር ነገሥታትም ከፍ ይላል። ለዘላለምም ምሕረቴን ለእርሱ እጠብቃለሁ፥",
+      "english": "Also I will make him my firstborn, higher than the kings of the earth. My mercy will I keep for him for evermore,"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 88,
+      "start": 27,
+      "end": 28
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወእፈቅድ ለክሙ አኃዊነ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ሮሜ ሰዎች",
+      "chapter": 11,
+      "start": 25
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "አኃዊነ ለኲላ መነፈስ ኢትእመኑ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ መልዕክት ፩",
+      "chapter": 4,
+      "start": 1,
+      "end": 9,
+      "endText": "ወበዝንቱ ተዐውቀ"
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወአመ በጽሐ ዕድሜሁ ዘአሰፈዎ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 7,
+      "start": 17,
+      "end": 23,
+      "endText": "ወአመ ተፈጸመ"
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወተወሊዶ እግዚእ ኢየሱስ"
+     },
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 2,
+      "start": 1,
+      "end": 13,
+      "endText": "ወእምድኅረ ኀለፉ"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘዲዮስቆሮስ"
+   ]
+  }
+ },
+ {
+  "season": "lidet",
+  "week": 3,
+  "part": null,
+  "raw": "03-lidet",
+  "movable": true,
+  "title": "፫ኛ",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "እስመ መምህረ ሕግ ይሁብ በረከተ። ወየሐውር እምኃይል ውስተ ኃይል። ወያስተርኢ አምላከ አማልክት በጽዮን",
+      "english": "Who passing through the valley of Baca make it a well; the rain also filleth the pools. They go from strength to strength, every one of them in Zion appeareth before God.",
+      "amharic": "የሕግ መምህር በረከትን ይሰጣልና። ከኃይል ወደ ኃይል ይሄዳሉ፤ የአማልክት አምላክ በጽዮን ይታያል።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 83,
+      "start": 6,
+      "end": 7
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወበእንተ ዝንቱ ርቱዐ ንትዐቀብ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ዕብራውያን ሰዎች",
+      "chapter": 2,
+      "start": 1,
+      "end": 3,
+      "endText": "ወእትአመነክሙ"
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ኲሉ ዘየአምን ከመ ኢየሱስ ውእቱ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ መልዕክት ፩",
+      "chapter": 5,
+      "start": 1,
+      "end": 13,
+      "endText": "ወዘንተ ጸሐፍኩ"
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወከሠተ አፉሁ ጴጥሮስ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 10,
+      "start": 34,
+      "end": 39,
+      "endText": "ወቀተልዎ ሰቂሎሙ"
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወአመ ሣልስት ዕለት"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 2,
+      "start": 1,
+      "end": 14,
+      "endText": "ወረከበ በምኲራብ"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘዲዮስቆሮስ"
+   ]
+  }
+ },
+ {
+  "season": "lidet",
+  "week": 4,
+  "part": null,
+  "raw": "04-lidet",
+  "movable": true,
+  "title": "፬ኛ",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "እግዚአብሔር እግዚእ አስተርአየ ለነ። ግበሩ በዐለ በትፍሥሕት በኀበ እለ ያስተሐምምዎ። እስከ አቅርንቲሁ ለምሥዋዕ።",
+      "english": "God is the LORD, which hath shewed us light: bind the sacrifice with cords, even unto the horns of the altar.",
+      "amharic": "እግዚአብሔር አምላክ ነው፥ ለእኛም በራልን፤ እስከ መሠዊያው ቀንዶች ድረስ የበዓሉን መሥዋዕት በገመድ እሰሩት።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 117,
+      "start": 27,
+      "end": 28
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "እስመ አልቦ ዘንጽሕፍ ኀቤክሙ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች ፪",
+      "chapter": 1,
+      "start": 13
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወመኑ ውእቱ ሐሳዊ ዘእንበለ ዘይክህድ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ መልዕክት ፩",
+      "chapter": 2,
+      "start": 22
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወእምድኅረዝ ሤመ ሎሙ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 13,
+      "start": 20,
+      "end": 28,
+      "endText": "ወሶበ ኢረከቡ"
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወአመ ኮነ ፍጹመ ሎቱ ፲ወ፪ ክረምቱ"
+     },
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 2,
+      "start": 42
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘዲዮስቆሮስ"
+   ]
+  }
+ },
+ {
+  "season": "lidet",
+  "week": 5,
+  "part": null,
+  "raw": "05-lidet",
+  "movable": true,
+  "title": "፭ኛ",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "በከመ ሰማዕነ ከማሁ ርኢነ። በሀገረ እግዚአ ኃያላን በሀገረ አምላክነ። እግዚአብሔር ሣረራ ለዓለም።",
+      "english": "As we have heard, so have we seen in the city of the LORD of hosts, in the city of our God: God will establish it for ever. Selah.",
+      "amharic": "እንደ ሰማን እንዲሁ አየን በሠራዊት ጌታ ከተማ፥ በአምላካችን ከተማ፤ እግዚአብሔር ለዘላለም ያጸናታል።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 47,
+      "start": 8,
+      "end": 9
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ጳውሎስ ገብሩ ለእግዚእነ ኢየሱስ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ሮሜ ሰዎች",
+      "chapter": 1,
+      "start": 1,
+      "end": 12,
+      "endText": "ወእፈቅድ ባሕቱ"
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወይእዜኒ ቅንቱ ሐቌ ልብክሙ"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት ፩",
+      "chapter": 1,
+      "start": 13,
+      "end": 22,
+      "endText": "አንጽሑ ነፍሳቲክሙ"
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወእምዝ እንዘ አጵሎስ ሀሎ ቆሮንቶስ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 10,
+      "start": 1,
+      "end": 11,
+      "endText": "ወዓቢየ ኃይለ"
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወሀለወት ሐና ነቢይት"
+     },
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 2,
+      "start": 336,
+      "end": 42,
+      "endText": "ወአመ ኮነ ፍጹመ"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘዲዮስቆሮስ"
+   ]
+  }
+ },
+ {
+  "season": "lidet",
+  "week": 8,
+  "part": null,
+  "raw": "08-lidet",
+  "movable": true,
+  "title": "፰ኛ",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ትሴብሖ ኢየሩሳሌም ለእግዚአብሔር። ወሰብሒዮ ለአምላክኪ ጽዮን። እስመ አጽንዐ መናሥግተ ኆኃትኪ።",
+      "english": "Praise the LORD, O Jerusalem; praise thy God, O Zion. For he hath strengthened the bars of thy gates; he hath blessed thy children within thee.",
+      "amharic": "ኢየሩሳሌም ሆይ፥ እግዚአብሔርን አመስግኚ፥ ጽዮንም ሆይ፥ ለአምላክሽ እልል በዪ፤ የደጆችሽን መወርወሪያ አጽንቶአልና፥ ልጆችንም በውስጥሽ ባርኮአልና።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 146,
+      "start": 13,
+      "end": 14
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ትብሉኑ በሕገ ኦሪት ነሀሉ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ገላትያ ሰዎች",
+      "chapter": 4,
+      "start": 21
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "አሰስልዋ እንከ እምኔክሙ"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት ፩",
+      "chapter": 2,
+      "start": 1,
+      "end": 9,
+      "endText": "ወአንትሙሰ"
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወተንሥኡ ሊቀ ካህናት"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 5,
+      "start": 17,
+      "end": 29,
+      "endText": "ወተሠጥዎሙ"
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወአመ ኮነ ፍጹመ ሎቱ"
+     },
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 2,
+      "start": 42
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘዲዮስቆሮስ"
+   ]
+  }
+ },
+ {
+  "season": "tnsae",
+  "week": 1,
+  "part": null,
+  "raw": "01-tnsae",
+  "movable": true,
+  "title": "እምትንሣኤ እስከ ዕርገት",
+  "negh": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ወተንሥአ እግዚአብሔር ከመ ዘንቃህ እምንዋም። ወከመ ኃያል ወኅዳገ ወይን። ወቀተለ ፀሮ በድኅሬሁ።",
+      "english": "Then the Lord awaked as one out of sleep, and like a mighty man that shouteth by reason of wine. And he smote his enemies in the hinder parts: he put them to a perpetual reproach.",
+      "amharic": "እግዚአብሔርም ከእንቅልፍ እንደሚነቃ ተነሣ፥ የወይን ስካር እንደ ተወው እንደ ኃያልም ሰው፤ ጠላቶቹንም በኋላቸው መታ፤ የዘላለምን ኀሣር ሰጣቸው።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 77,
+      "start": 85,
+      "end": 86
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወሠርከ ሰንበት ለጸቢሐ እሁድ"
+     },
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 28,
+      "start": 1
+     }
+    },
+    {
+     "text": {
+      "geez": "ወሐለፈት ሰንበት"
+     },
+     "verse": {
+      "bookTitle": "የማርቆስ ወንጌል",
+      "chapter": 16,
+      "start": 1
+     }
+    },
+    {
+     "text": {
+      "geez": "ወበእሑድ ሰንበት"
+     },
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 24,
+      "start": 1,
+      "end": 13,
+      "endText": "ወይእተ ዕለት"
+     }
+    }
+   ]
+  },
+  "kidassie": {
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወይእዜኒ ክርስቶስ ቀደመ ተንሥኦ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች ፩",
+      "chapter": 15,
+      "start": 20,
+      "end": 41,
+      "endText": "ወበከመ ለበስነ"
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "እምጴጥሮስ ልዑከ እግዚእነ"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት ፩",
+      "chapter": 1,
+      "start": 1,
+      "end": 13,
+      "endText": "ወይእዜኒ ቅንቱ"
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ስምዑ ሰብአ እስራኤል"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 2,
+      "start": 22,
+      "end": 37,
+      "endText": "ወሰሚዖሙ"
+     }
+    }
+   ],
+   "msbak": [
+    {
+     "text": {
+      "geez": "ዛቲ ዕለት እንተ ገብረ እግዚአብሔር። ንትፈሣሕ ወንትሐሠይ ባቲ። ኦ እግዚኦ አድኅንሶ።",
+      "amharic": "እግዚአብሔር የሠራት ቀን ይህች ናት፤ ሐሤትን እናድርግ፥ በእርስዋም ደስ ይበለን። አቤቱ፥ እባክህ፥ አሁን አድን፤",
+      "english": "This is the day which the LORD hath made; we will rejoice and be glad in it. Save now, I beseech thee, O LORD"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 117,
+      "start": 24,
+      "end": 25
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወበእሑድ ሰንበት መጽአት ማርያም"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 20,
+      "start": 1,
+      "end": 19,
+      "endText": "ወመስዮ በይእቲ"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘዲዮስቆሮስ"
+   ]
+  }
+ },
+ {
+  "season": "tnsae",
+  "week": 2,
+  "part": null,
+  "raw": "02-tnsae",
+  "movable": true,
+  "title": "እምትንሣኤ እስከ ዕርገት",
+  "negh": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "እምሥራቀ ጸሐይ እስከነ ዐረብ። ይትአኰት ስሙ ለእግዚአብሔር። ልዑል እግዚአብሔር መልዕልተ ኲሉ አሕዛብ።",
+      "english": "From the rising of the sun unto the going down of the same the LORD'S name is to be praised. The LORD is high above all nations, and his glory above the heavens.",
+      "amharic": "ከፀሐይ መውጫ ጀምሮ እስከ መግቢያው ድረስ የእግዚአብሔር ስም ይመስገን። እግዚአብሔር በአሕዛብ ሁሉ ላይ ከፍተኛ ነው፥ ክብሩም ከሰማያት በላይ ነው።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 112,
+      "start": 3,
+      "end": 4
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወዘንተ ነገረ ተናጊሮ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 17,
+      "start": 1
+     }
+    }
+   ]
+  },
+  "kidassie": {
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወአጤይቀክሙ አኃዊነ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች ፩",
+      "chapter": 15,
+      "start": 1,
+      "end": 20,
+      "endText": "ወይእዜኒ ክርስቶስ"
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ንዜንወክሙ በእንተ ውእቱ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ መልእክት ፩",
+      "chapter": 1,
+      "start": 1
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወነጺሮ ጳውሎስ ዐውደ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 23,
+      "start": 1,
+      "end": 10,
+      "endText": "ወሶበ ተሀውኩ"
+     }
+    }
+   ],
+   "msbak": [
+    {
+     "text": {
+      "geez": "ይትነሣእ እግዚአብሔር ወይዘረዉ ፀሩ። ወይጒየዩ ጸላዕቱ እምቅድመ ገጹ። ከመ የሐልቅ ጢስ ከማሁ የሐልቁ።",
+      "amharic": "እግዚአብሔር ይነሣ፥ ጠላቶቹም ይበተኑ፥ የሚጠሉትም ከፊቱ ይሽሹ። ጢስ እንደሚበንን እንዲሁ ይብነኑ፤ ሰም በእሳት ፊት እንደሚቀልጥ፥ እንዲሁ ኅጥኣን ከእግዚአብሔር ፊት ይጥፉ።",
+      "english": "Let God arise, let his enemies be scattered: let them also that hate him flee before him. As smoke is driven away, so drive them away: as wax melteth before the fire, so let the wicked perish at the presence of God."
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 67,
+      "start": 1,
+      "end": 2
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወመስዮ በይእቲ ዕለት"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 20,
+      "start": 19
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘዲዮስቆሮስ"
+   ]
+  }
+ },
+ {
+  "season": "tnsae",
+  "week": 3,
+  "part": null,
+  "raw": "03-tnsae",
+  "movable": true,
+  "title": "በ፫ እሐድ ከትንሣኤ በኋላ",
+  "kidassie": {
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወእንበይነ ዘነአምር ጽድቀ እግዚአብሔር"
+     },
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች ፪",
+      "chapter": 5,
+      "start": 11
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወይእዜኒ አኃውየ ዘንተ እንዘ ትሴፈዉ"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት ፪",
+      "chapter": 3,
+      "start": 14
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወበጽሐ መልእክት"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 21,
+      "start": 31
+     }
+    }
+   ],
+   "msbak": [
+    {
+     "text": {
+      "geez": "ይእዜ እትነሣእ ይቤ እግዚአብሔር። እሬሲ መድኃኒተ ወአግህድ ቦቱ። ቃለ እግዚአብሔር ቃል ንጹሕ።",
+      "amharic": "እግዚአብሔር አሁን እነሣለሁ ይላል፤ መድኃኒትን አደርጋለሁ፥ በላዩም እገልጣለሁ። በምድር ላይ እንደ ተፈተነ ሰባት ጊዜ እንደ ተጣራ ብር። የእግዚአብሔር ቃላት የነጹ ቃላት ናቸው።",
+      "english": "now will I arise, saith the LORD; I will set him in safety from him that puffeth at him. The words of the LORD are pure words: as silver tried in a furnace of earth, purified seven times."
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 11,
+      "start": 5,
+      "end": 6
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወይእተ ዕለት እንዘ የሀውሩ"
+     },
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 24,
+      "start": 13,
+      "end": 33,
+      "endText": "ወተንሥአ"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘዲዮስቆሮስ"
+   ]
+  }
+ },
+ {
+  "season": "tnsae",
+  "week": 4,
+  "part": null,
+  "raw": "04-tnsae",
+  "movable": true,
+  "title": "በ፬ተኛ እሑድ ከትንሣኤ በኋላ",
+  "kidassie": {
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወእመሰ ተንሥእከ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ቈላስይስ ሰዎች",
+      "chapter": 3,
+      "start": 1
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወድልዋኒክሙ ሀልዉ"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት ፩",
+      "chapter": 3,
+      "start": 15
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወሰምዑ ሐዋርያት ወቢጾሙሂ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 11,
+      "start": 1,
+      "end": 19,
+      "endText": "ወእለሰ"
+     }
+    }
+   ],
+   "msbak": [
+    {
+     "text": {
+      "geez": "አንሰ ሰከብኩ ወኖምኩ። ወተንሣእኩ እስመ እግዚአብሔር አንሥአኒ። ኢይፈርህ እምአእላፍ አሕዛብ",
+      "amharic": "እኔ ተኛሁ አንቀላፋሁም፤ እግዚአብሔርም ደግፎኛልና ነቃሁ። ከሚከብቡኝ ከአእላፍ ሕዝብ አልፈራም።",
+      "english": "I laid me down and slept; I awaked; for the LORD sustained me. I will not be afraid of ten thousands of people"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 3,
+      "start": 5,
+      "end": 66
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወተንሥኡ ሶቤሃ"
+     },
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 24,
+      "start": 33,
+      "end": 445,
+      "endText": "ወእምዝ ከሰተ"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘዲዮስቆሮስ"
+   ]
+  }
+ },
+ {
+  "season": "tnsae",
+  "week": 5,
+  "part": null,
+  "raw": "05-tnsae",
+  "movable": true,
+  "title": "በ፭ እሐድ ከትንሣኤ በኋላ",
+  "kidassie": {
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ሶበሰኬ ዘዘገብረ ዳዕሙ ሕገገ ኦሪት"
+     },
+     "verse": {
+      "bookTitle": "ወደ ሮሜ ሰዎች",
+      "chapter": 4,
+      "start": 14
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወእምዝ ወረደ ካልእ መልአክ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ ራዕይ",
+      "chapter": 20,
+      "start": 1
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወንሕነሰ ኲልነ ሰማዕቱ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 10,
+      "start": 39,
+      "end": 54,
+      "endText": "ወእንዘ ይነግሮ"
+     }
+    }
+   ],
+   "msbak": [
+    {
+     "text": {
+      "geez": "በልዑ ወጸግቡ ጥቀ። ወወሀቦሙ ለፍትወቶሙ።  ወኢያኅጥዖሙ እምዘፈቀዱ።",
+      "amharic": "በሉ እጅግም ጠገቡ፤ ምኞታቸውንም ሰጣቸው። ከወደዱትም አላሳጣቸውም፤",
+      "english": "So they did eat, and were well filled: for he gave them their own desire; They were not estranged from their lust."
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 77,
+      "start": 29,
+      "end": 30
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወእምዝ አስተርአዮሙ ካዕበ ኢየሱስ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 21,
+      "start": 1,
+      "end": 15,
+      "endText": "ወእምድኅረ"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘዲዮስቆሮስ"
+   ]
+  }
+ },
+ {
+  "season": "tnsae",
+  "week": 6,
+  "part": null,
+  "raw": "06-tnsae",
+  "movable": true,
+  "title": "በ፮ እሐድ ከትንሣኤ በኋላ",
+  "kidassie": {
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ምንተ እንከ ንብል ንግበርሁ ኃጢአተ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ሮሜ ሰዎች",
+      "chapter": 6,
+      "start": 1,
+      "end": 15,
+      "endText": "ወምንተ እንከ"
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ዑቆ እንከ ውስተ ዝንቱ ምግባር ኢትሩፁ"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት ፩",
+      "chapter": 4,
+      "start": 4,
+      "end": 12,
+      "endText": "አኃዊነ ኢታንክርዋ"
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወይእዜኒ ሑሩ ኀበ መልአከ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 23,
+      "start": 15,
+      "end": 22,
+      "endText": "ወእምዝ ፈነዎ"
+     }
+    }
+   ],
+   "msbak": [
+    {
+     "text": {
+      "geez": "እስመ ሰበረ ኆኃተ ብርት። ወቀጥቀጠ መናሥግተ ዘኃፂን። ወተወክፎሙ እምፍኖተ ጌጋዮሙ።",
+      "amharic": "የናሱን ደዶች ሰብሮአልና፥ የብረቱንም መወርወሪያ ቈርጦአልና። ስለ ዓመፃቸው ሰነፉ፥ ስለ ኃጢአታቸውም ተቸገሩ።",
+      "english": "For he hath broken the gates of brass, and cut the bars of iron in sunder. Fools because of their transgression, and because of their iniquities, are afflicted."
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 106,
+      "start": 16,
+      "end": 17
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወእምድኅረ መስሑ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 24,
+      "start": 15
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘዲዮስቆሮስ"
+   ]
+  }
+ },
+ {
+  "season": "erget",
+  "week": null,
+  "part": null,
+  "raw": "ዘዕርገት",
+  "movable": true,
+  "title": "ዘዕርገት",
+  "negh": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ዘምሩ ለእግዚአብሔር ዘዐርገ ውስተ ሰማይ። ሰማይ ዘመንገለ ጽባሕ። ናሁ ይሁብ ቃሎ ቃለ ኃይል።",
+      "english": "Sing unto God, ye kingdoms of the earth; O sing praises unto the Lord; Selah: To him that rideth upon the heavens of heavens, which were of old; lo, he doth send out his voice, and that a mighty voice.",
+      "amharic": "በምሥራቅ በኩል ወደ ሰማየ ሰማያት ለወጣ ለእግዚአብሔር ዘምሩ፤ የኃይል ቃል የሆነ ቃሉን፥ እነሆ፥ ይሰጣል።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 67,
+      "start": 33,
+      "end": 34
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወእምዝ ከሠተ ልቦሙ"
+     },
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 24,
+      "start": 45
+     }
+    }
+   ]
+  },
+  "kidassie": {
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "በብዙኅ ነገር ወበብዙኅ መክፈልት"
+     },
+     "verse": {
+      "bookTitle": "ወደ ዕብራውያን ሰዎች",
+      "chapter": 1,
+      "start": 1
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "እስመ ክርስቶስኒ ምዕረ ሞተ"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት ፩",
+      "chapter": 3,
+      "start": 18
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ቀዳሚ ጸሐፍኩ ለከ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 1,
+      "start": 1,
+      "end": 12,
+      "endText": "ወእምዝ ተሠውጡ"
+     }
+    }
+   ],
+   "msbak": [
+    {
+     "text": {
+      "geez": "ዐርገ እግዚአብሔር በይባቤ። ወእግዚእነ በቃለ ቀርን። ዘምሩ ለአምላክነ ዘምሩ።",
+      "amharic": "አምላክ በእልልታ፥ እግዚአብሔር በመለከት ድምፅ ዐረገ። ዘምሩ፥ ለአምላካችን ዘምሩ፤ ዘምሩ፥ ለንጉሣችን ዘምሩ።",
+      "english": "God is gone up with a shout, the LORD with the sound of a trumpet. Sing praises to God, sing praises: sing praises unto our King, sing praises."
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 46,
+      "start": 5,
+      "end": 6
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወእምድኅረዝ ካዕበ እንዘ ይረፍቁ"
+     },
+     "verse": {
+      "bookTitle": "የማርቆስ ወንጌል",
+      "chapter": 16,
+      "start": 14
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘዲዮስቆሮስ"
+   ]
+  }
+ },
+ {
+  "season": "tnsae",
+  "week": 7,
+  "part": null,
+  "raw": "07-tnsae",
+  "movable": true,
+  "title": "እምዕርገት እስከ ጰራቅሊጦስ፥ ፯ኛ እሑድ ክትንሣኤ በኋላ",
+  "kidassie": {
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "አኃውየ ሊተሰኬ ፈቃደ ልብየኒ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ሮሜ ሰዎች",
+      "chapter": 10,
+      "start": 1
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወድልዋኒክሙ ሀልዉ"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት ፩",
+      "chapter": 3,
+      "start": 15
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ቀዳሚ ጸሐፍኩ ለከ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 1,
+      "start": 1,
+      "end": 12,
+      "endText": "ወእምዝ ተሠውጡ"
+     }
+    }
+   ],
+   "msbak": [
+    {
+     "text": {
+      "geez": "ዐርገ እግዚአብሔር በይባቤ። ወእግዚእነ በቃለ ቀርን። ዘምሩ ለአምላክነ ዘምሩ።",
+      "amharic": "አምላክ በእልልታ፥ እግዚአብሔር በመለከት ድምፅ ዐረገ። ዘምሩ፥ ለአምላካችን ዘምሩ፤ ዘምሩ፥ ለንጉሣችን ዘምሩ።",
+      "english": "God is gone up with a shout, the LORD with the sound of a trumpet. Sing praises to God, sing praises: sing praises unto our King, sing praises."
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 46,
+      "start": 5,
+      "end": 6
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወእምዝ ከሠተ ልቦሙ"
+     },
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 24,
+      "start": 45
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘዲዮስቆሮስ"
+   ]
+  }
+ },
+ {
+  "season": "tnsae",
+  "week": 11,
+  "part": null,
+  "raw": "11-tnsae",
+  "movable": true,
+  "title": "፲፩ኛ እሁድ፥ ከጰራቅሊጦስ በኋላ",
+  "kidassie": {
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ዴግንዋ ለተፋቅሮ ወተቃኀዉ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች ፩",
+      "chapter": 14,
+      "start": 1,
+      "end": 27,
+      "endText": "ወይእዜኒ አኃዊነ"
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "አኃዊነ ለኲላ መንፈስ ኢትእመኑ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ መልእክት ፩",
+      "chapter": 4,
+      "start": 1,
+      "end": 9,
+      "endText": "ወበዝንቱ ተዐውቀ"
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወእንዘ ይነግሮሙ ጴጥሮስ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 10,
+      "start": 44,
+      "endNote": "(11)11",
+      "endText": "ወበይእቲ ሰዓት"
+     }
+    }
+   ],
+   "msbak": [
+    {
+     "text": {
+      "geez": "ኢትግድፈኒ እምቅድመ ገጽከ። ወመንፈሰከ ቅዱሰ ኢታውፅዕ እምላዕሌየ። ዕሥየኒ ፍሥሐ ወአድኅኖተከ።",
+      "amharic": "ከፊትህ አትጣለኝ፥ ቅዱስ መንፈስህንም ከእኔ ላይ አትውሰድብኝ። የማዳንህን ደስታ ስጠኝ፤",
+      "english": "Cast me not away from thy presence; and take not thy holy spirit from me. Restore unto me the joy of thy salvation;"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 50,
+      "start": 11,
+      "end": 12
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወዘንተ እኤዝዘክሙ ከመ ትትፋቀሩ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 15,
+      "start": 17
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘዲዮስቆሮስ"
+   ]
+  }
+ },
+ {
+  "season": "astemhro",
+  "week": null,
+  "part": null,
+  "raw": "ዘአስተምህሮ",
+  "movable": true,
+  "title": "እም፲ወ፯ ለሰኔ እስከ ፳ወ፭ አስተምህሮ ይትበሀል",
+  "kidassie": {
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወበእንተዝ በከመ በጌጋየ ፩ብእሲ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ሮሜ ሰዎች",
+      "chapter": 5,
+      "start": 12
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "እምነ ቀሲስ ለጋይዮስ"
+     },
+     "verse": {
+      "bookTitle": "የዮሐንስ መልእክት ፫",
+      "chapter": 1,
+      "start": 1
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወበጽሐ ሀገረ ደርቤን ወልስጥራን"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 16,
+      "start": 1,
+      "end": 14,
+      "endText": "ወሀለወት"
+     }
+    }
+   ],
+   "msbak": [
+    {
+     "text": {
+      "geez": "አንተሰ እግዚኦ መሐሪ ወመስተሣህል። ርኁቀ መዓት ወብዙኀ ምሕረት ወጻድቅ። ነጽር ላዕሌየ ወተሣሃለኒ።",
+      "amharic": "አቤቱ፥ አንተ ግን መሓሪና ርኅሩኅ አምላክ ነህ፤ መዓትህ የራቀ ምሕረትህም እውነትህም የበዛ፤ ወደ እኔ ተመልከት ማረኝም",
+      "english": "But thou, O Lord, art a God full of compassion, and gracious, longsuffering, and plenteous in mercy and truth. O turn unto me, and have mercy upon me;"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 85,
+      "start": 15,
+      "end": 16
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወአውሥአ እግዚእ ኢየሱስ ዳግመ"
+     },
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 22,
+      "start": 1,
+      "end": 23,
+      "endText": "ወበይእቲ ዕለት"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘእግዚእነ (ነአኲተከ)"
+   ]
+  }
+ },
+ {
+  "season": "zere_demena",
+  "week": null,
+  "part": null,
+  "raw": "ዘርዕ ደመና",
+  "movable": true,
+  "title": "አመ ፳ወ፮ ለሰኔ በዓተ ክረምት እስከ ቂርቆስ ዘርዕ ደመና ይትበሀል",
+  "kidassie": {
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ኢያስሕቱክሙ አኃዊነ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች ፩",
+      "chapter": 15,
+      "start": 33,
+      "end": 51,
+      "endText": "ናሁ ኅቡአ ነገረ"
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ተአመኑ በበይናቲክሙ ኃጢአተክሙ"
+     },
+     "verse": {
+      "bookTitle": "የያዕቆብ መልእክት",
+      "chapter": 5,
+      "start": 16
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወመልአክሰ ለሰብአ ሐመር ወለሐዳፊ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 27,
+      "start": 11,
+      "end": 21,
+      "endText": "ወተንሥአ"
+     }
+    }
+   ],
+   "msbak": [
+    {
+     "text": {
+      "geez": "ዘይገለብቦ ለሰማይ በደመና። ወያስተዴሉ ክረምት ለምድር። ዘያበቊል ሣዕረ ውስተ አድባር።",
+      "amharic": "ሰማዩን በደመናት ይሸፍናል ለምድርም ዝናብን ያዘጋጃል፤ ሣርን በተራሮች ላይ ያበቅላል፤ ለምለሙንም ለሰው ልጆች ጥቅም።",
+      "english": "Who covereth the heaven with clouds, who prepareth rain for the earth, who maketh grass to grow upon the mountains."
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 146,
+      "start": 8,
+      "end": 9
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወእምዝ በሣኒታ አንሶሰዉ"
+     },
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 8,
+      "start": 1,
+      "end": 22,
+      "endText": "ወኮነ በአሐቲ ዕለት"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘኤጲፋንዮስ"
+   ]
+  }
+ },
+ {
+  "season": "kremt",
+  "week": 2,
+  "part": null,
+  "raw": "ዘክረምት ፪ ሰንበት",
+  "movable": true,
+  "title": "፪ተኛ መዝሙር ዘክረምት ይሠጠዎ",
+  "kidassie": {
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ምድርኒ ለእመ ሰትየት ዝናመ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ዕብራውያን ሰዎች",
+      "chapter": 6,
+      "start": 7
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወማኅለቅቱሰ ለኲሉ ከመ ተዐርዩ ልበ"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት ፩",
+      "chapter": 3,
+      "start": 8,
+      "end": 15,
+      "endText": "ወድልዋኒክሙ"
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወሀሎ ፩ ብእሲ በሀገረ ልስጥራን"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 14,
+      "start": 8,
+      "end": 19,
+      "endText": "ወመጽኡ"
+     }
+    }
+   ],
+   "msbak": [
+    {
+     "text": {
+      "geez": "አርውዮ ለትለሚሃ። ወአስምሮ ለማዕረራ። ወበነጠብጣብከ ትበቊል ተፈሢሓ።",
+      "english": "Thou waterest the ridges thereof abundantly: thou settlest the furrows thereof: thou makest it soft with showers: thou blessest the springing thereof.",
+      "amharic": "ትልምዋን ታረካለህ፥ ቦይዋንም ታስተካክላለህ፤ በነጠብጣብ ታለሰልሳታለህ፥ ቡቃያዋንም ትባርካለህ።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 64,
+      "start": 10,
+      "end": 11
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወበይእቲ ዕለት ወፂኦ ኢየሱስ"
+     },
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 13,
+      "start": 1,
+      "end": 31,
+      "endText": "ካልእተ ምሳሌ"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘእግዚእነ (ነአኲተከ)"
+   ]
+  }
+ },
+ {
+  "season": "kremt",
+  "week": 3,
+  "part": null,
+  "raw": "ዘክረምት ፫ ሰንበት",
+  "movable": true,
+  "title": "፫ተኛ ለእመ ኮነ በዓለ ሐዋርያት በእሑድ መዝሙር አሠርገዎሙ ለሐዋርያት",
+  "kidassie": {
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወእኤዝዘከ በቅድመ እግዚአብሔር"
+     },
+     "verse": {
+      "bookTitle": "ወደ ጢሞቴዎስ ፪",
+      "chapter": 4,
+      "start": 1
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወበእንተዝ እጽሕቅ ለክሙ ዘልፈ"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት ፩",
+      "chapter": 1,
+      "start": 12,
+      "end": 19,
+      "endText": "ወብነ ዓዲ"
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወሶበ ተሐውኩ ፈድፋደ ፈርሀ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 23,
+      "start": 10
+     }
+    }
+   ],
+   "msbak": [
+    {
+     "text": {
+      "geez": "አልቦ ነገር ወአልቦ ነቢብ ዘኢተሰምዐ ቃሎሙ። ውስተ ኵሉ ምድር ወጽአ ነገሮሙ ወእስከ አጽናፈ ዓለም በጽሐ ነቢቦሙ፤",
+      "english": "There is no speech nor language, where their voice is not heard. Their line is gone out through all the earth, and their words to the end of the world.In them hath he set a tabernacle for the sun,",
+      "amharic": "ነገር የለም መናገርም የለም፥ ድምፃቸውም አይሰማም። ድምፃቸው ወደ ምድር ሁሉ፥ ቃላቸውም እስከ ዓለም ዳርቻ ወጣ።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 18,
+      "start": 4,
+      "end": 5
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወእምዝ ካዕበ ወፈረ ኢየሱስ"
+     },
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 6,
+      "start": 1,
+      "end": 20,
+      "endText": "ወውእቱሰ"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘሐዋርያት (ዘበደኃሪ)"
+   ]
+  }
+ },
+ {
+  "season": "kremt",
+  "week": 4,
+  "part": null,
+  "raw": "ዘክረምት ፬",
+  "movable": true,
+  "title": "፬ተኛ መዝሙር ንጉሥ ውእቱ ክርስቶስ",
+  "kidassie": {
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወበእንተሰ መልእክተ ቅዱሳን"
+     },
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች ፪",
+      "chapter": 9,
+      "start": 1
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወድልዋኒክሙ ሀልዉ"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት ፩",
+      "chapter": 3,
+      "start": 15
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወተንሥአ ጳውሎስ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 27,
+      "start": 21,
+      "end": 33,
+      "endText": "ወጸቢሖ ብሔር"
+     }
+    }
+   ],
+   "msbak": [
+    {
+     "text": {
+      "geez": "ዘያበቊል ሣዕረ ለእንስሳ. ወሐመልማለ ለቅኔ እጓለ እመሕያው. ከመ ያውፅእ እክለ እምድር።",
+      "english": "He causeth the grass to grow for the cattle, and herb for the service of man: that he may bring forth food out of the earth;",
+      "amharic": "እንጀራን ከምድር ያወጣ ዘንድ ለምለሙን ለሰው ልጆች ጥቅም፥ ሣርንም ለእንስሳ ያበቅላል።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 103,
+      "start": 14,
+      "end": 15
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወበእንተሰ ይእቲ ዕለት ወኪያሃ ሰዓት"
+     },
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 24,
+      "start": 36,
+      "endText": ""
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘኤጲፋንዮስ"
+   ]
+  }
+ },
+ {
+  "season": "kremt",
+  "week": 6,
+  "part": null,
+  "raw": "ዘክረምት ፮",
+  "movable": true,
+  "title": "መዝሙር (በታች ቤት) በቀዳሚ ገብረ እግዚአብሔር፡ (በላይ ቤት) አርውዮ",
+  "kidassie": {
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ዘክሮሙ ለቀደምት ወለመኳንንት"
+     },
+     "verse": {
+      "bookTitle": "ወደ ቲቶ",
+      "chapter": 3,
+      "start": 1
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወበእንተ ዝንቱ ዜንውዎሙ ለምውታን"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት ፩",
+      "chapter": 4,
+      "start": 6,
+      "end": 12,
+      "endText": "አኃዊነ"
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወእምድኅረዝ አእመርነ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 28,
+      "start": 1,
+      "end": 17,
+      "endText": "ወእምድኅረ"
+     }
+    }
+   ],
+   "msbak": [
+    {
+     "text": {
+      "geez": "ያዐርግ ደመናተ እምአጽናፈ ምድር። ወገብረ መብረቀ ለጊዜ ዝናም። ዘያወፅኦሙ ለነፋሳት እመዛግብቲሆሙ።",
+      "english": "He causeth the vapours to ascend from the ends of the earth; he maketh lightnings for the rain; he bringeth the wind out of his treasuries.",
+      "amharic": "ከምድር ዳር ደመናትን ያወጣል፤ በዝናብ ጊዜ መብረቅን አደረገ፤ ነፋሳትንም ከመዛግብቱ ያወጣል።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 134,
+      "start": 7,
+      "end": 8
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወመስዮ ብሔር ሀለወት ሐመር"
+     },
+     "verse": {
+      "bookTitle": "የማርቆስ ወንጌል",
+      "chapter": 6,
+      "start": 47,
+      "endText": ""
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘኤጲፋንዮስ"
+   ]
+  }
+ },
+ {
+  "season": "kremt",
+  "week": 7,
+  "part": null,
+  "raw": "ዘክረምት ፯",
+  "movable": true,
+  "title": "መዝሙር ቦእ ኢየሱስ",
+  "kidassie": {
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "አስተበቊዐክሙ አኃዊነ አነ ጳውሎስ"
+     },
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች ፪",
+      "chapter": 10,
+      "start": 1
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወኢይኩኑ እምውስቴትክሙ ብዙኃን"
+     },
+     "verse": {
+      "bookTitle": "የያዕቆብ መልእክት",
+      "chapter": 3,
+      "start": 1,
+      "end": 9,
+      "endText": "ባቲ ንባርኮ"
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወእምድኅረ ፫ ዕለት"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 28,
+      "start": 17
+     }
+    }
+   ],
+   "msbak": [
+    {
+     "text": {
+      "geez": "ሐወጽካ ለምድር ወአርወይካ። ወአብዛኅኮ ለብዕላ። ፈለገ እግዚአብሔር ምሉዕ ማያተ።",
+      "english": "Thou visitest the earth, and waterest it: thou greatly enrichest it with the river of God, which is full of water: thou preparest them corn, when thou hast so provided for it.",
+      "amharic": "ምድርን ጐበኘሃት አጠጣሃትም፥ ብልጥግናዋንም እጅግ አበዛህ፤ የእግዚአብሔርን ወንዝ ውኃን የተመላ ነው፤ ምግባቸውን አዘጋጀህ እንዲሁ ታሰናዳለህና።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 64,
+      "start": 9,
+      "end": 10
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወእንዘ ይወርድ እምደብር"
+     },
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 8,
+      "start": 1,
+      "endText": ""
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘእግዚእነ (ነአኲተከ)"
+   ]
+  }
+ },
+ {
+  "season": "filseta",
+  "week": 1,
+  "part": null,
+  "raw": "ዘፍልሰታ ፩ ሰንበት",
+  "movable": true,
+  "title": "መዝሙር ዘፍልሰታ ዮም ንወድሳ ለማርያም",
+  "kidassie": {
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወበእንተሰ እለ ይዘብሑ ለአማልክት"
+     },
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች ፩",
+      "chapter": 8,
+      "start": 1
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወእመሰ ክርስቶስ ተሰቅለ በሥጋሁ"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት ፩",
+      "chapter": 4,
+      "start": 1,
+      "end": 6,
+      "endText": "ወበእንተ ዝንቱ"
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወይቤሎ አግሪጳ ለጳውሎስ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 26,
+      "start": 1,
+      "end": 24,
+      "endText": "ወዘንተ ብሂሎ"
+     }
+    }
+   ],
+   "msbak": [
+    {
+     "text": {
+      "geez": "እምነ ጽዮን ይብል ሰብእ። ወብእሲ ተወልደ በውስቴታ። ወውእቱ ልዑል ሣረራ።",
+      "english": "And of Zion it shall be said, This and that man was born in her: and the highest himself shall establish her.",
+      "amharic": "ሰው እናታችን ጽዮን ይላል፥ በውስጥዋም ሰው ተወለደ፤ እርሱ ራሱም ልዑል መሠረታት።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 86,
+      "start": 5,
+      "end": 6
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወእምዝ አውሥእዎ ሰብእ"
+     },
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 12,
+      "start": 38,
+      "endText": ""
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘእግዝእትነ (ጎሥዐ)"
+   ]
+  }
+ },
+ {
+  "season": "filseta",
+  "week": 3,
+  "part": null,
+  "raw": "ዘፍልሰታ ፫ ሰንበት",
+  "movable": true,
+  "title": "መዝሙር ዘፍልሰታ ንዒ ርግብየ (በታች ቤት)፤ አዕረግዋ (በላይ ቤት)",
+  "kidassie": {
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወእመኒ ብእሲት"
+     },
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች ፩",
+      "chapter": 7,
+      "start": 13,
+      "end": 18,
+      "endText": "ለእመቦ ዘተጸውዐ"
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወኢትሐመዩ በበይናቲክሙ"
+     },
+     "verse": {
+      "bookTitle": "የያዕቆብ መልእክት",
+      "chapter": 4,
+      "start": 11
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወይቤሎ እግዚእነ ለጳውሎስ"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 18,
+      "start": 9,
+      "end": 18,
+      "endText": "ወነበረ"
+     }
+    }
+   ],
+   "msbak": [
+    {
+     "text": {
+      "geez": "ክነፈ ርግብ በብሩር ዘግቡር። ወገበዋቲሃኒ በሐመልማለ ወርቅ። አመ አዘዘ ሰማያዊ ንጉሥ ላዕሌሃ።",
+      "english": "Though ye have lien among the pots, yet shall ye be as the wings of a dove covered with silver, and her feathers with yellow gold. When the Almighty scattered kings in it, it was white as snow in Salmon.",
+      "amharic": "በርስቶች መካከል ብታድሩ፥ ከብር እንደ ተሠሩ እንደ ርግብ ክንፎች፥ በቅጠልያ ወርቅም እንደ ተለበጡ ላባዎችዋ ትሆናላችሁ። ሰማያዊ ንጉሥ በላይዋ ባዘዘ ጊዜ፥ በሰልሞን ላይ በረዶ ዘነበ።"
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 67,
+      "start": 13,
+      "end": 14
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወተንሥአት ማርያም"
+     },
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 1,
+      "start": 38,
+      "end": 46,
+      "endText": "ወትቤ ማርያም"
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘእግዝእትነ (ጎሥዐ)"
+   ]
+  }
+ },
+ {
+  "season": "pagumen",
+  "week": null,
+  "part": null,
+  "raw": "ዘጵጉሜን ሰንበት",
+  "movable": true,
+  "title": "ለእመ ኮነ እሑድ በጳጉሜን፡ መዝሙር ከመ እንተ መብረቅ።",
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "እግዚአብሔርሰ ገሃደ ይመጽእ። ወአምላክነሂ ኢያረምም። እሳት ይነድድ ቅድሜሁ።",
+      "amharic": "አምላካችን ይመጣል ዝምም አይልም፤ እሳት በፊት ይቃጠላል፥ በዙሪያውም ብዙ ዐውሎ አለ።",
+      "english": "Our God shall come, and shall not keep silence: a fire shall devour before him, and it shall be very tempestuous round about him."
+     },
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 49,
+      "start": 3,
+      "end": 4
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ጳውሎስ ዘተሠይመ ሐዋርያሁ።"
+     },
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች ፩",
+      "chapter": 1,
+      "start": 1,
+      "end": 10,
+      "endText": "አስተበቊዐክሙ"
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወዕለቱሰ ለእግዚአብሔር ግብተ ትመጽእ"
+     },
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት ፪",
+      "chapter": 3,
+      "start": 10
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወሳውልሰ ዓዲሁ ይትቄየም"
+     },
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 9,
+      "start": 1,
+      "end": 10,
+      "endText": "ወሀሎ ፩ ብእሲ"
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወእምዝ እንዘ የሐውር ኢየሩሳሌም"
+     },
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 17,
+      "start": 11
+     }
+    }
+   ],
+   "kidassie": [
+    "ዘያዕቆብ ዘሥሩግ (ተንሥኡ)"
+   ]
+  }
+ }
+]

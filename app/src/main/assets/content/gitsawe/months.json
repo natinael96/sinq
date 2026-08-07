@@ -1,0 +1,42 @@
+[
+ {
+  "name": "Meskerem",
+  "amharicName": "መስከረም",
+  "key": "meskerem"
+ },
+ {
+  "name": "Tikimt",
+  "amharicName": "ጥቅምት",
+  "key": "tikimt"
+ },
+ {
+  "name": "Hidar",
+  "amharicName": "ኅዳር",
+  "key": "hidar"
+ },
+ {
+  "name": "Tahsas",
+  "amharicName": "ታኅሣሥ",
+  "key": "tahsas"
+ },
+ {
+  "name": "Tir",
+  "amharicName": "ጥር",
+  "key": "tir"
+ },
+ {
+  "name": "Miyazya",
+  "amharicName": "ሚያዝያ",
+  "key": "miyazya"
+ },
+ {
+  "name": "Tsige",
+  "amharicName": "ጽጌ",
+  "key": "tsige"
+ },
+ {
+  "name": "Seasonal",
+  "amharicName": "የተውሳክ",
+  "key": "seasonal"
+ }
+]

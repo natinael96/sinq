@@ -1,0 +1,212 @@
+[
+ {
+  "key": "st_aregawi_tikimt",
+  "name": "St. Aregawi (Tikimt 14)",
+  "amharicName": "አቡነ አረጋዊ (ጥቅምት ፲፬)",
+  "month": "tikimt",
+  "monthNum": 2,
+  "day": 14,
+  "dateKey": "14-02",
+  "movable": false
+ },
+ {
+  "key": "st_abuye_tikimt",
+  "name": "St. Abune Gebre Menfes Kidus (Tikimt 5)",
+  "amharicName": "አቡነ ገብረ መንፈስ ቅዱስ (ጥቅምት ፭)",
+  "month": "tikimt",
+  "monthNum": 2,
+  "day": 5,
+  "dateKey": "05-02",
+  "movable": false
+ },
+ {
+  "key": "st_stephen_tikimt",
+  "name": "St. Stephen (Tikimt 17)",
+  "amharicName": "ሊቀ ዲያቆናት ቅዱስ እስጢፋኖስ (ጥቅምት ፲፯)",
+  "month": "tikimt",
+  "monthNum": 2,
+  "day": 17,
+  "dateKey": "17-02",
+  "movable": false
+ },
+ {
+  "key": "st_medhanealem_tikimt",
+  "name": "Medhanealem (Tikimt 27)",
+  "amharicName": "መድኃኔዓለም (ጥቅምት ፳፯)",
+  "month": "tikimt",
+  "monthNum": 2,
+  "day": 27,
+  "dateKey": "27-02",
+  "movable": false
+ },
+ {
+  "key": "qusquam_hidar",
+  "name": "Qusquam Mariam (Hidar 6)",
+  "amharicName": "ቁስቋም ማርያም (ህዳር ፮)",
+  "month": "hidar",
+  "monthNum": 3,
+  "day": 6,
+  "dateKey": "06-03",
+  "movable": false
+ },
+ {
+  "key": "st_georege_hidar",
+  "name": "St George. (Hidar 7)",
+  "amharicName": "ቅዱስ ጊዮርጊስ (ህዳር ፮)",
+  "month": "hidar",
+  "monthNum": 3,
+  "day": 6,
+  "dateKey": "06-03",
+  "movable": false
+ },
+ {
+  "key": "st_hanna_hidar",
+  "name": "St. Hanna Mother of St. Mary (Hidar 11)",
+  "amharicName": "ቅድስት ሐና እመ እግዝእትነ (ህዳር ፲፩)",
+  "month": "hidar",
+  "monthNum": 3,
+  "day": 11,
+  "dateKey": "11-03",
+  "movable": false
+ },
+ {
+  "key": "st_michael_hidar",
+  "name": "St. Michael (Hidar 12)",
+  "amharicName": "ቅዱስ ሚካኤል (ህዳር ፲፪)",
+  "month": "hidar",
+  "monthNum": 3,
+  "day": 12,
+  "dateKey": "12-03",
+  "movable": false
+ },
+ {
+  "key": "hidar_tsion",
+  "name": "Zion Mary (Hidar 21)",
+  "amharicName": "ጽዮን ማርያም (ህዳር ፳፩)",
+  "month": "hidar",
+  "monthNum": 3,
+  "day": 21,
+  "dateKey": "21-03",
+  "movable": false
+ },
+ {
+  "key": "st_merkorewos_hidar",
+  "name": "St. Merkorewos (Hidar 25)",
+  "amharicName": "ቅዱስ መርቆሬዎስ (ህዳር ፳፭)",
+  "month": "hidar",
+  "monthNum": 3,
+  "day": 25,
+  "dateKey": "25-03",
+  "movable": false
+ },
+ {
+  "key": "1st_tsige",
+  "name": "1st Year",
+  "amharicName": "የመጀመርያ ዓመት",
+  "month": "tsige",
+  "monthNum": null,
+  "day": null,
+  "dateKey": null,
+  "movable": true
+ },
+ {
+  "key": "nebiy_elias_tahsas",
+  "name": "Prophet Elias (Tahsas 1)",
+  "amharicName": "ነቢይ ኤልያስ (ታኅሣሥ ፩)",
+  "month": "tahsas",
+  "monthNum": 4,
+  "day": 1,
+  "dateKey": "01-04",
+  "movable": false
+ },
+ {
+  "key": "beata_tahsas",
+  "name": "Beata LeMaryam (Tahsas 3)",
+  "amharicName": "በዓታ ለማርያም (ታኅሣሥ ፫)",
+  "month": "tahsas",
+  "monthNum": 4,
+  "day": 3,
+  "dateKey": "03-04",
+  "movable": false
+ },
+ {
+  "key": "st_arsema_tahsas",
+  "name": "St. Arsema (Tahsas 6)",
+  "amharicName": "ቅድስት አርሴማ (ታኅሣሥ ፮)",
+  "month": "tahsas",
+  "monthNum": 4,
+  "day": 6,
+  "dateKey": "06-04",
+  "movable": false
+ },
+ {
+  "key": "mar_samuel_tahsas",
+  "name": "Mar Samuel of Wali (Tahsas 12)",
+  "amharicName": "ማር ሳሙኤል(ታኅሣሥ ፲፪)",
+  "month": "tahsas",
+  "monthNum": 4,
+  "day": 12,
+  "dateKey": "12-04",
+  "movable": false
+ },
+ {
+  "key": "st_gebriel_tahsas",
+  "name": "St. Gebriel (Tahsas 19)",
+  "amharicName": "ቅዱስ ገብርኤል(ታኅሣሥ ፲፱)",
+  "month": "tahsas",
+  "monthNum": 4,
+  "day": 19,
+  "dateKey": "19-04",
+  "movable": false
+ },
+ {
+  "key": "st_teklehaymanot_tahsas",
+  "name": "St. TekleHaymanot (Tahsas 19)",
+  "amharicName": "አቡነ ተክለሃይማኖት (ታኅሣሥ ፳፬)",
+  "month": "tahsas",
+  "monthNum": 4,
+  "day": 24,
+  "dateKey": "24-04",
+  "movable": false
+ },
+ {
+  "key": "st_estifanos_tir",
+  "name": "St. Estifanos (Tir 1)",
+  "amharicName": "ቅዱስ እስጢፋኖስ (ጥር ፩)",
+  "month": "tir",
+  "monthNum": 5,
+  "day": 1,
+  "dateKey": "01-05",
+  "movable": false
+ },
+ {
+  "key": "astereyo_maryam_tir",
+  "name": "Astere'yo Mariam (Tir 21)",
+  "amharicName": "አስተርዕዮ ማርያም (ጥር ፳፩)",
+  "month": "tir",
+  "monthNum": 5,
+  "day": 21,
+  "dateKey": "21-05",
+  "movable": false
+ },
+ {
+  "key": "easter",
+  "name": "Easter",
+  "amharicName": "በዓለ ትንሳኤ",
+  "month": "seasonal",
+  "monthNum": null,
+  "day": null,
+  "dateKey": null,
+  "movable": true
+ },
+ {
+  "key": "miyazya_stGeorge",
+  "name": "St. George (Miyazya 23)",
+  "amharicName": "ቅዱስ ጊዮርጊስ (ሚያዝያ 23)",
+  "month": "miyazya",
+  "monthNum": 8,
+  "day": 23,
+  "dateKey": "23-08",
+  "movable": false
+ }
+]
