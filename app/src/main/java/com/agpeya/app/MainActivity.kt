@@ -267,8 +267,12 @@ private fun AgpeyaNavHost(
             com.agpeya.app.ui.library.LibraryScreen(
                 onOpenPsalter = { navController.navigate("psalter") },
                 onOpenScriptures = { navController.navigate("scriptures") },
+                onOpenWudase = { navController.navigate("wudase") },
                 onSelectTab = navController::switchTab,
             )
+        }
+        composable("wudase") {
+            com.agpeya.app.ui.library.WudaseMaryamScreen(onBack = { navController.popBackStack() })
         }
         composable("scriptures") {
             com.agpeya.app.ui.library.ScriptureListScreen(
