@@ -36,6 +36,9 @@ interface Strings {
     val gitsaweOpenNotAvailable: String
     val gitsaweChangeDay: String
     val ok: String
+    val synaxariumTitle: String
+    val synaxariumKicker: String
+    val noSynaxariumToday: String
 
     val streaksTitle: String
     val currentStreakLabel: String
@@ -72,6 +75,11 @@ interface Strings {
     val streakReminderTitle: String
     val streakReminderBody: String
     val streakChannelName: String
+    val gitsaweReminderTitle: String
+    val gitsaweReminderBody: String
+    val gitsaweChannelName: String
+    val settingsGitsaweReminder: String
+    val settingsGitsaweReminderDesc: String
     val settingsStreakReminder: String
     val settingsStreakReminderDesc: String
     val notifDisabledTitle: String
@@ -252,6 +260,9 @@ object AmharicStrings : Strings {
     override val gitsaweOpenNotAvailable = "ይህ ምንባብ ገና የለም"
     override val gitsaweChangeDay = "ቀን ቀይር"
     override val ok = "እሺ"
+    override val synaxariumTitle = "ስንክሳር"
+    override val synaxariumKicker = "የዕለቱ ስንክሳር"
+    override val noSynaxariumToday = "ለዛሬ የተመዘገበ ስንክሳር የለም"
 
     override val streaksTitle = "ጉዞ"
     override val currentStreakLabel = "የአሁኑ ጉዞ"
@@ -288,6 +299,11 @@ object AmharicStrings : Strings {
     override val streakReminderTitle = "ዛሬን መዝግብ"
     override val streakReminderBody = "የዛሬን ጸሎትና ልማድ ሳትሞላ እንዳትተኛ"
     override val streakChannelName = "የሌሊት ማስታወሻ"
+    override val gitsaweReminderTitle = "የዕለቱ ግጻዌ"
+    override val gitsaweReminderBody = "የዛሬን ምንባብ ተመልከት"
+    override val gitsaweChannelName = "የዕለቱ ግጻዌ ማስታወሻ"
+    override val settingsGitsaweReminder = "የዕለቱ ግጻዌ ማስታወሻ"
+    override val settingsGitsaweReminderDesc = "በየቀኑ ጠዋት የዕለቱን ግጻዌ ምንባብ አስታውሰኝ"
     override val settingsStreakReminder = "የሌሊት ማስታወሻ"
     override val settingsStreakReminderDesc = "በ21፡30 ዛሬን እንድትሞላ ያስታውስሃል"
     override val notifDisabledTitle = "ማሳወቂያዎች ጠፍተዋል"
@@ -456,6 +472,9 @@ object EnglishStrings : Strings {
     override val gitsaweOpenNotAvailable = "This reading isn't available yet"
     override val gitsaweChangeDay = "Change day"
     override val ok = "OK"
+    override val synaxariumTitle = "Synaxarium"
+    override val synaxariumKicker = "Today's Synaxarium"
+    override val noSynaxariumToday = "No synaxarium recorded for today"
 
     override val streaksTitle = "Streaks"
     override val currentStreakLabel = "Current streak"
@@ -492,6 +511,11 @@ object EnglishStrings : Strings {
     override val streakReminderTitle = "Log today"
     override val streakReminderBody = "Mark today's prayers and habits before bed"
     override val streakChannelName = "Nightly reminder"
+    override val gitsaweReminderTitle = "Today's Gitsawe"
+    override val gitsaweReminderBody = "See today's reading"
+    override val gitsaweChannelName = "Daily Gitsawe reminder"
+    override val settingsGitsaweReminder = "Daily Gitsawe reminder"
+    override val settingsGitsaweReminderDesc = "Each morning, remind me of today's Gitsawe reading"
     override val settingsStreakReminder = "Nightly streak reminder"
     override val settingsStreakReminderDesc = "A 9:30 PM nudge to fill in today"
     override val notifDisabledTitle = "Notifications are off"

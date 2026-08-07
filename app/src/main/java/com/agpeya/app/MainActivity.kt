@@ -51,6 +51,9 @@ class MainActivity : ComponentActivity() {
     // Set when opened from the nightly streak-reminder notification.
     private val pendingOpenStreak = mutableStateOf(false)
 
+    // Set when opened from the morning ግጻዌ-reminder notification.
+    private val pendingOpenGitsawe = mutableStateOf(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -65,6 +68,8 @@ class MainActivity : ComponentActivity() {
                         onDeepLinkHandled = { pendingDeepLinkHourId.value = null },
                         openStreak = pendingOpenStreak.value,
                         onStreakHandled = { pendingOpenStreak.value = false },
+                        openGitsawe = pendingOpenGitsawe.value,
+                        onGitsaweHandled = { pendingOpenGitsawe.value = false },
                     )
                 }
             }
@@ -87,6 +92,10 @@ class MainActivity : ComponentActivity() {
         if (intent.getBooleanExtra(StreakReminderScheduler.EXTRA_OPEN_STREAK, false)) {
             pendingOpenStreak.value = true
             intent.removeExtra(StreakReminderScheduler.EXTRA_OPEN_STREAK)
+        }
+        if (intent.getBooleanExtra(com.agpeya.app.reminders.GitsaweReminderScheduler.EXTRA_OPEN_GITSAWE, false)) {
+            pendingOpenGitsawe.value = true
+            intent.removeExtra(com.agpeya.app.reminders.GitsaweReminderScheduler.EXTRA_OPEN_GITSAWE)
         }
     }
 }
@@ -112,6 +121,8 @@ private fun AgpeyaNavHost(
     onDeepLinkHandled: () -> Unit,
     openStreak: Boolean,
     onStreakHandled: () -> Unit,
+    openGitsawe: Boolean,
+    onGitsaweHandled: () -> Unit,
 ) {
     val navController = rememberNavController()
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -141,6 +152,12 @@ private fun AgpeyaNavHost(
                     SettingsRepository.streakReminder(context).first(),
                 )
             }
+            runCatching {
+                com.agpeya.app.reminders.GitsaweReminderScheduler.sync(
+                    context,
+                    SettingsRepository.gitsaweReminder(context).first(),
+                )
+            }
         }
     }
 
@@ -159,6 +176,14 @@ private fun AgpeyaNavHost(
         if (ready && openStreak) {
             navController.switchTab(Tab.STREAK)
             onStreakHandled()
+        }
+    }
+
+    // Opened from the morning ግጻዌ-reminder notification → open the ግጻዌ screen.
+    LaunchedEffect(ready, openGitsawe) {
+        if (ready && openGitsawe) {
+            navController.navigate("gitsawe")
+            onGitsaweHandled()
         }
     }
 
@@ -273,6 +298,16 @@ private fun AgpeyaNavHost(
                 onOpenReading = { target ->
                     navController.navigate(com.agpeya.app.data.GitsaweLinks.route(target))
                 },
+                onOpenSynaxarium = { epochDay -> navController.navigate("synaxarium/$epochDay") },
+            )
+        }
+        composable(
+            route = "synaxarium/{epochDay}",
+            arguments = listOf(navArgument("epochDay") { type = NavType.LongType }),
+        ) { backStackEntry ->
+            com.agpeya.app.ui.gitsawe.SynaxariumScreen(
+                epochDay = backStackEntry.arguments?.getLong("epochDay") ?: 0L,
+                onBack = { navController.popBackStack() },
             )
         }
         composable(Tab.SETTINGS.route) {

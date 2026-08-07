@@ -7,6 +7,18 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.4.0] — 2026-08-07
+
+_versionCode 14 · ስንክሳር & daily reminder_
+
+### Added
+- **ስንክሳር (Synaxarium).** The full Amharic synaxarium — the daily commemorations
+  of saints and events (367 days, 1,822 entries) — opens from a card on the ግጻዌ
+  screen and follows the day picker, so any day's synaxarium is a tap away.
+- **Daily ግጻዌ reminder.** An optional morning notification with today's ግጻዌ
+  reading heading; tapping it opens the day's readings. Toggle it in Settings
+  (on by default), scheduled with an exact, doze-exempt alarm.
+
 ## [0.3.1] — 2026-08-07
 
 _versionCode 13_

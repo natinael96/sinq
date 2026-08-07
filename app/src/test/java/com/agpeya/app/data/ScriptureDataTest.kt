@@ -109,7 +109,7 @@ class ScriptureDataTest {
         // Day-1 msbak: Psalm 64:11-12 -> Psalter section 63.
         val psalm = GitsaweLinks.target(VerseRef(bookTitle = "መዝሙረ ዳዊት", chapter = 64, start = 11, end = 12))
         assertEquals(ReadingTarget.Psalm(64, 63, 11, 12), psalm)
-        assertEquals("psalter?section=63", GitsaweLinks.route(psalm!!))
+        assertEquals("psalter?section=63&start=11&end=12", GitsaweLinks.route(psalm!!))
 
         // Day-1 negh gospel: Luke 4:17-23 -> NT passage.
         val gospel = GitsaweLinks.target(VerseRef(bookTitle = "የሉቃስ ወንጌል", chapter = 4, start = 17, end = 23))

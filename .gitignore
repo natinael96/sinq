@@ -12,3 +12,5 @@ captures/
 *.keystore
 *.jks
 keystore.properties
+# Local-only: decompiled third-party APKs kept for study, never distributed.
+docs/extracted/
