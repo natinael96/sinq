@@ -1,0 +1,70 @@
+{
+ "contentVersion": 1,
+ "months": [
+  {
+   "month": 1,
+   "name": "Meskerem",
+   "days": 30
+  },
+  {
+   "month": 2,
+   "name": "Tikimt",
+   "days": 30
+  },
+  {
+   "month": 3,
+   "name": "Hidar",
+   "days": 30
+  },
+  {
+   "month": 4,
+   "name": "Tahsas",
+   "days": 30
+  },
+  {
+   "month": 5,
+   "name": "Tir",
+   "days": 30
+  },
+  {
+   "month": 6,
+   "name": "Yekatit",
+   "days": 31
+  },
+  {
+   "month": 7,
+   "name": "Megabit",
+   "days": 30
+  },
+  {
+   "month": 8,
+   "name": "Miazia",
+   "days": 30
+  },
+  {
+   "month": 9,
+   "name": "Ginbot",
+   "days": 30
+  },
+  {
+   "month": 10,
+   "name": "Sene",
+   "days": 30
+  },
+  {
+   "month": 11,
+   "name": "Hamle",
+   "days": 30
+  },
+  {
+   "month": 12,
+   "name": "Nehasse",
+   "days": 30
+  },
+  {
+   "month": 13,
+   "name": "Pagume",
+   "days": 6
+  }
+ ]
+}

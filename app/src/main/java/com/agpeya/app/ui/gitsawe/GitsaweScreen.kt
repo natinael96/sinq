@@ -1,5 +1,6 @@
 package com.agpeya.app.ui.gitsawe
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -31,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -77,7 +79,11 @@ private data class Source(val label: String, val subtitle: String?, val services
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GitsaweScreen(onBack: () -> Unit, onOpenReading: (ReadingTarget) -> Unit) {
+fun GitsaweScreen(
+    onBack: () -> Unit,
+    onOpenReading: (ReadingTarget) -> Unit,
+    onOpenSynaxarium: (Long) -> Unit,
+) {
     val context = LocalContext.current
     val s = LocalStrings.current
     // The day being viewed, as an epoch-day so it survives rotation.
@@ -126,34 +132,35 @@ fun GitsaweScreen(onBack: () -> Unit, onOpenReading: (ReadingTarget) -> Unit) {
             )
         },
     ) { innerPadding ->
-        when {
-            data == null -> Box(
+        if (data == null) {
+            Box(
                 Modifier.fillMaxSize().padding(innerPadding),
                 contentAlignment = Alignment.Center,
             ) { CircularProgressIndicator(color = MaterialTheme.colorScheme.secondary) }
-
-            sources.isEmpty() -> Box(
-                Modifier.fillMaxSize().padding(innerPadding).padding(32.dp),
-                contentAlignment = Alignment.Center,
+        } else {
+            val active = sources.getOrNull(selected.coerceIn(0, (sources.size - 1).coerceAtLeast(0)))
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(innerPadding),
+                contentPadding = PaddingValues(horizontal = 22.dp),
             ) {
-                Text(
-                    s.noGitsaweToday,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                )
-            }
-
-            else -> {
-                val active = sources[selected.coerceIn(0, sources.lastIndex)]
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(innerPadding),
-                    contentPadding = PaddingValues(horizontal = 22.dp),
-                ) {
+                item(key = "sinksar") {
+                    Spacer(Modifier.height(10.dp))
+                    SynaxariumCard(onClick = { onOpenSynaxarium(epochDay) })
+                    Spacer(Modifier.height(6.dp))
+                }
+                if (active == null) {
+                    item(key = "empty") {
+                        Text(
+                            s.noGitsaweToday,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 28.dp),
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                } else {
                     if (sources.size > 1) {
-                        item(key = "switcher") {
-                            SourceSwitcher(sources, selected) { selected = it }
-                        }
+                        item(key = "switcher") { SourceSwitcher(sources, selected) { selected = it } }
                     }
                     active.subtitle?.let { sub ->
                         item(key = "sub") {
@@ -165,14 +172,10 @@ fun GitsaweScreen(onBack: () -> Unit, onOpenReading: (ReadingTarget) -> Unit) {
                             )
                         }
                     }
-                    active.services.negh?.let { svc ->
-                        serviceSection("ነግህ", svc, s, onOpenReading)
-                    }
-                    active.services.kidassie?.let { svc ->
-                        serviceSection("ቅዳሴ", svc, s, onOpenReading)
-                    }
-                    item { Spacer(Modifier.height(40.dp)) }
+                    active.services.negh?.let { svc -> serviceSection("ነግህ", svc, s, onOpenReading) }
+                    active.services.kidassie?.let { svc -> serviceSection("ቅዳሴ", svc, s, onOpenReading) }
                 }
+                item { Spacer(Modifier.height(40.dp)) }
             }
         }
     }
@@ -287,6 +290,33 @@ private fun verseRef(v: VerseRef): String = buildString {
     v.chapter?.let { append(geezNumeral(it)) }
     v.start?.let { append("፥"); append(geezNumeral(it)) }
     v.end?.let { append("–"); append(geezNumeral(it)) }
+}
+
+@Composable
+private fun SynaxariumCard(onClick: () -> Unit) {
+    val s = LocalStrings.current
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(s.synaxariumKicker, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                Text(s.synaxariumTitle, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
+            }
+            Icon(
+                Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
 }
 
 @Composable
