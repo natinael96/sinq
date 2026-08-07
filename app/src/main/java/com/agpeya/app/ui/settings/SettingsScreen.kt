@@ -55,6 +55,7 @@ fun SettingsScreen(
     val theme by SettingsRepository.theme(context).collectAsState(initial = ThemeChoice.SYSTEM)
     val keepOn by SettingsRepository.keepScreenOn(context).collectAsState(initial = true)
     val streakReminder by SettingsRepository.streakReminder(context).collectAsState(initial = true)
+    val gitsaweReminder by SettingsRepository.gitsaweReminder(context).collectAsState(initial = true)
     val language by SettingsRepository.language(context).collectAsState(initial = com.agpeya.app.data.Language.SYSTEM)
     val alarmAlert by SettingsRepository.alarmAlert(context)
         .collectAsState(initial = com.agpeya.app.data.AlarmAlert.SOUND_VIBRATE)
@@ -174,6 +175,35 @@ fun SettingsScreen(
                             scope.launch {
                                 SettingsRepository.setStreakReminder(context, on)
                                 com.agpeya.app.reminders.StreakReminderScheduler.sync(context, on)
+                            }
+                        },
+                    )
+                }
+                Spacer(Modifier.height(16.dp))
+            }
+
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(s.settingsGitsaweReminder, style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            s.settingsGitsaweReminderDesc,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Switch(
+                        checked = gitsaweReminder,
+                        onCheckedChange = { on ->
+                            scope.launch {
+                                SettingsRepository.setGitsaweReminder(context, on)
+                                com.agpeya.app.reminders.GitsaweReminderScheduler.sync(context, on)
                             }
                         },
                     )

@@ -35,6 +35,12 @@ class SystemEventsReceiver : BroadcastReceiver() {
                                 SettingsRepository.streakReminder(context).first(),
                             )
                         }
+                        runCatching {
+                            GitsaweReminderScheduler.sync(
+                                context,
+                                SettingsRepository.gitsaweReminder(context).first(),
+                            )
+                        }
                     }
                     pending.finish()
                 }.start()

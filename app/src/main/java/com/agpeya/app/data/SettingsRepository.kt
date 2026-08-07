@@ -35,6 +35,7 @@ object SettingsRepository {
     private val KEY_NAME = stringPreferencesKey("profile_name")
     private val KEY_CHRISTIAN_NAME = stringPreferencesKey("profile_christian_name")
     private val KEY_STREAK_REMINDER = booleanPreferencesKey("streak_reminder")
+    private val KEY_GITSAWE_REMINDER = booleanPreferencesKey("gitsawe_reminder")
 
     const val DEFAULT_FONT_STEP = 1
 
@@ -131,6 +132,14 @@ object SettingsRepository {
 
     suspend fun setStreakReminder(context: Context, value: Boolean) {
         context.settingsDataStore.edit { it[KEY_STREAK_REMINDER] = value }
+    }
+
+    /** Morning nudge (~06:00) with today's ግጻዌ reading heading. On by default. */
+    fun gitsaweReminder(context: Context): Flow<Boolean> =
+        context.settingsDataStore.data.map { it[KEY_GITSAWE_REMINDER] ?: true }
+
+    suspend fun setGitsaweReminder(context: Context, value: Boolean) {
+        context.settingsDataStore.edit { it[KEY_GITSAWE_REMINDER] = value }
     }
 
     fun onboarded(context: Context): Flow<Boolean> =
