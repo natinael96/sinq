@@ -9,9 +9,13 @@ reserved for the first public release.
 
 ## [0.5.0] — 2026-08-07
 
-_versionCode 15 · synaxarium reader reformat & bookmarkable scripture_
+_versionCode 15 · ውዳሴ ማርያም, synaxarium reader reformat & bookmarkable scripture_
 
 ### Added
+- **ውዳሴ ማርያም (Wudase Maryam).** The daily Praise of Mary opens from the library
+  — no longer "coming soon". One portion per weekday (defaulting to today) plus
+  ይወድስዋ መላእክት and አንቀጸ ብርሃን, in Amharic by default with a Ge'ez toggle on top.
+  Text from the community dataset credited in-app and in the README.
 - **Bookmark scripture.** The scripture-quote entries within the ስንክሳር and the
   library's Bible reader now carry a bookmark toggle; saved passages land in the
   existing Bookmarks screen and reopen where they came from.
