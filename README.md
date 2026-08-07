@@ -51,8 +51,8 @@ APK releases on GitHub are planned. Until then, build from source (below) or sid
 ### Build
 
 ```bash
-git clone https://github.com/natinael96/---sinq.git
-cd ---sinq
+git clone https://github.com/natinael96/sinq.git
+cd sinq
 ./gradlew assembleDebug
 # APK: app/build/outputs/apk/debug/app-debug.apk
 ```
