@@ -85,7 +85,12 @@ private fun dailyRange(day: DayOfWeek): IntRange? = when (day) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PsalterScreen(initialPsalmIndex: Int = -1, onBack: () -> Unit) {
+fun PsalterScreen(
+    initialPsalmIndex: Int = -1,
+    initialStartVerse: Int = -1,
+    initialEndVerse: Int = -1,
+    onBack: () -> Unit,
+) {
     val context = LocalContext.current
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
@@ -98,6 +103,12 @@ fun PsalterScreen(initialPsalmIndex: Int = -1, onBack: () -> Unit) {
     val bookmarkedIds = remember(bookmarks) { bookmarks.map { it.sectionId }.toSet() }
     val highlights by HighlightRepository.highlights(context).collectAsState(initial = emptyMap())
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
+
+    // A ግጻዌ psalm link carries the cited verse range; tint just that psalm's verses.
+    val citedPsalmNumber = if (initialPsalmIndex >= 0 && initialStartVerse > 0) initialPsalmIndex + 1 else -1
+    val citedRange = if (initialStartVerse > 0)
+        initialStartVerse..(if (initialEndVerse > 0) initialEndVerse else initialStartVerse)
+    else IntRange.EMPTY
 
     // Opened from a bookmark: show the whole psalter so the target psalm exists.
     var daily by remember { mutableStateOf(initialPsalmIndex < 0) }
@@ -173,14 +184,10 @@ fun PsalterScreen(initialPsalmIndex: Int = -1, onBack: () -> Unit) {
                             color = MaterialTheme.colorScheme.secondary,
                         )
                     }
-                    TextButton(
-                        onClick = { scope.launch { SettingsRepository.setFontStep(context, fontStep - 1) } },
-                        enabled = fontStep > 0,
-                    ) { Text("A−") }
-                    TextButton(
-                        onClick = { scope.launch { SettingsRepository.setFontStep(context, fontStep + 1) } },
-                        enabled = fontStep < FONT_STEPS_SP.lastIndex,
-                    ) { Text("A+") }
+                    com.agpeya.app.ui.reading.FontSizeActions(
+                        fontStep = fontStep,
+                        maxStep = FONT_STEPS_SP.lastIndex,
+                    ) { step -> scope.launch { SettingsRepository.setFontStep(context, step) } }
                     IconButton(onClick = {
                         // Capture the current position, then switch the mode. The
                         // anchor effect scrolls the newly-composed reader to it.
@@ -256,6 +263,7 @@ fun PsalterScreen(initialPsalmIndex: Int = -1, onBack: () -> Unit) {
                                 onToggleBookmark = { toggleBookmark(section) },
                                 highlights = highlights,
                                 onVerseTap = onVerseTap,
+                                citedRange = if (section.number == citedPsalmNumber) citedRange else IntRange.EMPTY,
                             )
                         }
                         item { Spacer(Modifier.height(56.dp)) }
@@ -288,6 +296,7 @@ fun PsalterScreen(initialPsalmIndex: Int = -1, onBack: () -> Unit) {
                                         onToggleBookmark = { toggleBookmark(section) },
                                         highlights = highlights,
                                         onVerseTap = onVerseTap,
+                                        citedRange = if (section.number == citedPsalmNumber) citedRange else IntRange.EMPTY,
                                     )
                                     Spacer(Modifier.height(48.dp))
                                 }

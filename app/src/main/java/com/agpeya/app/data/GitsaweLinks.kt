@@ -56,7 +56,8 @@ object GitsaweLinks {
     /** Navigation route for a resolved target. */
     fun route(target: ReadingTarget): String = when (target) {
         is ReadingTarget.Psalm ->
-            "psalter?section=${target.sectionIndex}"
+            "psalter?section=${target.sectionIndex}" +
+                "&start=${target.startVerse ?: -1}&end=${target.endVerse ?: -1}"
         is ReadingTarget.NtPassage ->
             "scripture/${target.bookKey}/${target.chapter}" +
                 "?start=${target.start ?: -1}&end=${target.end ?: -1}"

@@ -53,6 +53,7 @@ import com.agpeya.app.model.ScriptureBook
 import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.Abyssinica
+import kotlinx.coroutines.launch
 
 private val FONT_STEPS_SP = listOf(17, 19, 22, 25, 29)
 
@@ -72,6 +73,7 @@ fun ScriptureReaderScreen(
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
     val book by produceState<ScriptureBook?>(initialValue = null, bookKey) {
         value = ScriptureRepository.book(context, bookKey)
     }
@@ -121,6 +123,12 @@ fun ScriptureReaderScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
                     }
                 },
+                actions = {
+                    com.agpeya.app.ui.reading.FontSizeActions(
+                        fontStep = fontStep,
+                        maxStep = FONT_STEPS_SP.lastIndex,
+                    ) { step -> scope.launch { SettingsRepository.setFontStep(context, step) } }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
             )
         },
@@ -164,12 +172,19 @@ fun ScriptureReaderScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 2.dp)
-                        .clip(RoundedCornerShape(6.dp))
+                        .clip(RoundedCornerShape(8.dp))
                         .background(
-                            if (tinted) MaterialTheme.colorScheme.secondary.copy(alpha = 0.14f)
+                            if (tinted) MaterialTheme.colorScheme.secondary.copy(alpha = 0.30f)
                             else androidx.compose.ui.graphics.Color.Transparent,
                         )
-                        .padding(horizontal = 6.dp, vertical = 3.dp),
+                        .then(
+                            if (tinted) Modifier.border(
+                                1.5.dp,
+                                MaterialTheme.colorScheme.secondary,
+                                RoundedCornerShape(8.dp),
+                            ) else Modifier
+                        )
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
                 )
             }
             item { Spacer(Modifier.height(48.dp)) }

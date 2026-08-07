@@ -7,6 +7,8 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -64,6 +66,7 @@ internal fun SectionView(
     onToggleBookmark: () -> Unit,
     highlights: Map<String, String>,
     onVerseTap: (String) -> Unit,
+    citedRange: IntRange = IntRange.EMPTY,
 ) {
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(Modifier.height(40.dp))
@@ -100,6 +103,7 @@ internal fun SectionView(
             bodyFontSp = bodyFontSp,
             highlights = highlights,
             onVerseTap = onVerseTap,
+            citedRange = citedRange,
         )
     }
 }
@@ -110,6 +114,7 @@ internal fun VerseText(
     bodyFontSp: Int,
     highlights: Map<String, String>,
     onVerseTap: (String) -> Unit,
+    citedRange: IntRange = IntRange.EMPTY,
 ) {
     val markerColor = MaterialTheme.colorScheme.secondary
     val style = MaterialTheme.typography.bodyLarge.copy(
@@ -134,7 +139,11 @@ internal fun VerseText(
                 )
             }
             val verseKey = HighlightRepository.verseKey(section.id, verseNumber)
-            val bg = highlightColor(highlights[verseKey])
+            val cited = verseNumber in citedRange
+            // A reading opened from ግጻዌ tints its cited verses in gold; a user's
+            // own highlight still wins if they've coloured the verse themselves.
+            val bg = highlightColor(highlights[verseKey]).takeIf { it != Color.Transparent }
+                ?: if (cited) MaterialTheme.colorScheme.secondary.copy(alpha = 0.30f) else Color.Transparent
             val annotated = remember(verse, verseNumber, markerColor, bodyFontSp) {
                 buildAnnotatedString {
                     withStyle(
@@ -154,12 +163,19 @@ internal fun VerseText(
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(6.dp))
+                    .clip(RoundedCornerShape(8.dp))
                     .background(bg)
+                    .then(
+                        if (cited) Modifier.border(
+                            1.5.dp,
+                            MaterialTheme.colorScheme.secondary,
+                            RoundedCornerShape(8.dp),
+                        ) else Modifier
+                    )
                     .pointerInput(verseKey) {
                         detectTapGestures(onTap = { onVerseTap(verseKey) })
                     }
-                    .padding(horizontal = 6.dp, vertical = 3.dp),
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
             )
         }
     }
@@ -172,6 +188,21 @@ internal fun highlightColor(key: String?): Color = when (key) {
     "blue" -> Color(0x552196F3)
     "pink" -> Color(0x55E0529C)
     else -> Color.Transparent
+}
+
+/**
+ * The A− / A+ font-size stepper for a reader's app bar. Coloured with the gold
+ * secondary so it stays legible on both grounds — the TextButton default,
+ * primary, is a deep green that disappears on the dark-theme background.
+ */
+@Composable
+fun FontSizeActions(fontStep: Int, maxStep: Int, onChange: (Int) -> Unit) {
+    val colors = ButtonDefaults.textButtonColors(
+        contentColor = MaterialTheme.colorScheme.secondary,
+        disabledContentColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.38f),
+    )
+    TextButton(onClick = { onChange(fontStep - 1) }, enabled = fontStep > 0, colors = colors) { Text("A−") }
+    TextButton(onClick = { onChange(fontStep + 1) }, enabled = fontStep < maxStep, colors = colors) { Text("A+") }
 }
 
 @Composable

@@ -234,14 +234,10 @@ fun ReadingScreen(
                     }
                 },
                 actions = {
-                    TextButton(
-                        onClick = { scope.launch { SettingsRepository.setFontStep(context, fontStep - 1) } },
-                        enabled = fontStep > 0,
-                    ) { Text("A−") }
-                    TextButton(
-                        onClick = { scope.launch { SettingsRepository.setFontStep(context, fontStep + 1) } },
-                        enabled = fontStep < FONT_STEPS_SP.lastIndex,
-                    ) { Text("A+") }
+                    FontSizeActions(
+                        fontStep = fontStep,
+                        maxStep = FONT_STEPS_SP.lastIndex,
+                    ) { step -> scope.launch { SettingsRepository.setFontStep(context, step) } }
                     IconButton(onClick = {
                         // Capture the current position, then switch the mode. The
                         // anchor effect scrolls the newly-composed reader to it.

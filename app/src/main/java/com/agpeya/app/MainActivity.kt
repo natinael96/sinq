@@ -214,13 +214,17 @@ private fun AgpeyaNavHost(
             )
         }
         composable(
-            route = "psalter?section={section}",
+            route = "psalter?section={section}&start={start}&end={end}",
             arguments = listOf(
                 navArgument("section") { type = NavType.IntType; defaultValue = -1 },
+                navArgument("start") { type = NavType.IntType; defaultValue = -1 },
+                navArgument("end") { type = NavType.IntType; defaultValue = -1 },
             ),
         ) { backStackEntry ->
             com.agpeya.app.ui.psalter.PsalterScreen(
                 initialPsalmIndex = backStackEntry.arguments?.getInt("section") ?: -1,
+                initialStartVerse = backStackEntry.arguments?.getInt("start") ?: -1,
+                initialEndVerse = backStackEntry.arguments?.getInt("end") ?: -1,
                 onBack = { navController.popBackStack() },
             )
         }
