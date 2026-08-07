@@ -31,8 +31,18 @@ object StreakReminderScheduler {
         if (!next.isAfter(now)) next = next.plusDays(1)
         val triggerAt = next.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         val am = context.getSystemService(AlarmManager::class.java)
-        // Inexact + doze-friendly: a nudge doesn't need exact-alarm precision.
-        am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent(context))
+        val pi = pendingIntent(context)
+        // Exact + doze-exempt so the nightly nudge actually lands at 21:30. Plain
+        // setAndAllowWhileIdle is inexact and, once the app falls into the
+        // App-Standby "rare" bucket (a day or two unopened), gets throttled to
+        // ~once a day and deferred to a Doze maintenance window — the nudge then
+        // silently misses days at a time. USE_EXACT_ALARM is declared, so exact
+        // scheduling is normally granted; fall back to inexact if ever refused.
+        try {
+            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
+        } catch (_: SecurityException) {
+            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
+        }
     }
 
     fun cancel(context: Context) {
