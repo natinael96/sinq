@@ -89,6 +89,8 @@ interface Strings {
     val noBookmarksTitle: String
     val noBookmarksBody: String
     val removeAction: String
+    val bookmarkGroupScripture: String
+    val bookmarkGroupSynaxarium: String
 
     val settingsTitle: String
     val appearance: String
@@ -313,6 +315,8 @@ object AmharicStrings : Strings {
     override val noBookmarksTitle = "ገና ምልክት አላደረጉም"
     override val noBookmarksBody = "በንባብ ገጹ ላይ ያለውን የምልክት ምልክት በመንካት ጸሎቶችን ያስቀምጡ"
     override val removeAction = "አስወግድ"
+    override val bookmarkGroupScripture = "ቅዱሳት መጻሕፍት"
+    override val bookmarkGroupSynaxarium = "ስንክሳር"
 
     override val settingsTitle = "ቅንብሮች"
     override val appearance = "ገጽታ"
@@ -525,6 +529,8 @@ object EnglishStrings : Strings {
     override val noBookmarksTitle = "No bookmarks yet"
     override val noBookmarksBody = "Tap the bookmark icon on the reading page to save prayers"
     override val removeAction = "Remove"
+    override val bookmarkGroupScripture = "Scriptures"
+    override val bookmarkGroupSynaxarium = "Synaxarium"
 
     override val settingsTitle = "Settings"
     override val appearance = "Appearance"

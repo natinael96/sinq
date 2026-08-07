@@ -236,6 +236,7 @@ private fun AgpeyaNavHost(
                         navController.navigate("reading/$hourId?section=$index")
                     }
                 },
+                onOpenRoute = { route -> navController.navigate(route) },
             )
         }
         composable(
