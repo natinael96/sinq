@@ -96,9 +96,15 @@ data class Bookmark(
     val hourId: String,
     val hourName: String,
     val sectionId: String,
-    val sectionIndex: Int,
+    val sectionIndex: Int = 0,
     val title: String,
     val subtitle: String? = null,
+    /**
+     * A direct navigation route (e.g. "scripture/luke/10?start=38"). When set,
+     * the bookmarks list navigates here instead of the hour reader — used by
+     * scripture and synaxarium bookmarks that don't map to an Agpeya section.
+     */
+    val route: String? = null,
 )
 
 @Serializable

@@ -20,6 +20,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -49,6 +51,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.agpeya.app.data.ScriptureRepository
 import com.agpeya.app.data.SettingsRepository
+import com.agpeya.app.data.UserDataRepository
+import com.agpeya.app.model.Bookmark
 import com.agpeya.app.model.ScriptureBook
 import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
@@ -79,6 +83,9 @@ fun ScriptureReaderScreen(
     }
     val fontStep by SettingsRepository.fontStep(context).collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
+
+    val bookmarks by UserDataRepository.bookmarks(context).collectAsState(initial = emptyList())
+    val bookmarkedIds = remember(bookmarks) { bookmarks.mapTo(HashSet()) { it.sectionId } }
 
     val b = book ?: run {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -124,6 +131,29 @@ fun ScriptureReaderScreen(
                     }
                 },
                 actions = {
+                    val sectionId = "scripture:$bookKey:$chapter"
+                    val marked = sectionId in bookmarkedIds
+                    IconButton(onClick = {
+                        scope.launch {
+                            UserDataRepository.toggleBookmark(
+                                context,
+                                Bookmark(
+                                    hourId = "scripture_library",
+                                    hourName = s.bookmarkGroupScripture,
+                                    sectionId = sectionId,
+                                    title = "${b.nameAm} ${s.chapterUnit} ${geezNumeral(chapter)}",
+                                    route = "scripture/$bookKey/$chapter",
+                                ),
+                            )
+                        }
+                    }) {
+                        Icon(
+                            imageVector = if (marked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                            contentDescription = if (marked) s.removeAction else s.bookmarkAction,
+                            tint = if (marked) MaterialTheme.colorScheme.secondary
+                            else MaterialTheme.colorScheme.onBackground,
+                        )
+                    }
                     com.agpeya.app.ui.reading.FontSizeActions(
                         fontStep = fontStep,
                         maxStep = FONT_STEPS_SP.lastIndex,

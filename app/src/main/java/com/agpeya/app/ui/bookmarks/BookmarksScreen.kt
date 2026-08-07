@@ -38,6 +38,7 @@ import kotlinx.coroutines.launch
 fun BookmarksScreen(
     onBack: () -> Unit,
     onOpen: (hourId: String, sectionIndex: Int) -> Unit,
+    onOpenRoute: (route: String) -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -105,7 +106,11 @@ fun BookmarksScreen(
                 items(items.size, key = { items[it].sectionId }) { i ->
                     BookmarkRow(
                         bookmark = items[i],
-                        onOpen = { onOpen(items[i].hourId, items[i].sectionIndex) },
+                        onOpen = {
+                            val bm = items[i]
+                            if (bm.route != null) onOpenRoute(bm.route)
+                            else onOpen(bm.hourId, bm.sectionIndex)
+                        },
                         onRemove = {
                             scope.launch { UserDataRepository.removeBookmark(context, items[i].sectionId) }
                         },

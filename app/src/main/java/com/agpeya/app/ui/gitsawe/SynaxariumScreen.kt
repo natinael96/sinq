@@ -1,18 +1,24 @@
 package com.agpeya.app.ui.gitsawe
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -31,21 +37,33 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.data.SynaxariumRepository
+import com.agpeya.app.data.UserDataRepository
+import com.agpeya.app.model.Bookmark
 import com.agpeya.app.model.SynaxariumEntry
 import com.agpeya.app.ui.common.formatEthiopian
 import com.agpeya.app.ui.reading.FontSizeActions
+import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.Abyssinica
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 private val FONT_STEPS_SP = listOf(17, 19, 22, 25, 29)
+
+/** Warm liturgical red for the አርኬ hymn — distinct from the app's gold accent. */
+private val ArkeRed = androidx.compose.ui.graphics.Color(0xFFF0776A)
 
 /** ስንክሳር — the day's synaxarium commemorations for [epochDay]. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,6 +78,9 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
     }
     val fontStep by SettingsRepository.fontStep(context).collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
+
+    val bookmarks by UserDataRepository.bookmarks(context).collectAsState(initial = emptyList())
+    val bookmarkedIds = remember(bookmarks) { bookmarks.mapTo(HashSet()) { it.sectionId } }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -113,36 +134,238 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
                 contentPadding = PaddingValues(horizontal = 24.dp),
             ) {
                 itemsIndexed(list) { i, entry ->
-                    if (i > 0) {
-                        Spacer(Modifier.height(20.dp))
-                        HorizontalDivider(
-                            modifier = Modifier.padding(bottom = 16.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                        )
-                    } else {
-                        Spacer(Modifier.height(12.dp))
+                    Column(Modifier.fillMaxWidth()) {
+                        if (i > 0) {
+                            Spacer(Modifier.height(20.dp))
+                            HorizontalDivider(
+                                modifier = Modifier.padding(bottom = 16.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                            )
+                        } else {
+                            Spacer(Modifier.height(12.dp))
+                        }
+
+                        val title = cleanSynaxariumText(entry.title)
+                        if (title.isNotBlank()) {
+                            EntryTitle(title)
+                        }
+
+                        if (isScriptureEntry(entry.title)) {
+                            ScriptureBody(
+                                rawText = entry.text,
+                                fontSp = bodyFontSp,
+                                bookmarked = "sinksar:$epochDay:$i" in bookmarkedIds,
+                                onToggleBookmark = {
+                                    scope.launch {
+                                        UserDataRepository.toggleBookmark(
+                                            context,
+                                            Bookmark(
+                                                hourId = "sinksar_verse",
+                                                hourName = s.bookmarkGroupSynaxarium,
+                                                sectionId = "sinksar:$epochDay:$i",
+                                                title = if (title.isNotBlank()) title else s.synaxariumTitle,
+                                                subtitle = snippet(entry.text),
+                                                route = "synaxarium/$epochDay",
+                                            ),
+                                        )
+                                    }
+                                },
+                            )
+                        } else {
+                            var n = 0
+                            parseSynaxarium(entry.text).forEach { para ->
+                                when (para.kind) {
+                                    SynaxariumParaKind.NARRATIVE -> {
+                                        n++
+                                        NarrativePara(n, para.text, bodyFontSp)
+                                    }
+                                    SynaxariumParaKind.ARKE_LABEL -> ArkeLabel(para.text)
+                                    SynaxariumParaKind.ARKE_VERSE -> ArkeVerse(para.text, bodyFontSp)
+                                }
+                            }
+                        }
                     }
-                    if (entry.title.isNotBlank()) {
-                        Text(
-                            text = entry.title,
-                            style = MaterialTheme.typography.titleMedium.copy(fontFamily = Abyssinica),
-                            color = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                        )
-                    }
-                    Text(
-                        text = entry.text,
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontFamily = Abyssinica,
-                            fontSize = bodyFontSp.sp,
-                            lineHeight = (bodyFontSp * 1.9f).sp,
-                        ),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
                 }
+                item { ClosingPrayer(bodyFontSp) }
                 item { Spacer(Modifier.height(48.dp)) }
             }
         }
     }
+}
+
+/**
+ * The fixed closing ጸሎት, appended once after the day's commemorations and set
+ * apart by a divider. Holy names are drawn in red.
+ */
+@Composable
+private fun ClosingPrayer(fontSp: Int) {
+    Spacer(Modifier.height(28.dp))
+    HorizontalDivider(
+        modifier = Modifier.fillMaxWidth(),
+        thickness = 1.dp,
+        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+    )
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(top = 22.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(horizontal = 16.dp, vertical = 18.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        SYNAXARIUM_CLOSING_STANZAS.forEach { stanza ->
+            Text(
+                text = highlightHolyNames(stanza, ArkeRed),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontFamily = Abyssinica,
+                    fontSize = fontSp.sp,
+                    lineHeight = (fontSp * 1.95f).sp,
+                ),
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Justify,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        Text(
+            text = SYNAXARIUM_CLOSING_CODA,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontFamily = Abyssinica,
+                fontSize = fontSp.sp,
+                lineHeight = (fontSp * 1.95f).sp,
+            ),
+            color = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+        )
+    }
+}
+
+/** Colour every occurrence of a holy name in [text] with [color]. */
+private fun highlightHolyNames(text: String, color: Color): AnnotatedString =
+    buildAnnotatedString {
+        append(text)
+        for (name in CLOSING_HOLY_NAMES) {
+            var idx = text.indexOf(name)
+            while (idx >= 0) {
+                addStyle(SpanStyle(color = color), idx, idx + name.length)
+                idx = text.indexOf(name, idx + name.length)
+            }
+        }
+    }
+
+/** Centered gold commemoration title. */
+@Composable
+private fun EntryTitle(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleMedium.copy(fontFamily = Abyssinica),
+        color = MaterialTheme.colorScheme.secondary,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+    )
+}
+
+/** A numbered narrative paragraph: Ge'ez numeral in the gutter, justified prose. */
+@Composable
+private fun NarrativePara(number: Int, text: String, fontSp: Int) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(bottom = 18.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            text = geezNumeral(number),
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontFamily = Abyssinica,
+                fontSize = (fontSp * 0.85f).sp,
+                lineHeight = (fontSp * 1.9f).sp,
+            ),
+            color = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.width(24.dp),
+            textAlign = TextAlign.End,
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontFamily = Abyssinica,
+                fontSize = fontSp.sp,
+                lineHeight = (fontSp * 1.9f).sp,
+            ),
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Justify,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+/** The centered "አርኬ" heading above the hymn. */
+@Composable
+private fun ArkeLabel(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelLarge.copy(fontFamily = Abyssinica),
+        color = ArkeRed,
+        textAlign = TextAlign.Center,
+        letterSpacing = 6.sp,
+        modifier = Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 10.dp),
+    )
+}
+
+/** An arke verse — italic, centered, red. */
+@Composable
+private fun ArkeVerse(text: String, fontSp: Int) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyLarge.copy(
+            fontFamily = Abyssinica,
+            fontStyle = FontStyle.Italic,
+            fontSize = fontSp.sp,
+            lineHeight = (fontSp * 2.0f).sp,
+        ),
+        color = ArkeRed,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 2.dp),
+    )
+}
+
+/** A scripture-quote entry: the passage in a card, with a bookmark toggle. */
+@Composable
+private fun ScriptureBody(
+    rawText: String,
+    fontSp: Int,
+    bookmarked: Boolean,
+    onToggleBookmark: () -> Unit,
+) {
+    val s = LocalStrings.current
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Spacer(Modifier.weight(1f))
+        IconButton(onClick = onToggleBookmark) {
+            Icon(
+                imageVector = if (bookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                contentDescription = if (bookmarked) s.removeAction else s.bookmarkAction,
+                tint = if (bookmarked) MaterialTheme.colorScheme.secondary
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+    Text(
+        text = cleanSynaxariumText(rawText),
+        style = MaterialTheme.typography.bodyLarge.copy(
+            fontFamily = Abyssinica,
+            fontSize = fontSp.sp,
+            lineHeight = (fontSp * 1.9f).sp,
+        ),
+        color = MaterialTheme.colorScheme.onBackground,
+        textAlign = TextAlign.Justify,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(14.dp),
+    )
+}
+
+/** A short one-line preview of an entry's body for the bookmarks list. */
+private fun snippet(rawText: String): String {
+    val clean = cleanSynaxariumText(rawText.replace('\n', ' '))
+    return if (clean.length > 90) clean.take(89).trimEnd() + "…" else clean
 }
