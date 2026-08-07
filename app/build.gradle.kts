@@ -29,8 +29,8 @@ android {
         //   0.MINOR.PATCH — PATCH for fixes/small tweaks, MINOR for new features.
         //   1.0.0 is reserved for the first public (Play) release.
         //   versionCode increments by 1 on EVERY update, no exceptions.
-        versionCode = 14
-        versionName = "0.4.0" // Amharic synaxarium (ስንክሳር) + daily ግጻዌ reading reminder
+        versionCode = 15
+        versionName = "0.5.0" // synaxarium reader reformat (numbered paragraphs, አርኬ, closing ጸሎት) + bookmarkable scripture
     }
 
     signingConfigs {
