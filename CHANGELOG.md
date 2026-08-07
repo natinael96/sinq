@@ -7,6 +7,17 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.5.1] — 2026-08-07
+
+_versionCode 16_
+
+### Fixed
+- **Synaxarium paragraphs are centered again.** The Ge'ez paragraph numeral sat
+  in a left-only gutter that pushed the prose off-center; it now renders inline
+  at the head of the paragraph, so the text spans the full width.
+- **ውዳሴ ማርያም opens from the Home screen.** The Home library row still showed
+  the disabled "coming soon" stub even though the reader shipped in 0.5.0.
+
 ## [0.5.0] — 2026-08-07
 
 _versionCode 15 · ውዳሴ ማርያም, synaxarium reader reformat & bookmarkable scripture_
