@@ -29,8 +29,8 @@ android {
         //   0.MINOR.PATCH — PATCH for fixes/small tweaks, MINOR for new features.
         //   1.0.0 is reserved for the first public (Play) release.
         //   versionCode increments by 1 on EVERY update, no exceptions.
-        versionCode = 15
-        versionName = "0.5.0" // synaxarium reader reformat (numbered paragraphs, አርኬ, closing ጸሎት) + bookmarkable scripture
+        versionCode = 16
+        versionName = "0.5.1" // fix: centered synaxarium paragraphs, ውዳሴ ማርያም reachable from Home
     }
 
     signingConfigs {
