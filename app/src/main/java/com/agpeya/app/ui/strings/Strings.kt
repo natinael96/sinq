@@ -34,6 +34,8 @@ interface Strings {
     val srcMonthly: String
     val noGitsaweToday: String
     val gitsaweOpenNotAvailable: String
+    val gitsaweChangeDay: String
+    val ok: String
 
     val streaksTitle: String
     val currentStreakLabel: String
@@ -248,6 +250,8 @@ object AmharicStrings : Strings {
     override val srcMonthly = "ወርኃዊ"
     override val noGitsaweToday = "ለዛሬ የተመዘገበ ግጻዌ የለም"
     override val gitsaweOpenNotAvailable = "ይህ ምንባብ ገና የለም"
+    override val gitsaweChangeDay = "ቀን ቀይር"
+    override val ok = "እሺ"
 
     override val streaksTitle = "ጉዞ"
     override val currentStreakLabel = "የአሁኑ ጉዞ"
@@ -450,6 +454,8 @@ object EnglishStrings : Strings {
     override val srcMonthly = "Monthly"
     override val noGitsaweToday = "No Gitsawe recorded for today"
     override val gitsaweOpenNotAvailable = "This reading isn't available yet"
+    override val gitsaweChangeDay = "Change day"
+    override val ok = "OK"
 
     override val streaksTitle = "Streaks"
     override val currentStreakLabel = "Current streak"

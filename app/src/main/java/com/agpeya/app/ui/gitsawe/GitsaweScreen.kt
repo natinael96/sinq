@@ -22,18 +22,25 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.EditCalendar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -73,9 +80,12 @@ private data class Source(val label: String, val subtitle: String?, val services
 fun GitsaweScreen(onBack: () -> Unit, onOpenReading: (ReadingTarget) -> Unit) {
     val context = LocalContext.current
     val s = LocalStrings.current
-    val today = remember { LocalDate.now() }
-    val readings by produceState<DayReadings?>(initialValue = null) {
-        value = GitsaweRepository.readingsFor(context, today)
+    // The day being viewed, as an epoch-day so it survives rotation.
+    var epochDay by rememberSaveable { mutableLongStateOf(LocalDate.now().toEpochDay()) }
+    var showPicker by rememberSaveable { mutableStateOf(false) }
+    val date = LocalDate.ofEpochDay(epochDay)
+    val readings by produceState<DayReadings?>(initialValue = null, epochDay) {
+        value = GitsaweRepository.readingsFor(context, LocalDate.ofEpochDay(epochDay))
     }
 
     val data = readings
@@ -86,7 +96,7 @@ fun GitsaweScreen(onBack: () -> Unit, onOpenReading: (ReadingTarget) -> Unit) {
             data.monthly.forEach { add(Source(s.srcMonthly, it.title ?: it.raw, it)) }
         }
     }
-    var selected by rememberSaveable(sources.size) { mutableIntStateOf(0) }
+    var selected by rememberSaveable(epochDay, sources.size) { mutableIntStateOf(0) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -96,7 +106,7 @@ fun GitsaweScreen(onBack: () -> Unit, onOpenReading: (ReadingTarget) -> Unit) {
                     Column {
                         Text(s.gitsaweTitle, style = MaterialTheme.typography.titleLarge)
                         Text(
-                            formatEthiopian(today, s),
+                            formatEthiopian(date, s),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -105,6 +115,11 @@ fun GitsaweScreen(onBack: () -> Unit, onOpenReading: (ReadingTarget) -> Unit) {
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { showPicker = true }) {
+                        Icon(Icons.Outlined.EditCalendar, contentDescription = s.gitsaweChangeDay)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
@@ -160,6 +175,22 @@ fun GitsaweScreen(onBack: () -> Unit, onOpenReading: (ReadingTarget) -> Unit) {
                 }
             }
         }
+    }
+
+    if (showPicker) {
+        val pickerState = rememberDatePickerState(initialSelectedDateMillis = epochDay * 86_400_000L)
+        DatePickerDialog(
+            onDismissRequest = { showPicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    pickerState.selectedDateMillis?.let { epochDay = it / 86_400_000L }
+                    showPicker = false
+                }) { Text(s.ok) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPicker = false }) { Text(s.cancel) }
+            },
+        ) { DatePicker(state = pickerState) }
     }
 }
 
