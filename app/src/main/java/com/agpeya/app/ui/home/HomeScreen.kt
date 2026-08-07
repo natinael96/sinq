@@ -72,6 +72,7 @@ fun HomeScreen(
     onOpenSearch: () -> Unit,
     onOpenBookmarks: () -> Unit,
     onOpenPsalter: () -> Unit,
+    onOpenWudase: () -> Unit,
     onOpenGitsawe: () -> Unit,
     onSelectTab: (Tab) -> Unit,
 ) {
@@ -214,9 +215,9 @@ fun HomeScreen(
                     )
                     LibraryButton(
                         label = s.wudaseMariam,
-                        enabled = false,
-                        comingSoon = s.comingSoon,
-                        onClick = {},
+                        enabled = true,
+                        comingSoon = null,
+                        onClick = onOpenWudase,
                         modifier = Modifier.weight(1f),
                     )
                 }
