@@ -122,13 +122,25 @@ private fun AgpeyaNavHost(
 
     val ready = onboarded ?: return
 
-    // Arm the nightly streak reminder if enabled (idempotent — reuses one alarm).
+    // Self-heal the alarm schedule on every launch. Alarm chains are otherwise
+    // only re-armed on boot/update/time-change or a mode edit, so an OEM
+    // battery manager force-stopping the app (which cancels all pending alarms)
+    // would silence prayer reminders for days until the next reboot. Rearming
+    // here is idempotent — rescheduleAll cancels and re-adds; the streak reuses
+    // its single alarm — so opening the app restores anything that was dropped.
     LaunchedEffect(ready) {
         if (ready) {
-            com.agpeya.app.reminders.StreakReminderScheduler.sync(
-                context,
-                SettingsRepository.streakReminder(context).first(),
-            )
+            runCatching {
+                val names = com.agpeya.app.data.HoursRepository
+                    .visibleHours(context).associate { it.id to it.name }
+                ReminderScheduler.rescheduleAll(context, names)
+            }
+            runCatching {
+                StreakReminderScheduler.sync(
+                    context,
+                    SettingsRepository.streakReminder(context).first(),
+                )
+            }
         }
     }
 
@@ -170,6 +182,7 @@ private fun AgpeyaNavHost(
                 onOpenSearch = { navController.navigate("search") },
                 onOpenBookmarks = { navController.navigate("bookmarks") },
                 onOpenPsalter = { navController.navigate("psalter") },
+                onOpenGitsawe = { navController.navigate("gitsawe") },
                 onSelectTab = navController::switchTab,
             )
         }
@@ -219,6 +232,44 @@ private fun AgpeyaNavHost(
         }
         composable("habits") {
             com.agpeya.app.ui.habits.ManageHabitsScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Tab.LIBRARY.route) {
+            com.agpeya.app.ui.library.LibraryScreen(
+                onOpenPsalter = { navController.navigate("psalter") },
+                onOpenScriptures = { navController.navigate("scriptures") },
+                onSelectTab = navController::switchTab,
+            )
+        }
+        composable("scriptures") {
+            com.agpeya.app.ui.library.ScriptureListScreen(
+                onBack = { navController.popBackStack() },
+                onOpenBook = { key -> navController.navigate("scripture/$key/1") },
+            )
+        }
+        composable(
+            route = "scripture/{book}/{chapter}?start={start}&end={end}",
+            arguments = listOf(
+                navArgument("book") { type = NavType.StringType },
+                navArgument("chapter") { type = NavType.IntType; defaultValue = 1 },
+                navArgument("start") { type = NavType.IntType; defaultValue = -1 },
+                navArgument("end") { type = NavType.IntType; defaultValue = -1 },
+            ),
+        ) { backStackEntry ->
+            com.agpeya.app.ui.library.ScriptureReaderScreen(
+                bookKey = backStackEntry.arguments?.getString("book") ?: "matthew",
+                initialChapter = backStackEntry.arguments?.getInt("chapter") ?: 1,
+                initialStart = backStackEntry.arguments?.getInt("start") ?: -1,
+                initialEnd = backStackEntry.arguments?.getInt("end") ?: -1,
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable("gitsawe") {
+            com.agpeya.app.ui.gitsawe.GitsaweScreen(
+                onBack = { navController.popBackStack() },
+                onOpenReading = { target ->
+                    navController.navigate(com.agpeya.app.data.GitsaweLinks.route(target))
+                },
+            )
         }
         composable(Tab.SETTINGS.route) {
             SettingsScreen(

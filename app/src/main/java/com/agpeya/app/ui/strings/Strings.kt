@@ -13,6 +13,27 @@ interface Strings {
     val tabBookmarks: String
     val tabStreak: String
     val tabSettings: String
+    val tabLibrary: String
+
+    val libraryTitle: String
+    val librarySubtitle: String
+    val scripturesTitle: String
+    val scripturesSubtitle: String
+    val newTestamentLabel: String
+    val chapterUnit: String
+    val bookGroupGospels: String
+    val bookGroupActs: String
+    val bookGroupPaul: String
+    val bookGroupCatholic: String
+    val bookGroupRevelation: String
+
+    val gitsaweTitle: String
+    val gitsaweKicker: String
+    val srcDaily: String
+    val srcSeasonal: String
+    val srcMonthly: String
+    val noGitsaweToday: String
+    val gitsaweOpenNotAvailable: String
 
     val streaksTitle: String
     val currentStreakLabel: String
@@ -206,6 +227,27 @@ object AmharicStrings : Strings {
     override val tabBookmarks = "ምልክቶች"
     override val tabStreak = "ጉዞ"
     override val tabSettings = "ቅንብር"
+    override val tabLibrary = "ቤተ መጻሕፍት"
+
+    override val libraryTitle = "ቤተ መጻሕፍት"
+    override val librarySubtitle = "የጸሎትና የቅዱሳት መጻሕፍት ስብስብ"
+    override val scripturesTitle = "ቅዱሳት መጻሕፍት"
+    override val scripturesSubtitle = "የአዲስ ኪዳን መጻሕፍት"
+    override val newTestamentLabel = "አዲስ ኪዳን"
+    override val chapterUnit = "ምዕራፍ"
+    override val bookGroupGospels = "ወንጌላት"
+    override val bookGroupActs = "ግብረ ሐዋርያት"
+    override val bookGroupPaul = "መልእክታተ ጳውሎስ"
+    override val bookGroupCatholic = "ማኅበራዊ መልእክታት"
+    override val bookGroupRevelation = "ራዕይ"
+
+    override val gitsaweTitle = "የዕለቱ ግጻዌ"
+    override val gitsaweKicker = "ግጻዌ ዘዕለት"
+    override val srcDaily = "ዕለታዊ"
+    override val srcSeasonal = "ወቅታዊ"
+    override val srcMonthly = "ወርኃዊ"
+    override val noGitsaweToday = "ለዛሬ የተመዘገበ ግጻዌ የለም"
+    override val gitsaweOpenNotAvailable = "ይህ ምንባብ ገና የለም"
 
     override val streaksTitle = "ጉዞ"
     override val currentStreakLabel = "የአሁኑ ጉዞ"
@@ -387,6 +429,27 @@ object EnglishStrings : Strings {
     override val tabBookmarks = "Bookmarks"
     override val tabStreak = "Streak"
     override val tabSettings = "Settings"
+    override val tabLibrary = "Library"
+
+    override val libraryTitle = "Library"
+    override val librarySubtitle = "Prayers and holy scriptures"
+    override val scripturesTitle = "Scriptures"
+    override val scripturesSubtitle = "The New Testament"
+    override val newTestamentLabel = "New Testament"
+    override val chapterUnit = "ch."
+    override val bookGroupGospels = "Gospels"
+    override val bookGroupActs = "Acts"
+    override val bookGroupPaul = "Pauline Epistles"
+    override val bookGroupCatholic = "General Epistles"
+    override val bookGroupRevelation = "Revelation"
+
+    override val gitsaweTitle = "Today's Gitsawe"
+    override val gitsaweKicker = "Gitsawe of the day"
+    override val srcDaily = "Daily"
+    override val srcSeasonal = "Seasonal"
+    override val srcMonthly = "Monthly"
+    override val noGitsaweToday = "No Gitsawe recorded for today"
+    override val gitsaweOpenNotAvailable = "This reading isn't available yet"
 
     override val streaksTitle = "Streaks"
     override val currentStreakLabel = "Current streak"

@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.outlined.Bookmarks
@@ -71,6 +72,7 @@ fun HomeScreen(
     onOpenSearch: () -> Unit,
     onOpenBookmarks: () -> Unit,
     onOpenPsalter: () -> Unit,
+    onOpenGitsawe: () -> Unit,
     onSelectTab: (Tab) -> Unit,
 ) {
     val context = LocalContext.current
@@ -158,6 +160,11 @@ fun HomeScreen(
                     NowCard(hour = suggested, onClick = { onOpenHour(suggested.id) })
                     Spacer(Modifier.height(24.dp))
                 }
+            }
+
+            item {
+                GitsaweCard(onClick = onOpenGitsawe)
+                Spacer(Modifier.height(24.dp))
             }
 
             item {
@@ -272,6 +279,48 @@ private fun NowCard(hour: Hour, onClick: () -> Unit) {
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
                 modifier = Modifier.align(Alignment.BottomEnd).padding(18.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun GitsaweCard(onClick: () -> Unit) {
+    val s = LocalStrings.current
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surface,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                Icons.AutoMirrored.Outlined.MenuBook,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.size(26.dp),
+            )
+            Spacer(Modifier.width(14.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    s.gitsaweKicker,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.secondary,
+                )
+                Text(
+                    s.gitsaweTitle,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+            }
+            Icon(
+                Icons.AutoMirrored.Outlined.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocalFireDepartment
+import androidx.compose.material.icons.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material3.Icon
@@ -31,6 +32,7 @@ import com.agpeya.app.ui.strings.LocalStrings
 enum class Tab(val route: String, val icon: ImageVector) {
     HOME("home", Icons.Outlined.Home),
     STREAK("streak", Icons.Outlined.LocalFireDepartment),
+    LIBRARY("library", Icons.Outlined.MenuBook),
     SETTINGS("settings", Icons.Outlined.Settings),
 }
 
@@ -42,6 +44,7 @@ fun AgpeyaBottomBar(current: Tab, onSelect: (Tab) -> Unit) {
         when (it) {
             Tab.HOME -> s.tabHome
             Tab.STREAK -> s.tabStreak
+            Tab.LIBRARY -> s.tabLibrary
             Tab.SETTINGS -> s.tabSettings
         }
     }
