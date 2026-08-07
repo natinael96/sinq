@@ -35,6 +35,7 @@ import com.agpeya.app.ui.strings.LocalStrings
 fun LibraryScreen(
     onOpenPsalter: () -> Unit,
     onOpenScriptures: () -> Unit,
+    onOpenWudase: () -> Unit,
     onSelectTab: (Tab) -> Unit,
 ) {
     val s = LocalStrings.current
@@ -76,7 +77,7 @@ fun LibraryScreen(
                 )
             }
             item {
-                LibraryCard(icon = Icons.Outlined.MenuBook, title = s.wudaseMariam, subtitle = s.comingSoon, enabled = false, onClick = {})
+                LibraryCard(icon = Icons.Outlined.MenuBook, title = s.wudaseMariam, subtitle = "ሰኞ–እሑድ", onClick = onOpenWudase)
             }
             item {
                 LibraryCard(icon = Icons.Outlined.MenuBook, title = s.zewotrTselot, subtitle = s.comingSoon, enabled = false, onClick = {})
