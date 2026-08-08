@@ -16,6 +16,13 @@ enum class ReadingMode { VERTICAL, HORIZONTAL }
 enum class ThemeChoice { SYSTEM, LIGHT, DARK }
 enum class Language { SYSTEM, AMHARIC, ENGLISH }
 
+/**
+ * Which bundled Ethiopic face renders the prayer text. [ABYSSINICA] is the
+ * scripture-grade default; the rest are Ethiopic faces from Font.et. Stored by
+ * name, so adding or removing a face never corrupts an existing preference.
+ */
+enum class ReadingFont { ABYSSINICA, ABAY_LIGHT, BELA_BEREKA, ZEMENAY, MENBERE }
+
 /** How a fired reminder alerts: ring + vibrate, ring only, vibrate only, or silent. */
 enum class AlarmAlert { SOUND_VIBRATE, SOUND_ONLY, VIBRATE_ONLY, SILENT }
 /** Which sound a ringing alarm plays. */
@@ -27,6 +34,7 @@ object SettingsRepository {
     private val KEY_READING_MODE = stringPreferencesKey("reading_mode")
     private val KEY_FONT_STEP = intPreferencesKey("font_step")
     private val KEY_THEME = stringPreferencesKey("theme")
+    private val KEY_READING_FONT = stringPreferencesKey("reading_font")
     private val KEY_KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
     private val KEY_LANGUAGE = stringPreferencesKey("language")
     private val KEY_ALARM_ALERT = stringPreferencesKey("alarm_alert")
@@ -64,6 +72,17 @@ object SettingsRepository {
 
     suspend fun setTheme(context: Context, choice: ThemeChoice) {
         context.settingsDataStore.edit { it[KEY_THEME] = choice.name }
+    }
+
+    /** The face used for prayer/scripture body text. */
+    fun readingFont(context: Context): Flow<ReadingFont> =
+        context.settingsDataStore.data.map {
+            runCatching { ReadingFont.valueOf(it[KEY_READING_FONT] ?: "") }
+                .getOrDefault(ReadingFont.ABYSSINICA)
+        }
+
+    suspend fun setReadingFont(context: Context, font: ReadingFont) {
+        context.settingsDataStore.edit { it[KEY_READING_FONT] = font.name }
     }
 
     fun keepScreenOn(context: Context): Flow<Boolean> =

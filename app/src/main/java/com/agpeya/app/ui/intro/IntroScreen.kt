@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.strings.Strings
-import com.agpeya.app.ui.theme.Abyssinica
+import com.agpeya.app.ui.theme.LocalReadingFont
 import kotlinx.coroutines.launch
 
 /** One tour page: an icon (or wordmark hero) above a title and a line of body. */
@@ -272,7 +272,7 @@ private fun IntroPageContent(p: IntroPage) {
             p.hero != null -> {
                 Text(
                     text = p.hero,
-                    style = MaterialTheme.typography.headlineMedium.copy(fontFamily = Abyssinica),
+                    style = MaterialTheme.typography.headlineMedium.copy(fontFamily = LocalReadingFont.current),
                     color = MaterialTheme.colorScheme.primary,
                 )
                 Spacer(Modifier.height(24.dp))
