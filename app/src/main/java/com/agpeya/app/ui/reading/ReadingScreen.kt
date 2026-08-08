@@ -108,7 +108,11 @@ fun ReadingScreen(
         .collectAsState(initial = ReadingMode.VERTICAL)
     val keepScreenOn by SettingsRepository.keepScreenOn(context).collectAsState(initial = true)
     val bookmarks by UserDataRepository.bookmarks(context).collectAsState(initial = emptyList())
-    val bookmarkedIds = remember(bookmarks) { bookmarks.map { it.sectionId }.toSet() }
+    // Scope to this hour: the same section id can be bookmarked from elsewhere
+    // (a psalm added into an hour shares its id with the Psalter's copy).
+    val bookmarkedIds = remember(bookmarks, hourId) {
+        bookmarks.filter { it.hourId == hourId }.map { it.sectionId }.toSet()
+    }
     val layout by LayoutRepository.layout(context, hourId).collectAsState(initial = HourLayout())
     val highlights by HighlightRepository.highlights(context).collectAsState(initial = emptyMap())
 

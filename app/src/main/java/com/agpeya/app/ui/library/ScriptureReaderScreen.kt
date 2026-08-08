@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -85,11 +86,21 @@ fun ScriptureReaderScreen(
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
 
     val bookmarks by UserDataRepository.bookmarks(context).collectAsState(initial = emptyList())
-    val bookmarkedIds = remember(bookmarks) { bookmarks.mapTo(HashSet()) { it.sectionId } }
+    val bookmarkedIds = remember(bookmarks) {
+        bookmarks.filter { it.hourId == "scripture_library" }.mapTo(HashSet()) { it.sectionId }
+    }
 
     val b = book ?: run {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            androidx.compose.material3.CircularProgressIndicator(color = MaterialTheme.colorScheme.secondary)
+        // Keep a back arrow visible: if the book never loads (stale bookmark,
+        // bad key), the spinner would otherwise trap the user on this screen.
+        Box(Modifier.fillMaxSize()) {
+            IconButton(onClick = onBack, modifier = Modifier.padding(4.dp)) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
+            }
+            androidx.compose.material3.CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.align(Alignment.Center),
+            )
         }
         return
     }
@@ -102,19 +113,31 @@ fun ScriptureReaderScreen(
     var chapter by rememberSaveable(bookKey) {
         mutableIntStateOf(initialChapter.coerceIn(1, b.chapters.size))
     }
-    // Only the chapter we arrived on shows the cited-verse tint.
-    val highlightRange = remember(chapter) {
-        if (chapter == initialChapter && initialStart > 0) initialStart..(if (initialEnd > 0) initialEnd else initialStart)
-        else IntRange.EMPTY
-    }
     val current = remember(b, chapter) { b.chapters.find { it.chapter == chapter } ?: b.chapters.first() }
+    // Only the chapter we arrived on shows the cited-verse tint. The cited range
+    // is snapped onto verse numbers that actually exist: the Amharic source merges
+    // some verses (so e.g. v17 may not appear) and a few citations run past the
+    // chapter's end — both would otherwise scroll somewhere yet highlight nothing.
+    val highlightRange = remember(current, chapter) {
+        val verses = current.verses
+        if (chapter != initialChapter || initialStart <= 0 || verses.isEmpty()) IntRange.EMPTY
+        else {
+            val lastN = verses.last().n
+            val startN = verses.firstOrNull { it.n >= initialStart }?.n ?: lastN
+            val endN = (if (initialEnd > 0) initialEnd else initialStart).coerceIn(startN, lastN)
+            startN..endN
+        }
+    }
     val listState = rememberLazyListState()
 
-    // Land on the cited verse when opened from a reading link.
+    // Land on the cited verse when opened from a reading link — once. Without the
+    // guard, paging away and back to this chapter re-ran the jump mid-reading.
+    var landed by rememberSaveable(bookKey) { mutableStateOf(false) }
     androidx.compose.runtime.LaunchedEffect(current, highlightRange) {
-        if (!highlightRange.isEmpty()) {
+        if (!landed && !highlightRange.isEmpty()) {
             val idx = current.verses.indexOfFirst { it.n >= highlightRange.first }
             if (idx >= 0) listState.scrollToItem(idx + 1)   // +1 for the chapter-strip header item
+            landed = true
         }
     }
 

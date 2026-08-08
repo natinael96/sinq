@@ -25,7 +25,8 @@ object SynaxariumRepository {
     private val json = Json { ignoreUnknownKeys = true }
     private val monthCache = ConcurrentHashMap<Int, List<SynaxariumDay>>()
 
-    /** All days of an Ethiopian month (1–13), cached after first load. */
+    /** All days of an Ethiopian month (1–13), cached after first successful load
+     *  (a failed read is NOT cached, so a transient error doesn't stick). */
     suspend fun month(context: Context, month: Int): List<SynaxariumDay> =
         monthCache[month] ?: withContext(Dispatchers.IO) {
             runCatching {
@@ -33,8 +34,7 @@ object SynaxariumRepository {
                     .open("$DIR/$month.json").readBytes().decodeToString()
                 json.decodeFromString<SynaxariumMonth>(raw).days
             }.onFailure { Log.e(TAG, "Failed to load sinksar month $month", it) }
-                .getOrDefault(emptyList())
-                .also { monthCache[month] = it }
+                .getOrNull()?.also { monthCache[month] = it } ?: emptyList()
         }
 
     /** The commemorations for a Gregorian [date] (empty if none). */

@@ -49,47 +49,47 @@ object GitsaweRepository {
     suspend fun daily(context: Context): List<GitsaweEntry> =
         dailyCache ?: withContext(Dispatchers.IO) {
             load(context, "daily-gitsawe.json", ListSerializer(GitsaweEntry.serializer()))
-                .also { dailyCache = it }
+                ?.also { dailyCache = it } ?: emptyList()
         }
 
     suspend fun seasonal(context: Context): List<SeasonalEntry> =
         seasonalCache ?: withContext(Dispatchers.IO) {
             load(context, "seasonal-gitsawe.json", ListSerializer(SeasonalEntry.serializer()))
-                .also { seasonalCache = it }
+                ?.also { seasonalCache = it } ?: emptyList()
         }
 
     suspend fun monthly(context: Context): List<MonthlyEntry> =
         monthlyCache ?: withContext(Dispatchers.IO) {
             load(context, "monthly-gitsawe.json", ListSerializer(MonthlyEntry.serializer()))
-                .also { monthlyCache = it }
+                ?.also { monthlyCache = it } ?: emptyList()
         }
 
     suspend fun feasts(context: Context): List<Feast> =
         feastsCache ?: withContext(Dispatchers.IO) {
-            load(context, "feasts.json", ListSerializer(Feast.serializer())).also { feastsCache = it }
+            load(context, "feasts.json", ListSerializer(Feast.serializer()))?.also { feastsCache = it } ?: emptyList()
         }
 
     suspend fun subFeasts(context: Context): List<SubFeast> =
         subFeastsCache ?: withContext(Dispatchers.IO) {
             load(context, "sub-feasts.json", ListSerializer(SubFeast.serializer()))
-                .also { subFeastsCache = it }
+                ?.also { subFeastsCache = it } ?: emptyList()
         }
 
     suspend fun mahlets(context: Context): List<Mahlet> =
         mahletsCache ?: withContext(Dispatchers.IO) {
-            load(context, "mahlets.json", ListSerializer(Mahlet.serializer())).also { mahletsCache = it }
+            load(context, "mahlets.json", ListSerializer(Mahlet.serializer()))?.also { mahletsCache = it } ?: emptyList()
         }
 
     suspend fun months(context: Context): List<GitsaweMonth> =
         monthsCache ?: withContext(Dispatchers.IO) {
             load(context, "months.json", ListSerializer(GitsaweMonth.serializer()))
-                .also { monthsCache = it }
+                ?.also { monthsCache = it } ?: emptyList()
         }
 
     suspend fun packages(context: Context): List<GitsawePackage> =
         packagesCache ?: withContext(Dispatchers.IO) {
             load(context, "packages.json", ListSerializer(GitsawePackage.serializer()))
-                .also { packagesCache = it }
+                ?.also { packagesCache = it } ?: emptyList()
         }
 
     // ---- Lookups -------------------------------------------------------------
@@ -166,12 +166,14 @@ object GitsaweRepository {
 
     // ---- Internal ------------------------------------------------------------
 
-    private fun <T> load(context: Context, file: String, serializer: KSerializer<List<T>>): List<T> =
+    // Null on failure so call sites cache only successful loads — a transient
+    // read error must not stick as an empty collection for the process lifetime.
+    private fun <T> load(context: Context, file: String, serializer: KSerializer<List<T>>): List<T>? =
         runCatching {
             val raw = context.applicationContext.assets
                 .open("$DIR/$file").readBytes().decodeToString()
             json.decodeFromString(serializer, raw)
-        }.onFailure { Log.e(TAG, "Failed to load $file", it) }.getOrDefault(emptyList())
+        }.onFailure { Log.e(TAG, "Failed to load $file", it) }.getOrNull()
 }
 
 /**

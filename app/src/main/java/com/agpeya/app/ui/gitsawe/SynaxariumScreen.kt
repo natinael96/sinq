@@ -53,6 +53,7 @@ import com.agpeya.app.data.SynaxariumRepository
 import com.agpeya.app.data.UserDataRepository
 import com.agpeya.app.model.Bookmark
 import com.agpeya.app.model.SynaxariumEntry
+import com.agpeya.app.ui.common.EthiopianDate
 import com.agpeya.app.ui.common.formatEthiopian
 import com.agpeya.app.ui.reading.FontSizeActions
 import com.agpeya.app.ui.reading.geezNumeral
@@ -74,6 +75,7 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
     val date = remember(epochDay) { LocalDate.ofEpochDay(epochDay) }
+    val eth = remember(date) { EthiopianDate.from(date) }
     val entries by produceState<List<SynaxariumEntry>?>(initialValue = null, epochDay) {
         value = SynaxariumRepository.forDate(context, date)
     }
@@ -81,7 +83,9 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
 
     val bookmarks by UserDataRepository.bookmarks(context).collectAsState(initial = emptyList())
-    val bookmarkedIds = remember(bookmarks) { bookmarks.mapTo(HashSet()) { it.sectionId } }
+    val bookmarkedIds = remember(bookmarks) {
+        bookmarks.filter { it.hourId == "sinksar_verse" }.mapTo(HashSet()) { it.sectionId }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -152,10 +156,14 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
                         }
 
                         if (isScriptureEntry(entry.title)) {
+                            // Keyed by the Ethiopian date, not the Gregorian one:
+                            // the same commemoration recurs every year and should
+                            // stay bookmarked across years.
+                            val sectionId = "sinksar:${eth.month}-${eth.day}:$i"
                             ScriptureBody(
                                 rawText = entry.text,
                                 fontSp = bodyFontSp,
-                                bookmarked = "sinksar:$epochDay:$i" in bookmarkedIds,
+                                bookmarked = sectionId in bookmarkedIds,
                                 onToggleBookmark = {
                                     scope.launch {
                                         UserDataRepository.toggleBookmark(
@@ -163,7 +171,7 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
                                             Bookmark(
                                                 hourId = "sinksar_verse",
                                                 hourName = s.bookmarkGroupSynaxarium,
-                                                sectionId = "sinksar:$epochDay:$i",
+                                                sectionId = sectionId,
                                                 title = if (title.isNotBlank()) title else s.synaxariumTitle,
                                                 subtitle = snippet(entry.text),
                                                 route = "synaxarium/$epochDay",
@@ -173,11 +181,14 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
                                 },
                             )
                         } else {
+                            // Sequential Ge'ez numbering, except where the source
+                            // carries its own list numbers — those win (and resync
+                            // the counter) so meaningful numbering isn't rewritten.
                             var n = 0
                             parseSynaxarium(entry.text).forEach { para ->
                                 when (para.kind) {
                                     SynaxariumParaKind.NARRATIVE -> {
-                                        n++
+                                        n = para.sourceNumber ?: (n + 1)
                                         NarrativePara(n, para.text, bodyFontSp)
                                     }
                                     SynaxariumParaKind.ARKE_LABEL -> ArkeLabel(para.text)
@@ -342,8 +353,13 @@ private fun ScriptureBody(
             )
         }
     }
+    // A few scripture entries carry an embedded አርኬ hymn after the quotation —
+    // the quote goes in the card, the hymn keeps its red centered styling below.
+    val paras = parseSynaxarium(rawText)
+    val quote = paras.filter { it.kind == SynaxariumParaKind.NARRATIVE }
+        .joinToString("\n\n") { it.text }
     Text(
-        text = cleanSynaxariumText(rawText),
+        text = quote,
         style = MaterialTheme.typography.bodyLarge.copy(
             fontFamily = Abyssinica,
             fontSize = fontSp.sp,
@@ -357,6 +373,13 @@ private fun ScriptureBody(
             .background(MaterialTheme.colorScheme.surface)
             .padding(14.dp),
     )
+    paras.forEach { para ->
+        when (para.kind) {
+            SynaxariumParaKind.ARKE_LABEL -> ArkeLabel(para.text)
+            SynaxariumParaKind.ARKE_VERSE -> ArkeVerse(para.text, fontSp)
+            SynaxariumParaKind.NARRATIVE -> Unit
+        }
+    }
 }
 
 /** A short one-line preview of an entry's body for the bookmarks list. */

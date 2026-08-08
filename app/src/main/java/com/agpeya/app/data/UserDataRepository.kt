@@ -25,7 +25,13 @@ object UserDataRepository {
     private val KEY_PROGRESS = stringPreferencesKey("progress_json")
     private val KEY_RECENT_SEARCHES = stringPreferencesKey("recent_searches_json")
 
-    private val json = Json { ignoreUnknownKeys = true }
+    // encodeDefaults keeps every field in the stored JSON (a bookmark with
+    // sectionIndex 0 would otherwise omit it, which older app versions — whose
+    // model has no default — fail to decode, wiping the list on downgrade).
+    private val json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+    }
     private val bookmarkListSerializer = ListSerializer(Bookmark.serializer())
     private val stringListSerializer = ListSerializer(String.serializer())
 
@@ -38,13 +44,16 @@ object UserDataRepository {
             } ?: emptyList()
         }
 
+    // Identity is the (hourId, sectionId) pair: sectionId alone is not unique —
+    // a psalm added into an hour shares its "ps_N" id with the Psalter's copy,
+    // and matching by id only made one toggle delete the other's bookmark.
     suspend fun toggleBookmark(context: Context, bookmark: Bookmark) {
         context.userDataStore.edit { prefs ->
             val current = prefs[KEY_BOOKMARKS]?.let {
                 runCatching { json.decodeFromString(bookmarkListSerializer, it) }.getOrNull()
             } ?: emptyList()
-            val next = if (current.any { it.sectionId == bookmark.sectionId }) {
-                current.filterNot { it.sectionId == bookmark.sectionId }
+            val next = if (current.any { it.hourId == bookmark.hourId && it.sectionId == bookmark.sectionId }) {
+                current.filterNot { it.hourId == bookmark.hourId && it.sectionId == bookmark.sectionId }
             } else {
                 current + bookmark
             }
@@ -52,13 +61,15 @@ object UserDataRepository {
         }
     }
 
-    suspend fun removeBookmark(context: Context, sectionId: String) {
+    suspend fun removeBookmark(context: Context, hourId: String, sectionId: String) {
         context.userDataStore.edit { prefs ->
             val current = prefs[KEY_BOOKMARKS]?.let {
                 runCatching { json.decodeFromString(bookmarkListSerializer, it) }.getOrNull()
             } ?: emptyList()
-            prefs[KEY_BOOKMARKS] =
-                json.encodeToString(bookmarkListSerializer, current.filterNot { it.sectionId == sectionId })
+            prefs[KEY_BOOKMARKS] = json.encodeToString(
+                bookmarkListSerializer,
+                current.filterNot { it.hourId == hourId && it.sectionId == sectionId },
+            )
         }
     }
 
