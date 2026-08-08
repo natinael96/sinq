@@ -7,6 +7,39 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.5.2] — 2026-08-08
+
+_versionCode 17 · audit fixes & ዘወትር ጸሎት_
+
+### Added
+- **ዘወትር ጸሎት.** The daily opening prayer (ጸሎት ዘዘወትር) — no longer "coming
+  soon". It opens from Home and the library as the first section of the
+  ውዳሴ ማርያም reader, Amharic with the same Ge'ez toggle, from the same
+  credited source.
+
+### Fixed
+Five high-severity bugs found by a full feature audit:
+- The Bookmarks screen crashed when one group carried two names (hour
+  rename, or bookmarks created in both app languages).
+- Eight ስንክሳር entries whose አርኬ marker was glued to its verse rendered
+  the hymn as numbered prose instead of the red centered verse style.
+- Tapping the nightly streak notification could land on Home instead of
+  the Streak screen after any prayer alarm re-armed.
+- ግጻዌ citations naming chapters that don't exist (e.g. Mark 17) showed
+  chapter 1 under the cited title and highlighted the wrong verses.
+- Yekatit 3 showed Hamle 29's commemorations — the source carried a
+  mislabeled duplicate day; it now honestly shows no entry until a
+  trusted text for the day is found.
+
+And a batch of smaller ones, including: downgrade no longer wipes
+bookmarks; a psalm bookmarked in the Psalter and inside an hour toggle
+independently; the ስንክሳር keeps the source's own list numbering, drops
+leftover `<b>` markup, and keys its bookmarks to the Ethiopian date;
+scripture citations landing past a chapter's end or on merged verses now
+highlight the nearest real verse; the ውዳሴ ማርያም reader scrolls to the
+top when switching days; and a failed content load is retried instead of
+sticking as an empty screen until restart.
+
 ## [0.5.1] — 2026-08-07
 
 _versionCode 16_
