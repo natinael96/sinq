@@ -28,7 +28,8 @@ object WudaseRepository {
                     .open(PATH).readBytes().decodeToString()
                 json.decodeFromString<WudaseContent>(raw)
             }.onFailure { Log.e(TAG, "Failed to load wudase", it) }
-                .getOrDefault(WudaseContent())
-                .also { cache = it }
+                // Cache only success — a transient failure shouldn't stick as an
+                // empty screen for the rest of the process lifetime.
+                .getOrNull()?.also { cache = it } ?: WudaseContent()
         }
 }

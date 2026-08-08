@@ -113,9 +113,30 @@ fun WudaseMaryamScreen(onBack: () -> Unit) {
             }
             return@Scaffold
         }
+        if (sections.isEmpty()) {
+            Box(Modifier.fillMaxSize().padding(innerPadding).padding(32.dp), contentAlignment = Alignment.Center) {
+                Text(
+                    s.contentUnavailable,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            }
+            return@Scaffold
+        }
 
-        val section = sections.getOrNull(selected.coerceIn(0, (sections.size - 1).coerceAtLeast(0)))
+        val section = sections.getOrNull(selected.coerceIn(0, sections.size - 1))
+        val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+        // Jump back to the top when the user picks a different section — the keys
+        // are positional, so the old scroll offset would otherwise carry deep into
+        // the new day's text. Keyed off a saved sentinel so rotation doesn't jump.
+        var lastShown by rememberSaveable { mutableIntStateOf(-1) }
+        androidx.compose.runtime.LaunchedEffect(selected) {
+            if (lastShown != -1 && lastShown != selected) listState.scrollToItem(0)
+            lastShown = selected
+        }
         LazyColumn(
+            state = listState,
             modifier = Modifier.fillMaxSize().padding(innerPadding),
             contentPadding = PaddingValues(horizontal = 22.dp),
         ) {
@@ -205,7 +226,14 @@ private fun ToggleHalf(label: String, selected: Boolean, modifier: Modifier, onC
 
 @Composable
 private fun SectionStrip(sections: List<WudaseSection>, selected: Int, onSelect: (Int) -> Unit) {
+    val stripState = androidx.compose.foundation.lazy.rememberLazyListState()
+    // Keep the highlighted chip on screen — Sunday and the appended prayers sit
+    // past the fold on narrow devices.
+    androidx.compose.runtime.LaunchedEffect(selected) {
+        if (selected in sections.indices) stripState.animateScrollToItem(selected)
+    }
     LazyRow(
+        state = stripState,
         modifier = Modifier.padding(vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {

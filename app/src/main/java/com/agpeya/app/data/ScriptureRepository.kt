@@ -29,13 +29,13 @@ object ScriptureRepository {
     /** The 27 NT books (metadata only). */
     suspend fun books(context: Context): List<ScriptureBookMeta> =
         manifestCache ?: withContext(Dispatchers.IO) {
-            val loaded = runCatching {
+            runCatching {
                 val raw = context.applicationContext.assets
                     .open("$DIR/nt-manifest.json").readBytes().decodeToString()
                 json.decodeFromString<ScriptureManifest>(raw).books
             }.onFailure { Log.e(TAG, "Failed to load nt-manifest.json", it) }
-                .getOrDefault(emptyList())
-            loaded.also { manifestCache = it }
+                // Cache only success, matching book() below.
+                .getOrNull()?.also { manifestCache = it } ?: emptyList()
         }
 
     /** Load one book by its key (e.g. "luke"), cached after first read. */

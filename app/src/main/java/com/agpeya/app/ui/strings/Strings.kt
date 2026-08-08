@@ -169,6 +169,7 @@ interface Strings {
     val wudaseMariam: String
     val wudaseLangAmharic: String
     val wudaseLangGeez: String
+    val contentUnavailable: String
     fun psalmRange(from: Int, to: Int): String
     val snooze: String
     val addPsalm: String
@@ -393,6 +394,7 @@ object AmharicStrings : Strings {
     override val wudaseMariam = "ውዳሴ ማርያም"
     override val wudaseLangAmharic = "አማርኛ"
     override val wudaseLangGeez = "ግዕዝ"
+    override val contentUnavailable = "ይዘቱን ማግኘት አልተቻለም"
     override fun psalmRange(from: Int, to: Int) = "መዝሙር $from–$to"
     override val snooze = "አሳድር"
     override val addPsalm = "መዝሙር ጨምር"
@@ -624,6 +626,7 @@ object EnglishStrings : Strings {
     override val wudaseMariam = "ውዳሴ ማርያም"
     override val wudaseLangAmharic = "Amharic"
     override val wudaseLangGeez = "Ge'ez"
+    override val contentUnavailable = "Content unavailable"
     override fun psalmRange(from: Int, to: Int) = "Psalms $from–$to"
     override val snooze = "Snooze"
     override val addPsalm = "Add psalm"

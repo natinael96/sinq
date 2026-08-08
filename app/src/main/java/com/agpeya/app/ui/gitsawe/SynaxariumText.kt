@@ -16,9 +16,33 @@ package com.agpeya.app.ui.gitsawe
  */
 private val EMOJI = Regex("[←-⇿☀-➿⬀-⯿︀-️\\x{1F000}-\\x{1FAFF}]")
 
-/** A leading "1." / "2)" list marker some entries already carry — dropped so the
- * rendered Ge'ez numeral doesn't double it up ("፩ 1.ቅድስት …"). */
-private val LIST_PREFIX = Regex("^\\d+[.)]\\s*")
+/** Stray `<b>`-style markup left in the source (incl. malformed `< b >`, `</b >`,
+ * `<b<`), then any remaining lone angle brackets — never legitimate in this data. */
+private val B_TAG = Regex("<\\s*/?\\s*b\\s*[<>]")
+private val ANGLE = Regex("[<>]")
+
+/** A leading list marker some entries already carry: "1." / "2)" / keycap "1⃣" /
+ * circled "①"–"⓾". Captured so the source's own numbering can be preserved —
+ * blind stripping destroyed meaningful numbers (the four-seasons list). */
+private val LIST_PREFIX = Regex("^(?:(\\d+)[.)⃣]|([①-⑳⓵-⓾]))\\s*")
+
+/** The number a [LIST_PREFIX] match denotes, or null. */
+private fun listPrefixNumber(m: MatchResult): Int? {
+    m.groupValues[1].toIntOrNull()?.let { return it }
+    val c = m.groupValues[2].firstOrNull() ?: return null
+    return when (c.code) {
+        in 0x2460..0x2473 -> c.code - 0x245F   // ① .. ⑳
+        in 0x24F5..0x24FD -> c.code - 0x24F4   // ⓵ .. ⓽
+        0x24FE -> 10                            // ⓾
+        else -> null
+    }
+}
+
+/** Split a cleaned line into (text without marker, source number or null). */
+private fun stripListPrefix(line: String): Pair<String, Int?> {
+    val m = LIST_PREFIX.find(line) ?: return line to null
+    return line.removeRange(m.range) to listPrefixNumber(m)
+}
 
 /** The line that marks the start of the አርኬ hymn within an entry. */
 private const val ARKE_MARKER = "አርኬ" // አርኬ
@@ -28,12 +52,20 @@ private const val SCRIPTURE_MARKER = "📖" // 📖
 
 enum class SynaxariumParaKind { NARRATIVE, ARKE_LABEL, ARKE_VERSE }
 
-data class SynaxariumPara(val kind: SynaxariumParaKind, val text: String)
+/** [sourceNumber] is the entry's own list numbering when the source line carried
+ * one ("1.", "①", "1⃣") — the renderer shows it instead of a sequential count. */
+data class SynaxariumPara(
+    val kind: SynaxariumParaKind,
+    val text: String,
+    val sourceNumber: Int? = null,
+)
 
-/** Strip marker emojis and C0 control characters (the data contains stray
- * backspaces), collapse the whitespace they leave behind, and trim. */
+/** Strip marker emojis, `<b>` markup debris, and C0 control characters (the data
+ * contains stray backspaces), collapse the whitespace left behind, and trim. */
 fun cleanSynaxariumText(raw: String): String =
-    EMOJI.replace(raw, "").replace(Regex("[\\u0000-\\u0020]+"), " ").trim()
+    ANGLE.replace(B_TAG.replace(EMOJI.replace(raw, ""), " "), " ")
+        .replace(Regex("[\\u0000-\\u0020]+"), " ")
+        .trim()
 
 /** True when [rawTitle] marks a scripture-quote entry (📖 prefix in the source). */
 fun isScriptureEntry(rawTitle: String): Boolean =
@@ -70,16 +102,17 @@ fun parseSynaxarium(rawText: String): List<SynaxariumPara> {
             line.endsWith(" $ARKE_MARKER") -> {
                 val head = line.removeSuffix(ARKE_MARKER).trim()
                 if (head.isNotEmpty()) {
-                    out += SynaxariumPara(SynaxariumParaKind.NARRATIVE, head.replaceFirst(LIST_PREFIX, ""))
+                    val (text, num) = stripListPrefix(head)
+                    out += SynaxariumPara(SynaxariumParaKind.NARRATIVE, text, num)
                 }
                 inArke = true
                 out += SynaxariumPara(SynaxariumParaKind.ARKE_LABEL, ARKE_MARKER)
             }
 
-            else -> out += SynaxariumPara(
-                SynaxariumParaKind.NARRATIVE,
-                line.replaceFirst(LIST_PREFIX, ""),
-            )
+            else -> {
+                val (text, num) = stripListPrefix(line)
+                out += SynaxariumPara(SynaxariumParaKind.NARRATIVE, text, num)
+            }
         }
     }
     return out

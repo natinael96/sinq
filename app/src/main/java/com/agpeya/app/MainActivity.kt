@@ -166,7 +166,7 @@ private fun AgpeyaNavHost(
     // Consume it once so it isn't re-navigated on the next recomposition.
     LaunchedEffect(ready, deepLinkHourId) {
         if (ready && deepLinkHourId != null) {
-            navController.navigate("reading/$deepLinkHourId")
+            navController.navigate("reading/$deepLinkHourId") { launchSingleTop = true }
             onDeepLinkHandled()
         }
     }
@@ -182,7 +182,7 @@ private fun AgpeyaNavHost(
     // Opened from the morning ግጻዌ-reminder notification → open the ግጻዌ screen.
     LaunchedEffect(ready, openGitsawe) {
         if (ready && openGitsawe) {
-            navController.navigate("gitsawe")
+            navController.navigate("gitsawe") { launchSingleTop = true }
             onGitsaweHandled()
         }
     }
@@ -203,12 +203,12 @@ private fun AgpeyaNavHost(
         }
         composable(Tab.HOME.route) {
             HomeScreen(
-                onOpenHour = { hourId -> navController.navigate("reading/$hourId") },
-                onOpenSearch = { navController.navigate("search") },
-                onOpenBookmarks = { navController.navigate("bookmarks") },
-                onOpenPsalter = { navController.navigate("psalter") },
-                onOpenWudase = { navController.navigate("wudase") },
-                onOpenGitsawe = { navController.navigate("gitsawe") },
+                onOpenHour = { hourId -> navController.navigate("reading/$hourId") { launchSingleTop = true } },
+                onOpenSearch = { navController.navigate("search") { launchSingleTop = true } },
+                onOpenBookmarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
+                onOpenPsalter = { navController.navigate("psalter") { launchSingleTop = true } },
+                onOpenWudase = { navController.navigate("wudase") { launchSingleTop = true } },
+                onOpenGitsawe = { navController.navigate("gitsawe") { launchSingleTop = true } },
                 onSelectTab = navController::switchTab,
             )
         }
@@ -218,9 +218,9 @@ private fun AgpeyaNavHost(
                 onOpenResult = { result ->
                     when (result.source) {
                         com.agpeya.app.search.AmharicSearch.Source.HOUR ->
-                            navController.navigate("reading/${result.targetId}?section=${result.targetIndex}")
+                            navController.navigate("reading/${result.targetId}?section=${result.targetIndex}") { launchSingleTop = true }
                         com.agpeya.app.search.AmharicSearch.Source.PSALTER ->
-                            navController.navigate("psalter?section=${result.targetIndex}")
+                            navController.navigate("psalter?section=${result.targetIndex}") { launchSingleTop = true }
                     }
                 },
             )
@@ -232,12 +232,16 @@ private fun AgpeyaNavHost(
                     // Psalter bookmarks live under a pseudo hour id and open the
                     // Psalter screen, not the hour reader.
                     if (hourId == com.agpeya.app.ui.psalter.PSALTER_BOOKMARK_ID) {
-                        navController.navigate("psalter?section=$index")
+                        navController.navigate("psalter?section=$index") { launchSingleTop = true }
                     } else {
-                        navController.navigate("reading/$hourId?section=$index")
+                        navController.navigate("reading/$hourId?section=$index") { launchSingleTop = true }
                     }
                 },
-                onOpenRoute = { route -> navController.navigate(route) },
+                // Persisted bookmark routes are raw strings replayed verbatim; if a
+                // future version renames a route, an old bookmark must not crash.
+                onOpenRoute = { route ->
+                    runCatching { navController.navigate(route) { launchSingleTop = true } }
+                },
             )
         }
         composable(
@@ -258,7 +262,7 @@ private fun AgpeyaNavHost(
         composable(Tab.STREAK.route) {
             com.agpeya.app.ui.habits.StreakScreen(
                 onSelectTab = navController::switchTab,
-                onManageHabits = { navController.navigate("habits") },
+                onManageHabits = { navController.navigate("habits") { launchSingleTop = true } },
             )
         }
         composable("habits") {
@@ -266,9 +270,9 @@ private fun AgpeyaNavHost(
         }
         composable(Tab.LIBRARY.route) {
             com.agpeya.app.ui.library.LibraryScreen(
-                onOpenPsalter = { navController.navigate("psalter") },
-                onOpenScriptures = { navController.navigate("scriptures") },
-                onOpenWudase = { navController.navigate("wudase") },
+                onOpenPsalter = { navController.navigate("psalter") { launchSingleTop = true } },
+                onOpenScriptures = { navController.navigate("scriptures") { launchSingleTop = true } },
+                onOpenWudase = { navController.navigate("wudase") { launchSingleTop = true } },
                 onSelectTab = navController::switchTab,
             )
         }
@@ -278,7 +282,7 @@ private fun AgpeyaNavHost(
         composable("scriptures") {
             com.agpeya.app.ui.library.ScriptureListScreen(
                 onBack = { navController.popBackStack() },
-                onOpenBook = { key -> navController.navigate("scripture/$key/1") },
+                onOpenBook = { key -> navController.navigate("scripture/$key/1") { launchSingleTop = true } },
             )
         }
         composable(
@@ -302,9 +306,9 @@ private fun AgpeyaNavHost(
             com.agpeya.app.ui.gitsawe.GitsaweScreen(
                 onBack = { navController.popBackStack() },
                 onOpenReading = { target ->
-                    navController.navigate(com.agpeya.app.data.GitsaweLinks.route(target))
+                    navController.navigate(com.agpeya.app.data.GitsaweLinks.route(target)) { launchSingleTop = true }
                 },
-                onOpenSynaxarium = { epochDay -> navController.navigate("synaxarium/$epochDay") },
+                onOpenSynaxarium = { epochDay -> navController.navigate("synaxarium/$epochDay") { launchSingleTop = true } },
             )
         }
         composable(
@@ -319,10 +323,10 @@ private fun AgpeyaNavHost(
         composable(Tab.SETTINGS.route) {
             SettingsScreen(
                 onSelectTab = navController::switchTab,
-                onOpenModes = { navController.navigate("modes") },
-                onOpenCustomize = { navController.navigate("customize") },
-                onOpenTutorial = { navController.navigate("tutorial") },
-                onOpenAbout = { navController.navigate("about") },
+                onOpenModes = { navController.navigate("modes") { launchSingleTop = true } },
+                onOpenCustomize = { navController.navigate("customize") { launchSingleTop = true } },
+                onOpenTutorial = { navController.navigate("tutorial") { launchSingleTop = true } },
+                onOpenAbout = { navController.navigate("about") { launchSingleTop = true } },
             )
         }
         composable(
@@ -346,8 +350,8 @@ private fun AgpeyaNavHost(
         composable("modes") {
             ModesScreen(
                 onBack = { navController.popBackStack() },
-                onEditMode = { modeId -> navController.navigate("mode/$modeId") },
-                onOpenBatteryHelp = { navController.navigate("battery") },
+                onEditMode = { modeId -> navController.navigate("mode/$modeId") { launchSingleTop = true } },
+                onOpenBatteryHelp = { navController.navigate("battery") { launchSingleTop = true } },
             )
         }
         composable("battery") {
@@ -360,7 +364,7 @@ private fun AgpeyaNavHost(
         composable("customize") {
             com.agpeya.app.ui.hours.ManageHoursScreen(
                 onBack = { navController.popBackStack() },
-                onEditHour = { hourId -> navController.navigate("customize/$hourId") },
+                onEditHour = { hourId -> navController.navigate("customize/$hourId") { launchSingleTop = true } },
             )
         }
         composable("customize/{hourId}") { backStackEntry ->

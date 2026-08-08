@@ -49,10 +49,44 @@ class SynaxariumTextTest {
     }
 
     @Test
-    fun `strips an existing list marker so numbering does not double up`() {
+    fun `strips an existing list marker and preserves its number`() {
         val paras = parseSynaxarium("1.ቅድስት አንስጣስያ\n2.ቅድስት ሶስና ድንግል")
         assertEquals("ቅድስት አንስጣስያ", paras[0].text)
+        assertEquals(1, paras[0].sourceNumber)
         assertEquals("ቅድስት ሶስና ድንግል", paras[1].text)
+        assertEquals(2, paras[1].sourceNumber)
+    }
+
+    @Test
+    fun `keeps non-sequential source numbering`() {
+        // The four-seasons list: intro paragraphs first, then a 1..3 sub-list whose
+        // numbers are meaningful and must not be rewritten.
+        val paras = parseSynaxarium("መግቢያ ጽሑፍ\n1. ክረምት\n2. መፀው\n3. በጋ")
+        assertEquals(null, paras[0].sourceNumber)
+        assertEquals(listOf(1, 2, 3), paras.drop(1).map { it.sourceNumber })
+    }
+
+    @Test
+    fun `recognizes keycap and circled digits as list markers`() {
+        val paras = parseSynaxarium("1⃣ በታሪክ ዓለምን\n⓵ ጾሙም ሆነ ጸሎቱ\n② ሁለተኛ ነጥብ")
+        assertEquals(listOf(1, 1, 2), paras.map { it.sourceNumber })
+        assertEquals("በታሪክ ዓለምን", paras[0].text)
+        assertEquals("ጾሙም ሆነ ጸሎቱ", paras[1].text)
+    }
+
+    @Test
+    fun `a bare number that is part of the text is not a list marker`() {
+        val paras = parseSynaxarium("900 ዓመት ያስቆጠሩ የብራና መጻሕፍት")
+        assertEquals(null, paras.single().sourceNumber)
+        assertTrue(paras.single().text.startsWith("900 ዓመት"))
+    }
+
+    @Test
+    fun `strips bold-tag debris including malformed variants`() {
+        assertEquals("አራቱ ክፍላተ ዘመን", cleanSynaxariumText("<b> አራቱ ክፍላተ ዘመን</b>"))
+        assertEquals("ጽሑፍ", cleanSynaxariumText("< b >ጽሑፍ</b >"))
+        assertEquals("በእጆቹ", cleanSynaxariumText("<b<በእጆቹ"))
+        assertEquals("የምንመለሰ", cleanSynaxariumText("<የምንመለሰ"))
     }
 
     @Test

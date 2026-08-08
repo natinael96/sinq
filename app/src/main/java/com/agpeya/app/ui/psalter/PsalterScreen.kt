@@ -100,7 +100,10 @@ fun PsalterScreen(
     val readingMode by SettingsRepository.readingMode(context)
         .collectAsState(initial = ReadingMode.VERTICAL)
     val bookmarks by UserDataRepository.bookmarks(context).collectAsState(initial = emptyList())
-    val bookmarkedIds = remember(bookmarks) { bookmarks.map { it.sectionId }.toSet() }
+    // Scope to the Psalter's own group — an hour may bookmark the same "ps_N" id.
+    val bookmarkedIds = remember(bookmarks) {
+        bookmarks.filter { it.hourId == PSALTER_BOOKMARK_ID }.map { it.sectionId }.toSet()
+    }
     val highlights by HighlightRepository.highlights(context).collectAsState(initial = emptyMap())
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
 

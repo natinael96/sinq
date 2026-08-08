@@ -74,8 +74,12 @@ object BahreHasab {
         val off = ChronoUnit.DAYS.between(nineveh(year), date).toInt()
         return when {
             off in 0..2 -> SeasonWindow("neneweTsom", 1)                 // Nineveh fast, Mon–Wed
-            off in 13..62 && (off - 13) % 7 in 0..6 && off <= 62 ->      // Great Lent Sundays 1..8
-                SeasonWindow("abiyTsom", (off - 13) / 7 + 1)
+            // Great Lent: every day of the fast maps to its week's reading
+            // (weeks 1..8, ዘወረደ … ሆሣዕና). Unlike the Resurrection branch below,
+            // this deliberately matches all seven days of each week — the prior
+            // condition had dead subexpressions that implied Sundays-only but
+            // always evaluated true, so all-days IS the long-standing behavior.
+            off in 13..62 -> SeasonWindow("abiyTsom", (off - 13) / 7 + 1)
             off == 66 -> SeasonWindow("holy_thursday", null)             // ዘጸሎተ ሐሙስ
             off == 108 -> SeasonWindow("erget", null)                    // ዕርገት (Ascension)
             off in 69..117 && (off - 69) % 7 == 0 ->                     // Resurrection Sundays

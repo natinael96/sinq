@@ -43,8 +43,18 @@ fun BookmarksScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val bookmarks by UserDataRepository.bookmarks(context).collectAsState(initial = emptyList())
-    val grouped = bookmarks.groupBy { it.hourId to it.hourName }
     val s = com.agpeya.app.ui.strings.LocalStrings.current
+    // Group by hourId only — the stored hourName is a creation-time snapshot, so
+    // one hour can carry two names (rename, or bookmarks made in both languages).
+    // The header resolves its label live: current-language strings for the pseudo
+    // groups, the latest snapshot otherwise.
+    val grouped = bookmarks.groupBy { it.hourId }
+    fun groupLabel(hourId: String, items: List<com.agpeya.app.model.Bookmark>): String = when (hourId) {
+        com.agpeya.app.ui.psalter.PSALTER_BOOKMARK_ID -> s.psalterTitle
+        "scripture_library" -> s.bookmarkGroupScripture
+        "sinksar_verse" -> s.bookmarkGroupSynaxarium
+        else -> items.last().hourName
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -93,20 +103,19 @@ fun BookmarksScreen(
                 .padding(innerPadding),
             contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
         ) {
-            grouped.forEach { (hour, items) ->
-                // Key on the full (hourId, hourName) pair: the same hour can appear
-                // under two names (rename, or bookmarks made in both languages), and
-                // id-only keys would then collide and crash the LazyColumn.
-                item(key = "h_${hour.first}|${hour.second}") {
+            grouped.forEach { (hourId, items) ->
+                item(key = "h_$hourId") {
                     Spacer(Modifier.height(16.dp))
                     Text(
-                        text = hour.second,
+                        text = groupLabel(hourId, items),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.secondary,
                     )
                     Spacer(Modifier.height(4.dp))
                 }
-                items(items.size, key = { items[it].sectionId }) { i ->
+                // Row keys carry the hourId too: sectionId alone can repeat across
+                // groups (a psalm bookmarked in the Psalter and inside an hour).
+                items(items.size, key = { "${hourId}|${items[it].sectionId}" }) { i ->
                     BookmarkRow(
                         bookmark = items[i],
                         onOpen = {
@@ -115,7 +124,9 @@ fun BookmarksScreen(
                             else onOpen(bm.hourId, bm.sectionIndex)
                         },
                         onRemove = {
-                            scope.launch { UserDataRepository.removeBookmark(context, items[i].sectionId) }
+                            scope.launch {
+                                UserDataRepository.removeBookmark(context, hourId, items[i].sectionId)
+                            }
                         },
                     )
                 }
