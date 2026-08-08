@@ -31,8 +31,19 @@ class SynaxariumDataTest {
             entries += month.days.sumOf { it.entries.size }
             assertTrue("month $m has days", month.days.isNotEmpty())
         }
-        assertEquals(367, days)
-        assertEquals(1822, entries)
+        // 365 not 366: Yekatit 3 carried mislabeled wrong-month content in the
+        // source and was removed rather than shipped wrong (renders as empty).
+        assertEquals(365, days)
+        assertEquals(1817, entries)
+    }
+
+    @Test
+    fun `no month contains a duplicate day`() {
+        for (m in 1..13) {
+            val month: SynaxariumMonth = json.decodeFromString(File(dir, "$m.json").readText())
+            val dayNumbers = month.days.map { it.day }
+            assertEquals("month $m has duplicate days", dayNumbers.distinct().size, dayNumbers.size)
+        }
     }
 
     @Test

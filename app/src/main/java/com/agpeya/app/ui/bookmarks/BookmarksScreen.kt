@@ -94,7 +94,10 @@ fun BookmarksScreen(
             contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
         ) {
             grouped.forEach { (hour, items) ->
-                item(key = "h_${hour.first}") {
+                // Key on the full (hourId, hourName) pair: the same hour can appear
+                // under two names (rename, or bookmarks made in both languages), and
+                // id-only keys would then collide and crash the LazyColumn.
+                item(key = "h_${hour.first}|${hour.second}") {
                     Spacer(Modifier.height(16.dp))
                     Text(
                         text = hour.second,

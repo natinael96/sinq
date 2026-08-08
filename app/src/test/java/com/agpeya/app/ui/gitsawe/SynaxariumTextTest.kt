@@ -60,4 +60,33 @@ class SynaxariumTextTest {
         assertTrue(isScriptureEntry("📖ሉቃ 10፥38"))
         assertFalse(isScriptureEntry("ቅድስት አንስጣስያ"))
     }
+
+    @Test
+    fun `detects the arke marker glued to its verse`() {
+        // Both real data shapes: no space ("አርኬሰላም…") and with a space.
+        for (raw in listOf("prose\nአርኬሰላም ለሶስና ዘተዓገሠት", "prose\nአርኬ ሰላም ለቢሶራ አቃቤ")) {
+            val paras = parseSynaxarium(raw)
+            assertEquals(raw, 1, paras.count { it.kind == SynaxariumParaKind.ARKE_LABEL })
+            val verse = paras.single { it.kind == SynaxariumParaKind.ARKE_VERSE }
+            assertTrue("verse starts at ሰላም", verse.text.startsWith("ሰላም"))
+        }
+    }
+
+    @Test
+    fun `detects the arke marker dangling after prose with control characters`() {
+        val raw = "በረከቱም ከእኛ ጋር ትኑር ለዘላለሙ አሜን።\u0008\u0008\u0008 አርኬ\nሰላም ለከ በአሚን ስኩብ"
+        val paras = parseSynaxarium(raw)
+        assertEquals(1, paras.count { it.kind == SynaxariumParaKind.ARKE_LABEL })
+        assertEquals("ሰላም ለከ በአሚን ስኩብ", paras.single { it.kind == SynaxariumParaKind.ARKE_VERSE }.text)
+        val narrative = paras.single { it.kind == SynaxariumParaKind.NARRATIVE }
+        assertFalse("backspaces stripped", narrative.text.any { it.code < 0x20 })
+        assertTrue(narrative.text.endsWith("አሜን።"))
+    }
+
+    @Test
+    fun `does not mistake the name Archelaus for the arke marker`() {
+        val paras = parseSynaxarium("አርኬላዖስ ሰማዕት መታሰቢያው ነው።")
+        assertEquals(1, paras.size)
+        assertEquals(SynaxariumParaKind.NARRATIVE, paras.single().kind)
+    }
 }

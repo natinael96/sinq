@@ -39,9 +39,12 @@ class StreakReminderReceiver : BroadcastReceiver() {
 
                     val s = stringsFor(SettingsRepository.language(context).first())
                     ensureChannel(context, s.streakChannelName)
+                    // Request code must differ from ReminderScheduler's alarm-clock
+                    // show intent (code 0): extras don't distinguish PendingIntents,
+                    // so sharing the code lets each overwrite the other's extras.
                     val tap = PendingIntent.getActivity(
                         context,
-                        0,
+                        2,
                         Intent(context, MainActivity::class.java).apply {
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                             putExtra(StreakReminderScheduler.EXTRA_OPEN_STREAK, true)
