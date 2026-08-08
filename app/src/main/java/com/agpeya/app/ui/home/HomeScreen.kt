@@ -73,6 +73,7 @@ fun HomeScreen(
     onOpenBookmarks: () -> Unit,
     onOpenPsalter: () -> Unit,
     onOpenWudase: () -> Unit,
+    onOpenZewotr: () -> Unit,
     onOpenGitsawe: () -> Unit,
     onSelectTab: (Tab) -> Unit,
 ) {
@@ -208,9 +209,9 @@ fun HomeScreen(
                     )
                     LibraryButton(
                         label = s.zewotrTselot,
-                        enabled = false,
-                        comingSoon = s.comingSoon,
-                        onClick = {},
+                        enabled = true,
+                        comingSoon = null,
+                        onClick = onOpenZewotr,
                         modifier = Modifier.weight(1f),
                     )
                     LibraryButton(

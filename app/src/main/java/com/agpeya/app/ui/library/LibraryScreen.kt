@@ -36,6 +36,7 @@ fun LibraryScreen(
     onOpenPsalter: () -> Unit,
     onOpenScriptures: () -> Unit,
     onOpenWudase: () -> Unit,
+    onOpenZewotr: () -> Unit,
     onSelectTab: (Tab) -> Unit,
 ) {
     val s = LocalStrings.current
@@ -80,7 +81,7 @@ fun LibraryScreen(
                 LibraryCard(icon = Icons.Outlined.MenuBook, title = s.wudaseMariam, subtitle = "ሰኞ–እሑድ", onClick = onOpenWudase)
             }
             item {
-                LibraryCard(icon = Icons.Outlined.MenuBook, title = s.zewotrTselot, subtitle = s.comingSoon, enabled = false, onClick = {})
+                LibraryCard(icon = Icons.Outlined.MenuBook, title = s.zewotrTselot, subtitle = "ጸሎት ዘዘወትር", onClick = onOpenZewotr)
             }
         }
     }

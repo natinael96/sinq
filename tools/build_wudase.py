@@ -20,18 +20,22 @@ OUT = os.path.join(
 )
 ATTRIBUTION = "ጽሑፍ፦ github.com/tecleet/wudase-mariam · ትውፊታዊ የኦርቶዶክስ ተዋሕዶ ጸሎት"
 
-# The weekday portions (in liturgical order) plus the appended prayers we ship.
-# weekday: 1=Mon … 7=Sun for the day cycle; 0 = an appended prayer.
+# The sections we ship, in liturgical order: the daily opening prayer first,
+# then the weekday portions, then the appended prayers.
+# weekday: 1=Mon … 7=Sun for the day cycle; 0 = not day-keyed.
+# split: "numeral" breaks on ፩.-style stanza markers; "para" on blank lines
+# (the daily prayer has meaningful unnumbered sub-paragraphs to preserve).
 SECTIONS = [
-    ("monday", 1, "ሰኞ"),
-    ("tuesday", 2, "ማክሰኞ"),
-    ("wednesday", 3, "ረቡዕ"),
-    ("thursday", 4, "ሐሙስ"),
-    ("friday", 5, "ዓርብ"),
-    ("saturday", 6, "ቅዳሜ"),
-    ("sunday", 7, "እሑድ"),
-    ("yiwedsewa_melaekt", 0, "ይወድስዋ መላእክት"),
-    ("anqetse_birhan", 0, "አንቀጸ ብርሃን"),
+    ("daily", 0, "ዘወትር ጸሎት", "para"),
+    ("monday", 1, "ሰኞ", "numeral"),
+    ("tuesday", 2, "ማክሰኞ", "numeral"),
+    ("wednesday", 3, "ረቡዕ", "numeral"),
+    ("thursday", 4, "ሐሙስ", "numeral"),
+    ("friday", 5, "ዓርብ", "numeral"),
+    ("saturday", 6, "ቅዳሜ", "numeral"),
+    ("sunday", 7, "እሑድ", "numeral"),
+    ("yiwedsewa_melaekt", 0, "ይወድስዋ መላእክት", "numeral"),
+    ("anqetse_birhan", 0, "አንቀጸ ብርሃን", "numeral"),
 ]
 
 _NUM = r"[፩-፼]"
@@ -39,14 +43,19 @@ _NUM = r"[፩-፼]"
 _STANZA = re.compile(r"(?=(?<!\S)" + _NUM + r"+[.።] )")
 
 
-def stanzas(text):
-    """Clean the escape-mangled source text into a list of numbered stanzas."""
+def stanzas(text, split):
+    """Clean the escape-mangled source text into a list of display paragraphs."""
     if not text:
         return []
     # The source double-encodes some whitespace as the two characters "\t"/"\n".
-    text = text.replace("\\t", " ").replace("\\n", " ").replace("\t", " ").replace("\n", " ")
-    text = re.sub(r"[ ]+", " ", text).strip()
-    return [p.strip() for p in _STANZA.split(text) if p.strip()]
+    text = text.replace("\\t", " ").replace("\t", " ")
+    if split == "para":
+        text = text.replace("\\n", "\n")
+        parts = re.split(r"\n\s*\n", text)
+    else:
+        text = text.replace("\\n", " ").replace("\n", " ")
+        parts = _STANZA.split(text)
+    return [re.sub(r"\s+", " ", p).strip() for p in parts if p.strip()]
 
 
 def main():
@@ -54,7 +63,7 @@ def main():
         data = json.load(r)
 
     out_sections = []
-    for key, weekday, label in SECTIONS:
+    for key, weekday, label, split in SECTIONS:
         node = data[key]
         out_sections.append({
             "id": key,
@@ -62,8 +71,8 @@ def main():
             "label": label,
             "titleAm": node["title"].get("am", "").strip(),
             "titleGe": node["title"].get("ge", "").strip(),
-            "am": stanzas(node["content"].get("am", "")),
-            "ge": stanzas(node["content"].get("ge", "")),
+            "am": stanzas(node["content"].get("am", ""), split),
+            "ge": stanzas(node["content"].get("ge", ""), split),
         })
 
     payload = {

@@ -208,6 +208,7 @@ private fun AgpeyaNavHost(
                 onOpenBookmarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
                 onOpenPsalter = { navController.navigate("psalter") { launchSingleTop = true } },
                 onOpenWudase = { navController.navigate("wudase") { launchSingleTop = true } },
+                onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
                 onOpenGitsawe = { navController.navigate("gitsawe") { launchSingleTop = true } },
                 onSelectTab = navController::switchTab,
             )
@@ -273,11 +274,18 @@ private fun AgpeyaNavHost(
                 onOpenPsalter = { navController.navigate("psalter") { launchSingleTop = true } },
                 onOpenScriptures = { navController.navigate("scriptures") { launchSingleTop = true } },
                 onOpenWudase = { navController.navigate("wudase") { launchSingleTop = true } },
+                onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
                 onSelectTab = navController::switchTab,
             )
         }
-        composable("wudase") {
-            com.agpeya.app.ui.library.WudaseMaryamScreen(onBack = { navController.popBackStack() })
+        composable(
+            route = "wudase?sec={sec}",
+            arguments = listOf(navArgument("sec") { type = NavType.StringType; nullable = true; defaultValue = null }),
+        ) { backStackEntry ->
+            com.agpeya.app.ui.library.WudaseMaryamScreen(
+                onBack = { navController.popBackStack() },
+                initialSectionId = backStackEntry.arguments?.getString("sec"),
+            )
         }
         composable("scriptures") {
             com.agpeya.app.ui.library.ScriptureListScreen(
