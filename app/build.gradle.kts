@@ -29,8 +29,8 @@ android {
         //   0.MINOR.PATCH — PATCH for fixes/small tweaks, MINOR for new features.
         //   1.0.0 is reserved for the first public (Play) release.
         //   versionCode increments by 1 on EVERY update, no exceptions.
-        versionCode = 17
-        versionName = "0.5.2" // audit fixes (bookmarks crash, arke detection, wrong-day synaxarium…) + ዘወትር ጸሎት
+        versionCode = 18
+        versionName = "0.6.0" // choose the reading font — four bundled Ethiopic faces from Font.et
     }
 
     signingConfigs {
