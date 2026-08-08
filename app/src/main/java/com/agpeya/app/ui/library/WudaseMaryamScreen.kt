@@ -60,10 +60,11 @@ import java.time.LocalDate
 private val FONT_STEPS_SP = listOf(17, 19, 22, 25, 29)
 
 /** ውዳሴ ማርያም — the Praise of Mary, one portion per weekday, in Amharic (default)
- *  or Ge'ez via a toggle. */
+ *  or Ge'ez via a toggle. [initialSectionId] preselects a section (the ዘወትር ጸሎት
+ *  card opens the same reader on the daily prayer); otherwise today's portion. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WudaseMaryamScreen(onBack: () -> Unit) {
+fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
     val context = LocalContext.current
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
@@ -85,8 +86,11 @@ fun WudaseMaryamScreen(onBack: () -> Unit) {
         val wd = LocalDate.now().dayOfWeek.value
         sections.indexOfFirst { it.weekday == wd }.takeIf { it >= 0 } ?: 0
     }
+    val initialIndex = remember(sections, initialSectionId) {
+        initialSectionId?.let { id -> sections.indexOfFirst { it.id == id }.takeIf { it >= 0 } }
+    }
     var picked by rememberSaveable { mutableIntStateOf(-1) }
-    val selected = if (picked >= 0) picked else todayIndex
+    val selected = if (picked >= 0) picked else initialIndex ?: todayIndex
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,

@@ -18,10 +18,11 @@ class WudaseDataTest {
     private val content: WudaseContent by lazy { json.decodeFromString(file.readText()) }
 
     @Test
-    fun `decodes with all nine sections`() {
-        assertEquals(9, content.sections.size)
+    fun `decodes with all ten sections`() {
+        assertEquals(10, content.sections.size)
         assertTrue(content.attribution.isNotBlank())
-        // The seven weekday portions appear once each, in order Monday..Sunday.
+        // The daily prayer opens the book, then the seven weekday portions in order.
+        assertEquals("daily", content.sections.first().id)
         assertEquals((1..7).toList(), content.sections.filter { it.weekday in 1..7 }.map { it.weekday })
     }
 
