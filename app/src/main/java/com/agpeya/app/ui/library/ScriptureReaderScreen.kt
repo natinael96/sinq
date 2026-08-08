@@ -94,7 +94,14 @@ fun ScriptureReaderScreen(
         return
     }
 
-    var chapter by rememberSaveable(bookKey) { mutableIntStateOf(initialChapter.coerceAtLeast(1)) }
+    // Clamp into the book's real range: a few bundled ግጻዌ citations name chapters
+    // that don't exist (e.g. Mark 17). Landing on the nearest real chapter — with
+    // the title, chapter strip, and bookmark all agreeing — beats silently showing
+    // chapter 1 under the cited number. The highlight only fires when the clamped
+    // chapter still equals the cited one, so a bad citation never tints wrong verses.
+    var chapter by rememberSaveable(bookKey) {
+        mutableIntStateOf(initialChapter.coerceIn(1, b.chapters.size))
+    }
     // Only the chapter we arrived on shows the cited-verse tint.
     val highlightRange = remember(chapter) {
         if (chapter == initialChapter && initialStart > 0) initialStart..(if (initialEnd > 0) initialEnd else initialStart)

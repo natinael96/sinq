@@ -30,9 +30,10 @@ enum class SynaxariumParaKind { NARRATIVE, ARKE_LABEL, ARKE_VERSE }
 
 data class SynaxariumPara(val kind: SynaxariumParaKind, val text: String)
 
-/** Strip marker emojis, collapse the whitespace they leave behind, and trim. */
+/** Strip marker emojis and C0 control characters (the data contains stray
+ * backspaces), collapse the whitespace they leave behind, and trim. */
 fun cleanSynaxariumText(raw: String): String =
-    EMOJI.replace(raw, "").replace(Regex("[ \t]+"), " ").trim()
+    EMOJI.replace(raw, "").replace(Regex("[\\u0000-\\u0020]+"), " ").trim()
 
 /** True when [rawTitle] marks a scripture-quote entry (📖 prefix in the source). */
 fun isScriptureEntry(rawTitle: String): Boolean =
@@ -52,9 +53,29 @@ fun parseSynaxarium(rawText: String): List<SynaxariumPara> {
         when {
             line == ARKE_MARKER -> {
                 inArke = true
-                out += SynaxariumPara(SynaxariumParaKind.ARKE_LABEL, line)
+                out += SynaxariumPara(SynaxariumParaKind.ARKE_LABEL, ARKE_MARKER)
             }
             inArke -> out += SynaxariumPara(SynaxariumParaKind.ARKE_VERSE, line)
+
+            // Marker glued to the first verse on one line ("አርኬሰላም…" / "አርኬ ሰላም…").
+            // The ሰላም/punctuation requirement keeps names like አርኬላዖስ from matching.
+            line.startsWith(ARKE_MARKER) && isArkeRemainder(line.removePrefix(ARKE_MARKER)) -> {
+                inArke = true
+                out += SynaxariumPara(SynaxariumParaKind.ARKE_LABEL, ARKE_MARKER)
+                val verse = line.removePrefix(ARKE_MARKER).trimStart(' ', '፡', '።', '፤', '፥')
+                if (verse.isNotEmpty()) out += SynaxariumPara(SynaxariumParaKind.ARKE_VERSE, verse)
+            }
+
+            // Marker dangling at the end of a prose line ("… አሜን። አርኬ").
+            line.endsWith(" $ARKE_MARKER") -> {
+                val head = line.removeSuffix(ARKE_MARKER).trim()
+                if (head.isNotEmpty()) {
+                    out += SynaxariumPara(SynaxariumParaKind.NARRATIVE, head.replaceFirst(LIST_PREFIX, ""))
+                }
+                inArke = true
+                out += SynaxariumPara(SynaxariumParaKind.ARKE_LABEL, ARKE_MARKER)
+            }
+
             else -> out += SynaxariumPara(
                 SynaxariumParaKind.NARRATIVE,
                 line.replaceFirst(LIST_PREFIX, ""),
@@ -62,4 +83,13 @@ fun parseSynaxarium(rawText: String): List<SynaxariumPara> {
         }
     }
     return out
+}
+
+private val ARKE_SEPARATORS = charArrayOf(' ', '፡', '።', '፤', '፥')
+
+/** True when the text after a leading አርኬ is a hymn verse rather than the
+ * continuation of a longer word (e.g. the saint's name አርኬላዖስ). */
+private fun isArkeRemainder(rest: String): Boolean {
+    val first = rest.firstOrNull() ?: return false
+    return first in ARKE_SEPARATORS || rest.startsWith("ሰላም")
 }
