@@ -57,7 +57,7 @@ import com.agpeya.app.model.Bookmark
 import com.agpeya.app.model.ScriptureBook
 import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
-import com.agpeya.app.ui.theme.Abyssinica
+import com.agpeya.app.ui.theme.LocalReadingFont
 import kotlinx.coroutines.launch
 
 private val FONT_STEPS_SP = listOf(17, 19, 22, 25, 29)
@@ -224,7 +224,7 @@ fun ScriptureReaderScreen(
                 Text(
                     text = annotated,
                     style = MaterialTheme.typography.bodyLarge.copy(
-                        fontFamily = Abyssinica,
+                        fontFamily = LocalReadingFont.current,
                         fontSize = bodyFontSp.sp,
                         lineHeight = (bodyFontSp * 1.85f).sp,
                     ),

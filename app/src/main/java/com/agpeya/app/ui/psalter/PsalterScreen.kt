@@ -62,7 +62,7 @@ import com.agpeya.app.ui.reading.HighlightBar
 import com.agpeya.app.ui.reading.SectionView
 import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
-import com.agpeya.app.ui.theme.Abyssinica
+import com.agpeya.app.ui.theme.LocalReadingFont
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -234,7 +234,7 @@ fun PsalterScreen(
                 ) {
                     Text(
                         s.comingSoon,
-                        style = MaterialTheme.typography.titleMedium.copy(fontFamily = Abyssinica),
+                        style = MaterialTheme.typography.titleMedium.copy(fontFamily = LocalReadingFont.current),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                     )
@@ -391,7 +391,7 @@ private fun PsalterContents(psalms: List<Section>, onSelect: (Int) -> Unit) {
                         .clickable { onSelect(index) }
                         .padding(vertical = 10.dp),
                 ) {
-                    Text(p.title, style = MaterialTheme.typography.titleMedium.copy(fontFamily = Abyssinica), color = MaterialTheme.colorScheme.onSurface)
+                    Text(p.title, style = MaterialTheme.typography.titleMedium.copy(fontFamily = LocalReadingFont.current), color = MaterialTheme.colorScheme.onSurface)
                     p.subtitle?.let {
                         Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                     }

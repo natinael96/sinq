@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -35,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.data.ThemeChoice
 import com.agpeya.app.ui.common.AgpeyaBottomBar
@@ -53,6 +55,8 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
     val s = com.agpeya.app.ui.strings.LocalStrings.current
     val theme by SettingsRepository.theme(context).collectAsState(initial = ThemeChoice.SYSTEM)
+    val readingFont by SettingsRepository.readingFont(context)
+        .collectAsState(initial = com.agpeya.app.data.ReadingFont.ABYSSINICA)
     val keepOn by SettingsRepository.keepScreenOn(context).collectAsState(initial = true)
     val streakReminder by SettingsRepository.streakReminder(context).collectAsState(initial = true)
     val gitsaweReminder by SettingsRepository.gitsaweReminder(context).collectAsState(initial = true)
@@ -102,6 +106,27 @@ fun SettingsScreen(
                         ) { Text(label) }
                     }
                 }
+                Spacer(Modifier.height(24.dp))
+            }
+
+            item {
+                Text(
+                    text = s.readingFontTitle,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.secondary,
+                )
+                Text(
+                    text = s.readingFontSubtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(10.dp))
+                // Each row previews itself in its own face — the only honest way to
+                // choose a typeface is to see the script rendered in it.
+                ReadingFontPicker(
+                    selected = readingFont,
+                    onSelect = { scope.launch { SettingsRepository.setReadingFont(context, it) } },
+                )
                 Spacer(Modifier.height(24.dp))
             }
 
@@ -385,5 +410,69 @@ private fun SettingsLink(label: String, onClick: () -> Unit) {
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+    }
+}
+
+/** The bundled reader faces, each shown rendered in itself. */
+private val FONT_CHOICES = listOf(
+    com.agpeya.app.data.ReadingFont.ABYSSINICA to "Abyssinica SIL",
+    com.agpeya.app.data.ReadingFont.ABAY_LIGHT to "Ethiopic Abay Light",
+    com.agpeya.app.data.ReadingFont.BELA_BEREKA to "Bela Bereka",
+    com.agpeya.app.data.ReadingFont.ZEMENAY to "Zemenay",
+    com.agpeya.app.data.ReadingFont.MENBERE to "Menbere",
+)
+
+/** A sample line of the script the choice actually affects. */
+private const val FONT_SAMPLE = "አቡነ ዘበሰማያት ፩፪፫"
+
+@Composable
+private fun ReadingFontPicker(
+    selected: com.agpeya.app.data.ReadingFont,
+    onSelect: (com.agpeya.app.data.ReadingFont) -> Unit,
+) {
+    Column(verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)) {
+        FONT_CHOICES.forEach { (choice, name) ->
+            val isSel = choice == selected
+            androidx.compose.material3.Surface(
+                onClick = { onSelect(choice) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
+                color = if (isSel) MaterialTheme.colorScheme.secondary.copy(alpha = 0.14f)
+                else MaterialTheme.colorScheme.surface,
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    if (isSel) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surfaceVariant,
+                ),
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            text = FONT_SAMPLE,
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontFamily = com.agpeya.app.ui.theme.readingFontFamily(choice),
+                                fontSize = 21.sp,
+                                lineHeight = 34.sp,
+                            ),
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                        Text(
+                            text = name,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    if (isSel) {
+                        Icon(
+                            Icons.Outlined.Check,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary,
+                        )
+                    }
+                }
+            }
+        }
     }
 }

@@ -58,7 +58,7 @@ import com.agpeya.app.ui.common.formatEthiopian
 import com.agpeya.app.ui.reading.FontSizeActions
 import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
-import com.agpeya.app.ui.theme.Abyssinica
+import com.agpeya.app.ui.theme.LocalReadingFont
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -230,7 +230,7 @@ private fun ClosingPrayer(fontSp: Int) {
             Text(
                 text = highlightHolyNames(stanza, ArkeRed),
                 style = MaterialTheme.typography.bodyLarge.copy(
-                    fontFamily = Abyssinica,
+                    fontFamily = LocalReadingFont.current,
                     fontSize = fontSp.sp,
                     lineHeight = (fontSp * 1.95f).sp,
                 ),
@@ -242,7 +242,7 @@ private fun ClosingPrayer(fontSp: Int) {
         Text(
             text = SYNAXARIUM_CLOSING_CODA,
             style = MaterialTheme.typography.bodyLarge.copy(
-                fontFamily = Abyssinica,
+                fontFamily = LocalReadingFont.current,
                 fontSize = fontSp.sp,
                 lineHeight = (fontSp * 1.95f).sp,
             ),
@@ -270,7 +270,7 @@ private fun highlightHolyNames(text: String, color: Color): AnnotatedString =
 private fun EntryTitle(title: String) {
     Text(
         text = title,
-        style = MaterialTheme.typography.titleMedium.copy(fontFamily = Abyssinica),
+        style = MaterialTheme.typography.titleMedium.copy(fontFamily = LocalReadingFont.current),
         color = MaterialTheme.colorScheme.secondary,
         textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
@@ -293,7 +293,7 @@ private fun NarrativePara(number: Int, text: String, fontSp: Int) {
             append(text)
         },
         style = MaterialTheme.typography.bodyLarge.copy(
-            fontFamily = Abyssinica,
+            fontFamily = LocalReadingFont.current,
             fontSize = fontSp.sp,
             lineHeight = (fontSp * 1.9f).sp,
         ),
@@ -308,7 +308,7 @@ private fun NarrativePara(number: Int, text: String, fontSp: Int) {
 private fun ArkeLabel(text: String) {
     Text(
         text = text,
-        style = MaterialTheme.typography.labelLarge.copy(fontFamily = Abyssinica),
+        style = MaterialTheme.typography.labelLarge.copy(fontFamily = LocalReadingFont.current),
         color = ArkeRed,
         textAlign = TextAlign.Center,
         letterSpacing = 6.sp,
@@ -322,7 +322,7 @@ private fun ArkeVerse(text: String, fontSp: Int) {
     Text(
         text = text,
         style = MaterialTheme.typography.bodyLarge.copy(
-            fontFamily = Abyssinica,
+            fontFamily = LocalReadingFont.current,
             fontStyle = FontStyle.Italic,
             fontSize = fontSp.sp,
             lineHeight = (fontSp * 2.0f).sp,
@@ -361,7 +361,7 @@ private fun ScriptureBody(
     Text(
         text = quote,
         style = MaterialTheme.typography.bodyLarge.copy(
-            fontFamily = Abyssinica,
+            fontFamily = LocalReadingFont.current,
             fontSize = fontSp.sp,
             lineHeight = (fontSp * 1.9f).sp,
         ),

@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.sp
 import com.agpeya.app.data.HighlightRepository
 import com.agpeya.app.model.Section
 import com.agpeya.app.ui.strings.LocalStrings
-import com.agpeya.app.ui.theme.Abyssinica
+import com.agpeya.app.ui.theme.LocalReadingFont
 
 /**
  * Section rendering shared by the hour reader and the Psalter: title with
@@ -73,7 +73,7 @@ internal fun SectionView(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = section.title,
-                style = MaterialTheme.typography.titleLarge.copy(fontFamily = Abyssinica),
+                style = MaterialTheme.typography.titleLarge.copy(fontFamily = LocalReadingFont.current),
                 color = MaterialTheme.colorScheme.secondary,
                 textAlign = TextAlign.Center,
             )
@@ -89,7 +89,7 @@ internal fun SectionView(
         section.subtitle?.let {
             Text(
                 text = it,
-                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = Abyssinica),
+                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = LocalReadingFont.current),
                 fontStyle = FontStyle.Italic,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -118,7 +118,7 @@ internal fun VerseText(
 ) {
     val markerColor = MaterialTheme.colorScheme.secondary
     val style = MaterialTheme.typography.bodyLarge.copy(
-        fontFamily = Abyssinica,
+        fontFamily = LocalReadingFont.current,
         fontSize = bodyFontSp.sp,
         lineHeight = (bodyFontSp * 1.85f).sp,
     )
@@ -130,7 +130,7 @@ internal fun VerseText(
             section.verseHeaders[verseNumber]?.let { header ->
                 Text(
                     text = header,
-                    style = MaterialTheme.typography.titleSmall.copy(fontFamily = Abyssinica),
+                    style = MaterialTheme.typography.titleSmall.copy(fontFamily = LocalReadingFont.current),
                     color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier
                         .fillMaxWidth()

@@ -61,8 +61,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             val themeChoice by SettingsRepository.theme(this).collectAsState(initial = ThemeChoice.SYSTEM)
             val language by SettingsRepository.language(this).collectAsState(initial = Language.SYSTEM)
+            val readingFont by SettingsRepository.readingFont(this)
+                .collectAsState(initial = com.agpeya.app.data.ReadingFont.ABYSSINICA)
             AgpeyaTheme(themeChoice = themeChoice) {
-                CompositionLocalProvider(LocalStrings provides stringsFor(language)) {
+                CompositionLocalProvider(
+                    LocalStrings provides stringsFor(language),
+                    com.agpeya.app.ui.theme.LocalReadingFont provides
+                        com.agpeya.app.ui.theme.readingFontFamily(readingFont),
+                ) {
                     AgpeyaNavHost(
                         deepLinkHourId = pendingDeepLinkHourId.value,
                         onDeepLinkHandled = { pendingDeepLinkHourId.value = null },
