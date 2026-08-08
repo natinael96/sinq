@@ -7,6 +7,21 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.6.0] — 2026-08-09
+
+_versionCode 18 · choose your reading font_
+
+### Added
+- **Reading font setting.** Settings now offers four bundled Ethiopic faces
+  beside the Abyssinica SIL default — **Ethiopic Abay Light**, **Bela Bereka**,
+  **Zemenay**, and **Menbere**, all from [Font.et](https://www.font.et/) under
+  the SIL Open Font License. Each row in the picker is rendered in its own face,
+  and the choice applies to every prayer, Psalter, scripture, ስንክሳር, and
+  ውዳሴ ማርያም page. Designers are credited in the README and `docs/fonts/`.
+
+### Notes
+- The APK grows from 4.3 MB to 6.2 MB for the bundled faces.
+
 ## [0.5.2] — 2026-08-08
 
 _versionCode 17 · audit fixes & ዘወትር ጸሎት_
