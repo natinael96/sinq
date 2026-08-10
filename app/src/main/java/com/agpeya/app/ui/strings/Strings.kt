@@ -171,6 +171,14 @@ interface Strings {
     val wudaseLangGeez: String
     val contentUnavailable: String
     val mementoMoriGloss: String
+    val fastingTitle: String
+    val fastingToday: String
+    val fastingNone: String
+    val fastingWeekly: String
+    val fastingWeeklyNote: String
+    fun fastingYearHeader(ethYear: Int): String
+    fun fastingDays(n: Int): String
+    fun fastingDayOf(day: Int, total: Int): String
     val copyAction: String
     val copiedToast: String
     val readingFontTitle: String
@@ -402,6 +410,14 @@ object AmharicStrings : Strings {
     override val wudaseLangGeez = "ግዕዝ"
     override val contentUnavailable = "ይዘቱን ማግኘት አልተቻለም"
     override val mementoMoriGloss = "ሞትን አስብ"
+    override val fastingTitle = "አጽዋማት"
+    override val fastingToday = "ዛሬ"
+    override val fastingNone = "ጾም የለም"
+    override val fastingWeekly = "ጾመ ድህነት (ረቡዕ/ዓርብ)"
+    override val fastingWeeklyNote = "ረቡዕና ዓርብ ዓመቱን ሙሉ የጾም ቀናት ናቸው፤ ከትንሣኤ እስከ ጰራቅሊጦስ ባለው ሃምሳ ቀን ውስጥ ግን አይጾምም።"
+    override fun fastingYearHeader(ethYear: Int) = "የ$ethYear ዓ.ም አጽዋማት"
+    override fun fastingDays(n: Int) = "$n ቀን"
+    override fun fastingDayOf(day: Int, total: Int) = "$day ኛ ቀን ከ$total"
     override val copyAction = "ቅዳ"
     override val copiedToast = "ተቀድቷል"
     override val readingFontTitle = "የንባብ ፊደል"
@@ -639,6 +655,14 @@ object EnglishStrings : Strings {
     override val wudaseLangGeez = "Ge'ez"
     override val contentUnavailable = "Content unavailable"
     override val mementoMoriGloss = "Remember death"
+    override val fastingTitle = "Fasts"
+    override val fastingToday = "Today"
+    override val fastingNone = "No fast today"
+    override val fastingWeekly = "Wednesday/Friday fast"
+    override val fastingWeeklyNote = "Wednesdays and Fridays are fasting days year-round, except in the fifty days between Fasika and Pentecost."
+    override fun fastingYearHeader(ethYear: Int) = "Fasts of $ethYear E.C."
+    override fun fastingDays(n: Int) = "$n days"
+    override fun fastingDayOf(day: Int, total: Int) = "Day $day of $total"
     override val copyAction = "Copy"
     override val copiedToast = "Copied"
     override val readingFontTitle = "Reading font"
