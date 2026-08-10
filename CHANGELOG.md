@@ -7,6 +7,16 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.8.1] — 2026-08-10
+
+_versionCode 22 · አጽዋማት_
+
+### Added
+- **The fasting calendar**, from a button beside search on Home. It shows what's
+  in effect today — a named fast with which day of it you're on, or the ረቡዕ/ዓርብ
+  rule — then every fast of the Ethiopian year with its dates and length:
+  ጾመ ነነዌ, ዐቢይ ጾም, ጾመ ሐዋርያት, ጾመ ፍልሰታ, ጾመ ነቢያት and ጾመ ገሃድ.
+
 ## [0.8.0] — 2026-08-10
 
 _versionCode 21 · search everywhere & reading fixes_

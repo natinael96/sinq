@@ -24,6 +24,7 @@ import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.outlined.Bookmarks
+import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
@@ -73,6 +74,7 @@ private const val PRAYER_AGGREGATE_ID = "prayer"
 fun HomeScreen(
     onOpenHour: (String) -> Unit,
     onOpenSearch: () -> Unit,
+    onOpenFasting: () -> Unit,
     onOpenBookmarks: () -> Unit,
     onOpenPsalter: () -> Unit,
     onOpenWudase: () -> Unit,
@@ -142,6 +144,13 @@ fun HomeScreen(
                         }
                     }
                     Row {
+                        IconButton(onClick = onOpenFasting) {
+                            Icon(
+                                Icons.Outlined.CalendarMonth,
+                                contentDescription = s.fastingTitle,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                         IconButton(onClick = onOpenSearch) {
                             Icon(
                                 Icons.Outlined.Search,

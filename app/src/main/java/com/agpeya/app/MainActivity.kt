@@ -227,6 +227,7 @@ private fun AgpeyaNavHost(
             HomeScreen(
                 onOpenHour = { hourId -> navController.navigate("reading/$hourId") { launchSingleTop = true } },
                 onOpenSearch = { navController.navigate("search") { launchSingleTop = true } },
+                onOpenFasting = { navController.navigate("fasting") { launchSingleTop = true } },
                 onOpenBookmarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
                 onOpenPsalter = { navController.navigate("psalter") { launchSingleTop = true } },
                 onOpenWudase = { navController.navigate("wudase") { launchSingleTop = true } },
@@ -234,6 +235,9 @@ private fun AgpeyaNavHost(
                 onOpenGitsawe = { navController.navigate("gitsawe") { launchSingleTop = true } },
                 onSelectTab = navController::switchTab,
             )
+        }
+        composable("fasting") {
+            com.agpeya.app.ui.fasting.FastingScreen(onBack = { navController.popBackStack() })
         }
         composable("search") {
             SearchScreen(
