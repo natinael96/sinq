@@ -48,6 +48,26 @@ object HabitsRepository {
         }
     }
 
+    /**
+     * Merge a restored [HabitsState] into the device's. Records union per day,
+     * so a day marked done in either place stays done and restoring an old
+     * backup can't erase newer progress. Custom habits are added if missing.
+     */
+    suspend fun merge(context: Context, restored: HabitsState) = update(context) { current ->
+        val records = current.records.toMutableMap()
+        restored.records.forEach { (day, ids) ->
+            records[day] = (records[day] ?: emptySet()) + ids
+        }
+        val knownIds = current.custom.mapTo(mutableSetOf()) { it.id }
+        current.copy(
+            custom = current.custom + restored.custom.filter { it.id !in knownIds },
+            order = current.order.ifEmpty { restored.order },
+            hidden = current.hidden + restored.hidden,
+            names = restored.names + current.names,   // device naming wins
+            records = records,
+        )
+    }
+
     /** Toggle a habit's completion for a given day key ("yyyy-MM-dd"). */
     suspend fun toggle(context: Context, date: String, habitId: String) = update(context) {
         val done = it.records[date] ?: emptySet()

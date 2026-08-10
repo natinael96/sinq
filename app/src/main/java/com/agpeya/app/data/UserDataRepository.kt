@@ -61,6 +61,19 @@ object UserDataRepository {
         }
     }
 
+    /** Add restored bookmarks that aren't already present, keyed by (hour, section). */
+    suspend fun mergeBookmarks(context: Context, restored: List<Bookmark>) {
+        if (restored.isEmpty()) return
+        context.userDataStore.edit { prefs ->
+            val current = prefs[KEY_BOOKMARKS]?.let {
+                runCatching { json.decodeFromString(bookmarkListSerializer, it) }.getOrNull()
+            } ?: emptyList()
+            val have = current.mapTo(mutableSetOf()) { it.hourId to it.sectionId }
+            val next = current + restored.filter { (it.hourId to it.sectionId) !in have }
+            prefs[KEY_BOOKMARKS] = json.encodeToString(bookmarkListSerializer, next)
+        }
+    }
+
     suspend fun removeBookmark(context: Context, hourId: String, sectionId: String) {
         context.userDataStore.edit { prefs ->
             val current = prefs[KEY_BOOKMARKS]?.let {

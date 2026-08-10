@@ -7,6 +7,18 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.8.2] — 2026-08-10
+
+_versionCode 23 · backup & restore_
+
+### Added
+- **Backup and restore** in Settings. Your streak history, bookmarks and
+  highlights save to a file through the system file picker and come back on
+  restore. Restoring **merges** rather than replaces — a day marked done in
+  either the file or on the device stays done — so bringing back an old backup
+  can never erase newer progress. Nothing is uploaded anywhere; the app still
+  has no internet permission.
+
 ## [0.8.1] — 2026-08-10
 
 _versionCode 22 · አጽዋማት_

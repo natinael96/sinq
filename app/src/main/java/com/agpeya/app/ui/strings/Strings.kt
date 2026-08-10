@@ -179,6 +179,13 @@ interface Strings {
     fun fastingYearHeader(ethYear: Int): String
     fun fastingDays(n: Int): String
     fun fastingDayOf(day: Int, total: Int): String
+    val backupTitle: String
+    val backupExport: String
+    val backupImport: String
+    val backupSaved: String
+    val backupFailed: String
+    val restoreDone: String
+    val restoreFailed: String
     val copyAction: String
     val copiedToast: String
     val readingFontTitle: String
@@ -418,6 +425,13 @@ object AmharicStrings : Strings {
     override fun fastingYearHeader(ethYear: Int) = "የ$ethYear ዓ.ም አጽዋማት"
     override fun fastingDays(n: Int) = "$n ቀን"
     override fun fastingDayOf(day: Int, total: Int) = "$day ኛ ቀን ከ$total"
+    override val backupTitle = "ምትኬ"
+    override val backupExport = "ምትኬ አስቀምጥ"
+    override val backupImport = "ከምትኬ መልስ"
+    override val backupSaved = "ምትኬው ተቀምጧል።"
+    override val backupFailed = "ምትኬውን ማስቀመጥ አልተቻለም።"
+    override val restoreDone = "ከምትኬው ተመልሷል።"
+    override val restoreFailed = "ፋይሉን ማንበብ አልተቻለም።"
     override val copyAction = "ቅዳ"
     override val copiedToast = "ተቀድቷል"
     override val readingFontTitle = "የንባብ ፊደል"
@@ -663,6 +677,13 @@ object EnglishStrings : Strings {
     override fun fastingYearHeader(ethYear: Int) = "Fasts of $ethYear E.C."
     override fun fastingDays(n: Int) = "$n days"
     override fun fastingDayOf(day: Int, total: Int) = "Day $day of $total"
+    override val backupTitle = "Backup"
+    override val backupExport = "Save a backup"
+    override val backupImport = "Restore from a backup"
+    override val backupSaved = "Backup saved."
+    override val backupFailed = "Could not save the backup."
+    override val restoreDone = "Restored from the backup."
+    override val restoreFailed = "Could not read that file."
     override val copyAction = "Copy"
     override val copiedToast = "Copied"
     override val readingFontTitle = "Reading font"
