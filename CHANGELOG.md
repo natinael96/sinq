@@ -7,6 +7,27 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.7.0] — 2026-08-09
+
+_versionCode 19 · የዕለቱ ግጻዌ widget & typography polish_
+
+### Added
+- **የዕለቱ ግጻዌ home-screen widget.** Today's ምስባክ and ወንጌል with the Ethiopian
+  date, at a glance; tapping it opens the ግጻዌ screen. It rolls over to the new
+  day's readings at midnight, and adds no weight to the app.
+
+### Changed
+- **The reading fonts now sit together properly.** The bundled faces are not the
+  same size at a given setting — x-heights differ by up to 19% — so pages looked
+  bigger, smaller, or unevenly spaced depending on which font was chosen. Every
+  face now carries a size correction, and line spacing is applied consistently
+  rather than being left to each font's own metrics.
+- **Tighter line spacing** on every reading page — prayers, Psalter, scripture,
+  ስንክሳር, ውዳሴ ማርያም — so more text fits on screen without crowding it. The አርኬ
+  hymn keeps its wider spacing, being verse rather than prose.
+- **The font picker is collapsed by default** in Settings, with the current face
+  named in the header.
+
 ## [0.6.0] — 2026-08-09
 
 _versionCode 18 · choose your reading font_
