@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -26,6 +25,8 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -37,6 +38,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -51,7 +55,6 @@ import androidx.compose.ui.unit.sp
 import com.agpeya.app.data.ContentRepository
 import com.agpeya.app.data.HabitsRepository
 import com.agpeya.app.data.HoursRepository
-import com.agpeya.app.data.UserDataRepository
 import com.agpeya.app.model.HabitsState
 import com.agpeya.app.model.Hour
 import com.agpeya.app.model.HoursConfig
@@ -84,10 +87,8 @@ fun HomeScreen(
         value = ContentRepository.hours(context)
     }
     val hours = remember(builtIn, config) { HoursRepository.merge(builtIn, config, includeHidden = false) }
-    val recentIds by UserDataRepository.recents(context).collectAsState(initial = emptyList())
     val suggestedId = remember { ContentRepository.suggestedHourId(LocalTime.now().hour) }
     val suggested = hours.find { it.id == suggestedId }
-    val recents = recentIds.mapNotNull { id -> hours.find { it.id == id } }
 
     val habitState by HabitsRepository.state(context).collectAsState(initial = HabitsState())
     val today = remember { LocalDate.now() }
@@ -99,6 +100,9 @@ fun HomeScreen(
         listOf(PRAYER_AGGREGATE_ID) + HabitsRepository.orderedHabitIds(habitState, includeHidden = false)
     }
     val doneWithAggregate = if (prayedAnyHour) doneToday + PRAYER_AGGREGATE_ID else doneToday
+    // The hours list is long enough to bury everything under it; collapsing keeps
+    // Home scannable. Expanded by default — it's the app's primary content.
+    var hoursExpanded by rememberSaveable { mutableStateOf(true) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -185,19 +189,6 @@ fun HomeScreen(
                 Spacer(Modifier.height(24.dp))
             }
 
-            if (recents.isNotEmpty()) {
-                item {
-                    Text(s.continueReading, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-                    Spacer(Modifier.height(10.dp))
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items(recents, key = { it.id }) { hour ->
-                            RecentChip(hour = hour, onClick = { onOpenHour(hour.id) })
-                        }
-                    }
-                    Spacer(Modifier.height(24.dp))
-                }
-            }
-
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     LibraryButton(
@@ -226,13 +217,37 @@ fun HomeScreen(
             }
 
             item {
-                Text(s.hoursHeader, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-                Spacer(Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { hoursExpanded = !hoursExpanded }
+                        .padding(vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        s.hoursHeader,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Text(
+                        text = hours.size.toString(),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Icon(
+                        imageVector = if (hoursExpanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
-            items(hours, key = { it.id }) { hour ->
-                HourRow(hour = hour, onClick = { onOpenHour(hour.id) })
-                if (hour.id != hours.lastOrNull()?.id) {
-                    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant, thickness = 1.dp)
+            if (hoursExpanded) {
+                items(hours, key = { it.id }) { hour ->
+                    HourRow(hour = hour, onClick = { onOpenHour(hour.id) })
+                    if (hour.id != hours.lastOrNull()?.id) {
+                        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant, thickness = 1.dp)
+                    }
                 }
             }
             item { Spacer(Modifier.height(24.dp)) }
@@ -249,13 +264,16 @@ private fun NowCard(hour: Hour, onClick: () -> Unit) {
         shape = MaterialTheme.shapes.large,
         color = MaterialTheme.colorScheme.primary,
     ) {
+        // Compact hero: the arrow sits inline with the text rather than claiming
+        // its own row, so the card is roughly a third shorter and the hours list
+        // starts higher up the screen.
         Box(Modifier.fillMaxWidth()) {
             // Soft gold glow, clipped by the card shape.
             Box(
                 Modifier
                     .align(Alignment.TopEnd)
-                    .offset(x = 28.dp, y = (-28).dp)
-                    .size(130.dp)
+                    .offset(x = 24.dp, y = (-24).dp)
+                    .size(104.dp)
                     .background(
                         Brush.radialGradient(
                             listOf(MaterialTheme.colorScheme.secondary.copy(alpha = 0.34f), Color.Transparent),
@@ -263,25 +281,34 @@ private fun NowCard(hour: Hour, onClick: () -> Unit) {
                         CircleShape,
                     ),
             )
-            Column(Modifier.padding(horizontal = 22.dp, vertical = 20.dp)) {
-                Text(
-                    s.nowPrayer,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(hour.name, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onPrimary)
-                if (hour.timeHint.isNotBlank()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        s.nowPrayer,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
+                    )
                     Spacer(Modifier.height(2.dp))
-                    Text(hour.timeHint, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.66f))
+                    Text(hour.name, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onPrimary)
+                    if (hour.timeHint.isNotBlank()) {
+                        Text(
+                            hour.timeHint,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.66f),
+                        )
+                    }
                 }
+                Icon(
+                    Icons.AutoMirrored.Outlined.ArrowForward,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+                )
             }
-            Icon(
-                Icons.AutoMirrored.Outlined.ArrowForward,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
-                modifier = Modifier.align(Alignment.BottomEnd).padding(18.dp),
-            )
         }
     }
 }
@@ -454,22 +481,6 @@ private fun LibraryButton(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun RecentChip(hour: Hour, onClick: () -> Unit) {
-    Surface(
-        onClick = onClick,
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceVariant,
-    ) {
-        Text(
-            text = hour.name,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-        )
     }
 }
 
