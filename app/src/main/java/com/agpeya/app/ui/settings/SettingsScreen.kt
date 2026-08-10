@@ -332,6 +332,7 @@ fun SettingsScreen(
             item {
                 SettingsLink(s.manageHours, onOpenCustomize)
                 SettingsLink(s.reminderModes, onOpenModes)
+                BackupRows(s)
                 SettingsLink(s.tutorial, onOpenTutorial)
                 SettingsLink(s.about, onOpenAbout)
             }
@@ -513,3 +514,50 @@ private fun ReadingFontPicker(
 /** The face's own name, for the collapsed header. */
 private fun fontDisplayName(font: com.agpeya.app.data.ReadingFont): String =
     FONT_CHOICES.firstOrNull { it.first == font }?.second ?: "Abyssinica SIL"
+
+/**
+ * Backup and restore of the things the user can't recover: streak history,
+ * bookmarks, highlights. Written through the system file picker — the app has
+ * no network access, so a backup is simply a file the user keeps.
+ */
+@Composable
+private fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var message by remember { mutableStateOf<String?>(null) }
+
+    val createDoc = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/json"),
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            val today = java.time.LocalDate.now().toString()
+            val ok = com.agpeya.app.data.BackupRepository.writeTo(context, uri, today)
+            message = if (ok) s.backupSaved else s.backupFailed
+        }
+    }
+
+    val openDoc = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            val ok = com.agpeya.app.data.BackupRepository.restore(context, uri)
+            message = if (ok) s.restoreDone else s.restoreFailed
+        }
+    }
+
+    SettingsLink(s.backupExport) {
+        createDoc.launch("sinq-backup-${java.time.LocalDate.now()}.json")
+    }
+    SettingsLink(s.backupImport) { openDoc.launch(arrayOf("application/json", "text/plain", "*/*")) }
+
+    message?.let { text ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { message = null },
+            confirmButton = { TextButton(onClick = { message = null }) { Text(s.ok) } },
+            title = { Text(s.backupTitle) },
+            text = { Text(text) },
+        )
+    }
+}
