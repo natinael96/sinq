@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">ስንቅ</string>
+
+    <!-- Shown in the launcher's widget picker. Amharic, matching the app's default. -->
+    <string name="widget_gitsawe_label">የዕለቱ ግጻዌ</string>
+    <string name="widget_gitsawe_description">የዕለቱን ምስባክና ወንጌል በመነሻ ገጽ ላይ ይመልከቱ።</string>
 </resources>

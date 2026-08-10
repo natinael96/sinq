@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  የዕለቱ ግጻዌ widget. updatePeriodMillis is only a safety net (the system clamps it
+  to ≥30 min and won't wake the device for it) — the real refresh is driven by
+  ACTION_DATE_CHANGED / TIME_SET / boot in the provider's manifest filter, so the
+  widget rolls over to the new day's readings.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="250dp"
+    android:minHeight="110dp"
+    android:targetCellWidth="4"
+    android:targetCellHeight="2"
+    android:minResizeWidth="180dp"
+    android:minResizeHeight="110dp"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="21600000"
+    android:initialLayout="@layout/widget_gitsawe"
+    android:previewLayout="@layout/widget_gitsawe"
+    android:description="@string/widget_gitsawe_description"
+    android:widgetCategory="home_screen" />

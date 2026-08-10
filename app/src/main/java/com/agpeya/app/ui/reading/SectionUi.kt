@@ -52,7 +52,9 @@ import androidx.compose.ui.unit.sp
 import com.agpeya.app.data.HighlightRepository
 import com.agpeya.app.model.Section
 import com.agpeya.app.ui.strings.LocalStrings
-import com.agpeya.app.ui.theme.LocalReadingFont
+import com.agpeya.app.ui.theme.scaledReadingSp
+import com.agpeya.app.ui.theme.inReadingFont
+import com.agpeya.app.ui.theme.readingBodyStyle
 
 /**
  * Section rendering shared by the hour reader and the Psalter: title with
@@ -73,7 +75,7 @@ internal fun SectionView(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = section.title,
-                style = MaterialTheme.typography.titleLarge.copy(fontFamily = LocalReadingFont.current),
+                style = MaterialTheme.typography.titleLarge.inReadingFont(),
                 color = MaterialTheme.colorScheme.secondary,
                 textAlign = TextAlign.Center,
             )
@@ -89,7 +91,7 @@ internal fun SectionView(
         section.subtitle?.let {
             Text(
                 text = it,
-                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = LocalReadingFont.current),
+                style = MaterialTheme.typography.bodyMedium.inReadingFont(),
                 fontStyle = FontStyle.Italic,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -117,11 +119,7 @@ internal fun VerseText(
     citedRange: IntRange = IntRange.EMPTY,
 ) {
     val markerColor = MaterialTheme.colorScheme.secondary
-    val style = MaterialTheme.typography.bodyLarge.copy(
-        fontFamily = LocalReadingFont.current,
-        fontSize = bodyFontSp.sp,
-        lineHeight = (bodyFontSp * 1.85f).sp,
-    )
+    val style = readingBodyStyle(bodyFontSp)
     // One Text per verse so each carries its own highlight background and tap
     // target. (No SelectionContainer — it would swallow the verse taps.)
     Column(Modifier.fillMaxWidth()) {
@@ -130,7 +128,7 @@ internal fun VerseText(
             section.verseHeaders[verseNumber]?.let { header ->
                 Text(
                     text = header,
-                    style = MaterialTheme.typography.titleSmall.copy(fontFamily = LocalReadingFont.current),
+                    style = MaterialTheme.typography.titleSmall.inReadingFont(),
                     color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -144,12 +142,13 @@ internal fun VerseText(
             // own highlight still wins if they've coloured the verse themselves.
             val bg = highlightColor(highlights[verseKey]).takeIf { it != Color.Transparent }
                 ?: if (cited) MaterialTheme.colorScheme.secondary.copy(alpha = 0.30f) else Color.Transparent
-            val annotated = remember(verse, verseNumber, markerColor, bodyFontSp) {
+            val markerSize = scaledReadingSp(bodyFontSp) * 0.58f
+            val annotated = remember(verse, verseNumber, markerColor, markerSize) {
                 buildAnnotatedString {
                     withStyle(
                         SpanStyle(
                             color = markerColor,
-                            fontSize = (bodyFontSp * 0.58f).sp,
+                            fontSize = markerSize,
                             baselineShift = BaselineShift.Superscript,
                         )
                     ) { append(geezNumeral(verseNumber)) }

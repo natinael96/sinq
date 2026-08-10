@@ -81,6 +81,25 @@
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
             </intent-filter>
         </receiver>
+
+        <!-- የዕለቱ ግጻዌ home-screen widget. DATE_CHANGED rolls it over at midnight;
+             the others cover reboots, manual clock changes, and app updates. -->
+        <receiver
+            android:name=".widget.GitsaweWidgetProvider"
+            android:label="@string/widget_gitsawe_label"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.DATE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_gitsawe_info" />
+        </receiver>
     </application>
 
 </manifest>

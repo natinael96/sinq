@@ -71,7 +71,7 @@ import com.agpeya.app.model.Bookmark
 import com.agpeya.app.model.Hour
 import com.agpeya.app.model.HourLayout
 import com.agpeya.app.model.Section
-import com.agpeya.app.ui.theme.LocalReadingFont
+import com.agpeya.app.ui.theme.inReadingFont
 import kotlinx.coroutines.launch
 
 private val FONT_STEPS_SP = listOf(17, 19, 22, 25, 29)
@@ -447,7 +447,7 @@ private fun ContentsSheet(sections: List<Section>, onSelect: (Int) -> Unit) {
             }
             Text(
                 text = section.title,
-                style = MaterialTheme.typography.titleMedium.copy(fontFamily = LocalReadingFont.current),
+                style = MaterialTheme.typography.titleMedium.inReadingFont(),
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -465,7 +465,7 @@ private fun PartHeader(part: String) {
         Spacer(Modifier.height(44.dp))
         Text(
             text = part,
-            style = MaterialTheme.typography.titleLarge.copy(fontFamily = LocalReadingFont.current),
+            style = MaterialTheme.typography.titleLarge.inReadingFont(),
             color = MaterialTheme.colorScheme.secondary,
         )
         Spacer(Modifier.height(6.dp))

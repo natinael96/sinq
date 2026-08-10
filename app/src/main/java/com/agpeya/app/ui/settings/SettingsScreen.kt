@@ -1,5 +1,6 @@
 package com.agpeya.app.ui.settings
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -31,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -110,23 +114,52 @@ fun SettingsScreen(
             }
 
             item {
-                Text(
-                    text = s.readingFontTitle,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                )
-                Text(
-                    text = s.readingFontSubtitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.height(10.dp))
-                // Each row previews itself in its own face — the only honest way to
-                // choose a typeface is to see the script rendered in it.
-                ReadingFontPicker(
-                    selected = readingFont,
-                    onSelect = { scope.launch { SettingsRepository.setReadingFont(context, it) } },
-                )
+                // Collapsed by default — six preview rows would otherwise dominate
+                // the settings screen. The header still names the active face, so
+                // the current choice is visible without expanding.
+                var fontsExpanded by rememberSaveable { mutableStateOf(false) }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { fontsExpanded = !fontsExpanded }
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            text = s.readingFontTitle,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.secondary,
+                        )
+                        Text(
+                            text = fontDisplayName(readingFont),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                        Text(
+                            text = s.readingFontSubtitle,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Icon(
+                        imageVector = if (fontsExpanded) Icons.Outlined.ExpandLess
+                        else Icons.Outlined.ExpandMore,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                AnimatedVisibility(visible = fontsExpanded) {
+                    Column {
+                        Spacer(Modifier.height(10.dp))
+                        // Each row previews itself in its own face — the only honest
+                        // way to choose a typeface is to see the script rendered in it.
+                        ReadingFontPicker(
+                            selected = readingFont,
+                            onSelect = { scope.launch { SettingsRepository.setReadingFont(context, it) } },
+                        )
+                    }
+                }
                 Spacer(Modifier.height(24.dp))
             }
 
@@ -476,3 +509,7 @@ private fun ReadingFontPicker(
         }
     }
 }
+
+/** The face's own name, for the collapsed header. */
+private fun fontDisplayName(font: com.agpeya.app.data.ReadingFont): String =
+    FONT_CHOICES.firstOrNull { it.first == font }?.second ?: "Abyssinica SIL"

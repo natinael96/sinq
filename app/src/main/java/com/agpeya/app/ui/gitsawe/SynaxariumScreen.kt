@@ -58,7 +58,9 @@ import com.agpeya.app.ui.common.formatEthiopian
 import com.agpeya.app.ui.reading.FontSizeActions
 import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
-import com.agpeya.app.ui.theme.LocalReadingFont
+import com.agpeya.app.ui.theme.scaledReadingSp
+import com.agpeya.app.ui.theme.inReadingFont
+import com.agpeya.app.ui.theme.readingBodyStyle
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -66,6 +68,9 @@ private val FONT_STEPS_SP = listOf(17, 19, 22, 25, 29)
 
 /** Warm liturgical red for the አርኬ hymn — distinct from the app's gold accent. */
 private val ArkeRed = androidx.compose.ui.graphics.Color(0xFFF0776A)
+
+/** The hymn is verse, not prose: a little more air than the running text. */
+private const val ArkeLineHeight = 1.78f
 
 /** ስንክሳር — the day's synaxarium commemorations for [epochDay]. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -229,11 +234,7 @@ private fun ClosingPrayer(fontSp: Int) {
         SYNAXARIUM_CLOSING_STANZAS.forEach { stanza ->
             Text(
                 text = highlightHolyNames(stanza, ArkeRed),
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    fontFamily = LocalReadingFont.current,
-                    fontSize = fontSp.sp,
-                    lineHeight = (fontSp * 1.95f).sp,
-                ),
+                style = readingBodyStyle(fontSp),
                 color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Justify,
                 modifier = Modifier.fillMaxWidth(),
@@ -241,11 +242,7 @@ private fun ClosingPrayer(fontSp: Int) {
         }
         Text(
             text = SYNAXARIUM_CLOSING_CODA,
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontFamily = LocalReadingFont.current,
-                fontSize = fontSp.sp,
-                lineHeight = (fontSp * 1.95f).sp,
-            ),
+            style = readingBodyStyle(fontSp),
             color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
         )
@@ -270,7 +267,7 @@ private fun highlightHolyNames(text: String, color: Color): AnnotatedString =
 private fun EntryTitle(title: String) {
     Text(
         text = title,
-        style = MaterialTheme.typography.titleMedium.copy(fontFamily = LocalReadingFont.current),
+        style = MaterialTheme.typography.titleMedium.inReadingFont(),
         color = MaterialTheme.colorScheme.secondary,
         textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
@@ -286,17 +283,13 @@ private fun NarrativePara(number: Int, text: String, fontSp: Int) {
             withStyle(
                 SpanStyle(
                     color = MaterialTheme.colorScheme.secondary,
-                    fontSize = (fontSp * 0.85f).sp,
+                    fontSize = scaledReadingSp(fontSp) * 0.85f,
                 ),
             ) { append(geezNumeral(number)) }
             append("  ")
             append(text)
         },
-        style = MaterialTheme.typography.bodyLarge.copy(
-            fontFamily = LocalReadingFont.current,
-            fontSize = fontSp.sp,
-            lineHeight = (fontSp * 1.9f).sp,
-        ),
+        style = readingBodyStyle(fontSp),
         color = MaterialTheme.colorScheme.onBackground,
         textAlign = TextAlign.Justify,
         modifier = Modifier.fillMaxWidth().padding(bottom = 18.dp),
@@ -308,7 +301,7 @@ private fun NarrativePara(number: Int, text: String, fontSp: Int) {
 private fun ArkeLabel(text: String) {
     Text(
         text = text,
-        style = MaterialTheme.typography.labelLarge.copy(fontFamily = LocalReadingFont.current),
+        style = MaterialTheme.typography.labelLarge.inReadingFont(),
         color = ArkeRed,
         textAlign = TextAlign.Center,
         letterSpacing = 6.sp,
@@ -321,12 +314,7 @@ private fun ArkeLabel(text: String) {
 private fun ArkeVerse(text: String, fontSp: Int) {
     Text(
         text = text,
-        style = MaterialTheme.typography.bodyLarge.copy(
-            fontFamily = LocalReadingFont.current,
-            fontStyle = FontStyle.Italic,
-            fontSize = fontSp.sp,
-            lineHeight = (fontSp * 2.0f).sp,
-        ),
+        style = readingBodyStyle(fontSp, ArkeLineHeight).copy(fontStyle = FontStyle.Italic),
         color = ArkeRed,
         textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 2.dp),
@@ -360,11 +348,7 @@ private fun ScriptureBody(
         .joinToString("\n\n") { it.text }
     Text(
         text = quote,
-        style = MaterialTheme.typography.bodyLarge.copy(
-            fontFamily = LocalReadingFont.current,
-            fontSize = fontSp.sp,
-            lineHeight = (fontSp * 1.9f).sp,
-        ),
+        style = readingBodyStyle(fontSp),
         color = MaterialTheme.colorScheme.onBackground,
         textAlign = TextAlign.Justify,
         modifier = Modifier
