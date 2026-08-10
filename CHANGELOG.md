@@ -7,6 +7,20 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.7.1] — 2026-08-09
+
+_versionCode 20 · memento mori & a roomier Home_
+
+### Added
+- **The app opens on _memento mori_** (ሞትን አስብ) — the monastic reminder, held
+  for a moment, tap to move on.
+
+### Changed
+- **The hours list is collapsible** from its header on Home, with the count
+  shown beside it. Expanded by default.
+- **The "prayer for now" card is about a third shorter**, and the "Continue"
+  strip is gone — so the hours start much higher up the screen.
+
 ## [0.7.0] — 2026-08-09
 
 _versionCode 19 · የዕለቱ ግጻዌ widget & typography polish_
