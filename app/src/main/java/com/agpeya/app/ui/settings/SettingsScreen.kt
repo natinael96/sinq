@@ -27,6 +27,7 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -452,7 +453,6 @@ private val FONT_CHOICES = listOf(
     com.agpeya.app.data.ReadingFont.ABAY_LIGHT to "Ethiopic Abay Light",
     com.agpeya.app.data.ReadingFont.BELA_BEREKA to "Bela Bereka",
     com.agpeya.app.data.ReadingFont.ZEMENAY to "Zemenay",
-    com.agpeya.app.data.ReadingFont.MENBERE to "Menbere",
 )
 
 /** A sample line of the script the choice actually affects. */

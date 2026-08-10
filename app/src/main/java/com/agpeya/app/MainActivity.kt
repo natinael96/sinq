@@ -203,9 +203,15 @@ private fun AgpeyaNavHost(
         }
     }
 
+    // Freeze the start destination at the first resolved value. Finishing
+    // onboarding writes the flag asynchronously; when that emits, `ready` flips
+    // and an expression here would re-anchor the graph under the user — who may
+    // by then have navigated somewhere else. The intro navigates on explicitly.
+    val startDestination = rememberSaveable { if (ready) Tab.HOME.route else "intro" }
+
     NavHost(
         navController = navController,
-        startDestination = if (ready) Tab.HOME.route else "intro",
+        startDestination = startDestination,
     ) {
         composable("intro") {
             com.agpeya.app.ui.intro.IntroScreen(
@@ -233,25 +239,32 @@ private fun AgpeyaNavHost(
             SearchScreen(
                 onBack = { navController.popBackStack() },
                 onOpenResult = { result ->
-                    when (result.source) {
-                        com.agpeya.app.search.AmharicSearch.Source.HOUR ->
-                            navController.navigate("reading/${result.targetId}?section=${result.targetIndex}") { launchSingleTop = true }
+                    // Newer corpora carry their own route; the original two are
+                    // still addressed by (targetId, targetIndex).
+                    val route = result.route ?: when (result.source) {
                         com.agpeya.app.search.AmharicSearch.Source.PSALTER ->
-                            navController.navigate("psalter?section=${result.targetIndex}") { launchSingleTop = true }
+                            "psalter?section=${result.targetIndex}"
+                        else ->
+                            "reading/${result.targetId}?section=${result.targetIndex}"
                     }
+                    runCatching { navController.navigate(route) { launchSingleTop = true } }
                 },
             )
         }
         composable("bookmarks") {
             BookmarksScreen(
                 onBack = { navController.popBackStack() },
-                onOpen = { hourId, index ->
+                onOpen = { hourId, index, sectionId ->
                     // Psalter bookmarks live under a pseudo hour id and open the
                     // Psalter screen, not the hour reader.
                     if (hourId == com.agpeya.app.ui.psalter.PSALTER_BOOKMARK_ID) {
                         navController.navigate("psalter?section=$index") { launchSingleTop = true }
                     } else {
-                        navController.navigate("reading/$hourId?section=$index") { launchSingleTop = true }
+                        // Open by section id — a stored index goes stale the moment
+                        // the user reorders or hides sections in that hour.
+                        navController.navigate(
+                            "reading/$hourId?section=$index&sectionId=${android.net.Uri.encode(sectionId)}",
+                        ) { launchSingleTop = true }
                     }
                 },
                 // Persisted bookmark routes are raw strings replayed verbatim; if a
@@ -354,19 +367,21 @@ private fun AgpeyaNavHost(
             )
         }
         composable(
-            route = "reading/{hourId}?section={section}",
+            route = "reading/{hourId}?section={section}&sectionId={sectionId}",
             arguments = listOf(
                 navArgument("hourId") { type = NavType.StringType },
                 navArgument("section") { type = NavType.IntType; defaultValue = -1 },
+                navArgument("sectionId") { type = NavType.StringType; nullable = true; defaultValue = null },
             ),
         ) { backStackEntry ->
             ReadingScreen(
                 hourId = backStackEntry.arguments?.getString("hourId") ?: "morning",
                 initialSectionIndex = backStackEntry.arguments?.getInt("section") ?: -1,
+                initialSectionId = backStackEntry.arguments?.getString("sectionId"),
                 onBack = { navController.popBackStack() },
                 onSwitchHour = { id ->
                     navController.navigate("reading/$id") {
-                        popUpTo("reading/{hourId}?section={section}") { inclusive = true }
+                        popUpTo("reading/{hourId}?section={section}&sectionId={sectionId}") { inclusive = true }
                     }
                 },
             )

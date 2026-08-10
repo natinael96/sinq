@@ -68,7 +68,16 @@ fun SearchScreen(
             results = emptyList()
         } else {
             delay(180) // debounce
-            results = AmharicSearch.search(context, query, s.psalterTitle)
+            results = AmharicSearch.search(
+                context,
+                query,
+                AmharicSearch.Labels(
+                    psalter = s.psalterTitle,
+                    scripture = s.scripturesTitle,
+                    synaxarium = s.synaxariumTitle,
+                    wudase = s.wudaseMariam,
+                ),
+            )
         }
     }
 

@@ -7,6 +7,29 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.8.0] — 2026-08-10
+
+_versionCode 21 · search everywhere & reading fixes_
+
+### Added
+- **Search now reaches the whole app** — the New Testament, all 1,817 ስንክሳር
+  commemorations, and ውዳሴ ማርያም join the prayer hours and Psalter.
+- **Copy and share** — a tapped verse can be copied or shared, a ግጻዌ day shares
+  its ነግህ and ቅዳሴ readings, and a scripture chapter shares in full. Shared text
+  is signed "— ስንቅ".
+
+### Changed
+- **A ግጻዌ citation now highlights as one block** instead of a separate box per
+  verse, in both the prayer/Psalter reader and the scripture reader.
+- **The ስንክሳር closing ጸሎት reads as a coda** — smaller and tightly set, rather
+  than claiming a screenful at the end of every day.
+- **The About page is tighter**, and the Menbere font is removed.
+
+### Fixed
+- Bookmarks open the right section again after you reorder or hide sections in
+  an hour; they now follow the section itself rather than its position.
+- Finishing the first-run intro no longer re-anchors the navigation graph.
+
 ## [0.7.1] — 2026-08-09
 
 _versionCode 20 · memento mori & a roomier Home_

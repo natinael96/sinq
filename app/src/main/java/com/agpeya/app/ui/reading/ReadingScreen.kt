@@ -90,6 +90,9 @@ private fun Context.findActivity(): Activity? {
 fun ReadingScreen(
     hourId: String,
     initialSectionIndex: Int = -1,
+    /** Preferred over [initialSectionIndex]: section ids are permanent, while an
+     *  index shifts as soon as the user reorders or hides sections. */
+    initialSectionId: String? = null,
     onBack: () -> Unit,
     onSwitchHour: (String) -> Unit = {},
 ) {
@@ -145,13 +148,17 @@ fun ReadingScreen(
         val h = hour ?: return@LaunchedEffect
         if (sections.isEmpty()) return@LaunchedEffect
         UserDataRepository.recordRecent(context, h.id)
-        // A search/bookmark target is an index into the full section list; translate
-        // it to the displayed (customized) list by section id.
-        anchor = if (initialSectionIndex >= 0) {
-            val targetId = h.sections.getOrNull(initialSectionIndex)?.id
-            sections.indexOfFirst { it.id == targetId }.takeIf { it >= 0 } ?: 0
-        } else {
-            UserDataRepository.savedPosition(context, h.id).coerceIn(0, sections.size - 1)
+        // Resolve the target to the displayed (customized) list. A section id is
+        // exact; the legacy index is a fallback for bookmarks saved before ids
+        // were passed, and only means anything against the full section list.
+        anchor = when {
+            initialSectionId != null ->
+                sections.indexOfFirst { it.id == initialSectionId }.takeIf { it >= 0 } ?: 0
+            initialSectionIndex >= 0 -> {
+                val targetId = h.sections.getOrNull(initialSectionIndex)?.id
+                sections.indexOfFirst { it.id == targetId }.takeIf { it >= 0 } ?: 0
+            }
+            else -> UserDataRepository.savedPosition(context, h.id).coerceIn(0, sections.size - 1)
         }
     }
 
@@ -300,6 +307,7 @@ fun ReadingScreen(
                     if (key != null) scope.launch { HighlightRepository.setHighlight(context, key, colorKey) }
                 },
                 onDismiss = { selectedVerseKey = null },
+                shareText = com.agpeya.app.ui.reading.verseShareText(sections, selectedVerseKey),
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
         }

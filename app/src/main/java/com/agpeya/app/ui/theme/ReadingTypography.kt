@@ -16,12 +16,12 @@ import androidx.compose.ui.unit.sp
  * Two things make this necessary:
  *
  *  1. **The faces are not the same size at the same `sp`.** Their x-heights
- *     differ by up to 19% (Menbere 0.570 em vs Abyssinica 0.480 em), so a page
+ *     differ by up to 10% (Zemenay 0.528 em vs Abyssinica 0.480 em), so a page
  *     set at 19sp looks noticeably bigger or smaller purely from the choice of
  *     font. [opticalScale] normalizes that against Abyssinica, the default.
  *
  *  2. **Their vertical metrics differ even more** (total line box ranges from
- *     0.88 em to 1.72 em). Left alone, Android derives line spacing from those
+ *     0.88 em to 1.41 em). Left alone, Android derives line spacing from those
  *     metrics and the same `lineHeight` yields visibly different leading per
  *     font. Turning off the legacy font padding and centering the line box makes
  *     the requested `lineHeight` authoritative instead of advisory.
@@ -32,7 +32,6 @@ private fun opticalScale(family: FontFamily): Float = when (family) {
     AbayLight -> 1.05f     // x-height 0.459 em — runs small
     BelaBereka -> 0.96f    // 0.500 em
     Zemenay -> 0.91f       // 0.528 em
-    Menbere -> 0.84f       // 0.570 em — runs large
     else -> 1f             // Abyssinica SIL, the baseline
 }
 
@@ -98,7 +97,7 @@ fun scaledReadingSp(fontSp: Int): TextUnit = (fontSp * opticalScale(LocalReading
 /**
  * Re-cast a Material type-scale style (a section title, a psalm heading) in the
  * reader's face. Applies the same optical correction and even line distribution
- * as the body, so a heading in Menbere doesn't tower over one in Abay Light.
+ * as the body, so a heading in Zemenay doesn't tower over one in Abay Light.
  */
 @Composable
 @ReadOnlyComposable

@@ -2,7 +2,13 @@ package com.agpeya.app.search
 
 import android.content.Context
 import com.agpeya.app.data.ContentRepository
+import com.agpeya.app.data.ScriptureRepository
+import com.agpeya.app.data.SynaxariumRepository
+import com.agpeya.app.data.WudaseRepository
 import com.agpeya.app.model.Section
+import com.agpeya.app.ui.common.EthiopianDate
+import com.agpeya.app.ui.reading.geezNumeral
+import java.time.LocalDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -34,7 +40,7 @@ object AmharicSearch {
     }
 
     /** Where a result came from — lets the UI label it and route the tap. */
-    enum class Source { HOUR, PSALTER }
+    enum class Source { HOUR, PSALTER, SCRIPTURE, SYNAXARIUM, WUDASE }
 
     data class Result(
         val source: Source,
@@ -49,9 +55,95 @@ object AmharicSearch {
         /** Match offset within [snippet] for highlighting; -1 if not locatable. */
         val snippetMatchStart: Int,
         val snippetMatchLen: Int,
+        /** A ready navigation route. Sources added after the original two carry
+         *  one instead of being decoded from [targetId]/[targetIndex]. */
+        val route: String? = null,
     )
 
-    suspend fun search(context: Context, rawQuery: String, psalterLabel: String): List<Result> {
+    /** Per-source result cap, so one huge corpus can't crowd out the others. */
+    private const val PER_SOURCE_LIMIT = 40
+
+    /**
+     * One searchable unit of a bundled corpus, with its haystack pre-folded.
+     *
+     * The scripture, ስንክሳር and ውዳሴ ማርያም corpora together are megabytes of text;
+     * folding them on every keystroke would allocate all of it each time. They're
+     * folded once into [Doc]s and kept for the process lifetime instead.
+     */
+    private class Doc(
+        val source: Source,
+        val targetId: String,
+        val targetIndex: Int,
+        val title: String,
+        val route: String,
+        val haystack: String,
+        val folded: String,
+    )
+
+    @Volatile private var docIndex: List<Doc>? = null
+
+    /** Build (once) the folded index over the bundled corpora. */
+    private suspend fun index(context: Context): List<Doc> =
+        docIndex ?: buildIndex(context).also { docIndex = it }
+
+    private suspend fun buildIndex(context: Context): List<Doc> {
+        val docs = mutableListOf<Doc>()
+
+        for (meta in ScriptureRepository.books(context)) {
+            val book = ScriptureRepository.book(context, meta.key) ?: continue
+            for (chapter in book.chapters) {
+                val hay = chapter.verses.joinToString(" ") { it.text }
+                docs += Doc(
+                    source = Source.SCRIPTURE,
+                    targetId = meta.key,
+                    targetIndex = chapter.chapter,
+                    title = "${book.nameAm} ${geezNumeral(chapter.chapter)}",
+                    route = "scripture/${meta.key}/${chapter.chapter}",
+                    haystack = hay,
+                    folded = fold(hay),
+                )
+            }
+        }
+
+        // The ስንክሳር is keyed by Ethiopian month/day; the route resolves to the
+        // Gregorian date that day falls on in the current Ethiopian year.
+        val ethYear = EthiopianDate.from(LocalDate.now()).year
+        for (month in 1..13) {
+            for (day in SynaxariumRepository.month(context, month)) {
+                val epochDay = runCatching {
+                    EthiopianDate(ethYear, month, day.day).toGregorian().toEpochDay()
+                }.getOrNull() ?: continue
+                for (entry in day.entries) {
+                    val hay = entry.title + " " + entry.text
+                    docs += Doc(
+                        source = Source.SYNAXARIUM,
+                        targetId = "$month-${day.day}",
+                        targetIndex = day.day,
+                        title = com.agpeya.app.ui.gitsawe.cleanSynaxariumText(entry.title),
+                        route = "synaxarium/$epochDay",
+                        haystack = hay,
+                        folded = fold(hay),
+                    )
+                }
+            }
+        }
+
+        for (section in WudaseRepository.load(context).sections) {
+            val hay = (section.am + section.ge).joinToString(" ")
+            docs += Doc(
+                source = Source.WUDASE,
+                targetId = section.id,
+                targetIndex = 0,
+                title = section.titleAm.ifBlank { section.label },
+                route = "wudase?sec=${section.id}",
+                haystack = hay,
+                folded = fold(hay),
+            )
+        }
+        return docs
+    }
+
+    suspend fun search(context: Context, rawQuery: String, labels: Labels): List<Result> {
         val query = rawQuery.trim()
         if (query.length < 2) return emptyList()
         val needle = fold(query)
@@ -79,7 +171,7 @@ object AmharicSearch {
                     results += Result(
                         source = Source.PSALTER,
                         targetId = "",
-                        sourceLabel = psalterLabel,
+                        sourceLabel = labels.psalter,
                         targetIndex = index,
                         title = psalm.title,
                         snippet = snip.text,
@@ -88,8 +180,53 @@ object AmharicSearch {
                     )
                 }
             }
+
+            results += searchBundled(context, needle, query.length, labels)
             results
         }
+    }
+
+    /** Display labels for the corpora, passed in so search stays UI-agnostic. */
+    data class Labels(
+        val psalter: String,
+        val scripture: String,
+        val synaxarium: String,
+        val wudase: String,
+    )
+
+    /** One pass over the pre-folded index, capped per source. */
+    private suspend fun searchBundled(
+        context: Context,
+        needle: String,
+        matchLen: Int,
+        labels: Labels,
+    ): List<Result> {
+        val counts = mutableMapOf<Source, Int>()
+        val out = mutableListOf<Result>()
+        for (doc in index(context)) {
+            if ((counts[doc.source] ?: 0) >= PER_SOURCE_LIMIT) continue
+            val hit = doc.folded.indexOf(needle)
+            if (hit < 0) continue
+            val snip = snippet(doc.haystack, hit, matchLen)
+            val label = when (doc.source) {
+                Source.SCRIPTURE -> labels.scripture
+                Source.SYNAXARIUM -> labels.synaxarium
+                else -> labels.wudase
+            }
+            out += Result(
+                source = doc.source,
+                targetId = doc.targetId,
+                sourceLabel = label,
+                targetIndex = doc.targetIndex,
+                title = doc.title.ifBlank { label },
+                snippet = snip.text,
+                snippetMatchStart = snip.matchStart,
+                snippetMatchLen = snip.matchLen,
+                route = doc.route,
+            )
+            counts[doc.source] = (counts[doc.source] ?: 0) + 1
+        }
+        return out
     }
 
     /** Text of a section, searchable as one blob (title + subtitle + verses). */
