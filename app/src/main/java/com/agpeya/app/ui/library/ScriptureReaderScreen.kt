@@ -57,7 +57,9 @@ import com.agpeya.app.model.Bookmark
 import com.agpeya.app.model.ScriptureBook
 import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.theme.scaledReadingSp
 import com.agpeya.app.ui.theme.LocalReadingFont
+import com.agpeya.app.ui.theme.readingBodyStyle
 import kotlinx.coroutines.launch
 
 private val FONT_STEPS_SP = listOf(17, 19, 22, 25, 29)
@@ -214,7 +216,7 @@ fun ScriptureReaderScreen(
                     withStyle(
                         SpanStyle(
                             color = MaterialTheme.colorScheme.secondary,
-                            fontSize = (bodyFontSp * 0.58f).sp,
+                            fontSize = scaledReadingSp(bodyFontSp) * 0.58f,
                             baselineShift = BaselineShift.Superscript,
                         )
                     ) { append(geezNumeral(verse.n)) }
@@ -223,11 +225,7 @@ fun ScriptureReaderScreen(
                 }
                 Text(
                     text = annotated,
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontFamily = LocalReadingFont.current,
-                        fontSize = bodyFontSp.sp,
-                        lineHeight = (bodyFontSp * 1.85f).sp,
-                    ),
+                    style = readingBodyStyle(bodyFontSp),
                     color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier
                         .fillMaxWidth()

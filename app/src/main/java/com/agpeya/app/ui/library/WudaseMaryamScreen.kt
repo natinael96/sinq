@@ -53,7 +53,8 @@ import com.agpeya.app.model.WudaseContent
 import com.agpeya.app.model.WudaseSection
 import com.agpeya.app.ui.reading.FontSizeActions
 import com.agpeya.app.ui.strings.LocalStrings
-import com.agpeya.app.ui.theme.LocalReadingFont
+import com.agpeya.app.ui.theme.inReadingFont
+import com.agpeya.app.ui.theme.readingBodyStyle
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -156,7 +157,7 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
                 item(key = "title") {
                     Text(
                         text = if (geez) section.titleGe else section.titleAm,
-                        style = MaterialTheme.typography.titleMedium.copy(fontFamily = LocalReadingFont.current),
+                        style = MaterialTheme.typography.titleMedium.inReadingFont(),
                         color = MaterialTheme.colorScheme.secondary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 14.dp),
@@ -166,11 +167,7 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
                 items(stanzas.size, key = { "st_$it" }) { i ->
                     Text(
                         text = stanzas[i],
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontFamily = LocalReadingFont.current,
-                            fontSize = bodyFontSp.sp,
-                            lineHeight = (bodyFontSp * 1.9f).sp,
-                        ),
+                        style = readingBodyStyle(bodyFontSp),
                         color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                     )
@@ -181,7 +178,7 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
                     Spacer(Modifier.height(12.dp))
                     Text(
                         text = data.attribution,
-                        style = MaterialTheme.typography.labelSmall.copy(fontFamily = LocalReadingFont.current),
+                        style = MaterialTheme.typography.labelSmall.inReadingFont(),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
@@ -222,7 +219,7 @@ private fun ToggleHalf(label: String, selected: Boolean, modifier: Modifier, onC
     ) {
         Text(
             label,
-            style = MaterialTheme.typography.labelLarge.copy(fontFamily = LocalReadingFont.current),
+            style = MaterialTheme.typography.labelLarge.inReadingFont(),
             color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
@@ -256,7 +253,7 @@ private fun SectionStrip(sections: List<WudaseSection>, selected: Int, onSelect:
             ) {
                 Text(
                     sec.label,
-                    style = MaterialTheme.typography.labelLarge.copy(fontFamily = LocalReadingFont.current),
+                    style = MaterialTheme.typography.labelLarge.inReadingFont(),
                     fontWeight = if (isSel) FontWeight.SemiBold else FontWeight.Normal,
                     color = if (isSel) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
