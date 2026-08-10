@@ -12,6 +12,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
 import com.agpeya.app.data.Language
 import com.agpeya.app.ui.strings.AmharicStrings
@@ -69,6 +71,11 @@ class MainActivity : ComponentActivity() {
                     com.agpeya.app.ui.theme.LocalReadingFont provides
                         com.agpeya.app.ui.theme.readingFontFamily(readingFont),
                 ) {
+                    // The opening reminder sits over the graph rather than inside
+                    // it: the start destination already flips once onboarding
+                    // resolves, and a third destination in that race would be
+                    // fragile. Once per activity launch.
+                    var opened by rememberSaveable { mutableStateOf(false) }
                     AgpeyaNavHost(
                         deepLinkHourId = pendingDeepLinkHourId.value,
                         onDeepLinkHandled = { pendingDeepLinkHourId.value = null },
@@ -77,6 +84,9 @@ class MainActivity : ComponentActivity() {
                         openGitsawe = pendingOpenGitsawe.value,
                         onGitsaweHandled = { pendingOpenGitsawe.value = false },
                     )
+                    if (!opened) {
+                        com.agpeya.app.ui.intro.MementoMoriScreen(onDone = { opened = true })
+                    }
                 }
             }
         }

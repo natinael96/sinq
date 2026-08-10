@@ -170,6 +170,7 @@ interface Strings {
     val wudaseLangAmharic: String
     val wudaseLangGeez: String
     val contentUnavailable: String
+    val mementoMoriGloss: String
     val readingFontTitle: String
     val readingFontSubtitle: String
     val fontAbyssinica: String
@@ -398,6 +399,7 @@ object AmharicStrings : Strings {
     override val wudaseLangAmharic = "አማርኛ"
     override val wudaseLangGeez = "ግዕዝ"
     override val contentUnavailable = "ይዘቱን ማግኘት አልተቻለም"
+    override val mementoMoriGloss = "ሞትን አስብ"
     override val readingFontTitle = "የንባብ ፊደል"
     override val readingFontSubtitle = "የጸሎት ጽሑፍ ፊደል"
     override val fontAbyssinica = "አቢሲኒካ"
@@ -633,6 +635,7 @@ object EnglishStrings : Strings {
     override val wudaseLangAmharic = "Amharic"
     override val wudaseLangGeez = "Ge'ez"
     override val contentUnavailable = "Content unavailable"
+    override val mementoMoriGloss = "Remember death"
     override val readingFontTitle = "Reading font"
     override val readingFontSubtitle = "Font for prayer text"
     override val fontAbyssinica = "Abyssinica"
