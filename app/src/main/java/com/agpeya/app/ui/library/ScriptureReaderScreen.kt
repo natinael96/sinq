@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -130,14 +131,34 @@ fun ScriptureReaderScreen(
             startN..endN
         }
     }
+    // Verses grouped into rows: the cited run becomes one row, everything else
+    // stays a row of its own, so the highlight can be drawn around the group.
+    val rows = remember(current, highlightRange) {
+        buildList {
+            val vs = current.verses
+            var i = 0
+            while (i < vs.size) {
+                if (vs[i].n in highlightRange) {
+                    var j = i
+                    while (j + 1 < vs.size && vs[j + 1].n in highlightRange) j++
+                    add(vs.subList(i, j + 1))
+                    i = j + 1
+                } else {
+                    add(listOf(vs[i]))
+                    i++
+                }
+            }
+        }
+    }
     val listState = rememberLazyListState()
 
     // Land on the cited verse when opened from a reading link — once. Without the
     // guard, paging away and back to this chapter re-ran the jump mid-reading.
     var landed by rememberSaveable(bookKey) { mutableStateOf(false) }
-    androidx.compose.runtime.LaunchedEffect(current, highlightRange) {
+    androidx.compose.runtime.LaunchedEffect(current, highlightRange, rows) {
         if (!landed && !highlightRange.isEmpty()) {
-            val idx = current.verses.indexOfFirst { it.n >= highlightRange.first }
+            // Index into `rows`, not verses — the cited run collapses into one row.
+            val idx = rows.indexOfFirst { row -> row.any { it.n >= highlightRange.first } }
             if (idx >= 0) listState.scrollToItem(idx + 1)   // +1 for the chapter-strip header item
             landed = true
         }
@@ -165,6 +186,19 @@ fun ScriptureReaderScreen(
                 actions = {
                     val sectionId = "scripture:$bookKey:$chapter"
                     val marked = sectionId in bookmarkedIds
+                    IconButton(onClick = {
+                        val heading = "${b.nameAm} ${s.chapterUnit} ${geezNumeral(chapter)}"
+                        val body = heading + "\n\n" + current.verses.joinToString("\n") {
+                            "${geezNumeral(it.n)}  ${it.text}"
+                        }
+                        com.agpeya.app.ui.common.Sharing.share(context, body, heading)
+                    }) {
+                        Icon(
+                            Icons.Outlined.Share,
+                            contentDescription = s.shareAction,
+                            tint = MaterialTheme.colorScheme.onBackground,
+                        )
+                    }
                     IconButton(onClick = {
                         scope.launch {
                             UserDataRepository.toggleBookmark(
@@ -210,40 +244,44 @@ fun ScriptureReaderScreen(
                 )
                 Spacer(Modifier.height(8.dp))
             }
-            items(current.verses, key = { it.n }) { verse ->
-                val tinted = verse.n in highlightRange
-                val annotated = buildAnnotatedString {
-                    withStyle(
-                        SpanStyle(
-                            color = MaterialTheme.colorScheme.secondary,
-                            fontSize = scaledReadingSp(bodyFontSp) * 0.58f,
-                            baselineShift = BaselineShift.Superscript,
-                        )
-                    ) { append(geezNumeral(verse.n)) }
-                    append("  ")
-                    append(verse.text)
+            // The cited verses are emitted as ONE row so the citation reads as a
+            // single tinted block instead of a stack of separate boxes.
+            items(rows, key = { it.first().n }) { row ->
+                val tinted = row.first().n in highlightRange
+                val body = @Composable { verse: com.agpeya.app.model.ScriptureVerse ->
+                    val annotated = buildAnnotatedString {
+                        withStyle(
+                            SpanStyle(
+                                color = MaterialTheme.colorScheme.secondary,
+                                fontSize = scaledReadingSp(bodyFontSp) * 0.58f,
+                                baselineShift = BaselineShift.Superscript,
+                            )
+                        ) { append(geezNumeral(verse.n)) }
+                        append("  ")
+                        append(verse.text)
+                    }
+                    Text(
+                        text = annotated,
+                        style = readingBodyStyle(bodyFontSp),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                    )
                 }
-                Text(
-                    text = annotated,
-                    style = readingBodyStyle(bodyFontSp),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 2.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(
-                            if (tinted) MaterialTheme.colorScheme.secondary.copy(alpha = 0.30f)
-                            else androidx.compose.ui.graphics.Color.Transparent,
-                        )
-                        .then(
-                            if (tinted) Modifier.border(
-                                1.5.dp,
-                                MaterialTheme.colorScheme.secondary,
-                                RoundedCornerShape(8.dp),
-                            ) else Modifier
-                        )
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                )
+                if (tinted) {
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 2.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.30f))
+                            .border(1.5.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(10.dp))
+                            .padding(vertical = 4.dp),
+                    ) { row.forEach { body(it) } }
+                } else {
+                    Column(Modifier.fillMaxWidth().padding(vertical = 2.dp)) { row.forEach { body(it) } }
+                }
             }
             item { Spacer(Modifier.height(48.dp)) }
         }

@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.EditCalendar
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -103,6 +104,7 @@ fun GitsaweScreen(
         }
     }
     var selected by rememberSaveable(epochDay, sources.size) { mutableIntStateOf(0) }
+    val active = sources.getOrNull(selected.coerceIn(0, (sources.size - 1).coerceAtLeast(0)))
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -124,6 +126,16 @@ fun GitsaweScreen(
                     }
                 },
                 actions = {
+                    val ctx = LocalContext.current
+                    IconButton(
+                        onClick = {
+                            val body = gitsaweShareText(active?.services, active?.subtitle, formatEthiopian(date, s), s)
+                            com.agpeya.app.ui.common.Sharing.share(ctx, body, s.gitsaweTitle)
+                        },
+                        enabled = active != null,
+                    ) {
+                        Icon(Icons.Outlined.Share, contentDescription = s.shareAction)
+                    }
                     IconButton(onClick = { showPicker = true }) {
                         Icon(Icons.Outlined.EditCalendar, contentDescription = s.gitsaweChangeDay)
                     }
@@ -138,7 +150,6 @@ fun GitsaweScreen(
                 contentAlignment = Alignment.Center,
             ) { CircularProgressIndicator(color = MaterialTheme.colorScheme.secondary) }
         } else {
-            val active = sources.getOrNull(selected.coerceIn(0, (sources.size - 1).coerceAtLeast(0)))
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(innerPadding),
                 contentPadding = PaddingValues(horizontal = 22.dp),
@@ -345,4 +356,26 @@ private fun SourceSwitcher(sources: List<Source>, selected: Int, onSelect: (Int)
             }
         }
     }
+}
+
+/** The day's readings as plain text, for the share sheet. */
+private fun gitsaweShareText(
+    services: GitsaweServices?,
+    subtitle: String?,
+    dateLabel: String,
+    s: Strings,
+): String = buildString {
+    append(s.gitsaweTitle); append(" — "); append(dateLabel); append("\n")
+    subtitle?.takeIf { it.isNotBlank() }?.let { append(it); append("\n") }
+    fun service(label: String, svc: GitsaweService?) {
+        svc ?: return
+        val lines = ROLE_LABELS.flatMap { (role, pick) ->
+            pick(svc).mapNotNull { r -> r.verse?.let { "  $role  ${verseRef(it)}" } }
+        }
+        if (lines.isEmpty()) return
+        append("\n"); append(label); append("\n")
+        lines.forEach { append(it); append("\n") }
+    }
+    service("ነግህ", services?.negh)
+    service("ቅዳሴ", services?.kidassie)
 }

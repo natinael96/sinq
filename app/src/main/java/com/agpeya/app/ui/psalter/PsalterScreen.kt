@@ -328,6 +328,7 @@ fun PsalterScreen(
                     if (key != null) scope.launch { HighlightRepository.setHighlight(context, key, colorKey) }
                 },
                 onDismiss = { selectedVerseKey = null },
+                shareText = com.agpeya.app.ui.reading.verseShareText(shown, selectedVerseKey),
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
         }

@@ -171,6 +171,8 @@ interface Strings {
     val wudaseLangGeez: String
     val contentUnavailable: String
     val mementoMoriGloss: String
+    val copyAction: String
+    val copiedToast: String
     val readingFontTitle: String
     val readingFontSubtitle: String
     val fontAbyssinica: String
@@ -400,6 +402,8 @@ object AmharicStrings : Strings {
     override val wudaseLangGeez = "ግዕዝ"
     override val contentUnavailable = "ይዘቱን ማግኘት አልተቻለም"
     override val mementoMoriGloss = "ሞትን አስብ"
+    override val copyAction = "ቅዳ"
+    override val copiedToast = "ተቀድቷል"
     override val readingFontTitle = "የንባብ ፊደል"
     override val readingFontSubtitle = "የጸሎት ጽሑፍ ፊደል"
     override val fontAbyssinica = "አቢሲኒካ"
@@ -574,16 +578,15 @@ object EnglishStrings : Strings {
     val aboutTagline = "The Orthodox Tewahedo hours of prayer — fully offline."
     val aboutSourceTitle = "Text source"
     val aboutSourceBody =
-        "Psalms and gospels are drawn from the 80-weahadu open-source Amharic Bible by EOTCOpenSource — " +
-            "github.com/EOTCOpenSource/80-weahadu — used under the Creative Commons " +
-            "Attribution-NonCommercial-NoDerivatives 4.0 International licence — " +
-            "creativecommons.org/licenses/by-nc-nd/4.0. Passages are selected and arranged into the hours " +
-            "of prayer; the verse text is reproduced unchanged, except that the acrostic letters of " +
-            "Psalm 118 are shown as stanza headings. Provided as-is, without warranties."
+        "Psalms and gospels come from the 80-weahadu Amharic Bible by EOTCOpenSource, under " +
+            "CC BY-NC-ND 4.0. Verse text is unchanged; Psalm 118's acrostic letters are shown as " +
+            "stanza headings. Provided as-is."
     val aboutFontTitle = "Fonts"
-    val aboutFontBody = "Abyssinica SIL and Noto Sans Ethiopic — under the SIL Open Font License 1.1."
+    val aboutFontBody =
+        "Abyssinica SIL and Noto Sans Ethiopic, under the SIL Open Font License 1.1. The " +
+            "selectable reading faces come from Font.et under the same licence."
     val aboutPrivacyTitle = "Privacy"
-    val aboutPrivacyBody = "This app collects no data and has no internet permission."
+    val aboutPrivacyBody = "No data collected. No internet permission."
 
     override val modesTitle = "Reminder modes"
     override val startFromAgpeya = "Start from default"
@@ -636,6 +639,8 @@ object EnglishStrings : Strings {
     override val wudaseLangGeez = "Ge'ez"
     override val contentUnavailable = "Content unavailable"
     override val mementoMoriGloss = "Remember death"
+    override val copyAction = "Copy"
+    override val copiedToast = "Copied"
     override val readingFontTitle = "Reading font"
     override val readingFontSubtitle = "Font for prayer text"
     override val fontAbyssinica = "Abyssinica"

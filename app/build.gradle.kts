@@ -29,8 +29,8 @@ android {
         //   0.MINOR.PATCH — PATCH for fixes/small tweaks, MINOR for new features.
         //   1.0.0 is reserved for the first public (Play) release.
         //   versionCode increments by 1 on EVERY update, no exceptions.
-        versionCode = 20
-        versionName = "0.7.1" // memento mori opening, compact hero, collapsible hours
+        versionCode = 21
+        versionName = "0.8.0" // search everywhere, merged citation highlight, audit fixes
     }
 
     signingConfigs {

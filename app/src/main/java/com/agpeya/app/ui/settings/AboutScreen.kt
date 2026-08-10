@@ -71,16 +71,16 @@ fun AboutScreen(onBack: () -> Unit) {
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(8.dp))
             }
-            Para(s.aboutTagline)
+            Para(s.aboutTagline, MaterialTheme.typography.bodyMedium)
             Section(s.aboutSourceTitle)
-            Para(s.aboutSourceBody)
+            Para(s.aboutSourceBody, MaterialTheme.typography.bodyMedium)
             Section(s.aboutFontTitle)
-            Para(s.aboutFontBody)
+            Para(s.aboutFontBody, MaterialTheme.typography.bodyMedium)
             Section(s.aboutPrivacyTitle)
-            Para(s.aboutPrivacyBody)
-            Spacer(Modifier.height(56.dp))
+            Para(s.aboutPrivacyBody, MaterialTheme.typography.bodyMedium)
+            Spacer(Modifier.height(36.dp))
             // A small truth, thinly set.
             Text(
                 text = "powered by 2 ቡና",
@@ -93,16 +93,16 @@ fun AboutScreen(onBack: () -> Unit) {
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
             )
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(24.dp))
         }
     }
 }
 
 @Composable
 private fun Section(title: String) {
-    Spacer(Modifier.height(20.dp))
+    Spacer(Modifier.height(14.dp))
     Text(title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-    Spacer(Modifier.height(6.dp))
+    Spacer(Modifier.height(4.dp))
 }
 
 @Composable
@@ -111,5 +111,5 @@ private fun Para(
     style: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.bodyLarge,
 ) {
     Text(text, style = style, color = MaterialTheme.colorScheme.onBackground)
-    Spacer(Modifier.height(8.dp))
+    Spacer(Modifier.height(6.dp))
 }

@@ -68,8 +68,8 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
         val readings = GitsaweRepository.readingsFor(context, today)
 
         val views = RemoteViews(context.packageName, R.layout.widget_gitsawe)
-        views.setTextViewText(R.id.widget_kicker, s.gitsaweTitle)
-        views.setTextViewText(R.id.widget_date, formatEthiopian(today, s))
+        // One header line: "ግጻዌ · ነሐሴ ፬" — two separate views wasted a row.
+        views.setTextViewText(R.id.widget_date, "${s.gitsaweTitle}  ·  ${formatEthiopian(today, s)}")
 
         // Prefer the ቅዳሴ (liturgy) service, falling back to ነግህ (matins).
         val entry = readings.daily
@@ -83,12 +83,14 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
         if (rows.isEmpty()) {
             views.setViewVisibility(R.id.widget_row_1, View.GONE)
             views.setViewVisibility(R.id.widget_row_2, View.GONE)
+            views.setViewVisibility(R.id.widget_rule, View.GONE)
             views.setViewVisibility(R.id.widget_empty, View.VISIBLE)
             views.setTextViewText(R.id.widget_empty, s.noGitsaweToday)
         } else {
             views.setViewVisibility(R.id.widget_empty, View.GONE)
-            bindRow(views, 0, rows.getOrNull(0), R.id.widget_row_1, R.id.widget_role_1, R.id.widget_ref_1)
-            bindRow(views, 1, rows.getOrNull(1), R.id.widget_row_2, R.id.widget_role_2, R.id.widget_ref_2)
+            views.setViewVisibility(R.id.widget_rule, View.VISIBLE)
+            bindRow(views, rows.getOrNull(0), R.id.widget_row_1, R.id.widget_role_1, R.id.widget_ref_1)
+            bindRow(views, rows.getOrNull(1), R.id.widget_row_2, R.id.widget_role_2, R.id.widget_ref_2)
         }
 
         // Whole widget taps through to the ግጻዌ screen.
@@ -98,7 +100,6 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
 
     private fun bindRow(
         views: RemoteViews,
-        index: Int,
         row: Pair<String, String>?,
         rowId: Int,
         roleId: Int,

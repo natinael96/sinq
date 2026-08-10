@@ -72,6 +72,10 @@ private val ArkeRed = androidx.compose.ui.graphics.Color(0xFFF0776A)
 /** The hymn is verse, not prose: a little more air than the running text. */
 private const val ArkeLineHeight = 1.78f
 
+/** The fixed closing ጸሎት is a coda — noticeably smaller and tightly set. */
+private const val CLOSING_FONT_SCALE = 0.78f
+private const val CLOSING_LINE_HEIGHT = 1.28f
+
 /** ስንክሳር — the day's synaxarium commemorations for [epochDay]. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -216,7 +220,13 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
  */
 @Composable
 private fun ClosingPrayer(fontSp: Int) {
-    Spacer(Modifier.height(28.dp))
+    // The same fixed prayer closes every day, so it reads as a coda rather than
+    // content: smaller than the body and tightly leaded, to keep it from
+    // claiming a screenful at the end of each ስንክሳር.
+    val style = readingBodyStyle(fontSp, CLOSING_LINE_HEIGHT).let {
+        it.copy(fontSize = it.fontSize * CLOSING_FONT_SCALE, lineHeight = it.lineHeight * CLOSING_FONT_SCALE)
+    }
+    Spacer(Modifier.height(20.dp))
     HorizontalDivider(
         modifier = Modifier.fillMaxWidth(),
         thickness = 1.dp,
@@ -225,26 +235,26 @@ private fun ClosingPrayer(fontSp: Int) {
     Column(
         Modifier
             .fillMaxWidth()
-            .padding(top = 22.dp)
-            .clip(RoundedCornerShape(14.dp))
+            .padding(top = 12.dp)
+            .clip(RoundedCornerShape(12.dp))
             .background(MaterialTheme.colorScheme.surface)
-            .padding(horizontal = 16.dp, vertical = 18.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(7.dp),
     ) {
         SYNAXARIUM_CLOSING_STANZAS.forEach { stanza ->
             Text(
                 text = highlightHolyNames(stanza, ArkeRed),
-                style = readingBodyStyle(fontSp),
-                color = MaterialTheme.colorScheme.onBackground,
+                style = style,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Justify,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
         Text(
             text = SYNAXARIUM_CLOSING_CODA,
-            style = readingBodyStyle(fontSp),
+            style = style,
             color = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }

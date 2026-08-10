@@ -20,14 +20,12 @@ val Abyssinica = FontFamily(Font(R.font.abyssinica_sil))
 val AbayLight = FontFamily(Font(R.font.ethiopic_abay_light))
 val BelaBereka = FontFamily(Font(R.font.bela_bereka))
 val Zemenay = FontFamily(Font(R.font.zemenay))
-val Menbere = FontFamily(Font(R.font.menbere))
 
 fun readingFontFamily(choice: ReadingFont): FontFamily = when (choice) {
     ReadingFont.ABYSSINICA -> Abyssinica
     ReadingFont.ABAY_LIGHT -> AbayLight
     ReadingFont.BELA_BEREKA -> BelaBereka
     ReadingFont.ZEMENAY -> Zemenay
-    ReadingFont.MENBERE -> Menbere
 }
 
 /**

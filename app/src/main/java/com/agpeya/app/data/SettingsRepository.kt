@@ -21,7 +21,7 @@ enum class Language { SYSTEM, AMHARIC, ENGLISH }
  * scripture-grade default; the rest are Ethiopic faces from Font.et. Stored by
  * name, so adding or removing a face never corrupts an existing preference.
  */
-enum class ReadingFont { ABYSSINICA, ABAY_LIGHT, BELA_BEREKA, ZEMENAY, MENBERE }
+enum class ReadingFont { ABYSSINICA, ABAY_LIGHT, BELA_BEREKA, ZEMENAY }
 
 /** How a fired reminder alerts: ring + vibrate, ring only, vibrate only, or silent. */
 enum class AlarmAlert { SOUND_VIBRATE, SOUND_ONLY, VIBRATE_ONLY, SILENT }

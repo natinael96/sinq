@@ -37,7 +37,7 @@ import kotlinx.coroutines.launch
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 fun BookmarksScreen(
     onBack: () -> Unit,
-    onOpen: (hourId: String, sectionIndex: Int) -> Unit,
+    onOpen: (hourId: String, sectionIndex: Int, sectionId: String) -> Unit,
     onOpenRoute: (route: String) -> Unit,
 ) {
     val context = LocalContext.current
@@ -121,7 +121,7 @@ fun BookmarksScreen(
                         onOpen = {
                             val bm = items[i]
                             if (bm.route != null) onOpenRoute(bm.route)
-                            else onOpen(bm.hourId, bm.sectionIndex)
+                            else onOpen(bm.hourId, bm.sectionIndex, bm.sectionId)
                         },
                         onRemove = {
                             scope.launch {
