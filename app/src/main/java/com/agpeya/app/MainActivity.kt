@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -14,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
 import com.agpeya.app.data.Language
 import com.agpeya.app.ui.strings.AmharicStrings
@@ -74,18 +77,21 @@ class MainActivity : ComponentActivity() {
                     // The opening reminder sits over the graph rather than inside
                     // it: the start destination already flips once onboarding
                     // resolves, and a third destination in that race would be
-                    // fragile. Once per activity launch.
+                    // fragile. Once per activity launch. The Box is what makes it
+                    // an overlay — without it the two are merely siblings.
                     var opened by rememberSaveable { mutableStateOf(false) }
-                    AgpeyaNavHost(
-                        deepLinkHourId = pendingDeepLinkHourId.value,
-                        onDeepLinkHandled = { pendingDeepLinkHourId.value = null },
-                        openStreak = pendingOpenStreak.value,
-                        onStreakHandled = { pendingOpenStreak.value = false },
-                        openGitsawe = pendingOpenGitsawe.value,
-                        onGitsaweHandled = { pendingOpenGitsawe.value = false },
-                    )
-                    if (!opened) {
-                        com.agpeya.app.ui.intro.MementoMoriScreen(onDone = { opened = true })
+                    Box(Modifier.fillMaxSize()) {
+                        AgpeyaNavHost(
+                            deepLinkHourId = pendingDeepLinkHourId.value,
+                            onDeepLinkHandled = { pendingDeepLinkHourId.value = null },
+                            openStreak = pendingOpenStreak.value,
+                            onStreakHandled = { pendingOpenStreak.value = false },
+                            openGitsawe = pendingOpenGitsawe.value,
+                            onGitsaweHandled = { pendingOpenGitsawe.value = false },
+                        )
+                        if (!opened) {
+                            com.agpeya.app.ui.intro.MementoMoriScreen(onDone = { opened = true })
+                        }
                     }
                 }
             }

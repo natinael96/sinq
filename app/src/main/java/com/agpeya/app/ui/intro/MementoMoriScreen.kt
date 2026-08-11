@@ -34,9 +34,12 @@ import androidx.compose.ui.unit.sp
 import com.agpeya.app.ui.strings.LocalStrings
 import kotlinx.coroutines.delay
 
-/** How long the reminder rests on screen before the app opens. */
-private const val HOLD_MS = 2200L
-private const val FADE_MS = 700
+/**
+ * How long the reminder rests on screen before the app opens. Short enough not
+ * to be in the way on every launch — the fade runs inside this, not after it.
+ */
+private const val HOLD_MS = 1300L
+private const val FADE_MS = 350
 
 /**
  * The opening breath: *memento mori* — remember that you will die — the ancient
@@ -115,6 +118,13 @@ fun MementoMoriScreen(onDone: () -> Unit) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
+            )
+            androidx.compose.foundation.layout.Spacer(Modifier.height(28.dp))
+            // Thin and small: it marks the pause without competing with the words.
+            androidx.compose.material3.CircularProgressIndicator(
+                modifier = Modifier.width(22.dp).height(22.dp),
+                color = MaterialTheme.colorScheme.secondary,
+                strokeWidth = 2.dp,
             )
         }
     }

@@ -7,6 +7,15 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.8.3] — 2026-08-10
+
+_versionCode 24_
+
+### Changed
+- **The opening is quicker** — memento mori now holds for about 1.3 seconds
+  instead of 2.2, with a faster fade, and a small spinner sits beneath the
+  words. A tap still skips straight through.
+
 ## [0.8.2] — 2026-08-10
 
 _versionCode 23 · backup & restore_
