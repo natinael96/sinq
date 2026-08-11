@@ -29,8 +29,8 @@ android {
         //   0.MINOR.PATCH — PATCH for fixes/small tweaks, MINOR for new features.
         //   1.0.0 is reserved for the first public (Play) release.
         //   versionCode increments by 1 on EVERY update, no exceptions.
-        versionCode = 23
-        versionName = "0.8.2" // backup & restore of streaks, bookmarks and highlights
+        versionCode = 24
+        versionName = "0.8.3" // shorter opening, spinner under memento mori
     }
 
     signingConfigs {
