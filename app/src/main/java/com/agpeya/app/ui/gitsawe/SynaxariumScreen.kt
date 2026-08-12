@@ -54,7 +54,7 @@ import com.agpeya.app.data.UserDataRepository
 import com.agpeya.app.model.Bookmark
 import com.agpeya.app.model.SynaxariumEntry
 import com.agpeya.app.ui.common.EthiopianDate
-import com.agpeya.app.ui.common.formatEthiopian
+import com.agpeya.app.ui.common.formatEthiopianWithGregorian
 import com.agpeya.app.ui.reading.FontSizeActions
 import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
@@ -104,7 +104,7 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
                     Column {
                         Text(s.synaxariumTitle, style = MaterialTheme.typography.titleLarge)
                         Text(
-                            formatEthiopian(date, s),
+                            formatEthiopianWithGregorian(date, s),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )

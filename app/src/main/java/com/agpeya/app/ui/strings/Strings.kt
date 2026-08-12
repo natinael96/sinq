@@ -253,6 +253,16 @@ interface Strings {
     /** Ethiopian era suffix (ዓ.ም). */
     val eraSuffix: String
 
+    /** Gregorian month abbreviations, January..December. */
+    val gregorianMonths: List<String>
+
+    /** Whether to spell Gregorian months out; false falls back to dd/MM/yyyy. */
+    val usesGregorianMonthNames: Boolean
+
+    /** Liturgical season names, keyed by BahreHasab's season keys. */
+    fun seasonName(key: String): String?
+    fun seasonWithWeek(name: String, week: Int): String
+
     fun habitsCount(n: Int): String
 }
 
@@ -491,6 +501,20 @@ object AmharicStrings : Strings {
         "መጋቢት", "ሚያዝያ", "ግንቦት", "ሰኔ", "ሐምሌ", "ነሐሴ", "ጳጉሜን",
     )
     override val eraSuffix = "ዓ.ም"
+    override val gregorianMonths = listOf(
+        "ጃንዩ", "ፌብሩ", "ማርች", "ኤፕሪ", "ሜይ", "ጁን", "ጁላይ", "ኦገስ", "ሴፕቴ", "ኦክቶ", "ኖቬም", "ዲሴም",
+    )
+    override val usesGregorianMonthNames = false
+    override fun seasonName(key: String): String? = when (key) {
+        "neneweTsom" -> "ጾመ ነነዌ"
+        "abiyTsom" -> "ዐቢይ ጾም"
+        "holy_thursday" -> "ጸሎተ ሐሙስ"
+        "erget" -> "ዕርገት"
+        "tnsae" -> "ትንሣኤ"
+        else -> null
+    }
+    override fun seasonWithWeek(name: String, week: Int) = "$name · $week ኛ ሳምንት"
+
     override fun habitsCount(n: Int) = "$n ልማዶች"
 }
 
@@ -747,6 +771,19 @@ object EnglishStrings : Strings {
         "Megabit", "Miyazya", "Ginbot", "Sene", "Hamle", "Nehase", "Pagume",
     )
     override val eraSuffix = "EC"
+    override val gregorianMonths = listOf(
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    )
+    override val usesGregorianMonthNames = true
+    override fun seasonName(key: String): String? = when (key) {
+        "neneweTsom" -> "Fast of Nineveh"
+        "abiyTsom" -> "Great Lent"
+        "holy_thursday" -> "Holy Thursday"
+        "erget" -> "Ascension"
+        "tnsae" -> "Resurrection season"
+        else -> null
+    }
+    override fun seasonWithWeek(name: String, week: Int) = "$name · week $week"
     override fun habitsCount(n: Int) = "$n habits"
 }
 

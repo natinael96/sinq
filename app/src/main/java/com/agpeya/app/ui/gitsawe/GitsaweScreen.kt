@@ -64,6 +64,8 @@ import com.agpeya.app.model.GitsaweService
 import com.agpeya.app.model.GitsaweServices
 import com.agpeya.app.model.VerseRef
 import com.agpeya.app.ui.common.formatEthiopian
+import com.agpeya.app.ui.common.formatEthiopianWithGregorian
+import com.agpeya.app.ui.common.liturgicalSeasonLabel
 import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.strings.Strings
@@ -114,10 +116,17 @@ fun GitsaweScreen(
                     Column {
                         Text(s.gitsaweTitle, style = MaterialTheme.typography.titleLarge)
                         Text(
-                            formatEthiopian(date, s),
+                            formatEthiopianWithGregorian(date, s),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                        liturgicalSeasonLabel(date, s)?.let {
+                            Text(
+                                it,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.secondary,
+                            )
+                        }
                     }
                 },
                 navigationIcon = {

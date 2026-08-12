@@ -45,3 +45,38 @@ fun formatEthiopianShort(date: LocalDate, s: Strings): String {
     val e = EthiopianDate.from(date)
     return "${s.ethMonths[e.month - 1]} ${e.day}"
 }
+
+/**
+ * Ethiopian date with the Gregorian one alongside — "ሐምሌ 8 · Aug 10, 2026".
+ *
+ * The church date is what the app is organised around, so it leads; the
+ * Gregorian date follows for anyone reconciling with a phone calendar.
+ */
+fun formatEthiopianWithGregorian(date: LocalDate, s: Strings): String =
+    "${formatEthiopianShort(date, s)} · ${formatGregorianShort(date, s)}"
+
+/** "Aug 10, 2026" in English; "10/08/2026" under Amharic, where the month
+ *  abbreviations would be Gregorian names in Ethiopic script and read oddly. */
+fun formatGregorianShort(date: LocalDate, s: Strings): String =
+    if (s.usesGregorianMonthNames) {
+        "${s.gregorianMonths[date.monthValue - 1]} ${date.dayOfMonth}, ${date.year}"
+    } else {
+        "%02d/%02d/%d".format(date.dayOfMonth, date.monthValue, date.year)
+    }
+
+/**
+ * The movable liturgical season [date] falls in, ready to display — or null on
+ * a day outside any of them. The window itself comes from [BahreHasab]; this
+ * only names it.
+ *
+ * Note: which days of a season's week the readings apply to is still under
+ * liturgical review (docs/LITURGICAL_REVIEW.md). The week NUMBER shown here is
+ * plain arithmetic off the season's start and is not affected by that question.
+ */
+fun liturgicalSeasonLabel(date: LocalDate, s: Strings): String? {
+    val window = runCatching { com.agpeya.app.data.BahreHasab.movableSeasonOn(date) }.getOrNull()
+        ?: return null
+    val name = s.seasonName(window.season) ?: return null
+    val week = window.week ?: return name
+    return s.seasonWithWeek(name, week)
+}

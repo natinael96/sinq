@@ -63,6 +63,7 @@ import com.agpeya.app.ui.common.AgpeyaBottomBar
 import com.agpeya.app.ui.common.Tab
 import com.agpeya.app.ui.habits.HabitHeatmap
 import com.agpeya.app.ui.habits.habitName
+import com.agpeya.app.ui.common.liturgicalSeasonLabel
 import com.agpeya.app.ui.strings.LocalStrings
 import java.time.LocalDate
 import java.time.LocalTime
@@ -105,6 +106,7 @@ fun HomeScreen(
     // The hours list is long enough to bury everything under it; collapsing keeps
     // Home scannable. Expanded by default — it's the app's primary content.
     var hoursExpanded by rememberSaveable { mutableStateOf(true) }
+    val seasonLabel = remember(today, s) { liturgicalSeasonLabel(today, s) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -135,6 +137,20 @@ fun HomeScreen(
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                        Text(
+                            text = com.agpeya.app.ui.common.formatGregorianShort(today, s),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        // The liturgical season, when the date falls in one. The
+                        // calculation already existed; it was simply never shown.
+                        seasonLabel?.let {
+                            Text(
+                                text = it,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.secondary,
+                            )
+                        }
                         if (callName.isNotBlank()) {
                             Text(
                                 text = s.greeting(callName),

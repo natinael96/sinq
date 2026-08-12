@@ -36,7 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.FastingCalendar
 import com.agpeya.app.ui.common.EthiopianDate
-import com.agpeya.app.ui.common.formatEthiopian
+import com.agpeya.app.ui.common.formatEthiopianWithGregorian
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.strings.Strings
 import java.time.LocalDate
@@ -65,7 +65,7 @@ fun FastingScreen(onBack: () -> Unit) {
                     Column {
                         Text(s.fastingTitle, style = MaterialTheme.typography.titleLarge)
                         Text(
-                            formatEthiopian(today, s),
+                            formatEthiopianWithGregorian(today, s),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
