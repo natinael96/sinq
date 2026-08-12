@@ -63,13 +63,45 @@ object BackupRepository {
         }
 
     /** What a restore would change, so the user can be told before it happens. */
-    data class Summary(val days: Int, val bookmarks: Int, val highlights: Int)
+    data class Summary(
+        val version: Int,
+        val created: String,
+        val days: Int,
+        val bookmarks: Int,
+        val highlights: Int,
+        /** Days present in the file that the device does not already have. */
+        val newDays: Int,
+        /** Bookmarks in the file that the device does not already have. */
+        val newBookmarks: Int,
+    )
 
-    /** Read and validate a backup without applying it. */
+    /**
+     * Read and validate a backup without applying it, reporting both what the
+     * file holds and how much of it is actually new here — a restore that would
+     * change nothing is worth saying so before the user commits to it.
+     *
+     * Returns null when the file is unreadable, is not a Sinq backup, or was
+     * written by a newer format than this build understands.
+     */
     suspend fun peek(context: Context, uri: Uri): Summary? = withContext(Dispatchers.IO) {
-        parse(context, uri)?.let {
-            Summary(it.habits.records.size, it.bookmarks.size, it.highlights.size)
-        }
+        val b = parse(context, uri) ?: return@withContext null
+        if (b.version < 1 || b.version > VERSION) return@withContext null
+
+        val localHabits = HabitsRepository.current(context)
+        val localBookmarks = UserDataRepository.bookmarks(context).first()
+        val have = localBookmarks.mapTo(mutableSetOf()) { it.hourId to it.sectionId }
+
+        Summary(
+            version = b.version,
+            created = b.created,
+            days = b.habits.records.size,
+            bookmarks = b.bookmarks.size,
+            highlights = b.highlights.size,
+            newDays = b.habits.records.keys.count { day ->
+                (b.habits.records[day] ?: emptySet()) - (localHabits.records[day] ?: emptySet()) != emptySet<String>()
+            },
+            newBookmarks = b.bookmarks.count { (it.hourId to it.sectionId) !in have },
+        )
     }
 
     /**
@@ -80,6 +112,8 @@ object BackupRepository {
      */
     suspend fun restore(context: Context, uri: Uri): Boolean = withContext(Dispatchers.IO) {
         val backup = parse(context, uri) ?: return@withContext false
+        // Refuse a file from a newer format rather than half-applying it.
+        if (backup.version < 1 || backup.version > VERSION) return@withContext false
         runCatching {
             HabitsRepository.merge(context, backup.habits)
             UserDataRepository.mergeBookmarks(context, backup.bookmarks)

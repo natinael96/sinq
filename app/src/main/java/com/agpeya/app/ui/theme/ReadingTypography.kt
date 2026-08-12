@@ -6,7 +6,9 @@ import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
@@ -93,6 +95,25 @@ fun readingStyle(
 @Composable
 @ReadOnlyComposable
 fun scaledReadingSp(fontSp: Int): TextUnit = (fontSp * opticalScale(LocalReadingFont.current)).sp
+
+/**
+ * The gap between two verses, scaled with the text.
+ *
+ * Fixed padding is wrong here: at 17sp a 4dp gap separates verses cleanly, but
+ * at 29sp — where the leading inside a verse has itself grown to ~47dp — that
+ * same gap disappears and the page turns into one undifferentiated block. Tying
+ * it to the font size keeps verses distinct at every step.
+ */
+fun readingVerseGap(fontSp: Int): Dp = (fontSp * 0.26f).dp
+
+/**
+ * The widest a column of reading text is allowed to get.
+ *
+ * On a phone this never binds; on a tablet or an unfolded foldable it stops a
+ * line from running to 90+ characters, which is where the eye starts losing its
+ * place on the return sweep.
+ */
+val ReadingMaxWidth: Dp = 640.dp
 
 /**
  * Re-cast a Material type-scale style (a section title, a psalm heading) in the

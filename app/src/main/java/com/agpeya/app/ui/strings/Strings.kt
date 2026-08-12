@@ -179,6 +179,12 @@ interface Strings {
     fun fastingYearHeader(ethYear: Int): String
     fun fastingDays(n: Int): String
     fun fastingDayOf(day: Int, total: Int): String
+    val restorePreviewTitle: String
+    val restoreNothingNew: String
+    val restoreMergeNote: String
+    fun backupCreated(date: String): String
+    fun backupContains(days: Int, bookmarks: Int, highlights: Int): String
+    fun restoreWillAdd(days: Int, bookmarks: Int): String
     val backupTitle: String
     val backupExport: String
     val backupImport: String
@@ -444,6 +450,14 @@ object AmharicStrings : Strings {
     override fun fastingYearHeader(ethYear: Int) = "የ$ethYear ዓ.ም አጽዋማት"
     override fun fastingDays(n: Int) = "$n ቀን"
     override fun fastingDayOf(day: Int, total: Int) = "$day ኛ ቀን ከ$total"
+    override val restorePreviewTitle = "ከምትኬ መልስ?"
+    override val restoreNothingNew = "አዲስ ነገር የለም — ሁሉም አስቀድሞ አለ።"
+    override val restoreMergeNote = "መመለስ የነበረውን አያጠፋም፤ የሚጨምር ብቻ ነው።"
+    override fun backupCreated(date: String) = "የተሠራበት፦ $date"
+    override fun backupContains(days: Int, bookmarks: Int, highlights: Int) =
+        "$days ቀናት · $bookmarks ምልክቶች · $highlights ማድመቆች"
+    override fun restoreWillAdd(days: Int, bookmarks: Int) =
+        "$days ቀናትና $bookmarks ምልክቶች ይጨመራሉ።"
     override val backupTitle = "ምትኬ"
     override val backupExport = "ምትኬ አስቀምጥ"
     override val backupImport = "ከምትኬ መልስ"
@@ -723,6 +737,14 @@ object EnglishStrings : Strings {
     override fun fastingYearHeader(ethYear: Int) = "Fasts of $ethYear E.C."
     override fun fastingDays(n: Int) = "$n days"
     override fun fastingDayOf(day: Int, total: Int) = "Day $day of $total"
+    override val restorePreviewTitle = "Restore this backup?"
+    override val restoreNothingNew = "Nothing new — everything here is already on this device."
+    override val restoreMergeNote = "Restoring only adds; nothing already on this device is removed."
+    override fun backupCreated(date: String) = "Created $date"
+    override fun backupContains(days: Int, bookmarks: Int, highlights: Int) =
+        "$days days · $bookmarks bookmarks · $highlights highlights"
+    override fun restoreWillAdd(days: Int, bookmarks: Int) =
+        "Will add $days days and $bookmarks bookmarks."
     override val backupTitle = "Backup"
     override val backupExport = "Save a backup"
     override val backupImport = "Restore from a backup"

@@ -519,12 +519,19 @@ private fun fontDisplayName(font: com.agpeya.app.data.ReadingFont): String =
  * Backup and restore of the things the user can't recover: streak history,
  * bookmarks, highlights. Written through the system file picker — the app has
  * no network access, so a backup is simply a file the user keeps.
+ *
+ * Import shows what the file holds and how much of it is new here BEFORE
+ * anything is written, because a restore is not something to discover after
+ * the fact.
  */
 @Composable
 private fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var message by remember { mutableStateOf<String?>(null) }
+    // The file the user chose, held while they confirm the preview.
+    var pending by remember { mutableStateOf<android.net.Uri?>(null) }
+    var preview by remember { mutableStateOf<com.agpeya.app.data.BackupRepository.Summary?>(null) }
 
     val createDoc = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/json"),
@@ -542,8 +549,13 @@ private fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
     ) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
         scope.launch {
-            val ok = com.agpeya.app.data.BackupRepository.restore(context, uri)
-            message = if (ok) s.restoreDone else s.restoreFailed
+            val summary = com.agpeya.app.data.BackupRepository.peek(context, uri)
+            if (summary == null) {
+                message = s.restoreFailed
+            } else {
+                pending = uri
+                preview = summary
+            }
         }
     }
 
@@ -551,6 +563,54 @@ private fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
         createDoc.launch("sinq-backup-${java.time.LocalDate.now()}.json")
     }
     SettingsLink(s.backupImport) { openDoc.launch(arrayOf("application/json", "text/plain", "*/*")) }
+
+    // Preview: what's in the file, and what a restore would actually add.
+    val summary = preview
+    if (summary != null) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { preview = null; pending = null },
+            title = { Text(s.restorePreviewTitle) },
+            text = {
+                Column {
+                    if (summary.created.isNotBlank()) {
+                        Text(
+                            s.backupCreated(summary.created),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(Modifier.height(8.dp))
+                    }
+                    Text(s.backupContains(summary.days, summary.bookmarks, summary.highlights))
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        if (summary.newDays == 0 && summary.newBookmarks == 0) s.restoreNothingNew
+                        else s.restoreWillAdd(summary.newDays, summary.newBookmarks),
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        s.restoreMergeNote,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val uri = pending
+                    preview = null
+                    pending = null
+                    if (uri != null) scope.launch {
+                        val ok = com.agpeya.app.data.BackupRepository.restore(context, uri)
+                        message = if (ok) s.restoreDone else s.restoreFailed
+                    }
+                }) { Text(s.backupImport) }
+            },
+            dismissButton = {
+                TextButton(onClick = { preview = null; pending = null }) { Text(s.cancel) }
+            },
+        )
+    }
 
     message?.let { text ->
         androidx.compose.material3.AlertDialog(
