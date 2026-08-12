@@ -7,6 +7,33 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.9.1] — 2026-08-12
+
+_versionCode 26 · a ስንክሳር for the whole year_
+
+### Added
+- **ስንክሳር for the seven months that had none.** ጥር, የካቲት, መጋቢት, ሚያዝያ, ግንቦት, ሰኔ
+  and ሐምሌ carried only a day heading and a feast list — over half the year opened
+  to nothing to read. They now hold the full daily commemorations — some 650 new
+  entries, re-extracted from the `Nexuss0781/synaxarium` dataset by the new
+  `tools/extract_sinksar_hf.py`.
+- **The closing ጸሎት reads in Amharic.** Tapping the salutation that ends each
+  day's ስንክሳር switches between the Ge'ez verses and their Amharic rendering. The
+  last two stanzas have no Amharic counterpart and stay in Ge'ez. The choice is a
+  reading aid for the moment, not a saved setting.
+
+### Changed
+- መስከረም, ጥቅምት, ታኅሣሥ, ነሐሴ and ጳጉሜን now come from the same source as the rest of
+  the year, for one consistent voice throughout. Their readings are more
+  condensed than in 0.9.0: several saints who had a full entry of their own are
+  now commemorated within the day's narrative instead.
+
+### Known issues
+- Four months repeat a day from the source data: ጥር 21 repeats ጥር 20, መጋቢት 29
+  repeats መጋቢት 28, ሚያዝያ 4 and 6 repeat 3 and 5, and ሐምሌ 21 repeats ሐምሌ 20.
+- ሕዳር is untouched and still not the daily synaxarium — the source has a single
+  ድርሳነ መስቀል homily repeated across all 30 days.
+
 ## [0.9.0] — 2026-08-12
 
 _versionCode 25 · prayer progress, search, quiet hours, and a design system_
