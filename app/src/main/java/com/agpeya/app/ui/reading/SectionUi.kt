@@ -25,6 +25,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.ContentCopy
@@ -71,6 +73,10 @@ internal fun SectionView(
     highlights: Map<String, String>,
     onVerseTap: (String) -> Unit,
     citedRange: IntRange = IntRange.EMPTY,
+    /** Today's read-state for this section; null hides the control entirely
+     *  (the Psalter and scripture aren't part of the daily hour cycle). */
+    isRead: Boolean? = null,
+    onToggleRead: () -> Unit = {},
 ) {
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(Modifier.height(40.dp))
@@ -88,6 +94,17 @@ internal fun SectionView(
                     tint = if (isBookmarked) MaterialTheme.colorScheme.secondary
                     else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+            }
+            if (isRead != null) {
+                IconButton(onClick = onToggleRead) {
+                    Icon(
+                        imageVector = if (isRead) Icons.Filled.CheckCircle
+                        else Icons.Outlined.RadioButtonUnchecked,
+                        contentDescription = LocalStrings.current.markRead,
+                        tint = if (isRead) MaterialTheme.colorScheme.secondary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
         section.subtitle?.let {

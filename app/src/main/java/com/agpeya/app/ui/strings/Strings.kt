@@ -186,6 +186,14 @@ interface Strings {
     val backupFailed: String
     val restoreDone: String
     val restoreFailed: String
+    val markRead: String
+    val prayerProgress: String
+    fun progressOf(done: Int, total: Int): String
+    val resumePrayer: String
+    val startOver: String
+    val currentHourBadge: String
+    val previousHour: String
+    val nextHour: String
     val copyAction: String
     val copiedToast: String
     val readingFontTitle: String
@@ -442,6 +450,14 @@ object AmharicStrings : Strings {
     override val backupFailed = "ምትኬውን ማስቀመጥ አልተቻለም።"
     override val restoreDone = "ከምትኬው ተመልሷል።"
     override val restoreFailed = "ፋይሉን ማንበብ አልተቻለም።"
+    override val markRead = "እንደተነበበ ምልክት አድርግ"
+    override val prayerProgress = "ንባብ"
+    override fun progressOf(done: Int, total: Int) = "$done ከ$total"
+    override val resumePrayer = "ቀጥል"
+    override val startOver = "እንደገና ጀምር"
+    override val currentHourBadge = "አሁን"
+    override val previousHour = "ቀዳሚ"
+    override val nextHour = "ቀጣይ"
     override val copyAction = "ቅዳ"
     override val copiedToast = "ተቀድቷል"
     override val readingFontTitle = "የንባብ ፊደል"
@@ -712,6 +728,14 @@ object EnglishStrings : Strings {
     override val backupFailed = "Could not save the backup."
     override val restoreDone = "Restored from the backup."
     override val restoreFailed = "Could not read that file."
+    override val markRead = "Mark as read"
+    override val prayerProgress = "Progress"
+    override fun progressOf(done: Int, total: Int) = "$done of $total"
+    override val resumePrayer = "Resume"
+    override val startOver = "Start over"
+    override val currentHourBadge = "Now"
+    override val previousHour = "Previous"
+    override val nextHour = "Next"
     override val copyAction = "Copy"
     override val copiedToast = "Copied"
     override val readingFontTitle = "Reading font"

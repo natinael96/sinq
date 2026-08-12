@@ -107,6 +107,16 @@ fun HomeScreen(
     // Home scannable. Expanded by default — it's the app's primary content.
     var hoursExpanded by rememberSaveable { mutableStateOf(true) }
     val seasonLabel = remember(today, s) { liturgicalSeasonLabel(today, s) }
+    val currentHourId = remember(hours) { com.agpeya.app.data.PrayerSchedule.currentHourId(hours) }
+    val dayProgress by com.agpeya.app.data.PrayerProgressRepository.progress(context)
+        .collectAsState(initial = com.agpeya.app.data.PrayerProgressRepository.DayProgress())
+    // Section totals per hour, so a row can show "3 of 12" without loading text.
+    val sectionCounts = remember(hours) { hours.associate { it.id to it.sections.size } }
+    val resumeHour = remember(dayProgress, hours, sectionCounts) {
+        com.agpeya.app.data.PrayerSchedule
+            .resumable(dayProgress) { id -> hours.find { it.id == id }?.sections?.map { sec -> sec.id } ?: emptyList() }
+            ?.let { id -> hours.find { it.id == id } }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -193,6 +203,19 @@ fun HomeScreen(
                 }
             }
 
+            // Offered only when an hour was started today and left unfinished.
+            resumeHour?.takeIf { it.id != suggested?.id }?.let { h ->
+                item {
+                    ResumeCard(
+                        hour = h,
+                        done = dayProgress.done[h.id]?.size ?: 0,
+                        total = sectionCounts[h.id] ?: 0,
+                        onClick = { onOpenHour(h.id) },
+                    )
+                    Spacer(Modifier.height(16.dp))
+                }
+            }
+
             item {
                 GitsaweCard(onClick = onOpenGitsawe)
                 Spacer(Modifier.height(24.dp))
@@ -269,7 +292,14 @@ fun HomeScreen(
             }
             if (hoursExpanded) {
                 items(hours, key = { it.id }) { hour ->
-                    HourRow(hour = hour, onClick = { onOpenHour(hour.id) })
+                    HourRow(
+                        hour = hour,
+                        isCurrent = hour.id == currentHourId,
+                        progress = sectionCounts[hour.id]?.let { total ->
+                            (dayProgress.done[hour.id]?.size ?: 0) to total
+                        },
+                        onClick = { onOpenHour(hour.id) },
+                    )
                     if (hour.id != hours.lastOrNull()?.id) {
                         HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant, thickness = 1.dp)
                     }
@@ -510,16 +540,105 @@ private fun LibraryButton(
 }
 
 @Composable
-private fun HourRow(hour: Hour, onClick: () -> Unit) {
+private fun HourRow(
+    hour: Hour,
+    isCurrent: Boolean,
+    progress: Pair<Int, Int>?,
+    onClick: () -> Unit,
+) {
+    val s = LocalStrings.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(vertical = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(text = hour.name, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
-        Text(text = hour.timeHint, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Column(Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = hour.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                if (isCurrent) {
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = s.currentHourBadge,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f))
+                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                    )
+                }
+            }
+            // Only shown once the hour has been started today.
+            progress?.takeIf { it.first > 0 }?.let { (done, total) ->
+                Text(
+                    text = s.progressOf(done, total),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        Text(
+            text = hour.timeHint,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        if (progress != null && progress.first == progress.second && progress.second > 0) {
+            Spacer(Modifier.width(8.dp))
+            Icon(
+                Icons.Filled.CheckCircle,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.size(16.dp),
+            )
+        }
+    }
+}
+
+/** "Pick up where you left off" — only shown for an hour started but unfinished today. */
+@Composable
+private fun ResumeCard(hour: Hour, done: Int, total: Int, onClick: () -> Unit) {
+    val s = LocalStrings.current
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surface,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    s.resumePrayer,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.secondary,
+                )
+                Text(
+                    hour.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                if (total > 0) {
+                    Text(
+                        s.progressOf(done, total),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            Icon(
+                Icons.AutoMirrored.Outlined.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.secondary,
+            )
+        }
     }
 }

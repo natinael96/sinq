@@ -8,6 +8,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -118,6 +119,9 @@ fun ReadingScreen(
     }
     val layout by LayoutRepository.layout(context, hourId).collectAsState(initial = HourLayout())
     val highlights by HighlightRepository.highlights(context).collectAsState(initial = emptyMap())
+    // Today's read-state for this hour, keyed by permanent section id.
+    val readIds by com.agpeya.app.data.PrayerProgressRepository.doneIn(context, hourId)
+        .collectAsState(initial = emptySet())
 
     var showContents by remember { mutableStateOf(false) }
     // Verse currently chosen for highlighting (shows the colour palette); null = none.
@@ -142,12 +146,16 @@ fun ReadingScreen(
     // The section we want kept in view; shared across both readers so the
     // position survives a mode switch.
     var anchor by remember(hourId) { mutableIntStateOf(-1) }
+    // Neighbours in the user's own order, so hiding an hour doesn't leave a gap.
+    val prevHour = remember(allHours, hourId) { com.agpeya.app.data.PrayerSchedule.previous(allHours, hourId) }
+    val nextHour = remember(allHours, hourId) { com.agpeya.app.data.PrayerSchedule.next(allHours, hourId) }
 
     // Record recent + decide the initial anchor once content is ready.
     LaunchedEffect(hour, sections.size) {
         val h = hour ?: return@LaunchedEffect
         if (sections.isEmpty()) return@LaunchedEffect
         UserDataRepository.recordRecent(context, h.id)
+        com.agpeya.app.data.PrayerProgressRepository.recordOpened(context, h.id)
         // Resolve the target to the displayed (customized) list. A section id is
         // exact; the legacy index is a fallback for bookmarks saved before ids
         // were passed, and only means anything against the full section list.
@@ -187,6 +195,12 @@ fun ReadingScreen(
             val index = if (readingMode == ReadingMode.VERTICAL) listState.firstVisibleItemIndex
             else pagerState.currentPage
             scope.launch { UserDataRepository.savePosition(context, hourId, index) }
+        }
+    }
+
+    fun toggleRead(section: Section) {
+        scope.launch {
+            com.agpeya.app.data.PrayerProgressRepository.toggleSection(context, hourId, section.id)
         }
     }
 
@@ -285,16 +299,34 @@ fun ReadingScreen(
         containerColor = MaterialTheme.colorScheme.background,
     ) { innerPadding ->
         Box(Modifier.fillMaxSize()) {
+            // How far through the hour today's reading is. Sits under the app
+            // bar so it stays visible while scrolling.
+            if (sections.isNotEmpty()) {
+                val doneCount = sections.count { it.id in readIds }
+                androidx.compose.material3.LinearProgressIndicator(
+                    progress = { doneCount.toFloat() / sections.size },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = innerPadding.calculateTopPadding())
+                        .height(2.dp)
+                        .align(Alignment.TopCenter),
+                    color = MaterialTheme.colorScheme.secondary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    drawStopIndicator = {},
+                )
+            }
             AnimatedVisibility(visible = sections.isNotEmpty(), enter = fadeIn(tween(350))) {
                 val onVerseTap: (String) -> Unit = { selectedVerseKey = it }
                 when (readingMode) {
                     ReadingMode.VERTICAL -> VerticalReader(
                         sections, listState, bodyFontSp, innerPadding, bookmarkedIds,
-                        ::toggleBookmark, highlights, onVerseTap,
+                        ::toggleBookmark, highlights, onVerseTap, readIds, ::toggleRead,
+                        prevHour?.let { h -> { onSwitchHour(h.id) } },
+                        nextHour?.let { h -> { onSwitchHour(h.id) } },
                     )
                     ReadingMode.HORIZONTAL -> PagedReader(
                         sections, pagerState, bodyFontSp, innerPadding, bookmarkedIds,
-                        ::toggleBookmark, highlights, onVerseTap,
+                        ::toggleBookmark, highlights, onVerseTap, readIds, ::toggleRead,
                     )
                 }
             }
@@ -342,6 +374,10 @@ private fun VerticalReader(
     onToggleBookmark: (Section, Int) -> Unit,
     highlights: Map<String, String>,
     onVerseTap: (String) -> Unit,
+    readIds: Set<String>,
+    onToggleRead: (Section) -> Unit,
+    onPrevious: (() -> Unit)?,
+    onNext: (() -> Unit)?,
 ) {
     LazyColumn(
         state = listState,
@@ -362,9 +398,14 @@ private fun VerticalReader(
                 onToggleBookmark = { onToggleBookmark(section, index) },
                 highlights = highlights,
                 onVerseTap = onVerseTap,
+                isRead = section.id in readIds,
+                onToggleRead = { onToggleRead(section) },
             )
         }
-        item { Spacer(Modifier.height(56.dp)) }
+        item {
+            HourStepper(onPrevious = onPrevious, onNext = onNext)
+            Spacer(Modifier.height(56.dp))
+        }
     }
 }
 
@@ -378,6 +419,8 @@ private fun PagedReader(
     onToggleBookmark: (Section, Int) -> Unit,
     highlights: Map<String, String>,
     onVerseTap: (String) -> Unit,
+    readIds: Set<String>,
+    onToggleRead: (Section) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -415,6 +458,8 @@ private fun PagedReader(
                         onToggleBookmark = { onToggleBookmark(section, page) },
                         highlights = highlights,
                         onVerseTap = onVerseTap,
+                        isRead = section.id in readIds,
+                        onToggleRead = { onToggleRead(section) },
                     )
                     Spacer(Modifier.height(48.dp))
                 }
@@ -483,3 +528,24 @@ private fun PartHeader(part: String) {
 
 // SectionView, VerseText, and HighlightBar live in SectionUi.kt — shared with
 // the Psalter screen.
+
+/** Step to the neighbouring prayer hour from the foot of the reader. */
+@Composable
+private fun HourStepper(onPrevious: (() -> Unit)?, onNext: (() -> Unit)?) {
+    if (onPrevious == null && onNext == null) return
+    val s = com.agpeya.app.ui.strings.LocalStrings.current
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (onPrevious != null) {
+            TextButton(onClick = onPrevious) { Text("‹  ${s.previousHour}") }
+        } else {
+            Spacer(Modifier.width(1.dp))
+        }
+        if (onNext != null) {
+            TextButton(onClick = onNext) { Text("${s.nextHour}  ›") }
+        }
+    }
+}
