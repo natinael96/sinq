@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -67,7 +69,14 @@ import com.agpeya.app.ui.common.formatEthiopian
 import com.agpeya.app.ui.common.formatEthiopianWithGregorian
 import com.agpeya.app.ui.common.liturgicalSeasonLabel
 import com.agpeya.app.ui.reading.geezNumeral
+import com.agpeya.app.ui.common.LoadingPanel
+import com.agpeya.app.ui.common.SelectPill
+import com.agpeya.app.ui.common.SinqCard
+import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.common.StatePanel
 import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.theme.IconSize
+import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.strings.Strings
 import java.time.LocalDate
 
@@ -111,29 +120,11 @@ fun GitsaweScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(s.gitsaweTitle, style = MaterialTheme.typography.titleLarge)
-                        Text(
-                            formatEthiopianWithGregorian(date, s),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        liturgicalSeasonLabel(date, s)?.let {
-                            Text(
-                                it,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.secondary,
-                            )
-                        }
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
-                    }
-                },
+            SinqTopBar(
+                title = s.gitsaweTitle,
+                subtitle = formatEthiopianWithGregorian(date, s),
+                accentLine = liturgicalSeasonLabel(date, s),
+                onBack = onBack,
                 actions = {
                     val ctx = LocalContext.current
                     IconButton(
@@ -143,39 +134,44 @@ fun GitsaweScreen(
                         },
                         enabled = active != null,
                     ) {
-                        Icon(Icons.Outlined.Share, contentDescription = s.shareAction)
+                        Icon(
+                            Icons.Outlined.Share,
+                            contentDescription = s.shareAction,
+                            modifier = Modifier.size(IconSize.medium),
+                        )
                     }
                     IconButton(onClick = { showPicker = true }) {
-                        Icon(Icons.Outlined.EditCalendar, contentDescription = s.gitsaweChangeDay)
+                        Icon(
+                            Icons.Outlined.EditCalendar,
+                            contentDescription = s.gitsaweChangeDay,
+                            modifier = Modifier.size(IconSize.medium),
+                        )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
             )
         },
     ) { innerPadding ->
         if (data == null) {
-            Box(
-                Modifier.fillMaxSize().padding(innerPadding),
-                contentAlignment = Alignment.Center,
-            ) { CircularProgressIndicator(color = MaterialTheme.colorScheme.secondary) }
+            LoadingPanel(Modifier.padding(innerPadding))
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(innerPadding),
-                contentPadding = PaddingValues(horizontal = 22.dp),
+                contentPadding = PaddingValues(horizontal = Spacing.screen),
             ) {
                 item(key = "sinksar") {
-                    Spacer(Modifier.height(10.dp))
+                    Spacer(Modifier.height(Spacing.sm))
                     SynaxariumCard(onClick = { onOpenSynaxarium(epochDay) })
-                    Spacer(Modifier.height(6.dp))
                 }
                 if (active == null) {
+                    // Daily coverage is partial by design — say what's missing
+                    // and that the day itself is fine, rather than showing a
+                    // bare line of grey text.
                     item(key = "empty") {
-                        Text(
-                            s.noGitsaweToday,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 28.dp),
-                            textAlign = TextAlign.Center,
+                        StatePanel(
+                            icon = Icons.Outlined.EditCalendar,
+                            title = s.noGitsaweToday,
+                            actionLabel = s.gitsaweChangeDay,
+                            onAction = { showPicker = true },
                         )
                     }
                 } else {
@@ -186,16 +182,16 @@ fun GitsaweScreen(
                         item(key = "sub") {
                             Text(
                                 sub,
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = MaterialTheme.typography.titleSmall,
                                 color = MaterialTheme.colorScheme.onBackground,
-                                modifier = Modifier.padding(top = 6.dp, bottom = 4.dp),
+                                modifier = Modifier.padding(top = Spacing.sm, bottom = Spacing.xs),
                             )
                         }
                     }
                     active.services.negh?.let { svc -> serviceSection("ነግህ", svc, s, onOpenReading) }
                     active.services.kidassie?.let { svc -> serviceSection("ቅዳሴ", svc, s, onOpenReading) }
                 }
-                item { Spacer(Modifier.height(40.dp)) }
+                item { Spacer(Modifier.height(Spacing.huge)) }
             }
         }
     }
@@ -232,10 +228,17 @@ private fun androidx.compose.foundation.lazy.LazyListScope.serviceSection(
     onOpenReading: (ReadingTarget) -> Unit,
 ) {
     item(key = "svc_$label") {
-        Row(Modifier.fillMaxWidth().padding(top = 18.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.fillMaxWidth().padding(top = Spacing.xxl, bottom = Spacing.sm),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text(label, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onBackground)
-            Spacer(Modifier.width(10.dp))
-            androidx.compose.material3.HorizontalDivider(Modifier.weight(1f), color = MaterialTheme.colorScheme.surfaceVariant)
+            Spacer(Modifier.width(Spacing.md))
+            androidx.compose.material3.HorizontalDivider(
+                Modifier.weight(1f),
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.outlineVariant,
+            )
         }
     }
     for ((role, pick) in ROLE_LABELS) {
@@ -265,9 +268,10 @@ private fun ReadingRow(role: String, reading: GitsaweReading, s: Strings, onOpen
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .heightIn(min = 48.dp)
+            .clip(MaterialTheme.shapes.small)
             .then(if (clickable) Modifier.clickable { onOpenReading(target!!) } else Modifier)
-            .padding(vertical = 11.dp, horizontal = 6.dp),
+            .padding(vertical = Spacing.md, horizontal = Spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -277,20 +281,23 @@ private fun ReadingRow(role: String, reading: GitsaweReading, s: Strings, onOpen
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .width(62.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(MaterialTheme.shapes.extraSmall)
                 .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f))
-                .padding(vertical = 4.dp, horizontal = 6.dp),
+                .padding(vertical = Spacing.xs, horizontal = Spacing.xs),
         )
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(Spacing.md))
         Column(Modifier.weight(1f)) {
             Text(
                 verse?.bookTitle ?: "—",
                 style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onBackground,
+                // A reading with no bundled page is still real liturgical
+                // information — shown, but visibly not a door.
+                color = if (clickable) MaterialTheme.colorScheme.onBackground
+                else MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
                 text = if (clickable) verseRef(verse!!) else s.gitsaweOpenNotAvailable,
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -299,6 +306,7 @@ private fun ReadingRow(role: String, reading: GitsaweReading, s: Strings, onOpen
                 Icons.AutoMirrored.Outlined.KeyboardArrowRight,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(IconSize.medium),
             )
         }
     }
@@ -315,54 +323,43 @@ private fun verseRef(v: VerseRef): String = buildString {
 @Composable
 private fun SynaxariumCard(onClick: () -> Unit) {
     val s = LocalStrings.current
-    Surface(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant),
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
+    SinqCard(onClick = onClick) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text(s.synaxariumKicker, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-                Text(s.synaxariumTitle, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
+                Text(
+                    s.synaxariumKicker,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.secondary,
+                )
+                Text(
+                    s.synaxariumTitle,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
             }
             Icon(
                 Icons.AutoMirrored.Outlined.KeyboardArrowRight,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(IconSize.medium),
             )
         }
     }
 }
 
+/** Which office the day's readings are being shown from (daily / seasonal / monthly). */
 @Composable
 private fun SourceSwitcher(sources: List<Source>, selected: Int, onSelect: (Int) -> Unit) {
     LazyRow(
-        modifier = Modifier.padding(vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(vertical = Spacing.md),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         items(sources.size) { i ->
-            val isSel = i == selected
-            Box(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .then(
-                        if (isSel) Modifier.background(MaterialTheme.colorScheme.primary)
-                        else Modifier.border(1.dp, MaterialTheme.colorScheme.surfaceVariant, CircleShape),
-                    )
-                    .clickable { onSelect(i) }
-                    .padding(horizontal = 18.dp, vertical = 9.dp),
-            ) {
-                Text(
-                    sources[i].label,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = if (isSel) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            SelectPill(
+                label = sources[i].label,
+                selected = i == selected,
+                onClick = { onSelect(i) },
+            )
         }
     }
 }
