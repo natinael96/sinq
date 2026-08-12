@@ -39,8 +39,14 @@ class AlarmReceiver : BroadcastReceiver() {
                     val entry = ModesRepository.current(context).activeMode
                         ?.entries?.find { it.id == entryId && it.enabled }
                     if (entry != null) {
+                        // Always re-arm, even when silenced: the chain must keep
+                        // running or tomorrow's alarm is lost too.
                         ReminderScheduler.scheduleNext(context, entry, hourName)
-                        true
+                        val now = java.time.LocalTime.now()
+                        val quiet = com.agpeya.app.data.SettingsRepository
+                            .quietHoursBlocking(context)
+                            .covers(now.hour * 60 + now.minute)
+                        !quiet
                     } else {
                         ModesRepository.setScheduledIds(
                             context,

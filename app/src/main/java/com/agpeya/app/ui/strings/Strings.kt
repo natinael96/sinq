@@ -192,6 +192,9 @@ interface Strings {
     val backupFailed: String
     val restoreDone: String
     val restoreFailed: String
+    val quietHours: String
+    val quietHoursDesc: String
+    fun quietHoursRange(from: String, to: String): String
     val filterAll: String
     val markRead: String
     val prayerProgress: String
@@ -279,6 +282,28 @@ interface Strings {
     fun seasonWithWeek(name: String, week: Int): String
 
     fun habitsCount(n: Int): String
+
+    // Interaction labels a screen reader needs but a sighted user reads from
+    // the chevron's direction alone.
+    val expand: String
+    val collapse: String
+
+    // Settings groups. The screen is long enough that it has to be scannable by
+    // heading rather than by reading every row.
+    val settingsGroupReading: String
+    val settingsGroupPrayer: String
+    val settingsGroupData: String
+    val settingsGroupMore: String
+
+    /**
+     * Failure messages. Each one answers three questions in order: what
+     * happened, whether the user's own data is affected, and what to do next.
+     * A file picker returning a broken URI is not the user's problem to parse.
+     */
+    val backupFailedBody: String
+    val restoreFailedBody: String
+    val contentMissingTitle: String
+    val contentMissingBody: String
 }
 
 object AmharicStrings : Strings {
@@ -465,6 +490,9 @@ object AmharicStrings : Strings {
     override val backupFailed = "ምትኬውን ማስቀመጥ አልተቻለም።"
     override val restoreDone = "ከምትኬው ተመልሷል።"
     override val restoreFailed = "ፋይሉን ማንበብ አልተቻለም።"
+    override val quietHours = "ጸጥታ ሰዓታት"
+    override val quietHoursDesc = "በሌሊት ማሳሰቢያዎች ድምፅ አያሰሙም"
+    override fun quietHoursRange(from: String, to: String) = "ከ$from እስከ $to ድምፅ የለም"
     override val filterAll = "ሁሉም"
     override val markRead = "እንደተነበበ ምልክት አድርግ"
     override val prayerProgress = "ንባብ"
@@ -548,6 +576,22 @@ object AmharicStrings : Strings {
     override fun seasonWithWeek(name: String, week: Int) = "$name · $week ኛ ሳምንት"
 
     override fun habitsCount(n: Int) = "$n ልማዶች"
+
+    override val expand = "ክፈት"
+    override val collapse = "ዝጋ"
+
+    override val settingsGroupReading = "ንባብ"
+    override val settingsGroupPrayer = "ጸሎትና ማስታወሻ"
+    override val settingsGroupData = "መረጃ"
+    override val settingsGroupMore = "ተጨማሪ"
+
+    override val backupFailedBody =
+        "ምትኬው አልተቀመጠም። በመተግበሪያው ውስጥ ያለው መረጃህ እንደነበረ አለ። ሌላ ቦታ ወይም ሌላ ስም መርጠህ እንደገና ሞክር።"
+    override val restoreFailedBody =
+        "ፋይሉ አልተነበበም። ያለህ ጉዞ፣ ምልክቶችና ማድመቂያዎች አልተነኩም። የስንቅ ምትኬ ፋይል (.json) መሆኑን አረጋግጠህ እንደገና ሞክር።"
+    override val contentMissingTitle = "ይህ ክፍል አልተገኘም"
+    override val contentMissingBody =
+        "ጽሑፉ በዚህ እትም ውስጥ የለም። የቀሩት ክፍሎች እንደተለመደው ይሠራሉ።"
 }
 
 object EnglishStrings : Strings {
@@ -752,6 +796,9 @@ object EnglishStrings : Strings {
     override val backupFailed = "Could not save the backup."
     override val restoreDone = "Restored from the backup."
     override val restoreFailed = "Could not read that file."
+    override val quietHours = "Quiet hours"
+    override val quietHoursDesc = "Silence reminders overnight"
+    override fun quietHoursRange(from: String, to: String) = "Silent from $from to $to"
     override val filterAll = "All"
     override val markRead = "Mark as read"
     override val prayerProgress = "Progress"
@@ -834,6 +881,22 @@ object EnglishStrings : Strings {
     }
     override fun seasonWithWeek(name: String, week: Int) = "$name · week $week"
     override fun habitsCount(n: Int) = "$n habits"
+
+    override val expand = "Expand"
+    override val collapse = "Collapse"
+
+    override val settingsGroupReading = "Reading"
+    override val settingsGroupPrayer = "Prayer and reminders"
+    override val settingsGroupData = "Your data"
+    override val settingsGroupMore = "More"
+
+    override val backupFailedBody =
+        "The backup wasn't saved. Everything in the app is untouched. Try again, choosing a different folder or file name."
+    override val restoreFailedBody =
+        "That file couldn't be read. Your streak, bookmarks and highlights are unchanged. Check it's a Sinq backup (.json) and try again."
+    override val contentMissingTitle = "This passage isn't here"
+    override val contentMissingBody =
+        "The text isn't part of this edition. Everything else still works as usual."
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { AmharicStrings }

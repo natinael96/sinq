@@ -1,5 +1,11 @@
 package com.agpeya.app.ui.home
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,7 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -26,10 +32,7 @@ import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
-import androidx.compose.material.icons.outlined.ExpandLess
-import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,30 +50,51 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.agpeya.app.data.ContentRepository
+import com.agpeya.app.data.DayReadings
+import com.agpeya.app.data.GitsaweRepository
 import com.agpeya.app.data.HabitsRepository
 import com.agpeya.app.data.HoursRepository
 import com.agpeya.app.model.HabitsState
 import com.agpeya.app.model.Hour
 import com.agpeya.app.model.HoursConfig
 import com.agpeya.app.ui.common.AgpeyaBottomBar
+import com.agpeya.app.ui.common.CollapsibleHeader
+import com.agpeya.app.ui.common.HeroCard
+import com.agpeya.app.ui.common.SectionHeader
+import com.agpeya.app.ui.common.SinqCard
+import com.agpeya.app.ui.common.SinqDivider
 import com.agpeya.app.ui.common.Tab
 import com.agpeya.app.ui.habits.HabitHeatmap
 import com.agpeya.app.ui.habits.habitName
 import com.agpeya.app.ui.common.liturgicalSeasonLabel
 import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.theme.IconSize
+import com.agpeya.app.ui.theme.LocalMotion
+import com.agpeya.app.ui.theme.Motion
+import com.agpeya.app.ui.theme.Spacing
+import com.agpeya.app.ui.theme.sinqColors
 import java.time.LocalDate
 import java.time.LocalTime
 
 /** Synthetic id for the Home aggregate prayer dot; resolves to the ጸሎት label. */
 private const val PRAYER_AGGREGATE_ID = "prayer"
 
+/**
+ * Home answers five questions, in this order, without making the reader work for
+ * any of them: what day is it, what should I pray now, what is today's ግጻዌ, how
+ * am I doing, and what else can I open.
+ *
+ * Only two things on this page are cards — the prayer for now and the day's
+ * ግጻዌ. Everything else is separated by space and a header, because a screen
+ * where every block is a rounded box has no hierarchy left to spend.
+ */
 @Composable
 fun HomeScreen(
     onOpenHour: (String) -> Unit,
@@ -117,6 +141,11 @@ fun HomeScreen(
             .resumable(dayProgress) { id -> hours.find { it.id == id }?.sections?.map { sec -> sec.id } ?: emptyList() }
             ?.let { id -> hours.find { it.id == id } }
     }
+    // The day's lectionary, so the ግጻዌ card can name today's reading instead of
+    // being a label with an arrow on it.
+    val readings by produceState<DayReadings?>(initialValue = null, today) {
+        value = runCatching { GitsaweRepository.readingsFor(context, today) }.getOrNull()
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -126,105 +155,50 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = 24.dp),
+            contentPadding = PaddingValues(horizontal = Spacing.screen),
         ) {
-            item {
-                Spacer(Modifier.height(20.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column {
-                        val profileName by com.agpeya.app.data.SettingsRepository.profileName(context)
-                            .collectAsState(initial = "")
-                        val christianName by com.agpeya.app.data.SettingsRepository.christianName(context)
-                            .collectAsState(initial = "")
-                        val callName = christianName.ifBlank { profileName }
-                        Text("ስንቅ", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
-                        Text(
-                            text = com.agpeya.app.ui.common.formatEthiopian(today, s),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Text(
-                            text = com.agpeya.app.ui.common.formatGregorianShort(today, s),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        // The liturgical season, when the date falls in one. The
-                        // calculation already existed; it was simply never shown.
-                        seasonLabel?.let {
-                            Text(
-                                text = it,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.secondary,
-                            )
-                        }
-                        if (callName.isNotBlank()) {
-                            Text(
-                                text = s.greeting(callName),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.secondary,
-                            )
-                        }
-                    }
-                    Row {
-                        IconButton(onClick = onOpenFasting) {
-                            Icon(
-                                Icons.Outlined.CalendarMonth,
-                                contentDescription = s.fastingTitle,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        IconButton(onClick = onOpenSearch) {
-                            Icon(
-                                Icons.Outlined.Search,
-                                contentDescription = s.tabSearch,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        IconButton(onClick = onOpenBookmarks) {
-                            Icon(
-                                Icons.Outlined.Bookmarks,
-                                contentDescription = s.bookmarksTitle,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
-                }
-                Spacer(Modifier.height(16.dp))
+            item(key = "header") {
+                Spacer(Modifier.height(Spacing.xl))
+                DayHeader(
+                    today = today,
+                    seasonLabel = seasonLabel,
+                    onOpenFasting = onOpenFasting,
+                    onOpenSearch = onOpenSearch,
+                    onOpenBookmarks = onOpenBookmarks,
+                )
+                Spacer(Modifier.height(Spacing.xl))
             }
 
             if (suggested != null) {
-                item {
+                item(key = "now") {
                     NowCard(hour = suggested, onClick = { onOpenHour(suggested.id) })
-                    Spacer(Modifier.height(24.dp))
+                    Spacer(Modifier.height(Spacing.md))
                 }
             }
 
-            // Offered only when an hour was started today and left unfinished.
+            // Offered only when an hour was started today and left unfinished. A
+            // slim row rather than a second card — it's a continuation, not a
+            // rival to the prayer for now.
             resumeHour?.takeIf { it.id != suggested?.id }?.let { h ->
-                item {
-                    ResumeCard(
+                item(key = "resume") {
+                    ResumeRow(
                         hour = h,
                         done = dayProgress.done[h.id]?.size ?: 0,
                         total = sectionCounts[h.id] ?: 0,
                         onClick = { onOpenHour(h.id) },
                     )
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(Spacing.md))
                 }
             }
 
-            item {
-                GitsaweCard(onClick = onOpenGitsawe)
-                Spacer(Modifier.height(24.dp))
+            item(key = "gitsawe") {
+                Spacer(Modifier.height(Spacing.sm))
+                GitsaweCard(readings = readings, onClick = onOpenGitsawe)
+                Spacer(Modifier.height(Spacing.xxl))
             }
 
-            item {
-                Text(s.todayLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-                Spacer(Modifier.height(10.dp))
-                TodayCard(
+            item(key = "today") {
+                TodaySection(
                     habitIds = habitIds,
                     doneToday = doneWithAggregate,
                     habitState = habitState,
@@ -234,61 +208,27 @@ fun HomeScreen(
                     maxPossible = hours.size + (habitIds.size - 1),
                     onClick = { onSelectTab(Tab.STREAK) },
                 )
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(Spacing.xxl))
             }
 
-            item {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    LibraryButton(
-                        label = s.psalterTitle,
-                        enabled = true,
-                        comingSoon = null,
-                        onClick = onOpenPsalter,
-                        modifier = Modifier.weight(1f),
-                    )
-                    LibraryButton(
-                        label = s.zewotrTselot,
-                        enabled = true,
-                        comingSoon = null,
-                        onClick = onOpenZewotr,
-                        modifier = Modifier.weight(1f),
-                    )
-                    LibraryButton(
-                        label = s.wudaseMariam,
-                        enabled = true,
-                        comingSoon = null,
-                        onClick = onOpenWudase,
-                        modifier = Modifier.weight(1f),
-                    )
+            item(key = "shortcuts") {
+                SectionHeader(s.libraryTitle)
+                Spacer(Modifier.height(Spacing.md))
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                    QuickLink(s.psalterTitle, onOpenPsalter, Modifier.weight(1f))
+                    QuickLink(s.zewotrTselot, onOpenZewotr, Modifier.weight(1f))
+                    QuickLink(s.wudaseMariam, onOpenWudase, Modifier.weight(1f))
                 }
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(Spacing.xxl))
             }
 
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { hoursExpanded = !hoursExpanded }
-                        .padding(vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        s.hoursHeader,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Text(
-                        text = hours.size.toString(),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Icon(
-                        imageVector = if (hoursExpanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+            item(key = "hoursHeader") {
+                CollapsibleHeader(
+                    text = s.hoursHeader,
+                    expanded = hoursExpanded,
+                    badge = hours.size.toString(),
+                    onToggle = { hoursExpanded = !hoursExpanded },
+                )
             }
             if (hoursExpanded) {
                 items(hours, key = { it.id }) { hour ->
@@ -300,95 +240,137 @@ fun HomeScreen(
                         },
                         onClick = { onOpenHour(hour.id) },
                     )
-                    if (hour.id != hours.lastOrNull()?.id) {
-                        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant, thickness = 1.dp)
-                    }
+                    if (hour.id != hours.lastOrNull()?.id) SinqDivider()
                 }
             }
-            item { Spacer(Modifier.height(24.dp)) }
+            item { Spacer(Modifier.height(Spacing.xxl)) }
         }
+    }
+}
+
+/**
+ * The date block. Three lines at most: the app, the day, and — only when the day
+ * actually falls in one — the liturgical season. The greeting joins the season
+ * line rather than claiming a fourth.
+ */
+@Composable
+private fun DayHeader(
+    today: LocalDate,
+    seasonLabel: String?,
+    onOpenFasting: () -> Unit,
+    onOpenSearch: () -> Unit,
+    onOpenBookmarks: () -> Unit,
+) {
+    val context = LocalContext.current
+    val s = LocalStrings.current
+    val profileName by com.agpeya.app.data.SettingsRepository.profileName(context)
+        .collectAsState(initial = "")
+    val christianName by com.agpeya.app.data.SettingsRepository.christianName(context)
+        .collectAsState(initial = "")
+    val callName = christianName.ifBlank { profileName }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                "ስንቅ",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            Spacer(Modifier.height(Spacing.xxs))
+            Text(
+                text = com.agpeya.app.ui.common.formatEthiopian(today, s),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = com.agpeya.app.ui.common.formatGregorianShort(today, s),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+            )
+            val accent = listOfNotNull(
+                seasonLabel,
+                callName.takeIf { it.isNotBlank() }?.let { s.greeting(it) },
+            )
+            if (accent.isNotEmpty()) {
+                Spacer(Modifier.height(Spacing.xs))
+                Text(
+                    text = accent.joinToString("  ·  "),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.secondary,
+                )
+            }
+        }
+        Row {
+            HeaderAction(Icons.Outlined.CalendarMonth, s.fastingTitle, onOpenFasting)
+            HeaderAction(Icons.Outlined.Search, s.tabSearch, onOpenSearch)
+            HeaderAction(Icons.Outlined.Bookmarks, s.bookmarksTitle, onOpenBookmarks)
+        }
+    }
+}
+
+@Composable
+private fun HeaderAction(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit,
+) {
+    IconButton(onClick = onClick) {
+        Icon(
+            icon,
+            contentDescription = label,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(IconSize.medium),
+        )
     }
 }
 
 @Composable
 private fun NowCard(hour: Hour, onClick: () -> Unit) {
     val s = LocalStrings.current
-    Surface(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.primary,
-    ) {
-        // Compact hero: the arrow sits inline with the text rather than claiming
-        // its own row, so the card is roughly a third shorter and the hours list
-        // starts higher up the screen.
-        Box(Modifier.fillMaxWidth()) {
-            // Soft gold glow, clipped by the card shape.
-            Box(
-                Modifier
-                    .align(Alignment.TopEnd)
-                    .offset(x = 24.dp, y = (-24).dp)
-                    .size(104.dp)
-                    .background(
-                        Brush.radialGradient(
-                            listOf(MaterialTheme.colorScheme.secondary.copy(alpha = 0.34f), Color.Transparent),
-                        ),
-                        CircleShape,
-                    ),
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        s.nowPrayer,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
-                    )
-                    Spacer(Modifier.height(2.dp))
-                    Text(hour.name, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onPrimary)
-                    if (hour.timeHint.isNotBlank()) {
-                        Text(
-                            hour.timeHint,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.66f),
-                        )
-                    }
-                }
-                Icon(
-                    Icons.AutoMirrored.Outlined.ArrowForward,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
-                )
+    val sinq = sinqColors
+    HeroCard(onClick = onClick) {
+        Column(Modifier.weight(1f)) {
+            Text(s.nowPrayer, style = MaterialTheme.typography.labelMedium, color = sinq.onHeroMuted)
+            Spacer(Modifier.height(Spacing.xxs))
+            Text(hour.name, style = MaterialTheme.typography.titleLarge, color = sinq.onHero)
+            if (hour.timeHint.isNotBlank()) {
+                Text(hour.timeHint, style = MaterialTheme.typography.bodySmall, color = sinq.onHeroMuted)
             }
         }
+        Icon(
+            Icons.AutoMirrored.Outlined.ArrowForward,
+            contentDescription = null,
+            tint = sinq.onHeroMuted,
+            modifier = Modifier.size(IconSize.medium),
+        )
     }
 }
 
+/**
+ * Today's ግጻዌ. The card names the actual reading — and the feast, when there is
+ * one — so the day's lectionary is legible from Home rather than being a door
+ * you have to open to find out what's behind it.
+ */
 @Composable
-private fun GitsaweCard(onClick: () -> Unit) {
+private fun GitsaweCard(readings: DayReadings?, onClick: () -> Unit) {
     val s = LocalStrings.current
-    Surface(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surface,
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant),
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
+    val motion = LocalMotion.current
+    val feast = readings?.feasts?.firstOrNull()?.amharicName
+    val reading = readings?.daily?.title
+        ?: readings?.seasonal?.firstOrNull()?.title
+        ?: readings?.monthly?.firstOrNull()?.let { it.title ?: it.raw }
+    SinqCard(onClick = onClick, contentPadding = PaddingValues(Spacing.lg)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 Icons.AutoMirrored.Outlined.MenuBook,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.size(26.dp),
+                modifier = Modifier.size(IconSize.large),
             )
-            Spacer(Modifier.width(14.dp))
+            Spacer(Modifier.width(Spacing.md))
             Column(Modifier.weight(1f)) {
                 Text(
                     s.gitsaweKicker,
@@ -405,13 +387,46 @@ private fun GitsaweCard(onClick: () -> Unit) {
                 Icons.AutoMirrored.Outlined.ArrowForward,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(IconSize.medium),
             )
+        }
+        // Fades in once the lectionary resolves, so the card doesn't jump.
+        AnimatedVisibility(
+            visible = feast != null || reading != null,
+            enter = fadeIn(motion.spec(Motion.standard)) + expandVertically(motion.spec(Motion.standard)),
+            exit = fadeOut(motion.spec(Motion.fast)) + shrinkVertically(motion.spec(Motion.fast)),
+        ) {
+            Column {
+                Spacer(Modifier.height(Spacing.md))
+                SinqDivider()
+                Spacer(Modifier.height(Spacing.md))
+                feast?.let {
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
+                }
+                reading?.let {
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                    )
+                }
+            }
         }
     }
 }
 
+/**
+ * Today's progress: a count, the streak, one dot per trackable, and the recent
+ * history. No card — the header and the space around it do that job, and one
+ * less rounded box on this screen is one more place for the eye to rest.
+ */
 @Composable
-private fun TodayCard(
+private fun TodaySection(
     habitIds: List<String>,
     doneToday: Set<String>,
     habitState: HabitsState,
@@ -423,118 +438,119 @@ private fun TodayCard(
     val s = LocalStrings.current
     val doneCount = habitIds.count { it in doneToday }
     val overall = HabitsRepository.overallCurrentStreak(records, today)
-    Surface(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surface,
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant),
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick = onClick, onClickLabel = s.streaksTitle)
+            .padding(vertical = Spacing.xs),
     ) {
-        Column(Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    "${s.todayLabel}  $doneCount/${habitIds.size}",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Filled.LocalFireDepartment,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(16.dp),
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text(s.daysUnit(overall), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-                }
-            }
-            if (habitIds.isNotEmpty()) {
-                Spacer(Modifier.height(14.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-                    habitIds.take(4).forEach { id ->
-                        val done = id in doneToday
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
-                            Icon(
-                                imageVector = if (done) Icons.Filled.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
-                                contentDescription = null,
-                                tint = if (done) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(26.dp),
-                            )
-                            Spacer(Modifier.height(6.dp))
-                            Text(
-                                habitName(id, habitState, s),
-                                // Smaller + two lines so long names (e.g. "Prostration")
-                                // fit on narrow screens instead of truncating.
-                                style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.sp, lineHeight = 13.sp),
-                                color = if (done) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Center,
-                                maxLines = 2,
-                            )
-                        }
-                    }
-                }
-            }
-            Spacer(Modifier.height(14.dp))
-            HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-            Spacer(Modifier.height(12.dp))
-            HabitHeatmap(
-                records = records,
-                today = today,
-                maxPossible = maxPossible,
-                weeksBack = 14,
-                showLegend = false,
-                cell = 9.dp,
-                gap = 2.dp,
+        SectionHeader(s.todayLabel) {
+            Text(
+                text = "$doneCount/${habitIds.size}",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.width(Spacing.md))
+            Icon(
+                Icons.Filled.LocalFireDepartment,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.size(IconSize.small),
+            )
+            Spacer(Modifier.width(Spacing.xs))
+            Text(
+                s.daysUnit(overall),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.secondary,
             )
         }
+        if (habitIds.isNotEmpty()) {
+            Spacer(Modifier.height(Spacing.lg))
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md), modifier = Modifier.fillMaxWidth()) {
+                habitIds.take(4).forEach { id ->
+                    HabitDot(
+                        label = habitName(id, habitState, s),
+                        done = id in doneToday,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(Spacing.lg))
+        HabitHeatmap(
+            records = records,
+            today = today,
+            maxPossible = maxPossible,
+            weeksBack = 14,
+            showLegend = false,
+            cell = 9.dp,
+            gap = 2.dp,
+        )
     }
 }
 
-/** Small library card: active (gold-titled) or muted with a coming-soon caption. */
+/**
+ * One trackable's state for today. The check cross-fades its tint rather than
+ * popping — no scaling, no bounce; this is a status, not an award. The dot is
+ * announced as a single labelled state so a screen reader doesn't read an
+ * unlabelled icon followed by a stray word.
+ */
 @Composable
-private fun LibraryButton(
-    label: String,
-    enabled: Boolean,
-    comingSoon: String?,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun HabitDot(label: String, done: Boolean, modifier: Modifier = Modifier) {
+    val motion = LocalMotion.current
+    val tint by animateColorAsState(
+        targetValue = if (done) MaterialTheme.colorScheme.secondary
+        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+        animationSpec = motion.spec(Motion.standard),
+        label = "habitDotTint",
+    )
+    val s = LocalStrings.current
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier.semantics(mergeDescendants = true) {
+            contentDescription = if (done) "$label — ${s.markRead}" else label
+        },
+    ) {
+        Icon(
+            imageVector = if (done) Icons.Filled.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
+            contentDescription = null,
+            tint = tint,
+            modifier = Modifier.size(26.dp),
+        )
+        Spacer(Modifier.height(Spacing.xs))
+        Text(
+            label,
+            style = MaterialTheme.typography.labelSmall,
+            color = if (done) MaterialTheme.colorScheme.onBackground
+            else MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+        )
+    }
+}
+
+/** A quiet shortcut into the library. Filled, not outlined — three bordered
+ *  boxes in a row read as a control panel; three soft tiles read as a shelf. */
+@Composable
+private fun QuickLink(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
         onClick = onClick,
-        enabled = enabled,
         shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surface,
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant),
-        modifier = modifier,
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+        modifier = modifier.heightIn(min = 52.dp),
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 14.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Box(
+            modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.md),
+            contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, lineHeight = 15.sp),
-                color = if (enabled) MaterialTheme.colorScheme.onBackground
-                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center,
                 maxLines = 2,
             )
-            if (comingSoon != null) {
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = comingSoon,
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        fontSize = 10.sp,
-                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    maxLines = 1,
-                )
-            }
         }
     }
 }
@@ -547,11 +563,14 @@ private fun HourRow(
     onClick: () -> Unit,
 ) {
     val s = LocalStrings.current
+    val complete = progress != null && progress.second > 0 && progress.first == progress.second
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .clip(MaterialTheme.shapes.small)
             .clickable(onClick = onClick)
-            .padding(vertical = 16.dp),
+            .padding(vertical = Spacing.lg),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
@@ -562,15 +581,15 @@ private fun HourRow(
                     color = MaterialTheme.colorScheme.onBackground,
                 )
                 if (isCurrent) {
-                    Spacer(Modifier.width(8.dp))
+                    Spacer(Modifier.width(Spacing.sm))
                     Text(
                         text = s.currentHourBadge,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f))
-                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.14f))
+                            .padding(horizontal = Spacing.sm, vertical = Spacing.xxs),
                     )
                 }
             }
@@ -588,45 +607,55 @@ private fun HourRow(
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        if (progress != null && progress.first == progress.second && progress.second > 0) {
-            Spacer(Modifier.width(8.dp))
+        if (complete) {
+            Spacer(Modifier.width(Spacing.sm))
             Icon(
                 Icons.Filled.CheckCircle,
-                contentDescription = null,
+                contentDescription = s.markRead,
                 tint = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(IconSize.small),
             )
         }
     }
 }
 
-/** "Pick up where you left off" — only shown for an hour started but unfinished today. */
+/**
+ * "Pick up where you left off" — only shown for an hour started but unfinished
+ * today. A gold rule down the left edge marks it without a second card outline.
+ */
 @Composable
-private fun ResumeCard(hour: Hour, done: Int, total: Int, onClick: () -> Unit) {
+private fun ResumeRow(hour: Hour, done: Int, total: Int, onClick: () -> Unit) {
     val s = LocalStrings.current
-    Surface(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surface,
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)),
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick = onClick)
+            .padding(vertical = Spacing.md),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(Modifier.weight(1f)) {
-                Text(
-                    s.resumePrayer,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                )
+        Box(
+            Modifier
+                .width(3.dp)
+                .height(34.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.secondary),
+        )
+        Spacer(Modifier.width(Spacing.md))
+        Column(Modifier.weight(1f)) {
+            Text(
+                s.resumePrayer,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.secondary,
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     hour.name,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
                 if (total > 0) {
+                    Spacer(Modifier.width(Spacing.sm))
                     Text(
                         s.progressOf(done, total),
                         style = MaterialTheme.typography.labelSmall,
@@ -634,11 +663,12 @@ private fun ResumeCard(hour: Hour, done: Int, total: Int, onClick: () -> Unit) {
                     )
                 }
             }
-            Icon(
-                Icons.AutoMirrored.Outlined.ArrowForward,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.secondary,
-            )
         }
+        Icon(
+            Icons.AutoMirrored.Outlined.ArrowForward,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.size(IconSize.medium),
+        )
     }
 }

@@ -23,6 +23,29 @@ enum class Language { SYSTEM, AMHARIC, ENGLISH }
  */
 enum class ReadingFont { ABYSSINICA, ABAY_LIGHT, BELA_BEREKA, ZEMENAY }
 
+/**
+ * A nightly window in which reminders stay silent.
+ *
+ * Times are minutes past midnight. A window that wraps midnight — the normal
+ * case — simply has [startMinute] greater than [endMinute].
+ */
+data class QuietHours(
+    val enabled: Boolean = false,
+    val startMinute: Int = 22 * 60,
+    val endMinute: Int = 6 * 60,
+) {
+    /** True when [minuteOfDay] falls inside the window. */
+    fun covers(minuteOfDay: Int): Boolean {
+        if (!enabled) return false
+        if (startMinute == endMinute) return false            // zero-length window
+        return if (startMinute < endMinute) {
+            minuteOfDay >= startMinute && minuteOfDay < endMinute
+        } else {
+            minuteOfDay >= startMinute || minuteOfDay < endMinute   // wraps midnight
+        }
+    }
+}
+
 /** How a fired reminder alerts: ring + vibrate, ring only, vibrate only, or silent. */
 enum class AlarmAlert { SOUND_VIBRATE, SOUND_ONLY, VIBRATE_ONLY, SILENT }
 /** Which sound a ringing alarm plays. */
@@ -44,6 +67,9 @@ object SettingsRepository {
     private val KEY_CHRISTIAN_NAME = stringPreferencesKey("profile_christian_name")
     private val KEY_STREAK_REMINDER = booleanPreferencesKey("streak_reminder")
     private val KEY_GITSAWE_REMINDER = booleanPreferencesKey("gitsawe_reminder")
+    private val KEY_QUIET_ENABLED = booleanPreferencesKey("quiet_enabled")
+    private val KEY_QUIET_START = intPreferencesKey("quiet_start_min")
+    private val KEY_QUIET_END = intPreferencesKey("quiet_end_min")
 
     const val DEFAULT_FONT_STEP = 1
 
@@ -160,6 +186,34 @@ object SettingsRepository {
     suspend fun setGitsaweReminder(context: Context, value: Boolean) {
         context.settingsDataStore.edit { it[KEY_GITSAWE_REMINDER] = value }
     }
+
+    // ---- Quiet hours --------------------------------------------------------
+    //
+    // A window in which reminders stay silent. Stored as minutes past midnight
+    // so a window that crosses midnight (22:00 → 06:00) is just start > end.
+
+    /** Minutes past midnight; defaults to 22:00–06:00, off unless enabled. */
+    fun quietHours(context: Context): Flow<QuietHours> =
+        context.settingsDataStore.data.map {
+            QuietHours(
+                enabled = it[KEY_QUIET_ENABLED] ?: false,
+                startMinute = it[KEY_QUIET_START] ?: (22 * 60),
+                endMinute = it[KEY_QUIET_END] ?: (6 * 60),
+            )
+        }
+
+    suspend fun setQuietHours(context: Context, value: QuietHours) {
+        context.settingsDataStore.edit {
+            it[KEY_QUIET_ENABLED] = value.enabled
+            it[KEY_QUIET_START] = value.startMinute.coerceIn(0, 24 * 60 - 1)
+            it[KEY_QUIET_END] = value.endMinute.coerceIn(0, 24 * 60 - 1)
+        }
+    }
+
+    /** Blocking read for the alarm receiver, which has no coroutine scope. */
+    fun quietHoursBlocking(context: Context): QuietHours =
+        runCatching { kotlinx.coroutines.runBlocking { quietHours(context).first() } }
+            .getOrDefault(QuietHours())
 
     fun onboarded(context: Context): Flow<Boolean> =
         context.settingsDataStore.data.map { it[KEY_ONBOARDED] ?: false }

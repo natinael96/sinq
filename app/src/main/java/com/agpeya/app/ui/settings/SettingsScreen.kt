@@ -330,6 +330,11 @@ fun SettingsScreen(
             }
 
             item {
+                QuietHoursRow(s)
+                Spacer(Modifier.height(8.dp))
+            }
+
+            item {
                 SettingsLink(s.manageHours, onOpenCustomize)
                 SettingsLink(s.reminderModes, onOpenModes)
                 BackupRows(s)
@@ -618,6 +623,39 @@ private fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
             confirmButton = { TextButton(onClick = { message = null }) { Text(s.ok) } },
             title = { Text(s.backupTitle) },
             text = { Text(text) },
+        )
+    }
+}
+
+/** A nightly window in which prayer reminders stay silent. */
+@Composable
+private fun QuietHoursRow(s: com.agpeya.app.ui.strings.Strings) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val quiet by SettingsRepository.quietHours(context)
+        .collectAsState(initial = com.agpeya.app.data.QuietHours())
+
+    fun fmt(minute: Int) = "%02d:%02d".format(minute / 60, minute % 60)
+
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(s.quietHours, style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = if (quiet.enabled) s.quietHoursRange(fmt(quiet.startMinute), fmt(quiet.endMinute))
+                else s.quietHoursDesc,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Switch(
+            checked = quiet.enabled,
+            onCheckedChange = { on ->
+                scope.launch { SettingsRepository.setQuietHours(context, quiet.copy(enabled = on)) }
+            },
         )
     }
 }
