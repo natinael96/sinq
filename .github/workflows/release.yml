@@ -1,8 +1,11 @@
 name: Release
 
-# Pushing a tag like v0.2.2 builds a signed release APK + AAB and attaches
-# them to a GitHub Release. Signing comes from repo secrets (see README):
-#   KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD
+# Pushing a tag like v0.2.2 validates, tests, then builds a signed release APK
+# + AAB and attaches them to a GitHub Release. Signing comes from repo secrets
+# (see README): KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD
+#
+# The gates run BEFORE any artifact is built: a failing content check or unit
+# test stops the release, so a broken build can never reach the releases page.
 on:
   push:
     tags:
@@ -23,6 +26,26 @@ jobs:
           java-version: "17"
           cache: gradle
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # --- Gate 1: the bundled content is intact -------------------------
+      # Section ids are permanent contracts (bookmarks and highlights point at
+      # them), so a regeneration that renames one must never ship.
+      - name: Validate bundled content
+        run: python3 tools/validate_content.py
+
+      # --- Gate 2: the test suite passes ---------------------------------
+      - name: Unit tests
+        run: |
+          chmod +x gradlew
+          ./gradlew testDebugUnitTest --no-daemon
+
+      - name: Lint (release-blocking issues only)
+        run: ./gradlew lintVitalRelease --no-daemon
+
+      # --- Only now do we produce artifacts ------------------------------
       - name: Decode signing keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > sinq-upload.jks
 
@@ -32,9 +55,7 @@ jobs:
           SINQ_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           SINQ_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           SINQ_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleRelease bundleRelease --no-daemon
+        run: ./gradlew assembleRelease bundleRelease --no-daemon
 
       - name: Rename artifacts
         run: |
@@ -48,3 +69,8 @@ jobs:
             Sinq-*.apk
             Sinq-*.aab
           generate_release_notes: true
+
+      # Keep the signing key out of the runner's workspace afterwards.
+      - name: Remove keystore
+        if: always()
+        run: rm -f sinq-upload.jks

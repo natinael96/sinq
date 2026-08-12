@@ -1,0 +1,43 @@
+name: CI
+
+# Every push and pull request runs the same gates the release does, so a broken
+# commit is caught when it lands rather than at tag time. No signing here — this
+# builds the debug variant only and produces no publishable artifact.
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate bundled content
+        run: python3 tools/validate_content.py
+
+      - name: Unit tests
+        run: |
+          chmod +x gradlew
+          ./gradlew testDebugUnitTest --no-daemon
+
+      - name: Lint
+        run: ./gradlew lintDebug --no-daemon
+
+      - name: Assemble debug
+        run: ./gradlew assembleDebug --no-daemon
