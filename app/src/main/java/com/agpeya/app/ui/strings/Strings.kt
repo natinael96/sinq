@@ -40,6 +40,11 @@ interface Strings {
     val synaxariumKicker: String
     val noSynaxariumToday: String
 
+    /** Language of the closing ጸሎት, and the hint that tapping switches it. */
+    val closingPrayerGeez: String
+    val closingPrayerAmharic: String
+    val closingPrayerSwitchHint: String
+
     val streaksTitle: String
     val currentStreakLabel: String
     val todayLabel: String
@@ -342,6 +347,10 @@ object AmharicStrings : Strings {
     override val synaxariumKicker = "የዕለቱ ስንክሳር"
     override val noSynaxariumToday = "ለዛሬ የተመዘገበ ስንክሳር የለም"
 
+    override val closingPrayerGeez = "ግዕዝ"
+    override val closingPrayerAmharic = "አማርኛ"
+    override val closingPrayerSwitchHint = "ቋንቋ ለመቀየር ይንኩ"
+
     override val streaksTitle = "ጉዞ"
     override val currentStreakLabel = "የአሁኑ ጉዞ"
     override val todayLabel = "ዛሬ"
@@ -631,6 +640,10 @@ object EnglishStrings : Strings {
     override val synaxariumTitle = "Synaxarium"
     override val synaxariumKicker = "Today's Synaxarium"
     override val noSynaxariumToday = "No synaxarium recorded for today"
+
+    override val closingPrayerGeez = "Ge'ez"
+    override val closingPrayerAmharic = "Amharic"
+    override val closingPrayerSwitchHint = "Tap to switch language"
 
     override val streaksTitle = "Streaks"
     override val currentStreakLabel = "Current streak"

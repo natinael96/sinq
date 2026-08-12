@@ -1,6 +1,7 @@
 package com.agpeya.app.ui.gitsawe
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,9 +33,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -204,9 +208,16 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
 /**
  * The fixed closing ጸሎት, appended once after the day's commemorations and set
  * apart by a divider. Holy names are drawn in red.
+ *
+ * Tapping it switches between the Ge'ez verses and their Amharic rendering. The
+ * choice is remembered while the screen lives but deliberately not persisted —
+ * it is a reading aid for the moment, not a setting. Stanzas without an Amharic
+ * counterpart stay in Ge'ez rather than vanishing.
  */
 @Composable
 private fun ClosingPrayer(fontSp: Int) {
+    val s = LocalStrings.current
+    var showAmharic by rememberSaveable { mutableStateOf(false) }
     // The same fixed prayer closes every day, so it reads as a coda rather than
     // content: smaller than the body and tightly leaded, to keep it from
     // claiming a screenful at the end of each ስንክሳር.
@@ -219,18 +230,31 @@ private fun ClosingPrayer(fontSp: Int) {
         thickness = 1.dp,
         color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
     )
+    val language = if (showAmharic) s.closingPrayerAmharic else s.closingPrayerGeez
     Column(
         Modifier
             .fillMaxWidth()
             .padding(top = 12.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(MaterialTheme.colorScheme.surface)
+            .clickable(
+                onClickLabel = s.closingPrayerSwitchHint,
+            ) { showAmharic = !showAmharic }
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(7.dp),
     ) {
+        Text(
+            text = language,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.secondary,
+            textAlign = TextAlign.End,
+            modifier = Modifier.fillMaxWidth(),
+        )
         SYNAXARIUM_CLOSING_STANZAS.forEach { stanza ->
+            // Fall back to the Ge'ez when a stanza has no Amharic rendering.
+            val verse = if (showAmharic) stanza.amharic ?: stanza.geez else stanza.geez
             Text(
-                text = highlightHolyNames(stanza, ArkeRed),
+                text = highlightHolyNames(verse, ArkeRed),
                 style = style,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Justify,
