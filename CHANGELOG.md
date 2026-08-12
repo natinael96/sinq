@@ -7,6 +7,67 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.9.0] — 2026-08-12
+
+_versionCode 25 · prayer progress, search, quiet hours, and a design system_
+
+### Added
+- **Your place in an hour is kept.** Each section in the prayer reader has a
+  read toggle, a thin bar under the app bar shows how far through the hour you
+  are, and Home offers to resume an hour you started but didn't finish. Marks
+  are held against the section itself, so reordering or hiding sections never
+  loses them, and the day resets at midnight — an hour is prayed anew each day.
+- **Home marks the current hour** with a "now" badge and shows how much of each
+  hour you have read.
+- **Search understands references.** Typing "መዝሙር 23", "ሉቃስ 10", "Luke 4" or
+  just "23" jumps straight to the page. Results are grouped by where they came
+  from, in a fixed order, with a filter row showing each source's match count —
+  so one prayer match is no longer buried under scripture hits.
+- **Restoring a backup shows you what will happen first.** Choosing a file now
+  reports when it was made, what it holds, and how much of that is actually new
+  on this device, before anything is written. A file from a newer version of the
+  app is refused rather than half-applied.
+- **Quiet hours** silence reminders overnight without switching them off. The
+  alarm still re-arms while silent, so tomorrow's reminder is never lost.
+- **Today's ግጻዌ on Home** now names the day's reading and feast, instead of
+  being a label with an arrow on it.
+
+### Changed
+- **A shared design system.** One set of spacing, corner radii, icon sizes,
+  cards, rows, headers and app bars across every screen, so the prayers,
+  Psalter, scripture, ግጻዌ, ስንክሳር and ውዳሴ ማርያም read as one application rather
+  than as neighbours. Recorded in `docs/DESIGN_SYSTEM.md`.
+- **The readers are quieter.** Section titles are properly centred, bookmarking
+  sits at the head of a section and marking-as-read at its foot, so nothing
+  stands between the title and the first verse. Verse spacing now grows with the
+  text instead of collapsing at the largest size, and lines stop widening past a
+  comfortable measure on a tablet.
+- **The dark theme was designed on its own terms** rather than inverted: a
+  warmer, lower-glare ground for night prayer, surfaces that step up gently, and
+  highlight colours retuned so they stay distinguishable over green.
+- **Motion throughout** — expanding sections, selection, sheets, page
+  transitions — kept short and small, and switched off entirely when the system
+  animation setting is off.
+- **Settings is grouped** into Reading, Prayer and reminders, Your data, and
+  More, instead of one long list.
+- **Backup and restore failures explain themselves**, including whether your own
+  data was affected. They no longer report a bare "failed".
+- The gold accent is deeper on the light theme. It carries nearly every small
+  label in the app and only reached 3.1:1 on the ivory ground; it now clears
+  WCAG AA.
+
+### Fixed
+- **Amharic labels across Home, ግጻዌ and search were rendering in the device's
+  font**, not the bundled one, and with Latin letter spacing that pulled Ethiopic
+  syllables apart. Four undefined text roles were falling through to Material's
+  defaults.
+- **Dark-theme controls were painted from Material's stock palette** — switches,
+  chips, bottom sheets, dropdown menus and the date picker all drew from colours
+  the app had never defined, and switches were dark-on-dark.
+- The heatmap's year arrows were unlabelled; a screen reader announced two
+  anonymous buttons.
+- The bookmark remove button was labelled in Amharic even in English.
+
 ## [0.8.3] — 2026-08-10
 
 _versionCode 24_
