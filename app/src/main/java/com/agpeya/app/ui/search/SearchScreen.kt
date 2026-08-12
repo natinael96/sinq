@@ -48,6 +48,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.UserDataRepository
 import com.agpeya.app.search.AmharicSearch
+import com.agpeya.app.ui.common.ListRow
+import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.common.StatePanel
+import com.agpeya.app.ui.theme.Spacing
+import androidx.compose.ui.draw.clip
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -103,27 +108,15 @@ fun SearchScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            androidx.compose.material3.TopAppBar(
-                title = { Text(s.tabSearch, style = MaterialTheme.typography.titleLarge) },
-                navigationIcon = {
-                    androidx.compose.material3.IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
-                    }
-                },
-                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                ),
-            )
-        },
+        topBar = { SinqTopBar(title = s.tabSearch, onBack = onBack) },
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 20.dp),
+                .padding(horizontal = Spacing.screen),
         ) {
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(Spacing.md))
             TextField(
                 value = query,
                 onValueChange = { query = it },
@@ -135,14 +128,15 @@ fun SearchScreen(
                     imeAction = ImeAction.Search,
                 ),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                     focusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
                     unfocusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+                    cursorColor = MaterialTheme.colorScheme.secondary,
                 ),
                 shape = MaterialTheme.shapes.large,
             )
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(Spacing.sm))
 
             when {
                 // Idle: offer recent searches to tap.
@@ -156,6 +150,7 @@ fun SearchScreen(
                             s.recentSearches,
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.weight(1f),
                         )
                         TextButton(onClick = { scope.launch { UserDataRepository.clearRecentSearches(context) } }) {
                             Text(s.clearAction, style = MaterialTheme.typography.labelMedium)
@@ -163,34 +158,17 @@ fun SearchScreen(
                     }
                     LazyColumn(contentPadding = PaddingValues(vertical = 4.dp)) {
                         items(recent) { term ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { query = term }
-                                    .padding(vertical = 12.dp),
-                                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                            ) {
-                                Icon(
-                                    Icons.Outlined.History,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(20.dp),
-                                )
-                                Spacer(Modifier.width(12.dp))
-                                Text(term, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground)
-                            }
+                            ListRow(
+                                title = term,
+                                leadingIcon = Icons.Outlined.History,
+                                leadingTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                onClick = { query = term },
+                            )
                         }
                     }
                 }
                 query.trim().length >= 2 && results.isEmpty() && reference == null -> {
-                    Spacer(Modifier.height(40.dp))
-                    Text(
-                        text = s.noResults,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                    )
+                    StatePanel(icon = Icons.Outlined.Search, title = s.noResults)
                 }
                 else -> {
                     // Counts drive the filter row; grouping keeps a big corpus
@@ -226,7 +204,7 @@ fun SearchScreen(
                                 key = { "${it.source}:${it.targetId}:${it.targetIndex}" },
                             ) { r ->
                                 ResultRow(r) { open(r) }
-                                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                             }
                         }
                     }
@@ -241,8 +219,9 @@ private fun ResultRow(result: AmharicSearch.Result, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(MaterialTheme.shapes.small)
             .clickable(onClick = onClick)
-            .padding(vertical = 12.dp),
+            .padding(vertical = Spacing.md),
     ) {
         Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
             SourceTag(result.sourceLabel)
@@ -268,15 +247,15 @@ private fun ResultRow(result: AmharicSearch.Result, onClick: () -> Unit) {
 @Composable
 private fun SourceTag(label: String) {
     Surface(
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        shape = MaterialTheme.shapes.small,
+        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+        shape = MaterialTheme.shapes.extraSmall,
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.secondary,
             maxLines = 1,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+            modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xxs),
         )
     }
 }
@@ -354,31 +333,10 @@ private fun FilterChipRow(label: String, count: Int, selected: Boolean, onClick:
 /** A typed reference resolved to a page — shown above the text matches. */
 @Composable
 private fun ReferenceRow(result: AmharicSearch.Result, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 14.dp),
-        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-    ) {
-        Icon(
-            Icons.AutoMirrored.Outlined.MenuBook,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.size(20.dp),
-        )
-        Spacer(Modifier.width(12.dp))
-        Column(Modifier.weight(1f)) {
-            Text(
-                result.title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-            Text(
-                result.sourceLabel,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
+    ListRow(
+        title = result.title,
+        subtitle = result.sourceLabel,
+        leadingIcon = Icons.AutoMirrored.Outlined.MenuBook,
+        onClick = onClick,
+    )
 }

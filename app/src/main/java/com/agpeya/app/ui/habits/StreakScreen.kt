@@ -39,6 +39,23 @@ import com.agpeya.app.data.HabitsRepository
 import com.agpeya.app.model.HabitsState
 import com.agpeya.app.ui.common.AgpeyaBottomBar
 import com.agpeya.app.ui.common.Tab
+import com.agpeya.app.ui.common.HeroCard
+import com.agpeya.app.ui.common.NavRow
+import com.agpeya.app.ui.common.SectionHeader
+import com.agpeya.app.ui.theme.IconSize
+import com.agpeya.app.ui.theme.LocalMotion
+import com.agpeya.app.ui.theme.Motion
+import com.agpeya.app.ui.theme.Spacing
+import com.agpeya.app.ui.theme.sinqColors
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.Role
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.strings.Strings
 import kotlinx.coroutines.flow.first
@@ -85,7 +102,7 @@ fun StreakScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
+            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.md),
         ) {
             item {
                 Row(
@@ -115,29 +132,31 @@ fun StreakScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                         )
                     }
                 }
-                Spacer(Modifier.height(16.dp))
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.large,
-                    color = MaterialTheme.colorScheme.primary,
+                Spacer(Modifier.height(Spacing.lg))
+                // The one hero on this screen. Restrained on purpose: a number
+                // and what it counts, no confetti — the point is consistency in
+                // prayer, not a score.
+                HeroCard(
+                    glow = overall > 0,
+                    contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.xxl),
                 ) {
-                    Column(Modifier.padding(horizontal = 24.dp, vertical = 22.dp)) {
+                    Column(Modifier.weight(1f)) {
                         Text(
                             s.currentStreakLabel,
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
+                            color = sinqColors.onHeroMuted,
                         )
-                        Spacer(Modifier.height(6.dp))
+                        Spacer(Modifier.height(Spacing.xs))
                         Text(
                             s.daysUnit(overall),
                             style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onPrimary,
+                            color = sinqColors.onHero,
                         )
                     }
                 }
-                Spacer(Modifier.height(24.dp))
-                Text(s.todayLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(Spacing.xxl))
+                SectionHeader(s.todayLabel)
+                Spacer(Modifier.height(Spacing.xs))
             }
 
             item {
@@ -214,9 +233,9 @@ fun StreakScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                         color = MaterialTheme.colorScheme.secondary,
                     )
                 }
-                Spacer(Modifier.height(28.dp))
-                Text(s.habitsHeader, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(Spacing.xxl))
+                SectionHeader(s.habitsHeader)
+                Spacer(Modifier.height(Spacing.xs))
             }
 
             item {
@@ -253,22 +272,8 @@ fun StreakScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
 
             item {
                 Spacer(Modifier.height(16.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(onClick = onManageHabits)
-                        .padding(vertical = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(s.manageHabits, style = MaterialTheme.typography.titleMedium)
-                    Icon(
-                        Icons.AutoMirrored.Outlined.KeyboardArrowRight,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                Spacer(Modifier.height(24.dp))
+                NavRow(s.manageHabits, onClick = onManageHabits)
+                Spacer(Modifier.height(Spacing.xxl))
             }
         }
     }
@@ -282,20 +287,40 @@ private fun CheckRow(
     indented: Boolean,
     onToggle: () -> Unit,
 ) {
+    val motion = LocalMotion.current
+    val haptics = LocalHapticFeedback.current
+    val tint by animateColorAsState(
+        targetValue = if (done) MaterialTheme.colorScheme.secondary
+        else MaterialTheme.colorScheme.onSurfaceVariant,
+        animationSpec = motion.spec(Motion.standard),
+        label = "checkTint",
+    )
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onToggle)
-            .padding(vertical = 12.dp)
+            .heightIn(min = 48.dp)
+            .clip(MaterialTheme.shapes.small)
+            .toggleable(
+                value = done,
+                role = Role.Checkbox,
+                onValueChange = {
+                    // A kept habit is worth a tick you can feel; it replaces the
+                    // toast that would otherwise interrupt the page.
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onToggle()
+                },
+            )
+            .padding(vertical = Spacing.md)
             .padding(start = if (indented) 40.dp else 0.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             imageVector = if (done) Icons.Filled.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
             contentDescription = null,
-            tint = if (done) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
+            tint = tint,
+            modifier = Modifier.size(IconSize.medium),
         )
-        Spacer(Modifier.width(16.dp))
+        Spacer(Modifier.width(Spacing.lg))
         Text(
             text = name,
             style = MaterialTheme.typography.titleMedium,

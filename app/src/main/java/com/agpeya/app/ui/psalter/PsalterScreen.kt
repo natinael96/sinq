@@ -396,7 +396,7 @@ private fun PsalterContents(psalms: List<Section>, onSelect: (Int) -> Unit) {
                         Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                     }
                 }
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
             item { Spacer(Modifier.height(36.dp)) }
         }

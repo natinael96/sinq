@@ -46,6 +46,7 @@ import com.agpeya.app.ui.search.SearchScreen
 import com.agpeya.app.ui.settings.AboutScreen
 import com.agpeya.app.ui.settings.SettingsScreen
 import com.agpeya.app.ui.theme.AgpeyaTheme
+import com.agpeya.app.ui.theme.Motion
 
 class MainActivity : ComponentActivity() {
 
@@ -215,9 +216,27 @@ private fun AgpeyaNavHost(
     // by then have navigated somewhere else. The intro navigates on explicitly.
     val startDestination = rememberSaveable { if (ready) Tab.HOME.route else "intro" }
 
+    // One motion for the whole graph: the page fades and drifts a fraction of a
+    // screen in the direction of travel. Short (220ms) and small (a twelfth of
+    // the width) — enough to say "this came from there" and not enough to make
+    // anyone wait for it. At zero animation scale every duration below collapses
+    // to nothing, so the system's reduce-motion setting is honoured rather than
+    // approximated.
+    val motion = com.agpeya.app.ui.theme.LocalMotion.current
+    val fadeIn = androidx.compose.animation.fadeIn(motion.spec(Motion.standard))
+    val fadeOut = androidx.compose.animation.fadeOut(motion.spec(Motion.fast))
+
     NavHost(
         navController = navController,
         startDestination = startDestination,
+        enterTransition = {
+            fadeIn + androidx.compose.animation.slideInHorizontally(motion.spec(Motion.standard)) { it / 12 }
+        },
+        exitTransition = { fadeOut },
+        popEnterTransition = { fadeIn },
+        popExitTransition = {
+            fadeOut + androidx.compose.animation.slideOutHorizontally(motion.spec(Motion.fast)) { it / 12 }
+        },
     ) {
         composable("intro") {
             com.agpeya.app.ui.intro.IntroScreen(

@@ -43,6 +43,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.HabitsRepository
 import com.agpeya.app.model.HabitsState
+import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.strings.LocalStrings
 import kotlinx.coroutines.launch
 
@@ -66,15 +67,7 @@ fun ManageHabitsScreen(onBack: () -> Unit) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = { Text(s.manageHabits, style = MaterialTheme.typography.titleLarge) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
-            )
+            SinqTopBar(title = s.manageHabits, onBack = onBack)
         },
     ) { innerPadding ->
         LazyColumn(
@@ -134,7 +127,7 @@ fun ManageHabitsScreen(onBack: () -> Unit) {
                         }
                     }
                 }
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
             item {
                 Spacer(Modifier.height(12.dp))

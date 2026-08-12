@@ -44,6 +44,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.agpeya.app.ui.common.SinqTopBar
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
@@ -67,15 +68,7 @@ fun CustomizeHoursScreen(onBack: () -> Unit, onOpenHour: (String) -> Unit) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = { Text(s.customizeTitle, style = MaterialTheme.typography.titleLarge) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
-            )
+            SinqTopBar(title = s.customizeTitle, onBack = onBack)
         },
     ) { innerPadding ->
         LazyColumn(
@@ -108,7 +101,7 @@ fun CustomizeHoursScreen(onBack: () -> Unit, onOpenHour: (String) -> Unit) {
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
         }
     }
@@ -142,19 +135,14 @@ fun CustomizeHourScreen(hourId: String, onBack: () -> Unit) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = { Text(hour?.name ?: "", style = MaterialTheme.typography.titleLarge) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
-                    }
-                },
+            SinqTopBar(
+                title = hour?.name ?: "",
+                onBack = onBack,
                 actions = {
                     TextButton(onClick = { scope.launch { LayoutRepository.reset(context, hourId) } }) {
-                        Text(s.resetLayout)
+                        Text(s.resetLayout, style = MaterialTheme.typography.labelLarge)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
             )
         },
     ) { innerPadding ->
@@ -188,7 +176,7 @@ fun CustomizeHourScreen(hourId: String, onBack: () -> Unit) {
                         { scope.launch { LayoutRepository.removePsalm(context, hourId, section.number!!) } }
                     } else null,
                 )
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
             item {
                 Spacer(Modifier.height(12.dp))
@@ -261,7 +249,7 @@ private fun PsalmPicker(title: String, onPick: (Int) -> Unit) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
             item { Spacer(Modifier.height(32.dp)) }
         }

@@ -53,6 +53,11 @@ import com.agpeya.app.model.WudaseContent
 import com.agpeya.app.model.WudaseSection
 import com.agpeya.app.ui.reading.FontSizeActions
 import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.common.LoadingPanel
+import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.common.StatePanel
+import com.agpeya.app.ui.theme.Spacing
+import androidx.compose.material.icons.outlined.MenuBook
 import com.agpeya.app.ui.theme.inReadingFont
 import com.agpeya.app.ui.theme.readingBodyStyle
 import kotlinx.coroutines.launch
@@ -96,35 +101,27 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = { Text(s.wudaseMariam, style = MaterialTheme.typography.titleLarge) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
-                    }
-                },
+            SinqTopBar(
+                title = s.wudaseMariam,
+                onBack = onBack,
                 actions = {
                     FontSizeActions(fontStep = fontStep, maxStep = FONT_STEPS_SP.lastIndex) { step ->
                         scope.launch { SettingsRepository.setFontStep(context, step) }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
             )
         },
     ) { innerPadding ->
         if (data == null) {
-            Box(Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.secondary)
-            }
+            LoadingPanel(Modifier.padding(innerPadding))
             return@Scaffold
         }
         if (sections.isEmpty()) {
-            Box(Modifier.fillMaxSize().padding(innerPadding).padding(32.dp), contentAlignment = Alignment.Center) {
-                Text(
-                    s.contentUnavailable,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
+            Box(Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+                StatePanel(
+                    icon = Icons.Outlined.MenuBook,
+                    title = s.contentUnavailable,
+                    body = s.contentMissingBody,
                 )
             }
             return@Scaffold
@@ -143,7 +140,7 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize().padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = 22.dp),
+            contentPadding = PaddingValues(horizontal = Spacing.screen),
         ) {
             item(key = "lang") {
                 Spacer(Modifier.height(8.dp))
@@ -198,7 +195,7 @@ private fun LanguageToggle(geez: Boolean, amharicLabel: String, geezLabel: Strin
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .clip(RoundedCornerShape(12.dp))
-            .border(1.dp, MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
             .padding(3.dp),
         horizontalArrangement = Arrangement.spacedBy(3.dp),
     ) {
@@ -212,7 +209,7 @@ private fun ToggleHalf(label: String, selected: Boolean, modifier: Modifier, onC
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(9.dp))
-            .background(if (selected) MaterialTheme.colorScheme.primary else androidx.compose.ui.graphics.Color.Transparent)
+            .background(if (selected) com.agpeya.app.ui.theme.sinqColors.hero else androidx.compose.ui.graphics.Color.Transparent)
             .clickable(onClick = onClick)
             .padding(vertical = 9.dp),
         contentAlignment = Alignment.Center,
@@ -220,7 +217,7 @@ private fun ToggleHalf(label: String, selected: Boolean, modifier: Modifier, onC
         Text(
             label,
             style = MaterialTheme.typography.labelLarge.inReadingFont(),
-            color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+            color = if (selected) com.agpeya.app.ui.theme.sinqColors.onHero else MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -244,8 +241,8 @@ private fun SectionStrip(sections: List<WudaseSection>, selected: Int, onSelect:
                 modifier = Modifier
                     .clip(CircleShape)
                     .then(
-                        if (isSel) Modifier.background(MaterialTheme.colorScheme.primary)
-                        else Modifier.border(1.dp, MaterialTheme.colorScheme.surfaceVariant, CircleShape),
+                        if (isSel) Modifier.background(com.agpeya.app.ui.theme.sinqColors.hero)
+                        else Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
                     )
                     .clickable { onSelect(i) }
                     .padding(horizontal = 16.dp, vertical = 9.dp),
@@ -255,7 +252,7 @@ private fun SectionStrip(sections: List<WudaseSection>, selected: Int, onSelect:
                     sec.label,
                     style = MaterialTheme.typography.labelLarge.inReadingFont(),
                     fontWeight = if (isSel) FontWeight.SemiBold else FontWeight.Normal,
-                    color = if (isSel) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = if (isSel) com.agpeya.app.ui.theme.sinqColors.onHero else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }

@@ -58,6 +58,9 @@ import com.agpeya.app.ui.common.formatEthiopianWithGregorian
 import com.agpeya.app.ui.reading.FontSizeActions
 import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.common.LoadingPanel
+import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.scaledReadingSp
 import com.agpeya.app.ui.theme.inReadingFont
 import com.agpeya.app.ui.theme.readingBodyStyle
@@ -99,37 +102,21 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(s.synaxariumTitle, style = MaterialTheme.typography.titleLarge)
-                        Text(
-                            formatEthiopianWithGregorian(date, s),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
-                    }
-                },
+            SinqTopBar(
+                title = s.synaxariumTitle,
+                subtitle = formatEthiopianWithGregorian(date, s),
+                onBack = onBack,
                 actions = {
                     FontSizeActions(fontStep = fontStep, maxStep = FONT_STEPS_SP.lastIndex) { step ->
                         scope.launch { SettingsRepository.setFontStep(context, step) }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
             )
         },
     ) { innerPadding ->
         val list = entries
         when {
-            list == null -> Box(
-                Modifier.fillMaxSize().padding(innerPadding),
-                contentAlignment = Alignment.Center,
-            ) { CircularProgressIndicator(color = MaterialTheme.colorScheme.secondary) }
+            list == null -> LoadingPanel(Modifier.padding(innerPadding))
 
             list.isEmpty() -> Box(
                 Modifier.fillMaxSize().padding(innerPadding).padding(32.dp),
@@ -145,7 +132,7 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
 
             else -> LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(innerPadding),
-                contentPadding = PaddingValues(horizontal = 24.dp),
+                contentPadding = PaddingValues(horizontal = Spacing.screen),
             ) {
                 itemsIndexed(list) { i, entry ->
                     Column(Modifier.fillMaxWidth()) {

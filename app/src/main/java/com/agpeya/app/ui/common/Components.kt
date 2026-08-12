@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,6 +51,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -121,10 +123,15 @@ fun CollapsibleHeader(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .heightIn(min = 48.dp)
             .clip(MaterialTheme.shapes.small)
-            .clickable(onClick = onToggle)
-            .padding(vertical = Spacing.sm)
-            .semantics { contentDescription = if (expanded) "$text — ${s.collapse}" else "$text — ${s.expand}" },
+            // The chevron's direction is the only thing telling a sighted user
+            // what this tap will do; onClickLabel says the same to everyone else.
+            .clickable(
+                onClickLabel = if (expanded) s.collapse else s.expand,
+                onClick = onToggle,
+            )
+            .padding(vertical = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -366,9 +373,14 @@ fun ToggleRow(
             .fillMaxWidth()
             .heightIn(min = 48.dp)
             .clip(MaterialTheme.shapes.small)
-            .clickable(
-                onClick = { onCheckedChange(!checked) },
-                onClickLabel = title,
+            // `toggleable`, not `clickable`: it carries the on/off state into the
+            // accessibility tree, so TalkBack announces "switch, on" for the row.
+            // A plain clickable would have announced a button with no state —
+            // which is exactly what silencing the Switch below would have cost.
+            .toggleable(
+                value = checked,
+                role = Role.Switch,
+                onValueChange = onCheckedChange,
             )
             .padding(vertical = Spacing.md),
         verticalAlignment = Alignment.CenterVertically,

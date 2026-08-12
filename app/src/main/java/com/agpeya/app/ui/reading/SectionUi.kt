@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -187,17 +188,20 @@ private fun MarkReadButton(isRead: Boolean, onToggle: () -> Unit) {
     )
     Row(
         modifier = Modifier
-            .heightIn(min = 44.dp)
+            .heightIn(min = 48.dp)
             .clip(CircleShape)
-            .clickable(
+            // `toggleable` carries the read/unread state to a screen reader; a
+            // clickable with Role.Checkbox would announce the role and then have
+            // no state to report.
+            .toggleable(
+                value = isRead,
                 role = Role.Checkbox,
-                onClick = {
+                onValueChange = {
                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     onToggle()
                 },
             )
-            .padding(horizontal = Spacing.md, vertical = Spacing.sm)
-            .semantics { contentDescription = s.markRead },
+            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(

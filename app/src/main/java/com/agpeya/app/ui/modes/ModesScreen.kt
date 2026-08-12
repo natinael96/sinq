@@ -38,6 +38,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.agpeya.app.ui.common.SinqTopBar
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.ContentRepository
@@ -64,17 +65,7 @@ fun ModesScreen(onBack: () -> Unit, onEditMode: (String) -> Unit, onOpenBatteryH
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(s.modesTitle, style = MaterialTheme.typography.titleLarge) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                ),
-            )
+            SinqTopBar(title = s.modesTitle, onBack = onBack)
         },
         containerColor = MaterialTheme.colorScheme.background,
     ) { innerPadding ->
@@ -113,7 +104,7 @@ fun ModesScreen(onBack: () -> Unit, onEditMode: (String) -> Unit, onOpenBatteryH
                     onOpen = { onEditMode(mode.id) },
                     onDelete = if (mode.isBuiltIn) null else ({ deleteCandidate = mode }),
                 )
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
             item {
                 Spacer(Modifier.height(20.dp))
@@ -137,7 +128,7 @@ fun ModesScreen(onBack: () -> Unit, onEditMode: (String) -> Unit, onOpenBatteryH
                     }) { Text(s.startEmpty) }
                 }
                 Spacer(Modifier.height(24.dp))
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Text(
                     text = s.remindersNotFiringTitle,
                     style = MaterialTheme.typography.titleMedium,

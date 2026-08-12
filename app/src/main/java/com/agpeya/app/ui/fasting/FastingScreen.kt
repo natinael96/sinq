@@ -39,6 +39,11 @@ import com.agpeya.app.ui.common.EthiopianDate
 import com.agpeya.app.ui.common.formatEthiopianWithGregorian
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.strings.Strings
+import com.agpeya.app.ui.common.HeroCard
+import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.common.SinqCard
+import com.agpeya.app.ui.theme.Spacing
+import com.agpeya.app.ui.theme.sinqColors
 import java.time.LocalDate
 
 /**
@@ -60,34 +65,21 @@ fun FastingScreen(onBack: () -> Unit) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(s.fastingTitle, style = MaterialTheme.typography.titleLarge)
-                        Text(
-                            formatEthiopianWithGregorian(today, s),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
+            SinqTopBar(
+                title = s.fastingTitle,
+                subtitle = formatEthiopianWithGregorian(today, s),
+                onBack = onBack,
             )
         },
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = 22.dp),
+            contentPadding = PaddingValues(horizontal = Spacing.screen),
         ) {
             item {
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Spacing.sm))
                 TodayCard(activeFast, weeklyFast, s)
-                Spacer(Modifier.height(22.dp))
+                Spacer(Modifier.height(Spacing.xxl))
                 Text(
                     s.fastingYearHeader(ethYear),
                     style = MaterialTheme.typography.labelMedium,
@@ -119,35 +111,36 @@ private fun TodayCard(
     s: Strings,
 ) {
     val fasting = fast != null || weeklyFast
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        color = if (fasting) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-        border = if (fasting) null else BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant),
-    ) {
-        Column(Modifier.padding(horizontal = 20.dp, vertical = 18.dp)) {
+    val sinq = sinqColors
+    // A fast day gets the brand green; an ordinary day is a plain card. The
+    // difference in weight IS the information.
+    val body: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit = {
+        Text(
+            s.fastingToday,
+            style = MaterialTheme.typography.labelMedium,
+            color = if (fasting) sinq.onHeroMuted else MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(Spacing.xs))
+        Text(
+            text = fast?.nameAm ?: if (weeklyFast) s.fastingWeekly else s.fastingNone,
+            style = MaterialTheme.typography.titleLarge,
+            color = if (fasting) sinq.onHero else MaterialTheme.colorScheme.onBackground,
+        )
+        if (fast != null) {
+            Spacer(Modifier.height(Spacing.xxs))
             Text(
-                s.fastingToday,
-                style = MaterialTheme.typography.labelMedium,
-                color = if (fasting) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
-                else MaterialTheme.colorScheme.onSurfaceVariant,
+                text = s.fastingDayOf(fast.dayNumber(LocalDate.now()), fast.days),
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (fasting) sinq.onHeroMuted else MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = fast?.nameAm ?: if (weeklyFast) s.fastingWeekly else s.fastingNone,
-                style = MaterialTheme.typography.titleLarge,
-                color = if (fasting) MaterialTheme.colorScheme.onPrimary
-                else MaterialTheme.colorScheme.onBackground,
-            )
-            if (fast != null) {
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    text = s.fastingDayOf(fast.dayNumber(LocalDate.now()), fast.days),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
-                )
-            }
         }
+    }
+    if (fasting) {
+        HeroCard(contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.xl)) {
+            Column(Modifier.weight(1f)) { body() }
+        }
+    } else {
+        SinqCard(contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.xl)) { body() }
     }
 }
 

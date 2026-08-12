@@ -1,6 +1,10 @@
 package com.agpeya.app.ui.settings
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -39,13 +44,20 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.data.ThemeChoice
 import com.agpeya.app.ui.common.AgpeyaBottomBar
+import com.agpeya.app.ui.common.NavRow
+import com.agpeya.app.ui.common.SectionHeader
 import com.agpeya.app.ui.common.Tab
+import com.agpeya.app.ui.common.ToggleRow
+import com.agpeya.app.ui.theme.LocalMotion
+import com.agpeya.app.ui.theme.Motion
+import com.agpeya.app.ui.theme.Spacing
 import kotlinx.coroutines.launch
 
 @Composable
@@ -59,6 +71,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val s = com.agpeya.app.ui.strings.LocalStrings.current
+    val motion = LocalMotion.current
     val theme by SettingsRepository.theme(context).collectAsState(initial = ThemeChoice.SYSTEM)
     val readingFont by SettingsRepository.readingFont(context)
         .collectAsState(initial = com.agpeya.app.data.ReadingFont.ABYSSINICA)
@@ -79,24 +92,28 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
+            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.md),
         ) {
             item {
+                Spacer(Modifier.height(Spacing.sm))
                 Text(
                     text = s.settingsTitle,
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(Spacing.xxl))
             }
 
+            // ── Reading: theme, face, and what the screen does while you pray ─
             item {
+                SectionHeader(s.settingsGroupReading)
+                Spacer(Modifier.height(Spacing.md))
                 Text(
                     text = s.appearance,
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Spacing.sm))
                 val choices = listOf(
                     ThemeChoice.SYSTEM to s.themeSystem,
                     ThemeChoice.LIGHT to s.themeLight,
@@ -111,7 +128,7 @@ fun SettingsScreen(
                         ) { Text(label) }
                     }
                 }
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(Spacing.xl))
             }
 
             item {
@@ -150,9 +167,13 @@ fun SettingsScreen(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                AnimatedVisibility(visible = fontsExpanded) {
+                AnimatedVisibility(
+                    visible = fontsExpanded,
+                    enter = expandVertically(motion.spec(Motion.standard)) + fadeIn(motion.spec(Motion.standard)),
+                    exit = shrinkVertically(motion.spec(Motion.fast)) + fadeOut(motion.spec(Motion.fast)),
+                ) {
                     Column {
-                        Spacer(Modifier.height(10.dp))
+                        Spacer(Modifier.height(Spacing.md))
                         // Each row previews itself in its own face — the only honest
                         // way to choose a typeface is to see the script rendered in it.
                         ReadingFontPicker(
@@ -161,16 +182,16 @@ fun SettingsScreen(
                         )
                     }
                 }
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(Spacing.xl))
             }
 
             item {
                 Text(
                     text = s.languageLabel,
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Spacing.sm))
                 val langChoices = listOf(
                     com.agpeya.app.data.Language.SYSTEM to s.langSystem,
                     com.agpeya.app.data.Language.AMHARIC to s.langAmharic,
@@ -185,98 +206,46 @@ fun SettingsScreen(
                         ) { Text(label) }
                     }
                 }
-                Spacer(Modifier.height(24.dp))
-            }
-
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column(Modifier.weight(1f)) {
-                        Text(s.keepScreenOn, style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            s.keepScreenOnDesc,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    Switch(
-                        checked = keepOn,
-                        onCheckedChange = { scope.launch { SettingsRepository.setKeepScreenOn(context, it) } },
-                    )
-                }
-                Spacer(Modifier.height(16.dp))
-            }
-
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column(Modifier.weight(1f)) {
-                        Text(s.settingsStreakReminder, style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            s.settingsStreakReminderDesc,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    Switch(
-                        checked = streakReminder,
-                        onCheckedChange = { on ->
-                            scope.launch {
-                                SettingsRepository.setStreakReminder(context, on)
-                                com.agpeya.app.reminders.StreakReminderScheduler.sync(context, on)
-                            }
-                        },
-                    )
-                }
-                Spacer(Modifier.height(16.dp))
-            }
-
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column(Modifier.weight(1f)) {
-                        Text(s.settingsGitsaweReminder, style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            s.settingsGitsaweReminderDesc,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    Switch(
-                        checked = gitsaweReminder,
-                        onCheckedChange = { on ->
-                            scope.launch {
-                                SettingsRepository.setGitsaweReminder(context, on)
-                                com.agpeya.app.reminders.GitsaweReminderScheduler.sync(context, on)
-                            }
-                        },
-                    )
-                }
-                Spacer(Modifier.height(16.dp))
-            }
-
-            item {
-                Text(
-                    text = s.alarmSection,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary,
+                Spacer(Modifier.height(Spacing.sm))
+                ToggleRow(
+                    title = s.keepScreenOn,
+                    subtitle = s.keepScreenOnDesc,
+                    checked = keepOn,
+                    onCheckedChange = { scope.launch { SettingsRepository.setKeepScreenOn(context, it) } },
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Spacing.xxl))
+            }
+
+            // ── Prayer and reminders: everything that decides when the app
+            //    speaks to you, in one place instead of four.
+            item {
+                SectionHeader(s.settingsGroupPrayer)
+                Spacer(Modifier.height(Spacing.xs))
+                ToggleRow(
+                    title = s.settingsStreakReminder,
+                    subtitle = s.settingsStreakReminderDesc,
+                    checked = streakReminder,
+                    onCheckedChange = { on ->
+                        scope.launch {
+                            SettingsRepository.setStreakReminder(context, on)
+                            com.agpeya.app.reminders.StreakReminderScheduler.sync(context, on)
+                        }
+                    },
+                )
+                ToggleRow(
+                    title = s.settingsGitsaweReminder,
+                    subtitle = s.settingsGitsaweReminderDesc,
+                    checked = gitsaweReminder,
+                    onCheckedChange = { on ->
+                        scope.launch {
+                            SettingsRepository.setGitsaweReminder(context, on)
+                            com.agpeya.app.reminders.GitsaweReminderScheduler.sync(context, on)
+                        }
+                    },
+                )
+                NavRow(s.manageHours, onOpenCustomize)
+                NavRow(s.reminderModes, onOpenModes)
+                Spacer(Modifier.height(Spacing.md))
                 DropdownSetting(
                     label = s.alarmSection,
                     current = when (alarmAlert) {
@@ -309,15 +278,14 @@ fun SettingsScreen(
                     ),
                     onSelect = { scope.launch { SettingsRepository.setAlarmSound(context, it) } },
                 )
-                Spacer(Modifier.height(16.dp))
+                QuietHoursRow(s)
+                Spacer(Modifier.height(Spacing.xxl))
             }
 
+            // ── Your data: the things only this device holds. ────────────────
             item {
-                Text(
-                    text = s.profileSection,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                )
+                SectionHeader(s.settingsGroupData)
+                Spacer(Modifier.height(Spacing.xs))
                 val profileName by SettingsRepository.profileName(context).collectAsState(initial = "")
                 val christianName by SettingsRepository.christianName(context).collectAsState(initial = "")
                 EditableRow(s.yourNameLabel, profileName) { v ->
@@ -326,20 +294,17 @@ fun SettingsScreen(
                 EditableRow(s.christianNameLabel, christianName) { v ->
                     scope.launch { SettingsRepository.setChristianName(context, v) }
                 }
-                Spacer(Modifier.height(16.dp))
-            }
-
-            item {
-                QuietHoursRow(s)
-                Spacer(Modifier.height(8.dp))
-            }
-
-            item {
-                SettingsLink(s.manageHours, onOpenCustomize)
-                SettingsLink(s.reminderModes, onOpenModes)
                 BackupRows(s)
-                SettingsLink(s.tutorial, onOpenTutorial)
-                SettingsLink(s.about, onOpenAbout)
+                Spacer(Modifier.height(Spacing.xxl))
+            }
+
+            // ── More ─────────────────────────────────────────────────────────
+            item {
+                SectionHeader(s.settingsGroupMore)
+                Spacer(Modifier.height(Spacing.xs))
+                NavRow(s.tutorial, onOpenTutorial)
+                NavRow(s.about, onOpenAbout)
+                Spacer(Modifier.height(Spacing.xxl))
             }
         }
     }
@@ -359,8 +324,10 @@ private fun <T> DropdownSetting(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .heightIn(min = 48.dp)
+                .clip(MaterialTheme.shapes.small)
                 .clickable(enabled = enabled) { expanded = true }
-                .padding(vertical = 14.dp),
+                .padding(vertical = Spacing.md),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -396,8 +363,10 @@ private fun EditableRow(label: String, value: String, onSave: (String) -> Unit) 
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .clip(MaterialTheme.shapes.small)
             .clickable { editing = true }
-            .padding(vertical = 14.dp),
+            .padding(vertical = Spacing.md),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -434,25 +403,6 @@ private fun EditableRow(label: String, value: String, onSave: (String) -> Unit) 
     }
 }
 
-@Composable
-private fun SettingsLink(label: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(label, style = MaterialTheme.typography.titleMedium)
-        Icon(
-            Icons.AutoMirrored.Outlined.KeyboardArrowRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
-
 /** The bundled reader faces, each shown rendered in itself. */
 private val FONT_CHOICES = listOf(
     com.agpeya.app.data.ReadingFont.ABYSSINICA to "Abyssinica SIL",
@@ -480,7 +430,7 @@ private fun ReadingFontPicker(
                 else MaterialTheme.colorScheme.surface,
                 border = androidx.compose.foundation.BorderStroke(
                     1.dp,
-                    if (isSel) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surfaceVariant,
+                    if (isSel) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outlineVariant,
                 ),
             ) {
                 Row(
@@ -533,7 +483,10 @@ private fun fontDisplayName(font: com.agpeya.app.data.ReadingFont): String =
 private fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var message by remember { mutableStateOf<String?>(null) }
+    // Headline plus an explanation. A failed backup or a rejected file has to
+    // say what happened AND that nothing of the user's was lost — that second
+    // half is the one people actually need.
+    var message by remember { mutableStateOf<Pair<String, String?>?>(null) }
     // The file the user chose, held while they confirm the preview.
     var pending by remember { mutableStateOf<android.net.Uri?>(null) }
     var preview by remember { mutableStateOf<com.agpeya.app.data.BackupRepository.Summary?>(null) }
@@ -545,7 +498,7 @@ private fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
         scope.launch {
             val today = java.time.LocalDate.now().toString()
             val ok = com.agpeya.app.data.BackupRepository.writeTo(context, uri, today)
-            message = if (ok) s.backupSaved else s.backupFailed
+            message = if (ok) s.backupSaved to null else s.backupFailed to s.backupFailedBody
         }
     }
 
@@ -556,7 +509,7 @@ private fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
         scope.launch {
             val summary = com.agpeya.app.data.BackupRepository.peek(context, uri)
             if (summary == null) {
-                message = s.restoreFailed
+                message = s.restoreFailed to s.restoreFailedBody
             } else {
                 pending = uri
                 preview = summary
@@ -564,10 +517,8 @@ private fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
         }
     }
 
-    SettingsLink(s.backupExport) {
-        createDoc.launch("sinq-backup-${java.time.LocalDate.now()}.json")
-    }
-    SettingsLink(s.backupImport) { openDoc.launch(arrayOf("application/json", "text/plain", "*/*")) }
+    NavRow(s.backupExport, onClick = { createDoc.launch("sinq-backup-${java.time.LocalDate.now()}.json") })
+    NavRow(s.backupImport, onClick = { openDoc.launch(arrayOf("application/json", "text/plain", "*/*")) })
 
     // Preview: what's in the file, and what a restore would actually add.
     val summary = preview
@@ -607,7 +558,7 @@ private fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
                     pending = null
                     if (uri != null) scope.launch {
                         val ok = com.agpeya.app.data.BackupRepository.restore(context, uri)
-                        message = if (ok) s.restoreDone else s.restoreFailed
+                        message = if (ok) s.restoreDone to null else s.restoreFailed to s.restoreFailedBody
                     }
                 }) { Text(s.backupImport) }
             },
@@ -617,12 +568,12 @@ private fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
         )
     }
 
-    message?.let { text ->
+    message?.let { (headline, detail) ->
         androidx.compose.material3.AlertDialog(
             onDismissRequest = { message = null },
             confirmButton = { TextButton(onClick = { message = null }) { Text(s.ok) } },
-            title = { Text(s.backupTitle) },
-            text = { Text(text) },
+            title = { Text(headline) },
+            text = { if (detail != null) Text(detail, style = MaterialTheme.typography.bodyMedium) },
         )
     }
 }

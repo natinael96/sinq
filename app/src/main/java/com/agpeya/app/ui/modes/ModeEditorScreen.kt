@@ -46,6 +46,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.agpeya.app.ui.common.SinqTopBar
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -95,13 +96,9 @@ fun ModeEditorScreen(modeId: String, onBack: () -> Unit) {
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(mode?.name ?: "", style = MaterialTheme.typography.titleLarge) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
-                    }
-                },
+            SinqTopBar(
+                title = mode?.name ?: "",
+                onBack = onBack,
                 actions = {
                     if (mode?.isBuiltIn == true) {
                         TextButton(onClick = {
@@ -109,12 +106,9 @@ fun ModeEditorScreen(modeId: String, onBack: () -> Unit) {
                                 ModesRepository.resetBuiltIn(context)
                                 reschedule()
                             }
-                        }) { Text(s.resetTimes) }
+                        }) { Text(s.resetTimes, style = MaterialTheme.typography.labelLarge) }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                ),
             )
         },
         containerColor = MaterialTheme.colorScheme.background,
@@ -162,7 +156,7 @@ fun ModeEditorScreen(modeId: String, onBack: () -> Unit) {
                     },
                     onOpen = { editing = entry },
                 )
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
             if (!mode.isBuiltIn) {
                 item {

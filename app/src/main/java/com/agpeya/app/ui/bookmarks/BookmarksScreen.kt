@@ -31,6 +31,14 @@ import com.agpeya.app.data.UserDataRepository
 import com.agpeya.app.model.Bookmark
 import com.agpeya.app.ui.common.AgpeyaBottomBar
 import com.agpeya.app.ui.common.Tab
+import com.agpeya.app.ui.common.ListRow
+import com.agpeya.app.ui.common.SectionHeader
+import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.common.StatePanel
+import com.agpeya.app.ui.theme.IconSize
+import com.agpeya.app.ui.theme.Spacing
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import kotlinx.coroutines.launch
 
 @androidx.compose.runtime.Composable
@@ -58,40 +66,18 @@ fun BookmarksScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            androidx.compose.material3.TopAppBar(
-                title = { Text(s.bookmarksTitle, style = MaterialTheme.typography.titleLarge) },
-                navigationIcon = {
-                    androidx.compose.material3.IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
-                    }
-                },
-                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                ),
-            )
-        },
+        topBar = { SinqTopBar(title = s.bookmarksTitle, onBack = onBack) },
     ) { innerPadding ->
         if (bookmarks.isEmpty()) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(horizontal = 32.dp),
+                modifier = Modifier.fillMaxSize().padding(innerPadding),
                 verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(
-                    text = s.noBookmarksTitle,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = s.noBookmarksBody,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
+                StatePanel(
+                    icon = Icons.Outlined.BookmarkBorder,
+                    title = s.noBookmarksTitle,
+                    body = s.noBookmarksBody,
                 )
             }
             return@Scaffold
@@ -101,17 +87,13 @@ fun BookmarksScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
+            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.md),
         ) {
             grouped.forEach { (hourId, items) ->
                 item(key = "h_$hourId") {
-                    Spacer(Modifier.height(16.dp))
-                    Text(
-                        text = groupLabel(hourId, items),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.secondary,
-                    )
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(Spacing.lg))
+                    SectionHeader(groupLabel(hourId, items))
+                    Spacer(Modifier.height(Spacing.xs))
                 }
                 // Row keys carry the hourId too: sectionId alone can repeat across
                 // groups (a psalm bookmarked in the Psalter and inside an hour).
@@ -131,39 +113,31 @@ fun BookmarksScreen(
                     )
                 }
             }
-            item { Spacer(Modifier.height(24.dp)) }
+            item { Spacer(Modifier.height(Spacing.xxl)) }
         }
     }
 }
 
 @Composable
 private fun BookmarkRow(bookmark: Bookmark, onOpen: () -> Unit, onRemove: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onOpen)
-            .padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    val s = com.agpeya.app.ui.strings.LocalStrings.current
+    val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
+    ListRow(
+        title = bookmark.title,
+        subtitle = bookmark.subtitle,
+        onClick = onOpen,
     ) {
-        Column(Modifier.weight(1f)) {
-            Text(
-                text = bookmark.title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-            bookmark.subtitle?.let {
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-        IconButton(onClick = onRemove) {
+        IconButton(onClick = {
+            haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+            onRemove()
+        }) {
             Icon(
                 Icons.Outlined.BookmarkRemove,
-                contentDescription = "አስወግድ",
+                // Was a hard-coded Amharic literal — it stayed Amharic for a
+                // screen reader running in English.
+                contentDescription = s.removeAction,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(IconSize.medium),
             )
         }
     }

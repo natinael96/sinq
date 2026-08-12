@@ -35,6 +35,9 @@ import com.agpeya.app.data.ScriptureRepository
 import com.agpeya.app.model.ScriptureBookMeta
 import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.common.SectionHeader
+import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.theme.Spacing
 
 /** The New Testament: 27 books grouped by section, each opening the reader. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,23 +60,10 @@ fun ScriptureListScreen(onBack: () -> Unit, onOpenBook: (String) -> Unit) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(s.scripturesTitle, style = MaterialTheme.typography.titleLarge)
-                        Text(
-                            s.newTestamentLabel,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
+            SinqTopBar(
+                title = s.scripturesTitle,
+                subtitle = s.newTestamentLabel,
+                onBack = onBack,
             )
         },
     ) { innerPadding ->
@@ -81,21 +71,19 @@ fun ScriptureListScreen(onBack: () -> Unit, onOpenBook: (String) -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.sm),
         ) {
             groups.forEach { (label, groupBooks) ->
                 if (groupBooks.isEmpty()) return@forEach
                 item(key = "h_$label") {
-                    Text(
+                    SectionHeader(
                         text = label,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.padding(top = 20.dp, bottom = 4.dp),
+                        modifier = Modifier.padding(top = Spacing.xl, bottom = Spacing.xs),
                     )
                 }
                 items(groupBooks, key = { it.key }) { book ->
                     BookRow(book = book, unit = s.chapterUnit, onClick = { onOpenBook(book.key) })
-                    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant, thickness = 1.dp)
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
                 }
             }
             item { Spacer(Modifier.height(24.dp)) }

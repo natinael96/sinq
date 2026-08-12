@@ -47,6 +47,7 @@ import com.agpeya.app.data.ContentRepository
 import com.agpeya.app.data.HoursRepository
 import com.agpeya.app.model.Hour
 import com.agpeya.app.model.HoursConfig
+import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.strings.LocalStrings
 import kotlinx.coroutines.launch
 
@@ -71,15 +72,7 @@ fun ManageHoursScreen(onBack: () -> Unit, onEditHour: (String) -> Unit) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = { Text(s.manageHours, style = MaterialTheme.typography.titleLarge) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
-            )
+            SinqTopBar(title = s.manageHours, onBack = onBack)
         },
     ) { innerPadding ->
         LazyColumn(
@@ -113,7 +106,7 @@ fun ManageHoursScreen(onBack: () -> Unit, onEditHour: (String) -> Unit) {
                     onMoveDown = { move(index, index + 1) },
                     onDelete = { scope.launch { HoursRepository.deleteCustomHour(context, hour.id) } },
                 )
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
             item {
                 Spacer(Modifier.height(12.dp))

@@ -29,6 +29,9 @@ import androidx.compose.ui.unit.dp
 import com.agpeya.app.ui.common.AgpeyaBottomBar
 import com.agpeya.app.ui.common.Tab
 import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.common.SinqCard
+import com.agpeya.app.ui.theme.IconSize
+import com.agpeya.app.ui.theme.Spacing
 
 /** ቤተ መጻሕፍት — the library hub: the Psalter, the scriptures, and (soon) more. */
 @Composable
@@ -48,18 +51,22 @@ fun LibraryScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(horizontal = Spacing.screen),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
             item {
-                Spacer(Modifier.height(20.dp))
-                Text(s.libraryTitle, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
+                Spacer(Modifier.height(Spacing.xl))
+                Text(
+                    s.libraryTitle,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
                 Text(
                     s.librarySubtitle,
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(Spacing.sm))
             }
             item {
                 LibraryCard(
@@ -95,24 +102,16 @@ private fun LibraryCard(
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
-    Surface(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant),
-    ) {
+    SinqCard(onClick = onClick, enabled = enabled) {
         Row(
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 18.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
         ) {
             Icon(
                 icon,
                 contentDescription = null,
                 tint = if (enabled) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(28.dp),
+                modifier = Modifier.size(IconSize.large),
             )
             Column(Modifier.weight(1f)) {
                 Text(
