@@ -192,6 +192,8 @@ interface Strings {
     val backupFailed: String
     val restoreDone: String
     val restoreFailed: String
+    val previousYear: String
+    val nextYear: String
     val quietHours: String
     val quietHoursDesc: String
     fun quietHoursRange(from: String, to: String): String
@@ -490,6 +492,8 @@ object AmharicStrings : Strings {
     override val backupFailed = "ምትኬውን ማስቀመጥ አልተቻለም።"
     override val restoreDone = "ከምትኬው ተመልሷል።"
     override val restoreFailed = "ፋይሉን ማንበብ አልተቻለም።"
+    override val previousYear = "ያለፈው ዓመት"
+    override val nextYear = "የሚቀጥለው ዓመት"
     override val quietHours = "ጸጥታ ሰዓታት"
     override val quietHoursDesc = "በሌሊት ማሳሰቢያዎች ድምፅ አያሰሙም"
     override fun quietHoursRange(from: String, to: String) = "ከ$from እስከ $to ድምፅ የለም"
@@ -796,6 +800,8 @@ object EnglishStrings : Strings {
     override val backupFailed = "Could not save the backup."
     override val restoreDone = "Restored from the backup."
     override val restoreFailed = "Could not read that file."
+    override val previousYear = "Previous year"
+    override val nextYear = "Next year"
     override val quietHours = "Quiet hours"
     override val quietHoursDesc = "Silence reminders overnight"
     override fun quietHoursRange(from: String, to: String) = "Silent from $from to $to"

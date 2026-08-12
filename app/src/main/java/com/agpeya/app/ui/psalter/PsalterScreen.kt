@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
@@ -17,6 +18,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.LibraryMusic
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material.icons.outlined.SwapVert
@@ -62,6 +64,11 @@ import com.agpeya.app.ui.reading.HighlightBar
 import com.agpeya.app.ui.reading.SectionView
 import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.common.StatePanel
+import com.agpeya.app.ui.reading.ReadingColumn
+import com.agpeya.app.ui.theme.IconSize
+import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.inReadingFont
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
@@ -169,13 +176,12 @@ fun PsalterScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = { Text(s.psalterTitle, style = MaterialTheme.typography.titleLarge, maxLines = 1) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
-                    }
-                },
+            SinqTopBar(
+                title = s.psalterTitle,
+                // The division being read, so the title bar answers "which
+                // psalms am I looking at" without a second glance.
+                subtitle = if (daily && range != null) s.psalmRange(range.first, range.last) else null,
+                onBack = onBack,
                 actions = {
                     // Today's / All — compact toggle, same row as everything else.
                     TextButton(onClick = {
@@ -184,6 +190,7 @@ fun PsalterScreen(
                     }) {
                         Text(
                             if (daily) s.dailyPsalms else s.wholePsalter,
+                            style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.secondary,
                         )
                     }
@@ -211,43 +218,40 @@ fun PsalterScreen(
                             imageVector = if (readingMode == ReadingMode.VERTICAL) Icons.Outlined.SwapHoriz
                             else Icons.Outlined.SwapVert,
                             contentDescription = s.readingModeToggle,
+                            modifier = Modifier.size(IconSize.medium),
                         )
                     }
                     IconButton(onClick = { showContents = true }) {
-                        Icon(Icons.Outlined.Menu, contentDescription = s.contents)
+                        Icon(
+                            Icons.Outlined.Menu,
+                            contentDescription = s.contents,
+                            modifier = Modifier.size(IconSize.medium),
+                        )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
             )
         },
     ) { innerPadding ->
         Box(Modifier.fillMaxSize()) {
             val onVerseTap: (String) -> Unit = { selectedVerseKey = it }
             if (daily && range == null) {
-                // Sunday's division isn't defined yet.
+                // Sunday's division isn't defined yet — say so, and offer the
+                // way out (the whole Psalter) instead of a dead end.
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
+                    modifier = Modifier.fillMaxSize().padding(innerPadding),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    Text(
-                        s.comingSoon,
-                        style = MaterialTheme.typography.titleMedium.inReadingFont(),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
+                    StatePanel(
+                        icon = Icons.Outlined.LibraryMusic,
+                        title = s.comingSoon,
+                        actionLabel = s.wholePsalter,
+                        onAction = { daily = false },
                     )
                 }
             } else when (readingMode) {
                 ReadingMode.VERTICAL -> {
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-                    ) {
+                    ReadingColumn(state = listState, innerPadding = innerPadding) {
                         if (daily && range != null) {
                             item {
                                 Text(
@@ -269,7 +273,7 @@ fun PsalterScreen(
                                 citedRange = if (section.number == citedPsalmNumber) citedRange else IntRange.EMPTY,
                             )
                         }
-                        item { Spacer(Modifier.height(56.dp)) }
+                        item { Spacer(Modifier.height(Spacing.huge)) }
                     }
                 }
                 ReadingMode.HORIZONTAL -> {
@@ -286,11 +290,7 @@ fun PsalterScreen(
                             // getOrNull: a composed page can outlive the list for a frame
                             // when the daily/all toggle shrinks it under the pager.
                             val section = shown.getOrNull(page) ?: return@HorizontalPager
-                            LazyColumn(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = 24.dp),
-                            ) {
+                            ReadingColumn(innerPadding = PaddingValues(0.dp)) {
                                 item {
                                     SectionView(
                                         section = section,
@@ -301,19 +301,14 @@ fun PsalterScreen(
                                         onVerseTap = onVerseTap,
                                         citedRange = if (section.number == citedPsalmNumber) citedRange else IntRange.EMPTY,
                                     )
-                                    Spacer(Modifier.height(48.dp))
+                                    Spacer(Modifier.height(Spacing.huge))
                                 }
                             }
                         }
                         if (shown.isNotEmpty()) {
-                            Text(
-                                text = "${geezNumeral(pagerState.currentPage + 1)} / ${geezNumeral(shown.size)}",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 10.dp),
-                                textAlign = TextAlign.Center,
+                            com.agpeya.app.ui.reading.PageIndicator(
+                                current = pagerState.currentPage + 1,
+                                total = shown.size,
                             )
                         }
                     }
@@ -335,7 +330,11 @@ fun PsalterScreen(
     }
 
     if (showContents) {
-        ModalBottomSheet(onDismissRequest = { showContents = false }, sheetState = sheetState) {
+        ModalBottomSheet(
+            onDismissRequest = { showContents = false },
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        ) {
             PsalterContents(
                 psalms = shown,
                 onSelect = { index ->

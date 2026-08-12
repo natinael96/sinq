@@ -72,6 +72,20 @@ import com.agpeya.app.model.Bookmark
 import com.agpeya.app.model.Hour
 import com.agpeya.app.model.HourLayout
 import com.agpeya.app.model.Section
+import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.theme.LocalMotion
+import com.agpeya.app.ui.theme.Motion
+import com.agpeya.app.ui.theme.ReadingMaxWidth
+import com.agpeya.app.ui.theme.Spacing
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.inReadingFont
 import kotlinx.coroutines.launch
 
@@ -142,6 +156,7 @@ fun ReadingScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
     val s = com.agpeya.app.ui.strings.LocalStrings.current
+    val motion = LocalMotion.current
 
     // The section we want kept in view; shared across both readers so the
     // position survives a mode switch.
@@ -230,32 +245,45 @@ fun ReadingScreen(
             Modifier
         },
         topBar = {
-            TopAppBar(
-                title = {
+            SinqTopBar(
+                title = hour?.name ?: "",
+                onBack = onBack,
+                scrollBehavior = scrollBehavior,
+                titleContent = {
                     Box {
                         Row(
-                            modifier = Modifier.clickable { hourMenu = true },
+                            modifier = Modifier
+                                .clip(MaterialTheme.shapes.small)
+                                .clickable(role = Role.DropdownList) { hourMenu = true }
+                                .padding(horizontal = Spacing.xs),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(hour?.name ?: "", style = MaterialTheme.typography.titleLarge)
-                            Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
+                            Text(hour?.name ?: "", style = MaterialTheme.typography.titleLarge, maxLines = 1)
+                            Icon(
+                                Icons.Filled.ArrowDropDown,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
                         }
                         DropdownMenu(expanded = hourMenu, onDismissRequest = { hourMenu = false }) {
                             allHours.forEach { h ->
+                                val isCurrent = h.id == hourId
                                 DropdownMenuItem(
-                                    text = { Text(h.name, style = MaterialTheme.typography.titleMedium) },
+                                    text = {
+                                        Text(
+                                            h.name,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = if (isCurrent) MaterialTheme.colorScheme.secondary
+                                            else MaterialTheme.colorScheme.onSurface,
+                                        )
+                                    },
                                     onClick = {
                                         hourMenu = false
-                                        if (h.id != hourId) onSwitchHour(h.id)
+                                        if (!isCurrent) onSwitchHour(h.id)
                                     },
                                 )
                             }
                         }
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
                     }
                 },
                 actions = {
@@ -283,39 +311,53 @@ fun ReadingScreen(
                             imageVector = if (readingMode == ReadingMode.VERTICAL) Icons.Outlined.SwapHoriz
                             else Icons.Outlined.SwapVert,
                             contentDescription = s.readingModeToggle,
+                            modifier = Modifier.size(IconSize.medium),
                         )
                     }
                     IconButton(onClick = { showContents = true }) {
-                        Icon(Icons.Outlined.Menu, contentDescription = s.contents)
+                        Icon(
+                            Icons.Outlined.Menu,
+                            contentDescription = s.contents,
+                            modifier = Modifier.size(IconSize.medium),
+                        )
                     }
                 },
-                scrollBehavior = scrollBehavior,
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    scrolledContainerColor = MaterialTheme.colorScheme.background,
-                ),
             )
         },
         containerColor = MaterialTheme.colorScheme.background,
     ) { innerPadding ->
         Box(Modifier.fillMaxSize()) {
             // How far through the hour today's reading is. Sits under the app
-            // bar so it stays visible while scrolling.
+            // bar so it stays visible while scrolling, and slides to its new
+            // value rather than jumping — the only feedback that a section was
+            // marked read while you are looking at the foot of the page.
             if (sections.isNotEmpty()) {
                 val doneCount = sections.count { it.id in readIds }
+                val target = doneCount.toFloat() / sections.size
+                val progress by androidx.compose.animation.core.animateFloatAsState(
+                    targetValue = target,
+                    animationSpec = motion.spec(Motion.slow),
+                    label = "hourProgress",
+                )
                 androidx.compose.material3.LinearProgressIndicator(
-                    progress = { doneCount.toFloat() / sections.size },
+                    progress = { progress },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = innerPadding.calculateTopPadding())
                         .height(2.dp)
-                        .align(Alignment.TopCenter),
+                        .align(Alignment.TopCenter)
+                        .semantics {
+                            contentDescription = s.progressOf(doneCount, sections.size)
+                        },
                     color = MaterialTheme.colorScheme.secondary,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     drawStopIndicator = {},
                 )
             }
-            AnimatedVisibility(visible = sections.isNotEmpty(), enter = fadeIn(tween(350))) {
+            AnimatedVisibility(
+                visible = sections.isNotEmpty(),
+                enter = fadeIn(tween(motion.millis(300))),
+            ) {
                 val onVerseTap: (String) -> Unit = { selectedVerseKey = it }
                 when (readingMode) {
                     ReadingMode.VERTICAL -> VerticalReader(
@@ -346,9 +388,17 @@ fun ReadingScreen(
     }
 
     if (showContents) {
-        ModalBottomSheet(onDismissRequest = { showContents = false }, sheetState = sheetState) {
+        ModalBottomSheet(
+            onDismissRequest = { showContents = false },
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        ) {
             ContentsSheet(
                 sections = sections,
+                // Where the reader is right now, so opening the contents tells
+                // you where you are before it asks where you want to go.
+                currentIndex = if (readingMode == ReadingMode.VERTICAL) listState.firstVisibleItemIndex
+                else pagerState.currentPage,
                 onSelect = { index ->
                     scope.launch {
                         sheetState.hide()
@@ -379,12 +429,9 @@ private fun VerticalReader(
     onPrevious: (() -> Unit)?,
     onNext: (() -> Unit)?,
 ) {
-    LazyColumn(
+    ReadingColumn(
         state = listState,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding),
-        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+        innerPadding = innerPadding,
     ) {
         items(sections.size, key = { sections[it].id }) { index ->
             val section = sections[index]
@@ -435,14 +482,10 @@ private fun PagedReader(
             val section = sections[page]
             // LazyColumn (not Column+verticalScroll) so verse taps register inside
             // the pager — the scroll Column was consuming them.
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 24.dp),
-            ) {
+            ReadingColumn(innerPadding = PaddingValues(0.dp)) {
                 item {
                     section.part?.let { part ->
-                        Spacer(Modifier.height(12.dp))
+                        Spacer(Modifier.height(Spacing.md))
                         Text(
                             text = part,
                             style = MaterialTheme.typography.labelMedium,
@@ -461,26 +504,62 @@ private fun PagedReader(
                         isRead = section.id in readIds,
                         onToggleRead = { onToggleRead(section) },
                     )
-                    Spacer(Modifier.height(48.dp))
+                    Spacer(Modifier.height(Spacing.huge))
                 }
             }
         }
-        Text(
-            text = "${geezNumeral(pagerState.currentPage + 1)} / ${geezNumeral(sections.size)}",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 10.dp),
-            textAlign = TextAlign.Center,
+        PageIndicator(current = pagerState.currentPage + 1, total = sections.size)
+    }
+}
+
+/** "፫ / ፲፪" under a paged reader — where you are, in the numerals the page uses. */
+@Composable
+internal fun PageIndicator(current: Int, total: Int) {
+    Text(
+        text = "${geezNumeral(current)} / ${geezNumeral(total)}",
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = Spacing.sm),
+        textAlign = TextAlign.Center,
+    )
+}
+
+/**
+ * The reading list every reader is built on: page margins, and a ceiling on how
+ * wide a line of text may get. On a phone the ceiling never binds; on a tablet
+ * it is the difference between a book and a spreadsheet.
+ */
+@Composable
+internal fun ReadingColumn(
+    innerPadding: PaddingValues,
+    state: androidx.compose.foundation.lazy.LazyListState = rememberLazyListState(),
+    content: androidx.compose.foundation.lazy.LazyListScope.() -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding),
+        contentAlignment = Alignment.TopCenter,
+    ) {
+        LazyColumn(
+            state = state,
+            modifier = Modifier.fillMaxSize().widthIn(max = ReadingMaxWidth),
+            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.sm),
+            content = content,
         )
     }
 }
 
+/**
+ * The contents sheet. The section being read is marked in gold — a table of
+ * contents that can't tell you where you are is only half of one.
+ */
 @Composable
-private fun ContentsSheet(sections: List<Section>, onSelect: (Int) -> Unit) {
+private fun ContentsSheet(sections: List<Section>, currentIndex: Int, onSelect: (Int) -> Unit) {
     LazyColumn(
-        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+        contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.sm),
         modifier = Modifier.fillMaxWidth(),
     ) {
         item {
@@ -489,40 +568,59 @@ private fun ContentsSheet(sections: List<Section>, onSelect: (Int) -> Unit) {
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(Spacing.sm))
         }
         items(sections.size) { index ->
             val section = sections[index]
             if (section.part != null && sections.getOrNull(index - 1)?.part != section.part) {
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(Spacing.md))
                 Text(section.part, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(Spacing.xs))
             }
-            Text(
-                text = section.title,
-                style = MaterialTheme.typography.titleMedium.inReadingFont(),
-                color = MaterialTheme.colorScheme.onSurface,
+            val isCurrent = index == currentIndex
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onSelect(index) }
-                    .padding(vertical = 10.dp),
-            )
+                    .heightIn(min = 44.dp)
+                    .clip(MaterialTheme.shapes.small)
+                    .selectable(selected = isCurrent, onClick = { onSelect(index) })
+                    .padding(vertical = Spacing.sm),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = section.title,
+                    style = MaterialTheme.typography.titleMedium.inReadingFont(),
+                    color = if (isCurrent) MaterialTheme.colorScheme.secondary
+                    else MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
-        item { Spacer(Modifier.height(36.dp)) }
+        item { Spacer(Modifier.height(Spacing.huge)) }
     }
 }
 
+/**
+ * The divider between two parts of an hour. Deliberately the loudest thing in
+ * the reader after the text itself — it is the only structural signal that a new
+ * movement of the office has begun.
+ */
 @Composable
 private fun PartHeader(part: String) {
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Spacer(Modifier.height(44.dp))
+        Spacer(Modifier.height(Spacing.huge + Spacing.sm))
         Text(
             text = part,
             style = MaterialTheme.typography.titleLarge.inReadingFont(),
             color = MaterialTheme.colorScheme.secondary,
+            textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(6.dp))
-        HorizontalDivider(modifier = Modifier.width(56.dp), thickness = 2.dp, color = MaterialTheme.colorScheme.secondary)
+        Spacer(Modifier.height(Spacing.sm))
+        HorizontalDivider(
+            modifier = Modifier.width(56.dp),
+            thickness = 2.dp,
+            color = MaterialTheme.colorScheme.secondary,
+        )
     }
 }
 
@@ -534,18 +632,25 @@ private fun PartHeader(part: String) {
 private fun HourStepper(onPrevious: (() -> Unit)?, onNext: (() -> Unit)?) {
     if (onPrevious == null && onNext == null) return
     val s = com.agpeya.app.ui.strings.LocalStrings.current
+    val colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
     Row(
-        modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
+        modifier = Modifier.fillMaxWidth().padding(top = Spacing.xxl),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (onPrevious != null) {
-            TextButton(onClick = onPrevious) { Text("‹  ${s.previousHour}") }
+            TextButton(onClick = onPrevious, colors = colors) {
+                Text("‹  ${s.previousHour}", style = MaterialTheme.typography.labelLarge)
+            }
         } else {
             Spacer(Modifier.width(1.dp))
         }
         if (onNext != null) {
-            TextButton(onClick = onNext) { Text("${s.nextHour}  ›") }
+            TextButton(onClick = onNext, colors = colors) {
+                Text("${s.nextHour}  ›", style = MaterialTheme.typography.labelLarge)
+            }
         }
     }
 }

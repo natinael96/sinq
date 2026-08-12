@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -43,7 +44,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -60,7 +63,14 @@ import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.scaledReadingSp
 import com.agpeya.app.ui.theme.LocalReadingFont
+import com.agpeya.app.ui.common.LoadingPanel
+import com.agpeya.app.ui.common.SelectPill
+import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.reading.ReadingColumn
+import com.agpeya.app.ui.theme.IconSize
+import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.readingBodyStyle
+import com.agpeya.app.ui.theme.readingVerseGap
 import kotlinx.coroutines.launch
 
 private val FONT_STEPS_SP = listOf(17, 19, 22, 25, 29)
@@ -88,6 +98,7 @@ fun ScriptureReaderScreen(
     val fontStep by SettingsRepository.fontStep(context).collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
 
+    val haptics = LocalHapticFeedback.current
     val bookmarks by UserDataRepository.bookmarks(context).collectAsState(initial = emptyList())
     val bookmarkedIds = remember(bookmarks) {
         bookmarks.filter { it.hourId == "scripture_library" }.mapTo(HashSet()) { it.sectionId }
@@ -96,14 +107,11 @@ fun ScriptureReaderScreen(
     val b = book ?: run {
         // Keep a back arrow visible: if the book never loads (stale bookmark,
         // bad key), the spinner would otherwise trap the user on this screen.
-        Box(Modifier.fillMaxSize()) {
-            IconButton(onClick = onBack, modifier = Modifier.padding(4.dp)) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
-            }
-            androidx.compose.material3.CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.align(Alignment.Center),
-            )
+        Scaffold(
+            containerColor = MaterialTheme.colorScheme.background,
+            topBar = { SinqTopBar(title = "", onBack = onBack) },
+        ) { padding ->
+            LoadingPanel(Modifier.padding(padding))
         }
         return
     }
@@ -151,6 +159,7 @@ fun ScriptureReaderScreen(
         }
     }
     val listState = rememberLazyListState()
+    val verseGap = readingVerseGap(bodyFontSp)
 
     // Land on the cited verse when opened from a reading link — once. Without the
     // guard, paging away and back to this chapter re-ran the jump mid-reading.
@@ -167,22 +176,10 @@ fun ScriptureReaderScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(b.nameAm, style = MaterialTheme.typography.titleLarge)
-                        Text(
-                            "${s.chapterUnit} ${geezNumeral(chapter)}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = s.back)
-                    }
-                },
+            SinqTopBar(
+                title = b.nameAm,
+                subtitle = "${s.chapterUnit} ${geezNumeral(chapter)}",
+                onBack = onBack,
                 actions = {
                     val sectionId = "scripture:$bookKey:$chapter"
                     val marked = sectionId in bookmarkedIds
@@ -196,10 +193,11 @@ fun ScriptureReaderScreen(
                         Icon(
                             Icons.Outlined.Share,
                             contentDescription = s.shareAction,
-                            tint = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.size(IconSize.medium),
                         )
                     }
                     IconButton(onClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         scope.launch {
                             UserDataRepository.toggleBookmark(
                                 context,
@@ -217,7 +215,8 @@ fun ScriptureReaderScreen(
                             imageVector = if (marked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
                             contentDescription = if (marked) s.removeAction else s.bookmarkAction,
                             tint = if (marked) MaterialTheme.colorScheme.secondary
-                            else MaterialTheme.colorScheme.onBackground,
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(IconSize.medium),
                         )
                     }
                     com.agpeya.app.ui.reading.FontSizeActions(
@@ -225,17 +224,10 @@ fun ScriptureReaderScreen(
                         maxStep = FONT_STEPS_SP.lastIndex,
                     ) { step -> scope.launch { SettingsRepository.setFontStep(context, step) } }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
             )
         },
     ) { innerPadding ->
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = 22.dp),
-        ) {
+        ReadingColumn(state = listState, innerPadding = innerPadding) {
             item(key = "chapters") {
                 ChapterStrip(
                     count = b.chapters.size,
@@ -266,55 +258,51 @@ fun ScriptureReaderScreen(
                         color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                            .padding(horizontal = Spacing.sm, vertical = verseGap / 2),
                     )
                 }
                 if (tinted) {
                     Column(
                         Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 2.dp)
+                            .padding(vertical = Spacing.xxs)
                             .clip(RoundedCornerShape(10.dp))
-                            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.30f))
-                            .border(1.5.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(10.dp))
-                            .padding(vertical = 4.dp),
+                            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.22f))
+                            .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.75f), RoundedCornerShape(10.dp))
+                            .padding(vertical = Spacing.xs),
                     ) { row.forEach { body(it) } }
                 } else {
-                    Column(Modifier.fillMaxWidth().padding(vertical = 2.dp)) { row.forEach { body(it) } }
+                    Column(Modifier.fillMaxWidth()) { row.forEach { body(it) } }
                 }
             }
-            item { Spacer(Modifier.height(48.dp)) }
+            item { Spacer(Modifier.height(Spacing.huge)) }
         }
     }
 }
 
+/**
+ * The chapter picker. It scrolls itself to the chapter in view, so arriving at
+ * ማርቆስ ፲፬ from a ግጻዌ link doesn't leave the strip sitting at chapter one with
+ * the selection somewhere off-screen to the right.
+ */
 @Composable
 private fun ChapterStrip(count: Int, selected: Int, onSelect: (Int) -> Unit) {
+    val state = rememberLazyListState()
+    androidx.compose.runtime.LaunchedEffect(selected) {
+        state.animateScrollToItem((selected - 3).coerceAtLeast(0))
+    }
     LazyRow(
-        modifier = Modifier.padding(vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        state = state,
+        modifier = Modifier.padding(vertical = Spacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         items(count) { i ->
             val n = i + 1
-            val isSel = n == selected
-            Box(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .then(
-                        if (isSel) Modifier.background(MaterialTheme.colorScheme.primary)
-                        else Modifier.border(1.dp, MaterialTheme.colorScheme.surfaceVariant, CircleShape),
-                    )
-                    .clickable { onSelect(n) }
-                    .padding(horizontal = 14.dp, vertical = 8.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    geezNumeral(n),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (isSel) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            SelectPill(
+                label = geezNumeral(n),
+                selected = n == selected,
+                onClick = { onSelect(n) },
+            )
         }
     }
 }

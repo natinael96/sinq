@@ -202,7 +202,7 @@ fun EthiopianYearHeatmap(
             IconButton(onClick = { ecYear-- }, enabled = ecYear > APP_EPOCH_EC.year) {
                 Icon(
                     Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                    contentDescription = null,
+                    contentDescription = s.previousYear,
                     tint = if (ecYear > APP_EPOCH_EC.year) MaterialTheme.colorScheme.onSurface
                     else MaterialTheme.colorScheme.surfaceVariant,
                 )
@@ -215,7 +215,7 @@ fun EthiopianYearHeatmap(
             IconButton(onClick = { ecYear++ }, enabled = ecYear < currentEc) {
                 Icon(
                     Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null,
+                    contentDescription = s.nextYear,
                     tint = if (ecYear < currentEc) MaterialTheme.colorScheme.onSurface
                     else MaterialTheme.colorScheme.surfaceVariant,
                 )
