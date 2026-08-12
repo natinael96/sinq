@@ -186,6 +186,63 @@ object AmharicSearch {
         }
     }
 
+    /**
+     * A typed reference — "መዝሙር 23", "ሉቃስ 10", "ps 23" — resolved to the page
+     * it names, so the user jumps straight there instead of scanning matches.
+     * Returned ahead of the text results.
+     */
+    suspend fun referenceMatch(context: Context, rawQuery: String, labels: Labels): Result? {
+        val q = rawQuery.trim()
+        if (q.isEmpty()) return null
+
+        val (titlePart, number) = parseReference(q) ?: return null
+        if (looksLikePsalm(titlePart) && number in 1..150) {
+            return Result(
+                source = Source.PSALTER,
+                targetId = "",
+                sourceLabel = labels.psalter,
+                targetIndex = number - 1,
+                title = "${labels.psalter} ${geezNumeral(number)}",
+                snippet = "",
+                snippetMatchStart = -1,
+                snippetMatchLen = 0,
+                route = "psalter?section=${number - 1}",
+            )
+        }
+
+        if (titlePart.isEmpty()) return null
+        val key = ScriptureRepository.resolveBookKey(titlePart) ?: return null
+        val book = ScriptureRepository.book(context, key) ?: return null
+        // Silently clamping would send the user somewhere they didn't ask for.
+        if (number !in 1..book.chapters.size) return null
+        return Result(
+            source = Source.SCRIPTURE,
+            targetId = key,
+            sourceLabel = labels.scripture,
+            targetIndex = number,
+            title = "${book.nameAm} ${geezNumeral(number)}",
+            snippet = "",
+            snippetMatchStart = -1,
+            snippetMatchLen = 0,
+            route = "scripture/$key/$number",
+        )
+    }
+
+    /** Split "ሉቃስ 10" into its book part and trailing number; null if it isn't
+     *  shaped like a reference at all. Pure, so it is unit-testable. */
+    internal fun parseReference(raw: String): Pair<String, Int>? {
+        val m = Regex("^(.*?)[\\s:፥]*(\\d{1,3})\\s*$").find(raw.trim()) ?: return null
+        val number = m.groupValues[2].toIntOrNull() ?: return null
+        return m.groupValues[1].trim() to number
+    }
+
+    /** A bare number, or one prefixed with a psalm word, names a psalm. */
+    internal fun looksLikePsalm(titlePart: String): Boolean {
+        if (titlePart.isEmpty()) return true
+        return listOf("መዝሙር", "መዝ", "ps", "psalm", "ምዕራፍ")
+            .any { titlePart.equals(it, true) || titlePart.startsWith(it, true) }
+    }
+
     /** Display labels for the corpora, passed in so search stays UI-agnostic. */
     data class Labels(
         val psalter: String,

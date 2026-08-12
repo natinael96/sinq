@@ -1,6 +1,8 @@
 package com.agpeya.app.search
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AmharicSearchTest {
@@ -43,5 +45,30 @@ class AmharicSearchTest {
     @Test
     fun `non-homophone letters are unchanged`() {
         assertEquals("በዘ", AmharicSearch.fold("በዘ"))
+    }
+
+    // ---- typed references ------------------------------------------------
+
+    @Test
+    fun `a reference splits into its book and number`() {
+        assertEquals("ሉቃስ" to 10, AmharicSearch.parseReference("ሉቃስ 10"))
+        assertEquals("ሉቃስ" to 10, AmharicSearch.parseReference("ሉቃስ፥10"))
+        assertEquals("" to 23, AmharicSearch.parseReference("23"))
+        assertEquals("Luke" to 4, AmharicSearch.parseReference("  Luke 4  "))
+    }
+
+    @Test
+    fun `plain words are not references`() {
+        assertEquals(null, AmharicSearch.parseReference("ሰላም"))
+        assertEquals(null, AmharicSearch.parseReference(""))
+    }
+
+    @Test
+    fun `bare and psalm-prefixed numbers mean a psalm`() {
+        assertTrue(AmharicSearch.looksLikePsalm(""))
+        assertTrue(AmharicSearch.looksLikePsalm("መዝሙር"))
+        assertTrue(AmharicSearch.looksLikePsalm("ps"))
+        assertTrue(AmharicSearch.looksLikePsalm("Psalm"))
+        assertFalse(AmharicSearch.looksLikePsalm("ሉቃስ"))
     }
 }

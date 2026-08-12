@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -62,12 +63,26 @@ fun SearchScreen(
     var query by rememberSaveable { mutableStateOf("") }
     var results by remember { mutableStateOf<List<AmharicSearch.Result>>(emptyList()) }
     val recent by UserDataRepository.recentSearches(context).collectAsState(initial = emptyList())
+    // A typed reference ("መዝሙር 23", "ሉቃስ 10") jumps straight to the page.
+    var reference by remember { mutableStateOf<AmharicSearch.Result?>(null) }
+    var filter by rememberSaveable { mutableStateOf<AmharicSearch.Source?>(null) }
 
     LaunchedEffect(query) {
         if (query.trim().length < 2) {
             results = emptyList()
+            reference = null
         } else {
             delay(180) // debounce
+            reference = AmharicSearch.referenceMatch(
+                context,
+                query,
+                AmharicSearch.Labels(
+                    psalter = s.psalterTitle,
+                    scripture = s.scripturesTitle,
+                    synaxarium = s.synaxariumTitle,
+                    wudase = s.wudaseMariam,
+                ),
+            )
             results = AmharicSearch.search(
                 context,
                 query,
@@ -167,7 +182,7 @@ fun SearchScreen(
                         }
                     }
                 }
-                query.trim().length >= 2 && results.isEmpty() -> {
+                query.trim().length >= 2 && results.isEmpty() && reference == null -> {
                     Spacer(Modifier.height(40.dp))
                     Text(
                         text = s.noResults,
@@ -178,13 +193,41 @@ fun SearchScreen(
                     )
                 }
                 else -> {
+                    // Counts drive the filter row; grouping keeps a big corpus
+                    // from burying a single prayer match.
+                    val counts = remember(results) { results.groupingBy { it.source }.eachCount() }
+                    val shown = remember(results, filter) {
+                        if (filter == null) results else results.filter { it.source == filter }
+                    }
+                    val grouped = remember(shown) { shown.groupBy { it.source } }
+
+                    SourceFilters(counts, filter) { filter = it }
+
                     LazyColumn(contentPadding = PaddingValues(vertical = 8.dp)) {
-                        items(
-                            results,
-                            key = { "${it.source}:${it.targetId}:${it.targetIndex}" },
-                        ) { r ->
-                            ResultRow(r) { open(r) }
-                            HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                        reference?.let { ref ->
+                            item(key = "ref") {
+                                ReferenceRow(ref) { open(ref) }
+                                Spacer(Modifier.height(4.dp))
+                            }
+                        }
+                        SOURCE_ORDER.forEach { source ->
+                            val rows = grouped[source].orEmpty()
+                            if (rows.isEmpty()) return@forEach
+                            item(key = "h_$source") {
+                                Text(
+                                    text = sourceTitle(source, s),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+                                )
+                            }
+                            items(
+                                rows,
+                                key = { "${it.source}:${it.targetId}:${it.targetIndex}" },
+                            ) { r ->
+                                ResultRow(r) { open(r) }
+                                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                            }
                         }
                     }
                 }
@@ -252,5 +295,90 @@ private fun highlighted(result: AmharicSearch.Result) = buildAnnotatedString {
         append(text.substring(end))
     } else {
         append(text)
+    }
+}
+
+/** Fixed display order, so results don't reshuffle between queries. */
+private val SOURCE_ORDER = listOf(
+    AmharicSearch.Source.HOUR,
+    AmharicSearch.Source.PSALTER,
+    AmharicSearch.Source.SCRIPTURE,
+    AmharicSearch.Source.SYNAXARIUM,
+    AmharicSearch.Source.WUDASE,
+)
+
+private fun sourceTitle(source: AmharicSearch.Source, s: com.agpeya.app.ui.strings.Strings): String =
+    when (source) {
+        AmharicSearch.Source.HOUR -> s.hoursHeader
+        AmharicSearch.Source.PSALTER -> s.psalterTitle
+        AmharicSearch.Source.SCRIPTURE -> s.scripturesTitle
+        AmharicSearch.Source.SYNAXARIUM -> s.synaxariumTitle
+        AmharicSearch.Source.WUDASE -> s.wudaseMariam
+    }
+
+/** Filter row: "All" plus one chip per corpus that actually matched. */
+@Composable
+private fun SourceFilters(
+    counts: Map<AmharicSearch.Source, Int>,
+    active: AmharicSearch.Source?,
+    onSelect: (AmharicSearch.Source?) -> Unit,
+) {
+    if (counts.size < 2) return   // nothing to filter between
+    val s = com.agpeya.app.ui.strings.LocalStrings.current
+    androidx.compose.foundation.lazy.LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(vertical = 4.dp),
+    ) {
+        item {
+            FilterChipRow(s.filterAll, counts.values.sum(), active == null) { onSelect(null) }
+        }
+        SOURCE_ORDER.filter { counts.containsKey(it) }.forEach { source ->
+            item {
+                FilterChipRow(sourceTitle(source, s), counts[source] ?: 0, active == source) {
+                    onSelect(if (active == source) null else source)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FilterChipRow(label: String, count: Int, selected: Boolean, onClick: () -> Unit) {
+    androidx.compose.material3.FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text("$label  $count", style = MaterialTheme.typography.labelMedium) },
+    )
+}
+
+/** A typed reference resolved to a page — shown above the text matches. */
+@Composable
+private fun ReferenceRow(result: AmharicSearch.Result, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 14.dp),
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+    ) {
+        Icon(
+            Icons.AutoMirrored.Outlined.MenuBook,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.size(20.dp),
+        )
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(
+                result.title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            Text(
+                result.sourceLabel,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }

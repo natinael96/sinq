@@ -186,6 +186,7 @@ interface Strings {
     val backupFailed: String
     val restoreDone: String
     val restoreFailed: String
+    val filterAll: String
     val markRead: String
     val prayerProgress: String
     fun progressOf(done: Int, total: Int): String
@@ -450,6 +451,7 @@ object AmharicStrings : Strings {
     override val backupFailed = "ምትኬውን ማስቀመጥ አልተቻለም።"
     override val restoreDone = "ከምትኬው ተመልሷል።"
     override val restoreFailed = "ፋይሉን ማንበብ አልተቻለም።"
+    override val filterAll = "ሁሉም"
     override val markRead = "እንደተነበበ ምልክት አድርግ"
     override val prayerProgress = "ንባብ"
     override fun progressOf(done: Int, total: Int) = "$done ከ$total"
@@ -728,6 +730,7 @@ object EnglishStrings : Strings {
     override val backupFailed = "Could not save the backup."
     override val restoreDone = "Restored from the backup."
     override val restoreFailed = "Could not read that file."
+    override val filterAll = "All"
     override val markRead = "Mark as read"
     override val prayerProgress = "Progress"
     override fun progressOf(done: Int, total: Int) = "$done of $total"
