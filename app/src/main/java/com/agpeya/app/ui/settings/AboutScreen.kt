@@ -80,6 +80,8 @@ fun AboutScreen(onBack: () -> Unit) {
             Para(s.aboutFontBody, MaterialTheme.typography.bodyMedium)
             Section(s.aboutPrivacyTitle)
             Para(s.aboutPrivacyBody, MaterialTheme.typography.bodyMedium)
+            Section(s.aboutLicenceTitle)
+            Para(s.aboutLicenceBody, MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(36.dp))
             // A small truth, thinly set.
             Text(

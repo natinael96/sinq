@@ -15,28 +15,42 @@ Sinq brings the Agpeya's seven canonical prayer hours and the complete Psalter (
 ### Prayer
 - **The prayer hours** — ጸሎተ ነግህ (Morning), ሠለስት (Terce), ቀትር (Sext), ተሰዓት (None), ሰርክ (Vespers), ንዋም (Compline), መንፈቀ ሌሊት (Midnight, with its three watches), and the Veil prayer — with a time-of-day suggestion on the home screen.
 - **Full Psalter** — all 150 psalms, with the traditional weekday reading divisions and the whole book a toggle away. Psalm 118's acrostic renders with its 22 Hebrew-letter stanza headings (አሌፍ … ታው).
-- **Mequteria (መቁጠሪያ)** — a prayer-rope counter with configurable loop length.
+- **ውዳሴ ማርያም and ዘወትር ጸሎት** — a portion for each weekday plus ይወድስዋ መላእክት and አንቀጸ ብርሃን, in Amharic with a Ge'ez toggle.
+
+### Calendar and lectionary
+- **ግጻዌ** — the daily lectionary for any date, with the movable seasons resolved through the Bahre Hasab. Each reading taps through to the Psalter or the scripture reader with the cited verses highlighted.
+- **ስንክሳር** — the Amharic synaxarium, a day's commemorations with its አርኬ hymn, and the fixed closing ጸሎት.
+- **አጽዋማት** — the fasting calendar: what is in effect today, and every fast of the Ethiopian year.
 
 ### Reading
+- **Scriptures** — the bundled Amharic New Testament, 27 books.
 - Two reading modes: vertical scroll or page-by-page swiping, remembered per preference.
-- Five font-size steps, Ge'ez verse numerals, and Abyssinica SIL typography.
+- Five font-size steps and four selectable Ethiopic faces, Ge'ez verse numerals, optically matched so the page reads the same whichever face is chosen.
 - Keep-screen-on while praying; scroll position remembered per hour.
 - Light and dark themes; Amharic and English interface languages.
 
 ### Personal
-- **Bookmarks** — mark any prayer section or psalm; jump back from one list.
-- **Highlights** — tap any verse to color it (four colors), shared across every screen where the verse appears.
-- **Search** — homophone-tolerant Amharic search (ሀ/ሐ/ኀ, ሰ/ሠ, ጸ/ፀ … treated as equal) across all prayers.
-- **Customization** — reorder or hide sections within an hour, add any psalm to any hour, create custom hours, rename or hide hours.
+- **Bookmarks** — prayer sections, psalms, scripture chapters and ስንክሳር passages, in one list.
+- **Highlights** — tap any verse to colour it (four colours), shared across every screen where the verse appears.
+- **Search** — homophone-tolerant Amharic search (ሀ/ሐ/ኀ, ሰ/ሠ, ጸ/ፀ … treated as equal) across the prayers, Psalter, New Testament, ስንክሳር and ውዳሴ ማርያም.
+- **Copy and share** — a verse, a whole ግጻዌ day, or a scripture chapter.
+- **Backup and restore** — streaks, bookmarks and highlights to a file; restoring merges, so it cannot erase newer progress.
 - **Habits & streaks** — track daily practices, keep a streak, and share it as an image card.
-- **Reminders** — schedule prayer-time notifications with per-mode configuration.
+- **Reminders** — prayer-time notifications with per-mode configuration, plus a nightly streak nudge and a morning ግጻዌ reading.
+- **Home-screen widget** — today's ምስባክ and ወንጌል at a glance.
 
 ## Installation
 
-APK releases on GitHub are planned. Until then, build from source (below) or sideload a build shared with you:
+Signed APKs are published on the [Releases page](https://github.com/natinael96/sinq/releases) — every `v*` tag builds one in CI.
 
-1. Allow **Install unknown apps** for your browser or file manager (Android Settings → Apps).
-2. Open the APK and install. Requires **Android 8.0 (API 26)** or newer.
+1. Download `Sinq-vX.Y.Z.apk` from the latest release.
+2. Allow **Install unknown apps** for your browser or file manager (Android Settings → Apps).
+3. Open the APK and install. Requires **Android 8.0 (API 26)** or newer.
+
+**To get updates automatically**, install [Obtainium](https://github.com/ImranR98/Obtainium) and add
+`https://github.com/natinael96/sinq` — it watches the releases and prompts you when a new version
+appears. Android verifies each update carries the same signing key, so a tampered APK cannot install
+over a genuine one.
 
 ## Building from Source
 
@@ -112,10 +126,10 @@ Issues and pull requests are welcome — especially corrections to prayer text m
 
 The code and the bundled prayer text are under **different licenses**. If you fork this repo, that distinction matters — the content does not inherit the code's license.
 
-- **Code:** license not yet finalized. *(Pick one before 1.0 — see the note below.)*
+- **Code:** [Apache License 2.0](LICENSE).
 - **Prayer text:** the 80-weahadu Amharic Bible by [EOTCOpenSource](https://github.com/EOTCOpenSource/80-weahadu), used under [**CC BY-NC-ND 4.0**](https://creativecommons.org/licenses/by-nc-nd/4.0/). Passages are selected and arranged into the hours of prayer; verse text is reproduced unchanged, except that the acrostic letters of Psalm 118 are rendered as stanza headings. This means the bundled content under `app/src/main/assets/content/` **may not be used commercially, and may not be redistributed in modified form** — by this project or by anyone forking it. Sinq is and will remain non-commercial: no ads, no in-app purchases, no subscriptions.
 - **ውዳሴ ማርያም (Wudase Maryam):** the Ge'ez and Amharic text is a centuries-old, public-domain Ethiopian Orthodox liturgical prayer. This particular digitization is from [tecleet/wudase-mariam](https://github.com/tecleet/wudase-mariam) (no license stated), reshaped into stanzas by `tools/build_wudase.py`. If you hold rights to that transcription and want it removed or re-credited, please open an issue.
 - **Font:** [Abyssinica SIL](https://software.sil.org/abyssinica/) and Noto Sans Ethiopic, under the [SIL Open Font License 1.1](docs/AbyssinicaSIL-OFL.txt).
 - **Reader fonts:** the selectable faces — Ethiopic Abay Light (abass alamnehe), Bela Bereka (Abel Daniel), and Zemenay (Abel Yeshewalem) — are distributed by [Font.et](https://www.font.et/) under the SIL Open Font License; per-font notices are in [docs/fonts/](docs/fonts/). OFL permits bundling and redistribution with software provided the fonts are not sold on their own. *Note: Zemenay's embedded metadata names an "ETHL" license (t.me/ethelglyphs) while Font.et distributes it as OFL; we follow the distributor's stated terms.*
 
-> **Note on choosing a code license:** a permissive code license (MIT/Apache-2.0) is fine and does not conflict with the content terms, as long as this section keeps the split explicit. Full rights record: [docs/CONTENT_RIGHTS.md](docs/CONTENT_RIGHTS.md).
+> The Apache-2.0 grant covers the **source code only**. Nothing under `app/src/main/assets/content/` inherits it — see [NOTICE](NOTICE) for the per-source terms, and [docs/CONTENT_RIGHTS.md](docs/CONTENT_RIGHTS.md) for the full rights record.

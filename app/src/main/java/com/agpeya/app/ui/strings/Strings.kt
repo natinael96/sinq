@@ -617,6 +617,10 @@ object EnglishStrings : Strings {
             "selectable reading faces come from Font.et under the same licence."
     val aboutPrivacyTitle = "Privacy"
     val aboutPrivacyBody = "No data collected. No internet permission."
+    val aboutLicenceTitle = "Licence"
+    val aboutLicenceBody =
+        "App code under the Apache License 2.0. The bundled prayer text keeps its own " +
+            "terms (CC BY-NC-ND 4.0) and is not covered by that licence."
 
     override val modesTitle = "Reminder modes"
     override val startFromAgpeya = "Start from default"
