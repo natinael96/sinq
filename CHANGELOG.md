@@ -7,6 +7,40 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.9.9] — 2026-08-13
+
+_versionCode 30 · prayer list, sharing, and the day's psalm on Home_
+
+### Added
+- **የጸሎት ዝርዝር — a prayer list.** The people you remember in prayer, each with an
+  optional intention, reached from the Home header. Plain rows, local like
+  everything else, included in backups (older backup files still restore).
+- **Sharing from the ግጻዌ and ስንክሳር readers.** Copy, share as text, or share as a
+  rendered image card carrying the passage with its source and date.
+- **The day's ቅዳሴ on the widget**, one quiet line under the readings.
+- **Choose the streak reminder's time.** A ሰዓት row under the toggle in Settings
+  opens the same clock the prayer-mode editor uses; saving re-arms the alarm
+  immediately. Default unchanged at 21:30.
+- **Two smaller reading sizes** — 13 and 15sp below the old floor of 17. Your
+  saved size is unchanged.
+
+### Changed
+- **Home names the day's psalm.** የዕለቱ መዝሙረ ዳዊት sits beside Today as two equal
+  cards, naming today's portion by the traditional weekday division; Sunday,
+  which has no fixed portion, offers the whole Psalter. The library shortcut
+  row is gone — መዝሙረ ዳዊት, ዘወትር ጸሎት and ውዳሴ ማርያም live on the Library tab. The
+  Today card keeps the count, flame and heatmap; the per-habit dots now live
+  only on the Streak screen it opens.
+
+### Fixed
+- **Prose no longer renders inside the አርኬ.** The mirror of 0.9.8's fix: after
+  an explicit አርኬ line, everything to the end of the entry stayed hymn verse —
+  22 lines across the year, including an entire second commemoration on ጥር ፲.
+  Lines opening with formulas only prose uses (በዚችም ቀን…, ለእግዚአብሔርም ምስጋና…,
+  the month colophon) now return to narrative, and a following ሰላም salutation
+  reopens the hymn. All 366 days verified: no prose inside hymns, no hymn left
+  in prose, and the 11 days without a hymn confirmed hymn-less in the source.
+
 ## [0.9.8] — 2026-08-13
 
 _versionCode 29 · the አርኬ reads as a hymn again_
