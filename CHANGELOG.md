@@ -7,6 +7,24 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.9.7] — 2026-08-13
+
+_versionCode 28 · the nightly nudge actually arrives_
+
+### Fixed
+- **The nightly streak reminder never appeared.** The schedule was never the
+  problem — it is armed on app open, on the toggle, and on boot, and the alarm
+  fired on time. The notification was dropped by the system: `POST_NOTIFICATIONS`
+  is a runtime grant on Android 13+, and the app asked for it in exactly one
+  place, the prayer *mode* editor. Switching the reminder on from Settings armed
+  an alarm that fired into nothing. This is why it looked selective — a prayer
+  alarm rings and shows a full-screen intent without the grant, so only the
+  notification-only reminders (the streak nudge and the ግጻዌ nudge) vanished.
+  Switching either on now asks for the permission, and a banner above the toggles
+  links to the system settings page when notifications are blocked outright —
+  which the prompt alone cannot fix, since Android stops offering it after two
+  denials.
+
 ## [0.9.6] — 2026-08-13
 
 _versionCode 27 · a quieter Home_

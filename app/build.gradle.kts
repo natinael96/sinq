@@ -29,8 +29,8 @@ android {
         //   0.MINOR.PATCH — PATCH for fixes/small tweaks, MINOR for new features.
         //   1.0.0 is reserved for the first public (Play) release.
         //   versionCode increments by 1 on EVERY update, no exceptions.
-        versionCode = 27
-        versionName = "0.9.6" // a quieter Home; prayer progress and its controls removed
+        versionCode = 28
+        versionName = "0.9.7" // the nightly streak nudge actually arrives
     }
 
     signingConfigs {
