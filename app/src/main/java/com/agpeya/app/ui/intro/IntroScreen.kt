@@ -16,8 +16,8 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
-import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.outlined.CloudOff
+import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -61,7 +61,7 @@ private fun introPages(s: Strings): List<IntroPage> = listOf(
 /** The three headline features — offered after the name, replayable from Settings. */
 private fun tutorialPages(s: Strings): List<IntroPage> = listOf(
     IntroPage(icon = Icons.Outlined.NotificationsActive, title = s.introRemindersTitle, body = s.introRemindersBody),
-    IntroPage(icon = Icons.Filled.LocalFireDepartment, title = s.introStreakTitle, body = s.introStreakBody),
+    IntroPage(icon = Icons.Outlined.Route, title = s.introJourneyTitle, body = s.introJourneyBody),
     IntroPage(icon = Icons.AutoMirrored.Outlined.MenuBook, title = s.introPsalterTitle, body = s.introPsalterBody),
 )
 

@@ -133,8 +133,11 @@ fun ReadingScreen(
     val layout by LayoutRepository.layout(context, hourId).collectAsState(initial = HourLayout())
     val highlights by HighlightRepository.highlights(context).collectAsState(initial = emptyMap())
     var showContents by remember { mutableStateOf(false) }
-    // Verse currently chosen for highlighting (shows the colour palette); null = none.
-    var selectedVerseKey by remember { mutableStateOf<String?>(null) }
+    // The live verse selection: [selStart] anchors on the first tap, [selEnd]
+    // follows later taps in the same section, so a run of verses can be
+    // highlighted or shared together. Both null = no bar.
+    var selStart by remember(hourId) { mutableStateOf<String?>(null) }
+    var selEnd by remember(hourId) { mutableStateOf<String?>(null) }
     // Apply the user's per-hour customization (show/hide, reorder, added psalms).
     val sections by produceState(emptyList<Section>(), hour, layout) {
         val h = hour
@@ -319,31 +322,38 @@ fun ReadingScreen(
                 visible = sections.isNotEmpty(),
                 enter = fadeIn(tween(motion.millis(300))),
             ) {
-                val onVerseTap: (String) -> Unit = { selectedVerseKey = it }
+                val onVerseTap: (String) -> Unit = { key ->
+                    val (a, b) = advanceSelection(selStart, key)
+                    selStart = a
+                    selEnd = b
+                }
+                val selectionFor: (Section) -> IntRange = { sec -> selectionRangeFor(sec, selStart, selEnd) }
                 when (readingMode) {
                     ReadingMode.VERTICAL -> VerticalReader(
                         sections, listState, bodyFontSp, innerPadding, bookmarkedIds,
-                        ::toggleBookmark, highlights, onVerseTap,
+                        ::toggleBookmark, highlights, onVerseTap, selectionFor,
                         prevHour?.let { h -> { onSwitchHour(h.id) } },
                         nextHour?.let { h -> { onSwitchHour(h.id) } },
                     )
                     ReadingMode.HORIZONTAL -> PagedReader(
                         sections, pagerState, bodyFontSp, innerPadding, bookmarkedIds,
-                        ::toggleBookmark, highlights, onVerseTap,
+                        ::toggleBookmark, highlights, onVerseTap, selectionFor,
                     )
                 }
             }
             HighlightBar(
-                visible = selectedVerseKey != null,
-                currentColor = selectedVerseKey?.let { highlights[it] },
+                visible = selStart != null,
+                currentColor = selStart?.let { highlights[it] },
                 onPick = { colorKey ->
-                    val key = selectedVerseKey
-                    selectedVerseKey = null
-                    if (key != null) scope.launch { HighlightRepository.setHighlight(context, key, colorKey) }
+                    val keys = selectionKeys(sections, selStart, selEnd)
+                    selStart = null; selEnd = null
+                    if (keys.isNotEmpty()) scope.launch {
+                        keys.forEach { HighlightRepository.setHighlight(context, it, colorKey) }
+                    }
                 },
-                onDismiss = { selectedVerseKey = null },
-                shareText = com.agpeya.app.ui.reading.verseShareText(sections, selectedVerseKey),
-                shareImage = com.agpeya.app.ui.reading.versePayload(sections, selectedVerseKey, hour?.name),
+                onDismiss = { selStart = null; selEnd = null },
+                shareText = verseShareText(sections, selStart, selEnd),
+                shareImage = versePayload(sections, selStart, hour?.name, selEnd),
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
         }
@@ -386,6 +396,7 @@ private fun VerticalReader(
     onToggleBookmark: (Section, Int) -> Unit,
     highlights: Map<String, String>,
     onVerseTap: (String) -> Unit,
+    selectionFor: (Section) -> IntRange,
     onPrevious: (() -> Unit)?,
     onNext: (() -> Unit)?,
 ) {
@@ -405,6 +416,7 @@ private fun VerticalReader(
                 onToggleBookmark = { onToggleBookmark(section, index) },
                 highlights = highlights,
                 onVerseTap = onVerseTap,
+                selectedRange = selectionFor(section),
             )
         }
         item {
@@ -424,6 +436,7 @@ private fun PagedReader(
     onToggleBookmark: (Section, Int) -> Unit,
     highlights: Map<String, String>,
     onVerseTap: (String) -> Unit,
+    selectionFor: (Section) -> IntRange,
 ) {
     Column(
         modifier = Modifier
@@ -457,6 +470,7 @@ private fun PagedReader(
                         onToggleBookmark = { onToggleBookmark(section, page) },
                         highlights = highlights,
                         onVerseTap = onVerseTap,
+                        selectedRange = selectionFor(section),
                     )
                     Spacer(Modifier.height(Spacing.huge))
                 }

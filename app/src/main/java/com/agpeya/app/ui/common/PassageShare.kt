@@ -51,8 +51,8 @@ data class SharePayload(
  * so a whole chapter ellipsizes rather than producing a scroll-length image.
  *
  * Rendered with the bundled Abyssinica face so the Ethiopic is identical on
- * every device, and shared from the app cache via FileProvider like StreakShare
- * — no storage permission, nothing persisted outside the app.
+ * every device, and shared from the app cache via FileProvider — no storage
+ * permission, nothing persisted outside the app.
  */
 object PassageShare {
 

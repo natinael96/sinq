@@ -224,7 +224,7 @@ fun SinqCard(
 
 /**
  * The brand's green card — used for the one thing on a screen that matters most
- * (the prayer for now, the current streak). Rare by design: a page with two of
+ * (the prayer for now, today's candle). Rare by design: a page with two of
  * these has none.
  *
  * [glow] adds the soft gold bloom in the top corner. It is a single clipped

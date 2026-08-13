@@ -45,6 +45,12 @@
             android:exported="false"
             android:foregroundServiceType="systemExempted" />
 
+        <!-- Feeds the ግጻዌ widget's swipeable today/tomorrow stack. -->
+        <service
+            android:name=".widget.GitsaweWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"
+            android:exported="false" />
+
         <receiver
             android:name=".reminders.AlarmReceiver"
             android:exported="false" />
@@ -59,6 +65,14 @@
 
         <receiver
             android:name=".reminders.GitsaweReminderReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".reminders.SpecialHabitReminderReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".reminders.BreathPrayerReceiver"
             android:exported="false" />
 
         <provider

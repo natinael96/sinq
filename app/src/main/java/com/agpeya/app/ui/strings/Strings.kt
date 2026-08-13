@@ -1,6 +1,7 @@
 package com.agpeya.app.ui.strings
 
 import androidx.compose.runtime.staticCompositionLocalOf
+import com.agpeya.app.ui.reading.geezNumeral
 
 /**
  * All app-chrome strings in both languages. Prayer content (hour names, psalm
@@ -11,7 +12,7 @@ interface Strings {
     val tabHome: String
     val tabSearch: String
     val tabBookmarks: String
-    val tabStreak: String
+    val tabJourney: String
     val tabSettings: String
     val tabLibrary: String
 
@@ -45,8 +46,7 @@ interface Strings {
     val closingPrayerAmharic: String
     val closingPrayerSwitchHint: String
 
-    val streaksTitle: String
-    val currentStreakLabel: String
+    val journeyTitle: String
     val todayLabel: String
     val habitsHeader: String
     val habitPrayer: String
@@ -59,9 +59,24 @@ interface Strings {
     val habitNameLabel: String
     val less: String
     val more: String
-    val streakCurrent: String
-    val streakBest: String
-    fun daysUnit(n: Int): String
+
+    // The Journey metric: distinct days with prayer in the current period —
+    // the Ethiopian month, or the running fast. Never a consecutive count.
+    /** "23 days of prayer this month" (handles 0 with its own quiet wording). */
+    fun journeyMonthLine(days: Int): String
+    /** "Day 18 of ዐቢይ ጾም — prayed 16 days". Fast names are content, in Amharic. */
+    fun journeyFastLine(fastName: String, dayOfFast: Int, daysPrayed: Int): String
+    /** Today's candle, described for the hero line and screen readers. */
+    val journeyTodayLit: String
+    val journeyTodayUnlit: String
+    /** Shown after one or more missed days — a welcome, never a loss notice. */
+    val welcomeBack: String
+    /** Per-habit summary row: "12 days this month". */
+    fun daysThisMonth(n: Int): String
+    /** Header over the year heatmap — the main historical view. */
+    val yearJourneyHeader: String
+    /** Legend label for the fasting-season wash on the heatmap. */
+    val fastLegendLabel: String
 
     val nowPrayer: String
     val continueReading: String
@@ -77,18 +92,22 @@ interface Strings {
     val noResults: String
     val recentSearches: String
     val clearAction: String
-    val streakReminderTitle: String
-    val streakReminderBody: String
-    /** Nudge body when a streak is alive: what tonight's log keeps going. */
-    fun streakReminderKeep(days: Int): String
-    val streakChannelName: String
+    // The nightly nudge. Its wording never depends on history — no streak to
+    // keep, nothing to lose; the invitation is the same on day 1 and day 1000.
+    val nightReminderTitle: String
+    val nightReminderBody: String
+    /** Body on a fasting day (a fast period or the ረቡዕ/ዓርብ rule). */
+    val nightReminderFastBody: String
+    /** Body on a feast; the feast name is content and stays in Amharic. */
+    fun nightReminderFeastBody(feast: String): String
+    val nightReminderChannel: String
     val gitsaweReminderTitle: String
     val gitsaweReminderBody: String
     val gitsaweChannelName: String
     val settingsGitsaweReminder: String
     val settingsGitsaweReminderDesc: String
-    val settingsStreakReminder: String
-    val settingsStreakReminderDesc: String
+    val settingsNightReminder: String
+    val settingsNightReminderDesc: String
     val notifDisabledTitle: String
     val notifDisabledBody: String
 
@@ -162,6 +181,9 @@ interface Strings {
     val dismiss: String
     val reminderReached: String
     val itsTime: String
+    /** The alarm headline when the hour is known: "ሰርክ ደርሷል" — the prayer has
+     *  arrived, not merely the clock. Falls back to [itsTime] unnamed. */
+    fun hourArrived(hourName: String): String
     val openShort: String
     val donePrompt: String
     val yesAction: String
@@ -242,8 +264,8 @@ interface Strings {
     val introOfflineBody: String
     val introRemindersTitle: String
     val introRemindersBody: String
-    val introStreakTitle: String
-    val introStreakBody: String
+    val introJourneyTitle: String
+    val introJourneyBody: String
     val introPsalterTitle: String
     val introPsalterBody: String
     val tutorial: String
@@ -325,6 +347,38 @@ interface Strings {
     val prayerNoteLabel: String
     val noPrayerListTitle: String
     val noPrayerListBody: String
+
+    // Scheduled intentions (ምጽዋት / ንስሐ): reminders configured in Settings.
+    // Deliberately not habits — nothing is recorded or streaked.
+    val settingsAlmsReminder: String
+    val settingsAlmsReminderDesc: String
+    val settingsRepentReminder: String
+    val settingsRepentReminderDesc: String
+    val almsReminderTitle: String
+    val almsReminderBody: String
+    val almsChannelName: String
+    val repentReminderTitle: String
+    val repentReminderBody: String
+    val repentChannelName: String
+
+    // የመሃል ጸሎት — the once-a-day nudge to pray, not read, at an unplanned
+    // moment between the hours. The prayer itself is content and never
+    // translated; only this chrome is.
+    val settingsBreathReminder: String
+    val settingsBreathReminderDesc: String
+    val breathReminderTitle: String
+    val breathChannelName: String
+
+    /** The schedule row + editor: how often a special habit is due. */
+    val scheduleLabel: String
+    val scheduleWeekly: String
+    val scheduleEveryOtherDay: String
+    val scheduleMonthly: String
+    /** Summary for a monthly schedule; [day] is an ETHIOPIAN month day (1..30). */
+    fun monthlyOnDay(day: Int): String
+
+    /** Header of the widget's second card: tomorrow's ግጻዌ, for preparing. */
+    val tomorrowLabel: String
 }
 
 object AmharicStrings : Strings {
@@ -332,7 +386,7 @@ object AmharicStrings : Strings {
     override val tabHome = "ቤት"
     override val tabSearch = "ፍለጋ"
     override val tabBookmarks = "ምልክቶች"
-    override val tabStreak = "ጉዞ"
+    override val tabJourney = "ጉዞ"
     override val tabSettings = "ቅንብር"
     override val tabLibrary = "ቤተ መጻሕፍት"
 
@@ -365,8 +419,7 @@ object AmharicStrings : Strings {
     override val closingPrayerAmharic = "አማርኛ"
     override val closingPrayerSwitchHint = "ቋንቋ ለመቀየር ይንኩ"
 
-    override val streaksTitle = "ጉዞ"
-    override val currentStreakLabel = "የአሁኑ ጉዞ"
+    override val journeyTitle = "ጉዞ"
     override val todayLabel = "ዛሬ"
     override val habitsHeader = "ልማዶች"
     override val habitPrayer = "ጸሎት"
@@ -379,9 +432,19 @@ object AmharicStrings : Strings {
     override val habitNameLabel = "የልማዱ ስም"
     override val less = "ያነሰ"
     override val more = "የበዛ"
-    override val streakCurrent = "አሁን"
-    override val streakBest = "ከፍተኛ"
-    override fun daysUnit(n: Int) = "$n ቀናት"
+
+    override fun journeyMonthLine(days: Int) =
+        if (days <= 0) "በዚህ ወር ገና አልጸለዩም"
+        else "በዚህ ወር ${geezNumeral(days)} ቀን ጸልየዋል"
+    override fun journeyFastLine(fastName: String, dayOfFast: Int, daysPrayed: Int) =
+        if (daysPrayed <= 0) "የ$fastName ${geezNumeral(dayOfFast)}ኛ ቀን"
+        else "የ$fastName ${geezNumeral(dayOfFast)}ኛ ቀን — ${geezNumeral(daysPrayed)} ቀን ጸልየዋል"
+    override val journeyTodayLit = "ዛሬ ጸልየዋል"
+    override val journeyTodayUnlit = "የዛሬው ሻማ ይጠብቃል"
+    override val welcomeBack = "ተመልሰዋል — ዛሬ ይጀምሩ"
+    override fun daysThisMonth(n: Int) = "በዚህ ወር $n ቀን"
+    override val yearJourneyHeader = "የዓመቱ ጉዞ"
+    override val fastLegendLabel = "ጾም"
 
     override val nowPrayer = "የአሁኑ ሰዓት ጸሎት"
     override val continueReading = "ቀጥል"
@@ -397,17 +460,18 @@ object AmharicStrings : Strings {
     override val noResults = "ምንም አልተገኘም"
     override val recentSearches = "የቅርብ ጊዜ ፍለጋዎች"
     override val clearAction = "አጽዳ"
-    override val streakReminderTitle = "ዛሬን መዝግብ"
-    override val streakReminderBody = "የዛሬን ጸሎትና ልማድ ሳትሞላ እንዳትተኛ"
-    override fun streakReminderKeep(days: Int) = "የ$days ቀን ጉዞህ እንዳይቋረጥ — የዛሬን መዝግብ"
-    override val streakChannelName = "የሌሊት ማስታወሻ"
+    override val nightReminderTitle = "ሰርክ ደርሷል"
+    override val nightReminderBody = "ዕለቱን በጸሎት ዝጉ"
+    override val nightReminderFastBody = "ጾሙ በጸሎት ይታጀብ"
+    override fun nightReminderFeastBody(feast: String) = "$feast — ዕለቱን በጸሎት ዝጉ"
+    override val nightReminderChannel = "የሌሊት ማስታወሻ"
     override val gitsaweReminderTitle = "የዕለቱ ግጻዌ"
     override val gitsaweReminderBody = "የዛሬን ምንባብ ተመልከት"
     override val gitsaweChannelName = "የዕለቱ ግጻዌ ማስታወሻ"
     override val settingsGitsaweReminder = "የዕለቱ ግጻዌ ማስታወሻ"
     override val settingsGitsaweReminderDesc = "በየቀኑ ጠዋት የዕለቱን ግጻዌ ምንባብ አስታውሰኝ"
-    override val settingsStreakReminder = "የሌሊት ማስታወሻ"
-    override val settingsStreakReminderDesc = "በ21፡30 ዛሬን እንድትሞላ ያስታውስሃል"
+    override val settingsNightReminder = "የሌሊት ማስታወሻ"
+    override val settingsNightReminderDesc = "ዕለቱን በጸሎት እንድትዘጋ በሌሊት ያስታውስሃል"
     override val notifDisabledTitle = "ማሳወቂያዎች ጠፍተዋል"
     override val notifDisabledBody = "ማንቂያዎችህ እንዲደርሱህ የመተግበሪያውን ማሳወቂያዎች ከቅንብሮች አብራ።"
 
@@ -478,6 +542,7 @@ object AmharicStrings : Strings {
     override val dismiss = "አጥፋ"
     override val reminderReached = "የጸሎት ሰዓት ደርሷል"
     override val itsTime = "ጊዜው ደርሷል"
+    override fun hourArrived(hourName: String) = "$hourName ደርሷል"
     override val openShort = "ክፈት"
     override val donePrompt = "ጨርሰዋል?"
     override val yesAction = "አዎ"
@@ -556,8 +621,8 @@ object AmharicStrings : Strings {
     override val introOfflineBody = "ሙሉ በሙሉ ከመስመር ውጭ ይሰራል። ምንም መረጃ አይሰበሰብም።"
     override val introRemindersTitle = "ማስታወሻዎች"
     override val introRemindersBody = "የራስዎን የጸሎት ሰዓታት ይምረጡ፤ በሚፈልጉት ጊዜ ያስታውሱ።"
-    override val introStreakTitle = "ተከታታይነት"
-    override val introStreakBody = "የጸሎትዎንና የልማዶችዎን ተከታታይነት በየቀኑ ይከታተሉ።"
+    override val introJourneyTitle = "ጉዞ"
+    override val introJourneyBody = "የጸሎት ሕይወትዎን ቀን በቀን ይመልከቱ — በቤተ ክርስቲያን ዓመት ውስጥ።"
     override val introPsalterTitle = "መዝሙረ ዳዊት"
     override val introPsalterBody = "ሁሉም 150 መዝሙራት — በየቀኑ ተከፋፍለው፣ ሁልጊዜ ከመስመር ውጭ።"
     override val tutorial = "እንዴት እንደሚሠራ"
@@ -627,6 +692,29 @@ object AmharicStrings : Strings {
     override val prayerNoteLabel = "ማስታወሻ (አማራጭ)"
     override val noPrayerListTitle = "ገና ማንም አልተጨመረም"
     override val noPrayerListBody = "በጸሎት የምታስባቸውን ሰዎች እዚህ ጨምር።"
+
+    override val settingsAlmsReminder = "የምጽዋት ማስታወሻ"
+    override val settingsAlmsReminderDesc = "በመረጥከው ቀን ምጽዋት እንድትሰጥ ያስታውስሃል"
+    override val settingsRepentReminder = "የንስሐ ማስታወሻ"
+    override val settingsRepentReminderDesc = "ንስሐ እንድትገባና ቅዱስ ቁርባን እንድትቀበል ያስታውስሃል"
+    override val almsReminderTitle = "የምጽዋት ቀን"
+    override val almsReminderBody = "ዛሬ ምጽዋት የምትሰጥበት ቀን ነው።"
+    override val almsChannelName = "የምጽዋት ማስታወሻ"
+    override val repentReminderTitle = "ንስሐ"
+    override val repentReminderBody = "ንስሐ መግባትን አስብ፤ ለቅዱስ ቁርባን ተዘጋጅ።"
+    override val repentChannelName = "የንስሐ ማስታወሻ"
+
+    override val settingsBreathReminder = "የመሃል ጸሎት"
+    override val settingsBreathReminderDesc = "በቀን አንዴ፣ በሰዓታት መካከል ባልታሰበ ጊዜ አጭር ጸሎት ያስታውስሃል"
+    override val breathReminderTitle = "ለአፍታ ጸልይ"
+    override val breathChannelName = "የመሃል ጸሎት"
+
+    override val scheduleLabel = "ድግግሞሽ"
+    override val scheduleWeekly = "በሳምንት"
+    override val scheduleEveryOtherDay = "በየሁለት ቀን"
+    override val scheduleMonthly = "በየወሩ"
+    override fun monthlyOnDay(day: Int) = "በየወሩ በ$day ቀን"
+    override val tomorrowLabel = "ነገ"
 }
 
 object EnglishStrings : Strings {
@@ -634,7 +722,7 @@ object EnglishStrings : Strings {
     override val tabHome = "Home"
     override val tabSearch = "Search"
     override val tabBookmarks = "Bookmarks"
-    override val tabStreak = "Streak"
+    override val tabJourney = "Journey"
     override val tabSettings = "Settings"
     override val tabLibrary = "Library"
 
@@ -667,8 +755,7 @@ object EnglishStrings : Strings {
     override val closingPrayerAmharic = "Amharic"
     override val closingPrayerSwitchHint = "Tap to switch language"
 
-    override val streaksTitle = "Streaks"
-    override val currentStreakLabel = "Current streak"
+    override val journeyTitle = "Journey"
     override val todayLabel = "Today"
     override val habitsHeader = "Habits"
     override val habitPrayer = "Prayer"
@@ -681,9 +768,23 @@ object EnglishStrings : Strings {
     override val habitNameLabel = "Habit name"
     override val less = "Less"
     override val more = "More"
-    override val streakCurrent = "now"
-    override val streakBest = "best"
-    override fun daysUnit(n: Int) = "$n days"
+
+    override fun journeyMonthLine(days: Int) = when (days) {
+        0 -> "No days of prayer yet this month"
+        1 -> "1 day of prayer this month"
+        else -> "$days days of prayer this month"
+    }
+    override fun journeyFastLine(fastName: String, dayOfFast: Int, daysPrayed: Int) = when (daysPrayed) {
+        0 -> "Day $dayOfFast of $fastName"
+        1 -> "Day $dayOfFast of $fastName — prayed 1 day"
+        else -> "Day $dayOfFast of $fastName — prayed $daysPrayed days"
+    }
+    override val journeyTodayLit = "Prayed today"
+    override val journeyTodayUnlit = "Today's candle is waiting"
+    override val welcomeBack = "You're back — begin today"
+    override fun daysThisMonth(n: Int) = if (n == 1) "1 day this month" else "$n days this month"
+    override val yearJourneyHeader = "The year's journey"
+    override val fastLegendLabel = "Fast"
 
     override val nowPrayer = "Prayer for now"
     override val continueReading = "Continue"
@@ -699,17 +800,18 @@ object EnglishStrings : Strings {
     override val noResults = "Nothing found"
     override val recentSearches = "Recent searches"
     override val clearAction = "Clear"
-    override val streakReminderTitle = "Log today"
-    override val streakReminderBody = "Mark today's prayers and habits before bed"
-    override fun streakReminderKeep(days: Int) = "Keep your $days-day streak going — log today"
-    override val streakChannelName = "Nightly reminder"
+    override val nightReminderTitle = "The day is ending"
+    override val nightReminderBody = "Close it with prayer"
+    override val nightReminderFastBody = "Let the fast be kept with prayer"
+    override fun nightReminderFeastBody(feast: String) = "$feast — close the day with prayer"
+    override val nightReminderChannel = "Nightly reminder"
     override val gitsaweReminderTitle = "Today's Gitsawe"
     override val gitsaweReminderBody = "See today's reading"
     override val gitsaweChannelName = "Daily Gitsawe reminder"
     override val settingsGitsaweReminder = "Daily Gitsawe reminder"
     override val settingsGitsaweReminderDesc = "Each morning, remind me of today's Gitsawe reading"
-    override val settingsStreakReminder = "Nightly streak reminder"
-    override val settingsStreakReminderDesc = "A 9:30 PM nudge to fill in today"
+    override val settingsNightReminder = "Nightly reminder"
+    override val settingsNightReminderDesc = "An evening nudge to close the day with prayer"
     override val notifDisabledTitle = "Notifications are off"
     override val notifDisabledBody = "Turn on notifications in settings so your reminders can reach you."
 
@@ -798,6 +900,7 @@ object EnglishStrings : Strings {
     override val dismiss = "Dismiss"
     override val reminderReached = "It is time to pray"
     override val itsTime = "It's time"
+    override fun hourArrived(hourName: String) = "Time for $hourName"
     override val openShort = "Open"
     override val donePrompt = "Done?"
     override val yesAction = "Yes"
@@ -876,8 +979,8 @@ object EnglishStrings : Strings {
     override val introOfflineBody = "Fully offline. No data is collected, ever."
     override val introRemindersTitle = "Reminders"
     override val introRemindersBody = "Choose your own times and be reminded when you want."
-    override val introStreakTitle = "Streaks"
-    override val introStreakBody = "Track your prayer and habit streak day by day."
+    override val introJourneyTitle = "Journey"
+    override val introJourneyBody = "See your life of prayer take shape, day by day, within the Church's year."
     override val introPsalterTitle = "The Psalter"
     override val introPsalterBody = "All 150 psalms — divided by day and always offline."
     override val tutorial = "How it works"
@@ -931,7 +1034,7 @@ object EnglishStrings : Strings {
     override val backupFailedBody =
         "The backup wasn't saved. Everything in the app is untouched. Try again, choosing a different folder or file name."
     override val restoreFailedBody =
-        "That file couldn't be read. Your streak, bookmarks and highlights are unchanged. Check it's a Sinq backup (.json) and try again."
+        "That file couldn't be read. Your prayer history, bookmarks and highlights are unchanged. Check it's a Sinq backup (.json) and try again."
     override val contentMissingTitle = "This passage isn't here"
     override val contentMissingBody =
         "The text isn't part of this edition. Everything else still works as usual."
@@ -946,6 +1049,29 @@ object EnglishStrings : Strings {
     override val prayerNoteLabel = "Note (optional)"
     override val noPrayerListTitle = "No one here yet"
     override val noPrayerListBody = "Add the people you want to remember in prayer."
+
+    override val settingsAlmsReminder = "Almsgiving reminder"
+    override val settingsAlmsReminderDesc = "Remind me to give alms on the days I choose"
+    override val settingsRepentReminder = "Repentance reminder"
+    override val settingsRepentReminderDesc = "Remind me to repent and prepare for Holy Communion"
+    override val almsReminderTitle = "A day to give"
+    override val almsReminderBody = "Today is your day to give alms."
+    override val almsChannelName = "Almsgiving reminder"
+    override val repentReminderTitle = "Repentance"
+    override val repentReminderBody = "Remember repentance — and prepare for Holy Communion."
+    override val repentChannelName = "Repentance reminder"
+
+    override val settingsBreathReminder = "Prayer between the hours"
+    override val settingsBreathReminderDesc = "Once a day, at an unplanned moment between prayers, one short breath prayer"
+    override val breathReminderTitle = "A moment to pray"
+    override val breathChannelName = "Prayer between the hours"
+
+    override val scheduleLabel = "How often"
+    override val scheduleWeekly = "Weekly"
+    override val scheduleEveryOtherDay = "Every other day"
+    override val scheduleMonthly = "Monthly"
+    override fun monthlyOnDay(day: Int) = "Monthly, on day $day (Ethiopian month)"
+    override val tomorrowLabel = "Tomorrow"
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { AmharicStrings }

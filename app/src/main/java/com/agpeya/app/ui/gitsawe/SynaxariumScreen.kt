@@ -41,6 +41,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -98,6 +99,13 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
     val fontStep by SettingsRepository.fontStep(context).collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
 
+    // Live paragraph selection across the day's entries: a tap anchors, the
+    // next tap moves the end. Keys are entryIndex*1000 + paragraphIndex, so a
+    // run can span entries while staying in reading order. -1 = none.
+    var selA by rememberSaveable(epochDay) { androidx.compose.runtime.mutableIntStateOf(-1) }
+    var selB by rememberSaveable(epochDay) { androidx.compose.runtime.mutableIntStateOf(-1) }
+    val selRange = com.agpeya.app.ui.reading.flatSelectionRange(selA, selB)
+
     val bookmarks by UserDataRepository.bookmarks(context).collectAsState(initial = emptyList())
     val bookmarkedIds = remember(bookmarks) {
         bookmarks.filter { it.hourId == "sinksar_verse" }.mapTo(HashSet()) { it.sectionId }
@@ -131,6 +139,7 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
         },
     ) { innerPadding ->
         val list = entries
+        androidx.compose.foundation.layout.Box(Modifier.fillMaxSize()) {
         when {
             list == null -> LoadingPanel(Modifier.padding(innerPadding))
 
@@ -197,14 +206,20 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
                             // carries its own list numbers — those win (and resync
                             // the counter) so meaningful numbering isn't rewritten.
                             var n = 0
-                            parseSynaxarium(entry.text).forEach { para ->
+                            parseSynaxarium(entry.text).forEachIndexed { p, para ->
+                                val flatKey = i * 1000 + p
+                                val tap: () -> Unit = {
+                                    val (a, bSel) = com.agpeya.app.ui.reading.advanceFlatSelection(selA, flatKey)
+                                    selA = a
+                                    selB = bSel
+                                }
                                 when (para.kind) {
                                     SynaxariumParaKind.NARRATIVE -> {
                                         n = para.sourceNumber ?: (n + 1)
-                                        NarrativePara(n, para.text, bodyFontSp)
+                                        NarrativePara(n, para.text, bodyFontSp, selected = flatKey in selRange, onTap = tap)
                                     }
                                     SynaxariumParaKind.ARKE_LABEL -> ArkeLabel(para.text)
-                                    SynaxariumParaKind.ARKE_VERSE -> ArkeVerse(para.text, bodyFontSp)
+                                    SynaxariumParaKind.ARKE_VERSE -> ArkeVerse(para.text, bodyFontSp, selected = flatKey in selRange, onTap = tap)
                                 }
                             }
                         }
@@ -213,6 +228,30 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
                 item { ClosingPrayer(bodyFontSp) }
                 item { Spacer(Modifier.height(48.dp)) }
             }
+        }
+        // The selected run, ready to copy or leave as text or a PNG card.
+        val selBody = if (selRange.isEmpty()) null else list.orEmpty()
+            .flatMapIndexed { i, entry ->
+                if (isScriptureEntry(entry.title)) emptyList()
+                else parseSynaxarium(entry.text).mapIndexedNotNull { p, para ->
+                    para.text.takeIf { (i * 1000 + p) in selRange }
+                }
+            }
+            .joinToString("\n\n")
+            .ifBlank { null }
+        com.agpeya.app.ui.reading.SelectionShareBar(
+            visible = selA >= 0,
+            onDismiss = { selA = -1; selB = -1 },
+            shareText = selBody?.let { "${s.synaxariumTitle} — ${com.agpeya.app.ui.common.formatEthiopian(date, s)}\n\n$it" },
+            shareImage = selBody?.let {
+                com.agpeya.app.ui.common.SharePayload(
+                    body = it,
+                    kicker = s.synaxariumTitle,
+                    dateLabel = com.agpeya.app.ui.common.formatEthiopian(date, s),
+                )
+            },
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
         }
     }
 }
@@ -311,7 +350,13 @@ private fun EntryTitle(title: String) {
  *  spanning the full width so the text block stays centered on the page.
  *  Selectable — nothing here competes with a long-press. */
 @Composable
-private fun NarrativePara(number: Int, text: String, fontSp: Int) {
+private fun NarrativePara(
+    number: Int,
+    text: String,
+    fontSp: Int,
+    selected: Boolean = false,
+    onTap: (() -> Unit)? = null,
+) {
     androidx.compose.foundation.text.selection.SelectionContainer {
         Text(
             text = buildAnnotatedString {
@@ -327,10 +372,25 @@ private fun NarrativePara(number: Int, text: String, fontSp: Int) {
             style = readingBodyStyle(fontSp),
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Justify,
-            modifier = Modifier.fillMaxWidth().padding(bottom = 18.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .paragraphSelection(selected, onTap)
+                .padding(bottom = 18.dp),
         )
     }
 }
+
+/** Tap-to-select support shared by the paragraph kinds: the run tint and the
+ *  anchor/extend tap, layered under the padding so the tint hugs the text. */
+private fun Modifier.paragraphSelection(selected: Boolean, onTap: (() -> Unit)?): Modifier =
+    composed {
+        val tinted = if (selected)
+            this
+                .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.22f))
+        else this
+        if (onTap != null) tinted.clickable(onClick = onTap) else tinted
+    }
 
 /** The centered "አርኬ" heading above the hymn. */
 @Composable
@@ -347,14 +407,22 @@ private fun ArkeLabel(text: String) {
 
 /** An arke verse — italic, centered, red, and selectable like the prose. */
 @Composable
-private fun ArkeVerse(text: String, fontSp: Int) {
+private fun ArkeVerse(
+    text: String,
+    fontSp: Int,
+    selected: Boolean = false,
+    onTap: (() -> Unit)? = null,
+) {
     androidx.compose.foundation.text.selection.SelectionContainer {
         Text(
             text = text,
             style = readingBodyStyle(fontSp, ArkeLineHeight).copy(fontStyle = FontStyle.Italic),
             color = ArkeRed,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 2.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .paragraphSelection(selected, onTap)
+                .padding(horizontal = 6.dp, vertical = 2.dp),
         )
     }
 }

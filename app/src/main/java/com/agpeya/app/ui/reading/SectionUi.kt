@@ -90,6 +90,7 @@ internal fun SectionView(
     highlights: Map<String, String>,
     onVerseTap: (String) -> Unit,
     citedRange: IntRange = IntRange.EMPTY,
+    selectedRange: IntRange = IntRange.EMPTY,
 ) {
     val s = LocalStrings.current
     val haptics = LocalHapticFeedback.current
@@ -155,6 +156,7 @@ internal fun SectionView(
             highlights = highlights,
             onVerseTap = onVerseTap,
             citedRange = citedRange,
+            selectedRange = selectedRange,
         )
     }
 }
@@ -166,6 +168,9 @@ internal fun VerseText(
     highlights: Map<String, String>,
     onVerseTap: (String) -> Unit,
     citedRange: IntRange = IntRange.EMPTY,
+    /** The user's live verse selection in THIS section (tap start, tap end);
+     *  tinted stronger than a saved highlight so the pending run is unmissable. */
+    selectedRange: IntRange = IntRange.EMPTY,
 ) {
     val markerColor = MaterialTheme.colorScheme.secondary
     val style = readingBodyStyle(bodyFontSp)
@@ -185,6 +190,9 @@ internal fun VerseText(
         val verseKey = HighlightRepository.verseKey(section.id, verseNumber)
         val own = sinq.highlight(highlights[verseKey])
         val bg = when {
+            // The live selection wins over a saved highlight: what the share
+            // will carry has to be readable at a glance while picking.
+            verseNumber in selectedRange -> markerColor.copy(alpha = 0.28f)
             own != Color.Transparent -> own
             insideCitation -> Color.Transparent          // the block behind it carries the tint
             else -> Color.Transparent
@@ -402,14 +410,147 @@ private fun highlightSwatch(key: String?, tint: Color): Color =
  * The text behind a verse key ("<sectionId>:<n>"), formatted for sharing:
  * the section title, then the verse with its Ge'ez numeral.
  */
-internal fun verseShareText(sections: List<Section>, verseKey: String?): String? {
-    if (verseKey == null) return null
-    val sectionId = verseKey.substringBeforeLast(':')
-    val number = verseKey.substringAfterLast(':').toIntOrNull() ?: return null
-    val section = sections.firstOrNull { it.id == sectionId } ?: return null
-    val verse = section.verses.getOrNull(number - section.firstVerse) ?: return null
-    return "${section.title}\n${geezNumeral(number)}  $verse"
+/**
+ * The share bar for readers whose text has no highlight layer (ስንክሳር, ውዳሴ,
+ * the NT reader): the same slide-up surface as [HighlightBar], carrying only
+ * dismiss / copy / share / share-as-image for the current selection.
+ */
+@Composable
+internal fun SelectionShareBar(
+    visible: Boolean,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    shareText: String? = null,
+    shareImage: com.agpeya.app.ui.common.SharePayload? = null,
+) {
+    val motion = LocalMotion.current
+    AnimatedVisibility(
+        visible = visible,
+        modifier = modifier,
+        enter = slideInVertically(motion.spec(Motion.standard)) { it } + fadeIn(motion.spec(Motion.fast)),
+        exit = slideOutVertically(motion.spec(Motion.fast)) { it } + fadeOut(motion.spec(Motion.fast)),
+    ) {
+        val s = LocalStrings.current
+        Surface(
+            shadowElevation = 8.dp,
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = Spacing.xl, vertical = Spacing.sm),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                IconButton(onClick = onDismiss) {
+                    Icon(
+                        Icons.Outlined.Close,
+                        contentDescription = s.cancel,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(IconSize.medium),
+                    )
+                }
+                Spacer(Modifier.weight(1f))
+                val ctx = androidx.compose.ui.platform.LocalContext.current
+                if (shareText != null) {
+                    IconButton(onClick = { com.agpeya.app.ui.common.Sharing.copy(ctx, shareText, s) }) {
+                        Icon(
+                            Icons.Outlined.ContentCopy,
+                            contentDescription = s.copyAction,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(IconSize.medium),
+                        )
+                    }
+                    IconButton(onClick = { com.agpeya.app.ui.common.Sharing.share(ctx, shareText) }) {
+                        Icon(
+                            Icons.Outlined.Share,
+                            contentDescription = s.shareAction,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(IconSize.medium),
+                        )
+                    }
+                }
+                if (shareImage != null) {
+                    val scope = androidx.compose.runtime.rememberCoroutineScope()
+                    IconButton(onClick = {
+                        scope.launch { com.agpeya.app.ui.common.PassageShare.share(ctx, shareImage) }
+                    }) {
+                        Icon(
+                            Icons.Outlined.Image,
+                            contentDescription = s.shareAsImage,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(IconSize.medium),
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
+
+/** The int-pair selection used by paragraph/verse readers without section ids:
+ *  -1 anchors nothing; a tap anchors, later taps move the end. Order-free. */
+internal fun advanceFlatSelection(anchor: Int, tapped: Int): Pair<Int, Int> =
+    if (anchor < 0) tapped to -1 else anchor to tapped
+
+internal fun flatSelectionRange(anchor: Int, end: Int): IntRange =
+    if (anchor < 0) IntRange.EMPTY
+    else minOf(anchor, if (end < 0) anchor else end)..maxOf(anchor, if (end < 0) anchor else end)
+
+internal fun verseShareText(
+    sections: List<Section>,
+    verseKey: String?,
+    endKey: String? = null,
+): String? {
+    val (section, range) = resolveSelection(sections, verseKey, endKey) ?: return null
+    return "${section.title}\n${versesBody(section, range)}"
+}
+
+/** The verse-key pair after a tap: same section extends the run to the tapped
+ *  verse ("moving the cursor"); anywhere else starts over at the tap. */
+internal fun advanceSelection(start: String?, tapped: String): Pair<String, String?> =
+    if (start != null && start.substringBeforeLast(':') == tapped.substringBeforeLast(':'))
+        start to tapped
+    else tapped to null
+
+/** The selected verse numbers within [section], or empty when the selection
+ *  lives elsewhere. Order-free: an end tapped above the anchor still selects. */
+internal fun selectionRangeFor(section: Section, startKey: String?, endKey: String?): IntRange {
+    if (startKey == null || startKey.substringBeforeLast(':') != section.id) return IntRange.EMPTY
+    val a = startKey.substringAfterLast(':').toIntOrNull() ?: return IntRange.EMPTY
+    val b = endKey?.takeIf { it.substringBeforeLast(':') == section.id }
+        ?.substringAfterLast(':')?.toIntOrNull() ?: a
+    return minOf(a, b)..maxOf(a, b)
+}
+
+/** Every verse key in the selection, for applying a highlight to the run. */
+internal fun selectionKeys(sections: List<Section>, startKey: String?, endKey: String?): List<String> {
+    val (section, range) = resolveSelection(sections, startKey, endKey) ?: return emptyList()
+    return range.mapNotNull { n ->
+        if (section.verses.getOrNull(n - section.firstVerse) != null)
+            HighlightRepository.verseKey(section.id, n)
+        else null
+    }
+}
+
+private fun resolveSelection(
+    sections: List<Section>,
+    startKey: String?,
+    endKey: String?,
+): Pair<Section, IntRange>? {
+    if (startKey == null) return null
+    val section = sections.firstOrNull { it.id == startKey.substringBeforeLast(':') } ?: return null
+    val range = selectionRangeFor(section, startKey, endKey)
+    if (range.isEmpty()) return null
+    return section to range
+}
+
+/** The selected verses, each keeping its Ge'ez numeral, one per line. */
+private fun versesBody(section: Section, range: IntRange): String =
+    range.mapNotNull { n ->
+        section.verses.getOrNull(n - section.firstVerse)?.let { "${geezNumeral(n)}  $it" }
+    }.joinToString("\n")
 
 /**
  * The same verse as a [com.agpeya.app.ui.common.SharePayload] for the PNG card:
@@ -420,14 +561,11 @@ internal fun versePayload(
     sections: List<Section>,
     verseKey: String?,
     kicker: String?,
+    endKey: String? = null,
 ): com.agpeya.app.ui.common.SharePayload? {
-    if (verseKey == null) return null
-    val sectionId = verseKey.substringBeforeLast(':')
-    val number = verseKey.substringAfterLast(':').toIntOrNull() ?: return null
-    val section = sections.firstOrNull { it.id == sectionId } ?: return null
-    val verse = section.verses.getOrNull(number - section.firstVerse) ?: return null
+    val (section, range) = resolveSelection(sections, verseKey, endKey) ?: return null
     return com.agpeya.app.ui.common.SharePayload(
-        body = "${geezNumeral(number)}  $verse",
+        body = versesBody(section, range),
         kicker = kicker,
         title = section.title,
     )

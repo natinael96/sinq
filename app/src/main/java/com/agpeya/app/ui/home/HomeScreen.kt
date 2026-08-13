@@ -27,7 +27,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
-import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Search
@@ -56,10 +55,12 @@ import com.agpeya.app.data.DayReadings
 import com.agpeya.app.data.GitsaweRepository
 import com.agpeya.app.data.HabitsRepository
 import com.agpeya.app.data.HoursRepository
+import com.agpeya.app.data.PrayerJourney
 import com.agpeya.app.model.HabitsState
 import com.agpeya.app.model.Hour
 import com.agpeya.app.model.HoursConfig
 import com.agpeya.app.ui.common.AgpeyaBottomBar
+import com.agpeya.app.ui.common.Candle
 import com.agpeya.app.ui.common.CollapsibleHeader
 import com.agpeya.app.ui.common.HeroCard
 import com.agpeya.app.ui.common.SectionHeader
@@ -67,6 +68,7 @@ import com.agpeya.app.ui.common.SinqCard
 import com.agpeya.app.ui.common.SinqDivider
 import com.agpeya.app.ui.common.Tab
 import com.agpeya.app.ui.habits.HabitHeatmap
+import com.agpeya.app.ui.habits.journeyLine
 import com.agpeya.app.ui.common.liturgicalSeasonLabel
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.IconSize
@@ -113,7 +115,7 @@ fun HomeScreen(
     val habitState by HabitsRepository.state(context).collectAsState(initial = HabitsState())
     val today = remember { LocalDate.now() }
     // Prayer shows as one aggregate dot on Home (lit when any hour was prayed);
-    // the per-hour breakdown lives on the Streak screen.
+    // the per-hour breakdown lives on the Journey screen.
     val doneToday = habitState.records[today.toString()] ?: emptySet()
     val prayedAnyHour = doneToday.any { it.startsWith("hour_") }
     val habitIds = remember(habitState, prayedAnyHour) {
@@ -184,7 +186,7 @@ fun HomeScreen(
                         today = today,
                         // Real trackables: visible hours + habits (aggregate dot excluded).
                         maxPossible = hours.size + (habitIds.size - 1),
-                        onClick = { onSelectTab(Tab.STREAK) },
+                        onClick = { onSelectTab(Tab.JOURNEY) },
                         modifier = Modifier.weight(1f).fillMaxHeight(),
                     )
                     DailyPsalmCard(
@@ -394,11 +396,11 @@ private fun GitsaweCard(readings: DayReadings?, onClick: () -> Unit) {
 }
 
 /**
- * Today's progress at half width: the count, the streak, and the recent history.
- * A card now, because it shares a row with [DailyPsalmCard] and two shapes of
- * different rank would read as a mistake. The per-trackable dots moved out with
- * the shrink — four labelled dots in half a column were noise, and the full
- * breakdown is one tap away on the Streak screen this card opens.
+ * Today's progress at half width: the count, today's candle, and the recent
+ * history. A card now, because it shares a row with [DailyPsalmCard] and two
+ * shapes of different rank would read as a mistake. The metric line is the same
+ * [journeyLine] the Journey screen leads with — one [PrayerJourney] source of
+ * truth, so Home and Journey can never disagree.
  */
 @Composable
 private fun TodaySection(
@@ -413,7 +415,7 @@ private fun TodaySection(
 ) {
     val s = LocalStrings.current
     val doneCount = habitIds.count { it in doneToday }
-    val overall = HabitsRepository.overallCurrentStreak(records, today)
+    val summary = remember(records, today) { PrayerJourney.summarize(records, today) }
     SinqCard(
         onClick = onClick,
         modifier = modifier,
@@ -432,19 +434,20 @@ private fun TodaySection(
                 color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(Modifier.width(Spacing.md))
-            Icon(
-                Icons.Filled.LocalFireDepartment,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.size(IconSize.small),
-            )
-            Spacer(Modifier.width(Spacing.xxs))
-            Text(
-                s.daysUnit(overall),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.secondary,
+            Candle(
+                lit = summary.prayedToday,
+                contentDescription = if (summary.prayedToday) s.journeyTodayLit else s.journeyTodayUnlit,
+                bodyColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                flameColor = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.size(width = 13.dp, height = 22.dp),
             )
         }
+        Spacer(Modifier.height(Spacing.xs))
+        Text(
+            text = journeyLine(summary, s),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.secondary,
+        )
         Spacer(Modifier.weight(1f))
         Spacer(Modifier.height(Spacing.md))
         HabitHeatmap(

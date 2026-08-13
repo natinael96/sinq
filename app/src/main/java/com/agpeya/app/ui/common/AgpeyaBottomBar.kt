@@ -20,12 +20,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material.icons.outlined.MenuBook
+import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -47,7 +47,9 @@ import com.agpeya.app.ui.theme.Spacing
 
 enum class Tab(val route: String, val icon: ImageVector, val selectedIcon: ImageVector) {
     HOME("home", Icons.Outlined.Home, Icons.Filled.Home),
-    STREAK("streak", Icons.Outlined.LocalFireDepartment, Icons.Filled.LocalFireDepartment),
+    // A path, not a flame: the tab is about where you have walked, not what
+    // you might lose. (Route "journey" replaced "streak" with the rename.)
+    JOURNEY("journey", Icons.Outlined.Route, Icons.Filled.Route),
     LIBRARY("library", Icons.Outlined.MenuBook, Icons.Filled.MenuBook),
     SETTINGS("settings", Icons.Outlined.Settings, Icons.Filled.Settings),
 }
@@ -67,7 +69,7 @@ fun AgpeyaBottomBar(current: Tab, onSelect: (Tab) -> Unit) {
     val label: (Tab) -> String = {
         when (it) {
             Tab.HOME -> s.tabHome
-            Tab.STREAK -> s.tabStreak
+            Tab.JOURNEY -> s.tabJourney
             Tab.LIBRARY -> s.tabLibrary
             Tab.SETTINGS -> s.tabSettings
         }

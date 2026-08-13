@@ -139,7 +139,10 @@ fun PsalterScreen(
 
     var showContents by remember { mutableStateOf(false) }
     // Verse currently chosen for highlighting (shows the colour palette); null = none.
-    var selectedVerseKey by remember { mutableStateOf<String?>(null) }
+    // Live verse selection: first tap anchors, later taps in the same psalm
+    // extend the run (see ReadingScreen — the same two-key model).
+    var selStart by remember { mutableStateOf<String?>(null) }
+    var selEnd by remember { mutableStateOf<String?>(null) }
     val listState = rememberLazyListState()
     val pagerState = rememberPagerState(pageCount = { shown.size })
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -234,7 +237,11 @@ fun PsalterScreen(
         },
     ) { innerPadding ->
         Box(Modifier.fillMaxSize()) {
-            val onVerseTap: (String) -> Unit = { selectedVerseKey = it }
+            val onVerseTap: (String) -> Unit = { key ->
+                val (a, b) = com.agpeya.app.ui.reading.advanceSelection(selStart, key)
+                selStart = a
+                selEnd = b
+            }
             if (daily && range == null) {
                 // Sunday's division isn't defined yet — say so, and offer the
                 // way out (the whole Psalter) instead of a dead end.
@@ -272,6 +279,7 @@ fun PsalterScreen(
                                 highlights = highlights,
                                 onVerseTap = onVerseTap,
                                 citedRange = if (section.number == citedPsalmNumber) citedRange else IntRange.EMPTY,
+                                selectedRange = com.agpeya.app.ui.reading.selectionRangeFor(section, selStart, selEnd),
                             )
                         }
                         item { Spacer(Modifier.height(Spacing.huge)) }
@@ -301,6 +309,7 @@ fun PsalterScreen(
                                         highlights = highlights,
                                         onVerseTap = onVerseTap,
                                         citedRange = if (section.number == citedPsalmNumber) citedRange else IntRange.EMPTY,
+                                        selectedRange = com.agpeya.app.ui.reading.selectionRangeFor(section, selStart, selEnd),
                                     )
                                     Spacer(Modifier.height(Spacing.huge))
                                 }
@@ -316,16 +325,18 @@ fun PsalterScreen(
                 }
             }
             HighlightBar(
-                visible = selectedVerseKey != null,
-                currentColor = selectedVerseKey?.let { highlights[it] },
+                visible = selStart != null,
+                currentColor = selStart?.let { highlights[it] },
                 onPick = { colorKey ->
-                    val key = selectedVerseKey
-                    selectedVerseKey = null
-                    if (key != null) scope.launch { HighlightRepository.setHighlight(context, key, colorKey) }
+                    val keys = com.agpeya.app.ui.reading.selectionKeys(shown, selStart, selEnd)
+                    selStart = null; selEnd = null
+                    if (keys.isNotEmpty()) scope.launch {
+                        keys.forEach { HighlightRepository.setHighlight(context, it, colorKey) }
+                    }
                 },
-                onDismiss = { selectedVerseKey = null },
-                shareText = com.agpeya.app.ui.reading.verseShareText(shown, selectedVerseKey),
-                shareImage = com.agpeya.app.ui.reading.versePayload(shown, selectedVerseKey, s.psalterTitle),
+                onDismiss = { selStart = null; selEnd = null },
+                shareText = com.agpeya.app.ui.reading.verseShareText(shown, selStart, selEnd),
+                shareImage = com.agpeya.app.ui.reading.versePayload(shown, selStart, s.psalterTitle, selEnd),
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
         }

@@ -213,7 +213,8 @@ class AlarmService : Service() {
             getSystemService(NotificationManager::class.java).canUseFullScreenIntent()
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(s.itsTime)
+            // "ሰርክ ደርሷል", not "ጊዜው ደርሷል": the hour itself is the summons.
+            .setContentTitle(if (hourName.isNotBlank()) s.hourArrived(hourName) else s.itsTime)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setOngoing(true)

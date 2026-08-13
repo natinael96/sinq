@@ -6,31 +6,23 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.view.View
+import android.net.Uri
 import android.widget.RemoteViews
 import com.agpeya.app.MainActivity
 import com.agpeya.app.R
-import com.agpeya.app.data.GitsaweRepository
-import com.agpeya.app.data.SettingsRepository
-import com.agpeya.app.model.GitsaweReading
-import com.agpeya.app.model.GitsaweService
-import com.agpeya.app.model.VerseRef
 import com.agpeya.app.reminders.GitsaweReminderScheduler
-import com.agpeya.app.stringsFor
-import com.agpeya.app.ui.common.formatEthiopian
-import com.agpeya.app.ui.reading.geezNumeral
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
-import java.time.LocalDate
 
 /**
- * የዕለቱ ግጻዌ — a home-screen widget showing today's ምስባክ and ወንጌል at a glance.
- * Tapping it opens the ግጻዌ screen.
+ * የዕለቱ ግጻዌ — a home-screen widget showing today's ምስባክ and ወንጌል at a glance,
+ * with tomorrow's one swipe away (to prepare — only tomorrow, on purpose).
+ * Tapping either card opens the ግጻዌ screen.
  *
- * Content is read off the main thread in [onUpdate]'s worker and pushed as plain
- * [RemoteViews]; the widget renders in the launcher's process, so it uses system
- * text views (no Compose, no bundled fonts). It refreshes when the date rolls
- * over — see the manifest intent filter — rather than on a polling interval.
+ * The stack's cards come from [GitsaweWidgetService]'s factory, which reads
+ * content on a binder thread; the provider itself only wires the adapter and
+ * the click template. The widget renders in the launcher's process, so it uses
+ * system text views (no Compose, no bundled fonts). It refreshes when the date
+ * rolls over — see the manifest intent filter — rather than on a polling
+ * interval.
  */
 class GitsaweWidgetProvider : AppWidgetProvider() {
 
@@ -50,112 +42,37 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
 
     private fun refresh(context: Context, manager: AppWidgetManager, ids: IntArray) {
         if (ids.isEmpty()) return
-        val app = context.applicationContext
-        val pending = goAsync()
-        Thread {
-            try {
-                val views = runCatching { buildViews(app) }.getOrElse { return@Thread }
-                ids.forEach { manager.updateAppWidget(it, views) }
-            } finally {
-                pending.finish()
+        ids.forEach { id ->
+            val views = RemoteViews(context.packageName, R.layout.widget_gitsawe)
+            // The widget id in the data URI keeps each widget's adapter intent
+            // distinct — extras alone don't distinguish cached intents.
+            val adapter = Intent(context, GitsaweWidgetService::class.java).apply {
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
+                data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
             }
-        }.start()
-    }
-
-    private fun buildViews(context: Context): RemoteViews = runBlocking {
-        val s = stringsFor(SettingsRepository.language(context).first())
-        val today = LocalDate.now()
-        val readings = GitsaweRepository.readingsFor(context, today)
-
-        val views = RemoteViews(context.packageName, R.layout.widget_gitsawe)
-        // One header line: "ግጻዌ · ነሐሴ ፬" — two separate views wasted a row.
-        views.setTextViewText(R.id.widget_date, "${s.gitsaweTitle}  ·  ${formatEthiopian(today, s)}")
-
-        // Prefer the ቅዳሴ (liturgy) service, falling back to ነግህ (matins).
-        val entry = readings.daily
-        val service = entry?.kidassie ?: entry?.negh
-        val title = entry?.title?.takeIf { it.isNotBlank() }
-            ?: readings.feasts.firstOrNull()?.amharicName
-            ?: s.gitsaweTitle
-        views.setTextViewText(R.id.widget_title, title)
-
-        val rows = service?.let { pickRows(it) }.orEmpty()
-        if (rows.isEmpty()) {
-            views.setViewVisibility(R.id.widget_row_1, View.GONE)
-            views.setViewVisibility(R.id.widget_row_2, View.GONE)
-            views.setViewVisibility(R.id.widget_rule, View.GONE)
-            views.setViewVisibility(R.id.widget_kidase, View.GONE)
-            views.setViewVisibility(R.id.widget_empty, View.VISIBLE)
-            views.setTextViewText(R.id.widget_empty, s.noGitsaweToday)
-        } else {
-            views.setViewVisibility(R.id.widget_empty, View.GONE)
-            views.setViewVisibility(R.id.widget_rule, View.VISIBLE)
-            bindRow(views, rows.getOrNull(0), R.id.widget_row_1, R.id.widget_role_1, R.id.widget_ref_1)
-            bindRow(views, rows.getOrNull(1), R.id.widget_row_2, R.id.widget_role_2, R.id.widget_ref_2)
-            // The day's ቅዳሴ, one quiet line — a continuation, not a third row.
-            val chant = service?.kidassie?.firstOrNull { it.isNotBlank() }?.trim()
-            if (chant == null) {
-                views.setViewVisibility(R.id.widget_kidase, View.GONE)
-            } else {
-                views.setViewVisibility(R.id.widget_kidase, View.VISIBLE)
-                views.setTextViewText(R.id.widget_kidase, "ቅዳሴ · $chant")
-            }
+            views.setRemoteAdapter(R.id.widget_stack, adapter)
+            // MUTABLE, unlike every other PendingIntent in the app: a collection
+            // template must accept each card's fill-in intent, and an immutable
+            // one silently drops it.
+            views.setPendingIntentTemplate(R.id.widget_stack, openGitsaweTemplate(context))
+            manager.updateAppWidget(id, views)
         }
-
-        // Whole widget taps through to the ግጻዌ screen.
-        views.setOnClickPendingIntent(R.id.widget_root, openGitsawe(context))
-        views
+        // Make the factory re-read both days' content, not just re-lay-out.
+        manager.notifyAppWidgetViewDataChanged(ids, R.id.widget_stack)
     }
 
-    private fun bindRow(
-        views: RemoteViews,
-        row: Pair<String, String>?,
-        rowId: Int,
-        roleId: Int,
-        refId: Int,
-    ) {
-        if (row == null) {
-            views.setViewVisibility(rowId, View.GONE)
-            return
-        }
-        views.setViewVisibility(rowId, View.VISIBLE)
-        views.setTextViewText(roleId, row.first)
-        views.setTextViewText(refId, row.second)
-    }
-
-    /** The two most useful lines for a glance: ምስባክ and ወንጌል, when present. */
-    private fun pickRows(service: GitsaweService): List<Pair<String, String>> =
-        listOfNotNull(
-            service.msbak.firstOrNull()?.let { "ምስባክ" to summarize(it) },
-            service.wengel.firstOrNull()?.let { "ወንጌል" to summarize(it) },
-        )
-
-    private fun summarize(reading: GitsaweReading): String =
-        reading.verse?.let { verseRef(it) }?.takeIf { it.isNotBlank() }
-            ?: reading.text?.amharic
-            ?: reading.text?.geez
-            ?: ""
-
-    /** "መዝሙረ ዳዊት ፷፬፥፲፩–፲፪" — book with Ge'ez chapter:verse(range). */
-    private fun verseRef(v: VerseRef): String = buildString {
-        v.bookTitle?.let { append(it); append(" ") }
-        v.chapter?.let { append(geezNumeral(it)) }
-        v.start?.let { append("፥"); append(geezNumeral(it)) }
-        v.end?.let { append("–"); append(geezNumeral(it)) }
-    }.trim()
-
-    private fun openGitsawe(context: Context): PendingIntent = PendingIntent.getActivity(
+    private fun openGitsaweTemplate(context: Context): PendingIntent = PendingIntent.getActivity(
         context,
         REQUEST_CODE,
         Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra(GitsaweReminderScheduler.EXTRA_OPEN_GITSAWE, true)
         },
-        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
     )
 
     companion object {
-        /** Distinct from the reminder PendingIntents (0, 1, 2) — see the audit. */
+        /** Distinct from the reminder PendingIntents (0, 1, 2, 5, 6) — see the audit. */
         private const val REQUEST_CODE = 3
 
         private val REFRESH_ACTIONS = setOf(

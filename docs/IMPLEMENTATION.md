@@ -48,7 +48,7 @@ Four functional pillars:
 |---|---|
 | **Read** | 8 prayer hours + the complete 150-psalm Psalter, rendered from bundled JSON with Ge'ez verse numerals, two reading modes, five font steps, bookmarks and verse highlights. |
 | **Remind** | Real alarm-clock–grade prayer reminders: exact alarms, a ringing foreground service, a full-screen lock-screen alarm, snooze, and a "did you pray?" follow-up. |
-| **Track** | Daily habit check-offs (per prayer hour + custom habits), current/longest streaks, an Ethiopian-calendar contribution heatmap, and a shareable streak card. |
+| **Track** | Daily habit check-offs (per prayer hour + custom habits), a prayer-day count per Ethiopian month or running fast (never a streak), an Ethiopian-calendar contribution heatmap with a fasting-season wash, and today's candle. |
 | **Personalize** | Reorder/hide sections in an hour, add any psalm to any hour, create/rename/hide/reorder whole hours, multiple named reminder "modes", theme + language choice, a local profile name. |
 
 Hard constraints the code enforces:
@@ -58,7 +58,7 @@ Hard constraints the code enforces:
 - **Content is immutable data.** Prayer text is generated offline by a Python
   pipeline and never mutated at runtime. Personalization is an *overlay* keyed by
   stable section IDs.
-- **IDs are permanent contracts.** Bookmarks, highlights, reminders and streak
+- **IDs are permanent contracts.** Bookmarks, highlights, reminders and prayer-day
   records all reference content IDs (`morning_ps1`, `ps_118`, `hour_morning`).
   Changing an ID in the content pipeline would orphan user data.
 - **Amharic is the default, not a translation.** UI chrome is bilingual
@@ -118,7 +118,7 @@ unidirectional state. No ViewModel layer.**
 ┌──────────────────────────────────────────────────────────────────┐
 │  UI  (Jetpack Compose, Material 3)                               │
 │  HomeScreen · ReadingScreen · PsalterScreen · SearchScreen       │
-│  StreakScreen · SettingsScreen · ModesScreen · ModeEditorScreen  │
+│  JourneyScreen · SettingsScreen · ModesScreen · ModeEditorScreen  │
 │  ManageHours/ManageHabits/CustomizeHour · Intro/Tutorial · About │
 │                                                                  │
 │  reads:  Flow<T> ──collectAsState()──▶ State<T>                  │
@@ -132,7 +132,7 @@ unidirectional state. No ViewModel layer.**
 │  HighlightRepository · LayoutRepository(+PrayerLayout)            │
 │  HoursRepository · ModesRepository · HabitsRepository             │
 │                                                                   │
-│  Pure functions live here too (streak math, layout merges,        │
+│  Pure functions live here too (prayer-day math, layout merges,        │
 │  nextOccurrence, fold) so they are unit-testable without Android. │
 └───────────────▲──────────────────────────────┬───────────────────┘
                 │                              │
@@ -145,7 +145,7 @@ Reminders subsystem (Android framework, outside the Compose tree):
   AlarmManager.setAlarmClock
         └▶ AlarmReceiver ──▶ AlarmService (foreground, rings)
                           └▶ AlarmActivity (full-screen, over lock screen)
-                          └▶ MarkDoneReceiver ("Done? → Yes" writes the streak)
+                          └▶ MarkDoneReceiver ("Done? → Yes" writes the habit record)
   StreakReminderScheduler ──▶ StreakReminderReceiver (nightly nudge, user-set time)
   SystemEventsReceiver (BOOT / MY_PACKAGE_REPLACED / TIME_SET / TZ_CHANGED)
         └▶ ReminderScheduler.rescheduleAll
@@ -217,7 +217,7 @@ app/src/main/java/com/agpeya/app/
 │   ├── LayoutRepository.kt               86  Per-hour layout + PrayerLayout helpers
 │   ├── HoursRepository.kt                97  Hour list config + merge()
 │   ├── ModesRepository.kt               149  Reminder modes, scheduled-id bookkeeping
-│   └── HabitsRepository.kt              188  Habit state + all streak math
+│   └── HabitsRepository.kt                   Habit state + prayer-day math (PrayerJourney.kt holds the period metric)
 ├── search/AmharicSearch.kt              122  Homophone folding + snippet search
 ├── reminders/
 │   ├── ReminderScheduler.kt             144  nextOccurrence, rescheduleAll, snooze
@@ -236,8 +236,8 @@ app/src/main/java/com/agpeya/app/
     ├── reading/{ReadingScreen,SectionUi,GeezNumerals}.kt  477+244+10
     ├── psalter/PsalterScreen.kt         392
     ├── search/SearchScreen.kt           247
-    ├── habits/{StreakScreen,EthiopianYearHeatmap,HabitHeatmap,
-    │            ManageHabitsScreen,StreakShare}.kt  332+225+118+189+171
+    ├── habits/{JourneyScreen,EthiopianYearHeatmap,HabitHeatmap,
+    │            ManageHabitsScreen}.kt   332+225+118+189
     ├── hours/ManageHoursScreen.kt       243
     ├── customize/CustomizeScreens.kt    339
     ├── modes/{ModesScreen,ModeEditorScreen}.kt  244+380
@@ -580,7 +580,7 @@ it would be worth revisiting.
 | `onboarded` | Bool | `false` | gates the intro flow and the start destination |
 | `profile_name` | String | `""` | local only; trimmed on write |
 | `profile_christian_name` | String | `""` | baptismal name; preferred in greeting |
-| `streak_reminder` | Bool | `true` | nightly streak nudge |
+| `streak_reminder` | Bool | `true` | nightly nudge (key name is historical) |
 | `streak_reminder_min` | Int | `1290` (21:30) | when the nudge fires, minutes into the day |
 
 All enum reads are defensive: `runCatching { Enum.valueOf(raw ?: "") }.getOrDefault(…)`,
@@ -648,7 +648,7 @@ Compose state, so `onNewIntent` (which fires on a warm launch, because
 
 ```kotlin
 private val pendingDeepLinkHourId = mutableStateOf<String?>(null)
-private val pendingOpenStreak = mutableStateOf(false)
+private val pendingOpenJourney = mutableStateOf(false)
 
 private fun consumeDeepLink(intent: Intent?) {
     intent ?: return
@@ -682,7 +682,7 @@ Navigation-Compose.
 |---|---|---|
 | `intro` | `IntroScreen` | — |
 | `home` | `HomeScreen` | — (bottom-nav tab) |
-| `streak` | `StreakScreen` | — (bottom-nav tab) |
+| `journey` | `JourneyScreen` | — (bottom-nav tab) |
 | `settings` | `SettingsScreen` | — (bottom-nav tab) |
 | `reading/{hourId}?section={section}` | `ReadingScreen` | `hourId: String`, `section: Int = -1` |
 | `psalter?section={section}` | `PsalterScreen` | `section: Int = -1` |
@@ -941,8 +941,8 @@ matching the alarm itself.
 |---|---|---|
 | Ringing alarm | `prayer_alarms` (HIGH) | `7001` |
 | "Done?" follow-up | `prayer_alarms` | `7100 + hash%1000` |
-| Nightly streak nudge | `streak_reminders` (DEFAULT) | `7200` |
-| Streak-nudge alarm request code | — | `9100` |
+| Nightly nudge | `streak_reminders` (DEFAULT; channel id is historical) | `7200` |
+| Nightly-nudge alarm request code | — | `9100` |
 
 ### 9.7 `AlarmActivity`
 
@@ -971,16 +971,16 @@ HabitsRepository.markDone(context, LocalDate.now().toString(), HabitsRepository.
 ```
 
 This is the bridge between the reminders subsystem and the habits subsystem: an
-answered alarm becomes a streak entry without opening the app.
+answered alarm becomes a recorded prayer day without opening the app.
 
 ### 9.9 `SystemEventsReceiver`
 
 Registered for `BOOT_COMPLETED`, `MY_PACKAGE_REPLACED`, `TIME_SET`,
 `TIMEZONE_CHANGED` — the four events that invalidate every pending alarm. It
-rebuilds the whole schedule and re-arms the streak nudge, again on a `goAsync()`
+rebuilds the whole schedule and re-arms the nightly nudge, again on a `goAsync()`
 background thread with `runCatching` around the content load.
 
-### 9.10 The nightly streak nudge
+### 9.10 The nightly nudge
 
 Separate from prayer alarms and deliberately gentler:
 
@@ -991,9 +991,11 @@ Separate from prayer alarms and deliberately gentler:
 - `StreakReminderReceiver` **re-arms tomorrow first**, then checks the setting
   and posts the nudge. It fires every night while enabled — like the ግጻዌ nudge,
   and unlike its first design, which skipped any day that already had a log and
-  so read as broken on exactly the attentive days. When a streak is alive the
-  body names it ("Keep your N-day streak going"), BigTextStyle like the ግጻዌ one.
-- Tapping it sets `EXTRA_OPEN_STREAK` and lands you on the Streak tab.
+  so read as broken on exactly the attentive days. The wording never depends on
+  history: a feast is named, a fasting day colours the invitation, and the
+  default is "ሰርክ ደርሷል — ዕለቱን በጸሎት ዝጉ". BigTextStyle like the ግጻዌ one.
+- Tapping it sets `EXTRA_OPEN_STREAK` (key name is historical) and lands you on
+  the Journey tab.
 - Uses its own `streak_reminders` channel at `IMPORTANCE_DEFAULT` so the user can
   silence it independently of prayer alarms.
 
@@ -1146,30 +1148,26 @@ strictly-after semantics (an alarm at exactly *now* rolls to the next
 occurrence), `null` for an empty day set. `java.time` handles DST transitions
 implicitly via `atZone(ZoneId.systemDefault())` at the call site.
 
-### 10.5 Streak mathematics — `HabitsRepository`
+### 10.5 Prayer-day mathematics — `HabitsRepository` + `PrayerJourney`
 
 Records are `Map<"yyyy-MM-dd", Set<habitId>>`. Habit ids are:
 `hour_<hourId>` for prayer hours, `church` / `prostrate` / `bible` for built-in
 habits, `custom_<uuid>` for user-created ones.
 
-**Current streak** — the important nuance is the *day-tolerant* rule:
+**There are no streaks.** The metric everywhere is *distinct days with prayer
+activity inside the current period* — the running fast when one is underway
+(`FastingCalendar.fastOn(today)`), the Ethiopian month otherwise. Because the
+count is a set size and not a run length, a missed day changes nothing but that
+day: nothing resets, nothing breaks, and returning after a gap is just today's
+candle waiting.
 
-```kotlin
-fun currentStreak(records, habitId, today): Int {
-    var cursor = if (habitId in done(records, today)) today else today.minusDays(1)
-    var count = 0
-    while (habitId in done(records, cursor)) { count++; cursor = cursor.minusDays(1) }
-    return count
-}
-```
-
-If today isn't marked yet, counting starts from **yesterday** — so your streak
-doesn't visibly reset at midnight and shame you before you've had a chance to
-pray. The same rule is applied in `prayerCurrentStreak` (any `hour_*` id) and
-`overallCurrentStreak` (any habit at all).
-
-**Longest streak** sorts the dates on which the habit was done and walks for the
-longest run of `d[i] == d[i-1] + 1`.
+`PrayerJourney.summarize(records, today)` is the single source of truth for the
+hero line on both Home and Journey: `prayedToday` (the candle), `daysPrayed`,
+the fast + `fastDay` when in one, and `returning` (history exists but nothing
+today or yesterday → the quiet "ተመልሰዋል — ዛሬ ይጀምሩ" line, never a loss notice).
+`HabitsRepository.habitDaysBetween` / `prayerDaysBetween` give the per-habit
+month counts on the Journey screen. All of it derives from the same records the
+streak-era app wrote — no migration, and old backups restore unchanged.
 
 **Heatmap intensity** is *proportional*, not absolute:
 
@@ -1201,9 +1199,9 @@ A single `LazyColumn` with, top to bottom:
    commit `f5dfb0f`).
 2. **`NowCard`** — the time-of-day suggested hour, rendered on
    `colorScheme.primary` with a radial gold glow clipped to the card shape.
-3. **`TodayCard`** — `n/m` completed today, the overall streak with a flame
-   icon, up to four habit dots, and a compact 14-week `HabitHeatmap`. Tapping it
-   switches to the Streak tab.
+3. **`TodayCard`** — `n/m` completed today, today's candle (lit when anything
+   is recorded), the same `PrayerJourney` prayer-day line as the Journey hero,
+   and a compact `HabitHeatmap`. Tapping it switches to the Journey tab.
 4. **Continue reading** — a `LazyRow` of up to four recent-hour chips.
 5. **Library row** — Psalter (active) plus ዘወትር ጸሎት and ውዳሴ ማርያም (disabled,
    "coming soon" captions).
@@ -1211,7 +1209,7 @@ A single `LazyColumn` with, top to bottom:
 
 The Home card collapses all prayer hours into **one aggregate dot** (synthetic
 id `"prayer"`, lit if any `hour_*` was done today); the per-hour breakdown lives
-on the Streak screen. `maxPossible` passed to the heatmap deliberately excludes
+on the Journey screen. `maxPossible` passed to the heatmap deliberately excludes
 that synthetic dot: `hours.size + (habitIds.size - 1)`.
 
 ### 11.2 `ReadingScreen`
@@ -1353,17 +1351,18 @@ Debounced (180 ms), min 2 characters. Three states: recent searches (idle),
 the gold secondary colour via `buildAnnotatedString` + the exact offsets returned
 by the search. Opening a result records the query in recent searches.
 
-### 11.6 `StreakScreen`
+### 11.6 `JourneyScreen` (ጉዞ)
 
-- Hero card: overall current streak.
+- Hero card: today's candle plus the period's prayer-day line
+  (`journeyLine(PrayerJourney.summarize(...))`); the kicker is the lit/waiting
+  state, or "ተመልሰዋል — ዛሬ ይጀምሩ" after one or more whole missed days.
 - **Collapsible ጸሎት group** — a header row showing `donePrayers/totalHours`,
   expanding into one `CheckRow` per visible hour. Other habits are flat rows.
   Tapping a row toggles today's record.
-- `EthiopianYearHeatmap` with a tapped-day readout
-  (`"ረቡዕ፣ ሐምሌ 8 2018 ዓ.ም · 3 ልማዶች"`).
-- Per-item statistics rows: `አሁን n · ከፍተኛ m` (current · best), including a
-  prayer aggregate row.
-- A share icon that renders and shares the streak card (§11.9).
+- `EthiopianYearHeatmap` — the main historical view — with a tapped-day readout
+  (`"ረቡዕ፣ ሐምሌ 8 2018 ዓ.ም · 3 ልማዶች · ዐቢይ ጾም"`, the fast named when there is one).
+- Per-item rows: distinct days kept this Ethiopian month (`በዚህ ወር n ቀን`),
+  including a prayer aggregate row. No current/best runs anywhere.
 - Link to `ManageHabitsScreen`.
 
 ### 11.7 `EthiopianYearHeatmap`
@@ -1405,38 +1404,7 @@ accessible, and it works inside a `LazyColumn` without a reorder library.
 `CustomizeHourScreen`'s psalm picker is a `ModalBottomSheet` listing all 150
 psalms filtered by a numeric text field.
 
-### 11.9 `StreakShare` — Canvas image generation
-
-Renders a **1080 × 1350** PNG entirely with the Android graphics API (no Compose
-capture), off the main thread:
-
-```kotlin
-suspend fun share(...) = withContext(Dispatchers.Default) {
-    val bitmap = render(...)
-    val file = File(File(context.cacheDir, "images").apply { mkdirs() }, "streak.png")
-    file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
-    bitmap.recycle()
-    val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-    val send = Intent(Intent.ACTION_SEND).apply {
-        type = "image/png"; putExtra(Intent.EXTRA_STREAM, uri)
-        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    }
-    withContext(Dispatchers.Main) { context.startActivity(Intent.createChooser(send, null)) }
-}
-```
-
-The card draws: the deep-green ground with a `RadialGradient` gold glow, a
-rounded card with a hairline border, the ስንቅ wordmark, today's Ethiopian date,
-the user's name, the overall streak in 150 px gold, and a heatmap sized to
-however many weeks fit the card width. Text uses the bundled Abyssinica SIL
-loaded via `ResourcesCompat.getFont` (falling back to `Typeface.SERIF`), so
-Ethiopic renders correctly even on devices with poor system font coverage.
-
-Sharing goes through `FileProvider` with `share_paths.xml` exposing only
-`<cache-path name="images" path="images/" />` — no storage permission is
-required, and nothing is written outside the app's cache.
-
-### 11.10 `IntroScreen` / `TutorialScreen`
+### 11.9 `IntroScreen` / `TutorialScreen`
 
 A three-stage state machine:
 
@@ -1448,25 +1416,25 @@ PAGES (2 intro pages + a name form)  ──▶  ASK ("want a quick tour?")  ─�
 - Intro pages: the ስንቅ wordmark hero, and an "everything is offline" page.
 - The name form collects `profile_name` and `christian_name`, saved on advance
   or skip.
-- Tutorial pages: **Reminders**, **Streaks**, **Psalter** — the three features
+- Tutorial pages: **Reminders**, **Journey**, **Psalter** — the three features
   that are not self-evident.
 - `TutorialScreen` re-uses `tutorialPages()` and the same `TourScaffold` so the
   tour is **replayable from Settings** without the name form.
 - `onDone` is guaranteed to fire exactly once, on completion or any skip; it
   writes `onboarded = true` and pops the intro off the back stack.
 
-### 11.11 `SettingsScreen`
+### 11.10 `SettingsScreen`
 
 Theme (3-way segmented), language (3-way segmented), keep-screen-on switch,
-streak-reminder switch (which calls `StreakReminderScheduler.sync` inline), alarm
+nightly-reminder switch (which calls `StreakReminderScheduler.sync` inline), alarm
 alert mode + alarm sound dropdowns (the sound row disables itself when the alert
 mode is vibrate-only or silent), the local profile rows, and links to Manage
 Hours, Reminder Modes, Tutorial, and About.
 
-### 11.12 `AgpeyaBottomBar`
+### 11.11 `AgpeyaBottomBar`
 
 A floating pill (`RoundedCornerShape(24.dp)`, surface colour, 1 dp variant
-border) with three tabs — Home, Streak, Settings — each taking `weight(1f)` so
+border) with four tabs — Home, Journey, Library, Settings — each taking `weight(1f)` so
 labels never wrap on narrow screens (`maxLines = 1, softWrap = false,
 overflow = Ellipsis`). It applies `navigationBarsPadding()` itself. Selected
 state is gold; unselected is muted.
@@ -1491,7 +1459,7 @@ purpose, because the liturgical palette is part of the app's character.
 | onSurfaceVariant | `#5D6B60` | `#9DBBAD` |
 
 The semantic rule in the codebase: **gold (`colorScheme.secondary`) is the voice
-of what matters** — verse numbers, streak counts, section titles, selected tabs,
+of what matters** — verse numbers, day counts, section titles, selected tabs,
 search-match highlighting. Deep green carries the ground; ivory is the ink.
 
 `AgpeyaTheme(themeChoice)` resolves `SYSTEM` via `isSystemInDarkTheme()`. The
@@ -1628,7 +1596,7 @@ all of them exercise pure functions that were deliberately kept `Context`-free.
 | Class | Tests | Covers |
 |---|---:|---|
 | `ReminderSchedulerTest` | 8 | `nextOccurrence`: today vs tomorrow, exact-now roll-over, weekday subsets (Wed/Fri fasting), week wrap Sat→Mon, same-weekday-after-time waits a full week, empty day set → null, midnight (hour 0) |
-| `HabitStreakTest` | 9 | Empty history, current streak with/without today, break on a gap, per-habit isolation, longest over a sparse history, overall any-habit streak, proportional `level()` including the degenerate `maxPossible = 0`, `dayCount` |
+| `PrayerJourneyTest` | 20 | Distinct-day counting (days not events, gap survival, inclusive range, malformed keys), Ethiopian-month and fast periods with their boundaries, the candle/return states, per-habit and prayer-aggregate day counts, proportional `level()` including the degenerate `maxPossible = 0`, `dayCount` |
 | `EthiopianDateTest` | 5 | Ethiopian Millennium anchor, post-leap new year, mid-year conversion, `toGregorian` inverting `from` over 2019–2027 at a 17-day stride, Pagumen 5/6-day handling |
 | `AmharicSearchTest` | 6 | ሰ/ሠ, ጸ/ፀ, ሀ/ሐ/ኀ/ኸ, አ/ዐ families fold together; vowel order is preserved within a family; non-homophone letters are unchanged |
 

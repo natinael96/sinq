@@ -91,6 +91,9 @@ fun SettingsScreen(
     val keepOn by SettingsRepository.keepScreenOn(context).collectAsState(initial = true)
     val streakReminder by SettingsRepository.streakReminder(context).collectAsState(initial = true)
     val gitsaweReminder by SettingsRepository.gitsaweReminder(context).collectAsState(initial = true)
+    val breathReminder by SettingsRepository.breathReminder(context).collectAsState(initial = true)
+    val almsReminder by SettingsRepository.almsReminder(context).collectAsState(initial = false)
+    val repentReminder by SettingsRepository.repentanceReminder(context).collectAsState(initial = true)
     val language by SettingsRepository.language(context).collectAsState(initial = com.agpeya.app.data.Language.SYSTEM)
     val alarmAlert by SettingsRepository.alarmAlert(context)
         .collectAsState(initial = com.agpeya.app.data.AlarmAlert.SOUND_VIBRATE)
@@ -256,7 +259,7 @@ fun SettingsScreen(
                 // Re-read on each (re)composition, so returning from the system
                 // settings page reflects the change without a restart.
                 if (!NotificationManagerCompat.from(context).areNotificationsEnabled() &&
-                    (streakReminder || gitsaweReminder)
+                    (streakReminder || gitsaweReminder || breathReminder || almsReminder || repentReminder)
                 ) {
                     NotificationsOffBanner(
                         onOpenSettings = {
@@ -273,8 +276,8 @@ fun SettingsScreen(
                     Spacer(Modifier.height(Spacing.md))
                 }
                 ToggleRow(
-                    title = s.settingsStreakReminder,
-                    subtitle = s.settingsStreakReminderDesc,
+                    title = s.settingsNightReminder,
+                    subtitle = s.settingsNightReminderDesc,
                     checked = streakReminder,
                     onCheckedChange = { on ->
                         if (on) ensureNotificationPermission()
@@ -305,6 +308,73 @@ fun SettingsScreen(
                         }
                     },
                 )
+                // የመሃል ጸሎት: once a day, at a random moment between the
+                // hours, one short prayer — praying, not reading. No time row:
+                // the whole point is that nobody, including the user, picks it.
+                ToggleRow(
+                    title = s.settingsBreathReminder,
+                    subtitle = s.settingsBreathReminderDesc,
+                    checked = breathReminder,
+                    onCheckedChange = { on ->
+                        if (on) ensureNotificationPermission()
+                        scope.launch {
+                            SettingsRepository.setBreathReminder(context, on)
+                            com.agpeya.app.reminders.BreathPrayerScheduler.sync(context, on)
+                        }
+                    },
+                )
+                // ምጽዋት and ንስሐ: scheduled intentions, not habits — the app
+                // reminds on the chosen cadence and records nothing. Each
+                // toggle reveals its schedule and time only while on — the same
+                // rule as the streak nudge's time row above.
+                ToggleRow(
+                    title = s.settingsAlmsReminder,
+                    subtitle = s.settingsAlmsReminderDesc,
+                    checked = almsReminder,
+                    onCheckedChange = { on ->
+                        if (on) ensureNotificationPermission()
+                        scope.launch {
+                            SettingsRepository.setAlmsReminder(context, on)
+                            com.agpeya.app.reminders.SpecialHabitReminderScheduler.sync(
+                                context, com.agpeya.app.reminders.SpecialHabit.ALMS, on,
+                            )
+                        }
+                    },
+                )
+                AnimatedVisibility(
+                    visible = almsReminder,
+                    enter = fadeIn(motion.spec(Motion.standard)) + expandVertically(motion.spec(Motion.standard)),
+                    exit = fadeOut(motion.spec(Motion.fast)) + shrinkVertically(motion.spec(Motion.fast)),
+                ) {
+                    Column {
+                        SpecialHabitScheduleRow(s, com.agpeya.app.reminders.SpecialHabit.ALMS)
+                        SpecialHabitTimeRow(s, com.agpeya.app.reminders.SpecialHabit.ALMS)
+                    }
+                }
+                ToggleRow(
+                    title = s.settingsRepentReminder,
+                    subtitle = s.settingsRepentReminderDesc,
+                    checked = repentReminder,
+                    onCheckedChange = { on ->
+                        if (on) ensureNotificationPermission()
+                        scope.launch {
+                            SettingsRepository.setRepentanceReminder(context, on)
+                            com.agpeya.app.reminders.SpecialHabitReminderScheduler.sync(
+                                context, com.agpeya.app.reminders.SpecialHabit.REPENTANCE, on,
+                            )
+                        }
+                    },
+                )
+                AnimatedVisibility(
+                    visible = repentReminder,
+                    enter = fadeIn(motion.spec(Motion.standard)) + expandVertically(motion.spec(Motion.standard)),
+                    exit = fadeOut(motion.spec(Motion.fast)) + shrinkVertically(motion.spec(Motion.fast)),
+                ) {
+                    Column {
+                        SpecialHabitScheduleRow(s, com.agpeya.app.reminders.SpecialHabit.REPENTANCE)
+                        SpecialHabitTimeRow(s, com.agpeya.app.reminders.SpecialHabit.REPENTANCE)
+                    }
+                }
                 NavRow(s.manageHours, onOpenCustomize, leadingIcon = Icons.Outlined.Tune)
                 NavRow(s.reminderModes, onOpenModes, leadingIcon = Icons.Outlined.Alarm)
                 Spacer(Modifier.height(Spacing.md))
@@ -718,6 +788,233 @@ private fun StreakReminderTimeRow(s: com.agpeya.app.ui.strings.Strings) {
                             timeState.hour * 60 + timeState.minute,
                         )
                         com.agpeya.app.reminders.StreakReminderScheduler.sync(context, true)
+                    }
+                }) { Text(s.save) }
+            },
+            dismissButton = {
+                TextButton(onClick = { picking = false }) { Text(s.cancel) }
+            },
+        )
+    }
+}
+
+/**
+ * The schedule row for a special habit (ምጽዋት / ንስሐ): how often it is due.
+ * Tapping opens the cadence editor; saving re-arms the reminder immediately,
+ * so the change applies to the very next due day.
+ */
+@Composable
+private fun SpecialHabitScheduleRow(
+    s: com.agpeya.app.ui.strings.Strings,
+    habit: com.agpeya.app.reminders.SpecialHabit,
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val schedule by when (habit) {
+        com.agpeya.app.reminders.SpecialHabit.ALMS -> SettingsRepository.almsSchedule(context)
+        com.agpeya.app.reminders.SpecialHabit.REPENTANCE -> SettingsRepository.repentanceSchedule(context)
+    }.collectAsState(
+        initial = when (habit) {
+            com.agpeya.app.reminders.SpecialHabit.ALMS -> com.agpeya.app.model.HabitSchedule.DEFAULT_ALMS
+            com.agpeya.app.reminders.SpecialHabit.REPENTANCE -> com.agpeya.app.model.HabitSchedule.DEFAULT_REPENTANCE
+        },
+    )
+    var editing by remember { mutableStateOf(false) }
+
+    com.agpeya.app.ui.common.ListRow(
+        title = s.scheduleLabel,
+        subtitle = scheduleSummary(schedule, s),
+        onClick = { editing = true },
+    )
+
+    if (editing) {
+        ScheduleEditorDialog(
+            s = s,
+            initial = schedule,
+            onDismiss = { editing = false },
+            onSave = { edited ->
+                editing = false
+                scope.launch {
+                    when (habit) {
+                        com.agpeya.app.reminders.SpecialHabit.ALMS ->
+                            SettingsRepository.setAlmsSchedule(context, edited)
+                        com.agpeya.app.reminders.SpecialHabit.REPENTANCE ->
+                            SettingsRepository.setRepentanceSchedule(context, edited)
+                    }
+                    com.agpeya.app.reminders.SpecialHabitReminderScheduler.sync(context, habit, true)
+                }
+            },
+        )
+    }
+}
+
+private fun scheduleSummary(
+    schedule: com.agpeya.app.model.HabitSchedule,
+    s: com.agpeya.app.ui.strings.Strings,
+): String = when (schedule.kind) {
+    com.agpeya.app.model.HabitSchedule.Kind.WEEKLY -> when {
+        schedule.days.size == 7 -> s.daysSummaryDaily
+        schedule.days.isEmpty() -> s.noDaySelected
+        else -> schedule.days.sorted().joinToString(" ") { s.dayLabels[it - 1] }
+    }
+    com.agpeya.app.model.HabitSchedule.Kind.EVERY_OTHER_DAY -> s.scheduleEveryOtherDay
+    com.agpeya.app.model.HabitSchedule.Kind.MONTHLY -> s.monthlyOnDay(schedule.monthDay)
+}
+
+/**
+ * Cadence editor: weekly (with day chips), every other day, or monthly on an
+ * Ethiopian month day. Choosing every-other-day anchors on today, so it is due
+ * immediately and then alternates; an existing anchor is kept so re-saving
+ * can't shift the rhythm.
+ */
+@Composable
+private fun ScheduleEditorDialog(
+    s: com.agpeya.app.ui.strings.Strings,
+    initial: com.agpeya.app.model.HabitSchedule,
+    onDismiss: () -> Unit,
+    onSave: (com.agpeya.app.model.HabitSchedule) -> Unit,
+) {
+    var kind by remember { mutableStateOf(initial.kind) }
+    var days by remember { mutableStateOf(initial.days) }
+    var monthDay by remember { mutableStateOf(initial.monthDay) }
+
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(s.scheduleLabel) },
+        text = {
+            Column {
+                val kinds = listOf(
+                    com.agpeya.app.model.HabitSchedule.Kind.WEEKLY to s.scheduleWeekly,
+                    com.agpeya.app.model.HabitSchedule.Kind.EVERY_OTHER_DAY to s.scheduleEveryOtherDay,
+                    com.agpeya.app.model.HabitSchedule.Kind.MONTHLY to s.scheduleMonthly,
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    kinds.forEach { (k, label) ->
+                        androidx.compose.material3.FilterChip(
+                            selected = kind == k,
+                            onClick = { kind = k },
+                            label = { Text(label) },
+                        )
+                    }
+                }
+                Spacer(Modifier.height(Spacing.md))
+                when (kind) {
+                    com.agpeya.app.model.HabitSchedule.Kind.WEEKLY -> {
+                        Text(
+                            text = s.daysLabel,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(Modifier.height(Spacing.sm))
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            s.dayLabels.forEachIndexed { index, label ->
+                                val day = index + 1
+                                androidx.compose.material3.FilterChip(
+                                    selected = day in days,
+                                    onClick = { days = if (day in days) days - day else days + day },
+                                    label = { Text(label) },
+                                )
+                            }
+                        }
+                    }
+                    com.agpeya.app.model.HabitSchedule.Kind.EVERY_OTHER_DAY -> {
+                        // Nothing to configure: the rhythm starts today.
+                    }
+                    com.agpeya.app.model.HabitSchedule.Kind.MONTHLY -> {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            TextButton(onClick = { monthDay = if (monthDay > 1) monthDay - 1 else 30 }) {
+                                Text("−")
+                            }
+                            Text(
+                                text = s.monthlyOnDay(monthDay),
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.weight(1f),
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            )
+                            TextButton(onClick = { monthDay = if (monthDay < 30) monthDay + 1 else 1 }) {
+                                Text("+")
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = kind != com.agpeya.app.model.HabitSchedule.Kind.WEEKLY || days.isNotEmpty(),
+                onClick = {
+                    onSave(
+                        initial.copy(
+                            kind = kind,
+                            days = days,
+                            monthDay = monthDay.coerceIn(1, 30),
+                            anchor = if (initial.kind == com.agpeya.app.model.HabitSchedule.Kind.EVERY_OTHER_DAY &&
+                                initial.anchor.isNotBlank()
+                            ) {
+                                initial.anchor
+                            } else {
+                                java.time.LocalDate.now().toString()
+                            },
+                        ),
+                    )
+                },
+            ) { Text(s.save) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
+    )
+}
+
+/**
+ * When a special-habit reminder fires on its due day. Same clock dialog as the
+ * streak nudge's time row; saving re-arms the alarm immediately.
+ */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun SpecialHabitTimeRow(
+    s: com.agpeya.app.ui.strings.Strings,
+    habit: com.agpeya.app.reminders.SpecialHabit,
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val minute by when (habit) {
+        com.agpeya.app.reminders.SpecialHabit.ALMS -> SettingsRepository.almsReminderTime(context)
+        com.agpeya.app.reminders.SpecialHabit.REPENTANCE -> SettingsRepository.repentanceReminderTime(context)
+    }.collectAsState(
+        initial = when (habit) {
+            com.agpeya.app.reminders.SpecialHabit.ALMS -> SettingsRepository.DEFAULT_ALMS_REMINDER_MIN
+            com.agpeya.app.reminders.SpecialHabit.REPENTANCE -> SettingsRepository.DEFAULT_REPENTANCE_REMINDER_MIN
+        },
+    )
+    var picking by remember { mutableStateOf(false) }
+
+    com.agpeya.app.ui.common.ListRow(
+        title = s.timeLabel,
+        subtitle = "%02d:%02d".format(minute / 60, minute % 60),
+        onClick = { picking = true },
+    )
+
+    if (picking) {
+        val timeState = androidx.compose.material3.rememberTimePickerState(
+            initialHour = minute / 60,
+            initialMinute = minute % 60,
+            is24Hour = true,
+        )
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { picking = false },
+            title = { Text(s.timeLabel) },
+            text = { androidx.compose.material3.TimePicker(state = timeState) },
+            confirmButton = {
+                TextButton(onClick = {
+                    picking = false
+                    scope.launch {
+                        val newMinute = timeState.hour * 60 + timeState.minute
+                        when (habit) {
+                            com.agpeya.app.reminders.SpecialHabit.ALMS ->
+                                SettingsRepository.setAlmsReminderTime(context, newMinute)
+                            com.agpeya.app.reminders.SpecialHabit.REPENTANCE ->
+                                SettingsRepository.setRepentanceReminderTime(context, newMinute)
+                        }
+                        com.agpeya.app.reminders.SpecialHabitReminderScheduler.sync(context, habit, true)
                     }
                 }) { Text(s.save) }
             },

@@ -117,7 +117,8 @@ private fun AlarmScreen(
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
-                text = s.itsTime,
+                // The hour is the summons: "ሰርክ ደርሷል" over the generic clock-talk.
+                text = if (hourName.isNotBlank()) s.hourArrived(hourName) else s.itsTime,
                 style = MaterialTheme.typography.headlineMedium,
                 color = AlarmIvory,
                 textAlign = TextAlign.Center,

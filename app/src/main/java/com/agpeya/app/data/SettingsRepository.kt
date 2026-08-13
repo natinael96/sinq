@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -72,6 +73,21 @@ object SettingsRepository {
     /** 21:30 — the historical fixed time, kept as the default. */
     const val DEFAULT_STREAK_REMINDER_MIN = 21 * 60 + 30
     private val KEY_GITSAWE_REMINDER = booleanPreferencesKey("gitsawe_reminder")
+    private val KEY_ALMS_REMINDER = booleanPreferencesKey("alms_reminder")
+    private val KEY_ALMS_REMINDER_TIME = intPreferencesKey("alms_reminder_min")
+    private val KEY_ALMS_SCHEDULE = stringPreferencesKey("alms_schedule")
+    private val KEY_REPENTANCE_REMINDER = booleanPreferencesKey("repentance_reminder")
+    private val KEY_REPENTANCE_REMINDER_TIME = intPreferencesKey("repentance_reminder_min")
+    private val KEY_REPENTANCE_SCHEDULE = stringPreferencesKey("repentance_schedule")
+
+    /** 09:00 — morning of the chosen alms day, before the day fills up. */
+    const val DEFAULT_ALMS_REMINDER_MIN = 9 * 60
+
+    /** 19:00 — the eve; ንስሐ and communion preparation are an evening's work. */
+    const val DEFAULT_REPENTANCE_REMINDER_MIN = 19 * 60
+    private val KEY_BREATH_REMINDER = booleanPreferencesKey("breath_reminder")
+    private val KEY_BREATH_LAST_FIRED = stringPreferencesKey("breath_last_fired_day")
+    private val KEY_LAST_PRAYER_RECORDED_AT = longPreferencesKey("last_prayer_recorded_at")
     private val KEY_QUIET_ENABLED = booleanPreferencesKey("quiet_enabled")
     private val KEY_QUIET_START = intPreferencesKey("quiet_start_min")
     private val KEY_QUIET_END = intPreferencesKey("quiet_end_min")
@@ -223,6 +239,139 @@ object SettingsRepository {
     suspend fun setGitsaweReminder(context: Context, value: Boolean) {
         context.settingsDataStore.edit { it[KEY_GITSAWE_REMINDER] = value }
     }
+
+    // ---- የመሃል ጸሎት — the in-between breath prayer -----------------------------
+    //
+    // Once a day, at a random moment between the prayer hours, a one-line
+    // nudge to pray. The scheduler needs three facts: whether the nudge is on,
+    // when a prayer hour was last recorded (the window opens 10 minutes after
+    // it), and the last day the nudge fired (so it never fires twice).
+
+    /** The once-a-day in-between prayer nudge. On by default. */
+    fun breathReminder(context: Context): Flow<Boolean> =
+        context.settingsDataStore.data.map { it[KEY_BREATH_REMINDER] ?: true }
+
+    suspend fun setBreathReminder(context: Context, value: Boolean) {
+        context.settingsDataStore.edit { it[KEY_BREATH_REMINDER] = value }
+    }
+
+    fun breathReminderBlocking(context: Context): Boolean =
+        runCatching { kotlinx.coroutines.runBlocking { breathReminder(context).first() } }
+            .getOrDefault(true)
+
+    /** "yyyy-MM-dd" of the last day the nudge fired; empty if never. */
+    fun breathLastFiredDayBlocking(context: Context): String =
+        runCatching {
+            kotlinx.coroutines.runBlocking {
+                context.settingsDataStore.data.map { it[KEY_BREATH_LAST_FIRED] ?: "" }.first()
+            }
+        }.getOrDefault("")
+
+    suspend fun setBreathLastFiredDay(context: Context, day: String) {
+        context.settingsDataStore.edit { it[KEY_BREATH_LAST_FIRED] = day }
+    }
+
+    /** Epoch millis of the last recorded prayer hour; 0 if never. */
+    fun lastPrayerRecordedAtBlocking(context: Context): Long =
+        runCatching {
+            kotlinx.coroutines.runBlocking {
+                context.settingsDataStore.data.map { it[KEY_LAST_PRAYER_RECORDED_AT] ?: 0L }.first()
+            }
+        }.getOrDefault(0L)
+
+    suspend fun setLastPrayerRecordedAt(context: Context, epochMillis: Long) {
+        context.settingsDataStore.edit { it[KEY_LAST_PRAYER_RECORDED_AT] = epochMillis }
+    }
+
+    // ---- Special-habit reminders (ምጽዋት / ንስሐ) ------------------------------
+    //
+    // Each has an on/off switch, a time of day, and a HabitSchedule saying
+    // which days it is due. Blocking variants exist for the scheduler, which
+    // arms alarms outside any coroutine (same shape as streakReminderTime).
+
+    private val scheduleJson = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+
+    private fun decodeSchedule(raw: String?, fallback: com.agpeya.app.model.HabitSchedule) =
+        raw?.let {
+            runCatching {
+                scheduleJson.decodeFromString<com.agpeya.app.model.HabitSchedule>(it)
+            }.getOrNull()
+        } ?: fallback
+
+    /** Reminder to give alms on the chosen days. Off until the user opts in. */
+    fun almsReminder(context: Context): Flow<Boolean> =
+        context.settingsDataStore.data.map { it[KEY_ALMS_REMINDER] ?: false }
+
+    suspend fun setAlmsReminder(context: Context, value: Boolean) {
+        context.settingsDataStore.edit { it[KEY_ALMS_REMINDER] = value }
+    }
+
+    fun almsReminderTime(context: Context): Flow<Int> =
+        context.settingsDataStore.data.map { it[KEY_ALMS_REMINDER_TIME] ?: DEFAULT_ALMS_REMINDER_MIN }
+
+    suspend fun setAlmsReminderTime(context: Context, minuteOfDay: Int) {
+        context.settingsDataStore.edit {
+            it[KEY_ALMS_REMINDER_TIME] = minuteOfDay.coerceIn(0, 24 * 60 - 1)
+        }
+    }
+
+    fun almsReminderTimeBlocking(context: Context): Int =
+        runCatching { kotlinx.coroutines.runBlocking { almsReminderTime(context).first() } }
+            .getOrDefault(DEFAULT_ALMS_REMINDER_MIN)
+
+    fun almsSchedule(context: Context): Flow<com.agpeya.app.model.HabitSchedule> =
+        context.settingsDataStore.data.map {
+            decodeSchedule(it[KEY_ALMS_SCHEDULE], com.agpeya.app.model.HabitSchedule.DEFAULT_ALMS)
+        }
+
+    suspend fun setAlmsSchedule(context: Context, value: com.agpeya.app.model.HabitSchedule) {
+        context.settingsDataStore.edit { it[KEY_ALMS_SCHEDULE] = scheduleJson.encodeToString(value) }
+    }
+
+    fun almsScheduleBlocking(context: Context): com.agpeya.app.model.HabitSchedule =
+        runCatching { kotlinx.coroutines.runBlocking { almsSchedule(context).first() } }
+            .getOrDefault(com.agpeya.app.model.HabitSchedule.DEFAULT_ALMS)
+
+    /** Reminder to repent and prepare for communion. ON by default. */
+    fun repentanceReminder(context: Context): Flow<Boolean> =
+        context.settingsDataStore.data.map { it[KEY_REPENTANCE_REMINDER] ?: true }
+
+    suspend fun setRepentanceReminder(context: Context, value: Boolean) {
+        context.settingsDataStore.edit { it[KEY_REPENTANCE_REMINDER] = value }
+    }
+
+    fun repentanceReminderTime(context: Context): Flow<Int> =
+        context.settingsDataStore.data.map {
+            it[KEY_REPENTANCE_REMINDER_TIME] ?: DEFAULT_REPENTANCE_REMINDER_MIN
+        }
+
+    suspend fun setRepentanceReminderTime(context: Context, minuteOfDay: Int) {
+        context.settingsDataStore.edit {
+            it[KEY_REPENTANCE_REMINDER_TIME] = minuteOfDay.coerceIn(0, 24 * 60 - 1)
+        }
+    }
+
+    fun repentanceReminderTimeBlocking(context: Context): Int =
+        runCatching { kotlinx.coroutines.runBlocking { repentanceReminderTime(context).first() } }
+            .getOrDefault(DEFAULT_REPENTANCE_REMINDER_MIN)
+
+    fun repentanceSchedule(context: Context): Flow<com.agpeya.app.model.HabitSchedule> =
+        context.settingsDataStore.data.map {
+            decodeSchedule(
+                it[KEY_REPENTANCE_SCHEDULE],
+                com.agpeya.app.model.HabitSchedule.DEFAULT_REPENTANCE,
+            )
+        }
+
+    suspend fun setRepentanceSchedule(context: Context, value: com.agpeya.app.model.HabitSchedule) {
+        context.settingsDataStore.edit {
+            it[KEY_REPENTANCE_SCHEDULE] = scheduleJson.encodeToString(value)
+        }
+    }
+
+    fun repentanceScheduleBlocking(context: Context): com.agpeya.app.model.HabitSchedule =
+        runCatching { kotlinx.coroutines.runBlocking { repentanceSchedule(context).first() } }
+            .getOrDefault(com.agpeya.app.model.HabitSchedule.DEFAULT_REPENTANCE)
 
     // ---- Quiet hours --------------------------------------------------------
     //

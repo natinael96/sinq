@@ -17,6 +17,6 @@
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="21600000"
     android:initialLayout="@layout/widget_gitsawe"
-    android:previewLayout="@layout/widget_gitsawe"
+    android:previewLayout="@layout/widget_gitsawe_page"
     android:description="@string/widget_gitsawe_description"
     android:widgetCategory="home_screen" />

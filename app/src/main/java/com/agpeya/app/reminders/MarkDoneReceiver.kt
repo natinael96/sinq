@@ -10,7 +10,7 @@ import java.time.LocalDate
 
 /**
  * Handles the "Done?" follow-up notification's Yes action: marks the prayed
- * hour on today's streak record and dismisses the notification.
+ * hour on today's record and dismisses the notification.
  */
 class MarkDoneReceiver : BroadcastReceiver() {
 
@@ -30,6 +30,8 @@ class MarkDoneReceiver : BroadcastReceiver() {
                         LocalDate.now().toString(),
                         HabitsRepository.hourHabitId(hourId),
                     )
+                    // A recorded prayer re-anchors the የመሃል ጸሎት window.
+                    runCatching { BreathPrayerScheduler.onPrayerRecorded(context) }
                 }
             } finally {
                 pending.finish()

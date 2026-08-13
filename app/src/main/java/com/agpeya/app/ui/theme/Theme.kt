@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.Color
 import com.agpeya.app.data.ThemeChoice
 
 // Green & gold identity. Deep liturgical green carries the ground; gold is the
-// voice of what matters — counts, streaks, verse numbers, your place. Sage marks
+// voice of what matters — counts, prayer days, verse numbers, your place. Sage marks
 // what is completed.
 //
 // Two rules govern this file:

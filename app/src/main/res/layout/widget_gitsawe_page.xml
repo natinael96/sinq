@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  One page of the የዕለቱ ግጻዌ widget stack — today's readings, or tomorrow's.
+  The card carries its own background so the page behind it peeks out of the
+  StackView, which is what tells the user the widget can be swiped.
+
+  Same constraints as before: plain RemoteViews-supported views only
+  (LinearLayout/TextView/ImageView) — this renders in the launcher's process.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_page_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@drawable/widget_background"
+    android:paddingStart="14dp"
+    android:paddingEnd="14dp"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp">
+
+    <!-- Kicker · Ethiopian date, on one line to keep the header cheap.
+         Today reads "የዕለቱ ግጻዌ · …", tomorrow "ነገ · …". -->
+    <TextView
+        android:id="@+id/widget_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="#E4BC5A"
+        android:textSize="12sp"
+        android:letterSpacing="0.04"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <!-- The day's heading -->
+    <TextView
+        android:id="@+id/widget_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:textColor="#F2EDDE"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:lineSpacingMultiplier="1.1"
+        android:maxLines="2"
+        android:ellipsize="end" />
+
+    <!-- Hairline between the heading and the readings. An ImageView, not a bare
+         View: RemoteViews only inflates a fixed set of widget classes, and
+         View isn't one of them. -->
+    <ImageView
+        android:id="@+id/widget_rule"
+        android:layout_width="44dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="9dp"
+        android:layout_marginBottom="9dp"
+        android:contentDescription="@null"
+        android:background="#2F5B4C" />
+
+    <!-- Readings: role pill + reference, the pair centred as a group -->
+    <LinearLayout
+        android:id="@+id/widget_row_1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:baselineAligned="false">
+
+        <TextView
+            android:id="@+id/widget_role_1"
+            android:layout_width="52dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/widget_role_chip"
+            android:gravity="center"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:textColor="#E4BC5A"
+            android:textSize="11sp"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/widget_ref_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="9dp"
+            android:textColor="#F2EDDE"
+            android:textSize="14sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/widget_row_2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="7dp"
+        android:baselineAligned="false">
+
+        <TextView
+            android:id="@+id/widget_role_2"
+            android:layout_width="52dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/widget_role_chip"
+            android:gravity="center"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:textColor="#E4BC5A"
+            android:textSize="11sp"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/widget_ref_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="9dp"
+            android:textColor="#F2EDDE"
+            android:textSize="14sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+    </LinearLayout>
+
+    <!-- የዕለቱ ቅዳሴ — the day's anaphora, one quiet line under the readings -->
+    <TextView
+        android:id="@+id/widget_kidase"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="9dp"
+        android:gravity="center"
+        android:textColor="#9DBBAD"
+        android:textSize="11sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:visibility="gone" />
+
+    <!-- Shown instead of the rows when the day has no bundled reading -->
+    <TextView
+        android:id="@+id/widget_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="#9DBBAD"
+        android:textSize="13sp"
+        android:visibility="gone" />
+</LinearLayout>

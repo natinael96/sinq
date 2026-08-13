@@ -54,8 +54,8 @@ class MainActivity : ComponentActivity() {
     // (onNewIntent, singleTask reuses this instance) reaches the NavHost too.
     private val pendingDeepLinkHourId = mutableStateOf<String?>(null)
 
-    // Set when opened from the nightly streak-reminder notification.
-    private val pendingOpenStreak = mutableStateOf(false)
+    // Set when opened from the nightly reminder notification.
+    private val pendingOpenJourney = mutableStateOf(false)
 
     // Set when opened from the morning ግጻዌ-reminder notification.
     private val pendingOpenGitsawe = mutableStateOf(false)
@@ -85,8 +85,8 @@ class MainActivity : ComponentActivity() {
                         AgpeyaNavHost(
                             deepLinkHourId = pendingDeepLinkHourId.value,
                             onDeepLinkHandled = { pendingDeepLinkHourId.value = null },
-                            openStreak = pendingOpenStreak.value,
-                            onStreakHandled = { pendingOpenStreak.value = false },
+                            openJourney = pendingOpenJourney.value,
+                            onJourneyHandled = { pendingOpenJourney.value = false },
                             openGitsawe = pendingOpenGitsawe.value,
                             onGitsaweHandled = { pendingOpenGitsawe.value = false },
                         )
@@ -113,7 +113,7 @@ class MainActivity : ComponentActivity() {
             intent.removeExtra(ReminderScheduler.EXTRA_HOUR_ID)
         }
         if (intent.getBooleanExtra(StreakReminderScheduler.EXTRA_OPEN_STREAK, false)) {
-            pendingOpenStreak.value = true
+            pendingOpenJourney.value = true
             intent.removeExtra(StreakReminderScheduler.EXTRA_OPEN_STREAK)
         }
         if (intent.getBooleanExtra(com.agpeya.app.reminders.GitsaweReminderScheduler.EXTRA_OPEN_GITSAWE, false)) {
@@ -142,8 +142,8 @@ private fun NavController.switchTab(tab: Tab) {
 private fun AgpeyaNavHost(
     deepLinkHourId: String?,
     onDeepLinkHandled: () -> Unit,
-    openStreak: Boolean,
-    onStreakHandled: () -> Unit,
+    openJourney: Boolean,
+    onJourneyHandled: () -> Unit,
     openGitsawe: Boolean,
     onGitsaweHandled: () -> Unit,
 ) {
@@ -160,8 +160,8 @@ private fun AgpeyaNavHost(
     // only re-armed on boot/update/time-change or a mode edit, so an OEM
     // battery manager force-stopping the app (which cancels all pending alarms)
     // would silence prayer reminders for days until the next reboot. Rearming
-    // here is idempotent — rescheduleAll cancels and re-adds; the streak reuses
-    // its single alarm — so opening the app restores anything that was dropped.
+    // here is idempotent — rescheduleAll cancels and re-adds; the nightly nudge
+    // reuses its single alarm — so opening the app restores anything dropped.
     LaunchedEffect(ready) {
         if (ready) {
             runCatching {
@@ -181,6 +181,26 @@ private fun AgpeyaNavHost(
                     SettingsRepository.gitsaweReminder(context).first(),
                 )
             }
+            runCatching {
+                com.agpeya.app.reminders.BreathPrayerScheduler.sync(
+                    context,
+                    SettingsRepository.breathReminder(context).first(),
+                )
+            }
+            runCatching {
+                com.agpeya.app.reminders.SpecialHabitReminderScheduler.sync(
+                    context,
+                    com.agpeya.app.reminders.SpecialHabit.ALMS,
+                    SettingsRepository.almsReminder(context).first(),
+                )
+            }
+            runCatching {
+                com.agpeya.app.reminders.SpecialHabitReminderScheduler.sync(
+                    context,
+                    com.agpeya.app.reminders.SpecialHabit.REPENTANCE,
+                    SettingsRepository.repentanceReminder(context).first(),
+                )
+            }
         }
     }
 
@@ -194,11 +214,11 @@ private fun AgpeyaNavHost(
         }
     }
 
-    // Opened from the streak-reminder notification → jump to the Streak tab.
-    LaunchedEffect(ready, openStreak) {
-        if (ready && openStreak) {
-            navController.switchTab(Tab.STREAK)
-            onStreakHandled()
+    // Opened from the nightly reminder notification → jump to the Journey tab.
+    LaunchedEffect(ready, openJourney) {
+        if (ready && openJourney) {
+            navController.switchTab(Tab.JOURNEY)
+            onJourneyHandled()
         }
     }
 
@@ -320,8 +340,8 @@ private fun AgpeyaNavHost(
                 onBack = { navController.popBackStack() },
             )
         }
-        composable(Tab.STREAK.route) {
-            com.agpeya.app.ui.habits.StreakScreen(
+        composable(Tab.JOURNEY.route) {
+            com.agpeya.app.ui.habits.JourneyScreen(
                 onSelectTab = navController::switchTab,
                 onManageHabits = { navController.navigate("habits") { launchSingleTop = true } },
             )

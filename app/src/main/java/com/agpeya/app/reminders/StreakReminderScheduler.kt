@@ -9,8 +9,8 @@ import java.time.LocalTime
 import java.time.ZoneId
 
 /**
- * Schedules the nightly nudge to fill in today's streak (a gentle notification,
- * not the ringing prayer alarm). Fires once at the user's chosen time (21:30
+ * Schedules the nightly nudge to close the day with prayer (a gentle
+ * notification, not the ringing prayer alarm). Fires once at the user's chosen time (21:30
  * unless changed in Settings); the receiver re-arms the next day (chain
  * pattern), and boot/update/time changes re-arm too. Re-arming after a time
  * change needs no cancel: the PendingIntent is identity-matched, so setExact
@@ -18,6 +18,8 @@ import java.time.ZoneId
  */
 object StreakReminderScheduler {
 
+    // Action and extra keep their historical names: the extra rides in
+    // already-issued PendingIntents, and renaming buys nothing user-visible.
     const val ACTION_STREAK_REMINDER = "com.agpeya.app.STREAK_REMINDER"
     const val EXTRA_OPEN_STREAK = "openStreak"
     private const val REQUEST_CODE = 9100

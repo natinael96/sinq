@@ -17,8 +17,10 @@ private val Context.habitsDataStore by preferencesDataStore(name = "habits")
 
 /**
  * Habit tracking: daily check-off records plus a customizable habit list
- * (defaults + user-created). Streak/heatmap math is exposed as pure functions
- * (no Context) so it can be unit-tested. Mirrors HoursRepository's shape.
+ * (defaults + user-created). Prayer-day/heatmap math is exposed as pure
+ * functions (no Context) so it can be unit-tested. Mirrors HoursRepository's
+ * shape. The period-level metric (this month / this fast) lives in
+ * [PrayerJourney], which derives from these same records.
  */
 object HabitsRepository {
 
@@ -115,7 +117,7 @@ object HabitsRepository {
         return if (includeHidden) ordered else ordered.filterNot { it in state.hidden }
     }
 
-    // ---- Pure streak / heatmap math (no Context; unit-tested) ----
+    // ---- Pure prayer-day / heatmap math (no Context; unit-tested) ----
 
     private fun done(records: Map<String, Set<String>>, date: LocalDate): Set<String> =
         records[date.toString()] ?: emptySet()
@@ -140,69 +142,32 @@ object HabitsRepository {
     }
 
     /**
-     * Consecutive completed days ending today — or yesterday if today isn't yet
-     * marked, so the streak doesn't visibly reset mid-day. Breaks on a gap.
+     * Distinct days in [start]..[endInclusive] a habit was checked off. Days,
+     * not events: a day is a day however many times it was marked. Gaps in
+     * between change nothing — the count never resets.
      */
-    fun currentStreak(records: Map<String, Set<String>>, habitId: String, today: LocalDate): Int {
-        var cursor = if (habitId in done(records, today)) today else today.minusDays(1)
-        var count = 0
-        while (habitId in done(records, cursor)) {
-            count++
-            cursor = cursor.minusDays(1)
-        }
-        return count
-    }
+    fun habitDaysBetween(
+        records: Map<String, Set<String>>,
+        habitId: String,
+        start: LocalDate,
+        endInclusive: LocalDate,
+    ): Int = daysMatching(records, start, endInclusive) { habitId in it }
 
-    /** Longest run of consecutive calendar days the habit was completed, ever. */
-    fun longestStreak(records: Map<String, Set<String>>, habitId: String): Int {
-        val dates = records.filterValues { habitId in it }.keys
-            .mapNotNull { runCatching { LocalDate.parse(it) }.getOrNull() }
-            .sorted()
-        if (dates.isEmpty()) return 0
-        var best = 1
-        var run = 1
-        for (i in 1 until dates.size) {
-            if (dates[i] == dates[i - 1].plusDays(1)) run++ else run = 1
-            if (run > best) best = run
-        }
-        return best
-    }
+    /** Distinct days in the range with at least one prayer hour marked. */
+    fun prayerDaysBetween(
+        records: Map<String, Set<String>>,
+        start: LocalDate,
+        endInclusive: LocalDate,
+    ): Int = daysMatching(records, start, endInclusive) { ids -> ids.any { it.startsWith("hour_") } }
 
-    /** Prayer aggregate: consecutive days with at least one hour prayed. */
-    fun prayerCurrentStreak(records: Map<String, Set<String>>, today: LocalDate): Int {
-        fun prayed(d: LocalDate) = done(records, d).any { it.startsWith("hour_") }
-        var cursor = if (prayed(today)) today else today.minusDays(1)
-        var count = 0
-        while (prayed(cursor)) {
-            count++
-            cursor = cursor.minusDays(1)
-        }
-        return count
-    }
-
-    /** Prayer aggregate: longest run of days with at least one hour prayed. */
-    fun prayerLongestStreak(records: Map<String, Set<String>>): Int {
-        val dates = records.filterValues { set -> set.any { it.startsWith("hour_") } }.keys
-            .mapNotNull { runCatching { LocalDate.parse(it) }.getOrNull() }
-            .sorted()
-        if (dates.isEmpty()) return 0
-        var best = 1
-        var run = 1
-        for (i in 1 until dates.size) {
-            if (dates[i] == dates[i - 1].plusDays(1)) run++ else run = 1
-            if (run > best) best = run
-        }
-        return best
-    }
-
-    /** Consecutive days with at least one habit completed (same day-tolerant rule). */
-    fun overallCurrentStreak(records: Map<String, Set<String>>, today: LocalDate): Int {
-        var cursor = if (done(records, today).isNotEmpty()) today else today.minusDays(1)
-        var count = 0
-        while (done(records, cursor).isNotEmpty()) {
-            count++
-            cursor = cursor.minusDays(1)
-        }
-        return count
+    private fun daysMatching(
+        records: Map<String, Set<String>>,
+        start: LocalDate,
+        endInclusive: LocalDate,
+        predicate: (Set<String>) -> Boolean,
+    ): Int = records.count { (key, ids) ->
+        if (!predicate(ids)) return@count false
+        val day = runCatching { LocalDate.parse(key) }.getOrNull() ?: return@count false
+        !day.isBefore(start) && !day.isAfter(endInclusive)
     }
 }

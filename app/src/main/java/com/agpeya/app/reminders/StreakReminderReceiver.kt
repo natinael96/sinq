@@ -9,17 +9,24 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.agpeya.app.MainActivity
 import com.agpeya.app.R
-import com.agpeya.app.data.HabitsRepository
+import com.agpeya.app.data.FastingCalendar
+import com.agpeya.app.data.GitsaweRepository
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.stringsFor
+import com.agpeya.app.ui.strings.Strings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import java.time.LocalDate
 
 /**
- * The nightly streak nudge fired. Re-arms tomorrow, then (unless turned off)
- * posts a notification whose body carries the streak at stake and whose tap
- * opens the Streak screen — the same shape as the morning ግጻዌ nudge.
+ * The nightly nudge fired. Re-arms tomorrow, then (unless turned off) posts an
+ * invitation to close the day with prayer; its tap opens the Journey screen —
+ * the same shape as the morning ግጻዌ nudge.
+ *
+ * The wording never depends on history — no count carried, nothing "at stake",
+ * nothing to lose — so the notification is equally true on a first night, a
+ * hundredth night, or the night someone comes back after a month away. It does
+ * know the Church's day: a feast is named, a fast colours the invitation.
  *
  * It fires whether or not something was already logged today. It used to skip
  * itself on any logged day, which read as the reminder being broken: the nights
@@ -37,16 +44,8 @@ class StreakReminderReceiver : BroadcastReceiver() {
                     StreakReminderScheduler.schedule(context)
 
                     val s = stringsFor(SettingsRepository.language(context).first())
-                    // Like the ግጻዌ body carries the day's reading, this one
-                    // carries the streak: what tonight's log keeps alive.
-                    val streak = runCatching {
-                        HabitsRepository.overallCurrentStreak(
-                            HabitsRepository.current(context).records,
-                            LocalDate.now(),
-                        )
-                    }.getOrDefault(0)
-                    val body = if (streak > 0) s.streakReminderKeep(streak) else s.streakReminderBody
-                    ensureChannel(context, s.streakChannelName)
+                    val body = liturgicalBody(context, s)
+                    ensureChannel(context, s.nightReminderChannel)
                     // Request code must differ from ReminderScheduler's alarm-clock
                     // show intent (code 0): extras don't distinguish PendingIntents,
                     // so sharing the code lets each overwrite the other's extras.
@@ -61,7 +60,7 @@ class StreakReminderReceiver : BroadcastReceiver() {
                     )
                     val notification = NotificationCompat.Builder(context, CHANNEL_ID)
                         .setSmallIcon(R.drawable.ic_notification)
-                        .setContentTitle(s.streakReminderTitle)
+                        .setContentTitle(s.nightReminderTitle)
                         .setContentText(body)
                         .setStyle(NotificationCompat.BigTextStyle().bigText(body))
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -75,6 +74,21 @@ class StreakReminderReceiver : BroadcastReceiver() {
                 pending.finish()
             }
         }.start()
+    }
+
+    /**
+     * The invitation, coloured by the Church's day where the calendar knows it:
+     * a feast is named first, then a running fast (or the ረቡዕ/ዓርብ rule), then
+     * the plain evening wording. Each lookup fails soft to the next.
+     */
+    private suspend fun liturgicalBody(context: Context, s: Strings): String {
+        val today = LocalDate.now()
+        runCatching { GitsaweRepository.readingsFor(context, today).feasts.firstOrNull()?.amharicName }
+            .getOrNull()?.let { return s.nightReminderFeastBody(it) }
+        val fasting = runCatching {
+            FastingCalendar.fastOn(today) != null || FastingCalendar.isWeeklyFastDay(today)
+        }.getOrDefault(false)
+        return if (fasting) s.nightReminderFastBody else s.nightReminderBody
     }
 
     private fun ensureChannel(context: Context, name: String) {

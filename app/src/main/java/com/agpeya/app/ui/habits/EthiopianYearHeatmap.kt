@@ -35,9 +35,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.agpeya.app.data.FastingCalendar
 import com.agpeya.app.data.HabitsRepository
 import com.agpeya.app.ui.common.EthiopianDate
 import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.theme.Spacing
+import com.agpeya.app.ui.theme.sinqColors
 import java.time.LocalDate
 
 private val CELL = 13.dp
@@ -82,13 +85,28 @@ fun EthiopianYearHeatmap(
         list
     }
 
+    // The fasts touching the displayed year, so days can be read inside the
+    // Church's calendar. A quiet wash on *unprayed* cells only — prayer still
+    // shows as gold, and the liturgical context never outshines the history.
+    val fasts = remember(ecYear) {
+        (ecYear - 1..ecYear + 1).flatMap {
+            runCatching { FastingCalendar.fastsOf(it) }.getOrDefault(emptyList())
+        }
+    }
+    fun inFast(date: LocalDate): Boolean = fasts.any { it.contains(date) }
+
     val empty = MaterialTheme.colorScheme.surfaceVariant
     val gold = MaterialTheme.colorScheme.secondary
+    val fastWash = sinqColors.hero.copy(alpha = 0.14f)
     fun cellColor(date: LocalDate): Color {
         if (date.isBefore(start) || date.isAfter(end)) return Color.Transparent
-        if (date.isAfter(today)) return empty.copy(alpha = 0.35f) // future day
+        if (date.isAfter(today)) {
+            // Future days stay faint placeholders; an upcoming fast shows even
+            // fainter green, so the year ahead keeps its shape.
+            return if (inFast(date)) fastWash.copy(alpha = 0.08f) else empty.copy(alpha = 0.35f)
+        }
         return when (HabitsRepository.level(HabitsRepository.dayCount(records, date), maxPossible)) {
-            0 -> empty
+            0 -> if (inFast(date)) fastWash else empty
             1 -> gold.copy(alpha = 0.30f)
             2 -> gold.copy(alpha = 0.50f)
             3 -> gold.copy(alpha = 0.75f)
@@ -190,6 +208,9 @@ fun EthiopianYearHeatmap(
                 Spacer(Modifier.padding(GAP).size(CELL).clip(RoundedCornerShape(2.dp)).background(c))
             }
             Text(s.more, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.width(Spacing.md))
+            Spacer(Modifier.padding(GAP).size(CELL).clip(RoundedCornerShape(2.dp)).background(fastWash))
+            Text(s.fastLegendLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
         // Year switcher

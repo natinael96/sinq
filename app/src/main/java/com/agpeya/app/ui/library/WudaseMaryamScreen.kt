@@ -139,6 +139,10 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
         }
 
         val section = sections.getOrNull(selected.coerceIn(0, sections.size - 1))
+        // Live stanza selection: tap anchors, next tap moves the end; -1 = none.
+        var selA by rememberSaveable(selected, geez) { mutableIntStateOf(-1) }
+        var selB by rememberSaveable(selected, geez) { mutableIntStateOf(-1) }
+        val selRange = com.agpeya.app.ui.reading.flatSelectionRange(selA, selB)
         val listState = androidx.compose.foundation.lazy.rememberLazyListState()
         // Jump back to the top when the user picks a different section — the keys
         // are positional, so the old scroll offset would otherwise carry deep into
@@ -148,9 +152,10 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
             if (lastShown != -1 && lastShown != selected) listState.scrollToItem(0)
             lastShown = selected
         }
+        Box(Modifier.fillMaxSize().padding(innerPadding)) {
         LazyColumn(
             state = listState,
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(horizontal = Spacing.screen),
         ) {
             item(key = "lang") {
@@ -173,19 +178,46 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
                 }
                 val stanzas = if (geez) section.ge else section.am
                 items(stanzas.size, key = { "st_$it" }) { i ->
-                    // Selectable per stanza: there are no verse taps here to
-                    // swallow, so long-press-to-copy costs nothing.
+                    // Long-press still gives native character selection; a tap
+                    // anchors/extends the stanza run for the share bar below.
                     androidx.compose.foundation.text.selection.SelectionContainer {
                         Text(
                             text = stanzas[i],
                             style = readingBodyStyle(bodyFontSp),
                             color = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(
+                                    if (i in selRange)
+                                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.22f)
+                                    else androidx.compose.ui.graphics.Color.Transparent
+                                )
+                                .clickable {
+                                    val (a, bSel) = com.agpeya.app.ui.reading.advanceFlatSelection(selA, i)
+                                    selA = a
+                                    selB = bSel
+                                }
+                                .padding(bottom = 16.dp),
                         )
                     }
                 }
             }
             item { Spacer(Modifier.height(48.dp)) }
+        }
+        val stanzasNow = if (section == null) emptyList() else (if (geez) section.ge else section.am)
+        val selBody = if (selRange.isEmpty()) null
+        else stanzasNow.filterIndexed { i, _ -> i in selRange }.joinToString("\n\n").ifBlank { null }
+        val sectionTitle = section?.let { if (geez) it.titleGe else it.titleAm }
+        com.agpeya.app.ui.reading.SelectionShareBar(
+            visible = selA >= 0,
+            onDismiss = { selA = -1; selB = -1 },
+            shareText = selBody?.let { listOfNotNull(sectionTitle, it).joinToString("\n\n") },
+            shareImage = selBody?.let {
+                com.agpeya.app.ui.common.SharePayload(body = it, kicker = s.wudaseMariam, title = sectionTitle)
+            },
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
         }
     }
 }

@@ -14,15 +14,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
-import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -35,9 +32,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.agpeya.app.data.FastingCalendar
 import com.agpeya.app.data.HabitsRepository
+import com.agpeya.app.data.PrayerJourney
 import com.agpeya.app.model.HabitsState
 import com.agpeya.app.ui.common.AgpeyaBottomBar
+import com.agpeya.app.ui.common.Candle
+import com.agpeya.app.ui.common.EthiopianDate
 import com.agpeya.app.ui.common.Tab
 import com.agpeya.app.ui.common.HeroCard
 import com.agpeya.app.ui.common.NavRow
@@ -51,14 +52,12 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.strings.Strings
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -73,8 +72,30 @@ private fun builtInName(id: String, s: Strings): String = when (id) {
 fun habitName(id: String, state: HabitsState, s: Strings): String =
     state.names[id] ?: state.custom.find { it.id == id }?.name ?: builtInName(id, s)
 
+/**
+ * The one sentence Home and Journey both lead with: distinct days prayed in
+ * the current period. During a fast the period is the fast (named in Amharic —
+ * fast names are content, like psalm text); otherwise the Ethiopian month.
+ */
+fun journeyLine(summary: PrayerJourney.Summary, s: Strings): String {
+    val fast = summary.fast
+    return if (fast != null && summary.fastDay != null) {
+        s.journeyFastLine(fast.nameAm, summary.fastDay, summary.daysPrayed)
+    } else {
+        s.journeyMonthLine(summary.daysPrayed)
+    }
+}
+
+/**
+ * ጉዞ — where have I walked?
+ *
+ * The hero holds today's candle and the period's prayer-day count; the year
+ * heatmap below is the historical view. Nothing on this screen is consecutive,
+ * so nothing here can "break": a returning user sees the same screen as a
+ * faithful one, with today's candle waiting.
+ */
 @Composable
-fun StreakScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
+fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val s = LocalStrings.current
@@ -91,12 +112,17 @@ fun StreakScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
         HabitsRepository.orderedHabitIds(state, includeHidden = false).map { it to habitName(it, state, s) }
     }
     var prayersExpanded by remember { mutableStateOf(false) }
-    val overall = HabitsRepository.overallCurrentStreak(state.records, today)
+    val summary = remember(state, today) { PrayerJourney.summarize(state.records, today) }
+    // Per-habit summaries always count the Ethiopian month, even during a fast:
+    // the hero speaks the period's language, the private records stay steady.
+    val monthStart = remember(today) {
+        EthiopianDate.from(today).let { EthiopianDate(it.year, it.month, 1).toGregorian() }
+    }
     var selectedDay by remember { mutableStateOf<LocalDate?>(null) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        bottomBar = { AgpeyaBottomBar(current = Tab.STREAK, onSelect = onSelectTab) },
+        bottomBar = { AgpeyaBottomBar(current = Tab.JOURNEY, onSelect = onSelectTab) },
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -105,54 +131,41 @@ fun StreakScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
             contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.md),
         ) {
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(s.streaksTitle, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
-                    androidx.compose.material3.IconButton(onClick = {
-                        scope.launch {
-                            val pName = com.agpeya.app.data.SettingsRepository.profileName(context).first()
-                            val cName = com.agpeya.app.data.SettingsRepository.christianName(context).first()
-                            StreakShare.share(
-                                context = context,
-                                records = state.records,
-                                today = today,
-                                name = cName.ifBlank { pName },
-                                maxPossible = hourItems.size + habitItems.size,
-                                s = s,
-                            )
-                        }
-                    }) {
-                        Icon(
-                            androidx.compose.material.icons.Icons.Outlined.Share,
-                            contentDescription = s.shareAction,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
+                Text(s.journeyTitle, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
                 Spacer(Modifier.height(Spacing.lg))
-                // The one hero on this screen. Restrained on purpose: a number
-                // and what it counts, no confetti — the point is consistency in
-                // prayer, not a score.
+                // The one hero on this screen: today's candle and the period's
+                // count of days prayed. Restrained on purpose — the point is a
+                // life of prayer, not a score, and the wording stays true
+                // however many days were missed.
                 HeroCard(
-                    glow = overall > 0,
+                    glow = summary.prayedToday,
                     contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.xxl),
                 ) {
                     Column(Modifier.weight(1f)) {
                         Text(
-                            s.currentStreakLabel,
+                            when {
+                                summary.returning -> s.welcomeBack
+                                summary.prayedToday -> s.journeyTodayLit
+                                else -> s.journeyTodayUnlit
+                            },
                             style = MaterialTheme.typography.labelMedium,
                             color = sinqColors.onHeroMuted,
                         )
                         Spacer(Modifier.height(Spacing.xs))
                         Text(
-                            s.daysUnit(overall),
+                            journeyLine(summary, s),
                             style = MaterialTheme.typography.titleLarge,
                             color = sinqColors.onHero,
                         )
                     }
+                    Spacer(Modifier.width(Spacing.lg))
+                    Candle(
+                        lit = summary.prayedToday,
+                        contentDescription = if (summary.prayedToday) s.journeyTodayLit else s.journeyTodayUnlit,
+                        bodyColor = sinqColors.onHeroMuted,
+                        flameColor = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.size(width = 30.dp, height = 52.dp),
+                    )
                 }
                 Spacer(Modifier.height(Spacing.xxl))
                 SectionHeader(s.todayLabel)
@@ -197,9 +210,19 @@ fun StreakScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                     CheckRow(
                         name = name,
                         done = id in (state.records[todayKey] ?: emptySet()),
-                        streak = HabitsRepository.currentStreak(state.records, id, today),
                         indented = true,
-                        onToggle = { scope.launch { HabitsRepository.toggle(context, todayKey, id) } },
+                        onToggle = {
+                            scope.launch {
+                                HabitsRepository.toggle(context, todayKey, id)
+                                // Marking an hour prayed moves the የመሃል ጸሎት
+                                // anchor — only when it was turned ON.
+                                val nowDone = HabitsRepository.current(context)
+                                    .records[todayKey]?.contains(id) == true
+                                if (nowDone) {
+                                    com.agpeya.app.reminders.BreathPrayerScheduler.onPrayerRecorded(context)
+                                }
+                            }
+                        },
                     )
                 }
             }
@@ -209,14 +232,17 @@ fun StreakScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                 CheckRow(
                     name = name,
                     done = id in (state.records[todayKey] ?: emptySet()),
-                    streak = HabitsRepository.currentStreak(state.records, id, today),
                     indented = false,
                     onToggle = { scope.launch { HabitsRepository.toggle(context, todayKey, id) } },
                 )
             }
 
+            // The year heatmap is the historical view — the story is density
+            // and return across the Church's year, not any one unbroken run.
             item {
-                Spacer(Modifier.height(28.dp))
+                Spacer(Modifier.height(Spacing.xxl))
+                SectionHeader(s.yearJourneyHeader)
+                Spacer(Modifier.height(Spacing.md))
                 EthiopianYearHeatmap(
                     records = state.records,
                     today = today,
@@ -226,9 +252,18 @@ fun StreakScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                 )
                 selectedDay?.let { day ->
                     val n = HabitsRepository.dayCount(state.records, day)
+                    // Name the fast the tapped day fell in, if any — the day is
+                    // read inside the Church's year, not a productivity grid.
+                    val fastName = remember(day) {
+                        runCatching { FastingCalendar.fastOn(day)?.nameAm }.getOrNull()
+                    }
                     Spacer(Modifier.height(10.dp))
                     Text(
-                        text = "${com.agpeya.app.ui.common.formatEthiopian(day, s)} · ${s.habitsCount(n)}",
+                        text = listOfNotNull(
+                            com.agpeya.app.ui.common.formatEthiopian(day, s),
+                            s.habitsCount(n),
+                            fastName,
+                        ).joinToString(" · "),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.secondary,
                     )
@@ -238,13 +273,15 @@ fun StreakScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                 Spacer(Modifier.height(Spacing.xs))
             }
 
+            // Private per-habit records: days kept this month. Distinct days,
+            // no runs, no bests — self-knowledge rather than a scoreboard.
             item {
                 StatRow(
                     name = s.habitPrayer,
-                    now = HabitsRepository.prayerCurrentStreak(state.records, today),
-                    best = HabitsRepository.prayerLongestStreak(state.records),
+                    detail = s.daysThisMonth(
+                        HabitsRepository.prayerDaysBetween(state.records, monthStart, today),
+                    ),
                     indented = false,
-                    s = s,
                 )
             }
             if (prayersExpanded) {
@@ -252,10 +289,10 @@ fun StreakScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                     val (id, name) = hourItems[i]
                     StatRow(
                         name = name,
-                        now = HabitsRepository.currentStreak(state.records, id, today),
-                        best = HabitsRepository.longestStreak(state.records, id),
+                        detail = s.daysThisMonth(
+                            HabitsRepository.habitDaysBetween(state.records, id, monthStart, today),
+                        ),
                         indented = true,
-                        s = s,
                     )
                 }
             }
@@ -263,10 +300,10 @@ fun StreakScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                 val (id, name) = habitItems[i]
                 StatRow(
                     name = name,
-                    now = HabitsRepository.currentStreak(state.records, id, today),
-                    best = HabitsRepository.longestStreak(state.records, id),
+                    detail = s.daysThisMonth(
+                        HabitsRepository.habitDaysBetween(state.records, id, monthStart, today),
+                    ),
                     indented = false,
-                    s = s,
                 )
             }
 
@@ -283,7 +320,6 @@ fun StreakScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
 private fun CheckRow(
     name: String,
     done: Boolean,
-    streak: Int,
     indented: Boolean,
     onToggle: () -> Unit,
 ) {
@@ -327,18 +363,11 @@ private fun CheckRow(
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.weight(1f),
         )
-        if (streak > 0) {
-            Text(
-                text = streak.toString(),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.secondary,
-            )
-        }
     }
 }
 
 @Composable
-private fun StatRow(name: String, now: Int, best: Int, indented: Boolean, s: Strings) {
+private fun StatRow(name: String, detail: String, indented: Boolean) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -349,7 +378,7 @@ private fun StatRow(name: String, now: Int, best: Int, indented: Boolean, s: Str
     ) {
         Text(name, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
         Text(
-            text = "${s.streakCurrent} $now · ${s.streakBest} $best",
+            text = detail,
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

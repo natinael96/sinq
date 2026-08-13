@@ -59,7 +59,7 @@ val AgpeyaShapes = Shapes(
 
 /** Icon sizes. Anything drawn as an icon uses one of these three. */
 object IconSize {
-    /** Inline with text — a check beside a label, a streak flame. */
+    /** Inline with text — a check beside a label, a small candle. */
     val small = 18.dp
     /** The default: app-bar actions, row affordances, navigation. */
     val medium = 22.dp
@@ -131,7 +131,7 @@ fun rememberMotion(): Motion {
  * Brand colours that do not map onto a Material role.
  *
  * The deep liturgical green is the app's signature *surface* — the "pray now"
- * card, the streak card, a selected chapter. In Material's dark scheme `primary`
+ * card, the Journey hero, a selected chapter. In Material's dark scheme `primary`
  * has to be a light colour (switches, chips and progress bars are tinted with
  * it), so the hero green cannot live there. It lives here instead, identical in
  * both themes, which is exactly what makes it read as the brand.

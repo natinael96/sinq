@@ -28,7 +28,7 @@ class SystemEventsReceiver : BroadcastReceiver() {
                             HoursRepository.visibleHours(context).associate { it.id to it.name }
                         }.getOrDefault(emptyMap())
                         ReminderScheduler.rescheduleAll(context, names)
-                        // Re-arm the nightly streak nudge too, if it's enabled.
+                        // Re-arm the nightly nudge too, if it's enabled.
                         runCatching {
                             StreakReminderScheduler.sync(
                                 context,
@@ -39,6 +39,26 @@ class SystemEventsReceiver : BroadcastReceiver() {
                             GitsaweReminderScheduler.sync(
                                 context,
                                 SettingsRepository.gitsaweReminder(context).first(),
+                            )
+                        }
+                        runCatching {
+                            SpecialHabitReminderScheduler.sync(
+                                context,
+                                SpecialHabit.ALMS,
+                                SettingsRepository.almsReminder(context).first(),
+                            )
+                        }
+                        runCatching {
+                            SpecialHabitReminderScheduler.sync(
+                                context,
+                                SpecialHabit.REPENTANCE,
+                                SettingsRepository.repentanceReminder(context).first(),
+                            )
+                        }
+                        runCatching {
+                            BreathPrayerScheduler.sync(
+                                context,
+                                SettingsRepository.breathReminder(context).first(),
                             )
                         }
                     }

@@ -124,6 +124,9 @@ fun ScriptureReaderScreen(
     var chapter by rememberSaveable(bookKey) {
         mutableIntStateOf(initialChapter.coerceIn(1, b.chapters.size))
     }
+    // Live verse selection (tap anchors, next tap moves the end); -1 = none.
+    var selA by rememberSaveable(bookKey, chapter) { mutableIntStateOf(-1) }
+    var selB by rememberSaveable(bookKey, chapter) { mutableIntStateOf(-1) }
     val current = remember(b, chapter) { b.chapters.find { it.chapter == chapter } ?: b.chapters.first() }
     // Only the chapter we arrived on shows the cited-verse tint. The cited range
     // is snapped onto verse numbers that actually exist: the Amharic source merges
@@ -221,6 +224,8 @@ fun ScriptureReaderScreen(
             )
         },
     ) { innerPadding ->
+        val selRange = com.agpeya.app.ui.reading.flatSelectionRange(selA, selB)
+        androidx.compose.foundation.layout.Box(Modifier.fillMaxSize()) {
         ReadingColumn(state = listState, innerPadding = innerPadding) {
             item(key = "chapters") {
                 ChapterStrip(
@@ -252,7 +257,19 @@ fun ScriptureReaderScreen(
                         color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = Spacing.sm, vertical = verseGap / 2),
+                            .padding(vertical = verseGap / 2)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(
+                                if (verse.n in selRange)
+                                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.28f)
+                                else androidx.compose.ui.graphics.Color.Transparent
+                            )
+                            .clickable {
+                                val (a, bSel) = com.agpeya.app.ui.reading.advanceFlatSelection(selA, verse.n)
+                                selA = a
+                                selB = bSel
+                            }
+                            .padding(horizontal = Spacing.sm),
                     )
                 }
                 if (tinted) {
@@ -270,6 +287,23 @@ fun ScriptureReaderScreen(
                 }
             }
             item { Spacer(Modifier.height(Spacing.huge)) }
+        }
+        // Selected verses ready to copy or leave as text or a card. No
+        // highlight palette here — highlights are keyed to prayer sections.
+        val chapterTitle = "${b.nameAm} ${s.chapterUnit} ${geezNumeral(chapter)}"
+        val selBody = if (selRange.isEmpty()) null
+        else current.verses.filter { it.n in selRange }
+            .joinToString("\n") { "${geezNumeral(it.n)}  ${it.text}" }
+            .ifBlank { null }
+        com.agpeya.app.ui.reading.SelectionShareBar(
+            visible = selA >= 0,
+            onDismiss = { selA = -1; selB = -1 },
+            shareText = selBody?.let { "$chapterTitle\n$it" },
+            shareImage = selBody?.let {
+                com.agpeya.app.ui.common.SharePayload(body = it, kicker = s.scripturesTitle, title = chapterTitle)
+            },
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
         }
     }
 }
