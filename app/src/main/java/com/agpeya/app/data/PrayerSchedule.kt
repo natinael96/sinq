@@ -30,27 +30,4 @@ object PrayerSchedule {
         val i = hours.indexOfFirst { it.id == hourId }
         return if (i >= 0 && i < hours.lastIndex) hours[i + 1] else null
     }
-
-    /** How much of [hourId] has been read today: done count over total. */
-    fun progressOf(
-        sectionIds: List<String>,
-        done: Set<String>,
-    ): Pair<Int, Int> = sectionIds.count { it in done } to sectionIds.size
-
-    /**
-     * The hour worth offering to resume: the last one opened today, if it was
-     * started but not finished. Null when nothing is part-done — an untouched
-     * or completed hour is not something to "resume".
-     */
-    fun resumable(
-        progress: PrayerProgressRepository.DayProgress,
-        sectionIdsOf: (String) -> List<String>,
-    ): String? {
-        val hourId = progress.lastHourId ?: return null
-        val done = progress.done[hourId] ?: return null
-        if (done.isEmpty()) return null
-        val all = sectionIdsOf(hourId)
-        if (all.isEmpty()) return null
-        return hourId.takeIf { done.count { id -> id in all } < all.size }
-    }
 }

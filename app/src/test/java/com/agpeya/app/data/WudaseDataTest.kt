@@ -20,7 +20,6 @@ class WudaseDataTest {
     @Test
     fun `decodes with all ten sections`() {
         assertEquals(10, content.sections.size)
-        assertTrue(content.attribution.isNotBlank())
         // The daily prayer opens the book, then the seven weekday portions in order.
         assertEquals("daily", content.sections.first().id)
         assertEquals((1..7).toList(), content.sections.filter { it.weekday in 1..7 }.map { it.weekday })

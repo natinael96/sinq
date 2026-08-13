@@ -19,17 +19,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.ContentCopy
@@ -51,7 +47,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
@@ -79,11 +74,10 @@ import com.agpeya.app.ui.theme.sinqColors
  * readers — one reading language across all of them.
  *
  * The layout follows what praying actually looks like: the title sits alone and
- * genuinely centred, the text runs uninterrupted beneath it, and the two
- * controls are placed where each is needed. Bookmarking is a *before* action, so
- * it stays at the head of the section, muted until it is set. Marking a section
- * read is an *after* action, so it waits at the foot — which also means nothing
- * sits between the title and the first verse.
+ * genuinely centred, and the text runs uninterrupted beneath it to the end of
+ * the section. Bookmarking is the only control, and it stays at the head, muted
+ * until it is set — nothing sits between the title and the first verse, and
+ * nothing waits at the foot asking to be tapped.
  */
 @Composable
 internal fun SectionView(
@@ -94,17 +88,14 @@ internal fun SectionView(
     highlights: Map<String, String>,
     onVerseTap: (String) -> Unit,
     citedRange: IntRange = IntRange.EMPTY,
-    /** Today's read-state for this section; null hides the control entirely
-     *  (the Psalter and scripture aren't part of the daily hour cycle). */
-    isRead: Boolean? = null,
-    onToggleRead: () -> Unit = {},
 ) {
     val s = LocalStrings.current
     val haptics = LocalHapticFeedback.current
     val motion = LocalMotion.current
     val bookmarkTint by animateColorAsState(
+        // Muted, but not below the 3:1 an icon control needs against the page.
         targetValue = if (isBookmarked) MaterialTheme.colorScheme.secondary
-        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
+        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
         animationSpec = motion.spec(Motion.standard),
         label = "bookmarkTint",
     )
@@ -163,55 +154,6 @@ internal fun SectionView(
             onVerseTap = onVerseTap,
             citedRange = citedRange,
         )
-        if (isRead != null) {
-            Spacer(Modifier.height(Spacing.lg))
-            MarkReadButton(isRead = isRead, onToggle = onToggleRead)
-        }
-    }
-}
-
-/**
- * The one control at the foot of a section. Quiet when the section is unread —
- * it should not compete with the last verse — and gold once it is done, so
- * scrolling back through an hour shows at a glance how far you got.
- */
-@Composable
-private fun MarkReadButton(isRead: Boolean, onToggle: () -> Unit) {
-    val s = LocalStrings.current
-    val motion = LocalMotion.current
-    val haptics = LocalHapticFeedback.current
-    val tint by animateColorAsState(
-        targetValue = if (isRead) MaterialTheme.colorScheme.secondary
-        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-        animationSpec = motion.spec(Motion.standard),
-        label = "readTint",
-    )
-    Row(
-        modifier = Modifier
-            .heightIn(min = 48.dp)
-            .clip(CircleShape)
-            // `toggleable` carries the read/unread state to a screen reader; a
-            // clickable with Role.Checkbox would announce the role and then have
-            // no state to report.
-            .toggleable(
-                value = isRead,
-                role = Role.Checkbox,
-                onValueChange = {
-                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    onToggle()
-                },
-            )
-            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = if (isRead) Icons.Filled.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
-            contentDescription = null,
-            tint = tint,
-            modifier = Modifier.size(IconSize.small),
-        )
-        Spacer(Modifier.width(Spacing.sm))
-        Text(s.markRead, style = MaterialTheme.typography.labelMedium, color = tint)
     }
 }
 

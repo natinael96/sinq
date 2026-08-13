@@ -30,19 +30,35 @@ class SynaxariumDataTest {
             days += month.days.size
             entries += month.days.sumOf { it.entries.size }
             assertTrue("month $m has days", month.days.isNotEmpty())
+            // The manifest drives the month list; if it disagrees with the file
+            // a month advertises a day the reader cannot open.
+            assertEquals(
+                "manifest day count for month $m",
+                manifest.months.first { it.month == m }.days,
+                month.days.size,
+            )
         }
-        // 365 not 366: Yekatit 3 carried mislabeled wrong-month content in the
-        // source and was removed rather than shipped wrong (renders as empty).
-        assertEquals(365, days)
-        assertEquals(1817, entries)
+        // The whole fixed-calendar book: twelve months of thirty days plus all
+        // six of ጳጉሜን — the synaxarium keeps the leap day whatever the year does.
+        assertEquals(366, days)
+        assertEquals(2308, entries)
     }
 
+    /**
+     * A month must cover 1..n with no gap and no repeat: a duplicate shadows a
+     * day, and a hole leaves the reader on that date with nothing at all.
+     */
     @Test
-    fun `no month contains a duplicate day`() {
+    fun `every month covers its days exactly once`() {
         for (m in 1..13) {
             val month: SynaxariumMonth = json.decodeFromString(File(dir, "$m.json").readText())
             val dayNumbers = month.days.map { it.day }
             assertEquals("month $m has duplicate days", dayNumbers.distinct().size, dayNumbers.size)
+            assertEquals(
+                "month $m skips a day",
+                (1..dayNumbers.size).toList(),
+                dayNumbers.sorted(),
+            )
         }
     }
 

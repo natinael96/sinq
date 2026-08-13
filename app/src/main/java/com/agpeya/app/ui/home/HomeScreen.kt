@@ -127,20 +127,12 @@ fun HomeScreen(
         listOf(PRAYER_AGGREGATE_ID) + HabitsRepository.orderedHabitIds(habitState, includeHidden = false)
     }
     val doneWithAggregate = if (prayedAnyHour) doneToday + PRAYER_AGGREGATE_ID else doneToday
-    // The hours list is long enough to bury everything under it; collapsing keeps
-    // Home scannable. Expanded by default — it's the app's primary content.
-    var hoursExpanded by rememberSaveable { mutableStateOf(true) }
+    // The hours list is long enough to bury everything under it. Collapsed by
+    // default: the prayer for now is already on screen as a card, so the full
+    // list is a thing you go looking for rather than the first thing you scroll past.
+    var hoursExpanded by rememberSaveable { mutableStateOf(false) }
     val seasonLabel = remember(today, s) { liturgicalSeasonLabel(today, s) }
     val currentHourId = remember(hours) { com.agpeya.app.data.PrayerSchedule.currentHourId(hours) }
-    val dayProgress by com.agpeya.app.data.PrayerProgressRepository.progress(context)
-        .collectAsState(initial = com.agpeya.app.data.PrayerProgressRepository.DayProgress())
-    // Section totals per hour, so a row can show "3 of 12" without loading text.
-    val sectionCounts = remember(hours) { hours.associate { it.id to it.sections.size } }
-    val resumeHour = remember(dayProgress, hours, sectionCounts) {
-        com.agpeya.app.data.PrayerSchedule
-            .resumable(dayProgress) { id -> hours.find { it.id == id }?.sections?.map { sec -> sec.id } ?: emptyList() }
-            ?.let { id -> hours.find { it.id == id } }
-    }
     // The day's lectionary, so the ግጻዌ card can name today's reading instead of
     // being a label with an arrow on it.
     val readings by produceState<DayReadings?>(initialValue = null, today) {
@@ -172,21 +164,6 @@ fun HomeScreen(
             if (suggested != null) {
                 item(key = "now") {
                     NowCard(hour = suggested, onClick = { onOpenHour(suggested.id) })
-                    Spacer(Modifier.height(Spacing.md))
-                }
-            }
-
-            // Offered only when an hour was started today and left unfinished. A
-            // slim row rather than a second card — it's a continuation, not a
-            // rival to the prayer for now.
-            resumeHour?.takeIf { it.id != suggested?.id }?.let { h ->
-                item(key = "resume") {
-                    ResumeRow(
-                        hour = h,
-                        done = dayProgress.done[h.id]?.size ?: 0,
-                        total = sectionCounts[h.id] ?: 0,
-                        onClick = { onOpenHour(h.id) },
-                    )
                     Spacer(Modifier.height(Spacing.md))
                 }
             }
@@ -235,9 +212,6 @@ fun HomeScreen(
                     HourRow(
                         hour = hour,
                         isCurrent = hour.id == currentHourId,
-                        progress = sectionCounts[hour.id]?.let { total ->
-                            (dayProgress.done[hour.id]?.size ?: 0) to total
-                        },
                         onClick = { onOpenHour(hour.id) },
                     )
                     if (hour.id != hours.lastOrNull()?.id) SinqDivider()
@@ -466,8 +440,8 @@ private fun TodaySection(
             )
         }
         if (habitIds.isNotEmpty()) {
-            Spacer(Modifier.height(Spacing.lg))
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md), modifier = Modifier.fillMaxWidth()) {
+            Spacer(Modifier.height(Spacing.md))
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm), modifier = Modifier.fillMaxWidth()) {
                 habitIds.take(4).forEach { id ->
                     HabitDot(
                         label = habitName(id, habitState, s),
@@ -477,14 +451,14 @@ private fun TodaySection(
                 }
             }
         }
-        Spacer(Modifier.height(Spacing.lg))
+        Spacer(Modifier.height(Spacing.md))
         HabitHeatmap(
             records = records,
             today = today,
             maxPossible = maxPossible,
-            weeksBack = 14,
+            weeksBack = 10,
             showLegend = false,
-            cell = 9.dp,
+            cell = 7.dp,
             gap = 2.dp,
         )
     }
@@ -500,8 +474,10 @@ private fun TodaySection(
 private fun HabitDot(label: String, done: Boolean, modifier: Modifier = Modifier) {
     val motion = LocalMotion.current
     val tint by animateColorAsState(
+        // 0.75 is the floor that keeps the unlit dot at 3:1 on the ivory ground;
+        // any quieter and it stops being a legible control in the light theme.
         targetValue = if (done) MaterialTheme.colorScheme.secondary
-        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
         animationSpec = motion.spec(Motion.standard),
         label = "habitDotTint",
     )
@@ -509,16 +485,16 @@ private fun HabitDot(label: String, done: Boolean, modifier: Modifier = Modifier
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.semantics(mergeDescendants = true) {
-            contentDescription = if (done) "$label — ${s.markRead}" else label
+            contentDescription = if (done) "$label — ${s.doneLabel}" else label
         },
     ) {
         Icon(
             imageVector = if (done) Icons.Filled.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
             contentDescription = null,
             tint = tint,
-            modifier = Modifier.size(26.dp),
+            modifier = Modifier.size(20.dp),
         )
-        Spacer(Modifier.height(Spacing.xs))
+        Spacer(Modifier.height(Spacing.xxs))
         Text(
             label,
             style = MaterialTheme.typography.labelSmall,
@@ -559,11 +535,9 @@ private fun QuickLink(label: String, onClick: () -> Unit, modifier: Modifier = M
 private fun HourRow(
     hour: Hour,
     isCurrent: Boolean,
-    progress: Pair<Int, Int>?,
     onClick: () -> Unit,
 ) {
     val s = LocalStrings.current
-    val complete = progress != null && progress.second > 0 && progress.first == progress.second
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -588,87 +562,19 @@ private fun HourRow(
                         color = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.14f))
+                            // A lighter wash than it looks like it wants: gold text
+                            // on a gold tint only clears 4.5:1 once the tint drops
+                            // to about 8% on the ivory ground.
+                            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f))
                             .padding(horizontal = Spacing.sm, vertical = Spacing.xxs),
                     )
                 }
-            }
-            // Only shown once the hour has been started today.
-            progress?.takeIf { it.first > 0 }?.let { (done, total) ->
-                Text(
-                    text = s.progressOf(done, total),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
             }
         }
         Text(
             text = hour.timeHint,
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        if (complete) {
-            Spacer(Modifier.width(Spacing.sm))
-            Icon(
-                Icons.Filled.CheckCircle,
-                contentDescription = s.markRead,
-                tint = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.size(IconSize.small),
-            )
-        }
-    }
-}
-
-/**
- * "Pick up where you left off" — only shown for an hour started but unfinished
- * today. A gold rule down the left edge marks it without a second card outline.
- */
-@Composable
-private fun ResumeRow(hour: Hour, done: Int, total: Int, onClick: () -> Unit) {
-    val s = LocalStrings.current
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.medium)
-            .clickable(onClick = onClick)
-            .padding(vertical = Spacing.md),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            Modifier
-                .width(3.dp)
-                .height(34.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.secondary),
-        )
-        Spacer(Modifier.width(Spacing.md))
-        Column(Modifier.weight(1f)) {
-            Text(
-                s.resumePrayer,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.secondary,
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    hour.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-                if (total > 0) {
-                    Spacer(Modifier.width(Spacing.sm))
-                    Text(
-                        s.progressOf(done, total),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-        }
-        Icon(
-            Icons.AutoMirrored.Outlined.ArrowForward,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.size(IconSize.medium),
         )
     }
 }

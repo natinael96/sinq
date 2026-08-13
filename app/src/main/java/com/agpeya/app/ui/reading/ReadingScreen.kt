@@ -74,7 +74,6 @@ import com.agpeya.app.model.HourLayout
 import com.agpeya.app.model.Section
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.theme.LocalMotion
-import com.agpeya.app.ui.theme.Motion
 import com.agpeya.app.ui.theme.ReadingMaxWidth
 import com.agpeya.app.ui.theme.Spacing
 import androidx.compose.foundation.layout.heightIn
@@ -133,10 +132,6 @@ fun ReadingScreen(
     }
     val layout by LayoutRepository.layout(context, hourId).collectAsState(initial = HourLayout())
     val highlights by HighlightRepository.highlights(context).collectAsState(initial = emptyMap())
-    // Today's read-state for this hour, keyed by permanent section id.
-    val readIds by com.agpeya.app.data.PrayerProgressRepository.doneIn(context, hourId)
-        .collectAsState(initial = emptySet())
-
     var showContents by remember { mutableStateOf(false) }
     // Verse currently chosen for highlighting (shows the colour palette); null = none.
     var selectedVerseKey by remember { mutableStateOf<String?>(null) }
@@ -170,7 +165,6 @@ fun ReadingScreen(
         val h = hour ?: return@LaunchedEffect
         if (sections.isEmpty()) return@LaunchedEffect
         UserDataRepository.recordRecent(context, h.id)
-        com.agpeya.app.data.PrayerProgressRepository.recordOpened(context, h.id)
         // Resolve the target to the displayed (customized) list. A section id is
         // exact; the legacy index is a fallback for bookmarks saved before ids
         // were passed, and only means anything against the full section list.
@@ -210,12 +204,6 @@ fun ReadingScreen(
             val index = if (readingMode == ReadingMode.VERTICAL) listState.firstVisibleItemIndex
             else pagerState.currentPage
             scope.launch { UserDataRepository.savePosition(context, hourId, index) }
-        }
-    }
-
-    fun toggleRead(section: Section) {
-        scope.launch {
-            com.agpeya.app.data.PrayerProgressRepository.toggleSection(context, hourId, section.id)
         }
     }
 
@@ -327,33 +315,6 @@ fun ReadingScreen(
         containerColor = MaterialTheme.colorScheme.background,
     ) { innerPadding ->
         Box(Modifier.fillMaxSize()) {
-            // How far through the hour today's reading is. Sits under the app
-            // bar so it stays visible while scrolling, and slides to its new
-            // value rather than jumping — the only feedback that a section was
-            // marked read while you are looking at the foot of the page.
-            if (sections.isNotEmpty()) {
-                val doneCount = sections.count { it.id in readIds }
-                val target = doneCount.toFloat() / sections.size
-                val progress by androidx.compose.animation.core.animateFloatAsState(
-                    targetValue = target,
-                    animationSpec = motion.spec(Motion.slow),
-                    label = "hourProgress",
-                )
-                androidx.compose.material3.LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = innerPadding.calculateTopPadding())
-                        .height(2.dp)
-                        .align(Alignment.TopCenter)
-                        .semantics {
-                            contentDescription = s.progressOf(doneCount, sections.size)
-                        },
-                    color = MaterialTheme.colorScheme.secondary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                    drawStopIndicator = {},
-                )
-            }
             AnimatedVisibility(
                 visible = sections.isNotEmpty(),
                 enter = fadeIn(tween(motion.millis(300))),
@@ -362,13 +323,13 @@ fun ReadingScreen(
                 when (readingMode) {
                     ReadingMode.VERTICAL -> VerticalReader(
                         sections, listState, bodyFontSp, innerPadding, bookmarkedIds,
-                        ::toggleBookmark, highlights, onVerseTap, readIds, ::toggleRead,
+                        ::toggleBookmark, highlights, onVerseTap,
                         prevHour?.let { h -> { onSwitchHour(h.id) } },
                         nextHour?.let { h -> { onSwitchHour(h.id) } },
                     )
                     ReadingMode.HORIZONTAL -> PagedReader(
                         sections, pagerState, bodyFontSp, innerPadding, bookmarkedIds,
-                        ::toggleBookmark, highlights, onVerseTap, readIds, ::toggleRead,
+                        ::toggleBookmark, highlights, onVerseTap,
                     )
                 }
             }
@@ -424,8 +385,6 @@ private fun VerticalReader(
     onToggleBookmark: (Section, Int) -> Unit,
     highlights: Map<String, String>,
     onVerseTap: (String) -> Unit,
-    readIds: Set<String>,
-    onToggleRead: (Section) -> Unit,
     onPrevious: (() -> Unit)?,
     onNext: (() -> Unit)?,
 ) {
@@ -445,8 +404,6 @@ private fun VerticalReader(
                 onToggleBookmark = { onToggleBookmark(section, index) },
                 highlights = highlights,
                 onVerseTap = onVerseTap,
-                isRead = section.id in readIds,
-                onToggleRead = { onToggleRead(section) },
             )
         }
         item {
@@ -466,8 +423,6 @@ private fun PagedReader(
     onToggleBookmark: (Section, Int) -> Unit,
     highlights: Map<String, String>,
     onVerseTap: (String) -> Unit,
-    readIds: Set<String>,
-    onToggleRead: (Section) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -501,8 +456,6 @@ private fun PagedReader(
                         onToggleBookmark = { onToggleBookmark(section, page) },
                         highlights = highlights,
                         onVerseTap = onVerseTap,
-                        isRead = section.id in readIds,
-                        onToggleRead = { onToggleRead(section) },
                     )
                     Spacer(Modifier.height(Spacing.huge))
                 }

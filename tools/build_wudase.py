@@ -18,7 +18,8 @@ OUT = os.path.join(
     os.path.dirname(__file__),
     "..", "app", "src", "main", "assets", "content", "wudase", "wudase.json",
 )
-ATTRIBUTION = "ጽሑፍ፦ github.com/tecleet/wudase-mariam · ትውፊታዊ የኦርቶዶክስ ተዋሕዶ ጸሎት"
+# No attribution line is emitted: the page carries the prayer and nothing else.
+# The digitization's provenance is credited in NOTICE and README instead.
 
 # The sections we ship, in liturgical order: the daily opening prayer first,
 # then the weekday portions, then the appended prayers.
@@ -77,7 +78,6 @@ def main():
 
     payload = {
         "contentVersion": 1,
-        "attribution": ATTRIBUTION,
         "sections": out_sections,
     }
     os.makedirs(os.path.dirname(OUT), exist_ok=True)

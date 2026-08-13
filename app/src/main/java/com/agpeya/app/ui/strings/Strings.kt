@@ -203,11 +203,8 @@ interface Strings {
     val quietHoursDesc: String
     fun quietHoursRange(from: String, to: String): String
     val filterAll: String
-    val markRead: String
-    val prayerProgress: String
-    fun progressOf(done: Int, total: Int): String
-    val resumePrayer: String
-    val startOver: String
+    /** Screen-reader state for a completed habit dot. */
+    val doneLabel: String
     val currentHourBadge: String
     val previousHour: String
     val nextHour: String
@@ -507,11 +504,7 @@ object AmharicStrings : Strings {
     override val quietHoursDesc = "በሌሊት ማሳሰቢያዎች ድምፅ አያሰሙም"
     override fun quietHoursRange(from: String, to: String) = "ከ$from እስከ $to ድምፅ የለም"
     override val filterAll = "ሁሉም"
-    override val markRead = "እንደተነበበ ምልክት አድርግ"
-    override val prayerProgress = "ንባብ"
-    override fun progressOf(done: Int, total: Int) = "$done ከ$total"
-    override val resumePrayer = "ቀጥል"
-    override val startOver = "እንደገና ጀምር"
+    override val doneLabel = "ተጠናቋል"
     override val currentHourBadge = "አሁን"
     override val previousHour = "ቀዳሚ"
     override val nextHour = "ቀጣይ"
@@ -819,11 +812,7 @@ object EnglishStrings : Strings {
     override val quietHoursDesc = "Silence reminders overnight"
     override fun quietHoursRange(from: String, to: String) = "Silent from $from to $to"
     override val filterAll = "All"
-    override val markRead = "Mark as read"
-    override val prayerProgress = "Progress"
-    override fun progressOf(done: Int, total: Int) = "$done of $total"
-    override val resumePrayer = "Resume"
-    override val startOver = "Start over"
+    override val doneLabel = "Done"
     override val currentHourBadge = "Now"
     override val previousHour = "Previous"
     override val nextHour = "Next"

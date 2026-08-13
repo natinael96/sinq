@@ -24,6 +24,5 @@ data class WudaseSection(
 @Serializable
 data class WudaseContent(
     val contentVersion: Int = 1,
-    val attribution: String = "",
     val sections: List<WudaseSection> = emptyList(),
 )

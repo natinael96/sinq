@@ -55,6 +55,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.ui.strings.LocalStrings
@@ -76,8 +77,9 @@ import kotlinx.coroutines.delay
 // ── Section headers ──────────────────────────────────────────────────────────
 
 /**
- * The gold kicker that names a block of the page. Deliberately small and quiet:
- * it should orient you without competing with the content under it.
+ * The gold heading that names a block of the page. Set at [SectionTitleStyle] —
+ * a step up from the labels around it, and bold — so a long scroll reads as a
+ * sequence of named blocks rather than one undifferentiated column.
  */
 @Composable
 fun SectionHeader(
@@ -91,13 +93,21 @@ fun SectionHeader(
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.labelMedium,
+            style = SectionTitleStyle,
             color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.weight(1f),
         )
         trailing()
     }
 }
+
+/**
+ * The one type role for section names, shared by [SectionHeader] and
+ * [CollapsibleHeader] so a collapsible block sits at the same rank as a plain
+ * one instead of looking like a lesser heading with a chevron.
+ */
+private val SectionTitleStyle: androidx.compose.ui.text.TextStyle
+    @Composable get() = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
 
 /**
  * A section header that opens and closes what follows it. The chevron rotates
@@ -136,7 +146,7 @@ fun CollapsibleHeader(
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.labelMedium,
+            style = SectionTitleStyle,
             color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.weight(1f),
         )

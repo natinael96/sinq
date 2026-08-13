@@ -1,12 +1,18 @@
 name: CI
 
-# Every push and pull request runs the same gates the release does, so a broken
-# commit is caught when it lands rather than at tag time. No signing here — this
-# builds the debug variant only and produces no publishable artifact.
+# PAUSED. This ran the release's gates on every push and pull request, which was
+# spending more Actions minutes than the traffic on this repo justifies. Releases
+# still gate themselves — release.yml runs content validation and the unit tests
+# before it builds anything — so a tag cannot ship a broken build while this is off.
+#
+# It is manual-only for now: run it from the Actions tab when a change is worth
+# checking before tagging. To turn automatic runs back on, restore:
+#
+#   push:
+#     branches: [master]
+#   pull_request:
 on:
-  push:
-    branches: [master]
-  pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}

@@ -170,18 +170,6 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
                     )
                 }
             }
-            if (data.attribution.isNotBlank()) {
-                item(key = "attr") {
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        text = data.attribution,
-                        style = MaterialTheme.typography.labelSmall.inReadingFont(),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-            }
             item { Spacer(Modifier.height(48.dp)) }
         }
     }
