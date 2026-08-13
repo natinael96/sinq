@@ -47,6 +47,19 @@ private fun stripListPrefix(line: String): Pair<String, Int?> {
 /** The line that marks the start of the አርኬ hymn within an entry. */
 private const val ARKE_MARKER = "አርኬ" // አርኬ
 
+/**
+ * The salutation an አርኬ opens with — "ሰላም ለ…" / "ሰላም ዕብል…" — and the Ge'ez full
+ * stops that separate its clauses.
+ *
+ * Not every entry labels its hymn. ነሐሴ and ጳጉሜን almost never do (44 and 13
+ * unlabelled salutations against 12 and 0 labelled ones), so without this the
+ * hymn runs on as though it were another paragraph of the saint's life. The
+ * `፡፡`/`።` requirement is what separates the sung salutation from prose that
+ * merely uses the word ሰላም: across all thirteen months there is no line opening
+ * with ሰላም that lacks one.
+ */
+private val SALUTATION = Regex("^ሰላ[ምመ].*[፡።]")
+
 /** The 📖 that prefixes an entry whose body is a quoted scripture passage. */
 private const val SCRIPTURE_MARKER = "📖" // 📖
 
@@ -107,6 +120,15 @@ fun parseSynaxarium(rawText: String): List<SynaxariumPara> {
                 }
                 inArke = true
                 out += SynaxariumPara(SynaxariumParaKind.ARKE_LABEL, ARKE_MARKER)
+            }
+
+            // An unlabelled hymn: the entry drops straight from the saint's life
+            // into the salutation with no አርኬ line between them. Supply the
+            // heading the source omitted, so it reads as a hymn either way.
+            SALUTATION.containsMatchIn(line) -> {
+                inArke = true
+                out += SynaxariumPara(SynaxariumParaKind.ARKE_LABEL, ARKE_MARKER)
+                out += SynaxariumPara(SynaxariumParaKind.ARKE_VERSE, line)
             }
 
             else -> {

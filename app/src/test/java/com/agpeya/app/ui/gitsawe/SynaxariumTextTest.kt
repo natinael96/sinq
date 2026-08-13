@@ -123,4 +123,35 @@ class SynaxariumTextTest {
         assertEquals(1, paras.size)
         assertEquals(SynaxariumParaKind.NARRATIVE, paras.single().kind)
     }
+
+    /**
+     * ነሐሴ ፯, verbatim from the bundled data: the hymn follows the closing
+     * benediction with no አርኬ line between them. Before this was handled it
+     * rendered as one more paragraph of ጴጥሮስ's life.
+     */
+    @Test
+    fun `an unlabelled salutation still reads as a hymn`() {
+        val raw = "ለእግዚአብሔር ምስጋና ይሁን እኛንም በጌቶቻችን ሐዋርያት ጸሎት ይማረን ለዘላለሙ አሜን ።\n" +
+            "ሰላም ዕብል ለጴጥሮስ ሥዩም፡፡ ላዕለ ሐዋርያት ኄራን ካህናተ ኵሉ ዓለም፡፡"
+        val paras = parseSynaxarium(raw)
+        assertEquals("the benediction stays prose", 1, paras.count { it.kind == SynaxariumParaKind.NARRATIVE })
+        assertEquals("a heading is supplied", 1, paras.count { it.kind == SynaxariumParaKind.ARKE_LABEL })
+        assertTrue(paras.single { it.kind == SynaxariumParaKind.ARKE_VERSE }.text.startsWith("ሰላም ዕብል ለጴጥሮስ"))
+    }
+
+    @Test
+    fun `an explicit marker is not doubled by the salutation that follows it`() {
+        val raw = "አርኬ\nሰላም ለጢሞቲዎስ እንተ ረሰየ ምርዋጾ፡፡ ለምሂር ወለገሠጾ፡፡"
+        val paras = parseSynaxarium(raw)
+        assertEquals(1, paras.count { it.kind == SynaxariumParaKind.ARKE_LABEL })
+        assertEquals(1, paras.count { it.kind == SynaxariumParaKind.ARKE_VERSE })
+    }
+
+    /** ሰላም is an ordinary Amharic word; only the Ge'ez clause stops make it a hymn. */
+    @Test
+    fun `prose that merely uses the word selam stays prose`() {
+        val paras = parseSynaxarium("ሰላም ለሁላችሁ ይሁን")
+        assertEquals(1, paras.size)
+        assertEquals(SynaxariumParaKind.NARRATIVE, paras.single().kind)
+    }
 }
