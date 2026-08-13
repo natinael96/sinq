@@ -7,6 +7,18 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.9.9.1] — 2026-08-13
+
+_versionCode 31 · the streak nudge fires every night_
+
+### Fixed
+- **The nightly streak reminder now behaves like the morning ግጻዌ one.** It fires
+  every night while enabled — it used to skip any day that already had a log,
+  which meant it stayed silent on exactly the nights you were paying attention
+  and so read as broken. And where the ግጻዌ nudge carries the day's reading, this
+  one now carries the streak at stake: "የ5 ቀን ጉዞህ እንዳይቋረጥ — የዛሬን መዝግብ" /
+  "Keep your 5-day streak going — log today."
+
 ## [0.9.9] — 2026-08-13
 
 _versionCode 30 · prayer list, sharing, and the day's psalm on Home_
