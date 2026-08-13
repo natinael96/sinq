@@ -7,6 +7,22 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.9.8] — 2026-08-13
+
+_versionCode 29 · the አርኬ reads as a hymn again_
+
+### Fixed
+- **The ስንክሳር's አርኬ ran on as part of the saint's life.** The hymn was only set
+  apart when the source wrote the word አርኬ on its own line, and much of the data
+  never does — the entry goes straight from the closing benediction into the
+  salutation. Those hymns were rendered as one more paragraph of narrative. It
+  is worst in the last two months of the year: ነሐሴ labelled 12 of its hymns and
+  left 44 unlabelled, and ጳጉሜን labelled none of its 13. A salutation opening
+  with ሰላም and carrying the Ge'ez clause stops ፡፡ or ። now begins the hymn and is
+  given the heading the source omitted. 815 → 880 entries across the year read
+  correctly; ነሐሴ 12 → 53 and ጳጉሜን 0 → 12. Ordinary prose is untouched — the
+  clause stops are what distinguish the sung salutation from the plain word ሰላም.
+
 ## [0.9.7] — 2026-08-13
 
 _versionCode 28 · the nightly nudge actually arrives_
