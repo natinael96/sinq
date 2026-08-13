@@ -58,6 +58,14 @@ import com.agpeya.app.ui.common.ToggleRow
 import com.agpeya.app.ui.theme.LocalMotion
 import com.agpeya.app.ui.theme.Motion
 import com.agpeya.app.ui.theme.Spacing
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.Surface
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.launch
 
 @Composable
@@ -83,6 +91,23 @@ fun SettingsScreen(
         .collectAsState(initial = com.agpeya.app.data.AlarmAlert.SOUND_VIBRATE)
     val alarmSound by SettingsRepository.alarmSound(context)
         .collectAsState(initial = com.agpeya.app.data.AlarmSound.ALARM)
+
+    // The streak and ግጻዌ nudges are notification-only — unlike a prayer alarm,
+    // which rings and shows a full-screen intent regardless, they are silently
+    // dropped when POST_NOTIFICATIONS was never granted. Ask on the way in, so
+    // switching one on here is enough to actually make it arrive.
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { /* denial is reported by the banner below, not a second dialog */ }
+
+    fun ensureNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= 33 &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -221,11 +246,31 @@ fun SettingsScreen(
             item {
                 SectionHeader(s.settingsGroupPrayer)
                 Spacer(Modifier.height(Spacing.xs))
+                // Re-read on each (re)composition, so returning from the system
+                // settings page reflects the change without a restart.
+                if (!NotificationManagerCompat.from(context).areNotificationsEnabled() &&
+                    (streakReminder || gitsaweReminder)
+                ) {
+                    NotificationsOffBanner(
+                        onOpenSettings = {
+                            context.startActivity(
+                                android.content.Intent(
+                                    android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS,
+                                ).putExtra(
+                                    android.provider.Settings.EXTRA_APP_PACKAGE,
+                                    context.packageName,
+                                ),
+                            )
+                        },
+                    )
+                    Spacer(Modifier.height(Spacing.md))
+                }
                 ToggleRow(
                     title = s.settingsStreakReminder,
                     subtitle = s.settingsStreakReminderDesc,
                     checked = streakReminder,
                     onCheckedChange = { on ->
+                        if (on) ensureNotificationPermission()
                         scope.launch {
                             SettingsRepository.setStreakReminder(context, on)
                             com.agpeya.app.reminders.StreakReminderScheduler.sync(context, on)
@@ -237,6 +282,7 @@ fun SettingsScreen(
                     subtitle = s.settingsGitsaweReminderDesc,
                     checked = gitsaweReminder,
                     onCheckedChange = { on ->
+                        if (on) ensureNotificationPermission()
                         scope.launch {
                             SettingsRepository.setGitsaweReminder(context, on)
                             com.agpeya.app.reminders.GitsaweReminderScheduler.sync(context, on)
@@ -306,6 +352,37 @@ fun SettingsScreen(
                 NavRow(s.about, onOpenAbout)
                 Spacer(Modifier.height(Spacing.xxl))
             }
+        }
+    }
+}
+
+/**
+ * Shown when a notification-only reminder is switched on but the system will
+ * not deliver it. Once POST_NOTIFICATIONS has been denied twice the runtime
+ * prompt no longer appears, so the only way back is the system settings page.
+ */
+@Composable
+private fun NotificationsOffBanner(onOpenSettings: () -> Unit) {
+    val s = com.agpeya.app.ui.strings.LocalStrings.current
+    Surface(
+        color = MaterialTheme.colorScheme.errorContainer,
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(Spacing.lg)) {
+            Text(
+                s.notifDisabledTitle,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+            )
+            Spacer(Modifier.height(Spacing.xs))
+            Text(
+                s.notifDisabledBody,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+            )
+            Spacer(Modifier.height(Spacing.xs))
+            TextButton(onClick = onOpenSettings) { Text(s.openSettings) }
         }
     }
 }
