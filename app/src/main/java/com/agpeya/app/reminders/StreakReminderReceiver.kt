@@ -17,9 +17,13 @@ import kotlinx.coroutines.runBlocking
 import java.time.LocalDate
 
 /**
- * The nightly streak nudge fired. Re-arms tomorrow, then (unless the user has
- * already logged something today, or turned the reminder off) posts a gentle
- * notification whose tap opens the Streak screen.
+ * The nightly streak nudge fired. Re-arms tomorrow, then (unless turned off)
+ * posts a notification whose body carries the streak at stake and whose tap
+ * opens the Streak screen — the same shape as the morning ግጻዌ nudge.
+ *
+ * It fires whether or not something was already logged today. It used to skip
+ * itself on any logged day, which read as the reminder being broken: the nights
+ * it stayed silent were exactly the nights the user was paying attention.
  */
 class StreakReminderReceiver : BroadcastReceiver() {
 
@@ -32,12 +36,16 @@ class StreakReminderReceiver : BroadcastReceiver() {
                     // Chain: always re-arm for tomorrow while enabled.
                     StreakReminderScheduler.schedule(context)
 
-                    // Already engaged today? Skip the nudge — they don't need it.
-                    val today = LocalDate.now().toString()
-                    val doneToday = HabitsRepository.current(context).records[today] ?: emptySet()
-                    if (doneToday.isNotEmpty()) return@runBlocking
-
                     val s = stringsFor(SettingsRepository.language(context).first())
+                    // Like the ግጻዌ body carries the day's reading, this one
+                    // carries the streak: what tonight's log keeps alive.
+                    val streak = runCatching {
+                        HabitsRepository.overallCurrentStreak(
+                            HabitsRepository.current(context).records,
+                            LocalDate.now(),
+                        )
+                    }.getOrDefault(0)
+                    val body = if (streak > 0) s.streakReminderKeep(streak) else s.streakReminderBody
                     ensureChannel(context, s.streakChannelName)
                     // Request code must differ from ReminderScheduler's alarm-clock
                     // show intent (code 0): extras don't distinguish PendingIntents,
@@ -54,7 +62,8 @@ class StreakReminderReceiver : BroadcastReceiver() {
                     val notification = NotificationCompat.Builder(context, CHANNEL_ID)
                         .setSmallIcon(R.drawable.ic_notification)
                         .setContentTitle(s.streakReminderTitle)
-                        .setContentText(s.streakReminderBody)
+                        .setContentText(body)
+                        .setStyle(NotificationCompat.BigTextStyle().bigText(body))
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         .setAutoCancel(true)
                         .setContentIntent(tap)

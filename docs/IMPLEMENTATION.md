@@ -989,7 +989,10 @@ Separate from prayer alarms and deliberately gentler:
   Doze maintenance windows once the app falls into a rare App-Standby bucket,
   and the nudge silently missed days at a time.
 - `StreakReminderReceiver` **re-arms tomorrow first**, then checks the setting
-  and *skips the notification entirely if anything was already logged today*.
+  and posts the nudge. It fires every night while enabled — like the ግጻዌ nudge,
+  and unlike its first design, which skipped any day that already had a log and
+  so read as broken on exactly the attentive days. When a streak is alive the
+  body names it ("Keep your N-day streak going"), BigTextStyle like the ግጻዌ one.
 - Tapping it sets `EXTRA_OPEN_STREAK` and lands you on the Streak tab.
 - Uses its own `streak_reminders` channel at `IMPORTANCE_DEFAULT` so the user can
   silence it independently of prayer alarms.

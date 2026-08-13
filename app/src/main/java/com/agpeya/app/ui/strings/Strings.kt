@@ -79,6 +79,8 @@ interface Strings {
     val clearAction: String
     val streakReminderTitle: String
     val streakReminderBody: String
+    /** Nudge body when a streak is alive: what tonight's log keeps going. */
+    fun streakReminderKeep(days: Int): String
     val streakChannelName: String
     val gitsaweReminderTitle: String
     val gitsaweReminderBody: String
@@ -397,6 +399,7 @@ object AmharicStrings : Strings {
     override val clearAction = "አጽዳ"
     override val streakReminderTitle = "ዛሬን መዝግብ"
     override val streakReminderBody = "የዛሬን ጸሎትና ልማድ ሳትሞላ እንዳትተኛ"
+    override fun streakReminderKeep(days: Int) = "የ$days ቀን ጉዞህ እንዳይቋረጥ — የዛሬን መዝግብ"
     override val streakChannelName = "የሌሊት ማስታወሻ"
     override val gitsaweReminderTitle = "የዕለቱ ግጻዌ"
     override val gitsaweReminderBody = "የዛሬን ምንባብ ተመልከት"
@@ -698,6 +701,7 @@ object EnglishStrings : Strings {
     override val clearAction = "Clear"
     override val streakReminderTitle = "Log today"
     override val streakReminderBody = "Mark today's prayers and habits before bed"
+    override fun streakReminderKeep(days: Int) = "Keep your $days-day streak going — log today"
     override val streakChannelName = "Nightly reminder"
     override val gitsaweReminderTitle = "Today's Gitsawe"
     override val gitsaweReminderBody = "See today's reading"
