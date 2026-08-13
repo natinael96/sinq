@@ -7,6 +7,45 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.9.6] — 2026-08-13
+
+_versionCode 27 · a quieter Home_
+
+### Removed
+- **"እንደተነበበ ምልክት አድርግ" (Mark as read), and the prayer progress it fed.** Marking
+  each section off by hand turned praying into a checklist. Gone with it: the
+  progress bar in the reader, the "Resume where you left off" row on Home, the
+  "3 of 12" counts on the hours list, and the ✓ on a finished hour. Streaks are
+  unaffected — the "ጨርሰዋል?" prompt after an alarm still records the hour.
+- **The attribution line under ውዳሴ ማርያም.** The page carries the prayer and
+  nothing else. The digitization is still credited in NOTICE and README.
+
+### Changed
+- **The hours list on Home starts collapsed.** The prayer for now is already on
+  screen as a card; the full list is something you go looking for.
+- **The Today block is smaller** — smaller dots, a tighter heatmap over ten weeks
+  instead of fourteen, less space around both.
+- **Section headings are legible as headings** — 15sp bold rather than a 13sp
+  label, and collapsible headings now match plain ones instead of reading as a
+  lesser rank with a chevron.
+
+### Fixed
+- **Three light-theme contrast failures.** The unchecked habit dot (2.89:1) and
+  the unset bookmark icon (2.29:1) sat under the 3:1 an icon control needs, and
+  the current-hour badge's gold-on-gold reached only 4.20:1 against a 4.5:1 bar.
+  Now 3.19, 3.33 and 4.57. Dark theme already passed throughout.
+- **The ስንክሳር data test.** It asserted 365 days and 1817 entries against data
+  that 0.9.1 re-extracted to 366 and 2308, so master and the v0.9.1 tag both
+  shipped a failing build. The totals were stale, not the data: 366 is the whole
+  fixed-calendar book — twelve months of thirty days plus all six of ጳጉሜን. The
+  test now also checks the manifest agrees with each month file, and that a month
+  covers its days with no gap and no repeat.
+
+### Internal
+- CI no longer runs on every push and pull request; it is manual-only from the
+  Actions tab. Releases are unaffected and still gate themselves on content
+  validation, the unit tests and lint before building anything.
+
 ## [0.9.1] — 2026-08-12
 
 _versionCode 26 · a ስንክሳር for the whole year_
@@ -31,8 +70,11 @@ _versionCode 26 · a ስንክሳር for the whole year_
 ### Known issues
 - Four months repeat a day from the source data: ጥር 21 repeats ጥር 20, መጋቢት 29
   repeats መጋቢት 28, ሚያዝያ 4 and 6 repeat 3 and 5, and ሐምሌ 21 repeats ሐምሌ 20.
-- ሕዳር is untouched and still not the daily synaxarium — the source has a single
-  ድርሳነ መስቀል homily repeated across all 30 days.
+- ሕዳር is untouched: it keeps the original extraction rather than the new source,
+  because that source is not the daily synaxarium for this month but a single
+  ድርሳነ መስቀል homily repeated across all 30 days. (Corrected in 0.9.6: this entry
+  previously implied the homily had shipped. It never did — the bundled ሕዳር is
+  and always was the daily synaxarium.)
 
 ## [0.9.0] — 2026-08-12
 
