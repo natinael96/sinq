@@ -77,6 +77,7 @@ import com.agpeya.app.ui.common.StatePanel
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
+import com.agpeya.app.ui.theme.inReadingFont
 import com.agpeya.app.ui.strings.Strings
 import java.time.LocalDate
 
@@ -126,20 +127,16 @@ fun GitsaweScreen(
                 accentLine = liturgicalSeasonLabel(date, s),
                 onBack = onBack,
                 actions = {
-                    val ctx = LocalContext.current
-                    IconButton(
-                        onClick = {
-                            val body = gitsaweShareText(active?.services, active?.subtitle, formatEthiopian(date, s), s)
-                            com.agpeya.app.ui.common.Sharing.share(ctx, body, s.gitsaweTitle)
-                        },
-                        enabled = active != null,
-                    ) {
-                        Icon(
-                            Icons.Outlined.Share,
-                            contentDescription = s.shareAction,
-                            modifier = Modifier.size(IconSize.medium),
-                        )
-                    }
+                    com.agpeya.app.ui.common.ShareMenuAction(enabled = active != null, payload = {
+                        active?.let {
+                            com.agpeya.app.ui.common.SharePayload(
+                                body = gitsaweShareBody(it.services),
+                                kicker = s.gitsaweKicker,
+                                title = it.subtitle ?: s.gitsaweTitle,
+                                dateLabel = formatEthiopian(date, s),
+                            )
+                        }
+                    })
                     IconButton(onClick = { showPicker = true }) {
                         Icon(
                             Icons.Outlined.EditCalendar,
@@ -180,16 +177,25 @@ fun GitsaweScreen(
                     }
                     active.subtitle?.let { sub ->
                         item(key = "sub") {
-                            Text(
-                                sub,
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.onBackground,
-                                modifier = Modifier.padding(top = Spacing.sm, bottom = Spacing.xs),
-                            )
+                            // The day's own heading is content, not chrome: set in
+                            // the reading face, and selectable like a reading.
+                            androidx.compose.foundation.text.selection.SelectionContainer {
+                                Text(
+                                    sub,
+                                    style = MaterialTheme.typography.titleMedium
+                                        .inReadingFont(),
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                    modifier = Modifier.padding(top = Spacing.md, bottom = Spacing.xs),
+                                )
+                            }
                         }
                     }
                     active.services.negh?.let { svc -> serviceSection("ነግህ", svc, s, onOpenReading) }
                     active.services.kidassie?.let { svc -> serviceSection("ቅዳሴ", svc, s, onOpenReading) }
+                    val chants = dayChants(active.services)
+                    if (chants.isNotEmpty()) {
+                        item(key = "kidase") { KidaseSection(chants) }
+                    }
                 }
                 item { Spacer(Modifier.height(Spacing.huge)) }
             }
@@ -228,18 +234,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.serviceSection(
     onOpenReading: (ReadingTarget) -> Unit,
 ) {
     item(key = "svc_$label") {
-        Row(
-            Modifier.fillMaxWidth().padding(top = Spacing.xxl, bottom = Spacing.sm),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(label, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onBackground)
-            Spacer(Modifier.width(Spacing.md))
-            androidx.compose.material3.HorizontalDivider(
-                Modifier.weight(1f),
-                thickness = 1.dp,
-                color = MaterialTheme.colorScheme.outlineVariant,
-            )
-        }
+        ServiceHeader(label)
     }
     for ((role, pick) in ROLE_LABELS) {
         pick(service).forEachIndexed { i, reading ->
@@ -248,14 +243,70 @@ private fun androidx.compose.foundation.lazy.LazyListScope.serviceSection(
             }
         }
     }
-    service.kidassie.takeIf { it.isNotEmpty() }?.let { chants ->
-        item(key = "${label}_chants") {
-            Text(
-                chants.joinToString("  ·  "),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp),
-            )
+    // The service's chant names are gathered into the Kidase section at the
+    // foot of the page, where they read as the day's ቅዳሴ rather than a
+    // stray line of labels under the readings.
+}
+
+/**
+ * Names one movement of the day — ነግህ, ቅዳሴ, and the Kidase coda — at the same
+ * rank as every other section header in the app: gold, bold, with the rule
+ * carrying the line to the margin.
+ */
+@Composable
+private fun ServiceHeader(label: String) {
+    Row(
+        Modifier.fillMaxWidth().padding(top = Spacing.xxl, bottom = Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.titleSmall.copy(
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+            ),
+            color = MaterialTheme.colorScheme.secondary,
+        )
+        Spacer(Modifier.width(Spacing.md))
+        androidx.compose.material3.HorizontalDivider(
+            Modifier.weight(1f),
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.outlineVariant,
+        )
+    }
+}
+
+/**
+ * የዕለቱ ቅዳሴ — which anaphora is sung today, closing the page as a natural
+ * continuation of the readings above it. Chant names are content: set in the
+ * reading face, selectable, marked with the ፨ section sign rather than an icon
+ * the tradition never used.
+ */
+@Composable
+private fun KidaseSection(chants: List<String>) {
+    val s = LocalStrings.current
+    Column(Modifier.fillMaxWidth()) {
+        ServiceHeader(s.kidaseHeader)
+        chants.forEach { name ->
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = Spacing.sm, horizontal = Spacing.xs),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    "፨",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.secondary,
+                )
+                Spacer(Modifier.width(Spacing.md))
+                androidx.compose.foundation.text.selection.SelectionContainer {
+                    Text(
+                        name,
+                        style = MaterialTheme.typography.titleSmall.inReadingFont(),
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                }
+            }
         }
     }
 }
@@ -364,24 +415,30 @@ private fun SourceSwitcher(sources: List<Source>, selected: Int, onSelect: (Int)
     }
 }
 
-/** The day's readings as plain text, for the share sheet. */
-private fun gitsaweShareText(
-    services: GitsaweServices?,
-    subtitle: String?,
-    dateLabel: String,
-    s: Strings,
-): String = buildString {
-    append(s.gitsaweTitle); append(" — "); append(dateLabel); append("\n")
-    subtitle?.takeIf { it.isNotBlank() }?.let { append(it); append("\n") }
+/** The day's readings as plain text — the payload body for the share actions.
+ *  Context (title, date) travels in the payload's own fields, not repeated here. */
+private fun gitsaweShareBody(services: GitsaweServices): String = buildString {
     fun service(label: String, svc: GitsaweService?) {
         svc ?: return
         val lines = ROLE_LABELS.flatMap { (role, pick) ->
-            pick(svc).mapNotNull { r -> r.verse?.let { "  $role  ${verseRef(it)}" } }
+            pick(svc).mapNotNull { r -> r.verse?.let { "$role  ${verseRef(it)}" } }
         }
         if (lines.isEmpty()) return
-        append("\n"); append(label); append("\n")
+        if (isNotEmpty()) append("\n")
+        append(label); append("\n")
         lines.forEach { append(it); append("\n") }
     }
-    service("ነግህ", services?.negh)
-    service("ቅዳሴ", services?.kidassie)
+    service("ነግህ", services.negh)
+    service("ቅዳሴ", services.kidassie)
+    dayChants(services).takeIf { it.isNotEmpty() }?.let {
+        if (isNotEmpty()) append("\n")
+        append(it.joinToString("\n"))
+    }
 }
+
+/** The day's appointed ቅዳሴ chants, across both services, deduplicated. */
+private fun dayChants(services: GitsaweServices?): List<String> =
+    ((services?.negh?.kidassie ?: emptyList()) + (services?.kidassie?.kidassie ?: emptyList()))
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .distinct()

@@ -308,6 +308,21 @@ interface Strings {
     val restoreFailedBody: String
     val contentMissingTitle: String
     val contentMissingBody: String
+
+    /** The "share this passage as a PNG card" action, next to copy/share. */
+    val shareAsImage: String
+
+    /** የዕለቱ ቅዳሴ — the day's appointed anaphora, at the foot of the ግጻዌ. */
+    val kidaseHeader: String
+
+    // Prayer list — people to remember in prayer.
+    val prayerListTitle: String
+    val addPerson: String
+    val editPerson: String
+    val personNameLabel: String
+    val prayerNoteLabel: String
+    val noPrayerListTitle: String
+    val noPrayerListBody: String
 }
 
 object AmharicStrings : Strings {
@@ -598,6 +613,17 @@ object AmharicStrings : Strings {
     override val contentMissingTitle = "ይህ ክፍል አልተገኘም"
     override val contentMissingBody =
         "ጽሑፉ በዚህ እትም ውስጥ የለም። የቀሩት ክፍሎች እንደተለመደው ይሠራሉ።"
+
+    override val shareAsImage = "እንደ ምስል አጋራ"
+    override val kidaseHeader = "የዕለቱ ቅዳሴ"
+
+    override val prayerListTitle = "የጸሎት ዝርዝር"
+    override val addPerson = "ሰው ጨምር"
+    override val editPerson = "አስተካክል"
+    override val personNameLabel = "ስም"
+    override val prayerNoteLabel = "ማስታወሻ (አማራጭ)"
+    override val noPrayerListTitle = "ገና ማንም አልተጨመረም"
+    override val noPrayerListBody = "በጸሎት የምታስባቸውን ሰዎች እዚህ ጨምር።"
 }
 
 object EnglishStrings : Strings {
@@ -905,6 +931,17 @@ object EnglishStrings : Strings {
     override val contentMissingTitle = "This passage isn't here"
     override val contentMissingBody =
         "The text isn't part of this edition. Everything else still works as usual."
+
+    override val shareAsImage = "Share as image"
+    override val kidaseHeader = "Kidase of the day"
+
+    override val prayerListTitle = "Prayer list"
+    override val addPerson = "Add person"
+    override val editPerson = "Edit"
+    override val personNameLabel = "Name"
+    override val prayerNoteLabel = "Note (optional)"
+    override val noPrayerListTitle = "No one here yet"
+    override val noPrayerListBody = "Add the people you want to remember in prayer."
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { AmharicStrings }

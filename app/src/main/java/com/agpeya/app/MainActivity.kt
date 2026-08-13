@@ -254,12 +254,14 @@ private fun AgpeyaNavHost(
                 onOpenSearch = { navController.navigate("search") { launchSingleTop = true } },
                 onOpenFasting = { navController.navigate("fasting") { launchSingleTop = true } },
                 onOpenBookmarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
+                onOpenPrayerList = { navController.navigate("prayerlist") { launchSingleTop = true } },
                 onOpenPsalter = { navController.navigate("psalter") { launchSingleTop = true } },
-                onOpenWudase = { navController.navigate("wudase") { launchSingleTop = true } },
-                onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
                 onOpenGitsawe = { navController.navigate("gitsawe") { launchSingleTop = true } },
                 onSelectTab = navController::switchTab,
             )
+        }
+        composable("prayerlist") {
+            com.agpeya.app.ui.prayerlist.PrayerListScreen(onBack = { navController.popBackStack() })
         }
         composable("fasting") {
             com.agpeya.app.ui.fasting.FastingScreen(onBack = { navController.popBackStack() })

@@ -1,7 +1,6 @@
 package com.agpeya.app.ui.home
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -9,11 +8,12 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,17 +27,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.VolunteerActivism
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -51,10 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.ContentRepository
 import com.agpeya.app.data.DayReadings
@@ -72,7 +67,6 @@ import com.agpeya.app.ui.common.SinqCard
 import com.agpeya.app.ui.common.SinqDivider
 import com.agpeya.app.ui.common.Tab
 import com.agpeya.app.ui.habits.HabitHeatmap
-import com.agpeya.app.ui.habits.habitName
 import com.agpeya.app.ui.common.liturgicalSeasonLabel
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.IconSize
@@ -89,11 +83,11 @@ private const val PRAYER_AGGREGATE_ID = "prayer"
 /**
  * Home answers five questions, in this order, without making the reader work for
  * any of them: what day is it, what should I pray now, what is today's ግጻዌ, how
- * am I doing, and what else can I open.
+ * am I doing, and what is today's psalm.
  *
- * Only two things on this page are cards — the prayer for now and the day's
- * ግጻዌ. Everything else is separated by space and a header, because a screen
- * where every block is a rounded box has no hierarchy left to spend.
+ * The cards on this page are the day's doors: the prayer for now, the ግጻዌ, and
+ * the Today/psalter pair. The hours list stays plain rows under a header — a
+ * screen where every block is a rounded box has no hierarchy left to spend.
  */
 @Composable
 fun HomeScreen(
@@ -101,9 +95,8 @@ fun HomeScreen(
     onOpenSearch: () -> Unit,
     onOpenFasting: () -> Unit,
     onOpenBookmarks: () -> Unit,
+    onOpenPrayerList: () -> Unit,
     onOpenPsalter: () -> Unit,
-    onOpenWudase: () -> Unit,
-    onOpenZewotr: () -> Unit,
     onOpenGitsawe: () -> Unit,
     onSelectTab: (Tab) -> Unit,
 ) {
@@ -157,6 +150,7 @@ fun HomeScreen(
                     onOpenFasting = onOpenFasting,
                     onOpenSearch = onOpenSearch,
                     onOpenBookmarks = onOpenBookmarks,
+                    onOpenPrayerList = onOpenPrayerList,
                 )
                 Spacer(Modifier.height(Spacing.xl))
             }
@@ -174,27 +168,30 @@ fun HomeScreen(
                 Spacer(Modifier.height(Spacing.xxl))
             }
 
+            // Today's progress and the day's psalter portion, side by side: what
+            // I have done, and what there is to read. The library shortcuts that
+            // used to sit here live on the Library tab, where they belong.
             item(key = "today") {
-                TodaySection(
-                    habitIds = habitIds,
-                    doneToday = doneWithAggregate,
-                    habitState = habitState,
-                    records = habitState.records,
-                    today = today,
-                    // Real trackables: visible hours + habits (aggregate dot excluded).
-                    maxPossible = hours.size + (habitIds.size - 1),
-                    onClick = { onSelectTab(Tab.STREAK) },
-                )
-                Spacer(Modifier.height(Spacing.xxl))
-            }
-
-            item(key = "shortcuts") {
-                SectionHeader(s.libraryTitle)
-                Spacer(Modifier.height(Spacing.md))
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                    QuickLink(s.psalterTitle, onOpenPsalter, Modifier.weight(1f))
-                    QuickLink(s.zewotrTselot, onOpenZewotr, Modifier.weight(1f))
-                    QuickLink(s.wudaseMariam, onOpenWudase, Modifier.weight(1f))
+                Row(
+                    modifier = Modifier.height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                ) {
+                    TodaySection(
+                        habitIds = habitIds,
+                        doneToday = doneWithAggregate,
+                        habitState = habitState,
+                        records = habitState.records,
+                        today = today,
+                        // Real trackables: visible hours + habits (aggregate dot excluded).
+                        maxPossible = hours.size + (habitIds.size - 1),
+                        onClick = { onSelectTab(Tab.STREAK) },
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                    )
+                    DailyPsalmCard(
+                        today = today,
+                        onClick = onOpenPsalter,
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                    )
                 }
                 Spacer(Modifier.height(Spacing.xxl))
             }
@@ -234,6 +231,7 @@ private fun DayHeader(
     onOpenFasting: () -> Unit,
     onOpenSearch: () -> Unit,
     onOpenBookmarks: () -> Unit,
+    onOpenPrayerList: () -> Unit,
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
@@ -281,6 +279,7 @@ private fun DayHeader(
             HeaderAction(Icons.Outlined.CalendarMonth, s.fastingTitle, onOpenFasting)
             HeaderAction(Icons.Outlined.Search, s.tabSearch, onOpenSearch)
             HeaderAction(Icons.Outlined.Bookmarks, s.bookmarksTitle, onOpenBookmarks)
+            HeaderAction(Icons.Outlined.VolunteerActivism, s.prayerListTitle, onOpenPrayerList)
         }
     }
 }
@@ -395,9 +394,11 @@ private fun GitsaweCard(readings: DayReadings?, onClick: () -> Unit) {
 }
 
 /**
- * Today's progress: a count, the streak, one dot per trackable, and the recent
- * history. No card — the header and the space around it do that job, and one
- * less rounded box on this screen is one more place for the eye to rest.
+ * Today's progress at half width: the count, the streak, and the recent history.
+ * A card now, because it shares a row with [DailyPsalmCard] and two shapes of
+ * different rank would read as a mistake. The per-trackable dots moved out with
+ * the shrink — four labelled dots in half a column were noise, and the full
+ * breakdown is one tap away on the Streak screen this card opens.
  */
 @Composable
 private fun TodaySection(
@@ -408,22 +409,27 @@ private fun TodaySection(
     today: LocalDate,
     maxPossible: Int,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val s = LocalStrings.current
     val doneCount = habitIds.count { it in doneToday }
     val overall = HabitsRepository.overallCurrentStreak(records, today)
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.medium)
-            .clickable(onClick = onClick, onClickLabel = s.streaksTitle)
-            .padding(vertical = Spacing.xs),
+    SinqCard(
+        onClick = onClick,
+        modifier = modifier,
+        contentPadding = PaddingValues(Spacing.lg),
     ) {
-        SectionHeader(s.todayLabel) {
+        Text(
+            text = s.todayLabel,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.secondary,
+        )
+        Spacer(Modifier.height(Spacing.xs))
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = "$doneCount/${habitIds.size}",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(Modifier.width(Spacing.md))
             Icon(
@@ -432,25 +438,14 @@ private fun TodaySection(
                 tint = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier.size(IconSize.small),
             )
-            Spacer(Modifier.width(Spacing.xs))
+            Spacer(Modifier.width(Spacing.xxs))
             Text(
                 s.daysUnit(overall),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.secondary,
             )
         }
-        if (habitIds.isNotEmpty()) {
-            Spacer(Modifier.height(Spacing.md))
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm), modifier = Modifier.fillMaxWidth()) {
-                habitIds.take(4).forEach { id ->
-                    HabitDot(
-                        label = habitName(id, habitState, s),
-                        done = id in doneToday,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-            }
-        }
+        Spacer(Modifier.weight(1f))
         Spacer(Modifier.height(Spacing.md))
         HabitHeatmap(
             records = records,
@@ -465,67 +460,45 @@ private fun TodaySection(
 }
 
 /**
- * One trackable's state for today. The check cross-fades its tint rather than
- * popping — no scaling, no bounce; this is a status, not an award. The dot is
- * announced as a single labelled state so a screen reader doesn't read an
- * unlabelled icon followed by a stray word.
+ * የዕለቱ መዝሙረ ዳዊት — the day's portion of the Psalter by the traditional weekday
+ * division, named on the card so Home tells you what today's reading *is*, not
+ * just that one exists. Sunday has no fixed portion; the card offers the whole
+ * Psalter instead.
  */
 @Composable
-private fun HabitDot(label: String, done: Boolean, modifier: Modifier = Modifier) {
-    val motion = LocalMotion.current
-    val tint by animateColorAsState(
-        // 0.75 is the floor that keeps the unlit dot at 3:1 on the ivory ground;
-        // any quieter and it stops being a legible control in the light theme.
-        targetValue = if (done) MaterialTheme.colorScheme.secondary
-        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
-        animationSpec = motion.spec(Motion.standard),
-        label = "habitDotTint",
-    )
+private fun DailyPsalmCard(today: LocalDate, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val s = LocalStrings.current
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.semantics(mergeDescendants = true) {
-            contentDescription = if (done) "$label — ${s.doneLabel}" else label
-        },
-    ) {
-        Icon(
-            imageVector = if (done) Icons.Filled.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
-            contentDescription = null,
-            tint = tint,
-            modifier = Modifier.size(20.dp),
-        )
-        Spacer(Modifier.height(Spacing.xxs))
-        Text(
-            label,
-            style = MaterialTheme.typography.labelSmall,
-            color = if (done) MaterialTheme.colorScheme.onBackground
-            else MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-        )
-    }
-}
-
-/** A quiet shortcut into the library. Filled, not outlined — three bordered
- *  boxes in a row read as a control panel; three soft tiles read as a shelf. */
-@Composable
-private fun QuickLink(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Surface(
+    val range = remember(today) { com.agpeya.app.ui.psalter.dailyRange(today.dayOfWeek) }
+    SinqCard(
         onClick = onClick,
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
-        modifier = modifier.heightIn(min = 52.dp),
+        modifier = modifier,
+        contentPadding = PaddingValues(Spacing.lg),
     ) {
-        Box(
-            modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.md),
-            contentAlignment = Alignment.Center,
-        ) {
+        Text(
+            text = s.dailyPsalms,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.secondary,
+        )
+        Spacer(Modifier.height(Spacing.xs))
+        Text(
+            text = s.psalterTitle,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(Spacing.md))
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = label,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-                textAlign = TextAlign.Center,
-                maxLines = 2,
+                text = range?.let { s.psalmRange(it.first, it.last) } ?: s.wholePsalter,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+            )
+            Icon(
+                Icons.AutoMirrored.Outlined.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(IconSize.small),
             )
         }
     }

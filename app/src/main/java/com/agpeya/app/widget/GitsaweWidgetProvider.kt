@@ -84,6 +84,7 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
             views.setViewVisibility(R.id.widget_row_1, View.GONE)
             views.setViewVisibility(R.id.widget_row_2, View.GONE)
             views.setViewVisibility(R.id.widget_rule, View.GONE)
+            views.setViewVisibility(R.id.widget_kidase, View.GONE)
             views.setViewVisibility(R.id.widget_empty, View.VISIBLE)
             views.setTextViewText(R.id.widget_empty, s.noGitsaweToday)
         } else {
@@ -91,6 +92,14 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
             views.setViewVisibility(R.id.widget_rule, View.VISIBLE)
             bindRow(views, rows.getOrNull(0), R.id.widget_row_1, R.id.widget_role_1, R.id.widget_ref_1)
             bindRow(views, rows.getOrNull(1), R.id.widget_row_2, R.id.widget_role_2, R.id.widget_ref_2)
+            // The day's ቅዳሴ, one quiet line — a continuation, not a third row.
+            val chant = service?.kidassie?.firstOrNull { it.isNotBlank() }?.trim()
+            if (chant == null) {
+                views.setViewVisibility(R.id.widget_kidase, View.GONE)
+            } else {
+                views.setViewVisibility(R.id.widget_kidase, View.VISIBLE)
+                views.setTextViewText(R.id.widget_kidase, "ቅዳሴ · $chant")
+            }
         }
 
         // Whole widget taps through to the ግጻዌ screen.

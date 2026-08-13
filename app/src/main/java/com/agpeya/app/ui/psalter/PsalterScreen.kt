@@ -77,10 +77,11 @@ import java.time.LocalDate
 /** Pseudo hour id psalter bookmarks are stored under — never a real hour id. */
 const val PSALTER_BOOKMARK_ID = "psalter"
 
-private val FONT_STEPS_SP = listOf(17, 19, 22, 25, 29)
+private val FONT_STEPS_SP = com.agpeya.app.data.SettingsRepository.FONT_STEPS_SP
 
-/** Traditional weekday division of the Psalter; Sunday is not yet defined. */
-private fun dailyRange(day: DayOfWeek): IntRange? = when (day) {
+/** Traditional weekday division of the Psalter; Sunday is not yet defined.
+ *  Public because Home's የዕለቱ መዝሙረ ዳዊት card names the same portion. */
+fun dailyRange(day: DayOfWeek): IntRange? = when (day) {
     DayOfWeek.MONDAY -> 1..30
     DayOfWeek.TUESDAY -> 31..60
     DayOfWeek.WEDNESDAY -> 61..80
@@ -324,6 +325,7 @@ fun PsalterScreen(
                 },
                 onDismiss = { selectedVerseKey = null },
                 shareText = com.agpeya.app.ui.reading.verseShareText(shown, selectedVerseKey),
+                shareImage = com.agpeya.app.ui.reading.versePayload(shown, selectedVerseKey, s.psalterTitle),
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
         }

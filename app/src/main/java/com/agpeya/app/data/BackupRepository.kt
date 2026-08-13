@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import com.agpeya.app.model.Bookmark
 import com.agpeya.app.model.HabitsState
+import com.agpeya.app.model.PrayerPerson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -12,7 +13,7 @@ import kotlinx.serialization.json.Json
 
 /**
  * Export and restore the things the user builds up and can't get back: the
- * streak/habit history, bookmarks, and highlights.
+ * streak/habit history, bookmarks, highlights, and the prayer list.
  *
  * The app is offline by design, so a backup is a file the user writes wherever
  * they like through the system file picker — nothing is uploaded anywhere.
@@ -32,6 +33,8 @@ object BackupRepository {
         val habits: HabitsState = HabitsState(),
         val bookmarks: List<Bookmark> = emptyList(),
         val highlights: Map<String, String> = emptyMap(),
+        /** Added after v1 shipped; defaulted so older files still decode. */
+        val prayerList: List<PrayerPerson> = emptyList(),
     )
 
     private val json = Json {
@@ -47,6 +50,7 @@ object BackupRepository {
             habits = HabitsRepository.current(context),
             bookmarks = UserDataRepository.bookmarks(context).first(),
             highlights = HighlightRepository.highlights(context).first(),
+            prayerList = PrayerListRepository.current(context),
         )
         json.encodeToString(Backup.serializer(), backup)
     }
@@ -118,6 +122,7 @@ object BackupRepository {
             HabitsRepository.merge(context, backup.habits)
             UserDataRepository.mergeBookmarks(context, backup.bookmarks)
             HighlightRepository.merge(context, backup.highlights)
+            PrayerListRepository.merge(context, backup.prayerList)
             true
         }.getOrDefault(false)
     }

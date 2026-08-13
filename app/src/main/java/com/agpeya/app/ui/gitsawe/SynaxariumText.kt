@@ -60,6 +60,26 @@ private const val ARKE_MARKER = "አርኬ" // አርኬ
  */
 private val SALUTATION = Regex("^ሰላ[ምመ].*[፡።]")
 
+/**
+ * Amharic formulas that can only open prose, never a hymn verse: a new
+ * commemoration ("በዚችም ቀን…", "በዚህችም ዕለት…"), the closing benediction
+ * ("ለእግዚአብሔርም ምስጋና ይሁን…", "አምላከ ቅዱሳን…"), or the end-of-month colophon
+ * ("በ… ወር የሚነበብ ንባብ ደረሰ"). Inside a hymn these mark the return to narrative —
+ * without this, everything after an አርኬ stayed verse to the end of the entry,
+ * and on ጥር ፲ an entire commemoration was trapped inside the hymn. The ም on
+ * ለእግዚአብሔርም is load-bearing: the Ge'ez verse "ለእግዚአብሔር ነአኲቶ…" (ኅዳር ፲፰)
+ * opens without it.
+ */
+private fun isProseReturn(line: String): Boolean {
+    // የካቲት ፴ opens its benediction with the ፠ section mark; ignore it. The
+    // colophon check is stem-only ("የሚነበ") because the data inflects it both
+    // ways — "የሚነበብ ንባብ" and "የሚነበበው ንባብ".
+    val l = line.trimStart('፠', ' ')
+    return l.startsWith("በዚች") || l.startsWith("በዚህ") ||
+        l.startsWith("ለእግዚአብሔርም") || l.startsWith("አምላከ") ||
+        l.contains("ወር የሚነበ")
+}
+
 /** The 📖 that prefixes an entry whose body is a quoted scripture passage. */
 private const val SCRIPTURE_MARKER = "📖" // 📖
 
@@ -99,6 +119,11 @@ fun parseSynaxarium(rawText: String): List<SynaxariumPara> {
             line == ARKE_MARKER -> {
                 inArke = true
                 out += SynaxariumPara(SynaxariumParaKind.ARKE_LABEL, ARKE_MARKER)
+            }
+            inArke && isProseReturn(line) -> {
+                inArke = false
+                val (text, num) = stripListPrefix(line)
+                out += SynaxariumPara(SynaxariumParaKind.NARRATIVE, text, num)
             }
             inArke -> out += SynaxariumPara(SynaxariumParaKind.ARKE_VERSE, line)
 

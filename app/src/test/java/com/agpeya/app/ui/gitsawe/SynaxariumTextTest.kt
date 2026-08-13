@@ -154,4 +154,37 @@ class SynaxariumTextTest {
         assertEquals(1, paras.size)
         assertEquals(SynaxariumParaKind.NARRATIVE, paras.single().kind)
     }
+
+    /**
+     * ጥቅምት ፮'s shape: hymn, then a whole further commemoration and the closing
+     * benediction. Before the prose-return rule they stayed trapped as verse.
+     */
+    @Test
+    fun `prose after the hymn returns to narrative`() {
+        val raw = "አርኬ\nሰላም ለከ በአሚን ስኩብ፡፡\n" +
+            "በዚችም ቀን በዋሻ ውስጥ የሚኖር ቅዱስ አባት አባ ጰንጠሌዎን አረፈ ።\n" +
+            "ለእግዚአብሔርም ምስጋና ይሁን በረከቱም ከእኛ ጋር ትኑር ለዘላለሙ አሜን ።"
+        val paras = parseSynaxarium(raw)
+        assertEquals(1, paras.count { it.kind == SynaxariumParaKind.ARKE_VERSE })
+        assertEquals(2, paras.count { it.kind == SynaxariumParaKind.NARRATIVE })
+    }
+
+    /** ኅዳር ፲፰: a genuine verse opens ለእግዚአብሔር without the ም — it must stay hymn. */
+    @Test
+    fun `a geez verse opening with leEgziabher stays in the hymn`() {
+        val raw = "አርኬ\nለእግዚአብሔር ነአኲቶ በእንቲአከ መቅድመ። ወናተሉ ካዕበ ለኂሩትከ ሰላመ።"
+        val paras = parseSynaxarium(raw)
+        assertEquals(1, paras.count { it.kind == SynaxariumParaKind.ARKE_VERSE })
+        assertEquals(0, paras.count { it.kind == SynaxariumParaKind.NARRATIVE })
+    }
+
+    /** A salutation after the prose return re-opens the hymn (second saint's አርኬ). */
+    @Test
+    fun `a second salutation after prose reopens the hymn`() {
+        val raw = "አርኬ\nሰላም ለከ ቀዳማዊ፡፡\nበዚችም ቀን ሌላ ቅዱስ አረፈ ።\nሰላም ለካልኡ ቅዱስ ገዳማዊ፡፡"
+        val paras = parseSynaxarium(raw)
+        assertEquals(2, paras.count { it.kind == SynaxariumParaKind.ARKE_LABEL })
+        assertEquals(2, paras.count { it.kind == SynaxariumParaKind.ARKE_VERSE })
+        assertEquals(1, paras.count { it.kind == SynaxariumParaKind.NARRATIVE })
+    }
 }

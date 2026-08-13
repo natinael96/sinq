@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.FormatColorReset
 import androidx.compose.material3.HorizontalDivider
@@ -68,6 +69,7 @@ import com.agpeya.app.ui.theme.scaledReadingSp
 import com.agpeya.app.ui.theme.inReadingFont
 import com.agpeya.app.ui.theme.readingBodyStyle
 import com.agpeya.app.ui.theme.sinqColors
+import kotlinx.coroutines.launch
 
 /**
  * Section rendering shared by the hour reader, the Psalter and the scripture
@@ -292,6 +294,8 @@ internal fun HighlightBar(
     modifier: Modifier = Modifier,
     /** The tapped verse, ready to copy or share; null hides those actions. */
     shareText: String? = null,
+    /** The same verse as a card payload; null hides the share-as-image action. */
+    shareImage: com.agpeya.app.ui.common.SharePayload? = null,
 ) {
     val motion = LocalMotion.current
     AnimatedVisibility(
@@ -352,6 +356,19 @@ internal fun HighlightBar(
                             modifier = Modifier.size(IconSize.medium),
                         )
                     }
+                    if (shareImage != null) {
+                        val scope = androidx.compose.runtime.rememberCoroutineScope()
+                        IconButton(onClick = {
+                            scope.launch { com.agpeya.app.ui.common.PassageShare.share(ctx, shareImage) }
+                        }) {
+                            Icon(
+                                Icons.Outlined.Image,
+                                contentDescription = s.shareAsImage,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(IconSize.medium),
+                            )
+                        }
+                    }
                 }
                 IconButton(onClick = { onPick(null) }) {
                     Icon(
@@ -392,4 +409,26 @@ internal fun verseShareText(sections: List<Section>, verseKey: String?): String?
     val section = sections.firstOrNull { it.id == sectionId } ?: return null
     val verse = section.verses.getOrNull(number - section.firstVerse) ?: return null
     return "${section.title}\n${geezNumeral(number)}  $verse"
+}
+
+/**
+ * The same verse as a [com.agpeya.app.ui.common.SharePayload] for the PNG card:
+ * the section title carries the heading, [kicker] names the book it came from
+ * (the hour, the Psalter), and the verse keeps its Ge'ez numeral.
+ */
+internal fun versePayload(
+    sections: List<Section>,
+    verseKey: String?,
+    kicker: String?,
+): com.agpeya.app.ui.common.SharePayload? {
+    if (verseKey == null) return null
+    val sectionId = verseKey.substringBeforeLast(':')
+    val number = verseKey.substringAfterLast(':').toIntOrNull() ?: return null
+    val section = sections.firstOrNull { it.id == sectionId } ?: return null
+    val verse = section.verses.getOrNull(number - section.firstVerse) ?: return null
+    return com.agpeya.app.ui.common.SharePayload(
+        body = "${geezNumeral(number)}  $verse",
+        kicker = kicker,
+        title = section.title,
+    )
 }

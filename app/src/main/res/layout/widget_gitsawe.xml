@@ -121,6 +121,19 @@
             android:ellipsize="end" />
     </LinearLayout>
 
+    <!-- የዕለቱ ቅዳሴ — the day's anaphora, one quiet line under the readings -->
+    <TextView
+        android:id="@+id/widget_kidase"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="9dp"
+        android:gravity="center"
+        android:textColor="#9DBBAD"
+        android:textSize="11sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:visibility="gone" />
+
     <!-- Shown instead of the rows when the day has no bundled reading -->
     <TextView
         android:id="@+id/widget_empty"

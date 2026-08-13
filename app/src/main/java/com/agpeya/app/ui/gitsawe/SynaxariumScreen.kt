@@ -111,6 +111,18 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
                 subtitle = formatEthiopianWithGregorian(date, s),
                 onBack = onBack,
                 actions = {
+                    val list = entries.orEmpty()
+                    com.agpeya.app.ui.common.ShareMenuAction(enabled = list.isNotEmpty(), payload = {
+                        if (list.isEmpty()) null
+                        else com.agpeya.app.ui.common.SharePayload(
+                            body = synaxariumShareBody(list),
+                            kicker = s.synaxariumTitle,
+                            title = list.firstNotNullOfOrNull {
+                                cleanSynaxariumText(it.title).takeIf { t -> t.isNotBlank() }
+                            },
+                            dateLabel = com.agpeya.app.ui.common.formatEthiopian(date, s),
+                        )
+                    })
                     FontSizeActions(fontStep = fontStep, maxStep = FONT_STEPS_SP.lastIndex) { step ->
                         scope.launch { SettingsRepository.setFontStep(context, step) }
                     }
@@ -296,25 +308,28 @@ private fun EntryTitle(title: String) {
 }
 
 /** A numbered narrative paragraph: inline gold Ge'ez numeral, justified prose
- *  spanning the full width so the text block stays centered on the page. */
+ *  spanning the full width so the text block stays centered on the page.
+ *  Selectable — nothing here competes with a long-press. */
 @Composable
 private fun NarrativePara(number: Int, text: String, fontSp: Int) {
-    Text(
-        text = buildAnnotatedString {
-            withStyle(
-                SpanStyle(
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontSize = scaledReadingSp(fontSp) * 0.85f,
-                ),
-            ) { append(geezNumeral(number)) }
-            append("  ")
-            append(text)
-        },
-        style = readingBodyStyle(fontSp),
-        color = MaterialTheme.colorScheme.onBackground,
-        textAlign = TextAlign.Justify,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 18.dp),
-    )
+    androidx.compose.foundation.text.selection.SelectionContainer {
+        Text(
+            text = buildAnnotatedString {
+                withStyle(
+                    SpanStyle(
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontSize = scaledReadingSp(fontSp) * 0.85f,
+                    ),
+                ) { append(geezNumeral(number)) }
+                append("  ")
+                append(text)
+            },
+            style = readingBodyStyle(fontSp),
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Justify,
+            modifier = Modifier.fillMaxWidth().padding(bottom = 18.dp),
+        )
+    }
 }
 
 /** The centered "አርኬ" heading above the hymn. */
@@ -330,16 +345,18 @@ private fun ArkeLabel(text: String) {
     )
 }
 
-/** An arke verse — italic, centered, red. */
+/** An arke verse — italic, centered, red, and selectable like the prose. */
 @Composable
 private fun ArkeVerse(text: String, fontSp: Int) {
-    Text(
-        text = text,
-        style = readingBodyStyle(fontSp, ArkeLineHeight).copy(fontStyle = FontStyle.Italic),
-        color = ArkeRed,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 2.dp),
-    )
+    androidx.compose.foundation.text.selection.SelectionContainer {
+        Text(
+            text = text,
+            style = readingBodyStyle(fontSp, ArkeLineHeight).copy(fontStyle = FontStyle.Italic),
+            color = ArkeRed,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 2.dp),
+        )
+    }
 }
 
 /** A scripture-quote entry: the passage in a card, with a bookmark toggle. */
@@ -367,17 +384,19 @@ private fun ScriptureBody(
     val paras = parseSynaxarium(rawText)
     val quote = paras.filter { it.kind == SynaxariumParaKind.NARRATIVE }
         .joinToString("\n\n") { it.text }
-    Text(
-        text = quote,
-        style = readingBodyStyle(fontSp),
-        color = MaterialTheme.colorScheme.onBackground,
-        textAlign = TextAlign.Justify,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(14.dp),
-    )
+    androidx.compose.foundation.text.selection.SelectionContainer {
+        Text(
+            text = quote,
+            style = readingBodyStyle(fontSp),
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Justify,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(14.dp),
+        )
+    }
     paras.forEach { para ->
         when (para.kind) {
             SynaxariumParaKind.ARKE_LABEL -> ArkeLabel(para.text)
@@ -386,6 +405,19 @@ private fun ScriptureBody(
         }
     }
 }
+
+/** The whole day's commemorations as plain text, for the share actions. */
+private fun synaxariumShareBody(entries: List<SynaxariumEntry>): String =
+    entries.joinToString("\n\n") { e ->
+        buildString {
+            val t = cleanSynaxariumText(e.title)
+            if (t.isNotBlank()) {
+                append(t)
+                append("\n")
+            }
+            append(parseSynaxarium(e.text).joinToString("\n") { it.text })
+        }
+    }
 
 /** A short one-line preview of an entry's body for the bookmarks list. */
 private fun snippet(rawText: String): String {

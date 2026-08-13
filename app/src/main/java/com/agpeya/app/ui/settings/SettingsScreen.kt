@@ -19,9 +19,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.School
+import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material.icons.outlined.Upload
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -31,7 +37,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Switch
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -169,10 +174,12 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column(Modifier.weight(1f)) {
+                        // Muted like the Appearance/Language labels above it —
+                        // gold here read as a second section header.
                         Text(
                             text = s.readingFontTitle,
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.secondary,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Text(
                             text = fontDisplayName(readingFont),
@@ -277,6 +284,15 @@ fun SettingsScreen(
                         }
                     },
                 )
+                // The nudge's time, shown only while it is on — a time for a
+                // reminder that will not fire is clutter.
+                AnimatedVisibility(
+                    visible = streakReminder,
+                    enter = fadeIn(motion.spec(Motion.standard)) + expandVertically(motion.spec(Motion.standard)),
+                    exit = fadeOut(motion.spec(Motion.fast)) + shrinkVertically(motion.spec(Motion.fast)),
+                ) {
+                    StreakReminderTimeRow(s)
+                }
                 ToggleRow(
                     title = s.settingsGitsaweReminder,
                     subtitle = s.settingsGitsaweReminderDesc,
@@ -289,8 +305,8 @@ fun SettingsScreen(
                         }
                     },
                 )
-                NavRow(s.manageHours, onOpenCustomize)
-                NavRow(s.reminderModes, onOpenModes)
+                NavRow(s.manageHours, onOpenCustomize, leadingIcon = Icons.Outlined.Tune)
+                NavRow(s.reminderModes, onOpenModes, leadingIcon = Icons.Outlined.Alarm)
                 Spacer(Modifier.height(Spacing.md))
                 DropdownSetting(
                     label = s.alarmSection,
@@ -348,8 +364,8 @@ fun SettingsScreen(
             item {
                 SectionHeader(s.settingsGroupMore)
                 Spacer(Modifier.height(Spacing.xs))
-                NavRow(s.tutorial, onOpenTutorial)
-                NavRow(s.about, onOpenAbout)
+                NavRow(s.tutorial, onOpenTutorial, leadingIcon = Icons.Outlined.School)
+                NavRow(s.about, onOpenAbout, leadingIcon = Icons.Outlined.Info)
                 Spacer(Modifier.height(Spacing.xxl))
             }
         }
@@ -594,8 +610,16 @@ private fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
         }
     }
 
-    NavRow(s.backupExport, onClick = { createDoc.launch("sinq-backup-${java.time.LocalDate.now()}.json") })
-    NavRow(s.backupImport, onClick = { openDoc.launch(arrayOf("application/json", "text/plain", "*/*")) })
+    NavRow(
+        s.backupExport,
+        onClick = { createDoc.launch("sinq-backup-${java.time.LocalDate.now()}.json") },
+        leadingIcon = Icons.Outlined.Upload,
+    )
+    NavRow(
+        s.backupImport,
+        onClick = { openDoc.launch(arrayOf("application/json", "text/plain", "*/*")) },
+        leadingIcon = Icons.Outlined.Download,
+    )
 
     // Preview: what's in the file, and what a restore would actually add.
     val summary = preview
@@ -655,6 +679,55 @@ private fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
     }
 }
 
+/**
+ * When the nightly streak nudge fires. The same Material clock the prayer-mode
+ * editor uses, in a dialog; saving re-arms the alarm immediately, so the change
+ * takes effect tonight rather than after the old time fires once more.
+ */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun StreakReminderTimeRow(s: com.agpeya.app.ui.strings.Strings) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val minute by SettingsRepository.streakReminderTime(context)
+        .collectAsState(initial = SettingsRepository.DEFAULT_STREAK_REMINDER_MIN)
+    var picking by remember { mutableStateOf(false) }
+
+    com.agpeya.app.ui.common.ListRow(
+        title = s.timeLabel,
+        subtitle = "%02d:%02d".format(minute / 60, minute % 60),
+        onClick = { picking = true },
+    )
+
+    if (picking) {
+        val timeState = androidx.compose.material3.rememberTimePickerState(
+            initialHour = minute / 60,
+            initialMinute = minute % 60,
+            is24Hour = true,
+        )
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { picking = false },
+            title = { Text(s.timeLabel) },
+            text = { androidx.compose.material3.TimePicker(state = timeState) },
+            confirmButton = {
+                TextButton(onClick = {
+                    picking = false
+                    scope.launch {
+                        SettingsRepository.setStreakReminderTime(
+                            context,
+                            timeState.hour * 60 + timeState.minute,
+                        )
+                        com.agpeya.app.reminders.StreakReminderScheduler.sync(context, true)
+                    }
+                }) { Text(s.save) }
+            },
+            dismissButton = {
+                TextButton(onClick = { picking = false }) { Text(s.cancel) }
+            },
+        )
+    }
+}
+
 /** A nightly window in which prayer reminders stay silent. */
 @Composable
 private fun QuietHoursRow(s: com.agpeya.app.ui.strings.Strings) {
@@ -665,25 +738,16 @@ private fun QuietHoursRow(s: com.agpeya.app.ui.strings.Strings) {
 
     fun fmt(minute: Int) = "%02d:%02d".format(minute / 60, minute % 60)
 
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(Modifier.weight(1f)) {
-            Text(s.quietHours, style = MaterialTheme.typography.titleMedium)
-            Text(
-                text = if (quiet.enabled) s.quietHoursRange(fmt(quiet.startMinute), fmt(quiet.endMinute))
-                else s.quietHoursDesc,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        Switch(
-            checked = quiet.enabled,
-            onCheckedChange = { on ->
-                scope.launch { SettingsRepository.setQuietHours(context, quiet.copy(enabled = on)) }
-            },
-        )
-    }
+    // The shared ToggleRow, not a hand-rolled Row+Switch: the whole width
+    // toggles, and TalkBack announces one switch with its state instead of an
+    // unlabelled row followed by a stray control.
+    ToggleRow(
+        title = s.quietHours,
+        subtitle = if (quiet.enabled) s.quietHoursRange(fmt(quiet.startMinute), fmt(quiet.endMinute))
+        else s.quietHoursDesc,
+        checked = quiet.enabled,
+        onCheckedChange = { on ->
+            scope.launch { SettingsRepository.setQuietHours(context, quiet.copy(enabled = on)) }
+        },
+    )
 }

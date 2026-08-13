@@ -73,7 +73,7 @@ import com.agpeya.app.ui.theme.readingBodyStyle
 import com.agpeya.app.ui.theme.readingVerseGap
 import kotlinx.coroutines.launch
 
-private val FONT_STEPS_SP = listOf(17, 19, 22, 25, 29)
+private val FONT_STEPS_SP = com.agpeya.app.data.SettingsRepository.FONT_STEPS_SP
 
 /**
  * A New-Testament book reader. Opens at [initialChapter] (and scrolls to
@@ -183,19 +183,13 @@ fun ScriptureReaderScreen(
                 actions = {
                     val sectionId = "scripture:$bookKey:$chapter"
                     val marked = sectionId in bookmarkedIds
-                    IconButton(onClick = {
-                        val heading = "${b.nameAm} ${s.chapterUnit} ${geezNumeral(chapter)}"
-                        val body = heading + "\n\n" + current.verses.joinToString("\n") {
-                            "${geezNumeral(it.n)}  ${it.text}"
-                        }
-                        com.agpeya.app.ui.common.Sharing.share(context, body, heading)
-                    }) {
-                        Icon(
-                            Icons.Outlined.Share,
-                            contentDescription = s.shareAction,
-                            modifier = Modifier.size(IconSize.medium),
+                    com.agpeya.app.ui.common.ShareMenuAction(payload = {
+                        com.agpeya.app.ui.common.SharePayload(
+                            body = current.verses.joinToString("\n") { "${geezNumeral(it.n)}  ${it.text}" },
+                            kicker = s.scripturesTitle,
+                            title = "${b.nameAm} ${s.chapterUnit} ${geezNumeral(chapter)}",
                         )
-                    }
+                    })
                     IconButton(onClick = {
                         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         scope.launch {

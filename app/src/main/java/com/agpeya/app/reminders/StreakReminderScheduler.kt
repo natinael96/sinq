@@ -10,15 +10,17 @@ import java.time.ZoneId
 
 /**
  * Schedules the nightly nudge to fill in today's streak (a gentle notification,
- * not the ringing prayer alarm). Fires once around [REMINDER_TIME]; the receiver
- * re-arms the next day (chain pattern), and boot/update/time changes re-arm too.
+ * not the ringing prayer alarm). Fires once at the user's chosen time (21:30
+ * unless changed in Settings); the receiver re-arms the next day (chain
+ * pattern), and boot/update/time changes re-arm too. Re-arming after a time
+ * change needs no cancel: the PendingIntent is identity-matched, so setExact
+ * with the same request code replaces the pending alarm.
  */
 object StreakReminderScheduler {
 
     const val ACTION_STREAK_REMINDER = "com.agpeya.app.STREAK_REMINDER"
     const val EXTRA_OPEN_STREAK = "openStreak"
     private const val REQUEST_CODE = 9100
-    private val REMINDER_TIME: LocalTime = LocalTime.of(21, 30)
 
     /** Re-arm or cancel to match the current setting; call after any toggle. */
     fun sync(context: Context, enabled: Boolean) {
@@ -26,8 +28,9 @@ object StreakReminderScheduler {
     }
 
     fun schedule(context: Context) {
+        val minute = com.agpeya.app.data.SettingsRepository.streakReminderTimeBlocking(context)
         val now = LocalDateTime.now()
-        var next = now.toLocalDate().atTime(REMINDER_TIME)
+        var next = now.toLocalDate().atTime(LocalTime.of(minute / 60, minute % 60))
         if (!next.isAfter(now)) next = next.plusDays(1)
         val triggerAt = next.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         val am = context.getSystemService(AlarmManager::class.java)

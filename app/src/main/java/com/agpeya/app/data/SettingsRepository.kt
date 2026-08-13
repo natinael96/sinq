@@ -56,6 +56,7 @@ object SettingsRepository {
 
     private val KEY_READING_MODE = stringPreferencesKey("reading_mode")
     private val KEY_FONT_STEP = intPreferencesKey("font_step")
+    private val KEY_FONT_STEP_V2 = intPreferencesKey("font_step_v2")
     private val KEY_THEME = stringPreferencesKey("theme")
     private val KEY_READING_FONT = stringPreferencesKey("reading_font")
     private val KEY_KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
@@ -66,12 +67,27 @@ object SettingsRepository {
     private val KEY_NAME = stringPreferencesKey("profile_name")
     private val KEY_CHRISTIAN_NAME = stringPreferencesKey("profile_christian_name")
     private val KEY_STREAK_REMINDER = booleanPreferencesKey("streak_reminder")
+    private val KEY_STREAK_REMINDER_TIME = intPreferencesKey("streak_reminder_min")
+
+    /** 21:30 — the historical fixed time, kept as the default. */
+    const val DEFAULT_STREAK_REMINDER_MIN = 21 * 60 + 30
     private val KEY_GITSAWE_REMINDER = booleanPreferencesKey("gitsawe_reminder")
     private val KEY_QUIET_ENABLED = booleanPreferencesKey("quiet_enabled")
     private val KEY_QUIET_START = intPreferencesKey("quiet_start_min")
     private val KEY_QUIET_END = intPreferencesKey("quiet_end_min")
 
-    const val DEFAULT_FONT_STEP = 1
+    /**
+     * The reading sizes A−/A+ step through, shared by every reader. The stored
+     * preference is an INDEX into this list, so entries may only ever be added
+     * at the ends — inserting in the middle silently changes every saved size.
+     * 13/15 were prepended in 0.9.9 (the old floor of 17 was still large);
+     * [KEY_FONT_STEP_V2] holds the index into this list, and an old
+     * [KEY_FONT_STEP] value (an index into the 17..29 tail) migrates on read
+     * by the +2 offset, so nobody's saved size changes.
+     */
+    val FONT_STEPS_SP = listOf(13, 15, 17, 19, 22, 25, 29)
+
+    const val DEFAULT_FONT_STEP = 3 // 19sp — the same default size as before 0.9.9
 
     fun readingMode(context: Context): Flow<ReadingMode> =
         context.settingsDataStore.data.map {
@@ -84,10 +100,14 @@ object SettingsRepository {
     }
 
     fun fontStep(context: Context): Flow<Int> =
-        context.settingsDataStore.data.map { it[KEY_FONT_STEP] ?: DEFAULT_FONT_STEP }
+        context.settingsDataStore.data.map {
+            it[KEY_FONT_STEP_V2]
+                ?: it[KEY_FONT_STEP]?.plus(2)   // old index into the 17..29 tail
+                ?: DEFAULT_FONT_STEP
+        }
 
     suspend fun setFontStep(context: Context, step: Int) {
-        context.settingsDataStore.edit { it[KEY_FONT_STEP] = step }
+        context.settingsDataStore.edit { it[KEY_FONT_STEP_V2] = step.coerceIn(0, FONT_STEPS_SP.lastIndex) }
     }
 
     fun theme(context: Context): Flow<ThemeChoice> =
@@ -171,13 +191,30 @@ object SettingsRepository {
         context.settingsDataStore.edit { it[KEY_CHRISTIAN_NAME] = value.trim() }
     }
 
-    /** Nightly nudge (~21:30) to fill in today's streak. On by default. */
+    /** Nightly nudge to fill in today's streak. On by default, at [streakReminderTime]. */
     fun streakReminder(context: Context): Flow<Boolean> =
         context.settingsDataStore.data.map { it[KEY_STREAK_REMINDER] ?: true }
 
     suspend fun setStreakReminder(context: Context, value: Boolean) {
         context.settingsDataStore.edit { it[KEY_STREAK_REMINDER] = value }
     }
+
+    /** When the nightly streak nudge fires, as minutes into the day. */
+    fun streakReminderTime(context: Context): Flow<Int> =
+        context.settingsDataStore.data.map { it[KEY_STREAK_REMINDER_TIME] ?: DEFAULT_STREAK_REMINDER_MIN }
+
+    suspend fun setStreakReminderTime(context: Context, minuteOfDay: Int) {
+        context.settingsDataStore.edit {
+            it[KEY_STREAK_REMINDER_TIME] = minuteOfDay.coerceIn(0, 24 * 60 - 1)
+        }
+    }
+
+    /** For the scheduler, which arms alarms outside any coroutine (same shape as
+     *  [alarmAlertBlocking]); falls back to the 21:30 default on any failure. */
+    fun streakReminderTimeBlocking(context: Context): Int =
+        runCatching {
+            kotlinx.coroutines.runBlocking { streakReminderTime(context).first() }
+        }.getOrDefault(DEFAULT_STREAK_REMINDER_MIN)
 
     /** Morning nudge (~06:00) with today's ግጻዌ reading heading. On by default. */
     fun gitsaweReminder(context: Context): Flow<Boolean> =

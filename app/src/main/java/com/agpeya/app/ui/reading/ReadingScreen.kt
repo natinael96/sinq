@@ -88,7 +88,7 @@ import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.inReadingFont
 import kotlinx.coroutines.launch
 
-private val FONT_STEPS_SP = listOf(17, 19, 22, 25, 29)
+private val FONT_STEPS_SP = com.agpeya.app.data.SettingsRepository.FONT_STEPS_SP
 
 private fun Context.findActivity(): Activity? {
     var c: Context? = this
@@ -343,6 +343,7 @@ fun ReadingScreen(
                 },
                 onDismiss = { selectedVerseKey = null },
                 shareText = com.agpeya.app.ui.reading.verseShareText(sections, selectedVerseKey),
+                shareImage = com.agpeya.app.ui.reading.versePayload(sections, selectedVerseKey, hour?.name),
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
         }

@@ -90,6 +90,14 @@ data class HabitsState(
     val records: Map<String, Set<String>> = emptyMap(),
 )
 
+/** Someone the user remembers in prayer, with an optional intention note. */
+@Serializable
+data class PrayerPerson(
+    val id: String,
+    val name: String,
+    val note: String = "",
+)
+
 /** A saved bookmark — a snapshot so the bookmarks list renders without rescanning content. */
 @Serializable
 data class Bookmark(

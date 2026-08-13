@@ -146,7 +146,7 @@ Reminders subsystem (Android framework, outside the Compose tree):
         └▶ AlarmReceiver ──▶ AlarmService (foreground, rings)
                           └▶ AlarmActivity (full-screen, over lock screen)
                           └▶ MarkDoneReceiver ("Done? → Yes" writes the streak)
-  StreakReminderScheduler ──▶ StreakReminderReceiver (nightly 21:30 nudge)
+  StreakReminderScheduler ──▶ StreakReminderReceiver (nightly nudge, user-set time)
   SystemEventsReceiver (BOOT / MY_PACKAGE_REPLACED / TIME_SET / TZ_CHANGED)
         └▶ ReminderScheduler.rescheduleAll
 ```
@@ -225,7 +225,7 @@ app/src/main/java/com/agpeya/app/
 │   ├── AlarmService.kt                  264  Ringing FGS + notifications
 │   ├── AlarmActivity.kt                 150  Full-screen lock-screen alarm
 │   ├── MarkDoneReceiver.kt               43  "Done? → Yes" writes the habit record
-│   ├── StreakReminderScheduler.kt        52  Nightly 21:30 nudge scheduling
+│   ├── StreakReminderScheduler.kt        52  Nightly nudge scheduling (user-set time)
 │   ├── StreakReminderReceiver.kt         81  Nudge firing + re-arm
 │   └── SystemEventsReceiver.kt           44  Boot/update/time-change reschedule
 └── ui/
@@ -580,7 +580,8 @@ it would be worth revisiting.
 | `onboarded` | Bool | `false` | gates the intro flow and the start destination |
 | `profile_name` | String | `""` | local only; trimmed on write |
 | `profile_christian_name` | String | `""` | baptismal name; preferred in greeting |
-| `streak_reminder` | Bool | `true` | nightly 21:30 nudge |
+| `streak_reminder` | Bool | `true` | nightly streak nudge |
+| `streak_reminder_min` | Int | `1290` (21:30) | when the nudge fires, minutes into the day |
 
 All enum reads are defensive: `runCatching { Enum.valueOf(raw ?: "") }.getOrDefault(…)`,
 so a value written by a future version can't crash an older one.
@@ -983,8 +984,10 @@ background thread with `runCatching` around the content load.
 
 Separate from prayer alarms and deliberately gentler:
 
-- Fires at **21:30** local, via `setAndAllowWhileIdle` (inexact — a nudge doesn't
-  need alarm-clock precision, and inexact is easier on the battery).
+- Fires at the **user-chosen time** (Settings row under the toggle; default
+  21:30), via `setExactAndAllowWhileIdle` — inexact scheduling gets throttled to
+  Doze maintenance windows once the app falls into a rare App-Standby bucket,
+  and the nudge silently missed days at a time.
 - `StreakReminderReceiver` **re-arms tomorrow first**, then checks the setting
   and *skips the notification entirely if anything was already logged today*.
 - Tapping it sets `EXTRA_OPEN_STREAK` and lands you on the Streak tab.

@@ -63,7 +63,7 @@ import com.agpeya.app.ui.theme.readingBodyStyle
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-private val FONT_STEPS_SP = listOf(17, 19, 22, 25, 29)
+private val FONT_STEPS_SP = com.agpeya.app.data.SettingsRepository.FONT_STEPS_SP
 
 /** ውዳሴ ማርያም — the Praise of Mary, one portion per weekday, in Amharic (default)
  *  or Ge'ez via a toggle. [initialSectionId] preselects a section (the ዘወትር ጸሎት
@@ -105,6 +105,17 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
                 title = s.wudaseMariam,
                 onBack = onBack,
                 actions = {
+                    // The whole portion being read, in the language being read.
+                    val shown = sections.getOrNull(selected.coerceIn(0, (sections.size - 1).coerceAtLeast(0)))
+                    com.agpeya.app.ui.common.ShareMenuAction(enabled = shown != null, payload = {
+                        shown?.let {
+                            com.agpeya.app.ui.common.SharePayload(
+                                body = (if (geez) it.ge else it.am).joinToString("\n\n"),
+                                kicker = s.wudaseMariam,
+                                title = if (geez) it.titleGe else it.titleAm,
+                            )
+                        }
+                    })
                     FontSizeActions(fontStep = fontStep, maxStep = FONT_STEPS_SP.lastIndex) { step ->
                         scope.launch { SettingsRepository.setFontStep(context, step) }
                     }
@@ -162,12 +173,16 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
                 }
                 val stanzas = if (geez) section.ge else section.am
                 items(stanzas.size, key = { "st_$it" }) { i ->
-                    Text(
-                        text = stanzas[i],
-                        style = readingBodyStyle(bodyFontSp),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                    )
+                    // Selectable per stanza: there are no verse taps here to
+                    // swallow, so long-press-to-copy costs nothing.
+                    androidx.compose.foundation.text.selection.SelectionContainer {
+                        Text(
+                            text = stanzas[i],
+                            style = readingBodyStyle(bodyFontSp),
+                            color = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                        )
+                    }
                 }
             }
             item { Spacer(Modifier.height(48.dp)) }
