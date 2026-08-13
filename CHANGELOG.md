@@ -7,6 +7,50 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.9.9.2] — 2026-08-13
+
+_versionCode 32 · the streak becomes a journey_
+
+### Changed
+- **ጉዞ (Journey) replaces the streak.** The tab, formerly Streak, keeps its
+  Amharic name and gains it in English, under a path icon instead of a flame.
+  The hero is today's candle — lit when prayer is recorded, waiting when not,
+  never sized by history — beside the period's count of distinct prayer days:
+  "በዚህ ወር ፳፫ ቀን ጸልየዋል" / "23 days of prayer this month", or during a fast
+  "የዐቢይ ጾም ፲፰ኛ ቀን — ፲፮ ቀን ጸልየዋል" / "Day 18 of ዐቢይ ጾም — prayed 16 days".
+  Missing a day changes nothing but that day; coming back after a gap shows
+  only "ተመልሰዋል — ዛሬ ይጀምሩ" / "You're back — begin today". Home's Today card
+  speaks the same line from the same source of truth. Prayer records and
+  backups are untouched — the new count derives from the same day records.
+- **The year heatmap is the historical view.** Promoted under its own header,
+  with a quiet liturgical-green wash on unprayed fasting days and the fast
+  named in the tapped-day readout — prayer history read inside the Church's
+  year. Per-habit rows now count distinct days this month; current/longest
+  runs are gone.
+- **The nightly nudge stops carrying a number.** "ሰርክ ደርሷል — ዕለቱን በጸሎት ዝጉ"
+  every night; "ጾሙ በጸሎት ይታጀብ" on a fasting day; the feast named on a feast.
+  The wording never depends on history — nothing at stake, nothing to lose.
+- **The ringing alarm names its hour** — "ሰርክ ደርሷል" over the generic
+  "ጊዜው ደርሷል", on the full-screen alarm and the notification title.
+
+### Added
+- **Passage sharing from every reader.** A tap anchors a verse run, the next
+  tap moves its end; a slide-up bar offers copy, share as text, or share as an
+  image card — now also in ስንክሳር, ውዳሴ ማርያም and the New Testament reader.
+- **የመሃል ጸሎት — the in-between prayer.** Once a day, at a random moment
+  between the last recorded prayer and the next scheduled one, a notification
+  carrying one short prayer in full. Praying, not reading: nothing to open.
+- **ምጽዋት and ንስሐ reminders.** Scheduled intentions, deliberately not habits —
+  the app reminds and then looks away; weekly, every other day, or monthly on
+  an Ethiopian month day.
+- **The ግጻዌ widget carries tomorrow.** A two-card stack: today's readings,
+  and tomorrow's for preparing.
+
+### Removed
+- **The streak, everywhere.** No current or longest streak, no flame icon, no
+  streak share card (passage sharing carries the meaning now), no "streak
+  lost" state — and no setting to bring any of it back.
+
 ## [0.9.9.1] — 2026-08-13
 
 _versionCode 31 · the streak nudge fires every night_
