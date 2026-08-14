@@ -50,11 +50,13 @@ object ScriptureRepository {
         }
 
     /**
-     * Resolve a Gitsawe reference to its verses. [bookTitle] is the raw lectionary
-     * title (any of its many spellings); [start]/[end] are verse numbers ([end]
-     * null = single verse, both null = whole chapter). Returns null only when the
-     * book or chapter genuinely doesn't exist — a valid chapter always yields a
-     * non-empty page.
+     * Resolve a Gitsawe reference to its verses. [bookKey] is a bundled book
+     * key (already resolved via [resolveBookKey]); [start]/[end] are verse
+     * numbers. A missing [end] is not an incomplete range: the lectionary's
+     * "ከ᎐᎐ ጀምሮ" convention means from [start] to the END of the chapter, so
+     * [end] null reads through the chapter's last verse (both null = the whole
+     * chapter). Returns null only when the book or chapter genuinely doesn't
+     * exist — a valid chapter always yields a non-empty page.
      *
      * The verse range is clamped to what the chapter actually has: some ~3% of
      * lectionary references over-cite (LXX/Masoretic verse-count differences, or
@@ -64,19 +66,26 @@ object ScriptureRepository {
      */
     suspend fun passage(
         context: Context,
-        bookTitle: String,
+        bookKey: String,
         chapter: Int,
         start: Int? = null,
         end: Int? = null,
     ): List<ScriptureVerse>? {
-        val key = resolveBookKey(bookTitle) ?: return null
-        val book = book(context, key) ?: return null
+        val book = book(context, bookKey) ?: return null
         val ch = book.chapters.find { it.chapter == chapter } ?: return null
-        if (start == null) return ch.verses
-        val maxN = ch.verses.maxOfOrNull { it.n } ?: return ch.verses
+        return citedRange(ch.verses, start, end)
+    }
+
+    /**
+     * The cited slice of a chapter's verses — the pure half of [passage], so
+     * the range rules are unit-testable against the real bundled data.
+     */
+    fun citedRange(verses: List<ScriptureVerse>, start: Int?, end: Int?): List<ScriptureVerse> {
+        if (start == null) return verses
+        val maxN = verses.maxOfOrNull { it.n } ?: return verses
         val lo = start.coerceAtMost(maxN)
-        val hi = (end ?: lo).coerceIn(lo, maxN)
-        return ch.verses.filter { it.n in lo..hi }.ifEmpty { ch.verses }
+        val hi = (end ?: maxN).coerceIn(lo, maxN)
+        return verses.filter { it.n in lo..hi }.ifEmpty { verses }
     }
 
     // ---- Gitsawe title resolution -------------------------------------------

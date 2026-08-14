@@ -694,6 +694,9 @@ Navigation-Compose.
 | `modes` | `ModesScreen` | — |
 | `mode/{modeId}` | `ModeEditorScreen` | `modeId: String` |
 | `battery` | `BatteryHelpScreen` | — |
+| `gitsawePassage?psalm=&book=&chapter=&start=&end=&role=` | `GitsawePassageScreen` | the cited passage a ግጻዌ section opens on; `role` is the lectionary label |
+| `seatat?sec={sec}` | `SeatatScreen` | ሰዓታት reader; `sec` preselects an hour (search results use it) |
+| `intention/{habit}` | `SpecialHabitScreen` | `habit: "alms" \| "repentance"` |
 | `tutorial` | `TutorialScreen` | — |
 | `about` | `AboutScreen` | — |
 
@@ -1429,7 +1432,17 @@ Theme (3-way segmented), language (3-way segmented), keep-screen-on switch,
 nightly-reminder switch (which calls `StreakReminderScheduler.sync` inline), alarm
 alert mode + alarm sound dropdowns (the sound row disables itself when the alert
 mode is vibrate-only or silent), the local profile rows, and links to Manage
-Hours, Reminder Modes, Tutorial, and About.
+Hours, Reminder Modes, Tutorial, and About. ምጽዋት and ንስሐ are doors, not rows:
+each opens its own `SpecialHabitScreen` (`intention/{habit}`) holding the
+toggle, cadence, time, and the next due day — Settings stays a list, the
+editing lives on the page.
+
+ግጻዌ sections open the same way: a reading row navigates to
+`GitsawePassageScreen`, which shows only the cited verses (an open-ended
+citation — start with no end — reads through to the chapter's last verse) in
+the reading face, with two `NavRow` doors out: the book, and the chapter that
+holds the passage (`GitsaweLinks.bookRoute` / `chapterRoute`, derived from the
+same `ReadingTarget` so section, book and chapter can never disagree).
 
 ### 11.11 `AgpeyaBottomBar`
 

@@ -355,7 +355,17 @@ private fun AgpeyaNavHost(
                 onOpenScriptures = { navController.navigate("scriptures") { launchSingleTop = true } },
                 onOpenWudase = { navController.navigate("wudase") { launchSingleTop = true } },
                 onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
+                onOpenSeatat = { navController.navigate("seatat") { launchSingleTop = true } },
                 onSelectTab = navController::switchTab,
+            )
+        }
+        composable(
+            route = "seatat?sec={sec}",
+            arguments = listOf(navArgument("sec") { type = NavType.StringType; nullable = true; defaultValue = null }),
+        ) { backStackEntry ->
+            com.agpeya.app.ui.library.SeatatScreen(
+                onBack = { navController.popBackStack() },
+                initialSectionId = backStackEntry.arguments?.getString("sec"),
             )
         }
         composable(
@@ -393,10 +403,64 @@ private fun AgpeyaNavHost(
         composable("gitsawe") {
             com.agpeya.app.ui.gitsawe.GitsaweScreen(
                 onBack = { navController.popBackStack() },
-                onOpenReading = { target ->
-                    navController.navigate(com.agpeya.app.data.GitsaweLinks.route(target)) { launchSingleTop = true }
+                // A section opens its own focused passage page; the full reader
+                // is reached from there ("open the book / chapter"), not here.
+                onOpenReading = { target, role ->
+                    navController.navigate(
+                        com.agpeya.app.data.GitsaweLinks.passageRoute(target, role),
+                    ) { launchSingleTop = true }
                 },
                 onOpenSynaxarium = { epochDay -> navController.navigate("synaxarium/$epochDay") { launchSingleTop = true } },
+            )
+        }
+        composable(
+            route = "gitsawePassage?psalm={psalm}&book={book}&chapter={chapter}&start={start}&end={end}&role={role}",
+            arguments = listOf(
+                navArgument("psalm") { type = NavType.IntType; defaultValue = -1 },
+                navArgument("book") { type = NavType.StringType; nullable = true; defaultValue = null },
+                navArgument("chapter") { type = NavType.IntType; defaultValue = 1 },
+                navArgument("start") { type = NavType.IntType; defaultValue = -1 },
+                navArgument("end") { type = NavType.IntType; defaultValue = -1 },
+                navArgument("role") { type = NavType.StringType; nullable = true; defaultValue = null },
+            ),
+        ) { backStackEntry ->
+            val args = backStackEntry.arguments
+            val psalm = args?.getInt("psalm") ?: -1
+            val bookKey = args?.getString("book")
+            val chapter = args?.getInt("chapter") ?: 1
+            val start = args?.getInt("start") ?: -1
+            val end = args?.getInt("end") ?: -1
+            // Rebuild the target once; both doors out derive their routes from
+            // it, so section, book and chapter can never drift apart.
+            val target = if (psalm >= 1) {
+                com.agpeya.app.data.ReadingTarget.Psalm(
+                    number = psalm,
+                    sectionIndex = psalm - 1,
+                    startVerse = start.takeIf { it >= 1 },
+                    endVerse = end.takeIf { it >= 1 },
+                )
+            } else {
+                com.agpeya.app.data.ReadingTarget.NtPassage(
+                    bookKey = bookKey ?: "matthew",
+                    chapter = chapter,
+                    start = start.takeIf { it >= 1 },
+                    end = end.takeIf { it >= 1 },
+                )
+            }
+            com.agpeya.app.ui.gitsawe.GitsawePassageScreen(
+                psalm = psalm,
+                bookKey = bookKey,
+                chapter = chapter,
+                start = start,
+                end = end,
+                role = args?.getString("role"),
+                onBack = { navController.popBackStack() },
+                onOpenBook = {
+                    navController.navigate(com.agpeya.app.data.GitsaweLinks.bookRoute(target)) { launchSingleTop = true }
+                },
+                onOpenChapter = {
+                    navController.navigate(com.agpeya.app.data.GitsaweLinks.chapterRoute(target)) { launchSingleTop = true }
+                },
             )
         }
         composable(
@@ -415,6 +479,22 @@ private fun AgpeyaNavHost(
                 onOpenCustomize = { navController.navigate("customize") { launchSingleTop = true } },
                 onOpenTutorial = { navController.navigate("tutorial") { launchSingleTop = true } },
                 onOpenAbout = { navController.navigate("about") { launchSingleTop = true } },
+                onOpenSpecialHabit = { habit ->
+                    navController.navigate("intention/${habit.name.lowercase()}") { launchSingleTop = true }
+                },
+            )
+        }
+        composable(
+            route = "intention/{habit}",
+            arguments = listOf(navArgument("habit") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val habit = when (backStackEntry.arguments?.getString("habit")) {
+                "repentance" -> com.agpeya.app.reminders.SpecialHabit.REPENTANCE
+                else -> com.agpeya.app.reminders.SpecialHabit.ALMS
+            }
+            com.agpeya.app.ui.settings.SpecialHabitScreen(
+                habit = habit,
+                onBack = { navController.popBackStack() },
             )
         }
         composable(

@@ -3,6 +3,7 @@ package com.agpeya.app.search
 import android.content.Context
 import com.agpeya.app.data.ContentRepository
 import com.agpeya.app.data.ScriptureRepository
+import com.agpeya.app.data.SeatatRepository
 import com.agpeya.app.data.SynaxariumRepository
 import com.agpeya.app.data.WudaseRepository
 import com.agpeya.app.model.Section
@@ -40,7 +41,7 @@ object AmharicSearch {
     }
 
     /** Where a result came from — lets the UI label it and route the tap. */
-    enum class Source { HOUR, PSALTER, SCRIPTURE, SYNAXARIUM, WUDASE }
+    enum class Source { HOUR, PSALTER, SCRIPTURE, SYNAXARIUM, WUDASE, SEATAT }
 
     data class Result(
         val source: Source,
@@ -136,6 +137,25 @@ object AmharicSearch {
                 targetIndex = 0,
                 title = section.titleAm.ifBlank { section.label },
                 route = "wudase?sec=${section.id}",
+                haystack = hay,
+                folded = fold(hay),
+            )
+        }
+
+        // ሰዓታት: both halves of every paired line are searchable, so a query
+        // in either Ge'ez or Amharic finds the hour it belongs to.
+        for (section in SeatatRepository.load(context).sections) {
+            // The `*` typo-review flag is display-only; stripped so a flagged
+            // word still matches a search for its plain spelling.
+            val hay = section.lines.joinToString(" ") { line ->
+                if (line.am.isBlank()) line.ge else "${line.ge} ${line.am}"
+            }.replace("*", "")
+            docs += Doc(
+                source = Source.SEATAT,
+                targetId = section.id,
+                targetIndex = 0,
+                title = section.titleGe.ifBlank { section.label },
+                route = "seatat?sec=${section.id}",
                 haystack = hay,
                 folded = fold(hay),
             )
@@ -249,6 +269,7 @@ object AmharicSearch {
         val scripture: String,
         val synaxarium: String,
         val wudase: String,
+        val seatat: String,
     )
 
     /** One pass over the pre-folded index, capped per source. */
@@ -268,6 +289,7 @@ object AmharicSearch {
             val label = when (doc.source) {
                 Source.SCRIPTURE -> labels.scripture
                 Source.SYNAXARIUM -> labels.synaxarium
+                Source.SEATAT -> labels.seatat
                 else -> labels.wudase
             }
             out += Result(

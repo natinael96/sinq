@@ -51,6 +51,8 @@ data class QuietHours(
 enum class AlarmAlert { SOUND_VIBRATE, SOUND_ONLY, VIBRATE_ONLY, SILENT }
 /** Which sound a ringing alarm plays. */
 enum class AlarmSound { ALARM, RINGTONE, NOTIFICATION }
+/** How the ሰዓታት reader shows its bilingual text: paired lines, or one language. */
+enum class SeatatLang { BOTH, GEEZ, AMHARIC }
 
 /** User preferences: reading mode, font size, theme, keep-screen-on. */
 object SettingsRepository {
@@ -64,6 +66,7 @@ object SettingsRepository {
     private val KEY_LANGUAGE = stringPreferencesKey("language")
     private val KEY_ALARM_ALERT = stringPreferencesKey("alarm_alert")
     private val KEY_ALARM_SOUND = stringPreferencesKey("alarm_sound")
+    private val KEY_SEATAT_LANG = stringPreferencesKey("seatat_lang")
     private val KEY_ONBOARDED = booleanPreferencesKey("onboarded")
     private val KEY_NAME = stringPreferencesKey("profile_name")
     private val KEY_CHRISTIAN_NAME = stringPreferencesKey("profile_christian_name")
@@ -145,6 +148,16 @@ object SettingsRepository {
 
     suspend fun setReadingFont(context: Context, font: ReadingFont) {
         context.settingsDataStore.edit { it[KEY_READING_FONT] = font.name }
+    }
+
+    /** The ሰዓታት reader's language mode. Paired Ge'ez + Amharic by default. */
+    fun seatatLang(context: Context): Flow<SeatatLang> =
+        context.settingsDataStore.data.map {
+            runCatching { SeatatLang.valueOf(it[KEY_SEATAT_LANG] ?: "") }.getOrDefault(SeatatLang.BOTH)
+        }
+
+    suspend fun setSeatatLang(context: Context, lang: SeatatLang) {
+        context.settingsDataStore.edit { it[KEY_SEATAT_LANG] = lang.name }
     }
 
     fun keepScreenOn(context: Context): Flow<Boolean> =

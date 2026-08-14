@@ -87,14 +87,16 @@ private data class Source(val label: String, val subtitle: String?, val services
 /**
  * የዕለቱ ግጻዌ — today's lectionary. Offers whatever offices fall on the date
  * (daily, the movable-season reading via [GitsaweRepository]'s Bahre Hasab, and
- * the monthly reading) as a switch. Each reading taps through to the Psalter or
- * the scripture reader; a reading with no bundled page is shown but not tappable.
+ * the monthly reading) as a switch. Each reading taps through to its own
+ * focused passage page ([onOpenReading] carries the target and the role label
+ * for that page's header); a reading with no bundled page is shown but not
+ * tappable.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GitsaweScreen(
     onBack: () -> Unit,
-    onOpenReading: (ReadingTarget) -> Unit,
+    onOpenReading: (ReadingTarget, String) -> Unit,
     onOpenSynaxarium: (Long) -> Unit,
 ) {
     val context = LocalContext.current
@@ -231,7 +233,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.serviceSection(
     label: String,
     service: GitsaweService,
     s: Strings,
-    onOpenReading: (ReadingTarget) -> Unit,
+    onOpenReading: (ReadingTarget, String) -> Unit,
 ) {
     item(key = "svc_$label") {
         ServiceHeader(label)
@@ -312,7 +314,7 @@ private fun KidaseSection(chants: List<String>) {
 }
 
 @Composable
-private fun ReadingRow(role: String, reading: GitsaweReading, s: Strings, onOpenReading: (ReadingTarget) -> Unit) {
+private fun ReadingRow(role: String, reading: GitsaweReading, s: Strings, onOpenReading: (ReadingTarget, String) -> Unit) {
     val verse = reading.verse
     val target = verse?.let { GitsaweLinks.target(it) }
     val clickable = target != null
@@ -321,7 +323,7 @@ private fun ReadingRow(role: String, reading: GitsaweReading, s: Strings, onOpen
             .fillMaxWidth()
             .heightIn(min = 48.dp)
             .clip(MaterialTheme.shapes.small)
-            .then(if (clickable) Modifier.clickable { onOpenReading(target!!) } else Modifier)
+            .then(if (clickable) Modifier.clickable { onOpenReading(target!!, role) } else Modifier)
             .padding(vertical = Spacing.md, horizontal = Spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
     ) {

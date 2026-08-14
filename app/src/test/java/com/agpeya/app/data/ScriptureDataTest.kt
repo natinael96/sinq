@@ -109,12 +109,45 @@ class ScriptureDataTest {
         // Day-1 msbak: Psalm 64:11-12 -> Psalter section 63.
         val psalm = GitsaweLinks.target(VerseRef(bookTitle = "መዝሙረ ዳዊት", chapter = 64, start = 11, end = 12))
         assertEquals(ReadingTarget.Psalm(64, 63, 11, 12), psalm)
-        assertEquals("psalter?section=63&start=11&end=12", GitsaweLinks.route(psalm!!))
+        assertEquals("psalter?section=63&start=11&end=12", GitsaweLinks.chapterRoute(psalm!!))
+        assertEquals("psalter", GitsaweLinks.bookRoute(psalm))
+        assertEquals(
+            "gitsawePassage?psalm=64&start=11&end=12",
+            GitsaweLinks.passageRoute(psalm),
+        )
 
         // Day-1 negh gospel: Luke 4:17-23 -> NT passage.
         val gospel = GitsaweLinks.target(VerseRef(bookTitle = "የሉቃስ ወንጌል", chapter = 4, start = 17, end = 23))
         assertEquals(ReadingTarget.NtPassage("luke", 4, 17, 23), gospel)
-        assertEquals("scripture/luke/4?start=17&end=23", GitsaweLinks.route(gospel!!))
+        assertEquals("scripture/luke/4?start=17&end=23", GitsaweLinks.chapterRoute(gospel!!))
+        assertEquals("scripture/luke/1", GitsaweLinks.bookRoute(gospel))
+        assertEquals(
+            "gitsawePassage?book=luke&chapter=4&start=17&end=23",
+            GitsaweLinks.passageRoute(gospel),
+        )
+    }
+
+    @Test
+    fun `a citation range resolves exactly, and open-ended runs to the chapter's end`() {
+        val ch4 = book("luke").chapters.first { it.chapter == 4 }
+        val lastN = ch4.verses.last().n
+
+        // Explicit start and end: exactly that range.
+        val ranged = ScriptureRepository.citedRange(ch4.verses, 17, 23)
+        assertEquals(17, ranged.first().n)
+        assertEquals(23, ranged.last().n)
+
+        // Start with no end is not incomplete: it reads to the chapter's end.
+        val openEnded = ScriptureRepository.citedRange(ch4.verses, 17, null)
+        assertEquals(17, openEnded.first().n)
+        assertEquals(lastN, openEnded.last().n)
+
+        // No start at all: the whole chapter.
+        assertEquals(ch4.verses.size, ScriptureRepository.citedRange(ch4.verses, null, null).size)
+
+        // A citation past the chapter's real end still shows what exists.
+        val overCited = ScriptureRepository.citedRange(ch4.verses, lastN + 5, null)
+        assertTrue(overCited.isNotEmpty())
     }
 
     @Test

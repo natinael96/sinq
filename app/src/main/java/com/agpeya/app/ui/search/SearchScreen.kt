@@ -86,6 +86,7 @@ fun SearchScreen(
                     scripture = s.scripturesTitle,
                     synaxarium = s.synaxariumTitle,
                     wudase = s.wudaseMariam,
+                    seatat = s.seatatTitle,
                 ),
             )
             results = AmharicSearch.search(
@@ -96,6 +97,7 @@ fun SearchScreen(
                     scripture = s.scripturesTitle,
                     synaxarium = s.synaxariumTitle,
                     wudase = s.wudaseMariam,
+                    seatat = s.seatatTitle,
                 ),
             )
         }
@@ -284,6 +286,7 @@ private val SOURCE_ORDER = listOf(
     AmharicSearch.Source.SCRIPTURE,
     AmharicSearch.Source.SYNAXARIUM,
     AmharicSearch.Source.WUDASE,
+    AmharicSearch.Source.SEATAT,
 )
 
 private fun sourceTitle(source: AmharicSearch.Source, s: com.agpeya.app.ui.strings.Strings): String =
@@ -293,6 +296,7 @@ private fun sourceTitle(source: AmharicSearch.Source, s: com.agpeya.app.ui.strin
         AmharicSearch.Source.SCRIPTURE -> s.scripturesTitle
         AmharicSearch.Source.SYNAXARIUM -> s.synaxariumTitle
         AmharicSearch.Source.WUDASE -> s.wudaseMariam
+        AmharicSearch.Source.SEATAT -> s.seatatTitle
     }
 
 /** Filter row: "All" plus one chip per corpus that actually matched. */

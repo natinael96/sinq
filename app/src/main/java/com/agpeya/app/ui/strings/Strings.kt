@@ -36,6 +36,10 @@ interface Strings {
     val noGitsaweToday: String
     val gitsaweOpenNotAvailable: String
     val gitsaweChangeDay: String
+    // The dedicated passage page a ግጻዌ section opens on, and its two doors out.
+    val goToBook: String
+    val goToChapter: String
+    val goToPsalm: String
     val ok: String
     val synaxariumTitle: String
     val synaxariumKicker: String
@@ -198,6 +202,11 @@ interface Strings {
     val wudaseMariam: String
     val wudaseLangAmharic: String
     val wudaseLangGeez: String
+    // ሰዓታት — the Horologion. The name is content and stays in Ge'ez script.
+    val seatatTitle: String
+    val seatatSubtitle: String
+    /** The paired Ge'ez + Amharic mode of the ሰዓታት reader. */
+    val seatatLangBoth: String
     val contentUnavailable: String
     val mementoMoriGloss: String
     val fastingTitle: String
@@ -369,6 +378,9 @@ interface Strings {
     val breathReminderTitle: String
     val breathChannelName: String
 
+    /** The next day a scheduled intention's reminder will fire. */
+    fun nextDue(date: String): String
+
     /** The schedule row + editor: how often a special habit is due. */
     val scheduleLabel: String
     val scheduleWeekly: String
@@ -410,6 +422,9 @@ object AmharicStrings : Strings {
     override val noGitsaweToday = "ለዛሬ የተመዘገበ ግጻዌ የለም"
     override val gitsaweOpenNotAvailable = "ይህ ምንባብ ገና የለም"
     override val gitsaweChangeDay = "ቀን ቀይር"
+    override val goToBook = "መጽሐፉን ክፈት"
+    override val goToChapter = "ምዕራፉን ክፈት"
+    override val goToPsalm = "መዝሙሩን ክፈት"
     override val ok = "እሺ"
     override val synaxariumTitle = "ስንክሳር"
     override val synaxariumKicker = "የዕለቱ ስንክሳር"
@@ -556,6 +571,9 @@ object AmharicStrings : Strings {
     override val wudaseMariam = "ውዳሴ ማርያም"
     override val wudaseLangAmharic = "አማርኛ"
     override val wudaseLangGeez = "ግዕዝ"
+    override val seatatTitle = "ሰዓታት"
+    override val seatatSubtitle = "Seatat — ግዕዝ ከአማርኛ ትርጓሜ ጋር"
+    override val seatatLangBoth = "ግዕዝና አማርኛ"
     override val contentUnavailable = "ይዘቱን ማግኘት አልተቻለም"
     override val mementoMoriGloss = "ሞትን አስብ"
     override val fastingTitle = "አጽዋማት"
@@ -709,6 +727,7 @@ object AmharicStrings : Strings {
     override val breathReminderTitle = "ለአፍታ ጸልይ"
     override val breathChannelName = "የመሃል ጸሎት"
 
+    override fun nextDue(date: String) = "ቀጣይ ማስታወሻ፦ $date"
     override val scheduleLabel = "ድግግሞሽ"
     override val scheduleWeekly = "በሳምንት"
     override val scheduleEveryOtherDay = "በየሁለት ቀን"
@@ -746,6 +765,9 @@ object EnglishStrings : Strings {
     override val noGitsaweToday = "No Gitsawe recorded for today"
     override val gitsaweOpenNotAvailable = "This reading isn't available yet"
     override val gitsaweChangeDay = "Change day"
+    override val goToBook = "Open the book"
+    override val goToChapter = "Open the chapter"
+    override val goToPsalm = "Open the psalm"
     override val ok = "OK"
     override val synaxariumTitle = "Synaxarium"
     override val synaxariumKicker = "Today's Synaxarium"
@@ -914,6 +936,9 @@ object EnglishStrings : Strings {
     override val wudaseMariam = "ውዳሴ ማርያም"
     override val wudaseLangAmharic = "Amharic"
     override val wudaseLangGeez = "Ge'ez"
+    override val seatatTitle = "ሰዓታት"
+    override val seatatSubtitle = "Seatat — Ge'ez with Amharic"
+    override val seatatLangBoth = "Ge'ez + Amharic"
     override val contentUnavailable = "Content unavailable"
     override val mementoMoriGloss = "Remember death"
     override val fastingTitle = "Fasts"
@@ -1066,6 +1091,7 @@ object EnglishStrings : Strings {
     override val breathReminderTitle = "A moment to pray"
     override val breathChannelName = "Prayer between the hours"
 
+    override fun nextDue(date: String) = "Next reminder: $date"
     override val scheduleLabel = "How often"
     override val scheduleWeekly = "Weekly"
     override val scheduleEveryOtherDay = "Every other day"
