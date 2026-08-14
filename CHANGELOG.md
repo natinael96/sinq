@@ -7,6 +7,23 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.9.9.4] — 2026-08-15
+
+_versionCode 34 · the real መጽሐፈ ሰዓታት_
+
+### Changed
+- **ሰዓታት is now the real book.** The starter text is replaced by a full
+  digitization of መጽሐፈ ሰዓታት ዘሌሊት ወዘነግህ (Tinsae Ze-Gubae edition, Addis
+  Ababa, ፲፱፻፶፯ ዓ.ም.): the መቅድም on አባ ጊዮርጊስ ዘጋሥጫ, then all 42 sections in
+  printed order — the fifteen ስብሐት parts of the night office alternating with
+  the biblical canticles and the ምስለ intercessions — 199 Ge'ez–Amharic paired
+  lines. It is one office, not four hours, so the reader now reads as one
+  continuous scroll: the hour chips are gone, and a ይዘት (contents) sheet
+  jumps to any section. Line pairing, the three language modes, tap-to-select
+  sharing and the red typo-review flag all carry over; search now normalizes
+  the traditional ፡ word separators, so queries typed with plain spaces match
+  the printed text in either language.
+
 ## [0.9.9.3] — 2026-08-14
 
 _versionCode 33 · ሰዓታት in the Library, and pages of their own_
