@@ -7,6 +7,20 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.9.9.5] — 2026-08-15
+
+_versionCode 35 · the widget shows where it stands_
+
+### Changed
+- **The ግጻዌ widget got its polish.** Each card now carries a page indicator —
+  gold for the shown day, muted for the other — baked into the card itself so
+  the dots always agree with what's visible; with only one day available they
+  disappear along with the swipe. Today is explicitly labelled ዛሬ (symmetric
+  with ነገ), a gold "ግጻዌውን ክፈት →" action line names what a tap does, and every
+  refresh snaps the stack back to Today so a browse to tomorrow never lingers
+  overnight. Tomorrow's card only exists when tomorrow actually has readings;
+  an empty today says so honestly instead of letting tomorrow pose as today.
+
 ## [0.9.9.4] — 2026-08-15
 
 _versionCode 34 · the real መጽሐፈ ሰዓታት_
