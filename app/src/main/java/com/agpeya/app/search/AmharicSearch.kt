@@ -143,18 +143,20 @@ object AmharicSearch {
         }
 
         // ሰዓታት: both halves of every paired line are searchable, so a query
-        // in either Ge'ez or Amharic finds the hour it belongs to.
+        // in either Ge'ez or Amharic finds the section it belongs to. The
+        // printed text separates every word with the traditional ፡; queries
+        // are typed with plain spaces, so the haystack (and thus the folded
+        // index AND the snippet shown) is normalized to spaces. The `*`
+        // typo-review flag is display-only and stripped the same way.
         for (section in SeatatRepository.load(context).sections) {
-            // The `*` typo-review flag is display-only; stripped so a flagged
-            // word still matches a search for its plain spelling.
             val hay = section.lines.joinToString(" ") { line ->
                 if (line.am.isBlank()) line.ge else "${line.ge} ${line.am}"
-            }.replace("*", "")
+            }.replace("*", "").replace("፡", " ").replace(Regex("\\s+"), " ")
             docs += Doc(
                 source = Source.SEATAT,
                 targetId = section.id,
                 targetIndex = 0,
-                title = section.titleGe.ifBlank { section.label },
+                title = section.titleGe.ifBlank { section.titleAm },
                 route = "seatat?sec=${section.id}",
                 haystack = hay,
                 folded = fold(hay),

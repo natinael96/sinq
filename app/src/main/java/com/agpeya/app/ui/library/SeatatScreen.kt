@@ -13,16 +13,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.outlined.MenuBook
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,12 +32,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,11 +55,13 @@ import com.agpeya.app.data.SeatatRepository
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.model.SeatatContent
 import com.agpeya.app.model.SeatatLine
+import com.agpeya.app.model.SeatatSection
 import com.agpeya.app.ui.common.LoadingPanel
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.common.StatePanel
 import com.agpeya.app.ui.reading.FontSizeActions
 import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.inReadingFont
 import com.agpeya.app.ui.theme.readingBodyStyle
@@ -67,13 +71,28 @@ import kotlinx.coroutines.launch
 
 private val FONT_STEPS_SP = SettingsRepository.FONT_STEPS_SP
 
+/** One row of the continuous office: a section heading, or one paired line
+ *  (with its flat line index, so tap-selection can run across sections). */
+private sealed interface SeatatRow {
+    val key: String
+
+    data class Header(val section: SeatatSection, val sectionIndex: Int) : SeatatRow {
+        override val key get() = "h_${section.id}"
+    }
+
+    data class Line(val line: SeatatLine, val sectionIndex: Int, val flatIndex: Int) : SeatatRow {
+        override val key get() = "l_$flatIndex"
+    }
+}
+
 /**
- * ሰዓታት (Seatat) — the prayers of the hours, Ge'ez-first with a line-by-line
- * Amharic translation. Each Amharic line sits directly under its Ge'ez line,
- * smaller and italic, so the page reads as one continuous prayer with an
- * inline translation — never two documents. The language mode (paired /
- * Ge'ez only / Amharic only) is persisted; the section chips (ጠዋት · ቀትር ·
- * ማታ · ሌሊት) switch hours without losing each hour's reading position.
+ * ሰዓታት (Seatat) — መጽሐፈ ሰዓታት ዘሌሊት ወዘነግህ, one office read as one continuous
+ * scroll: the መቅድም, then the fifteen ስብሐት parts alternating with the biblical
+ * canticles and the ምስለ intercessions, exactly in the printed order. Ge'ez is
+ * the prayer; each Amharic line sits directly under its own Ge'ez line, smaller
+ * and italic. Navigation is a contents sheet (ይዘት) — 42 sections are a list to
+ * jump within, not chips to flip between — and the language mode (paired /
+ * Ge'ez / Amharic) is persisted.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,27 +112,72 @@ fun SeatatScreen(onBack: () -> Unit, initialSectionId: String? = null) {
     val data = content
     val sections = data?.sections ?: emptyList()
 
-    val initialIndex = remember(sections, initialSectionId) {
-        initialSectionId?.let { id -> sections.indexOfFirst { it.id == id }.takeIf { it >= 0 } }
+    // The whole office flattened once: headers interleaved with lines, each
+    // line carrying a global index for cross-section tap selection.
+    val rows = remember(sections) {
+        buildList {
+            var flat = 0
+            sections.forEachIndexed { si, sec ->
+                add(SeatatRow.Header(sec, si))
+                sec.lines.forEach { line ->
+                    add(SeatatRow.Line(line, si, flat))
+                    flat++
+                }
+            }
+        }
     }
-    var picked by rememberSaveable { mutableIntStateOf(-1) }
-    val selected = if (picked >= 0) picked else initialIndex ?: 0
+    val flatLines = remember(rows) { rows.filterIsInstance<SeatatRow.Line>() }
+    // List index of a section's header; +1 below accounts for the toggle item.
+    fun headerListIndex(sectionIndex: Int): Int =
+        rows.indexOfFirst { it is SeatatRow.Header && it.sectionIndex == sectionIndex } + 1
+
+    val listState = rememberLazyListState()
+    var sheetOpen by rememberSaveable { mutableStateOf(false) }
+
+    // A search result (seatat?sec=...) lands on its section — once.
+    var landed by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(rows) {
+        if (!landed && initialSectionId != null && rows.isNotEmpty()) {
+            sections.indexOfFirst { it.id == initialSectionId }.takeIf { it >= 0 }?.let {
+                listState.scrollToItem(headerListIndex(it))
+            }
+            landed = true
+        }
+    }
+
+    // Live line selection across the whole office; -1 = none.
+    var selA by rememberSaveable { mutableIntStateOf(-1) }
+    var selB by rememberSaveable { mutableIntStateOf(-1) }
+    val selRange = com.agpeya.app.ui.reading.flatSelectionRange(selA, selB)
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             SinqTopBar(
                 title = s.seatatTitle,
+                subtitle = "ዘሌሊት ወዘነግህ",
                 onBack = onBack,
                 actions = {
-                    // The whole hour being read, shaped by the language mode.
-                    val shown = sections.getOrNull(selected.coerceIn(0, (sections.size - 1).coerceAtLeast(0)))
-                    com.agpeya.app.ui.common.ShareMenuAction(enabled = shown != null, payload = {
-                        shown?.let {
+                    IconButton(onClick = { sheetOpen = true }) {
+                        Icon(
+                            Icons.AutoMirrored.Outlined.List,
+                            contentDescription = s.contents,
+                            modifier = Modifier.size(IconSize.medium),
+                        )
+                    }
+                    // Shares the section currently at the top of the screen.
+                    val visibleSection = sections.getOrNull(
+                        (rows.getOrNull(
+                            (listState.firstVisibleItemIndex - 1).coerceAtLeast(0),
+                        )?.let { if (it is SeatatRow.Header) it.sectionIndex else (it as? SeatatRow.Line)?.sectionIndex })
+                            ?: 0,
+                    )
+                    com.agpeya.app.ui.common.ShareMenuAction(enabled = visibleSection != null, payload = {
+                        visibleSection?.let {
                             com.agpeya.app.ui.common.SharePayload(
                                 body = it.lines.joinToString("\n\n") { line -> shareLine(line, lang) },
                                 kicker = s.seatatTitle,
-                                title = if (lang == SeatatLang.AMHARIC) it.titleAm.ifBlank { it.titleGe } else it.titleGe,
+                                title = sectionTitle(it, lang),
                             )
                         }
                     })
@@ -139,26 +203,6 @@ fun SeatatScreen(onBack: () -> Unit, initialSectionId: String? = null) {
             return@Scaffold
         }
 
-        val section = sections.getOrNull(selected.coerceIn(0, sections.size - 1))
-        // Live line selection: tap anchors, next tap moves the end; -1 = none.
-        var selA by rememberSaveable(selected) { mutableIntStateOf(-1) }
-        var selB by rememberSaveable(selected) { mutableIntStateOf(-1) }
-        val selRange = com.agpeya.app.ui.reading.flatSelectionRange(selA, selB)
-
-        val listState = rememberLazyListState()
-        // Each hour keeps its own reading position for the life of the screen:
-        // the scroll is recorded per section and restored when its chip is
-        // tapped again, so flipping ጠዋት → ማታ → ጠዋት lands back mid-prayer.
-        val positions = remember { mutableMapOf<Int, Pair<Int, Int>>() }
-        LaunchedEffect(selected) {
-            val (index, offset) = positions[selected] ?: (0 to 0)
-            listState.scrollToItem(index, offset)
-        }
-        LaunchedEffect(selected) {
-            snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
-                .collect { positions[selected] = it }
-        }
-
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
             LazyColumn(
                 state = listState,
@@ -173,43 +217,18 @@ fun SeatatScreen(onBack: () -> Unit, initialSectionId: String? = null) {
                         geezLabel = s.wudaseLangGeez,
                         amharicLabel = s.wudaseLangAmharic,
                     ) { mode -> scope.launch { SettingsRepository.setSeatatLang(context, mode) } }
-                }
-                item(key = "hours") {
-                    HourStrip(sections.map { it.label.ifBlank { it.id } }, selected) { picked = it }
                     Spacer(Modifier.height(6.dp))
                 }
-                if (section != null) {
-                    item(key = "title") {
-                        Column(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 14.dp)) {
-                            Text(
-                                text = if (lang == SeatatLang.AMHARIC) section.titleAm.ifBlank { section.titleGe }
-                                else section.titleGe,
-                                style = MaterialTheme.typography.titleMedium.inReadingFont(),
-                                color = MaterialTheme.colorScheme.secondary,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                            if (lang == SeatatLang.BOTH && section.titleAm.isNotBlank()) {
-                                Text(
-                                    text = section.titleAm,
-                                    style = MaterialTheme.typography.labelMedium
-                                        .inReadingFont()
-                                        .copy(fontStyle = FontStyle.Italic),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
-                                )
-                            }
-                        }
-                    }
-                    items(section.lines.size, key = { "ln_$it" }) { i ->
-                        PairedLine(
-                            line = section.lines[i],
+                items(rows.size, key = { rows[it].key }) { i ->
+                    when (val row = rows[i]) {
+                        is SeatatRow.Header -> SectionHeader(row.section, lang)
+                        is SeatatRow.Line -> PairedLine(
+                            line = row.line,
                             lang = lang,
                             bodyFontSp = bodyFontSp,
-                            selected = i in selRange,
+                            selected = row.flatIndex in selRange,
                             onTap = {
-                                val (a, b) = com.agpeya.app.ui.reading.advanceFlatSelection(selA, i)
+                                val (a, b) = com.agpeya.app.ui.reading.advanceFlatSelection(selA, row.flatIndex)
                                 selA = a
                                 selB = b
                             },
@@ -219,32 +238,75 @@ fun SeatatScreen(onBack: () -> Unit, initialSectionId: String? = null) {
                 item { Spacer(Modifier.height(48.dp)) }
             }
 
-            val linesNow = section?.lines ?: emptyList()
             val selBody = if (selRange.isEmpty()) null
-            else linesNow.filterIndexed { i, _ -> i in selRange }
-                .joinToString("\n\n") { shareLine(it, lang) }
+            else flatLines.filter { it.flatIndex in selRange }
+                .joinToString("\n\n") { shareLine(it.line, lang) }
                 .ifBlank { null }
-            val sectionTitle = section?.let {
-                if (lang == SeatatLang.AMHARIC) it.titleAm.ifBlank { it.titleGe } else it.titleGe
-            }
+            // The selection's home section names the share.
+            val selTitle = flatLines.firstOrNull { it.flatIndex == selRange.first }
+                ?.let { sections.getOrNull(it.sectionIndex) }
+                ?.let { sectionTitle(it, lang) }
             com.agpeya.app.ui.reading.SelectionShareBar(
                 visible = selA >= 0,
                 onDismiss = { selA = -1; selB = -1 },
-                shareText = selBody?.let { listOfNotNull(sectionTitle, it).joinToString("\n\n") },
+                shareText = selBody?.let { listOfNotNull(selTitle, it).joinToString("\n\n") },
                 shareImage = selBody?.let {
-                    com.agpeya.app.ui.common.SharePayload(body = it, kicker = s.seatatTitle, title = sectionTitle)
+                    com.agpeya.app.ui.common.SharePayload(body = it, kicker = s.seatatTitle, title = selTitle)
                 },
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
         }
     }
+
+    // ይዘት — the contents sheet. The one navigation surface for 43 sections:
+    // tap a title, land on it, keep reading.
+    if (sheetOpen) {
+        ModalBottomSheet(onDismissRequest = { sheetOpen = false }) {
+            LazyColumn(contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.sm)) {
+                items(sections.size, key = { sections[it].id }) { i ->
+                    val sec = sections[i]
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(MaterialTheme.shapes.small)
+                            .clickable {
+                                sheetOpen = false
+                                scope.launch { listState.scrollToItem(headerListIndex(i)) }
+                            }
+                            .padding(vertical = Spacing.md, horizontal = Spacing.xs),
+                    ) {
+                        Text(
+                            sec.titleGe.ifBlank { sec.titleAm },
+                            style = MaterialTheme.typography.titleSmall.inReadingFont(),
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                        if (sec.titleAm.isNotBlank() && sec.titleAm != sec.titleGe) {
+                            Text(
+                                sec.titleAm,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+                item { Spacer(Modifier.height(Spacing.xxl)) }
+            }
+        }
+    }
+}
+
+private fun sectionTitle(section: SeatatSection, lang: SeatatLang): String = when (lang) {
+    SeatatLang.AMHARIC -> section.titleAm.ifBlank { section.titleGe }
+    else -> section.titleGe.ifBlank { section.titleAm }
 }
 
 /** One line in the language mode's shape — pairs joined for sharing. The `*`
  *  typo flag is an in-app review mark; it never travels into shared text. */
 private fun shareLine(line: SeatatLine, lang: SeatatLang): String = when (lang) {
-    SeatatLang.BOTH -> if (line.am.isBlank()) line.ge else "${line.ge}\n${line.am}"
-    SeatatLang.GEEZ -> line.ge
+    SeatatLang.BOTH -> if (line.am.isBlank()) line.ge
+    else if (line.ge.isBlank()) line.am
+    else "${line.ge}\n${line.am}"
+    SeatatLang.GEEZ -> line.ge.ifBlank { line.am }
     SeatatLang.AMHARIC -> line.am.ifBlank { line.ge }
 }.replace("*", "")
 
@@ -266,11 +328,38 @@ private fun typoFlagged(text: String, flagColor: androidx.compose.ui.graphics.Co
         }
     }
 
+/** A section heading inside the continuous office: gold title, Amharic under
+ *  it in paired mode — the same rank the ግጻዌ page gives its movements. */
+@Composable
+private fun SectionHeader(section: SeatatSection, lang: SeatatLang) {
+    Column(Modifier.fillMaxWidth().padding(top = Spacing.xxl, bottom = Spacing.md)) {
+        Text(
+            text = sectionTitle(section, lang),
+            style = MaterialTheme.typography.titleMedium.inReadingFont(),
+            color = MaterialTheme.colorScheme.secondary,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        if (lang == SeatatLang.BOTH && section.titleAm.isNotBlank() && section.titleAm != section.titleGe) {
+            Text(
+                text = section.titleAm,
+                style = MaterialTheme.typography.labelMedium
+                    .inReadingFont()
+                    .copy(fontStyle = FontStyle.Italic),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+            )
+        }
+    }
+}
+
 /**
  * One paired line: the Ge'ez as the prayer, its Amharic directly beneath —
  * smaller, italic, slightly indented, muted — close enough that the pair
  * reads as a unit. In a single-language mode the shown text takes the full
- * reading width and the primary style.
+ * reading width and the primary style. A line with no Ge'ez (the መቅድም's
+ * Amharic prose) renders its Amharic as the primary text in every mode.
  */
 @Composable
 private fun PairedLine(
@@ -301,32 +390,26 @@ private fun PairedLine(
                 .padding(bottom = 18.dp),
         ) {
             val flag = MaterialTheme.colorScheme.error
-            when (lang) {
-                SeatatLang.GEEZ -> Text(
-                    text = typoFlagged(line.ge, flag),
-                    style = primaryStyle,
-                    color = MaterialTheme.colorScheme.onBackground,
+            val primary: String
+            val under: String?
+            when {
+                line.ge.isBlank() -> { primary = line.am; under = null }
+                lang == SeatatLang.GEEZ -> { primary = line.ge; under = null }
+                lang == SeatatLang.AMHARIC -> { primary = line.am.ifBlank { line.ge }; under = null }
+                else -> { primary = line.ge; under = line.am.takeIf { it.isNotBlank() } }
+            }
+            Text(
+                text = typoFlagged(primary, flag),
+                style = primaryStyle,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            under?.let {
+                Text(
+                    text = typoFlagged(it, flag),
+                    style = translationStyle,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 12.dp, top = 3.dp),
                 )
-                SeatatLang.AMHARIC -> Text(
-                    text = typoFlagged(line.am.ifBlank { line.ge }, flag),
-                    style = primaryStyle,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-                SeatatLang.BOTH -> {
-                    Text(
-                        text = typoFlagged(line.ge, flag),
-                        style = primaryStyle,
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
-                    if (line.am.isNotBlank()) {
-                        Text(
-                            text = typoFlagged(line.am, flag),
-                            style = translationStyle,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(start = 12.dp, top = 3.dp),
-                        )
-                    }
-                }
             }
         }
     }
@@ -369,42 +452,6 @@ private fun LangModeToggle(
                 Text(
                     label,
                     style = MaterialTheme.typography.labelLarge.inReadingFont(),
-                    color = if (isSel) sinqColors.onHero else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-    }
-}
-
-/** ጠዋት · ቀትር · ማታ · ሌሊት — the hour chips, same shape as the ውዳሴ day strip. */
-@Composable
-private fun HourStrip(labels: List<String>, selected: Int, onSelect: (Int) -> Unit) {
-    val stripState = rememberLazyListState()
-    LaunchedEffect(selected) {
-        if (selected in labels.indices) stripState.animateScrollToItem(selected)
-    }
-    LazyRow(
-        state = stripState,
-        modifier = Modifier.padding(vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        itemsIndexed(labels) { i, label ->
-            val isSel = i == selected
-            Box(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .then(
-                        if (isSel) Modifier.background(sinqColors.hero)
-                        else Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
-                    )
-                    .clickable { onSelect(i) }
-                    .padding(horizontal = 16.dp, vertical = 9.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    label,
-                    style = MaterialTheme.typography.labelLarge.inReadingFont(),
-                    fontWeight = if (isSel) FontWeight.SemiBold else FontWeight.Normal,
                     color = if (isSel) sinqColors.onHero else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }

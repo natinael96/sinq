@@ -695,7 +695,7 @@ Navigation-Compose.
 | `mode/{modeId}` | `ModeEditorScreen` | `modeId: String` |
 | `battery` | `BatteryHelpScreen` | — |
 | `gitsawePassage?psalm=&book=&chapter=&start=&end=&role=` | `GitsawePassageScreen` | the cited passage a ግጻዌ section opens on; `role` is the lectionary label |
-| `seatat?sec={sec}` | `SeatatScreen` | ሰዓታት reader; `sec` preselects an hour (search results use it) |
+| `seatat?sec={sec}` | `SeatatScreen` | ሰዓታት reader — the night-and-dawn office as one continuous scroll with a contents sheet; `sec` lands on a section (search results use it) |
 | `intention/{habit}` | `SpecialHabitScreen` | `habit: "alms" \| "repentance"` |
 | `tutorial` | `TutorialScreen` | — |
 | `about` | `AboutScreen` | — |

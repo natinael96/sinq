@@ -8,9 +8,10 @@ import org.junit.Test
 import java.io.File
 
 /**
- * Guards the bundled ሰዓታት: the file decodes, every section is addressable
- * (unique id, chip label, Ge'ez title), and every line keeps the Ge'ez-first
- * contract — Ge'ez never blank, the paired Amharic attached to its own line.
+ * Guards the bundled ሰዓታት (generated from tools/seatat-source.json by
+ * tools/build_seatat.py): the file decodes, every section is addressable
+ * (unique id, a title), and every line keeps the paired-text contract —
+ * at least one half present, the Amharic never a stray copy of the Ge'ez.
  */
 class SeatatDataTest {
 
@@ -24,29 +25,36 @@ class SeatatDataTest {
         json.decodeFromString(File(contentDir, "seatat/seatat.json").readText())
 
     @Test
-    fun `seatat decodes with the four hours`() {
+    fun `seatat decodes as the full night-and-dawn office`() {
         val c = content()
-        assertEquals(listOf("negh", "ketr", "serk", "lelit"), c.sections.map { it.id })
+        // መቅድም + the 42 sections of the printed book, in printed order.
+        assertEquals(43, c.sections.size)
         assertEquals(c.sections.size, c.sections.map { it.id }.distinct().size)
+        assertEquals("meqdim", c.sections.first().id)
+        assertEquals("introductory_prayer", c.sections[1].id)
+        assertEquals("concluding_doxology_and_colophon", c.sections.last().id)
         for (s in c.sections) {
-            assertTrue("${s.id} has a chip label", s.label.isNotBlank())
-            assertTrue("${s.id} has a Ge'ez title", s.titleGe.isNotBlank())
+            assertTrue("${s.id} has a title", s.titleGe.isNotBlank() || s.titleAm.isNotBlank())
             assertTrue("${s.id} has lines", s.lines.isNotEmpty())
         }
     }
 
     @Test
-    fun `every line is Ge'ez-first with its own translation`() {
+    fun `every line carries text and an honest pairing`() {
+        var geezLines = 0
         for (s in content().sections) {
             s.lines.forEachIndexed { i, line ->
-                assertTrue("${s.id}[$i] Ge'ez never blank", line.ge.isNotBlank())
+                assertTrue("${s.id}[$i] has text", line.ge.isNotBlank() || line.am.isNotBlank())
+                if (line.ge.isNotBlank()) geezLines++
                 // The one-to-one pairing lives in the line itself: an Amharic
-                // half, when present, may not be a stray copy of the Ge'ez.
-                if (line.am.isNotBlank()) {
+                // half, when present with Ge'ez, may not be a stray copy.
+                if (line.ge.isNotBlank() && line.am.isNotBlank()) {
                     assertTrue("${s.id}[$i] am differs from ge", line.am != line.ge)
                 }
             }
         }
+        // The book is Ge'ez-first: only the መቅድም is Amharic-only prose.
+        assertTrue("most lines are Ge'ez-first ($geezLines)", geezLines >= 190)
     }
 
     @Test
