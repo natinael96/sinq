@@ -7,6 +7,34 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.9.9.3] — 2026-08-14
+
+_versionCode 33 · ሰዓታት in the Library, and pages of their own_
+
+### Added
+- **ሰዓታት (Seatat) in the Library.** The prayers of the hours, Ge'ez-first with
+  a line-by-line Amharic translation: each Amharic line sits directly under its
+  Ge'ez line — smaller, italic, visually attached — so the page reads as one
+  continuous prayer with an inline translation. Three persisted language modes
+  (ግዕዝና አማርኛ · ግዕዝ · አማርኛ); hour chips (ጠዋት · ቀትር · ማታ · ሌሊት) that keep
+  each hour's reading position; tap-to-select sharing and font sizing like the
+  other readers; searchable in both languages from the unified search. A word
+  marked `*` in the bundled text renders a small red asterisk — an in-app
+  review flag for a spelling that still needs checking (stripped from shares
+  and search).
+- **Dedicated pages for ምጽዋት and ንስሐ.** Each scheduled intention now opens its
+  own page from Settings — toggle, cadence, time, and the next due day in the
+  Ethiopian calendar — instead of expanding rows inline.
+- **A focused page for every ግጻዌ section.** Tapping ምስባክ, ወንጌል or any reading
+  opens only the cited verses in the reading face, with the lectionary role in
+  the header and two doors out: open the book, or open the chapter that holds
+  the passage.
+
+### Changed
+- **Open-ended ግጻዌ citations read to the chapter's end.** A reference with a
+  start verse and no end is not a single verse: the passage page shows from
+  the start through the chapter's last verse, across all Gitsawe types.
+
 ## [0.9.9.2] — 2026-08-13
 
 _versionCode 32 · the streak becomes a journey_
