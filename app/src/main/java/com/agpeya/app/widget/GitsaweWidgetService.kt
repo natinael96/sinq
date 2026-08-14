@@ -2,6 +2,7 @@ package com.agpeya.app.widget
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
@@ -40,6 +41,9 @@ private class GitsaweWidgetFactory(
         val rows: List<Pair<String, String>>,
         val kidase: String?,
         val emptyText: String,
+        /** The day genuinely has something to read (not just a fallback title). */
+        val hasContent: Boolean,
+        val ctaText: String,
     )
 
     private var pages: List<Page> = emptyList()
@@ -53,17 +57,22 @@ private class GitsaweWidgetFactory(
         pages = runCatching { buildPages() }.getOrDefault(emptyList())
     }
 
+    /**
+     * Today's card, and tomorrow's ONLY when tomorrow actually has readings —
+     * an empty second page would make the swipe a disappointment. Today's card
+     * always exists: when the day has no bundled reading it says so honestly
+     * rather than letting tomorrow slide forward and pose as today.
+     */
     private fun buildPages(): List<Page> = runBlocking {
         val s = stringsFor(SettingsRepository.language(context).first())
         val today = LocalDate.now()
-        listOf(
-            pageFor(today, "${s.gitsaweTitle}  ·  ${formatEthiopian(today, s)}", s),
-            pageFor(
-                today.plusDays(1),
-                "${s.tomorrowLabel}  ·  ${formatEthiopian(today.plusDays(1), s)}",
-                s,
-            ),
+        val todayPage = pageFor(today, "${s.todayLabel}  ·  ${formatEthiopian(today, s)}", s)
+        val tomorrowPage = pageFor(
+            today.plusDays(1),
+            "${s.tomorrowLabel}  ·  ${formatEthiopian(today.plusDays(1), s)}",
+            s,
         )
+        if (tomorrowPage.hasContent) listOf(todayPage, tomorrowPage) else listOf(todayPage)
     }
 
     private suspend fun pageFor(date: LocalDate, header: String, s: com.agpeya.app.ui.strings.Strings): Page {
@@ -71,15 +80,17 @@ private class GitsaweWidgetFactory(
         // Prefer the ቅዳሴ (liturgy) service, falling back to ነግህ (matins).
         val entry = readings.daily
         val service = entry?.kidassie ?: entry?.negh
-        val title = entry?.title?.takeIf { it.isNotBlank() }
+        val realTitle = entry?.title?.takeIf { it.isNotBlank() }
             ?: readings.feasts.firstOrNull()?.amharicName
-            ?: s.gitsaweTitle
+        val rows = service?.let { pickRows(it) }.orEmpty()
         return Page(
             header = header,
-            title = title,
-            rows = service?.let { pickRows(it) }.orEmpty(),
+            title = realTitle ?: s.gitsaweTitle,
+            rows = rows,
             kidase = service?.kidassie?.firstOrNull { it.isNotBlank() }?.trim(),
             emptyText = s.noGitsaweToday,
+            hasContent = rows.isNotEmpty() || realTitle != null,
+            ctaText = "${s.readGitsawe} →",
         )
     }
 
@@ -109,6 +120,25 @@ private class GitsaweWidgetFactory(
                 views.setViewVisibility(R.id.widget_kidase, View.VISIBLE)
                 views.setTextViewText(R.id.widget_kidase, "ቅዳሴ · ${page.kidase}")
             }
+        }
+        // The primary action line — the whole card opens the app, this names it.
+        if (page.hasContent) {
+            views.setViewVisibility(R.id.widget_cta, View.VISIBLE)
+            views.setTextViewText(R.id.widget_cta, page.ctaText)
+        } else {
+            views.setViewVisibility(R.id.widget_cta, View.GONE)
+        }
+        // Page dots, baked per card so they always agree with the visible page:
+        // gold marks this card's position, the muted dot is the other day.
+        // With a single page there is nothing to swipe to — no dots at all.
+        if (pages.size > 1) {
+            views.setViewVisibility(R.id.widget_dots, View.VISIBLE)
+            val active = Color.parseColor("#E4BC5A")
+            val inactive = Color.parseColor("#527065")
+            views.setTextColor(R.id.widget_dot_1, if (position == 0) active else inactive)
+            views.setTextColor(R.id.widget_dot_2, if (position == 1) active else inactive)
+        } else {
+            views.setViewVisibility(R.id.widget_dots, View.GONE)
         }
         // Fills the provider's PendingIntent template: any card opens the app's
         // ግጻዌ screen (which has its own change-day control for going further).

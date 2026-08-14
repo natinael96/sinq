@@ -391,6 +391,9 @@ interface Strings {
 
     /** Header of the widget's second card: tomorrow's ግጻዌ, for preparing. */
     val tomorrowLabel: String
+
+    /** The widget card's action line; an arrow is appended in the layout. */
+    val readGitsawe: String
 }
 
 object AmharicStrings : Strings {
@@ -734,6 +737,7 @@ object AmharicStrings : Strings {
     override val scheduleMonthly = "በየወሩ"
     override fun monthlyOnDay(day: Int) = "በየወሩ በ$day ቀን"
     override val tomorrowLabel = "ነገ"
+    override val readGitsawe = "ግጻዌውን ክፈት"
 }
 
 object EnglishStrings : Strings {
@@ -1098,6 +1102,7 @@ object EnglishStrings : Strings {
     override val scheduleMonthly = "Monthly"
     override fun monthlyOnDay(day: Int) = "Monthly, on day $day (Ethiopian month)"
     override val tomorrowLabel = "Tomorrow"
+    override val readGitsawe = "Read the Gitsawe"
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { AmharicStrings }

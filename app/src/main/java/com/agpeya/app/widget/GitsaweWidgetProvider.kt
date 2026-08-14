@@ -55,6 +55,11 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
             // template must accept each card's fill-in intent, and an immutable
             // one silently drops it.
             views.setPendingIntentTemplate(R.id.widget_stack, openGitsaweTemplate(context))
+            // Today is the default card, every time: a refresh (date rollover,
+            // boot, language change, the periodic safety net) snaps the stack
+            // back to the front so yesterday's browse to "tomorrow" never
+            // lingers as the first thing seen.
+            views.setDisplayedChild(R.id.widget_stack, 0)
             manager.updateAppWidget(id, views)
         }
         // Make the factory re-read both days' content, not just re-lay-out.

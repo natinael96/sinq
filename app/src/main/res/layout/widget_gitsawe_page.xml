@@ -144,4 +144,43 @@
         android:textColor="#9DBBAD"
         android:textSize="13sp"
         android:visibility="gone" />
+
+    <!-- The primary action — the whole card is tappable; this line says so. -->
+    <TextView
+        android:id="@+id/widget_cta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textColor="#E4BC5A"
+        android:textSize="11sp"
+        android:maxLines="1"
+        android:visibility="gone" />
+
+    <!-- Page indicator, baked into each card: the today card carries ● ○, the
+         tomorrow card ○ ●, so the dots always agree with the visible page
+         (a StackView never reports its position back to the provider). Hidden
+         entirely when the stack has only one card. -->
+    <LinearLayout
+        android:id="@+id/widget_dots"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="5dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/widget_dot_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="●"
+            android:textSize="7sp" />
+
+        <TextView
+            android:id="@+id/widget_dot_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="7dp"
+            android:text="●"
+            android:textSize="7sp" />
+    </LinearLayout>
 </LinearLayout>
