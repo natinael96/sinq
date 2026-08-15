@@ -5,14 +5,21 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -38,7 +45,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -313,12 +323,18 @@ private fun ScheduleEditorDialog(
                     HabitSchedule.Kind.EVERY_OTHER_DAY to s.scheduleEveryOtherDay,
                     HabitSchedule.Kind.MONTHLY to s.scheduleMonthly,
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                // A dialog is narrower than a full screen: the three cadence
+                // chips don't fit on one line, so they wrap instead of being
+                // squeezed to one letter per line.
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
                     kinds.forEach { (k, label) ->
                         androidx.compose.material3.FilterChip(
                             selected = kind == k,
                             onClick = { kind = k },
-                            label = { Text(label) },
+                            label = { Text(label, maxLines = 1) },
                         )
                     }
                 }
@@ -331,13 +347,21 @@ private fun ScheduleEditorDialog(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Spacer(Modifier.height(Spacing.sm))
-                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        // Seven chips don't fit a dialog's width, and the last
+                        // two (ቅ/እ — Saturday, Sunday) were being clipped off
+                        // the edge. Each day takes an equal share of the row
+                        // instead, so all seven are always reachable.
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
                             s.dayLabels.forEachIndexed { index, label ->
                                 val day = index + 1
-                                androidx.compose.material3.FilterChip(
+                                DayToggle(
+                                    label = label,
                                     selected = day in days,
-                                    onClick = { days = if (day in days) days - day else days + day },
-                                    label = { Text(label) },
+                                    onToggle = { days = if (day in days) days - day else days + day },
+                                    modifier = Modifier.weight(1f),
                                 )
                             }
                         }
@@ -387,6 +411,52 @@ private fun ScheduleEditorDialog(
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
     )
+}
+
+/**
+ * One day of the week, as a small pill toggle. Its width comes from the row
+ * that holds it (a seventh of the space) rather than from its own content, so
+ * the full week always fits a dialog whatever the screen width or font scale;
+ * the height is fixed so the target stays comfortably tappable even when that
+ * seventh is narrow.
+ */
+@Composable
+private fun DayToggle(
+    label: String,
+    selected: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .height(40.dp)
+            .clip(CircleShape)
+            .background(
+                if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
+            )
+            .border(
+                width = 1.dp,
+                color = if (selected) {
+                    MaterialTheme.colorScheme.secondary
+                } else {
+                    MaterialTheme.colorScheme.outline
+                },
+                shape = CircleShape,
+            )
+            .toggleable(value = selected, role = Role.Checkbox, onValueChange = { onToggle() }),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            color = if (selected) {
+                MaterialTheme.colorScheme.onSecondaryContainer
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
+            maxLines = 1,
+        )
+    }
 }
 
 /**
