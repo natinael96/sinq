@@ -7,6 +7,19 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.9.9.8] — 2026-08-15
+
+_versionCode 38 · the whole week fits_
+
+### Fixed
+- **The "how often" dialog no longer cuts off half the week.** Saturday and
+  Sunday were being clipped off the right edge of the day row, so they could not
+  be picked at all, and "Monthly" was squeezed into a column one letter tall.
+  The cadence chips now wrap to a second line instead of being crushed, and each
+  day takes an equal share of the row — all seven are visible and tappable on
+  any screen width. Affects both the ምጽዋት and ንስሐ reminders, which share the
+  dialog.
+
 ## [0.9.9.7] — 2026-08-15
 
 _versionCode 37 · the reminder writes itself_
