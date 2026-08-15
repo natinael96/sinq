@@ -176,12 +176,16 @@ fun SearchScreen(
                     // Counts drive the filter row; grouping keeps a big corpus
                     // from burying a single prayer match.
                     val counts = remember(results) { results.groupingBy { it.source }.eachCount() }
-                    val shown = remember(results, filter) {
-                        if (filter == null) results else results.filter { it.source == filter }
+                    // A filter chosen for an earlier query may name a source the
+                    // new query doesn't match; fall back to "All" so results are
+                    // never silently hidden behind a stale filter.
+                    val activeFilter = if (filter != null && counts.containsKey(filter)) filter else null
+                    val shown = remember(results, activeFilter) {
+                        if (activeFilter == null) results else results.filter { it.source == activeFilter }
                     }
                     val grouped = remember(shown) { shown.groupBy { it.source } }
 
-                    SourceFilters(counts, filter) { filter = it }
+                    SourceFilters(counts, activeFilter) { filter = it }
 
                     LazyColumn(contentPadding = PaddingValues(vertical = 8.dp)) {
                         reference?.let { ref ->
