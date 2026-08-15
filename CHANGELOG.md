@@ -7,6 +7,20 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.9.9.7] — 2026-08-15
+
+_versionCode 37 · the reminder writes itself_
+
+### Changed
+- **The opening spinner is gone; the reminder is written instead.** Where the
+  splash used to mark its pause with a small spinning ring, *Memento Mori* is
+  now inked onto the screen letter by letter under a soft gold nib, then signed
+  off with a hand-drawn underline; **Remember Death** and **ሞትን አስብ** settle
+  beneath it. The words are drawn in the reading serif, scaled to fit narrow
+  screens, and a tap still moves on early. Nothing spins — the wait reads as a
+  moment of attention rather than a loading state. With animations turned off
+  system-wide the words simply appear already written.
+
 ## [0.9.9.6] — 2026-08-15
 
 _versionCode 36 · a reminder for every intention_
