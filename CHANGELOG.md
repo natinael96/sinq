@@ -7,6 +7,31 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.9.9.6] — 2026-08-15
+
+_versionCode 36 · a reminder for every intention_
+
+### Added
+- **ምጽዋት and ንስሐ can hold many reminders now.** Each intention used to be a
+  single nudge; now it is a list. Keep as many as you like, each with its own
+  name (which rides in the notification so they read apart in the tray), its own
+  cadence (weekly, every other day, or monthly on an Ethiopian day) and its own
+  time. Your existing reminder migrates in as the first entry, unchanged. They
+  are still intentions, not habits — nothing is recorded or shown as done.
+
+### Changed
+- **ሰዓታት is tucked away for now.** The bundled digitization is still partial
+  (መሐረነ አብ and other portions are missing), so the Library card and its search
+  entries are hidden until the text is whole. The reader, route and data stay
+  intact for when it returns.
+
+### Fixed
+- **Search no longer goes blank behind a stale filter.** A source filter (say
+  መጻሕፍት) chosen for one query stayed on for the next; if the new query didn't
+  match that source, the results vanished even though other sources had matches.
+  The filter now falls back to "All" whenever it names a source the current
+  query didn't hit.
+
 ## [0.9.9.5] — 2026-08-15
 
 _versionCode 35 · the widget shows where it stands_

@@ -14,3 +14,7 @@ captures/
 keystore.properties
 # Local-only: decompiled third-party APKs kept for study, never distributed.
 docs/extracted/
+
+# Kotlin build cache and local agent/tooling config.
+.kotlin/
+.claude/
