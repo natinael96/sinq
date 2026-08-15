@@ -15,41 +15,49 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
 /**
- * A special reminder (ምጽዋት or ንስሐ) fired on its due day. Re-arms for the
- * NEXT due day, then (unless turned off meanwhile) posts a notification whose
- * tap simply opens the app.
+ * One entry of a special reminder (ምጽዋት or ንስሐ) fired on its due day. Re-arms
+ * THAT entry for its next due day, then (unless it was disabled or removed
+ * meanwhile) posts a notification whose tap simply opens the app.
  *
  * Deliberately no "Done" action and no record: these are intentions, not
  * habits. The app's part ends at the reminder — whether alms were given or
- * repentance made is not the app's to know.
+ * repentance made is not the app's to know. The entry's label, when set, rides
+ * in the notification title so several reminders read apart in the tray.
  */
 class SpecialHabitReminderReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val habit = SpecialHabit.entries.firstOrNull { it.action == intent.action } ?: return
+        val entryId = intent.getStringExtra(SpecialHabitReminderScheduler.EXTRA_ENTRY_ID) ?: return
         val pending = goAsync()
         Thread {
             try {
                 runBlocking {
-                    val enabled = when (habit) {
-                        SpecialHabit.ALMS -> SettingsRepository.almsReminder(context).first()
-                        SpecialHabit.REPENTANCE -> SettingsRepository.repentanceReminder(context).first()
+                    val list = when (habit) {
+                        SpecialHabit.ALMS -> SettingsRepository.almsReminders(context).first()
+                        SpecialHabit.REPENTANCE -> SettingsRepository.repentanceReminders(context).first()
                     }
-                    if (!enabled) return@runBlocking
-                    // Chain: always re-arm for the next due day while enabled.
-                    SpecialHabitReminderScheduler.schedule(context, habit)
+                    val entry = list.firstOrNull { it.id == entryId } ?: return@runBlocking
+                    if (!entry.enabled) return@runBlocking
+                    // Chain: always re-arm this entry for its next due day.
+                    SpecialHabitReminderScheduler.scheduleNext(context, habit, entry)
 
                     val s = stringsFor(SettingsRepository.language(context).first())
-                    val (title, body, channelName) = when (habit) {
+                    val (defaultTitle, body, channelName) = when (habit) {
                         SpecialHabit.ALMS ->
                             Triple(s.almsReminderTitle, s.almsReminderBody, s.almsChannelName)
                         SpecialHabit.REPENTANCE ->
                             Triple(s.repentReminderTitle, s.repentReminderBody, s.repentChannelName)
                     }
+                    val title = entry.label.ifBlank { defaultTitle }
                     ensureChannel(context, habit, channelName)
+                    // Tap request code and notification id both derive from the
+                    // entry id, so entries never overwrite each other's tray
+                    // notification or share a PendingIntent.
+                    val tapCode = "${habit.action}:tap:$entryId".hashCode()
                     val tap = PendingIntent.getActivity(
                         context,
-                        habit.tapRequestCode,
+                        tapCode,
                         Intent(context, MainActivity::class.java).apply {
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                         },
@@ -65,7 +73,7 @@ class SpecialHabitReminderReceiver : BroadcastReceiver() {
                         .setContentIntent(tap)
                         .build()
                     context.getSystemService(NotificationManager::class.java)
-                        .notify(habit.notificationId, notification)
+                        .notify("${habit.action}:$entryId".hashCode(), notification)
                 }
             } finally {
                 pending.finish()

@@ -191,14 +191,12 @@ private fun AgpeyaNavHost(
                 com.agpeya.app.reminders.SpecialHabitReminderScheduler.sync(
                     context,
                     com.agpeya.app.reminders.SpecialHabit.ALMS,
-                    SettingsRepository.almsReminder(context).first(),
                 )
             }
             runCatching {
                 com.agpeya.app.reminders.SpecialHabitReminderScheduler.sync(
                     context,
                     com.agpeya.app.reminders.SpecialHabit.REPENTANCE,
-                    SettingsRepository.repentanceReminder(context).first(),
                 )
             }
         }
@@ -355,7 +353,6 @@ private fun AgpeyaNavHost(
                 onOpenScriptures = { navController.navigate("scriptures") { launchSingleTop = true } },
                 onOpenWudase = { navController.navigate("wudase") { launchSingleTop = true } },
                 onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
-                onOpenSeatat = { navController.navigate("seatat") { launchSingleTop = true } },
                 onSelectTab = navController::switchTab,
             )
         }

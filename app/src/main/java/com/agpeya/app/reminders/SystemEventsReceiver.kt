@@ -42,18 +42,10 @@ class SystemEventsReceiver : BroadcastReceiver() {
                             )
                         }
                         runCatching {
-                            SpecialHabitReminderScheduler.sync(
-                                context,
-                                SpecialHabit.ALMS,
-                                SettingsRepository.almsReminder(context).first(),
-                            )
+                            SpecialHabitReminderScheduler.sync(context, SpecialHabit.ALMS)
                         }
                         runCatching {
-                            SpecialHabitReminderScheduler.sync(
-                                context,
-                                SpecialHabit.REPENTANCE,
-                                SettingsRepository.repentanceReminder(context).first(),
-                            )
+                            SpecialHabitReminderScheduler.sync(context, SpecialHabit.REPENTANCE)
                         }
                         runCatching {
                             BreathPrayerScheduler.sync(

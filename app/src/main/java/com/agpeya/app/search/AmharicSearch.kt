@@ -3,7 +3,6 @@ package com.agpeya.app.search
 import android.content.Context
 import com.agpeya.app.data.ContentRepository
 import com.agpeya.app.data.ScriptureRepository
-import com.agpeya.app.data.SeatatRepository
 import com.agpeya.app.data.SynaxariumRepository
 import com.agpeya.app.data.WudaseRepository
 import com.agpeya.app.model.Section
@@ -142,26 +141,9 @@ object AmharicSearch {
             )
         }
 
-        // ሰዓታት: both halves of every paired line are searchable, so a query
-        // in either Ge'ez or Amharic finds the section it belongs to. The
-        // printed text separates every word with the traditional ፡; queries
-        // are typed with plain spaces, so the haystack (and thus the folded
-        // index AND the snippet shown) is normalized to spaces. The `*`
-        // typo-review flag is display-only and stripped the same way.
-        for (section in SeatatRepository.load(context).sections) {
-            val hay = section.lines.joinToString(" ") { line ->
-                if (line.am.isBlank()) line.ge else "${line.ge} ${line.am}"
-            }.replace("*", "").replace("፡", " ").replace(Regex("\\s+"), " ")
-            docs += Doc(
-                source = Source.SEATAT,
-                targetId = section.id,
-                targetIndex = 0,
-                title = section.titleGe.ifBlank { section.titleAm },
-                route = "seatat?sec=${section.id}",
-                haystack = hay,
-                folded = fold(hay),
-            )
-        }
+        // ሰዓታት is hidden for now (see LibraryScreen) — not indexed, so it
+        // never surfaces in search. Restore this loop when the card returns;
+        // the ፡-separator normalization it needs is preserved in git history.
         return docs
     }
 

@@ -16,7 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.LibraryMusic
 import androidx.compose.material.icons.outlined.MenuBook
-import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -41,7 +40,6 @@ fun LibraryScreen(
     onOpenScriptures: () -> Unit,
     onOpenWudase: () -> Unit,
     onOpenZewotr: () -> Unit,
-    onOpenSeatat: () -> Unit,
     onSelectTab: (Tab) -> Unit,
 ) {
     val s = LocalStrings.current
@@ -89,14 +87,9 @@ fun LibraryScreen(
             item {
                 LibraryCard(icon = Icons.Outlined.MenuBook, title = s.wudaseMariam, subtitle = "ሰኞ–እሑድ", onClick = onOpenWudase)
             }
-            item {
-                LibraryCard(
-                    icon = Icons.Outlined.Schedule,
-                    title = s.seatatTitle,
-                    subtitle = s.seatatSubtitle,
-                    onClick = onOpenSeatat,
-                )
-            }
+            // ሰዓታት is hidden for now — the bundled digitization is partial
+            // (መሐረነ አብ and other portions are missing). Restore the card once
+            // the content is complete; the reader, route and data are intact.
             item {
                 LibraryCard(icon = Icons.Outlined.MenuBook, title = s.zewotrTselot, subtitle = "ጸሎት ዘዘወትር", onClick = onOpenZewotr)
             }

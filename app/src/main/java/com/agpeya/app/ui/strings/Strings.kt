@@ -389,6 +389,14 @@ interface Strings {
     /** Summary for a monthly schedule; [day] is an ETHIOPIAN month day (1..30). */
     fun monthlyOnDay(day: Int): String
 
+    // A person can keep several ምጽዋት / ንስሐ reminders, each with its own name.
+    val addSpecialReminder: String
+    val reminderNameLabel: String
+    val reminderNameHintAlms: String
+    val reminderNameHintRepent: String
+    val untitledReminder: String
+    val noSpecialReminders: String
+
     /** Header of the widget's second card: tomorrow's ግጻዌ, for preparing. */
     val tomorrowLabel: String
 
@@ -736,6 +744,12 @@ object AmharicStrings : Strings {
     override val scheduleEveryOtherDay = "በየሁለት ቀን"
     override val scheduleMonthly = "በየወሩ"
     override fun monthlyOnDay(day: Int) = "በየወሩ በ$day ቀን"
+    override val addSpecialReminder = "ማስታወሻ ጨምር"
+    override val reminderNameLabel = "ስም (አማራጭ)"
+    override val reminderNameHintAlms = "ለምሳሌ፦ ለቤተ ክርስቲያን"
+    override val reminderNameHintRepent = "ለምሳሌ፦ የሳምንት ንስሐ"
+    override val untitledReminder = "ስም የሌለው"
+    override val noSpecialReminders = "ገና ማስታወሻ አልተጨመረም።"
     override val tomorrowLabel = "ነገ"
     override val readGitsawe = "ግጻዌውን ክፈት"
 }
@@ -1101,6 +1115,12 @@ object EnglishStrings : Strings {
     override val scheduleEveryOtherDay = "Every other day"
     override val scheduleMonthly = "Monthly"
     override fun monthlyOnDay(day: Int) = "Monthly, on day $day (Ethiopian month)"
+    override val addSpecialReminder = "Add reminder"
+    override val reminderNameLabel = "Name (optional)"
+    override val reminderNameHintAlms = "e.g. For the church"
+    override val reminderNameHintRepent = "e.g. Weekly repentance"
+    override val untitledReminder = "Untitled"
+    override val noSpecialReminders = "No reminders yet."
     override val tomorrowLabel = "Tomorrow"
     override val readGitsawe = "Read the Gitsawe"
 }

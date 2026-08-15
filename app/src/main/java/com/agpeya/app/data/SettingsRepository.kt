@@ -76,12 +76,21 @@ object SettingsRepository {
     /** 21:30 — the historical fixed time, kept as the default. */
     const val DEFAULT_STREAK_REMINDER_MIN = 21 * 60 + 30
     private val KEY_GITSAWE_REMINDER = booleanPreferencesKey("gitsawe_reminder")
+    // Legacy single-reminder keys — read only, to migrate the one old alms /
+    // repentance reminder into the first entry of the new lists below.
     private val KEY_ALMS_REMINDER = booleanPreferencesKey("alms_reminder")
     private val KEY_ALMS_REMINDER_TIME = intPreferencesKey("alms_reminder_min")
     private val KEY_ALMS_SCHEDULE = stringPreferencesKey("alms_schedule")
     private val KEY_REPENTANCE_REMINDER = booleanPreferencesKey("repentance_reminder")
     private val KEY_REPENTANCE_REMINDER_TIME = intPreferencesKey("repentance_reminder_min")
     private val KEY_REPENTANCE_SCHEDULE = stringPreferencesKey("repentance_schedule")
+
+    // The lists of custom reminders, one JSON list per intention.
+    private val KEY_ALMS_REMINDERS = stringPreferencesKey("alms_reminders_v2")
+    private val KEY_REPENTANCE_REMINDERS = stringPreferencesKey("repentance_reminders_v2")
+    // Entry ids last armed, so the scheduler can cancel ones that were removed.
+    private val KEY_ALMS_SCHEDULED_IDS = stringPreferencesKey("alms_scheduled_ids")
+    private val KEY_REPENTANCE_SCHEDULED_IDS = stringPreferencesKey("repentance_scheduled_ids")
 
     /** 09:00 — morning of the chosen alms day, before the day fills up. */
     const val DEFAULT_ALMS_REMINDER_MIN = 9 * 60
@@ -311,80 +320,112 @@ object SettingsRepository {
             }.getOrNull()
         } ?: fallback
 
-    /** Reminder to give alms on the chosen days. Off until the user opts in. */
-    fun almsReminder(context: Context): Flow<Boolean> =
-        context.settingsDataStore.data.map { it[KEY_ALMS_REMINDER] ?: false }
-
-    suspend fun setAlmsReminder(context: Context, value: Boolean) {
-        context.settingsDataStore.edit { it[KEY_ALMS_REMINDER] = value }
-    }
-
-    fun almsReminderTime(context: Context): Flow<Int> =
-        context.settingsDataStore.data.map { it[KEY_ALMS_REMINDER_TIME] ?: DEFAULT_ALMS_REMINDER_MIN }
-
-    suspend fun setAlmsReminderTime(context: Context, minuteOfDay: Int) {
-        context.settingsDataStore.edit {
-            it[KEY_ALMS_REMINDER_TIME] = minuteOfDay.coerceIn(0, 24 * 60 - 1)
+    // Decode a stored list, or migrate the one legacy reminder into a single
+    // entry when the list has never been written. On a fresh install there is
+    // no legacy key either, so the migrated entry simply carries the built-in
+    // defaults (alms: Sunday 09:00, off; repentance: Saturday 19:00, on).
+    private fun readReminders(
+        prefs: androidx.datastore.preferences.core.Preferences,
+        listKey: androidx.datastore.preferences.core.Preferences.Key<String>,
+        legacyEnabledKey: androidx.datastore.preferences.core.Preferences.Key<Boolean>,
+        legacyEnabledDefault: Boolean,
+        legacyTimeKey: androidx.datastore.preferences.core.Preferences.Key<Int>,
+        legacyTimeDefault: Int,
+        legacyScheduleKey: androidx.datastore.preferences.core.Preferences.Key<String>,
+        legacyScheduleDefault: com.agpeya.app.model.HabitSchedule,
+    ): List<com.agpeya.app.model.SpecialReminder> {
+        prefs[listKey]?.let { raw ->
+            return runCatching {
+                scheduleJson.decodeFromString<List<com.agpeya.app.model.SpecialReminder>>(raw)
+            }.getOrDefault(emptyList())
         }
+        return listOf(
+            com.agpeya.app.model.SpecialReminder(
+                id = "migrated",
+                label = "",
+                schedule = decodeSchedule(prefs[legacyScheduleKey], legacyScheduleDefault),
+                minute = prefs[legacyTimeKey] ?: legacyTimeDefault,
+                enabled = prefs[legacyEnabledKey] ?: legacyEnabledDefault,
+            ),
+        )
     }
 
-    fun almsReminderTimeBlocking(context: Context): Int =
-        runCatching { kotlinx.coroutines.runBlocking { almsReminderTime(context).first() } }
-            .getOrDefault(DEFAULT_ALMS_REMINDER_MIN)
-
-    fun almsSchedule(context: Context): Flow<com.agpeya.app.model.HabitSchedule> =
+    fun almsReminders(context: Context): Flow<List<com.agpeya.app.model.SpecialReminder>> =
         context.settingsDataStore.data.map {
-            decodeSchedule(it[KEY_ALMS_SCHEDULE], com.agpeya.app.model.HabitSchedule.DEFAULT_ALMS)
-        }
-
-    suspend fun setAlmsSchedule(context: Context, value: com.agpeya.app.model.HabitSchedule) {
-        context.settingsDataStore.edit { it[KEY_ALMS_SCHEDULE] = scheduleJson.encodeToString(value) }
-    }
-
-    fun almsScheduleBlocking(context: Context): com.agpeya.app.model.HabitSchedule =
-        runCatching { kotlinx.coroutines.runBlocking { almsSchedule(context).first() } }
-            .getOrDefault(com.agpeya.app.model.HabitSchedule.DEFAULT_ALMS)
-
-    /** Reminder to repent and prepare for communion. ON by default. */
-    fun repentanceReminder(context: Context): Flow<Boolean> =
-        context.settingsDataStore.data.map { it[KEY_REPENTANCE_REMINDER] ?: true }
-
-    suspend fun setRepentanceReminder(context: Context, value: Boolean) {
-        context.settingsDataStore.edit { it[KEY_REPENTANCE_REMINDER] = value }
-    }
-
-    fun repentanceReminderTime(context: Context): Flow<Int> =
-        context.settingsDataStore.data.map {
-            it[KEY_REPENTANCE_REMINDER_TIME] ?: DEFAULT_REPENTANCE_REMINDER_MIN
-        }
-
-    suspend fun setRepentanceReminderTime(context: Context, minuteOfDay: Int) {
-        context.settingsDataStore.edit {
-            it[KEY_REPENTANCE_REMINDER_TIME] = minuteOfDay.coerceIn(0, 24 * 60 - 1)
-        }
-    }
-
-    fun repentanceReminderTimeBlocking(context: Context): Int =
-        runCatching { kotlinx.coroutines.runBlocking { repentanceReminderTime(context).first() } }
-            .getOrDefault(DEFAULT_REPENTANCE_REMINDER_MIN)
-
-    fun repentanceSchedule(context: Context): Flow<com.agpeya.app.model.HabitSchedule> =
-        context.settingsDataStore.data.map {
-            decodeSchedule(
-                it[KEY_REPENTANCE_SCHEDULE],
-                com.agpeya.app.model.HabitSchedule.DEFAULT_REPENTANCE,
+            readReminders(
+                it, KEY_ALMS_REMINDERS,
+                KEY_ALMS_REMINDER, false,
+                KEY_ALMS_REMINDER_TIME, DEFAULT_ALMS_REMINDER_MIN,
+                KEY_ALMS_SCHEDULE, com.agpeya.app.model.HabitSchedule.DEFAULT_ALMS,
             )
         }
 
-    suspend fun setRepentanceSchedule(context: Context, value: com.agpeya.app.model.HabitSchedule) {
+    fun repentanceReminders(context: Context): Flow<List<com.agpeya.app.model.SpecialReminder>> =
+        context.settingsDataStore.data.map {
+            readReminders(
+                it, KEY_REPENTANCE_REMINDERS,
+                KEY_REPENTANCE_REMINDER, true,
+                KEY_REPENTANCE_REMINDER_TIME, DEFAULT_REPENTANCE_REMINDER_MIN,
+                KEY_REPENTANCE_SCHEDULE, com.agpeya.app.model.HabitSchedule.DEFAULT_REPENTANCE,
+            )
+        }
+
+    suspend fun setAlmsReminders(context: Context, list: List<com.agpeya.app.model.SpecialReminder>) {
+        context.settingsDataStore.edit { it[KEY_ALMS_REMINDERS] = scheduleJson.encodeToString(list) }
+    }
+
+    suspend fun setRepentanceReminders(
+        context: Context,
+        list: List<com.agpeya.app.model.SpecialReminder>,
+    ) {
         context.settingsDataStore.edit {
-            it[KEY_REPENTANCE_SCHEDULE] = scheduleJson.encodeToString(value)
+            it[KEY_REPENTANCE_REMINDERS] = scheduleJson.encodeToString(list)
         }
     }
 
-    fun repentanceScheduleBlocking(context: Context): com.agpeya.app.model.HabitSchedule =
-        runCatching { kotlinx.coroutines.runBlocking { repentanceSchedule(context).first() } }
-            .getOrDefault(com.agpeya.app.model.HabitSchedule.DEFAULT_REPENTANCE)
+    fun almsRemindersBlocking(context: Context): List<com.agpeya.app.model.SpecialReminder> =
+        runCatching { kotlinx.coroutines.runBlocking { almsReminders(context).first() } }
+            .getOrDefault(emptyList())
+
+    fun repentanceRemindersBlocking(context: Context): List<com.agpeya.app.model.SpecialReminder> =
+        runCatching { kotlinx.coroutines.runBlocking { repentanceReminders(context).first() } }
+            .getOrDefault(emptyList())
+
+    /** Whether any alms entry is enabled — drives the Settings state subtitle. */
+    fun almsReminder(context: Context): Flow<Boolean> =
+        almsReminders(context).map { list -> list.any { it.enabled } }
+
+    /** Whether any repentance entry is enabled. */
+    fun repentanceReminder(context: Context): Flow<Boolean> =
+        repentanceReminders(context).map { list -> list.any { it.enabled } }
+
+    // The entry ids the scheduler last armed, so it can cancel any that the
+    // person has since deleted or disabled. Stored as a newline-joined string.
+    fun scheduledIds(
+        context: Context,
+        key: androidx.datastore.preferences.core.Preferences.Key<String>,
+    ): Set<String> =
+        runCatching {
+            kotlinx.coroutines.runBlocking {
+                context.settingsDataStore.data.first()[key]
+                    ?.split('\n')?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
+            }
+        }.getOrDefault(emptySet())
+
+    fun setScheduledIds(
+        context: Context,
+        key: androidx.datastore.preferences.core.Preferences.Key<String>,
+        ids: Set<String>,
+    ) {
+        runCatching {
+            kotlinx.coroutines.runBlocking {
+                context.settingsDataStore.edit { it[key] = ids.joinToString("\n") }
+            }
+        }
+    }
+
+    val KEY_ALMS_SCHEDULED_IDS_PUBLIC get() = KEY_ALMS_SCHEDULED_IDS
+    val KEY_REPENTANCE_SCHEDULED_IDS_PUBLIC get() = KEY_REPENTANCE_SCHEDULED_IDS
 
     // ---- Quiet hours --------------------------------------------------------
     //
