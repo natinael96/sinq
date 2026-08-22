@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.LibraryMusic
-import androidx.compose.material.icons.outlined.MenuBook
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,9 +23,9 @@ fun ScriptureHubScreen(onBack: () -> Unit, onOpenOldTestament: () -> Unit, onOpe
     Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = { SinqTopBar(title = s.scripturesTitle, onBack = onBack) }) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.lg)) {
             item { SectionHeader(s.bibleTitle) }
-            item { HubRow(Icons.Outlined.MenuBook, s.oldTestamentLabel, "${s.langAmharic} 2000", onOpenOldTestament) }
+            item { HubRow(Icons.AutoMirrored.Outlined.MenuBook, s.oldTestamentLabel, "${s.langAmharic} 1980", onOpenOldTestament) }
             item { HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant) }
-            item { HubRow(Icons.Outlined.MenuBook, s.newTestamentLabel, "${s.langAmharic} 2000", onOpenNewTestament) }
+            item { HubRow(Icons.AutoMirrored.Outlined.MenuBook, s.newTestamentLabel, "${s.langAmharic} 1980", onOpenNewTestament) }
             item { Spacer(Modifier.height(Spacing.xl)); SectionHeader(s.psalterTitle) }
             item { HubRow(Icons.Outlined.LibraryMusic, s.psalterTitle, "${s.wudaseLangAmharic} 1980 · ${s.wudaseLangGeez} 1980", onOpenPsalms) }
         }

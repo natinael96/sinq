@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -51,13 +52,11 @@ import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.data.WudaseRepository
 import com.agpeya.app.model.WudaseContent
 import com.agpeya.app.model.WudaseSection
-import com.agpeya.app.ui.reading.FontSizeActions
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.common.LoadingPanel
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.common.StatePanel
 import com.agpeya.app.ui.theme.Spacing
-import androidx.compose.material.icons.outlined.MenuBook
 import com.agpeya.app.ui.theme.inReadingFont
 import com.agpeya.app.ui.theme.readingBodyStyle
 import kotlinx.coroutines.launch
@@ -107,18 +106,21 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
                 actions = {
                     // The whole portion being read, in the language being read.
                     val shown = sections.getOrNull(selected.coerceIn(0, (sections.size - 1).coerceAtLeast(0)))
-                    com.agpeya.app.ui.common.ShareMenuAction(enabled = shown != null, payload = {
-                        shown?.let {
-                            com.agpeya.app.ui.common.SharePayload(
-                                body = (if (geez) it.ge else it.am).joinToString("\n\n"),
-                                kicker = s.wudaseMariam,
-                                title = if (geez) it.titleGe else it.titleAm,
-                            )
-                        }
-                    })
-                    FontSizeActions(fontStep = fontStep, maxStep = FONT_STEPS_SP.lastIndex) { step ->
-                        scope.launch { SettingsRepository.setFontStep(context, step) }
-                    }
+                    com.agpeya.app.ui.common.ReaderToolsMenu(
+                        fontStep = fontStep,
+                        maxFontStep = FONT_STEPS_SP.lastIndex,
+                        onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
+                        shareEnabled = shown != null,
+                        sharePayload = {
+                            shown?.let {
+                                com.agpeya.app.ui.common.SharePayload(
+                                    body = (if (geez) it.ge else it.am).joinToString("\n\n"),
+                                    kicker = s.wudaseMariam,
+                                    title = if (geez) it.titleGe else it.titleAm,
+                                )
+                            }
+                        },
+                    )
                 },
             )
         },
@@ -130,7 +132,7 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
         if (sections.isEmpty()) {
             Box(Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
                 StatePanel(
-                    icon = Icons.Outlined.MenuBook,
+                    icon = Icons.AutoMirrored.Outlined.MenuBook,
                     title = s.contentUnavailable,
                     body = s.contentMissingBody,
                 )

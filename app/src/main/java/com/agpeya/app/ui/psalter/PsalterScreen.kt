@@ -20,8 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.LibraryMusic
 import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.SwapHoriz
-import androidx.compose.material.icons.outlined.SwapVert
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -193,51 +191,44 @@ fun PsalterScreen(
                 subtitle = if (daily && range != null) s.psalmRange(range.first, range.last) else null,
                 onBack = onBack,
                 actions = {
-                    TextButton(onClick = { geez = !geez }) {
+                    TextButton(onClick = {
+                        selStart = null
+                        selEnd = null
+                        geez = !geez
+                    }) {
                         Text(
                             if (geez) s.wudaseLangGeez else s.wudaseLangAmharic,
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.secondary,
                         )
                     }
-                    // Today's / All — compact toggle, same row as everything else.
-                    TextButton(onClick = {
-                        daily = !daily
-                        anchor = -1
-                    }) {
-                        Text(
-                            if (daily) s.dailyPsalms else s.wholePsalter,
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.secondary,
-                        )
-                    }
-                    com.agpeya.app.ui.reading.FontSizeActions(
+                    com.agpeya.app.ui.common.ReaderToolsMenu(
                         fontStep = fontStep,
-                        maxStep = FONT_STEPS_SP.lastIndex,
-                    ) { step -> scope.launch { SettingsRepository.setFontStep(context, step) } }
-                    IconButton(onClick = {
-                        // Capture the current position, then switch the mode. The
-                        // anchor effect scrolls the newly-composed reader to it.
-                        anchor = if (readingMode == ReadingMode.VERTICAL) {
-                            (listState.firstVisibleItemIndex - headerCount()).coerceAtLeast(0)
-                        } else {
-                            pagerState.currentPage
-                        }
-                        scope.launch {
-                            SettingsRepository.setReadingMode(
-                                context,
-                                if (readingMode == ReadingMode.VERTICAL) ReadingMode.HORIZONTAL
-                                else ReadingMode.VERTICAL,
-                            )
-                        }
-                    }) {
-                        Icon(
-                            imageVector = if (readingMode == ReadingMode.VERTICAL) Icons.Outlined.SwapHoriz
-                            else Icons.Outlined.SwapVert,
-                            contentDescription = s.readingModeToggle,
-                            modifier = Modifier.size(IconSize.medium),
-                        )
-                    }
+                        maxFontStep = FONT_STEPS_SP.lastIndex,
+                        onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
+                        secondaryActionLabel = if (daily) s.wholePsalter else s.dailyPsalms,
+                        onSecondaryAction = {
+                            selStart = null
+                            selEnd = null
+                            daily = !daily
+                            anchor = -1
+                        },
+                        onToggleReadingMode = {
+                            // Preserve the visible Psalm when changing layout.
+                            anchor = if (readingMode == ReadingMode.VERTICAL) {
+                                (listState.firstVisibleItemIndex - headerCount()).coerceAtLeast(0)
+                            } else {
+                                pagerState.currentPage
+                            }
+                            scope.launch {
+                                SettingsRepository.setReadingMode(
+                                    context,
+                                    if (readingMode == ReadingMode.VERTICAL) ReadingMode.HORIZONTAL
+                                    else ReadingMode.VERTICAL,
+                                )
+                            }
+                        },
+                    )
                     IconButton(onClick = { showContents = true }) {
                         Icon(
                             Icons.Outlined.Menu,
@@ -246,6 +237,28 @@ fun PsalterScreen(
                         )
                     }
                 },
+            )
+        },
+        bottomBar = {
+            HighlightBar(
+                visible = selStart != null,
+                currentColor = com.agpeya.app.ui.reading.selectionKeys(shown, selStart, null) {
+                    if (geez) HighlightRepository.GEEZ_PSALTER_NAMESPACE
+                    else HighlightRepository.AMHARIC_PSALTER_NAMESPACE
+                }.firstOrNull()?.let { highlights[it] },
+                onPick = { colorKey ->
+                    val keys = com.agpeya.app.ui.reading.selectionKeys(shown, selStart, selEnd) {
+                        if (geez) HighlightRepository.GEEZ_PSALTER_NAMESPACE
+                        else HighlightRepository.AMHARIC_PSALTER_NAMESPACE
+                    }
+                    selStart = null; selEnd = null
+                    if (keys.isNotEmpty()) scope.launch {
+                        HighlightRepository.setHighlights(context, keys, colorKey)
+                    }
+                },
+                onDismiss = { selStart = null; selEnd = null },
+                shareText = com.agpeya.app.ui.reading.verseShareText(shown, selStart, selEnd),
+                shareImage = com.agpeya.app.ui.reading.versePayload(shown, selStart, s.psalterTitle, selEnd),
             )
         },
     ) { innerPadding ->
@@ -291,6 +304,8 @@ fun PsalterScreen(
                                 onToggleBookmark = { toggleBookmark(section) },
                                 highlights = highlights,
                                 onVerseTap = onVerseTap,
+                                highlightNamespace = if (geez) HighlightRepository.GEEZ_PSALTER_NAMESPACE
+                                else HighlightRepository.AMHARIC_PSALTER_NAMESPACE,
                                 citedRange = if (section.number == citedPsalmNumber) citedRange else IntRange.EMPTY,
                                 selectedRange = com.agpeya.app.ui.reading.selectionRangeFor(section, selStart, selEnd),
                             )
@@ -321,6 +336,8 @@ fun PsalterScreen(
                                         onToggleBookmark = { toggleBookmark(section) },
                                         highlights = highlights,
                                         onVerseTap = onVerseTap,
+                                        highlightNamespace = if (geez) HighlightRepository.GEEZ_PSALTER_NAMESPACE
+                                        else HighlightRepository.AMHARIC_PSALTER_NAMESPACE,
                                         citedRange = if (section.number == citedPsalmNumber) citedRange else IntRange.EMPTY,
                                         selectedRange = com.agpeya.app.ui.reading.selectionRangeFor(section, selStart, selEnd),
                                     )
@@ -337,21 +354,6 @@ fun PsalterScreen(
                     }
                 }
             }
-            HighlightBar(
-                visible = selStart != null,
-                currentColor = selStart?.let { highlights[it] },
-                onPick = { colorKey ->
-                    val keys = com.agpeya.app.ui.reading.selectionKeys(shown, selStart, selEnd)
-                    selStart = null; selEnd = null
-                    if (keys.isNotEmpty()) scope.launch {
-                        keys.forEach { HighlightRepository.setHighlight(context, it, colorKey) }
-                    }
-                },
-                onDismiss = { selStart = null; selEnd = null },
-                shareText = com.agpeya.app.ui.reading.verseShareText(shown, selStart, selEnd),
-                shareImage = com.agpeya.app.ui.reading.versePayload(shown, selStart, s.psalterTitle, selEnd),
-                modifier = Modifier.align(Alignment.BottomCenter),
-            )
         }
     }
 
@@ -364,6 +366,8 @@ fun PsalterScreen(
             PsalterContents(
                 psalms = shown,
                 onSelect = { index ->
+                    selStart = null
+                    selEnd = null
                     scope.launch {
                         sheetState.hide()
                         showContents = false

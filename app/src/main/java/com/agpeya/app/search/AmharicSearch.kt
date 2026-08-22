@@ -6,6 +6,7 @@ import com.agpeya.app.data.ScriptureRepository
 import com.agpeya.app.data.SynaxariumRepository
 import com.agpeya.app.data.WudaseRepository
 import com.agpeya.app.model.Section
+import com.agpeya.app.model.SynaxariumDay
 import com.agpeya.app.ui.common.EthiopianDate
 import com.agpeya.app.ui.reading.geezNumeral
 import java.time.LocalDate
@@ -70,7 +71,7 @@ object AmharicSearch {
      * folding them on every keystroke would allocate all of it each time. They're
      * folded once into [Doc]s and kept for the process lifetime instead.
      */
-    private class Doc(
+    internal class Doc(
         val source: Source,
         val targetId: String,
         val targetIndex: Int,
@@ -109,23 +110,7 @@ object AmharicSearch {
         // Gregorian date that day falls on in the current Ethiopian year.
         val ethYear = EthiopianDate.from(LocalDate.now()).year
         for (month in 1..13) {
-            for (day in SynaxariumRepository.month(context, month)) {
-                val epochDay = runCatching {
-                    EthiopianDate(ethYear, month, day.day).toGregorian().toEpochDay()
-                }.getOrNull() ?: continue
-                for (entry in day.entries) {
-                    val hay = entry.title + " " + entry.text
-                    docs += Doc(
-                        source = Source.SYNAXARIUM,
-                        targetId = "$month-${day.day}",
-                        targetIndex = day.day,
-                        title = com.agpeya.app.ui.gitsawe.cleanSynaxariumText(entry.title),
-                        route = "synaxarium/$epochDay",
-                        haystack = hay,
-                        folded = fold(hay),
-                    )
-                }
-            }
+            docs += synaxariumDocs(month, ethYear, SynaxariumRepository.month(context, month))
         }
 
         for (section in WudaseRepository.load(context).sections) {
@@ -146,6 +131,35 @@ object AmharicSearch {
         // the ፡-separator normalization it needs is preserved in git history.
         return docs
     }
+
+    /**
+     * Build one month of Synaxarium search documents. A day commonly has several
+     * commemorations, so the entry ordinal is part of [Doc.targetId]. Without it,
+     * two matches from the same day receive the same Compose lazy-list key and
+     * crash while the result list is being laid out.
+     */
+    internal fun synaxariumDocs(month: Int, ethYear: Int, days: List<SynaxariumDay>): List<Doc> =
+        buildList {
+            for (day in days) {
+                val epochDay = runCatching {
+                    EthiopianDate(ethYear, month, day.day).toGregorian().toEpochDay()
+                }.getOrNull() ?: continue
+                day.entries.forEachIndexed { entryIndex, entry ->
+                    val hay = entry.title + " " + entry.text
+                    add(
+                        Doc(
+                            source = Source.SYNAXARIUM,
+                            targetId = "$month-${day.day}-$entryIndex",
+                            targetIndex = day.day,
+                            title = com.agpeya.app.ui.gitsawe.cleanSynaxariumText(entry.title),
+                            route = "synaxarium/$epochDay",
+                            haystack = hay,
+                            folded = fold(hay),
+                        ),
+                    )
+                }
+            }
+        }
 
     suspend fun search(context: Context, rawQuery: String, labels: Labels): List<Result> {
         val query = rawQuery.trim()
@@ -263,9 +277,21 @@ object AmharicSearch {
         matchLen: Int,
         labels: Labels,
     ): List<Result> {
+        return searchDocs(index(context), needle, matchLen, labels)
+    }
+
+    /** Pure search pass, separated so the complete bundled Synaxarium can be
+     * regression-tested without an Android Context. */
+    internal fun searchDocs(
+        docs: List<Doc>,
+        needle: String,
+        matchLen: Int,
+        labels: Labels,
+    ): List<Result> {
+        if (needle.isEmpty()) return emptyList()
         val counts = mutableMapOf<Source, Int>()
         val out = mutableListOf<Result>()
-        for (doc in index(context)) {
+        for (doc in docs) {
             if ((counts[doc.source] ?: 0) >= PER_SOURCE_LIMIT) continue
             val hit = doc.folded.indexOf(needle)
             if (hit < 0) continue

@@ -23,38 +23,42 @@ class SystemEventsReceiver : BroadcastReceiver() {
             -> {
                 val pending = goAsync()
                 Thread {
-                    runBlocking {
-                        val names = runCatching {
-                            HoursRepository.visibleHours(context).associate { it.id to it.name }
-                        }.getOrDefault(emptyMap())
-                        ReminderScheduler.rescheduleAll(context, names)
-                        // Re-arm the nightly nudge too, if it's enabled.
-                        runCatching {
-                            StreakReminderScheduler.sync(
-                                context,
-                                SettingsRepository.streakReminder(context).first(),
-                            )
+                    try {
+                        runBlocking {
+                            val names = runCatching {
+                                HoursRepository.visibleHours(context).associate { it.id to it.name }
+                            }.getOrDefault(emptyMap())
+                            runCatching { ReminderScheduler.rescheduleAll(context, names) }
+                            // Re-arm every independent reminder chain. Completion
+                            // records are deliberately not consulted here.
+                            runCatching {
+                                StreakReminderScheduler.sync(
+                                    context,
+                                    SettingsRepository.streakReminder(context).first(),
+                                )
+                            }
+                            runCatching {
+                                GitsaweReminderScheduler.sync(
+                                    context,
+                                    SettingsRepository.gitsaweReminder(context).first(),
+                                )
+                            }
+                            runCatching {
+                                SpecialHabitReminderScheduler.sync(context, SpecialHabit.ALMS)
+                            }
+                            runCatching {
+                                SpecialHabitReminderScheduler.sync(context, SpecialHabit.REPENTANCE)
+                            }
+                            runCatching {
+                                BreathPrayerScheduler.sync(
+                                    context,
+                                    SettingsRepository.breathReminder(context).first(),
+                                )
+                            }
                         }
-                        runCatching {
-                            GitsaweReminderScheduler.sync(
-                                context,
-                                SettingsRepository.gitsaweReminder(context).first(),
-                            )
-                        }
-                        runCatching {
-                            SpecialHabitReminderScheduler.sync(context, SpecialHabit.ALMS)
-                        }
-                        runCatching {
-                            SpecialHabitReminderScheduler.sync(context, SpecialHabit.REPENTANCE)
-                        }
-                        runCatching {
-                            BreathPrayerScheduler.sync(
-                                context,
-                                SettingsRepository.breathReminder(context).first(),
-                            )
-                        }
+                    } finally {
+                        pending.finish()
                     }
-                    pending.finish()
                 }.start()
             }
         }

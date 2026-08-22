@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
@@ -49,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.ContentRepository
 import com.agpeya.app.data.DayReadings
@@ -63,7 +63,6 @@ import com.agpeya.app.ui.common.AgpeyaBottomBar
 import com.agpeya.app.ui.common.Candle
 import com.agpeya.app.ui.common.CollapsibleHeader
 import com.agpeya.app.ui.common.HeroCard
-import com.agpeya.app.ui.common.SectionHeader
 import com.agpeya.app.ui.common.SinqCard
 import com.agpeya.app.ui.common.SinqDivider
 import com.agpeya.app.ui.common.Tab
@@ -87,9 +86,10 @@ private const val PRAYER_AGGREGATE_ID = "prayer"
  * any of them: what day is it, what should I pray now, what is today's ግጻዌ, how
  * am I doing, and what is today's psalm.
  *
- * The cards on this page are the day's doors: the prayer for now, the ግጻዌ, and
- * the Today/psalter pair. The hours list stays plain rows under a header — a
- * screen where every block is a rounded box has no hierarchy left to spend.
+ * The cards on this page are the day's doors: the prayer for now, the prayer
+ * hours, the ግጻዌ, and the Today/psalter pair. Hours stays compact until the
+ * reader asks for the complete list, keeping that primary route visible without
+ * letting it push the rest of the day below the fold.
  */
 @Composable
 fun HomeScreen(
@@ -122,9 +122,8 @@ fun HomeScreen(
         listOf(PRAYER_AGGREGATE_ID) + HabitsRepository.orderedHabitIds(habitState, includeHidden = false)
     }
     val doneWithAggregate = if (prayedAnyHour) doneToday + PRAYER_AGGREGATE_ID else doneToday
-    // The hours list is long enough to bury everything under it. Collapsed by
-    // default: the prayer for now is already on screen as a card, so the full
-    // list is a thing you go looking for rather than the first thing you scroll past.
+    // Keep the full list opt-in, but leave its compact preview near the top so
+    // Hours remains discoverable instead of becoming a footer.
     var hoursExpanded by rememberSaveable { mutableStateOf(false) }
     val seasonLabel = remember(today, s) { liturgicalSeasonLabel(today, s) }
     val currentHourId = remember(hours) { com.agpeya.app.data.PrayerSchedule.currentHourId(hours) }
@@ -164,8 +163,18 @@ fun HomeScreen(
                 }
             }
 
+            item(key = "hours") {
+                HoursCard(
+                    hours = hours,
+                    currentHourId = currentHourId,
+                    expanded = hoursExpanded,
+                    onToggle = { hoursExpanded = !hoursExpanded },
+                    onOpenHour = onOpenHour,
+                )
+                Spacer(Modifier.height(Spacing.lg))
+            }
+
             item(key = "gitsawe") {
-                Spacer(Modifier.height(Spacing.sm))
                 GitsaweCard(readings = readings, onClick = onOpenGitsawe)
                 Spacer(Modifier.height(Spacing.xxl))
             }
@@ -198,24 +207,6 @@ fun HomeScreen(
                 Spacer(Modifier.height(Spacing.xxl))
             }
 
-            item(key = "hoursHeader") {
-                CollapsibleHeader(
-                    text = s.hoursHeader,
-                    expanded = hoursExpanded,
-                    badge = hours.size.toString(),
-                    onToggle = { hoursExpanded = !hoursExpanded },
-                )
-            }
-            if (hoursExpanded) {
-                items(hours, key = { it.id }) { hour ->
-                    HourRow(
-                        hour = hour,
-                        isCurrent = hour.id == currentHourId,
-                        onClick = { onOpenHour(hour.id) },
-                    )
-                    if (hour.id != hours.lastOrNull()?.id) SinqDivider()
-                }
-            }
             item { Spacer(Modifier.height(Spacing.xxl)) }
         }
     }
@@ -325,6 +316,67 @@ private fun NowCard(hour: Hour, onClick: () -> Unit) {
 }
 
 /**
+ * The complete prayer cycle in a compact, early-page card. Collapsed state still
+ * names the available hours, while expansion keeps the existing direct links and
+ * current-hour marker in place.
+ */
+@Composable
+private fun HoursCard(
+    hours: List<Hour>,
+    currentHourId: String?,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    onOpenHour: (String) -> Unit,
+) {
+    val s = LocalStrings.current
+    val motion = LocalMotion.current
+    SinqCard(
+        contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.sm),
+        accented = true,
+    ) {
+        CollapsibleHeader(
+            text = s.hoursHeader,
+            expanded = expanded,
+            badge = hours.size.toString(),
+            onToggle = onToggle,
+        )
+        AnimatedVisibility(
+            visible = !expanded,
+            enter = fadeIn(motion.spec(Motion.fast)),
+            exit = fadeOut(motion.spec(Motion.fast)),
+        ) {
+            Text(
+                text = hours.joinToString("  ·  ") { it.name },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onToggle)
+                    .padding(bottom = Spacing.md),
+            )
+        }
+        AnimatedVisibility(
+            visible = expanded,
+            enter = fadeIn(motion.spec(Motion.standard)) + expandVertically(motion.spec(Motion.standard)),
+            exit = fadeOut(motion.spec(Motion.fast)) + shrinkVertically(motion.spec(Motion.fast)),
+        ) {
+            Column {
+                hours.forEachIndexed { index, hour ->
+                    HourRow(
+                        hour = hour,
+                        isCurrent = hour.id == currentHourId,
+                        onClick = { onOpenHour(hour.id) },
+                    )
+                    if (index < hours.lastIndex) SinqDivider()
+                }
+            }
+        }
+    }
+}
+
+/**
  * Today's ግጻዌ. The card names the actual reading — and the feast, when there is
  * one — so the day's lectionary is legible from Home rather than being a door
  * you have to open to find out what's behind it.
@@ -332,66 +384,56 @@ private fun NowCard(hour: Hour, onClick: () -> Unit) {
 @Composable
 private fun GitsaweCard(readings: DayReadings?, onClick: () -> Unit) {
     val s = LocalStrings.current
-    val motion = LocalMotion.current
+    val sinq = sinqColors
     val feast = readings?.feasts?.firstOrNull()?.amharicName
     val reading = readings?.daily?.title
         ?: readings?.seasonal?.firstOrNull()?.title
         ?: readings?.monthly?.firstOrNull()?.let { it.title ?: it.raw }
-    SinqCard(onClick = onClick, contentPadding = PaddingValues(Spacing.lg)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                Icons.AutoMirrored.Outlined.MenuBook,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.size(IconSize.large),
+    HeroCard(onClick = onClick) {
+        Icon(
+            Icons.AutoMirrored.Outlined.MenuBook,
+            contentDescription = null,
+            tint = sinq.onHeroMuted,
+            modifier = Modifier.size(IconSize.large),
+        )
+        Spacer(Modifier.width(Spacing.md))
+        Column(Modifier.weight(1f)) {
+            Text(
+                s.gitsaweKicker,
+                style = MaterialTheme.typography.labelMedium,
+                color = sinq.onHeroMuted,
             )
-            Spacer(Modifier.width(Spacing.md))
-            Column(Modifier.weight(1f)) {
+            Text(
+                s.gitsaweTitle,
+                style = MaterialTheme.typography.titleMedium,
+                color = sinq.onHero,
+            )
+            feast?.let {
+                Spacer(Modifier.height(Spacing.xs))
                 Text(
-                    s.gitsaweKicker,
+                    it,
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = sinq.onHeroMuted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
+            }
+            reading?.let {
                 Text(
-                    s.gitsaweTitle,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = sinq.onHeroMuted,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
-            Icon(
-                Icons.AutoMirrored.Outlined.ArrowForward,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(IconSize.medium),
-            )
         }
-        // Fades in once the lectionary resolves, so the card doesn't jump.
-        AnimatedVisibility(
-            visible = feast != null || reading != null,
-            enter = fadeIn(motion.spec(Motion.standard)) + expandVertically(motion.spec(Motion.standard)),
-            exit = fadeOut(motion.spec(Motion.fast)) + shrinkVertically(motion.spec(Motion.fast)),
-        ) {
-            Column {
-                Spacer(Modifier.height(Spacing.md))
-                SinqDivider()
-                Spacer(Modifier.height(Spacing.md))
-                feast?.let {
-                    Text(
-                        it,
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.secondary,
-                    )
-                }
-                reading?.let {
-                    Text(
-                        it,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2,
-                    )
-                }
-            }
-        }
+        Icon(
+            Icons.AutoMirrored.Outlined.ArrowForward,
+            contentDescription = null,
+            tint = sinq.onHeroMuted,
+            modifier = Modifier.size(IconSize.medium),
+        )
     }
 }
 

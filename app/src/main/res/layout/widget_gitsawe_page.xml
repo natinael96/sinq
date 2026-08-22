@@ -172,15 +172,15 @@
             android:id="@+id/widget_dot_1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="●"
-            android:textSize="7sp" />
+            android:text="@string/widget_page_dot"
+            android:textSize="11sp" />
 
         <TextView
             android:id="@+id/widget_dot_2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="7dp"
-            android:text="●"
-            android:textSize="7sp" />
+            android:layout_marginStart="5dp"
+            android:text="@string/widget_page_dot"
+            android:textSize="11sp" />
     </LinearLayout>
 </LinearLayout>

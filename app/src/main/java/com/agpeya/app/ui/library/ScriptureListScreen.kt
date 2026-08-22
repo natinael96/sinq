@@ -39,7 +39,7 @@ import com.agpeya.app.ui.common.SectionHeader
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.theme.Spacing
 
-/** One testament from the unified Amharic 2000 Bible, grouped by canon section. */
+/** One testament from the unified Amharic 1980 Bible, grouped by canon section. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScriptureListScreen(testament: String, onBack: () -> Unit, onOpenBook: (String) -> Unit) {

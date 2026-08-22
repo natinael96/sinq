@@ -1,6 +1,6 @@
-"""Bundle selected 80-weahadu editions as lossless, minified JSON assets.
+"""Bundle the Amharic Bible and Ge'ez Psalms as minified JSON assets.
 
-Reads : ../80-weahadu/data/{am-2000,am-1980,gez-1980}/
+Reads : ../80-weahadu/data/{am-1980,gez-1980}/
 Writes: app/src/main/assets/content/bible/
 
 The upstream schema is preserved verbatim at the JSON-value level, including
@@ -20,7 +20,8 @@ ROOT = Path(__file__).resolve().parent.parent
 SOURCE_ROOT = ROOT.parent / "80-weahadu"
 SOURCE_DATA = SOURCE_ROOT / "data"
 OUT = ROOT / "app" / "src" / "main" / "assets" / "content" / "bible"
-EDITIONS = ("am-2000", "am-1980", "gez-1980")
+FULL_EDITION = "am-1980"
+PSALM_EDITION = "gez-1980"
 
 
 def load(path: Path):
@@ -80,15 +81,17 @@ def main() -> None:
     write_minified(staging / "canon.json", load(SOURCE_DATA / "canon.json"))
     write_minified(staging / "names-am.json", load(SOURCE_DATA / "names" / "am.json"))
 
-    for edition in EDITIONS:
+    for edition in (FULL_EDITION, PSALM_EDITION):
         source_dir = SOURCE_DATA / edition
         meta = load(source_dir / "meta.json")
-        expected_stats = meta["stats"]
         if meta.get("id") != edition:
             raise ValueError(f"{edition}: metadata id mismatch")
 
         chapters = verses = 0
-        for expected in meta["books"]:
+        selected_books = meta["books"] if edition == FULL_EDITION else [
+            book for book in meta["books"] if book["id"] == "PSA"
+        ]
+        for expected in selected_books:
             source_file = source_dir / expected["file"]
             book = load(source_file)
             book_chapters, book_verses = validate_book(book, edition, expected)
@@ -96,11 +99,12 @@ def main() -> None:
             verses += book_verses
             write_minified(staging / edition / expected["file"], book)
 
-        actual = {"books": len(meta["books"]), "chapters": chapters, "verses": verses}
-        if actual != expected_stats:
-            raise ValueError(f"{edition}: expected totals {expected_stats}, found {actual}")
+        actual = {"books": len(selected_books), "chapters": chapters, "verses": verses}
+        if edition == FULL_EDITION and actual != meta["stats"]:
+            raise ValueError(f"{edition}: expected totals {meta['stats']}, found {actual}")
 
-        write_minified(staging / edition / "meta.json", meta)
+        if edition == FULL_EDITION:
+            write_minified(staging / edition / "meta.json", meta)
         catalog["editions"].append(
             {
                 "id": edition,
@@ -111,7 +115,8 @@ def main() -> None:
                 "year": meta["year"],
                 "era": meta["era"],
                 "stats": actual,
-                "meta": f"{edition}/meta.json",
+                "scope": "full" if edition == FULL_EDITION else "psalms",
+                **({"meta": f"{edition}/meta.json"} if edition == FULL_EDITION else {}),
             }
         )
         print(f"{edition}: {actual['books']} books, {chapters} chapters, {verses} verses")
@@ -124,7 +129,7 @@ def main() -> None:
     if OUT.exists():
         shutil.rmtree(OUT)
     staging.rename(OUT)
-    print(f"Extracted {len(EDITIONS)} editions to {OUT}")
+    print(f"Extracted Amharic Bible and Ge'ez Psalms to {OUT}")
 
 
 if __name__ == "__main__":

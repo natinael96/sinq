@@ -33,7 +33,7 @@ class ScriptureDataTest {
         listOf("src/main/assets/content", "app/src/main/assets/content")
             .map(::File).first { it.isDirectory }
 
-    private val bibleDir = File(contentDir, "bible/am-2000")
+    private val bibleDir = File(contentDir, "bible/am-1980")
     private val metas by lazy {
         json.parseToJsonElement(File(bibleDir, "meta.json").readText()).jsonObject["books"]!!.jsonArray
             .map { it.jsonObject }.filter { it["id"]!!.jsonPrimitive.content != "PSA" }
@@ -71,8 +71,8 @@ class ScriptureDataTest {
         allServices().flatMap { it.readings() }.mapNotNull { it.verse?.bookTitle }
 
     @Test
-    fun `Amharic 2000 Bible books decode`() {
-        assertEquals(88, metas.size) // 89 source books minus Psalms (owned by its reader)
+    fun `Amharic 1980 Bible books decode`() {
+        assertEquals(92, metas.size) // 93 source books minus Psalms (owned by its reader)
         for (meta in metas) {
             val key = meta["file"]!!.jsonPrimitive.content.substringAfter('-').removeSuffix(".json")
             val b = book(key)

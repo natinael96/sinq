@@ -31,10 +31,8 @@ import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.ui.common.LoadingPanel
 import com.agpeya.app.ui.common.NavRow
 import com.agpeya.app.ui.common.SharePayload
-import com.agpeya.app.ui.common.ShareMenuAction
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.common.StatePanel
-import com.agpeya.app.ui.reading.FontSizeActions
 import com.agpeya.app.ui.reading.ReadingColumn
 import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
@@ -120,18 +118,21 @@ fun GitsawePassageScreen(
                             Text(if (misbakLanguage == MisbakLanguage.GEEZ) s.wudaseLangGeez else s.wudaseLangAmharic)
                         }
                     }
-                    ShareMenuAction(enabled = passage != null, payload = {
-                        passage?.let { p ->
-                            SharePayload(
-                                body = p.verses.joinToString("\n") { "${geezNumeral(it.n)}  ${it.text}" },
-                                kicker = role?.takeIf { it.isNotBlank() } ?: s.gitsaweKicker,
-                                title = "${p.bookName} ${p.refLine}",
-                            )
-                        }
-                    })
-                    FontSizeActions(fontStep = fontStep, maxStep = FONT_STEPS_SP.lastIndex) { step ->
-                        scope.launch { SettingsRepository.setFontStep(context, step) }
-                    }
+                    com.agpeya.app.ui.common.ReaderToolsMenu(
+                        fontStep = fontStep,
+                        maxFontStep = FONT_STEPS_SP.lastIndex,
+                        onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
+                        shareEnabled = passage != null,
+                        sharePayload = {
+                            passage?.let { p ->
+                                SharePayload(
+                                    body = p.verses.joinToString("\n") { "${geezNumeral(it.n)}  ${it.text}" },
+                                    kicker = role?.takeIf { it.isNotBlank() } ?: s.gitsaweKicker,
+                                    title = "${p.bookName} ${p.refLine}",
+                                )
+                            }
+                        },
+                    )
                 },
             )
         },

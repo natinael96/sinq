@@ -25,12 +25,11 @@ android {
         applicationId = "com.agpeya.app"
         minSdk = 26
         targetSdk = 36
-        // Versioning policy (semver-style, pre-release):
-        //   0.MINOR.PATCH — PATCH for fixes/small tweaks, MINOR for new features.
-        //   1.0.0 is reserved for the first public (Play) release.
+        // Versioning policy (semver-style):
+        //   MINOR for features, PATCH for fixes/small tweaks.
         //   versionCode increments by 1 on EVERY update, no exceptions.
-        versionCode = 39
-        versionName = "0.10" // one Scripture, one day's Gitsawe
+        versionCode = 40
+        versionName = "1.0" // first stable public release
 
     }
 

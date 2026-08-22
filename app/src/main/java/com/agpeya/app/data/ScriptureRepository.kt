@@ -11,14 +11,14 @@ import kotlinx.serialization.json.*
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Unified offline scripture source. Bible books come from Amharic 2000;
- * Psalms are deliberately sourced from Amharic 1980 or Ge'ez 1980.
+ * Unified offline scripture source. Bible books and default Psalms come from
+ * Amharic 1980; Psalms alone can be switched to Ge'ez 1980.
  */
 object ScriptureRepository {
 
     private const val TAG = "ScriptureRepository"
     private const val DIR = "content/bible"
-    const val BIBLE_EDITION = "am-2000"
+    const val BIBLE_EDITION = "am-1980"
     const val PSALMS_AMHARIC_EDITION = "am-1980"
     const val PSALMS_GEEZ_EDITION = "gez-1980"
 

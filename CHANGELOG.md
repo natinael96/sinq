@@ -3,9 +3,56 @@
 All notable changes to Sinq (ስንቅ) are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
-MINOR for features; `versionCode` increments on every release). `1.0.0` is
-reserved for the first public release.
+and this project follows semantic-style releases (PATCH for fixes, MINOR for
+features; `versionCode` increments on every release).
+
+## [1.0] — 2026-08-23
+
+_versionCode 40 · the first stable Sinq release_
+
+### Added
+- **Persistent Bible highlighting and dependable verse sharing.** Bible verses
+  can now keep one of four highlight colours, selected ranges update in one
+  atomic operation, and copied/shared passages retain their book or reference.
+  Existing Psalm highlights migrate safely to the Amharic 1980 edition.
+- **A complete daily checklist.** Sinkisar joins church and prostrations as a
+  trackable practice, and the nightly reminder names what remains without being
+  suppressed when an hour of prayer has already been marked.
+- **Creator attribution.** About now links “Built by Natinael M.” directly to
+  `@natinael96` on Telegram.
+
+### Changed
+- **The offline Bible now uses Amharic 1980 throughout.** The unused Amharic
+  2000 bundle and non-Psalm Ge'ez books have been removed; Ge'ez 1980 remains
+  available specifically for Psalms. This cuts the optimized APK substantially
+  while keeping the requested reading library offline.
+- **Home makes the day's paths visible.** Hours is an early, compact expandable
+  card, and Today's Gitsawe uses the same devotional green-and-gold hero
+  treatment as Prayer for now.
+- **Prayer List is denser and easier to scan.** Prayers use an adaptive two-column
+  card grid, with the Marian prayer presented as a distinct concluding element.
+- **Reader and Settings headers adapt to narrow screens.** Long titles ellipsize
+  cleanly, secondary reader actions live in a compact tools menu, and Settings
+  rows no longer crowd or clip their current value.
+- **Selection actions are responsive and accessible.** Highlight colours and
+  copy/share actions use an inset-safe two-row panel, announce individual colour
+  names to screen readers, and dismiss after completing an action.
+
+### Fixed
+- **Fasting boundaries are exact.** ጾመ ሐዋርያት ends on ሐምሌ 4 and ጾመ
+  ፍልሠታ ends on ነሐሴ 15 without an added day; ጾመ ነቢያት and ዐቢይ ጾም
+  retain their existing calculations.
+- **Sinkisar search no longer crashes on valid entries.** Same-day results have
+  stable unique identities, and Ge'ez text, Ethiopic punctuation, empty queries,
+  no-result queries, and result navigation are covered by regression tests.
+- **Psalm highlights cannot cross translations incorrectly.** Amharic and Ge'ez
+  use separate identities, and switching language clears any pending selection
+  before copy, share, or highlight can target different versification.
+- **Reminder chains recover reliably.** Breath-prayer and daily reminder alarms
+  re-arm independently after firing and after reboot, update, time, or timezone
+  changes.
+- **Image shares cannot overwrite one another.** Each generated passage card has
+  a unique cache file and sharing failures are handled without crashing.
 
 ## [0.10] — 2026-08-22
 

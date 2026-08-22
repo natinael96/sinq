@@ -58,6 +58,7 @@ interface Strings {
     val todayLabel: String
     val habitsHeader: String
     val habitPrayer: String
+    val habitSynaxarium: String
     val habitChurch: String
     val habitProstrate: String
     val habitBible: String
@@ -94,6 +95,7 @@ interface Strings {
     val readingModeToggle: String
     val bookmarkAction: String
     val highlight: String
+    fun highlightColor(colorKey: String): String
     val removeHighlight: String
 
     val searchHint: String
@@ -108,6 +110,8 @@ interface Strings {
     val nightReminderFastBody: String
     /** Body on a feast; the feast name is content and stays in Amharic. */
     fun nightReminderFeastBody(feast: String): String
+    /** Appended when core daily items have not yet been checked off. */
+    fun nightReminderPending(items: String): String
     val nightReminderChannel: String
     val gitsaweReminderTitle: String
     val gitsaweReminderBody: String
@@ -348,6 +352,7 @@ interface Strings {
 
     /** The "share this passage as a PNG card" action, next to copy/share. */
     val shareAsImage: String
+    val shareFailed: String
 
     /** የዕለቱ ቅዳሴ — the day's appointed anaphora, at the foot of the ግጻዌ. */
     val kidaseHeader: String
@@ -457,6 +462,7 @@ object AmharicStrings : Strings {
     override val todayLabel = "ዛሬ"
     override val habitsHeader = "ልማዶች"
     override val habitPrayer = "ጸሎት"
+    override val habitSynaxarium = "ስንክሳር"
     override val habitChurch = "ቤተ ክርስቲያን"
     override val habitProstrate = "ስግደት"
     override val habitBible = "የዕለት ንባብ"
@@ -488,6 +494,13 @@ object AmharicStrings : Strings {
     override val readingModeToggle = "የንባብ ሁነታ"
     override val bookmarkAction = "ምልክት አድርግ"
     override val highlight = "አድምቅ"
+    override fun highlightColor(colorKey: String) = when (colorKey) {
+        "yellow" -> "ቢጫ"
+        "green" -> "አረንጓዴ"
+        "blue" -> "ሰማያዊ"
+        "pink" -> "ሮዝ"
+        else -> colorKey
+    }
     override val removeHighlight = "ማድመቅ አስወግድ"
 
     override val searchHint = "በጸሎቶችና በመዝሙራት ውስጥ ፈልግ"
@@ -498,6 +511,7 @@ object AmharicStrings : Strings {
     override val nightReminderBody = "ዕለቱን በጸሎት ዝጉ"
     override val nightReminderFastBody = "ጾሙ በጸሎት ይታጀብ"
     override fun nightReminderFeastBody(feast: String) = "$feast — ዕለቱን በጸሎት ዝጉ"
+    override fun nightReminderPending(items: String) = "ዛሬ ያልተመዘገቡ፦ $items"
     override val nightReminderChannel = "የሌሊት ማስታወሻ"
     override val gitsaweReminderTitle = "የዕለቱ ግጻዌ"
     override val gitsaweReminderBody = "የዛሬን ምንባብ ተመልከት"
@@ -505,7 +519,7 @@ object AmharicStrings : Strings {
     override val settingsGitsaweReminder = "የዕለቱ ግጻዌ ማስታወሻ"
     override val settingsGitsaweReminderDesc = "በየቀኑ ጠዋት የዕለቱን ግጻዌ ምንባብ አስታውሰኝ"
     override val settingsNightReminder = "የሌሊት ማስታወሻ"
-    override val settingsNightReminderDesc = "ዕለቱን በጸሎት እንድትዘጋ በሌሊት ያስታውስሃል"
+    override val settingsNightReminderDesc = "ጸሎት ቢመዘገብም ስንክሳርን፣ ቤተ ክርስቲያንንና ስግደትን ለማስታወስ በየሌሊቱ ይልካል"
     override val notifDisabledTitle = "ማሳወቂያዎች ጠፍተዋል"
     override val notifDisabledBody = "ማንቂያዎችህ እንዲደርሱህ የመተግበሪያውን ማሳወቂያዎች ከቅንብሮች አብራ።"
 
@@ -720,6 +734,7 @@ object AmharicStrings : Strings {
         "ጽሑፉ በዚህ እትም ውስጥ የለም። የቀሩት ክፍሎች እንደተለመደው ይሠራሉ።"
 
     override val shareAsImage = "እንደ ምስል አጋራ"
+    override val shareFailed = "ማጋራት አልተቻለም። እንደገና ይሞክሩ።"
     override val kidaseHeader = "የዕለቱ ቅዳሴ"
 
     override val prayerListTitle = "የጸሎት ዝርዝር"
@@ -811,6 +826,7 @@ object EnglishStrings : Strings {
     override val todayLabel = "Today"
     override val habitsHeader = "Habits"
     override val habitPrayer = "Prayer"
+    override val habitSynaxarium = "Synaxarium"
     override val habitChurch = "Church"
     override val habitProstrate = "Prostration"
     override val habitBible = "Daily Bible"
@@ -846,6 +862,7 @@ object EnglishStrings : Strings {
     override val readingModeToggle = "Reading mode"
     override val bookmarkAction = "Bookmark"
     override val highlight = "Highlight"
+    override fun highlightColor(colorKey: String) = colorKey.replaceFirstChar { it.uppercase() }
     override val removeHighlight = "Remove highlight"
 
     override val searchHint = "Search prayers & psalms"
@@ -856,6 +873,7 @@ object EnglishStrings : Strings {
     override val nightReminderBody = "Close it with prayer"
     override val nightReminderFastBody = "Let the fast be kept with prayer"
     override fun nightReminderFeastBody(feast: String) = "$feast — close the day with prayer"
+    override fun nightReminderPending(items: String) = "Still to mark today: $items"
     override val nightReminderChannel = "Nightly reminder"
     override val gitsaweReminderTitle = "Today's Gitsawe"
     override val gitsaweReminderBody = "See today's reading"
@@ -863,7 +881,7 @@ object EnglishStrings : Strings {
     override val settingsGitsaweReminder = "Daily Gitsawe reminder"
     override val settingsGitsaweReminderDesc = "Each morning, remind me of today's Gitsawe reading"
     override val settingsNightReminder = "Nightly reminder"
-    override val settingsNightReminderDesc = "An evening nudge to close the day with prayer"
+    override val settingsNightReminderDesc = "Sent every evening—even after prayer is marked—to review Synaxarium, church, and prostrations"
     override val notifDisabledTitle = "Notifications are off"
     override val notifDisabledBody = "Turn on notifications in settings so your reminders can reach you."
 
@@ -1095,6 +1113,7 @@ object EnglishStrings : Strings {
         "The text isn't part of this edition. Everything else still works as usual."
 
     override val shareAsImage = "Share as image"
+    override val shareFailed = "Couldn't share this passage. Please try again."
     override val kidaseHeader = "Kidase of the day"
 
     override val prayerListTitle = "Prayer list"

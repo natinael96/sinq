@@ -42,7 +42,7 @@ class GitsaweLinkCoverageTest {
 
     // Book key -> set of chapter numbers present (from the bundled NT).
     private val bookChapters: Map<String, Set<Int>> by lazy {
-        contentDir.resolve("bible/am-2000/books").listFiles { f -> f.name.endsWith(".json") && !f.name.endsWith("-psalms.json") }!!
+        contentDir.resolve("bible/am-1980/books").listFiles { f -> f.name.endsWith(".json") && !f.name.endsWith("-psalms.json") }!!
             .associate { f ->
                 val root = json.parseToJsonElement(f.readText()).jsonObject
                 f.name.substringAfter('-').removeSuffix(".json") to root["chapters"]!!.jsonArray.map { it.jsonObject["n"]!!.jsonPrimitive.content.toInt() }.toSet()

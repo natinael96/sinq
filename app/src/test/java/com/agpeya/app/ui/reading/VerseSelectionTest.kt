@@ -77,6 +77,22 @@ class VerseSelectionTest {
     }
 
     @Test
+    fun `highlight keys can be scoped to a translation`() {
+        assertEquals(
+            listOf("gez-1980:ps_23:2", "gez-1980:ps_23:3"),
+            selectionKeys(listOf(psalm), "ps_23:2", "ps_23:3") { "gez-1980" },
+        )
+    }
+
+    @Test
+    fun `shared scripture selection includes its reference`() {
+        val gospel = psalm.copy(title = "ወንጌል", reference = "Luke 2:25-32")
+        val text = verseShareText(listOf(gospel), "ps_23:1")!!
+        assertTrue(text.startsWith("ወንጌል — Luke 2:25-32\n"))
+        assertEquals("ወንጌል — Luke 2:25-32", versePayload(listOf(gospel), "ps_23:1", null)!!.title)
+    }
+
+    @Test
     fun `an unknown section or malformed key resolves to nothing`() {
         assertNull(verseShareText(listOf(psalm), "missing:1", "missing:2"))
         assertNull(versePayload(listOf(psalm), "ps_23:notanumber", null))

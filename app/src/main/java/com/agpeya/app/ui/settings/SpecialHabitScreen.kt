@@ -40,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -311,7 +312,7 @@ private fun ScheduleEditorDialog(
 ) {
     var kind by remember { mutableStateOf(initial.kind) }
     var days by remember { mutableStateOf(initial.days) }
-    var monthDay by remember { mutableStateOf(initial.monthDay) }
+    var monthDay by remember { mutableIntStateOf(initial.monthDay) }
 
     androidx.compose.material3.AlertDialog(
         onDismissRequest = onDismiss,

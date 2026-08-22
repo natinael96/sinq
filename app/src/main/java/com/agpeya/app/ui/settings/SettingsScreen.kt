@@ -53,6 +53,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextOverflow
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.data.ThemeChoice
 import com.agpeya.app.ui.common.AgpeyaBottomBar
@@ -132,10 +133,10 @@ fun SettingsScreen(
                 Spacer(Modifier.height(Spacing.sm))
                 Text(
                     text = s.settingsTitle,
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
-                Spacer(Modifier.height(Spacing.xxl))
+                Spacer(Modifier.height(Spacing.xl))
             }
 
             // ── Reading: theme, face, and what the screen does while you pray ─
@@ -159,7 +160,14 @@ fun SettingsScreen(
                             selected = theme == choice,
                             onClick = { scope.launch { SettingsRepository.setTheme(context, choice) } },
                             shape = SegmentedButtonDefaults.itemShape(index, choices.size),
-                        ) { Text(label) }
+                        ) {
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
                     }
                 }
                 Spacer(Modifier.height(Spacing.xl))
@@ -239,7 +247,14 @@ fun SettingsScreen(
                             selected = language == choice,
                             onClick = { scope.launch { SettingsRepository.setLanguage(context, choice) } },
                             shape = SegmentedButtonDefaults.itemShape(index, langChoices.size),
-                        ) { Text(label) }
+                        ) {
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
                     }
                 }
                 Spacer(Modifier.height(Spacing.sm))
@@ -454,18 +469,26 @@ private fun <T> DropdownSetting(
                 .clip(MaterialTheme.shapes.small)
                 .clickable(enabled = enabled) { expanded = true }
                 .padding(vertical = Spacing.md),
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                label,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = alpha),
-            )
-            Text(
-                current,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha),
+            Column(Modifier.weight(1f)) {
+                Text(
+                    label,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha),
+                )
+                Text(
+                    current,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = alpha),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            Icon(
+                Icons.Outlined.ExpandMore,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha),
             )
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
@@ -493,14 +516,26 @@ private fun EditableRow(label: String, value: String, onSave: (String) -> Unit) 
             .clip(MaterialTheme.shapes.small)
             .clickable { editing = true }
             .padding(vertical = Spacing.md),
-        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(label, style = MaterialTheme.typography.titleMedium)
-        Text(
-            text = value.ifBlank { "—" },
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        Column(Modifier.weight(1f)) {
+            Text(
+                label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = value.ifBlank { "—" },
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Icon(
+            Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
     if (editing) {

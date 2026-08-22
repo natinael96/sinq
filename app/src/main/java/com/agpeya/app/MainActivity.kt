@@ -165,6 +165,9 @@ private fun AgpeyaNavHost(
     LaunchedEffect(ready) {
         if (ready) {
             runCatching {
+                com.agpeya.app.data.HighlightRepository.migrateLegacyPsalterKeys(context)
+            }
+            runCatching {
                 val names = com.agpeya.app.data.HoursRepository
                     .visibleHours(context).associate { it.id to it.name }
                 ReminderScheduler.rescheduleAll(context, names)

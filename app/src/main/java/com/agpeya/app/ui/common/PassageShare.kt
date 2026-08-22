@@ -14,10 +14,14 @@ import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
 import android.text.TextUtils
+import android.util.Log
+import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.core.content.res.ResourcesCompat
 import com.agpeya.app.R
+import com.agpeya.app.ui.strings.Strings
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
 import java.io.File
 
@@ -56,6 +60,8 @@ data class SharePayload(
  */
 object PassageShare {
 
+    private const val TAG = "PassageShare"
+
     private const val W = 1080
     private const val MAX_H = 1920
 
@@ -70,23 +76,43 @@ object PassageShare {
     private val IVORY = Color.parseColor("#F2EDDE")
     private val MUTED = Color.parseColor("#9DBBAD")
 
-    suspend fun share(context: Context, payload: SharePayload) = withContext(Dispatchers.Default) {
-        val bitmap = render(context, payload)
-        val dir = File(context.cacheDir, "images").apply { mkdirs() }
-        val file = File(dir, "passage.png")
-        file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
-        bitmap.recycle()
+    suspend fun share(context: Context, payload: SharePayload, strings: Strings? = null): Boolean = try {
+        withContext(Dispatchers.Default) {
+            val bitmap = render(context, payload)
+            val dir = File(context.cacheDir, "images").apply { mkdirs() }
+            val staleBefore = System.currentTimeMillis() - 24 * 60 * 60 * 1000L
+            dir.listFiles()?.filter { it.lastModified() < staleBefore }?.forEach { it.delete() }
+            // A receiving app can read the URI after the chooser closes. A unique
+            // file prevents a second share from replacing the first one's image.
+            val file = File.createTempFile("passage-", ".png", dir)
+            try {
+                file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            } finally {
+                bitmap.recycle()
+            }
 
-        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-        val send = Intent(Intent.ACTION_SEND).apply {
-            type = "image/png"
-            putExtra(Intent.EXTRA_STREAM, uri)
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+            val send = Intent(Intent.ACTION_SEND).apply {
+                type = "image/png"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            val chooser = Intent.createChooser(send, null).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            withContext(Dispatchers.Main) { context.startActivity(chooser) }
         }
-        val chooser = Intent.createChooser(send, null).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        true
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (failure: Exception) {
+        Log.e(TAG, "Unable to render or share passage image", failure)
+        strings?.let { s ->
+            withContext(Dispatchers.Main) {
+                Toast.makeText(context, s.shareFailed, Toast.LENGTH_SHORT).show()
+            }
         }
-        withContext(Dispatchers.Main) { context.startActivity(chooser) }
+        false
     }
 
     private fun render(context: Context, payload: SharePayload): Bitmap {

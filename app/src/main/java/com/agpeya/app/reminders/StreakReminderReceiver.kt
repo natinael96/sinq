@@ -11,6 +11,7 @@ import com.agpeya.app.MainActivity
 import com.agpeya.app.R
 import com.agpeya.app.data.FastingCalendar
 import com.agpeya.app.data.GitsaweRepository
+import com.agpeya.app.data.HabitsRepository
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.stringsFor
 import com.agpeya.app.ui.strings.Strings
@@ -44,7 +45,9 @@ class StreakReminderReceiver : BroadcastReceiver() {
                     StreakReminderScheduler.schedule(context)
 
                     val s = stringsFor(SettingsRepository.language(context).first())
-                    val body = liturgicalBody(context, s)
+                    // Completion never suppresses this notification. Instead,
+                    // it adds the core checklist items that still need a mark.
+                    val body = reminderBody(context, s)
                     ensureChannel(context, s.nightReminderChannel)
                     // Request code must differ from ReminderScheduler's alarm-clock
                     // show intent (code 0): extras don't distinguish PendingIntents,
@@ -91,6 +94,22 @@ class StreakReminderReceiver : BroadcastReceiver() {
         return if (fasting) s.nightReminderFastBody else s.nightReminderBody
     }
 
+    private suspend fun reminderBody(context: Context, s: Strings): String {
+        val base = liturgicalBody(context, s)
+        val done = runCatching {
+            HabitsRepository.current(context).records[LocalDate.now().toString()].orEmpty()
+        }.getOrDefault(emptySet())
+        val pending = pendingNightlyHabitIds(done).map { id ->
+            when (id) {
+                "sinksar" -> s.habitSynaxarium
+                "church" -> s.habitChurch
+                "prostrate" -> s.habitProstrate
+                else -> id
+            }
+        }
+        return if (pending.isEmpty()) base else "$base\n${s.nightReminderPending(pending.joinToString(" · "))}"
+    }
+
     private fun ensureChannel(context: Context, name: String) {
         val nm = context.getSystemService(NotificationManager::class.java)
         if (nm.getNotificationChannel(CHANNEL_ID) == null) {
@@ -105,3 +124,7 @@ class StreakReminderReceiver : BroadcastReceiver() {
         private const val NOTIFICATION_ID = 7200
     }
 }
+
+/** These remain worth reviewing even after one or every prayer hour is marked. */
+internal fun pendingNightlyHabitIds(done: Set<String>): List<String> =
+    listOf("sinksar", "church", "prostrate").filterNot(done::contains)

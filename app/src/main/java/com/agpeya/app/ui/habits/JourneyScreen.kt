@@ -63,6 +63,7 @@ import java.time.LocalDate
 
 private fun builtInName(id: String, s: Strings): String = when (id) {
     "prayer" -> s.habitPrayer
+    "sinksar" -> s.habitSynaxarium
     "church" -> s.habitChurch
     "prostrate" -> s.habitProstrate
     "bible" -> s.habitBible

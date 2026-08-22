@@ -27,9 +27,10 @@ import kotlin.random.Random
  * recorded prayer reopens the window with a fresh roll.
  *
  * Re-armed from every place the window can change: a prayer being recorded
- * (JourneyScreen, the Done notification), app launch, boot/time changes, and
- * the Settings toggle. The receiver marks the day fired, so a day never gets
- * two nudges however many times the schedule is recomputed.
+ * (JourneyScreen, the Done notification), app launch, boot/time changes, the
+ * Settings toggle, and the receiver itself after firing. The receiver marks
+ * the day fired, so a day never gets two nudges; scheduling then chains into a
+ * fresh window tomorrow even if the app is not opened again.
  */
 object BreathPrayerScheduler {
 
@@ -57,6 +58,7 @@ object BreathPrayerScheduler {
     private const val MIN_AFTER_PRAYER_MIN = 10L
     private const val MIN_FROM_NOW_MIN = 15L
     private const val BEFORE_NEXT_PRAYER_MIN = 1L
+    private const val NEXT_DAY_EARLIEST_HOUR = 8
 
     /** No nudges after 21:00 — the evening belongs to the nightly reminder. */
     private const val LATEST_HOUR = 21
@@ -76,10 +78,18 @@ object BreathPrayerScheduler {
         if (!SettingsRepository.breathReminderBlocking(context)) return cancel(context)
         val now = LocalDateTime.now()
         val today = now.toLocalDate()
-        // Once a day: after it fires, nothing more is armed until tomorrow's
-        // first trigger (app launch or a recorded prayer) recomputes.
+        // Once today's nudge has fired, keep the chain alive by arming a fresh
+        // daytime window tomorrow. Prayer completion must never silence it.
         if (SettingsRepository.breathLastFiredDayBlocking(context) == today.toString()) {
-            return cancel(context)
+            val lower = today.plusDays(1).atTime(NEXT_DAY_EARLIEST_HOUR, 0)
+            var upper = today.plusDays(1).atTime(LATEST_HOUR, 0)
+            nextPrayerTime(context, lower)?.let { next ->
+                if (next.toLocalDate() == lower.toLocalDate()) {
+                    val cap = next.minusMinutes(BEFORE_NEXT_PRAYER_MIN)
+                    if (cap.isAfter(lower) && cap.isBefore(upper)) upper = cap
+                }
+            }
+            return armRandom(context, lower, upper)
         }
 
         // Lower bound: a while from now, and clear of the last recorded prayer.
@@ -105,6 +115,11 @@ object BreathPrayerScheduler {
         // (or tomorrow's launch) rolls again.
         if (!upper.isAfter(lower)) return cancel(context)
 
+        armRandom(context, lower, upper)
+    }
+
+    private fun armRandom(context: Context, lower: LocalDateTime, upper: LocalDateTime) {
+        if (!upper.isAfter(lower)) return cancel(context)
         val span = java.time.Duration.between(lower, upper).seconds
         val at = lower.plusSeconds(Random.nextLong(span + 1))
         val triggerAt = at.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()

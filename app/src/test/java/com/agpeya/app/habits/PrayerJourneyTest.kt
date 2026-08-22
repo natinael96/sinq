@@ -4,6 +4,7 @@ import com.agpeya.app.data.BahreHasab
 import com.agpeya.app.data.FastingCalendar
 import com.agpeya.app.data.HabitsRepository
 import com.agpeya.app.data.PrayerJourney
+import com.agpeya.app.model.HabitsState
 import com.agpeya.app.ui.common.EthiopianDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -25,6 +26,14 @@ class PrayerJourneyTest {
 
     private fun ecMonthStart(date: LocalDate): LocalDate =
         EthiopianDate.from(date).let { EthiopianDate(it.year, it.month, 1).toGregorian() }
+
+    @Test
+    fun `daily checklist includes Synaxarium church and prostration`() {
+        val ids = HabitsRepository.orderedHabitIds(HabitsState(), includeHidden = false)
+        assertTrue("sinksar" in ids)
+        assertTrue("church" in ids)
+        assertTrue("prostrate" in ids)
+    }
 
     // ---- daysPrayedBetween ----
 

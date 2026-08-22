@@ -27,8 +27,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.SwapHoriz
-import androidx.compose.material.icons.outlined.SwapVert
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -48,6 +46,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -60,6 +59,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.ContentRepository
 import com.agpeya.app.data.HighlightRepository
@@ -149,12 +149,21 @@ fun ReadingScreen(
     }
     val listState = rememberLazyListState()
     val pagerState = rememberPagerState(pageCount = { sections.size })
+    val contentsIndex by remember(readingMode, listState, pagerState) {
+        derivedStateOf {
+            if (readingMode == ReadingMode.VERTICAL) listState.firstVisibleItemIndex
+            else pagerState.currentPage
+        }
+    }
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
     val s = com.agpeya.app.ui.strings.LocalStrings.current
     val motion = LocalMotion.current
+    val highlightNamespaceFor: (Section) -> String? = { section ->
+        if (section.id.startsWith("ps_")) HighlightRepository.AMHARIC_PSALTER_NAMESPACE else null
+    }
 
     // The section we want kept in view; shared across both readers so the
     // position survives a mode switch.
@@ -244,12 +253,19 @@ fun ReadingScreen(
                     Box {
                         Row(
                             modifier = Modifier
+                                .fillMaxWidth()
                                 .clip(MaterialTheme.shapes.small)
                                 .clickable(role = Role.DropdownList) { hourMenu = true }
                                 .padding(horizontal = Spacing.xs),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(hour?.name ?: "", style = MaterialTheme.typography.titleLarge, maxLines = 1)
+                            Text(
+                                text = hour?.name ?: "",
+                                style = MaterialTheme.typography.titleSmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f),
+                            )
                             Icon(
                                 Icons.Filled.ArrowDropDown,
                                 contentDescription = null,
@@ -278,33 +294,26 @@ fun ReadingScreen(
                     }
                 },
                 actions = {
-                    FontSizeActions(
+                    com.agpeya.app.ui.common.ReaderToolsMenu(
                         fontStep = fontStep,
-                        maxStep = FONT_STEPS_SP.lastIndex,
-                    ) { step -> scope.launch { SettingsRepository.setFontStep(context, step) } }
-                    IconButton(onClick = {
-                        // Capture the current position, then switch the mode. The
-                        // anchor effect scrolls the newly-composed reader to it.
-                        anchor = if (readingMode == ReadingMode.VERTICAL) {
-                            listState.firstVisibleItemIndex
-                        } else {
-                            pagerState.currentPage
-                        }
-                        scope.launch {
-                            SettingsRepository.setReadingMode(
-                                context,
-                                if (readingMode == ReadingMode.VERTICAL) ReadingMode.HORIZONTAL
-                                else ReadingMode.VERTICAL,
-                            )
-                        }
-                    }) {
-                        Icon(
-                            imageVector = if (readingMode == ReadingMode.VERTICAL) Icons.Outlined.SwapHoriz
-                            else Icons.Outlined.SwapVert,
-                            contentDescription = s.readingModeToggle,
-                            modifier = Modifier.size(IconSize.medium),
-                        )
-                    }
+                        maxFontStep = FONT_STEPS_SP.lastIndex,
+                        onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
+                        onToggleReadingMode = {
+                            // Preserve the visible passage when changing layout.
+                            anchor = if (readingMode == ReadingMode.VERTICAL) {
+                                listState.firstVisibleItemIndex
+                            } else {
+                                pagerState.currentPage
+                            }
+                            scope.launch {
+                                SettingsRepository.setReadingMode(
+                                    context,
+                                    if (readingMode == ReadingMode.VERTICAL) ReadingMode.HORIZONTAL
+                                    else ReadingMode.VERTICAL,
+                                )
+                            }
+                        },
+                    )
                     IconButton(onClick = { showContents = true }) {
                         Icon(
                             Icons.Outlined.Menu,
@@ -313,6 +322,23 @@ fun ReadingScreen(
                         )
                     }
                 },
+            )
+        },
+        bottomBar = {
+            HighlightBar(
+                visible = selStart != null,
+                currentColor = selectionKeys(sections, selStart, null, highlightNamespaceFor)
+                    .firstOrNull()?.let { highlights[it] },
+                onPick = { colorKey ->
+                    val keys = selectionKeys(sections, selStart, selEnd, highlightNamespaceFor)
+                    selStart = null; selEnd = null
+                    if (keys.isNotEmpty()) scope.launch {
+                        HighlightRepository.setHighlights(context, keys, colorKey)
+                    }
+                },
+                onDismiss = { selStart = null; selEnd = null },
+                shareText = verseShareText(sections, selStart, selEnd),
+                shareImage = versePayload(sections, selStart, hour?.name, selEnd),
             )
         },
         containerColor = MaterialTheme.colorScheme.background,
@@ -332,30 +358,17 @@ fun ReadingScreen(
                     ReadingMode.VERTICAL -> VerticalReader(
                         sections, listState, bodyFontSp, innerPadding, bookmarkedIds,
                         ::toggleBookmark, highlights, onVerseTap, selectionFor,
+                        highlightNamespaceFor,
                         prevHour?.let { h -> { onSwitchHour(h.id) } },
                         nextHour?.let { h -> { onSwitchHour(h.id) } },
                     )
                     ReadingMode.HORIZONTAL -> PagedReader(
                         sections, pagerState, bodyFontSp, innerPadding, bookmarkedIds,
                         ::toggleBookmark, highlights, onVerseTap, selectionFor,
+                        highlightNamespaceFor,
                     )
                 }
             }
-            HighlightBar(
-                visible = selStart != null,
-                currentColor = selStart?.let { highlights[it] },
-                onPick = { colorKey ->
-                    val keys = selectionKeys(sections, selStart, selEnd)
-                    selStart = null; selEnd = null
-                    if (keys.isNotEmpty()) scope.launch {
-                        keys.forEach { HighlightRepository.setHighlight(context, it, colorKey) }
-                    }
-                },
-                onDismiss = { selStart = null; selEnd = null },
-                shareText = verseShareText(sections, selStart, selEnd),
-                shareImage = versePayload(sections, selStart, hour?.name, selEnd),
-                modifier = Modifier.align(Alignment.BottomCenter),
-            )
         }
     }
 
@@ -369,8 +382,7 @@ fun ReadingScreen(
                 sections = sections,
                 // Where the reader is right now, so opening the contents tells
                 // you where you are before it asks where you want to go.
-                currentIndex = if (readingMode == ReadingMode.VERTICAL) listState.firstVisibleItemIndex
-                else pagerState.currentPage,
+                currentIndex = contentsIndex,
                 onSelect = { index ->
                     scope.launch {
                         sheetState.hide()
@@ -397,6 +409,7 @@ private fun VerticalReader(
     highlights: Map<String, String>,
     onVerseTap: (String) -> Unit,
     selectionFor: (Section) -> IntRange,
+    highlightNamespaceFor: (Section) -> String?,
     onPrevious: (() -> Unit)?,
     onNext: (() -> Unit)?,
 ) {
@@ -416,6 +429,7 @@ private fun VerticalReader(
                 onToggleBookmark = { onToggleBookmark(section, index) },
                 highlights = highlights,
                 onVerseTap = onVerseTap,
+                highlightNamespace = highlightNamespaceFor(section),
                 selectedRange = selectionFor(section),
             )
         }
@@ -437,6 +451,7 @@ private fun PagedReader(
     highlights: Map<String, String>,
     onVerseTap: (String) -> Unit,
     selectionFor: (Section) -> IntRange,
+    highlightNamespaceFor: (Section) -> String?,
 ) {
     Column(
         modifier = Modifier
@@ -470,6 +485,7 @@ private fun PagedReader(
                         onToggleBookmark = { onToggleBookmark(section, page) },
                         highlights = highlights,
                         onVerseTap = onVerseTap,
+                        highlightNamespace = highlightNamespaceFor(section),
                         selectedRange = selectionFor(section),
                     )
                     Spacer(Modifier.height(Spacing.huge))

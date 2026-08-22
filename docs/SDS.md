@@ -114,7 +114,7 @@ com.agpeya.app
 - **Forward compatibility**: `Json { ignoreUnknownKeys = true }`; every model field has a default.
 
 ### 3.4 Content Pipeline (offline, build-time)
-`tools/extract_content.py` emits the prayer-hour assets. `tools/extract_bible_editions.py` bundles Amharic 2000 for the Bible and Amharic/Ge'ez 1980 for Psalms under `assets/content/bible/`. LXX/Ge'ez psalm numbering matches the Agpeya references.
+`tools/extract_content.py` emits the prayer-hour assets. `tools/extract_bible_editions.py` bundles Amharic 1980 for the Bible and a Ge'ez 1980 Psalm-only alternative under `assets/content/bible/`. LXX/Ge'ez psalm numbering matches the Agpeya references.
 
 ---
 

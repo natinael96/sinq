@@ -44,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -55,6 +56,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.agpeya.app.data.ScriptureRepository
+import com.agpeya.app.data.HighlightRepository
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.data.UserDataRepository
 import com.agpeya.app.model.Bookmark
@@ -71,6 +73,7 @@ import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.readingBodyStyle
 import com.agpeya.app.ui.theme.readingVerseGap
+import com.agpeya.app.ui.theme.sinqColors
 import kotlinx.coroutines.launch
 
 private val FONT_STEPS_SP = com.agpeya.app.data.SettingsRepository.FONT_STEPS_SP
@@ -100,6 +103,7 @@ fun ScriptureReaderScreen(
 
     val haptics = LocalHapticFeedback.current
     val bookmarks by UserDataRepository.bookmarks(context).collectAsState(initial = emptyList())
+    val highlights by HighlightRepository.highlights(context).collectAsState(initial = emptyMap())
     val bookmarkedIds = remember(bookmarks) {
         bookmarks.filter { it.hourId == "scripture_library" }.mapTo(HashSet()) { it.sectionId }
     }
@@ -128,6 +132,7 @@ fun ScriptureReaderScreen(
     var selA by rememberSaveable(bookKey, chapter) { mutableIntStateOf(-1) }
     var selB by rememberSaveable(bookKey, chapter) { mutableIntStateOf(-1) }
     val current = remember(b, chapter) { b.chapters.find { it.chapter == chapter } ?: b.chapters.first() }
+    val highlightSectionId = "scripture:${ScriptureRepository.BIBLE_EDITION}:$bookKey:$chapter"
     // Only the chapter we arrived on shows the cited-verse tint. The cited range
     // is snapped onto verse numbers that actually exist: the Amharic source merges
     // some verses (so e.g. v17 may not appear) and a few citations run past the
@@ -163,6 +168,13 @@ fun ScriptureReaderScreen(
     }
     val listState = rememberLazyListState()
     val verseGap = readingVerseGap(bodyFontSp)
+    val selRange = com.agpeya.app.ui.reading.flatSelectionRange(selA, selB)
+    val sinq = sinqColors
+    val chapterTitle = "${b.nameAm} ${s.chapterUnit} ${geezNumeral(chapter)}"
+    val selBody = if (selRange.isEmpty()) null
+    else current.verses.filter { it.n in selRange }
+        .joinToString("\n") { "${geezNumeral(it.n)}  ${it.text}" }
+        .ifBlank { null }
 
     // Land on the cited verse when opened from a reading link — once. Without the
     // guard, paging away and back to this chapter re-ran the jump mid-reading.
@@ -186,13 +198,6 @@ fun ScriptureReaderScreen(
                 actions = {
                     val sectionId = "scripture:$bookKey:$chapter"
                     val marked = sectionId in bookmarkedIds
-                    com.agpeya.app.ui.common.ShareMenuAction(payload = {
-                        com.agpeya.app.ui.common.SharePayload(
-                            body = current.verses.joinToString("\n") { "${geezNumeral(it.n)}  ${it.text}" },
-                            kicker = s.scripturesTitle,
-                            title = "${b.nameAm} ${s.chapterUnit} ${geezNumeral(chapter)}",
-                        )
-                    })
                     IconButton(onClick = {
                         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         scope.launch {
@@ -216,16 +221,48 @@ fun ScriptureReaderScreen(
                             modifier = Modifier.size(IconSize.medium),
                         )
                     }
-                    com.agpeya.app.ui.reading.FontSizeActions(
+                    com.agpeya.app.ui.common.ReaderToolsMenu(
                         fontStep = fontStep,
-                        maxStep = FONT_STEPS_SP.lastIndex,
-                    ) { step -> scope.launch { SettingsRepository.setFontStep(context, step) } }
+                        maxFontStep = FONT_STEPS_SP.lastIndex,
+                        onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
+                        sharePayload = {
+                            com.agpeya.app.ui.common.SharePayload(
+                                body = current.verses.joinToString("\n") { "${geezNumeral(it.n)}  ${it.text}" },
+                                kicker = s.scripturesTitle,
+                                title = "${b.nameAm} ${s.chapterUnit} ${geezNumeral(chapter)}",
+                            )
+                        },
+                    )
+                },
+            )
+        },
+        bottomBar = {
+            com.agpeya.app.ui.reading.HighlightBar(
+                visible = selA >= 0,
+                currentColor = selA.takeIf { it >= 0 }
+                    ?.let { highlights[HighlightRepository.verseKey(highlightSectionId, it)] },
+                onPick = { colorKey ->
+                    val keys = current.verses
+                        .filter { it.n in selRange }
+                        .map { HighlightRepository.verseKey(highlightSectionId, it.n) }
+                    selA = -1
+                    selB = -1
+                    if (keys.isNotEmpty()) scope.launch {
+                        HighlightRepository.setHighlights(context, keys, colorKey)
+                    }
+                },
+                onDismiss = { selA = -1; selB = -1 },
+                shareText = selBody?.let { "$chapterTitle\n$it" },
+                shareImage = selBody?.let {
+                    com.agpeya.app.ui.common.SharePayload(
+                        body = it,
+                        kicker = s.scripturesTitle,
+                        title = chapterTitle,
+                    )
                 },
             )
         },
     ) { innerPadding ->
-        val selRange = com.agpeya.app.ui.reading.flatSelectionRange(selA, selB)
-        androidx.compose.foundation.layout.Box(Modifier.fillMaxSize()) {
         ReadingColumn(state = listState, innerPadding = innerPadding) {
             item(key = "chapters") {
                 ChapterStrip(
@@ -259,11 +296,12 @@ fun ScriptureReaderScreen(
                             .fillMaxWidth()
                             .padding(vertical = verseGap / 2)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(
-                                if (verse.n in selRange)
-                                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.28f)
-                                else androidx.compose.ui.graphics.Color.Transparent
-                            )
+                            .background(when {
+                                verse.n in selRange -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.28f)
+                                else -> sinq.highlight(
+                                    highlights[HighlightRepository.verseKey(highlightSectionId, verse.n)]
+                                ).takeUnless { it == Color.Transparent } ?: Color.Transparent
+                            })
                             .clickable {
                                 val (a, bSel) = com.agpeya.app.ui.reading.advanceFlatSelection(selA, verse.n)
                                 selA = a
@@ -287,23 +325,6 @@ fun ScriptureReaderScreen(
                 }
             }
             item { Spacer(Modifier.height(Spacing.huge)) }
-        }
-        // Selected verses ready to copy or leave as text or a card. No
-        // highlight palette here — highlights are keyed to prayer sections.
-        val chapterTitle = "${b.nameAm} ${s.chapterUnit} ${geezNumeral(chapter)}"
-        val selBody = if (selRange.isEmpty()) null
-        else current.verses.filter { it.n in selRange }
-            .joinToString("\n") { "${geezNumeral(it.n)}  ${it.text}" }
-            .ifBlank { null }
-        com.agpeya.app.ui.reading.SelectionShareBar(
-            visible = selA >= 0,
-            onDismiss = { selA = -1; selB = -1 },
-            shareText = selBody?.let { "$chapterTitle\n$it" },
-            shareImage = selBody?.let {
-                com.agpeya.app.ui.common.SharePayload(body = it, kicker = s.scripturesTitle, title = chapterTitle)
-            },
-            modifier = Modifier.align(Alignment.BottomCenter),
-        )
         }
     }
 }

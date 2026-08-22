@@ -19,7 +19,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.List
-import androidx.compose.material.icons.outlined.MenuBook
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -59,7 +59,6 @@ import com.agpeya.app.model.SeatatSection
 import com.agpeya.app.ui.common.LoadingPanel
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.common.StatePanel
-import com.agpeya.app.ui.reading.FontSizeActions
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
@@ -172,18 +171,21 @@ fun SeatatScreen(onBack: () -> Unit, initialSectionId: String? = null) {
                         )?.let { if (it is SeatatRow.Header) it.sectionIndex else (it as? SeatatRow.Line)?.sectionIndex })
                             ?: 0,
                     )
-                    com.agpeya.app.ui.common.ShareMenuAction(enabled = visibleSection != null, payload = {
-                        visibleSection?.let {
-                            com.agpeya.app.ui.common.SharePayload(
-                                body = it.lines.joinToString("\n\n") { line -> shareLine(line, lang) },
-                                kicker = s.seatatTitle,
-                                title = sectionTitle(it, lang),
-                            )
-                        }
-                    })
-                    FontSizeActions(fontStep = fontStep, maxStep = FONT_STEPS_SP.lastIndex) { step ->
-                        scope.launch { SettingsRepository.setFontStep(context, step) }
-                    }
+                    com.agpeya.app.ui.common.ReaderToolsMenu(
+                        fontStep = fontStep,
+                        maxFontStep = FONT_STEPS_SP.lastIndex,
+                        onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
+                        shareEnabled = visibleSection != null,
+                        sharePayload = {
+                            visibleSection?.let {
+                                com.agpeya.app.ui.common.SharePayload(
+                                    body = it.lines.joinToString("\n\n") { line -> shareLine(line, lang) },
+                                    kicker = s.seatatTitle,
+                                    title = sectionTitle(it, lang),
+                                )
+                            }
+                        },
+                    )
                 },
             )
         },
@@ -195,7 +197,7 @@ fun SeatatScreen(onBack: () -> Unit, initialSectionId: String? = null) {
         if (sections.isEmpty()) {
             Box(Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
                 StatePanel(
-                    icon = Icons.Outlined.MenuBook,
+                    icon = Icons.AutoMirrored.Outlined.MenuBook,
                     title = s.contentUnavailable,
                     body = s.contentMissingBody,
                 )

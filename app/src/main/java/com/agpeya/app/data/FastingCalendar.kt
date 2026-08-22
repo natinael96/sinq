@@ -30,7 +30,7 @@ object FastingCalendar {
     /**
      * Every fast of the Ethiopian year [ethYear], in calendar order.
      *
-     * Note on lengths: ጾመ ሐዋርያት runs from the day after Pentecost to ሐምሌ ፭
+     * Note on lengths: ጾመ ሐዋርያት runs from the day after Pentecost to ሐምሌ ፬
      * (the eve of Peter and Paul), so its length varies with Fasika — it is
      * computed from both ends rather than assumed. ጾመ ድህነት (the Wednesday/Friday
      * rule) is not listed here; see [isWeeklyFastDay].
@@ -39,9 +39,9 @@ object FastingCalendar {
         val nineveh = BahreHasab.nineveh(ethYear)
         val fasika = BahreHasab.fasika(ethYear)
 
-        // ጾመ ሐዋርያት ends on ሐምሌ ፭ (month 11, day 5) of the same Ethiopian year.
+        // Inclusive fixed endpoint: ሐምሌ ፬. Do not extend this to the feast day.
         val apostlesStart = BahreHasab.apostlesFast(ethYear)
-        val apostlesEnd = EthiopianDate(ethYear, 11, 5).toGregorian()
+        val apostlesEnd = EthiopianDate(ethYear, 11, 4).toGregorian()
 
         return listOf(
             Fast(
@@ -73,7 +73,7 @@ object FastingCalendar {
                 nameAm = "ጾመ ፍልሰታ",
                 nameEn = "Fast of the Assumption",
                 start = EthiopianDate(ethYear, 12, 1).toGregorian(),   // ነሐሴ ፩
-                end = EthiopianDate(ethYear, 12, 16).toGregorian(),    // ነሐሴ ፲፮
+                end = EthiopianDate(ethYear, 12, 15).toGregorian(),    // ነሐሴ ፲፭
                 movable = false,
             ),
             Fast(

@@ -30,11 +30,22 @@ class FastingCalendarTest {
     }
 
     @Test
-    fun `filseta is the sixteen days of Nehase`() {
+    fun `filseta ends on Nehase 15 without an extra day`() {
         val f = FastingCalendar.fastsOf(year).first { it.key == "filseta" }
-        assertEquals(16, f.days)
+        assertEquals(15, f.days)
         assertEquals(12, EthiopianDate.from(f.start).month)
         assertEquals(1, EthiopianDate.from(f.start).day)
+        assertEquals(EthiopianDate(year, 12, 15).toGregorian(), f.end)
+        assertEquals("filseta", FastingCalendar.fastOn(f.end)?.key)
+        assertTrue(FastingCalendar.fastOn(f.end.plusDays(1))?.key != "filseta")
+    }
+
+    @Test
+    fun `apostles fast ends on Hamle 4 without an extra day`() {
+        val f = FastingCalendar.fastsOf(year).first { it.key == "hawaryat" }
+        assertEquals(EthiopianDate(year, 11, 4).toGregorian(), f.end)
+        assertEquals("hawaryat", FastingCalendar.fastOn(f.end)?.key)
+        assertTrue(FastingCalendar.fastOn(f.end.plusDays(1))?.key != "hawaryat")
     }
 
     @Test
@@ -50,6 +61,17 @@ class FastingCalendarTest {
         // "43 days", which counts one endpoint exclusively — the dates, not the
         // headline number, are what this asserts.
         assertEquals(44, f.days)
+    }
+
+    @Test
+    fun `unchanged Lent and Prophets endpoints remain exact`() {
+        val fasts = FastingCalendar.fastsOf(year)
+        val lent = fasts.first { it.key == "abiy" }
+        val prophets = fasts.first { it.key == "nebiyat" }
+        assertEquals(BahreHasab.greatLentStart(year), lent.start)
+        assertEquals(BahreHasab.fasika(year).minusDays(1), lent.end)
+        assertEquals(EthiopianDate(year, 3, 15).toGregorian(), prophets.start)
+        assertEquals(EthiopianDate(year, 4, 28).toGregorian(), prophets.end)
     }
 
     @Test

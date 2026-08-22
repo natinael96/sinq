@@ -57,6 +57,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.IconSize
@@ -223,9 +224,8 @@ fun SinqCard(
 }
 
 /**
- * The brand's green card — used for the one thing on a screen that matters most
- * (the prayer for now, today's candle). Rare by design: a page with two of
- * these has none.
+ * The brand's green gradient card — reserved for primary daily actions such as
+ * the prayer for now and today's Gitsawe.
  *
  * [glow] adds the soft gold bloom in the top corner. It is a single clipped
  * radial gradient, not a blur, so it costs nothing to draw.
@@ -564,14 +564,20 @@ fun SinqTopBar(
             if (titleContent != null) {
                 titleContent()
             } else {
-                Column {
-                    Text(title, style = MaterialTheme.typography.titleLarge, maxLines = 1)
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                     if (subtitle != null) {
                         Text(
                             subtitle,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                     if (accentLine != null) {
@@ -580,6 +586,7 @@ fun SinqTopBar(
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.secondary,
                             maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }

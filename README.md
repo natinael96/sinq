@@ -14,7 +14,7 @@ Sinq brings the Agpeya's seven canonical prayer hours and the complete Psalter (
 
 ### Prayer
 - **The prayer hours** — ጸሎተ ነግህ (Morning), ሠለስት (Terce), ቀትር (Sext), ተሰዓት (None), ሰርክ (Vespers), ንዋም (Compline), መንፈቀ ሌሊት (Midnight, with its three watches), and the Veil prayer — with a time-of-day suggestion on the home screen.
-- **Unified Scripture library** — the Old and New Testaments use the Amharic 2000 edition; all 150 Psalms use Amharic 1980 by default with a reader-local Ge'ez 1980 switch.
+- **Unified Scripture library** — the Old and New Testaments use the Amharic 1980 edition; all 150 Psalms use Amharic 1980 by default with a reader-local Ge'ez 1980 switch.
 - **ውዳሴ ማርያም and ዘወትር ጸሎት** — a portion for each weekday plus ይወድስዋ መላእክት and አንቀጸ ብርሃን, in Amharic with a Ge'ez toggle.
 
 ### Calendar and lectionary
@@ -23,7 +23,7 @@ Sinq brings the Agpeya's seven canonical prayer hours and the complete Psalter (
 - **አጽዋማት** — the fasting calendar: what is in effect today, and every fast of the Ethiopian year.
 
 ### Reading
-- **Bible** — the bundled Amharic 2000 Ethiopian Orthodox canon, organized into Old and New Testaments without a network connection.
+- **Bible** — the bundled Amharic 1980 Ethiopian Orthodox canon, organized into Old and New Testaments without a network connection.
 - Two reading modes: vertical scroll or page-by-page swiping, remembered per preference.
 - Five font-size steps and four selectable Ethiopic faces, Ge'ez verse numerals, optically matched so the page reads the same whichever face is chosen.
 - Keep-screen-on while praying; scroll position remembered per hour.
@@ -87,7 +87,7 @@ python tools/extract_content.py
 
 | Input | Role |
 |---|---|
-| `../80-weahadu/data/{am-2000,am-1980,gez-1980}` | Bible and Psalms source editions from the sibling 80-weahadu repository |
+| `../80-weahadu/data/{am-1980,gez-1980}` | Amharic Bible and Ge'ez Psalms source editions from the sibling 80-weahadu repository |
 | `content/hour_mapping.json` | Which psalms, stanzas, and gospel passages compose each hour |
 
 `extract_content.py` assembles the prayer hours. `extract_bible_editions.py` losslessly bundles the three Scripture editions and writes their catalog. Section IDs and legacy reader routes remain permanent compatibility contracts for bookmarks and highlights.
@@ -116,7 +116,7 @@ app/src/main/java/com/agpeya/app/
 
 ### Versioning
 
-`0.MINOR.PATCH` pre-release scheme — PATCH for fixes, MINOR for features; `versionCode` increments on every update. `1.0.0` is reserved for the first public release. See [PLAN.md](PLAN.md) for the roadmap.
+Semantic-style releases use PATCH for fixes and MINOR for features; `versionCode` increments on every update. See [PLAN.md](PLAN.md) for the roadmap.
 
 ## Contributing
 

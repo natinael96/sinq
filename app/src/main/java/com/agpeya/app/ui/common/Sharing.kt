@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import com.agpeya.app.ui.strings.Strings
 
@@ -14,6 +15,8 @@ import com.agpeya.app.ui.strings.Strings
  * came from.
  */
 object Sharing {
+
+    private const val TAG = "Sharing"
 
     /** The line appended to every shared or copied passage. */
     private const val SIGNATURE = "— ስንቅ"
@@ -34,12 +37,24 @@ object Sharing {
     }
 
     /** Open the system share sheet with [body], signed. */
-    fun share(context: Context, body: String, subject: String? = null) {
+    fun share(
+        context: Context,
+        body: String,
+        subject: String? = null,
+        strings: Strings? = null,
+    ): Boolean {
         val send = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, sign(body))
             subject?.let { putExtra(Intent.EXTRA_SUBJECT, it) }
         }
-        context.startActivity(Intent.createChooser(send, null))
+        return runCatching {
+            context.startActivity(Intent.createChooser(send, null))
+            true
+        }.onFailure {
+            Log.e(TAG, "Unable to open text share sheet", it)
+            strings?.let { s -> Toast.makeText(context, s.shareFailed, Toast.LENGTH_SHORT).show() }
+        }
+            .getOrDefault(false)
     }
 }

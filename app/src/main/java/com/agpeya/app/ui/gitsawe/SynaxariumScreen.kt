@@ -60,7 +60,6 @@ import com.agpeya.app.model.Bookmark
 import com.agpeya.app.model.SynaxariumEntry
 import com.agpeya.app.ui.common.EthiopianDate
 import com.agpeya.app.ui.common.formatEthiopianWithGregorian
-import com.agpeya.app.ui.reading.FontSizeActions
 import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.common.LoadingPanel
@@ -120,20 +119,23 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
                 onBack = onBack,
                 actions = {
                     val list = entries.orEmpty()
-                    com.agpeya.app.ui.common.ShareMenuAction(enabled = list.isNotEmpty(), payload = {
-                        if (list.isEmpty()) null
-                        else com.agpeya.app.ui.common.SharePayload(
-                            body = synaxariumShareBody(list),
-                            kicker = s.synaxariumTitle,
-                            title = list.firstNotNullOfOrNull {
-                                cleanSynaxariumText(it.title).takeIf { t -> t.isNotBlank() }
-                            },
-                            dateLabel = com.agpeya.app.ui.common.formatEthiopian(date, s),
-                        )
-                    })
-                    FontSizeActions(fontStep = fontStep, maxStep = FONT_STEPS_SP.lastIndex) { step ->
-                        scope.launch { SettingsRepository.setFontStep(context, step) }
-                    }
+                    com.agpeya.app.ui.common.ReaderToolsMenu(
+                        fontStep = fontStep,
+                        maxFontStep = FONT_STEPS_SP.lastIndex,
+                        onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
+                        shareEnabled = list.isNotEmpty(),
+                        sharePayload = {
+                            if (list.isEmpty()) null
+                            else com.agpeya.app.ui.common.SharePayload(
+                                body = synaxariumShareBody(list),
+                                kicker = s.synaxariumTitle,
+                                title = list.firstNotNullOfOrNull {
+                                    cleanSynaxariumText(it.title).takeIf { t -> t.isNotBlank() }
+                                },
+                                dateLabel = com.agpeya.app.ui.common.formatEthiopian(date, s),
+                            )
+                        },
+                    )
                 },
             )
         },

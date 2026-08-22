@@ -29,7 +29,7 @@ object HabitsRepository {
      * Prayer is NOT a single habit — each prayer hour is tracked individually
      * with a "hour_<hourId>" record id (see [hourHabitId]).
      */
-    val BUILT_IN_IDS = listOf("church", "prostrate", "bible")
+    val BUILT_IN_IDS = listOf("sinksar", "church", "prostrate", "bible")
 
     fun hourHabitId(hourId: String): String = "hour_$hourId"
 

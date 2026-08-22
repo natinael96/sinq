@@ -21,9 +21,9 @@ import java.time.LocalTime
  * four short prayers, drawn at random, in full — so it can be prayed from the
  * lock screen without opening anything. Tapping simply opens the app.
  *
- * Nothing is recorded or streaked, and nothing re-arms here: the day is marked
- * fired, and tomorrow's moment is rolled by the next app launch or recorded
- * prayer, whose timing shapes tomorrow's window anyway.
+ * Nothing is recorded or streaked. After posting, the day is marked fired and
+ * tomorrow's moment is armed immediately, so the reminder remains reliable
+ * even if the app is not reopened and today's prayers are already marked.
  */
 class BreathPrayerReceiver : BroadcastReceiver() {
 
@@ -65,6 +65,7 @@ class BreathPrayerReceiver : BroadcastReceiver() {
                     context.getSystemService(NotificationManager::class.java)
                         .notify(BreathPrayerScheduler.NOTIFICATION_ID, notification)
                     SettingsRepository.setBreathLastFiredDay(context, today)
+                    BreathPrayerScheduler.schedule(context)
                 }
             } finally {
                 pending.finish()

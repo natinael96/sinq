@@ -15,10 +15,13 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -55,6 +58,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.HighlightRepository
@@ -89,6 +93,7 @@ internal fun SectionView(
     onToggleBookmark: () -> Unit,
     highlights: Map<String, String>,
     onVerseTap: (String) -> Unit,
+    highlightNamespace: String? = null,
     citedRange: IntRange = IntRange.EMPTY,
     selectedRange: IntRange = IntRange.EMPTY,
 ) {
@@ -155,6 +160,7 @@ internal fun SectionView(
             bodyFontSp = bodyFontSp,
             highlights = highlights,
             onVerseTap = onVerseTap,
+            highlightNamespace = highlightNamespace,
             citedRange = citedRange,
             selectedRange = selectedRange,
         )
@@ -167,6 +173,7 @@ internal fun VerseText(
     bodyFontSp: Int,
     highlights: Map<String, String>,
     onVerseTap: (String) -> Unit,
+    highlightNamespace: String? = null,
     citedRange: IntRange = IntRange.EMPTY,
     /** The user's live verse selection in THIS section (tap start, tap end);
      *  tinted stronger than a saved highlight so the pending run is unmissable. */
@@ -187,7 +194,7 @@ internal fun VerseText(
     // user highlight. (No SelectionContainer — it would swallow the verse taps.)
     @Composable
     fun verseLine(verseNumber: Int, verse: String, insideCitation: Boolean) {
-        val verseKey = HighlightRepository.verseKey(section.id, verseNumber)
+        val verseKey = HighlightRepository.verseKey(section.id, verseNumber, highlightNamespace)
         val own = sinq.highlight(highlights[verseKey])
         val bg = when {
             // The live selection wins over a saved highlight: what the share
@@ -316,82 +323,77 @@ internal fun HighlightBar(
         val haptics = LocalHapticFeedback.current
         val sinq = sinqColors
         Surface(
+            modifier = Modifier.navigationBarsPadding(),
             shadowElevation = 8.dp,
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
             shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
         ) {
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = Spacing.xl, vertical = Spacing.lg),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
-                verticalAlignment = Alignment.CenterVertically,
+                    .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
             ) {
-                HighlightRepository.COLOR_KEYS.forEach { key ->
-                    val selected = key == currentColor
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(highlightSwatch(key, sinq.highlight(key)))
-                            .then(
-                                if (selected) Modifier.border(2.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
-                                else Modifier
-                            )
-                            .semantics { contentDescription = s.highlight }
-                            .clickable {
-                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                onPick(key)
-                            },
-                    )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    HighlightRepository.COLOR_KEYS.forEach { key ->
+                        val selected = key == currentColor
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(highlightSwatch(key, sinq.highlight(key)))
+                                .then(
+                                    if (selected) Modifier.border(2.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
+                                    else Modifier
+                                )
+                                .semantics {
+                                    contentDescription = "${s.highlight}: ${s.highlightColor(key)}"
+                                }
+                                .clickable {
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    onPick(key)
+                                },
+                        )
+                    }
+                    Spacer(Modifier.weight(1f))
+                    IconButton(onClick = { onPick(null) }) {
+                        Icon(
+                            Icons.Outlined.FormatColorReset,
+                            contentDescription = s.removeHighlight,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(IconSize.medium),
+                        )
+                    }
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            Icons.Outlined.Close,
+                            contentDescription = s.dismiss,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(IconSize.medium),
+                        )
+                    }
                 }
-                Spacer(Modifier.weight(1f))
                 if (shareText != null) {
                     val ctx = androidx.compose.ui.platform.LocalContext.current
-                    IconButton(onClick = { com.agpeya.app.ui.common.Sharing.copy(ctx, shareText, s) }) {
-                        Icon(
-                            Icons.Outlined.ContentCopy,
-                            contentDescription = s.copyAction,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(IconSize.medium),
-                        )
-                    }
-                    IconButton(onClick = { com.agpeya.app.ui.common.Sharing.share(ctx, shareText) }) {
-                        Icon(
-                            Icons.Outlined.Share,
-                            contentDescription = s.shareAction,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(IconSize.medium),
-                        )
-                    }
-                    if (shareImage != null) {
-                        val scope = androidx.compose.runtime.rememberCoroutineScope()
-                        IconButton(onClick = {
-                            scope.launch { com.agpeya.app.ui.common.PassageShare.share(ctx, shareImage) }
-                        }) {
-                            Icon(
-                                Icons.Outlined.Image,
-                                contentDescription = s.shareAsImage,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(IconSize.medium),
-                            )
-                        }
-                    }
-                }
-                IconButton(onClick = { onPick(null) }) {
-                    Icon(
-                        Icons.Outlined.FormatColorReset,
-                        contentDescription = s.removeHighlight,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(IconSize.medium),
-                    )
-                }
-                IconButton(onClick = onDismiss) {
-                    Icon(
-                        Icons.Outlined.Close,
-                        contentDescription = s.dismiss,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(IconSize.medium),
+                    val scope = androidx.compose.runtime.rememberCoroutineScope()
+                    SelectionActions(
+                        onCopy = {
+                            com.agpeya.app.ui.common.Sharing.copy(ctx, shareText, s)
+                            onDismiss()
+                        },
+                        onShare = {
+                            com.agpeya.app.ui.common.Sharing.share(ctx, shareText, strings = s)
+                            onDismiss()
+                        },
+                        onShareImage = shareImage?.let { payload ->
+                            {
+                                onDismiss()
+                                scope.launch { com.agpeya.app.ui.common.PassageShare.share(ctx, payload, s) }
+                            }
+                        },
                     )
                 }
             }
@@ -432,60 +434,99 @@ internal fun SelectionShareBar(
     ) {
         val s = LocalStrings.current
         Surface(
+            modifier = Modifier.navigationBarsPadding(),
             shadowElevation = 8.dp,
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
             shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
         ) {
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = Spacing.xl, vertical = Spacing.sm),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
-                verticalAlignment = Alignment.CenterVertically,
             ) {
-                IconButton(onClick = onDismiss) {
-                    Icon(
-                        Icons.Outlined.Close,
-                        contentDescription = s.cancel,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(IconSize.medium),
-                    )
-                }
-                Spacer(Modifier.weight(1f))
                 val ctx = androidx.compose.ui.platform.LocalContext.current
-                if (shareText != null) {
-                    IconButton(onClick = { com.agpeya.app.ui.common.Sharing.copy(ctx, shareText, s) }) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    IconButton(onClick = onDismiss) {
                         Icon(
-                            Icons.Outlined.ContentCopy,
-                            contentDescription = s.copyAction,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(IconSize.medium),
-                        )
-                    }
-                    IconButton(onClick = { com.agpeya.app.ui.common.Sharing.share(ctx, shareText) }) {
-                        Icon(
-                            Icons.Outlined.Share,
-                            contentDescription = s.shareAction,
+                            Icons.Outlined.Close,
+                            contentDescription = s.cancel,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(IconSize.medium),
                         )
                     }
                 }
-                if (shareImage != null) {
+                if (shareText != null) {
                     val scope = androidx.compose.runtime.rememberCoroutineScope()
-                    IconButton(onClick = {
-                        scope.launch { com.agpeya.app.ui.common.PassageShare.share(ctx, shareImage) }
-                    }) {
-                        Icon(
-                            Icons.Outlined.Image,
-                            contentDescription = s.shareAsImage,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(IconSize.medium),
-                        )
-                    }
+                    SelectionActions(
+                        onCopy = {
+                            com.agpeya.app.ui.common.Sharing.copy(ctx, shareText, s)
+                            onDismiss()
+                        },
+                        onShare = {
+                            com.agpeya.app.ui.common.Sharing.share(ctx, shareText, strings = s)
+                            onDismiss()
+                        },
+                        onShareImage = shareImage?.let { payload ->
+                            {
+                                onDismiss()
+                                scope.launch { com.agpeya.app.ui.common.PassageShare.share(ctx, payload, s) }
+                            }
+                        },
+                    )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ColumnScope.SelectionActions(
+    onCopy: () -> Unit,
+    onShare: () -> Unit,
+    onShareImage: (() -> Unit)?,
+) {
+    val s = LocalStrings.current
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        SelectionAction(s.copyAction, Icons.Outlined.ContentCopy, onCopy, Modifier.weight(1f))
+        SelectionAction(s.shareAction, Icons.Outlined.Share, onShare, Modifier.weight(1f))
+        if (onShareImage != null) {
+            SelectionAction(s.shareAsImage, Icons.Outlined.Image, onShareImage, Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun SelectionAction(
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .heightIn(min = 56.dp)
+            .clip(MaterialTheme.shapes.small)
+            .clickable(onClick = onClick)
+            .padding(horizontal = Spacing.xs, vertical = Spacing.xs),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(IconSize.medium),
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 
@@ -504,7 +545,7 @@ internal fun verseShareText(
     endKey: String? = null,
 ): String? {
     val (section, range) = resolveSelection(sections, verseKey, endKey) ?: return null
-    return "${section.title}\n${versesBody(section, range)}"
+    return "${shareHeading(section)}\n${versesBody(section, range)}"
 }
 
 /** The verse-key pair after a tap: same section extends the run to the tapped
@@ -525,11 +566,16 @@ internal fun selectionRangeFor(section: Section, startKey: String?, endKey: Stri
 }
 
 /** Every verse key in the selection, for applying a highlight to the run. */
-internal fun selectionKeys(sections: List<Section>, startKey: String?, endKey: String?): List<String> {
+internal fun selectionKeys(
+    sections: List<Section>,
+    startKey: String?,
+    endKey: String?,
+    namespaceFor: (Section) -> String? = { null },
+): List<String> {
     val (section, range) = resolveSelection(sections, startKey, endKey) ?: return emptyList()
     return range.mapNotNull { n ->
         if (section.verses.getOrNull(n - section.firstVerse) != null)
-            HighlightRepository.verseKey(section.id, n)
+            HighlightRepository.verseKey(section.id, n, namespaceFor(section))
         else null
     }
 }
@@ -552,6 +598,9 @@ private fun versesBody(section: Section, range: IntRange): String =
         section.verses.getOrNull(n - section.firstVerse)?.let { "${geezNumeral(n)}  $it" }
     }.joinToString("\n")
 
+private fun shareHeading(section: Section): String =
+    listOfNotNull(section.title, section.reference?.takeIf { it.isNotBlank() }).joinToString(" — ")
+
 /**
  * The same verse as a [com.agpeya.app.ui.common.SharePayload] for the PNG card:
  * the section title carries the heading, [kicker] names the book it came from
@@ -567,6 +616,6 @@ internal fun versePayload(
     return com.agpeya.app.ui.common.SharePayload(
         body = versesBody(section, range),
         kicker = kicker,
-        title = section.title,
+        title = shareHeading(section),
     )
 }
