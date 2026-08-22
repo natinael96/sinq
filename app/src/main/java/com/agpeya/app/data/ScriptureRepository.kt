@@ -4,37 +4,57 @@ import android.content.Context
 import android.util.Log
 import com.agpeya.app.model.ScriptureBook
 import com.agpeya.app.model.ScriptureBookMeta
-import com.agpeya.app.model.ScriptureManifest
 import com.agpeya.app.model.ScriptureVerse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.*
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Loads the bundled New Testament (assets/content/scripture/) and resolves the
- * ግጻዌ (Gitsawe) book titles to it. The manifest is small and loaded once; each
- * book is loaded lazily and cached, so a reading opens only the one book it needs.
+ * Unified offline scripture source. Bible books come from Amharic 2000;
+ * Psalms are deliberately sourced from Amharic 1980 or Ge'ez 1980.
  */
 object ScriptureRepository {
 
     private const val TAG = "ScriptureRepository"
-    private const val DIR = "content/scripture"
+    private const val DIR = "content/bible"
+    const val BIBLE_EDITION = "am-2000"
+    const val PSALMS_AMHARIC_EDITION = "am-1980"
+    const val PSALMS_GEEZ_EDITION = "gez-1980"
 
     private val json = Json { ignoreUnknownKeys = true }
 
     @Volatile private var manifestCache: List<ScriptureBookMeta>? = null
     private val bookCache = ConcurrentHashMap<String, ScriptureBook>()
+    private val psalmCache = ConcurrentHashMap<Boolean, List<com.agpeya.app.model.Section>>()
 
-    /** The 27 NT books (metadata only). */
+    /** All Bible books except Psalms, which has its own translation selector. */
     suspend fun books(context: Context): List<ScriptureBookMeta> =
         manifestCache ?: withContext(Dispatchers.IO) {
             runCatching {
-                val raw = context.applicationContext.assets
-                    .open("$DIR/nt-manifest.json").readBytes().decodeToString()
-                json.decodeFromString<ScriptureManifest>(raw).books
-            }.onFailure { Log.e(TAG, "Failed to load nt-manifest.json", it) }
-                // Cache only success, matching book() below.
+                val assets = context.applicationContext.assets
+                val canon = json.parseToJsonElement(
+                    assets.open("$DIR/canon.json").readBytes().decodeToString()
+                ).jsonArray.associateBy { it.jsonObject["id"]!!.jsonPrimitive.content }
+                val meta = json.parseToJsonElement(
+                    assets.open("$DIR/$BIBLE_EDITION/meta.json").readBytes().decodeToString()
+                ).jsonObject
+                meta["books"]!!.jsonArray.mapNotNull { node ->
+                    val b = node.jsonObject
+                    val id = b["id"]!!.jsonPrimitive.content
+                    if (id == "PSA") return@mapNotNull null
+                    val canonical = canon[id]?.jsonObject
+                    ScriptureBookMeta(
+                        number = b["order"]!!.jsonPrimitive.int,
+                        key = slug(b["file"]!!.jsonPrimitive.content),
+                        nameAm = b["name"]!!.jsonPrimitive.content,
+                        nameEn = canonical?.get("name_en")?.jsonPrimitive?.content ?: id,
+                        chapters = b["chapters"]!!.jsonPrimitive.int,
+                        testament = canonical?.get("testament")?.jsonPrimitive?.content ?: "old",
+                        section = canonical?.get("section")?.jsonPrimitive?.content ?: "",
+                    )
+                }
+            }.onFailure { Log.e(TAG, "Failed to load unified Bible catalog", it) }
                 .getOrNull()?.also { manifestCache = it } ?: emptyList()
         }
 
@@ -42,12 +62,71 @@ object ScriptureRepository {
     suspend fun book(context: Context, key: String): ScriptureBook? =
         bookCache[key] ?: withContext(Dispatchers.IO) {
             runCatching {
+                val meta = books(context.applicationContext).first { it.key == key }
                 val raw = context.applicationContext.assets
-                    .open("$DIR/$key.json").readBytes().decodeToString()
-                json.decodeFromString<ScriptureBook>(raw)
+                    .open("$DIR/$BIBLE_EDITION/books/${meta.number.toString().padStart(2, '0')}-$key.json")
+                    .readBytes().decodeToString()
+                parseBook(json.parseToJsonElement(raw).jsonObject, meta)
             }.onFailure { Log.e(TAG, "Failed to load book $key", it) }
                 .getOrNull()?.also { bookCache[key] = it }
         }
+
+    /** Psalms as the shared Section model used by prayer and scripture readers. */
+    suspend fun psalms(context: Context, geez: Boolean = false): List<com.agpeya.app.model.Section> =
+        psalmCache[geez] ?: withContext(Dispatchers.IO) {
+            val edition = if (geez) PSALMS_GEEZ_EDITION else PSALMS_AMHARIC_EDITION
+            runCatching {
+                val raw = context.applicationContext.assets
+                    .open("$DIR/$edition/books/19-psalms.json").readBytes().decodeToString()
+                json.parseToJsonElement(raw).jsonObject["chapters"]!!.jsonArray
+                    .mapNotNull { chapter ->
+                        val c = chapter.jsonObject
+                        val number = c["n"]?.jsonPrimitive?.intOrNull ?: return@mapNotNull null
+                        if (number !in 1..150) return@mapNotNull null
+                        val verses = c["verses"]!!.jsonArray.mapNotNull { v ->
+                            v.jsonObject["t"]?.jsonPrimitive?.contentOrNull
+                        }
+                        val headings = c["headings"]?.jsonArray.orEmpty().mapNotNull { hNode ->
+                            val h = hNode.jsonObject
+                            val before = h["before"]?.jsonPrimitive?.intOrNull ?: return@mapNotNull null
+                            val text = h["text"]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() }
+                                ?: return@mapNotNull null
+                            before to text
+                        }.toMap()
+                        com.agpeya.app.model.Section(
+                            id = "ps_$number",
+                            orderIndex = number - 1,
+                            type = "psalm",
+                            number = number,
+                            title = "መዝሙር ${com.agpeya.app.ui.reading.geezNumeral(number)}",
+                            firstVerse = 1,
+                            verseHeaders = headings,
+                            verses = verses,
+                        )
+                    }
+            }.onFailure { Log.e(TAG, "Failed to load Psalms from $edition", it) }
+                .getOrDefault(emptyList()).also { if (it.isNotEmpty()) psalmCache[geez] = it }
+        }
+
+    private fun slug(file: String): String = file.substringAfter('/').substringAfter('-').removeSuffix(".json")
+
+    private fun parseBook(raw: JsonObject, meta: ScriptureBookMeta): ScriptureBook = ScriptureBook(
+        number = meta.number,
+        key = meta.key,
+        nameAm = meta.nameAm,
+        nameEn = meta.nameEn,
+        chapters = raw["chapters"]!!.jsonArray.map { node ->
+            val c = node.jsonObject
+            com.agpeya.app.model.ScriptureChapter(
+                chapter = c["n"]!!.jsonPrimitive.int,
+                verses = c["verses"]!!.jsonArray.mapIndexedNotNull { index, verseNode ->
+                    val v = verseNode.jsonObject
+                    val text = v["t"]?.jsonPrimitive?.contentOrNull ?: return@mapIndexedNotNull null
+                    ScriptureVerse(v["n"]?.jsonPrimitive?.intOrNull ?: index + 1, text)
+                },
+            )
+        },
+    )
 
     /**
      * Resolve a Gitsawe reference to its verses. [bookKey] is a bundled book

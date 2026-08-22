@@ -4,12 +4,16 @@ import com.agpeya.app.model.GitsaweEntry
 import com.agpeya.app.model.GitsaweServices
 import com.agpeya.app.model.MonthlyEntry
 import com.agpeya.app.model.ScriptureBook
-import com.agpeya.app.model.ScriptureManifest
+import com.agpeya.app.model.ScriptureChapter
+import com.agpeya.app.model.ScriptureVerse
 import com.agpeya.app.model.SeasonalEntry
 import com.agpeya.app.model.VerseRef
 import com.agpeya.app.model.readings
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -29,11 +33,28 @@ class ScriptureDataTest {
         listOf("src/main/assets/content", "app/src/main/assets/content")
             .map(::File).first { it.isDirectory }
 
-    private fun manifest(): ScriptureManifest =
-        json.decodeFromString(File(contentDir, "scripture/nt-manifest.json").readText())
+    private val bibleDir = File(contentDir, "bible/am-2000")
+    private val metas by lazy {
+        json.parseToJsonElement(File(bibleDir, "meta.json").readText()).jsonObject["books"]!!.jsonArray
+            .map { it.jsonObject }.filter { it["id"]!!.jsonPrimitive.content != "PSA" }
+    }
 
-    private fun book(key: String): ScriptureBook =
-        json.decodeFromString(File(contentDir, "scripture/$key.json").readText())
+    private fun book(key: String): ScriptureBook {
+        val meta = metas.first { it["file"]!!.jsonPrimitive.content.endsWith("-$key.json") }
+        val root = json.parseToJsonElement(File(bibleDir, meta["file"]!!.jsonPrimitive.content).readText()).jsonObject
+        return ScriptureBook(
+            number = meta["order"]!!.jsonPrimitive.content.toInt(), key = key,
+            nameAm = meta["name"]!!.jsonPrimitive.content, nameEn = key,
+            chapters = root["chapters"]!!.jsonArray.map { cNode ->
+                val c = cNode.jsonObject
+                ScriptureChapter(c["n"]!!.jsonPrimitive.content.toInt(), c["verses"]!!.jsonArray.mapIndexedNotNull { i, vNode ->
+                    val v = vNode.jsonObject
+                    val text = v["t"]?.jsonPrimitive?.content ?: return@mapIndexedNotNull null
+                    ScriptureVerse(v["n"]?.jsonPrimitive?.content?.toIntOrNull() ?: i + 1, text)
+                })
+            },
+        )
+    }
 
     private fun allServices(): List<GitsaweServices> {
         val out = ArrayList<GitsaweServices>()
@@ -50,14 +71,13 @@ class ScriptureDataTest {
         allServices().flatMap { it.readings() }.mapNotNull { it.verse?.bookTitle }
 
     @Test
-    fun `manifest lists 27 books and each decodes`() {
-        val books = manifest().books
-        assertEquals(27, books.size)
-        for (meta in books) {
-            val b = book(meta.key)
-            assertEquals(meta.number, b.number)
-            assertEquals(meta.chapters, b.chapters.size)
-            assertTrue("${meta.key} has verses", b.chapters.all { it.verses.isNotEmpty() })
+    fun `Amharic 2000 Bible books decode`() {
+        assertEquals(88, metas.size) // 89 source books minus Psalms (owned by its reader)
+        for (meta in metas) {
+            val key = meta["file"]!!.jsonPrimitive.content.substringAfter('-').removeSuffix(".json")
+            val b = book(key)
+            assertEquals(meta["chapters"]!!.jsonPrimitive.content.toInt(), b.chapters.size)
+            assertTrue("$key has verses", b.chapters.all { it.verses.isNotEmpty() })
         }
     }
 

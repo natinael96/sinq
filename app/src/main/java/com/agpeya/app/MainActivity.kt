@@ -324,17 +324,19 @@ private fun AgpeyaNavHost(
             )
         }
         composable(
-            route = "psalter?section={section}&start={start}&end={end}",
+            route = "psalter?section={section}&start={start}&end={end}&lang={lang}",
             arguments = listOf(
                 navArgument("section") { type = NavType.IntType; defaultValue = -1 },
                 navArgument("start") { type = NavType.IntType; defaultValue = -1 },
                 navArgument("end") { type = NavType.IntType; defaultValue = -1 },
+                navArgument("lang") { type = NavType.StringType; defaultValue = "am" },
             ),
         ) { backStackEntry ->
             com.agpeya.app.ui.psalter.PsalterScreen(
                 initialPsalmIndex = backStackEntry.arguments?.getInt("section") ?: -1,
                 initialStartVerse = backStackEntry.arguments?.getInt("start") ?: -1,
                 initialEndVerse = backStackEntry.arguments?.getInt("end") ?: -1,
+                initialGeez = backStackEntry.arguments?.getString("lang") == "gez",
                 onBack = { navController.popBackStack() },
             )
         }
@@ -349,7 +351,6 @@ private fun AgpeyaNavHost(
         }
         composable(Tab.LIBRARY.route) {
             com.agpeya.app.ui.library.LibraryScreen(
-                onOpenPsalter = { navController.navigate("psalter") { launchSingleTop = true } },
                 onOpenScriptures = { navController.navigate("scriptures") { launchSingleTop = true } },
                 onOpenWudase = { navController.navigate("wudase") { launchSingleTop = true } },
                 onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
@@ -375,7 +376,16 @@ private fun AgpeyaNavHost(
             )
         }
         composable("scriptures") {
+            com.agpeya.app.ui.library.ScriptureHubScreen(
+                onBack = { navController.popBackStack() },
+                onOpenOldTestament = { navController.navigate("scripture/books/old") { launchSingleTop = true } },
+                onOpenNewTestament = { navController.navigate("scripture/books/new") { launchSingleTop = true } },
+                onOpenPsalms = { navController.navigate("psalter") { launchSingleTop = true } },
+            )
+        }
+        composable("scripture/books/{testament}") { backStackEntry ->
             com.agpeya.app.ui.library.ScriptureListScreen(
+                testament = backStackEntry.arguments?.getString("testament") ?: "new",
                 onBack = { navController.popBackStack() },
                 onOpenBook = { key -> navController.navigate("scripture/$key/1") { launchSingleTop = true } },
             )
@@ -455,8 +465,10 @@ private fun AgpeyaNavHost(
                 onOpenBook = {
                     navController.navigate(com.agpeya.app.data.GitsaweLinks.bookRoute(target)) { launchSingleTop = true }
                 },
-                onOpenChapter = {
-                    navController.navigate(com.agpeya.app.data.GitsaweLinks.chapterRoute(target)) { launchSingleTop = true }
+                onOpenChapter = { geez ->
+                    val route = com.agpeya.app.data.GitsaweLinks.chapterRoute(target) +
+                        if (target is com.agpeya.app.data.ReadingTarget.Psalm && geez) "&lang=gez" else ""
+                    navController.navigate(route) { launchSingleTop = true }
                 },
             )
         }

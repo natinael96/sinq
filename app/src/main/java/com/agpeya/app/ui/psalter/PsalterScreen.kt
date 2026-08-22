@@ -45,6 +45,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +57,7 @@ import com.agpeya.app.data.ContentRepository
 import com.agpeya.app.data.HighlightRepository
 import com.agpeya.app.data.ReadingMode
 import com.agpeya.app.data.SettingsRepository
+import com.agpeya.app.data.ScriptureRepository
 import com.agpeya.app.data.UserDataRepository
 import com.agpeya.app.model.Bookmark
 import com.agpeya.app.model.Section
@@ -97,12 +99,16 @@ fun PsalterScreen(
     initialPsalmIndex: Int = -1,
     initialStartVerse: Int = -1,
     initialEndVerse: Int = -1,
+    initialGeez: Boolean = false,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
-    val psalms by produceState(emptyList<Section>()) { value = ContentRepository.psalter(context) }
+    var geez by rememberSaveable { mutableStateOf(initialGeez) }
+    val psalms by produceState(emptyList<Section>(), geez) {
+        value = ScriptureRepository.psalms(context, geez)
+    }
     val fontStep by SettingsRepository.fontStep(context)
         .collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
     val readingMode by SettingsRepository.readingMode(context)
@@ -187,6 +193,13 @@ fun PsalterScreen(
                 subtitle = if (daily && range != null) s.psalmRange(range.first, range.last) else null,
                 onBack = onBack,
                 actions = {
+                    TextButton(onClick = { geez = !geez }) {
+                        Text(
+                            if (geez) s.wudaseLangGeez else s.wudaseLangAmharic,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.secondary,
+                        )
+                    }
                     // Today's / All — compact toggle, same row as everything else.
                     TextButton(onClick = {
                         daily = !daily

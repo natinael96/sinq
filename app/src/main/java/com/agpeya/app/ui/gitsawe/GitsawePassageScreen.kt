@@ -12,6 +12,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,7 +25,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.agpeya.app.data.ContentRepository
+import com.agpeya.app.data.MisbakLanguage
 import com.agpeya.app.data.ScriptureRepository
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.ui.common.LoadingPanel
@@ -61,7 +62,7 @@ private data class Passage(
  * (ምስባክ, ወንጌል …) sits in the top bar as the page's liturgical context, and
  * two rows at the foot lead out: the book, and the chapter that holds the
  * passage. Psalms resolve from the bundled Psalter, everything else from the
- * bundled New Testament — the same sources the full readers use.
+ * unified Bible bundle — the same source the full reader uses.
  */
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
@@ -74,7 +75,7 @@ fun GitsawePassageScreen(
     role: String?,
     onBack: () -> Unit,
     onOpenBook: () -> Unit,
-    onOpenChapter: () -> Unit,
+    onOpenChapter: (Boolean) -> Unit,
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
@@ -82,11 +83,16 @@ fun GitsawePassageScreen(
     val fontStep by SettingsRepository.fontStep(context)
         .collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
+    val misbakLanguage by SettingsRepository.misbakLanguage(context)
+        .collectAsState(initial = MisbakLanguage.GEEZ)
 
     // `loaded` distinguishes "still resolving" from "genuinely not bundled":
     // the first shows the spinner, the second an honest empty state.
-    val state by produceState<Pair<Boolean, Passage?>>(false to null, psalm, bookKey, chapter, start, end) {
-        value = true to resolvePassage(context, psalm, bookKey, chapter, start, end)
+    val state by produceState<Pair<Boolean, Passage?>>(false to null, psalm, bookKey, chapter, start, end, misbakLanguage) {
+        value = true to resolvePassage(
+            context, psalm, bookKey, chapter, start, end,
+            psalmGeez = misbakLanguage == MisbakLanguage.GEEZ,
+        )
     }
     val (loaded, passage) = state
     val isPsalm = psalm >= 1
@@ -102,6 +108,18 @@ fun GitsawePassageScreen(
                 accentLine = role?.takeIf { it.isNotBlank() },
                 onBack = onBack,
                 actions = {
+                    if (isPsalm) {
+                        TextButton(onClick = {
+                            scope.launch {
+                                SettingsRepository.setMisbakLanguage(
+                                    context,
+                                    if (misbakLanguage == MisbakLanguage.GEEZ) MisbakLanguage.AMHARIC else MisbakLanguage.GEEZ,
+                                )
+                            }
+                        }) {
+                            Text(if (misbakLanguage == MisbakLanguage.GEEZ) s.wudaseLangGeez else s.wudaseLangAmharic)
+                        }
+                    }
                     ShareMenuAction(enabled = passage != null, payload = {
                         passage?.let { p ->
                             SharePayload(
@@ -169,16 +187,20 @@ fun GitsawePassageScreen(
                         Spacer(Modifier.height(Spacing.xl))
                         HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
                         Spacer(Modifier.height(Spacing.sm))
-                        NavRow(
-                            title = s.goToBook,
-                            subtitle = passage.bookName,
-                            onClick = onOpenBook,
-                        )
-                        NavRow(
-                            title = if (isPsalm) s.goToPsalm else s.goToChapter,
-                            subtitle = "${passage.bookName} ${geezNumeral(if (isPsalm) psalm else chapter)}",
-                            onClick = onOpenChapter,
-                        )
+                        if (isPsalm) {
+                            NavRow(
+                                title = s.goToPsalm,
+                                subtitle = "${passage.bookName} ${geezNumeral(psalm)}",
+                                onClick = { onOpenChapter(misbakLanguage == MisbakLanguage.GEEZ) },
+                            )
+                        } else {
+                            NavRow(
+                                title = s.goToChapter,
+                                subtitle = "${passage.bookName} ${geezNumeral(chapter)}",
+                                onClick = { onOpenChapter(false) },
+                            )
+                            NavRow(title = s.goToBook, subtitle = passage.bookName, onClick = onOpenBook)
+                        }
                         Spacer(Modifier.height(Spacing.huge))
                     }
                 }
@@ -199,9 +221,11 @@ private suspend fun resolvePassage(
     chapter: Int,
     start: Int,
     end: Int,
+    psalmGeez: Boolean,
 ): Passage? {
     if (psalm >= 1) {
-        val section = ContentRepository.psalter(context).find { it.number == psalm } ?: return null
+        val section = ScriptureRepository.psalms(context, geez = psalmGeez)
+            .find { it.number == psalm } ?: return null
         val total = section.verses.size
         if (total == 0) return null
         val lo: Int

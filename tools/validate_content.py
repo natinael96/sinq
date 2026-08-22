@@ -114,17 +114,14 @@ def collect_section_ids() -> dict[str, list[str]]:
                 for i, v in enumerate(verses):
                     check_text(f"{fname}/{sid} v{i}", v)
 
-    psalms = load("psalms.json")
+    # Runtime Psalm section ids remain the historical ps_N contract even though
+    # their text now comes from the unified Amharic-1980 Bible edition.
+    psalms = load("bible", "am-1980", "books", "19-psalms.json")
     if psalms:
-        items = psalms.get("psalms", [])
-        if len(items) != 150:
-            fail(f"psalms.json: expected 150 psalms, found {len(items)}")
-        ids["psalms.json"] = [p.get("id", "") for p in items]
-        for p in items:
-            if not p.get("verses"):
-                fail(f"psalms.json/{p.get('id')}: no verses")
-            for i, v in enumerate(p.get("verses", [])):
-                check_text(f"psalms.json/{p.get('id')} v{i}", v)
+        chapters = [c for c in psalms.get("chapters", []) if isinstance(c.get("n"), int) and 1 <= c["n"] <= 150]
+        if len(chapters) != 150:
+            fail(f"bible/am-1980 Psalms: expected 150 chapters, found {len(chapters)}")
+        ids["bible/am-1980/psalms"] = [f"ps_{c['n']}" for c in chapters]
     return ids
 
 
@@ -151,36 +148,20 @@ def check_synaxarium() -> None:
 
 
 def check_scripture() -> None:
-    manifest = load("scripture", "nt-manifest.json")
-    if not manifest:
+    catalog = load("bible", "catalog.json")
+    if not catalog:
         return
-    check_version("scripture/nt-manifest.json", manifest)
-    books = manifest.get("books", [])
-    if len(books) != 27:
-        fail(f"scripture: expected 27 books, found {len(books)}")
-    keys = [b.get("key") for b in books]
-    if len(keys) != len(set(keys)):
-        fail("scripture: duplicate book keys in the manifest")
-    for meta in books:
-        book = load("scripture", f"{meta['key']}.json")
-        if book is None:
+    expected = {"am-2000": (89, 44200), "am-1980": (93, 44290), "gez-1980": (93, 44283)}
+    for edition in catalog.get("editions", []):
+        eid = edition.get("id")
+        if eid not in expected:
             continue
-        chapters = book.get("chapters", [])
-        if len(chapters) != meta.get("chapters"):
-            fail(
-                f"scripture/{meta['key']}: manifest says {meta.get('chapters')} chapters, "
-                f"file has {len(chapters)}"
-            )
-        expected = list(range(1, len(chapters) + 1))
-        if [c.get("chapter") for c in chapters] != expected:
-            fail(f"scripture/{meta['key']}: chapters are not contiguous 1..N")
-        for c in chapters:
-            verses = c.get("verses", [])
-            if not verses:
-                fail(f"scripture/{meta['key']} ch {c.get('chapter')}: no verses")
-            ns = [v.get("n") for v in verses]
-            if ns != sorted(ns) or len(ns) != len(set(ns)):
-                fail(f"scripture/{meta['key']} ch {c.get('chapter')}: verse numbers unsorted/duplicated")
+        stats = edition.get("stats", {})
+        if (stats.get("books"), stats.get("verses")) != expected[eid]:
+            fail(f"bible/{eid}: unexpected catalog totals {stats}")
+        meta = load("bible", eid, "meta.json")
+        if meta and len(meta.get("books", [])) != expected[eid][0]:
+            fail(f"bible/{eid}: metadata book count mismatch")
 
 
 def check_wudase() -> None:

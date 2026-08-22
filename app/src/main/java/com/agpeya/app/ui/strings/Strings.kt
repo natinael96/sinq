@@ -21,6 +21,8 @@ interface Strings {
     val scripturesTitle: String
     val scripturesSubtitle: String
     val newTestamentLabel: String
+    val oldTestamentLabel: String
+    val bibleTitle: String
     val chapterUnit: String
     val bookGroupGospels: String
     val bookGroupActs: String
@@ -36,6 +38,8 @@ interface Strings {
     val noGitsaweToday: String
     val gitsaweOpenNotAvailable: String
     val gitsaweChangeDay: String
+    val previousDay: String
+    val nextDay: String
     // The dedicated passage page a ግጻዌ section opens on, and its two doors out.
     val goToBook: String
     val goToChapter: String
@@ -418,6 +422,8 @@ object AmharicStrings : Strings {
     override val scripturesTitle = "ቅዱሳት መጻሕፍት"
     override val scripturesSubtitle = "የአዲስ ኪዳን መጻሕፍት"
     override val newTestamentLabel = "አዲስ ኪዳን"
+    override val oldTestamentLabel = "ቀዳማዊ ኪዳን"
+    override val bibleTitle = "መጽሐፍ ቅዱስ"
     override val chapterUnit = "ምዕራፍ"
     override val bookGroupGospels = "ወንጌላት"
     override val bookGroupActs = "ግብረ ሐዋርያት"
@@ -433,6 +439,8 @@ object AmharicStrings : Strings {
     override val noGitsaweToday = "ለዛሬ የተመዘገበ ግጻዌ የለም"
     override val gitsaweOpenNotAvailable = "ይህ ምንባብ ገና የለም"
     override val gitsaweChangeDay = "ቀን ቀይር"
+    override val previousDay = "ያለፈው ቀን"
+    override val nextDay = "የሚቀጥለው ቀን"
     override val goToBook = "መጽሐፉን ክፈት"
     override val goToChapter = "ምዕራፉን ክፈት"
     override val goToPsalm = "መዝሙሩን ክፈት"
@@ -768,6 +776,8 @@ object EnglishStrings : Strings {
     override val scripturesTitle = "Scriptures"
     override val scripturesSubtitle = "The New Testament"
     override val newTestamentLabel = "New Testament"
+    override val oldTestamentLabel = "Old Testament"
+    override val bibleTitle = "Bible"
     override val chapterUnit = "ch."
     override val bookGroupGospels = "Gospels"
     override val bookGroupActs = "Acts"
@@ -783,6 +793,8 @@ object EnglishStrings : Strings {
     override val noGitsaweToday = "No Gitsawe recorded for today"
     override val gitsaweOpenNotAvailable = "This reading isn't available yet"
     override val gitsaweChangeDay = "Change day"
+    override val previousDay = "Previous day"
+    override val nextDay = "Next day"
     override val goToBook = "Open the book"
     override val goToChapter = "Open the chapter"
     override val goToPsalm = "Open the psalm"

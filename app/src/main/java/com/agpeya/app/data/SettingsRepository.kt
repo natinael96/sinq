@@ -53,6 +53,8 @@ enum class AlarmAlert { SOUND_VIBRATE, SOUND_ONLY, VIBRATE_ONLY, SILENT }
 enum class AlarmSound { ALARM, RINGTONE, NOTIFICATION }
 /** How the ሰዓታት reader shows its bilingual text: paired lines, or one language. */
 enum class SeatatLang { BOTH, GEEZ, AMHARIC }
+/** Language used only for Gitsawe Misbak/Psalm readings. */
+enum class MisbakLanguage { GEEZ, AMHARIC }
 
 /** User preferences: reading mode, font size, theme, keep-screen-on. */
 object SettingsRepository {
@@ -67,6 +69,7 @@ object SettingsRepository {
     private val KEY_ALARM_ALERT = stringPreferencesKey("alarm_alert")
     private val KEY_ALARM_SOUND = stringPreferencesKey("alarm_sound")
     private val KEY_SEATAT_LANG = stringPreferencesKey("seatat_lang")
+    private val KEY_MISBAK_LANGUAGE = stringPreferencesKey("misbak_language")
     private val KEY_ONBOARDED = booleanPreferencesKey("onboarded")
     private val KEY_NAME = stringPreferencesKey("profile_name")
     private val KEY_CHRISTIAN_NAME = stringPreferencesKey("profile_christian_name")
@@ -167,6 +170,16 @@ object SettingsRepository {
 
     suspend fun setSeatatLang(context: Context, lang: SeatatLang) {
         context.settingsDataStore.edit { it[KEY_SEATAT_LANG] = lang.name }
+    }
+
+    fun misbakLanguage(context: Context): Flow<MisbakLanguage> =
+        context.settingsDataStore.data.map {
+            runCatching { MisbakLanguage.valueOf(it[KEY_MISBAK_LANGUAGE] ?: "") }
+                .getOrDefault(MisbakLanguage.GEEZ)
+        }
+
+    suspend fun setMisbakLanguage(context: Context, language: MisbakLanguage) {
+        context.settingsDataStore.edit { it[KEY_MISBAK_LANGUAGE] = language.name }
     }
 
     fun keepScreenOn(context: Context): Flow<Boolean> =

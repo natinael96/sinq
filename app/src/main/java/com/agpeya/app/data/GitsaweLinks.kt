@@ -4,7 +4,7 @@ import com.agpeya.app.model.VerseRef
 
 /**
  * Where a ግጻዌ (Gitsawe) reading reference should open. Psalms land in the
- * bundled Psalter; New Testament references land in the bundled scripture reader.
+ * Psalms and Bible references land in the unified Scripture reading system.
  */
 sealed interface ReadingTarget {
 

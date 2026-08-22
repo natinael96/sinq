@@ -33,10 +33,9 @@ import com.agpeya.app.ui.common.SinqCard
 import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
 
-/** ቤተ መጻሕፍት — the library hub: the Psalter, the scriptures, and (soon) more. */
+/** ቤተ መጻሕፍት — Scripture is one entry; its categories live in its hub. */
 @Composable
 fun LibraryScreen(
-    onOpenPsalter: () -> Unit,
     onOpenScriptures: () -> Unit,
     onOpenWudase: () -> Unit,
     onOpenZewotr: () -> Unit,
@@ -70,17 +69,9 @@ fun LibraryScreen(
             }
             item {
                 LibraryCard(
-                    icon = Icons.Outlined.LibraryMusic,
-                    title = s.psalterTitle,
-                    subtitle = "፻፶ መዝሙራት",
-                    onClick = onOpenPsalter,
-                )
-            }
-            item {
-                LibraryCard(
                     icon = Icons.AutoMirrored.Outlined.MenuBook,
                     title = s.scripturesTitle,
-                    subtitle = s.scripturesSubtitle,
+                    subtitle = "${s.bibleTitle} · ${s.psalterTitle}",
                     onClick = onOpenScriptures,
                 )
             }

@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.EditCalendar
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
@@ -42,6 +43,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -56,11 +58,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.DayReadings
 import com.agpeya.app.data.GitsaweLinks
 import com.agpeya.app.data.GitsaweRepository
+import com.agpeya.app.data.MisbakLanguage
 import com.agpeya.app.data.ReadingTarget
+import com.agpeya.app.data.ScriptureRepository
+import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.model.GitsaweReading
 import com.agpeya.app.model.GitsaweService
 import com.agpeya.app.model.GitsaweServices
@@ -80,6 +86,7 @@ import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.inReadingFont
 import com.agpeya.app.ui.strings.Strings
 import java.time.LocalDate
+import kotlinx.coroutines.launch
 
 /** One reading office the user can switch to on a given day. */
 private data class Source(val label: String, val subtitle: String?, val services: GitsaweServices)
@@ -101,6 +108,9 @@ fun GitsaweScreen(
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val misbakLanguage by SettingsRepository.misbakLanguage(context)
+        .collectAsState(initial = MisbakLanguage.GEEZ)
     // The day being viewed, as an epoch-day so it survives rotation.
     var epochDay by rememberSaveable { mutableLongStateOf(LocalDate.now().toEpochDay()) }
     var showPicker by rememberSaveable { mutableStateOf(false) }
@@ -124,8 +134,7 @@ fun GitsaweScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             SinqTopBar(
-                title = s.gitsaweTitle,
-                subtitle = formatEthiopianWithGregorian(date, s),
+                title = s.gitsaweKicker,
                 accentLine = liturgicalSeasonLabel(date, s),
                 onBack = onBack,
                 actions = {
@@ -157,6 +166,15 @@ fun GitsaweScreen(
                 modifier = Modifier.fillMaxSize().padding(innerPadding),
                 contentPadding = PaddingValues(horizontal = Spacing.screen),
             ) {
+                item(key = "day") {
+                    DayNavigator(
+                        date = date,
+                        onPrevious = { epochDay-- },
+                        onNext = { epochDay++ },
+                        onToday = { epochDay = LocalDate.now().toEpochDay() },
+                        onPick = { showPicker = true },
+                    )
+                }
                 item(key = "sinksar") {
                     Spacer(Modifier.height(Spacing.sm))
                     SynaxariumCard(onClick = { onOpenSynaxarium(epochDay) })
@@ -192,8 +210,11 @@ fun GitsaweScreen(
                             }
                         }
                     }
-                    active.services.negh?.let { svc -> serviceSection("ነግህ", svc, s, onOpenReading) }
-                    active.services.kidassie?.let { svc -> serviceSection("ቅዳሴ", svc, s, onOpenReading) }
+                    val setMisbakLanguage: (MisbakLanguage) -> Unit = { language ->
+                        scope.launch { SettingsRepository.setMisbakLanguage(context, language) }
+                    }
+                    active.services.negh?.let { svc -> serviceSection("ነግህ", svc, s, misbakLanguage, setMisbakLanguage, onOpenReading) }
+                    active.services.kidassie?.let { svc -> serviceSection("ቅዳሴ", svc, s, misbakLanguage, setMisbakLanguage, onOpenReading) }
                     val chants = dayChants(active.services)
                     if (chants.isNotEmpty()) {
                         item(key = "kidase") { KidaseSection(chants) }
@@ -233,6 +254,8 @@ private fun androidx.compose.foundation.lazy.LazyListScope.serviceSection(
     label: String,
     service: GitsaweService,
     s: Strings,
+    misbakLanguage: MisbakLanguage,
+    onMisbakLanguage: (MisbakLanguage) -> Unit,
     onOpenReading: (ReadingTarget, String) -> Unit,
 ) {
     item(key = "svc_$label") {
@@ -241,7 +264,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.serviceSection(
     for ((role, pick) in ROLE_LABELS) {
         pick(service).forEachIndexed { i, reading ->
             item(key = "${label}_${role}_$i") {
-                ReadingRow(role, reading, s, onOpenReading)
+                ReadingRow(role, reading, s, misbakLanguage, onMisbakLanguage, onOpenReading)
             }
         }
     }
@@ -314,53 +337,109 @@ private fun KidaseSection(chants: List<String>) {
 }
 
 @Composable
-private fun ReadingRow(role: String, reading: GitsaweReading, s: Strings, onOpenReading: (ReadingTarget, String) -> Unit) {
+private fun ReadingRow(
+    role: String,
+    reading: GitsaweReading,
+    s: Strings,
+    misbakLanguage: MisbakLanguage,
+    onMisbakLanguage: (MisbakLanguage) -> Unit,
+    onOpenReading: (ReadingTarget, String) -> Unit,
+) {
+    val context = LocalContext.current
     val verse = reading.verse
     val target = verse?.let { GitsaweLinks.target(it) }
     val clickable = target != null
-    Row(
+    val isMisbak = role == "ምስባክ" && target is ReadingTarget.Psalm
+    val preview by produceState<String?>(null, target, misbakLanguage) {
+        value = when (val t = target) {
+            is ReadingTarget.Psalm -> {
+                val section = ScriptureRepository.psalms(
+                    context,
+                    geez = isMisbak && misbakLanguage == MisbakLanguage.GEEZ,
+                ).find { it.number == t.number }
+                section?.verses?.let { verses ->
+                    val lo = (t.startVerse ?: 1).coerceIn(1, verses.size.coerceAtLeast(1))
+                    val hi = (t.endVerse ?: (lo + 1)).coerceIn(lo, verses.size)
+                    verses.subList(lo - 1, hi).joinToString(" ")
+                }
+            }
+            is ReadingTarget.NtPassage -> ScriptureRepository.passage(
+                context, t.bookKey, t.chapter, t.start, t.end,
+            )?.take(2)?.joinToString(" ") { it.text }
+            null -> reading.text?.geez ?: reading.text?.amharic
+        }
+    }
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 48.dp)
-            .clip(MaterialTheme.shapes.small)
-            .then(if (clickable) Modifier.clickable { onOpenReading(target!!, role) } else Modifier)
-            .padding(vertical = Spacing.md, horizontal = Spacing.xs),
-        verticalAlignment = Alignment.CenterVertically,
+            .padding(bottom = Spacing.sm)
+            .then(if (clickable) Modifier.clickable { onOpenReading(target!!, role) } else Modifier),
+        shape = RoundedCornerShape(16.dp),
+        color = if (isMisbak) MaterialTheme.colorScheme.secondary.copy(alpha = 0.10f)
+        else MaterialTheme.colorScheme.surfaceContainerLow,
+        border = BorderStroke(1.dp, if (isMisbak) MaterialTheme.colorScheme.secondary.copy(alpha = 0.32f) else MaterialTheme.colorScheme.outlineVariant),
     ) {
-        Text(
-            role,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.secondary,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .width(62.dp)
-                .clip(MaterialTheme.shapes.extraSmall)
-                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f))
-                .padding(vertical = Spacing.xs, horizontal = Spacing.xs),
-        )
-        Spacer(Modifier.width(Spacing.md))
-        Column(Modifier.weight(1f)) {
-            Text(
-                verse?.bookTitle ?: "—",
-                style = MaterialTheme.typography.titleSmall,
-                // A reading with no bundled page is still real liturgical
-                // information — shown, but visibly not a door.
-                color = if (clickable) MaterialTheme.colorScheme.onBackground
-                else MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = if (clickable) verseRef(verse!!) else s.gitsaweOpenNotAvailable,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+        Column(Modifier.padding(Spacing.lg)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(role, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                    Text(
+                        if (verse != null) verseRef(verse) else "—",
+                        style = MaterialTheme.typography.titleSmall.inReadingFont(),
+                        color = if (clickable) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                if (isMisbak) {
+                    SelectPill(
+                        label = if (misbakLanguage == MisbakLanguage.GEEZ) s.wudaseLangGeez else s.wudaseLangAmharic,
+                        selected = true,
+                        onClick = {
+                            onMisbakLanguage(
+                                if (misbakLanguage == MisbakLanguage.GEEZ) MisbakLanguage.AMHARIC else MisbakLanguage.GEEZ,
+                            )
+                        },
+                    )
+                } else if (clickable) {
+                    Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+            preview?.takeIf { it.isNotBlank() }?.let {
+                Spacer(Modifier.height(Spacing.sm))
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodyMedium.inReadingFont(),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            if (!clickable) {
+                Spacer(Modifier.height(Spacing.xs))
+                Text(s.gitsaweOpenNotAvailable, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
-        if (clickable) {
-            Icon(
-                Icons.AutoMirrored.Outlined.KeyboardArrowRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(IconSize.medium),
-            )
+    }
+}
+
+@Composable
+private fun DayNavigator(date: LocalDate, onPrevious: () -> Unit, onNext: () -> Unit, onToday: () -> Unit, onPick: () -> Unit) {
+    val s = LocalStrings.current
+    val today = remember { LocalDate.now() }
+    Column(Modifier.fillMaxWidth().padding(top = Spacing.md, bottom = Spacing.sm), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(s.gitsaweTitle, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onBackground)
+        Text(
+            formatEthiopianWithGregorian(date, s),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(Spacing.xs))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = onPrevious) { Icon(Icons.AutoMirrored.Outlined.KeyboardArrowLeft, s.previousDay) }
+            TextButton(onClick = if (date == today) onPick else onToday) {
+                Text(if (date == today) s.gitsaweChangeDay else s.todayLabel)
+            }
+            IconButton(onClick = onNext) { Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, s.nextDay) }
         }
     }
 }

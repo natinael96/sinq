@@ -3,7 +3,6 @@ package com.agpeya.app.data
 import com.agpeya.app.model.GitsaweEntry
 import com.agpeya.app.model.GitsaweServices
 import com.agpeya.app.model.MonthlyEntry
-import com.agpeya.app.model.ScriptureBook
 import com.agpeya.app.model.SeasonalEntry
 import com.agpeya.app.model.VerseRef
 import com.agpeya.app.model.readings
@@ -35,19 +34,18 @@ class GitsaweLinkCoverageTest {
 
     // Psalm number -> verse count (from the bundled Psalter).
     private val psalmVerses: Map<Int, Int> by lazy {
-        val root = json.parseToJsonElement(File(contentDir, "psalms.json").readText()).jsonObject
-        root["psalms"]!!.jsonArray.associate { el ->
-            val o = el.jsonObject
-            o["number"]!!.jsonPrimitive.content.toInt() to o["verses"]!!.jsonArray.size
+        val root = json.parseToJsonElement(File(contentDir, "bible/am-1980/books/19-psalms.json").readText()).jsonObject
+        root["chapters"]!!.jsonArray.map { it.jsonObject }.filter { it["n"]!!.jsonPrimitive.content.toInt() in 1..150 }.associate { o ->
+            o["n"]!!.jsonPrimitive.content.toInt() to o["verses"]!!.jsonArray.size
         }
     }
 
     // Book key -> set of chapter numbers present (from the bundled NT).
     private val bookChapters: Map<String, Set<Int>> by lazy {
-        contentDir.resolve("scripture").listFiles { f -> f.name.endsWith(".json") && f.name != "nt-manifest.json" }!!
+        contentDir.resolve("bible/am-2000/books").listFiles { f -> f.name.endsWith(".json") && !f.name.endsWith("-psalms.json") }!!
             .associate { f ->
-                val b: ScriptureBook = json.decodeFromString(f.readText())
-                b.key to b.chapters.map { it.chapter }.toSet()
+                val root = json.parseToJsonElement(f.readText()).jsonObject
+                f.name.substringAfter('-').removeSuffix(".json") to root["chapters"]!!.jsonArray.map { it.jsonObject["n"]!!.jsonPrimitive.content.toInt() }.toSet()
             }
     }
 

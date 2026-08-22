@@ -7,6 +7,34 @@ and this project follows a pre-release `0.MINOR.PATCH` scheme (PATCH for fixes,
 MINOR for features; `versionCode` increments on every release). `1.0.0` is
 reserved for the first public release.
 
+## [0.10] — 2026-08-22
+
+_versionCode 39 · one Scripture, one day's Gitsawe_
+
+### Added
+- **The complete Ethiopian Orthodox Bible is now in the Library.** Old and New
+  Testaments read from the Amharic 2000 edition, fully offline. Scripture has a
+  single home with Bible and Psalms as clear categories instead of two competing
+  Library entries.
+- **Psalms now carry their proper editions.** Amharic 1980 is the default and
+  Ge'ez 1980 is available from the Psalm reader. Misbak remembers its own
+  language choice without changing the rest of Scripture.
+
+### Changed
+- **የዕለቱ ግጻዌ now reads as a day, not a directory.** The selected Ethiopian
+  and Gregorian date leads the page, previous and next days sit within reach,
+  and a historical day returns to Today in one tap. Misbak and Scripture are
+  distinct devotional preview cards that open into the focused cited passage.
+- **Gitsawe continuity is explicit.** Misbak opens in Ge'ez by default and
+  carries that choice into its Psalm; Scripture remains Amharic 2000 and leads
+  naturally from passage to chapter to book. Existing bookmark and Gitsawe
+  routes remain compatible.
+
+### Removed
+- The duplicated legacy `psalms.json` and New-Testament-only `content/scripture`
+  bundle. All canonical reading content now comes from the unified, reproducible
+  80-weahadu edition bundle.
+
 ## [0.9.9.8] — 2026-08-15
 
 _versionCode 38 · the whole week fits_

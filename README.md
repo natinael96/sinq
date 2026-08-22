@@ -14,16 +14,16 @@ Sinq brings the Agpeya's seven canonical prayer hours and the complete Psalter (
 
 ### Prayer
 - **The prayer hours** — ጸሎተ ነግህ (Morning), ሠለስት (Terce), ቀትር (Sext), ተሰዓት (None), ሰርክ (Vespers), ንዋም (Compline), መንፈቀ ሌሊት (Midnight, with its three watches), and the Veil prayer — with a time-of-day suggestion on the home screen.
-- **Full Psalter** — all 150 psalms, with the traditional weekday reading divisions and the whole book a toggle away. Psalm 118's acrostic renders with its 22 Hebrew-letter stanza headings (አሌፍ … ታው).
+- **Unified Scripture library** — the Old and New Testaments use the Amharic 2000 edition; all 150 Psalms use Amharic 1980 by default with a reader-local Ge'ez 1980 switch.
 - **ውዳሴ ማርያም and ዘወትር ጸሎት** — a portion for each weekday plus ይወድስዋ መላእክት and አንቀጸ ብርሃን, in Amharic with a Ge'ez toggle.
 
 ### Calendar and lectionary
-- **ግጻዌ** — the daily lectionary for any date, with the movable seasons resolved through the Bahre Hasab. Each reading taps through to the Psalter or the scripture reader with the cited verses highlighted.
+- **ግጻዌ** — the daily lectionary for any date, with the movable seasons resolved through the Bahre Hasab. Each reading opens the cited passage in the unified Scripture system.
 - **ስንክሳር** — the Amharic synaxarium, a day's commemorations with its አርኬ hymn, and the fixed closing ጸሎት.
 - **አጽዋማት** — the fasting calendar: what is in effect today, and every fast of the Ethiopian year.
 
 ### Reading
-- **Scriptures** — the bundled Amharic New Testament, 27 books.
+- **Bible** — the bundled Amharic 2000 Ethiopian Orthodox canon, organized into Old and New Testaments without a network connection.
 - Two reading modes: vertical scroll or page-by-page swiping, remembered per preference.
 - Five font-size steps and four selectable Ethiopic faces, Ge'ez verse numerals, optically matched so the page reads the same whichever face is chosen.
 - Keep-screen-on while praying; scroll position remembered per hour.
@@ -87,10 +87,10 @@ python tools/extract_content.py
 
 | Input | Role |
 |---|---|
-| `../80-weahadu/data/am/*.json` | Source text — the 80-weahadu Amharic Bible (sibling repository) |
+| `../80-weahadu/data/{am-2000,am-1980,gez-1980}` | Bible and Psalms source editions from the sibling 80-weahadu repository |
 | `content/hour_mapping.json` | Which psalms, stanzas, and gospel passages compose each hour |
 
-The script assembles each hour's sections, splits Psalm 118's acrostic letters into stanza headings, builds the full Psalter, and writes a manifest. Section IDs are permanent contracts — bookmarks and highlights reference them across app updates.
+`extract_content.py` assembles the prayer hours. `extract_bible_editions.py` losslessly bundles the three Scripture editions and writes their catalog. Section IDs and legacy reader routes remain permanent compatibility contracts for bookmarks and highlights.
 
 ## Architecture
 

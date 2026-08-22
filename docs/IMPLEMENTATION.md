@@ -413,7 +413,7 @@ content/hour_mapping.json  +  ../80-weahadu/data/am/{28-psalms,55-matthew,57-luk
                 app/src/main/assets/content/
                   ├── manifest.json      (contentVersion + hour → file)
                   ├── morning.json … veil.json   (8 hours)
-                  └── psalms.json        (all 150 psalms)
+                  └── bible/             (unified Bible + Psalm editions)
 ```
 
 `content/hour_mapping.json` declares, per hour, the psalm numbers (LXX/Ge'ez
@@ -474,7 +474,7 @@ These IDs are the join keys for bookmarks, highlights, and layout overrides.
 | `midnight.json` | 56 | 481 | 19,648 | 65 KB |
 | `veil.json` | 33 | 328 | 13,965 | 44 KB |
 | **hours total** | **181** | **1,752** | **75,757** | ~242 KB |
-| `psalms.json` | 150 | 2,444 | 104,001 | 307 KB |
+| `bible/am-1980/books/19-psalms.json` | 150 | 2,464 | — | bundled with unified Bible assets |
 | `manifest.json` | — | — | — | <1 KB |
 
 Total content payload ≈ **560 KB** of UTF-8 JSON (written with

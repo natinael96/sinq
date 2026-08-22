@@ -39,30 +39,25 @@ import com.agpeya.app.ui.common.SectionHeader
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.theme.Spacing
 
-/** The New Testament: 27 books grouped by section, each opening the reader. */
+/** One testament from the unified Amharic 2000 Bible, grouped by canon section. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScriptureListScreen(onBack: () -> Unit, onOpenBook: (String) -> Unit) {
+fun ScriptureListScreen(testament: String, onBack: () -> Unit, onOpenBook: (String) -> Unit) {
     val context = LocalContext.current
     val s = LocalStrings.current
     val books by produceState<List<ScriptureBookMeta>>(initialValue = emptyList()) {
         value = ScriptureRepository.books(context)
     }
-    // Canon order is the book number; group by the classic divisions.
-    val groups = listOf(
-        s.bookGroupGospels to books.filter { it.number in 55..58 },
-        s.bookGroupActs to books.filter { it.number == 59 },
-        s.bookGroupPaul to books.filter { it.number in 60..73 },
-        s.bookGroupCatholic to books.filter { it.number in 74..80 },
-        s.bookGroupRevelation to books.filter { it.number == 81 },
-    )
+    val groups = books.filter { it.testament == testament }
+        .groupBy { it.section.ifBlank { if (testament == "old") s.oldTestamentLabel else s.newTestamentLabel } }
+        .toList()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             SinqTopBar(
                 title = s.scripturesTitle,
-                subtitle = s.newTestamentLabel,
+                subtitle = if (testament == "old") s.oldTestamentLabel else s.newTestamentLabel,
                 onBack = onBack,
             )
         },
