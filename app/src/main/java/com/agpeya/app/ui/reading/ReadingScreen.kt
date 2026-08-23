@@ -65,6 +65,8 @@ import com.agpeya.app.data.ContentRepository
 import com.agpeya.app.data.HighlightRepository
 import com.agpeya.app.data.LayoutRepository
 import com.agpeya.app.data.PrayerLayout
+import com.agpeya.app.data.PrayerLevelRepository
+import com.agpeya.app.data.PrayerLevel
 import com.agpeya.app.data.ReadingMode
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.data.UserDataRepository
@@ -124,6 +126,10 @@ fun ReadingScreen(
     val readingMode by SettingsRepository.readingMode(context)
         .collectAsState(initial = ReadingMode.VERTICAL)
     val keepScreenOn by SettingsRepository.keepScreenOn(context).collectAsState(initial = true)
+    val prayerLevel by SettingsRepository.prayerLevel(context).collectAsState(initial = PrayerLevel.FULL)
+    // A reader can continue with the complete hour without changing the saved setting.
+    var showFullHour by remember(hourId) { mutableStateOf(false) }
+    val effectivePrayerLevel = if (showFullHour) PrayerLevel.FULL else prayerLevel
     val bookmarks by UserDataRepository.bookmarks(context).collectAsState(initial = emptyList())
     // Scope to this hour: the same section id can be bookmarked from elsewhere
     // (a psalm added into an hour shares its id with the Psalter's copy).
@@ -139,12 +145,18 @@ fun ReadingScreen(
     var selStart by remember(hourId) { mutableStateOf<String?>(null) }
     var selEnd by remember(hourId) { mutableStateOf<String?>(null) }
     // Apply the user's per-hour customization (show/hide, reorder, added psalms).
-    val sections by produceState(emptyList<Section>(), hour, layout) {
+    val sections by produceState(emptyList<Section>(), hour, layout, effectivePrayerLevel) {
         val h = hour
         value = if (h == null) emptyList()
         else {
             val extras = layout.added.mapNotNull { ContentRepository.psalm(context, it) }
-            PrayerLayout.visible(h.sections, extras, layout)
+            PrayerLevelRepository.apply(
+                context,
+                hourId,
+                PrayerLayout.ordered(h.sections, extras, layout)
+                    .filter { it.type == "gospel" || it.id !in layout.hidden },
+                effectivePrayerLevel,
+            )
         }
     }
     val listState = rememberLazyListState()
@@ -294,6 +306,15 @@ fun ReadingScreen(
                     }
                 },
                 actions = {
+                    if (effectivePrayerLevel != PrayerLevel.FULL) {
+                        TextButton(onClick = { showFullHour = true }) {
+                            Text(
+                                text = s.showFullPsalms,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
                     com.agpeya.app.ui.common.ReaderToolsMenu(
                         fontStep = fontStep,
                         maxFontStep = FONT_STEPS_SP.lastIndex,

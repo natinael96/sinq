@@ -16,6 +16,7 @@ private val Context.settingsDataStore by preferencesDataStore(name = "settings")
 enum class ReadingMode { VERTICAL, HORIZONTAL }
 enum class ThemeChoice { SYSTEM, LIGHT, DARK }
 enum class Language { SYSTEM, AMHARIC, ENGLISH }
+enum class PrayerLevel { PSALM_50, BEGINNING, GROWTH, STEADFAST, FULL }
 
 /**
  * Which bundled Ethiopic face renders the prayer text. [ABYSSINICA] is the
@@ -66,6 +67,7 @@ object SettingsRepository {
     private val KEY_READING_FONT = stringPreferencesKey("reading_font")
     private val KEY_KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
     private val KEY_LANGUAGE = stringPreferencesKey("language")
+    private val KEY_PRAYER_LEVEL = stringPreferencesKey("prayer_level")
     private val KEY_ALARM_ALERT = stringPreferencesKey("alarm_alert")
     private val KEY_ALARM_SOUND = stringPreferencesKey("alarm_sound")
     private val KEY_SEATAT_LANG = stringPreferencesKey("seatat_lang")
@@ -196,6 +198,16 @@ object SettingsRepository {
 
     suspend fun setLanguage(context: Context, value: Language) {
         context.settingsDataStore.edit { it[KEY_LANGUAGE] = value.name }
+    }
+
+    fun prayerLevel(context: Context): Flow<PrayerLevel> =
+        context.settingsDataStore.data.map {
+            runCatching { PrayerLevel.valueOf(it[KEY_PRAYER_LEVEL] ?: "") }
+                .getOrDefault(PrayerLevel.FULL)
+        }
+
+    suspend fun setPrayerLevel(context: Context, value: PrayerLevel) {
+        context.settingsDataStore.edit { it[KEY_PRAYER_LEVEL] = value.name }
     }
 
     fun alarmAlert(context: Context): Flow<AlarmAlert> =

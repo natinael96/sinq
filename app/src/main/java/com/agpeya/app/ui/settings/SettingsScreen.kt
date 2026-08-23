@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.style.TextOverflow
 import com.agpeya.app.data.SettingsRepository
+import com.agpeya.app.data.PrayerLevel
 import com.agpeya.app.data.ThemeChoice
 import com.agpeya.app.ui.common.AgpeyaBottomBar
 import com.agpeya.app.ui.common.NavRow
@@ -91,6 +92,7 @@ fun SettingsScreen(
     val readingFont by SettingsRepository.readingFont(context)
         .collectAsState(initial = com.agpeya.app.data.ReadingFont.ABYSSINICA)
     val keepOn by SettingsRepository.keepScreenOn(context).collectAsState(initial = true)
+    val prayerLevel by SettingsRepository.prayerLevel(context).collectAsState(initial = PrayerLevel.FULL)
     val streakReminder by SettingsRepository.streakReminder(context).collectAsState(initial = true)
     val gitsaweReminder by SettingsRepository.gitsaweReminder(context).collectAsState(initial = true)
     val breathReminder by SettingsRepository.breathReminder(context).collectAsState(initial = true)
@@ -272,6 +274,18 @@ fun SettingsScreen(
             item {
                 SectionHeader(s.settingsGroupPrayer)
                 Spacer(Modifier.height(Spacing.xs))
+                DropdownSetting(
+                    label = s.prayerLevelTitle,
+                    current = prayerLevelName(prayerLevel),
+                    options = PrayerLevel.entries.map { it to prayerLevelName(it) },
+                    onSelect = { scope.launch { SettingsRepository.setPrayerLevel(context, it) } },
+                )
+                Text(
+                    text = s.prayerLevelDescription,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(Spacing.md))
                 // Re-read on each (re)composition, so returning from the system
                 // settings page reflects the change without a restart.
                 if (!NotificationManagerCompat.from(context).areNotificationsEnabled() &&
@@ -418,6 +432,14 @@ fun SettingsScreen(
             }
         }
     }
+}
+
+private fun prayerLevelName(level: PrayerLevel): String = when (level) {
+    PrayerLevel.PSALM_50 -> "መዝሙር ፶"
+    PrayerLevel.BEGINNING -> "መጀመሪያ"
+    PrayerLevel.GROWTH -> "እድገት"
+    PrayerLevel.STEADFAST -> "ጽናት"
+    PrayerLevel.FULL -> "ሙሉ"
 }
 
 /**

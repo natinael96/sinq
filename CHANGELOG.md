@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [1.0.1] — 2026-08-23
+
+_versionCode 41 · prayer that meets people where they are_
+
+### Added
+- **Five selectable Agpeya prayer levels.** Settings now offers መዝሙር ፶,
+  መጀመሪያ, እድገት, ጽናት, and ሙሉ, with a curated, progressive Psalm
+  priority for every hour and the larger 7/14/24/full progression at Midnight.
+- **Continue with the complete hour.** A reader using a shorter level can reveal
+  all Psalms for the current hour without changing the saved default.
+
+### Changed
+- **The Gospel remains foundational at every level.** Shorter levels affect
+  only the Psalms; every Gospel reading remains present and concludes its hour
+  or Midnight watch. The complete level preserves all bundled prayer content.
+- **Prayer-level allocation is offline and data-driven.** Psalm priorities and
+  the Psalm 50-only choice live in bundled configuration rather than UI code.
+
 ## [1.0] — 2026-08-23
 
 _versionCode 40 · the first stable Sinq release_

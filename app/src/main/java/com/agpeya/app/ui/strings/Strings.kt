@@ -92,6 +92,7 @@ interface Strings {
     val hoursHeader: String
 
     val contents: String
+    val showFullPsalms: String
     val readingModeToggle: String
     val bookmarkAction: String
     val highlight: String
@@ -337,6 +338,8 @@ interface Strings {
     // heading rather than by reading every row.
     val settingsGroupReading: String
     val settingsGroupPrayer: String
+    val prayerLevelTitle: String
+    val prayerLevelDescription: String
     val settingsGroupData: String
     val settingsGroupMore: String
 
@@ -491,6 +494,7 @@ object AmharicStrings : Strings {
     override val hoursHeader = "ሰዓታት"
 
     override val contents = "ይዘት"
+    override val showFullPsalms = "ሙሉ መዝሙራት"
     override val readingModeToggle = "የንባብ ሁነታ"
     override val bookmarkAction = "ምልክት አድርግ"
     override val highlight = "አድምቅ"
@@ -722,6 +726,8 @@ object AmharicStrings : Strings {
 
     override val settingsGroupReading = "ንባብ"
     override val settingsGroupPrayer = "ጸሎትና ማስታወሻ"
+    override val prayerLevelTitle = "የጸሎት ደረጃ"
+    override val prayerLevelDescription = "እንደ ጊዜዎና አቅምዎ የሚነበቡትን መዝሙራት ብዛት ይምረጡ፤ ወንጌል ሁልጊዜ ይነበባል።"
     override val settingsGroupData = "መረጃ"
     override val settingsGroupMore = "ተጨማሪ"
 
@@ -859,6 +865,7 @@ object EnglishStrings : Strings {
     override val hoursHeader = "Hours"
 
     override val contents = "Contents"
+    override val showFullPsalms = "Full Psalms"
     override val readingModeToggle = "Reading mode"
     override val bookmarkAction = "Bookmark"
     override val highlight = "Highlight"
@@ -1101,6 +1108,8 @@ object EnglishStrings : Strings {
 
     override val settingsGroupReading = "Reading"
     override val settingsGroupPrayer = "Prayer and reminders"
+    override val prayerLevelTitle = "Prayer level"
+    override val prayerLevelDescription = "Choose the number of Psalms for your time and ability. The Gospel is always included."
     override val settingsGroupData = "Your data"
     override val settingsGroupMore = "More"
 
