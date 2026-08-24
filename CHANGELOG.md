@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [1.0.3] — 2026-08-24
+
+_versionCode 43 · today's path, given room to be seen_
+
+### Changed
+- **Today's progress has a row of its own.** The Home dashboard now gives the
+  completion count, candle, Journey status, and ten-week heatmap the full screen
+  width instead of sharing a half-width card.
+- **Daily readings sit together.** Today's Psalms and ዘወትር ጸሎት / ውዳሴ
+  ማርያም appear as compact companion cards, with the latter opening directly to
+  the existing daily Wudase reading.
+- **The new reading row remains adaptive.** Its cards sit side by side on normal
+  phones and stack on narrow screens or with larger accessibility text.
+
 ## [1.0.2] — 2026-08-24
 
 _versionCode 42 · the day at a glance, settings with room to breathe_

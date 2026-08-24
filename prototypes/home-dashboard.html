@@ -290,13 +290,15 @@
     }
     .gitsawe-full .arrow { color: var(--hero-muted); align-self: center; }
 
-    .summary-grid {
+    .reading-grid {
       flex: none;
-      height: 126px;
+      height: 92px;
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
     }
+
+    .today-wide { flex: none; min-height: 112px; }
 
     .summary {
       min-width: 0;
@@ -429,7 +431,7 @@
       main { gap: 7px; padding-top: 5px; }
       .hero { min-height: 78px; padding-block: 11px; }
       .gitsawe-full { min-height: 110px; padding-block: 11px; }
-      .summary-grid { min-height: 98px; }
+      .reading-grid { min-height: 88px; }
       .summary { padding-block: 9px; }
       .phone { min-height: 600px; }
     }
@@ -495,8 +497,7 @@
             <svg class="arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
           </button>
 
-          <section class="summary-grid" aria-label="Today summaries">
-            <button class="card summary" data-message="Opening Journey">
+          <button class="card summary today-wide" data-message="Opening Journey">
               <span>
                 <span class="card-title">ዛሬ</span>
                 <strong>2 of 5</strong>
@@ -508,8 +509,9 @@
                 </span>
               </span>
               <span class="summary-bottom"><span class="candle"></span>Prayer kept today</span>
-            </button>
+          </button>
 
+          <section class="reading-grid" aria-label="Daily readings">
             <button class="card summary" data-message="Opening today’s Psalms">
               <span>
                 <span class="card-title">የዕለቱ መዝሙር</span>
@@ -517,6 +519,15 @@
               </span>
               <span class="summary-bottom">
                 <span class="row"><span>Read today’s portion</span><svg class="arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></span>
+              </span>
+            </button>
+            <button class="card summary" data-message="Opening daily Wudase Maryam">
+              <span>
+                <span class="card-title">ዘወትር ጸሎት</span>
+                <strong>ውዳሴ ማርያም</strong>
+              </span>
+              <span class="summary-bottom">
+                <span class="row"><span>ጸሎት ዘዘወትር</span><svg class="arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></span>
               </span>
             </button>
           </section>

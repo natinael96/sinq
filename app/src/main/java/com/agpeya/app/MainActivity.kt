@@ -280,6 +280,7 @@ private fun AgpeyaNavHost(
                 onOpenBookmarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
                 onOpenPrayerList = { navController.navigate("prayerlist") { launchSingleTop = true } },
                 onOpenPsalter = { navController.navigate("psalter") { launchSingleTop = true } },
+                onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
                 onOpenGitsawe = { navController.navigate("gitsawe") { launchSingleTop = true } },
                 onSelectTab = navController::switchTab,
             )

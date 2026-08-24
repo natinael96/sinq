@@ -90,6 +90,7 @@ fun HomeScreen(
     onOpenBookmarks: () -> Unit,
     onOpenPrayerList: () -> Unit,
     onOpenPsalter: () -> Unit,
+    onOpenZewotr: () -> Unit,
     onOpenGitsawe: () -> Unit,
     onSelectTab: (Tab) -> Unit,
 ) {
@@ -142,8 +143,8 @@ fun HomeScreen(
     ) { innerPadding ->
         BoxWithConstraints(Modifier.fillMaxSize().padding(innerPadding)) {
             val fontScale = LocalDensity.current.fontScale
-            val stackSummaries = maxWidth < 360.dp || fontScale > 1.15f
-            val needsScroll = maxHeight < 530.dp || stackSummaries || fontScale > 1.25f
+            val stackReadingCards = maxWidth < 360.dp || fontScale > 1.15f
+            val needsScroll = maxHeight < 650.dp || stackReadingCards || fontScale > 1.25f
             HomeDashboard(
                 modifier = Modifier
                     .fillMaxHeight()
@@ -154,7 +155,7 @@ fun HomeScreen(
                     .then(if (needsScroll) Modifier.verticalScroll(rememberScrollState()) else Modifier)
                     .padding(horizontal = Spacing.screen, vertical = Spacing.md),
                 flexibleSummary = !needsScroll,
-                stackSummaries = stackSummaries,
+                stackReadingCards = stackReadingCards,
                 today = today,
                 seasonLabel = seasonLabel,
                 suggested = suggested,
@@ -174,6 +175,7 @@ fun HomeScreen(
                 onOpenGitsawe = onOpenGitsawe,
                 onOpenJourney = { onSelectTab(Tab.JOURNEY) },
                 onOpenPsalter = onOpenPsalter,
+                onOpenZewotr = onOpenZewotr,
             )
         }
     }
@@ -204,7 +206,7 @@ private fun prayerShortcuts(hours: List<Hour>, currentId: String?): List<Hour> {
 private fun HomeDashboard(
     modifier: Modifier,
     flexibleSummary: Boolean,
-    stackSummaries: Boolean,
+    stackReadingCards: Boolean,
     today: LocalDate,
     seasonLabel: String?,
     suggested: Hour?,
@@ -224,6 +226,7 @@ private fun HomeDashboard(
     onOpenGitsawe: () -> Unit,
     onOpenJourney: () -> Unit,
     onOpenPsalter: () -> Unit,
+    onOpenZewotr: () -> Unit,
 ) {
     Column(modifier) {
         DayHeader(today, seasonLabel, onOpenSearch, onOpenFasting, onOpenBookmarks, onOpenPrayerList)
@@ -236,33 +239,27 @@ private fun HomeDashboard(
         GitsaweCard(readingsState, onOpenGitsawe)
         Spacer(Modifier.height(Spacing.md))
 
-        if (stackSummaries) {
-            TodayCard(
-                habitIds,
-                doneToday,
-                habitState.records,
-                today,
-                hours.size + (habitIds.size - 1),
-                onOpenJourney,
-                Modifier.fillMaxWidth().height(116.dp),
-            )
+        TodayCard(
+            habitIds,
+            doneToday,
+            habitState.records,
+            today,
+            hours.size + (habitIds.size - 1),
+            onOpenJourney,
+            Modifier.fillMaxWidth().height(132.dp),
+        )
+        Spacer(Modifier.height(Spacing.sm))
+        if (stackReadingCards) {
+            DailyPsalmCard(today, onOpenPsalter, Modifier.fillMaxWidth().height(88.dp))
             Spacer(Modifier.height(Spacing.sm))
-            DailyPsalmCard(today, onOpenPsalter, Modifier.fillMaxWidth().height(104.dp))
+            ZewotrCard(onOpenZewotr, Modifier.fillMaxWidth().height(88.dp))
         } else {
             Row(
-                modifier = Modifier.height(124.dp).fillMaxWidth(),
+                modifier = Modifier.height(96.dp).fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
-                TodayCard(
-                    habitIds,
-                    doneToday,
-                    habitState.records,
-                    today,
-                    hours.size + (habitIds.size - 1),
-                    onOpenJourney,
-                    Modifier.weight(1f).fillMaxHeight(),
-                )
                 DailyPsalmCard(today, onOpenPsalter, Modifier.weight(1f).fillMaxHeight())
+                ZewotrCard(onOpenZewotr, Modifier.weight(1f).fillMaxHeight())
             }
         }
         if (flexibleSummary) Spacer(Modifier.weight(1f))
@@ -492,9 +489,9 @@ private fun TodayCard(
                 records = records,
                 today = today,
                 maxPossible = maxPossible.coerceAtLeast(1),
-                weeksBack = 5,
+                weeksBack = 10,
                 showLegend = false,
-                cell = 5.dp,
+                cell = 6.dp,
                 gap = 1.dp,
             )
         }
@@ -519,6 +516,45 @@ private fun DailyPsalmCard(today: LocalDate, onClick: () -> Unit, modifier: Modi
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(s.psalterTitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
             Icon(Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(IconSize.small))
+        }
+    }
+}
+
+@Composable
+private fun ZewotrCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val s = LocalStrings.current
+    SinqCard(onClick = onClick, modifier = modifier, contentPadding = PaddingValues(Spacing.md)) {
+        Text(
+            s.zewotrTselot,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.secondary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Spacer(Modifier.height(Spacing.xs))
+        Text(
+            s.wudaseMariam,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Spacer(Modifier.weight(1f))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "ጸሎት ዘዘወትር",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Icon(
+                Icons.AutoMirrored.Outlined.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(IconSize.small),
+            )
         }
     }
 }
