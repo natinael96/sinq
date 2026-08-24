@@ -2,6 +2,7 @@ package com.agpeya.app.ui.theme
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -44,6 +45,8 @@ private fun opticalScale(family: FontFamily): Float = when (family) {
  */
 const val READING_LINE_HEIGHT = 1.62f
 
+val LocalReadingLineSpacing = staticCompositionLocalOf { READING_LINE_HEIGHT }
+
 /** Tighter leading for headings and single-line labels, which don't need the air. */
 const val TITLE_LINE_HEIGHT = 1.35f
 
@@ -65,7 +68,7 @@ private val NoFontPadding = PlatformTextStyle(includeFontPadding = false)
 @ReadOnlyComposable
 fun readingBodyStyle(
     fontSp: Int,
-    lineHeightMultiplier: Float = READING_LINE_HEIGHT,
+    lineHeightMultiplier: Float = LocalReadingLineSpacing.current,
 ): TextStyle {
     val family = LocalReadingFont.current
     val size = fontSp * opticalScale(family)

@@ -17,6 +17,7 @@ enum class ReadingMode { VERTICAL, HORIZONTAL }
 enum class ThemeChoice { SYSTEM, LIGHT, DARK }
 enum class Language { SYSTEM, AMHARIC, ENGLISH }
 enum class PrayerLevel { PSALM_50, BEGINNING, GROWTH, STEADFAST, FULL }
+enum class ReadingLineSpacing(val multiplier: Float) { COMPACT(1.3f), NORMAL(1.5f), RELAXED(1.75f) }
 
 /**
  * Which bundled Ethiopic face renders the prayer text. [ABYSSINICA] is the
@@ -63,8 +64,10 @@ object SettingsRepository {
     private val KEY_READING_MODE = stringPreferencesKey("reading_mode")
     private val KEY_FONT_STEP = intPreferencesKey("font_step")
     private val KEY_FONT_STEP_V2 = intPreferencesKey("font_step_v2")
+    private val KEY_FONT_SIZE_SP = intPreferencesKey("font_size_sp_v3")
     private val KEY_THEME = stringPreferencesKey("theme")
     private val KEY_READING_FONT = stringPreferencesKey("reading_font")
+    private val KEY_READING_LINE_SPACING = stringPreferencesKey("reading_line_spacing")
     private val KEY_KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
     private val KEY_LANGUAGE = stringPreferencesKey("language")
     private val KEY_PRAYER_LEVEL = stringPreferencesKey("prayer_level")
@@ -105,6 +108,7 @@ object SettingsRepository {
     private val KEY_BREATH_REMINDER = booleanPreferencesKey("breath_reminder")
     private val KEY_BREATH_LAST_FIRED = stringPreferencesKey("breath_last_fired_day")
     private val KEY_LAST_PRAYER_RECORDED_AT = longPreferencesKey("last_prayer_recorded_at")
+    private val KEY_LAST_BACKUP_AT = longPreferencesKey("last_backup_at")
     private val KEY_QUIET_ENABLED = booleanPreferencesKey("quiet_enabled")
     private val KEY_QUIET_START = intPreferencesKey("quiet_start_min")
     private val KEY_QUIET_END = intPreferencesKey("quiet_end_min")
@@ -118,9 +122,10 @@ object SettingsRepository {
      * [KEY_FONT_STEP] value (an index into the 17..29 tail) migrates on read
      * by the +2 offset, so nobody's saved size changes.
      */
-    val FONT_STEPS_SP = listOf(13, 15, 17, 19, 22, 25, 29)
+    private val LEGACY_FONT_STEPS_SP = listOf(13, 15, 17, 19, 22, 25, 29)
+    val FONT_STEPS_SP = listOf(16, 18, 20, 22, 25, 28)
 
-    const val DEFAULT_FONT_STEP = 3 // 19sp — the same default size as before 0.9.9
+    const val DEFAULT_FONT_STEP = 1 // 18sp, nearest to the historical 19sp default
 
     fun readingMode(context: Context): Flow<ReadingMode> =
         context.settingsDataStore.data.map {
@@ -134,13 +139,19 @@ object SettingsRepository {
 
     fun fontStep(context: Context): Flow<Int> =
         context.settingsDataStore.data.map {
-            it[KEY_FONT_STEP_V2]
-                ?: it[KEY_FONT_STEP]?.plus(2)   // old index into the 17..29 tail
+            val savedSp = it[KEY_FONT_SIZE_SP] ?: run {
+                val legacyIndex = it[KEY_FONT_STEP_V2]
+                    ?: it[KEY_FONT_STEP]?.plus(2)
+                    ?: 3 // historical 19sp default in LEGACY_FONT_STEPS_SP
+                LEGACY_FONT_STEPS_SP[legacyIndex.coerceIn(0, LEGACY_FONT_STEPS_SP.lastIndex)]
+            }
+            FONT_STEPS_SP.indices.minByOrNull { index -> kotlin.math.abs(FONT_STEPS_SP[index] - savedSp) }
                 ?: DEFAULT_FONT_STEP
         }
 
     suspend fun setFontStep(context: Context, step: Int) {
-        context.settingsDataStore.edit { it[KEY_FONT_STEP_V2] = step.coerceIn(0, FONT_STEPS_SP.lastIndex) }
+        val safe = step.coerceIn(0, FONT_STEPS_SP.lastIndex)
+        context.settingsDataStore.edit { it[KEY_FONT_SIZE_SP] = FONT_STEPS_SP[safe] }
     }
 
     fun theme(context: Context): Flow<ThemeChoice> =
@@ -162,6 +173,16 @@ object SettingsRepository {
 
     suspend fun setReadingFont(context: Context, font: ReadingFont) {
         context.settingsDataStore.edit { it[KEY_READING_FONT] = font.name }
+    }
+
+    fun readingLineSpacing(context: Context): Flow<ReadingLineSpacing> =
+        context.settingsDataStore.data.map {
+            runCatching { ReadingLineSpacing.valueOf(it[KEY_READING_LINE_SPACING] ?: "") }
+                .getOrDefault(ReadingLineSpacing.NORMAL)
+        }
+
+    suspend fun setReadingLineSpacing(context: Context, value: ReadingLineSpacing) {
+        context.settingsDataStore.edit { it[KEY_READING_LINE_SPACING] = value.name }
     }
 
     /** The ሰዓታት reader's language mode. Paired Ge'ez + Amharic by default. */
@@ -232,6 +253,13 @@ object SettingsRepository {
 
     suspend fun setAlarmSound(context: Context, value: AlarmSound) {
         context.settingsDataStore.edit { it[KEY_ALARM_SOUND] = value.name }
+    }
+
+    fun lastBackupAt(context: Context): Flow<Long> =
+        context.settingsDataStore.data.map { it[KEY_LAST_BACKUP_AT] ?: 0L }
+
+    suspend fun setLastBackupAt(context: Context, epochMillis: Long) {
+        context.settingsDataStore.edit { it[KEY_LAST_BACKUP_AT] = epochMillis }
     }
 
     fun alarmSoundBlocking(context: Context): AlarmSound =

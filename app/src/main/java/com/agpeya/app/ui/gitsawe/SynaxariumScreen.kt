@@ -71,7 +71,7 @@ import com.agpeya.app.ui.theme.readingBodyStyle
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-private val FONT_STEPS_SP = listOf(17, 19, 22, 25, 29)
+private val FONT_STEPS_SP = SettingsRepository.FONT_STEPS_SP
 
 /** Warm liturgical red for the አርኬ hymn — distinct from the app's gold accent. */
 private val ArkeRed = androidx.compose.ui.graphics.Color(0xFFF0776A)

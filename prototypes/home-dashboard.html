@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sinq — Home dashboard concept</title>
+  <style>
+    @font-face {
+      font-family: "Noto Ethiopic";
+      src: url("../app/src/main/res/font/noto_sans_ethiopic.ttf") format("truetype");
+      font-display: swap;
+    }
+
+    :root {
+      --ground: #efede2;
+      --surface: #f7f5eb;
+      --ink: #1d2b24;
+      --muted: #56655a;
+      --green: #0e3b31;
+      --green-soft: #d3e1d8;
+      --gold: #7e5f1e;
+      --gold-soft: #efe3c6;
+      --line: #d9d6c6;
+      --hero-ink: #f4f1e4;
+      --hero-muted: #b9ccc0;
+      --shadow: 0 24px 70px rgba(14, 59, 49, .18);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 15%, rgba(126, 95, 30, .10), transparent 28%),
+        radial-gradient(circle at 88% 80%, rgba(14, 59, 49, .12), transparent 32%),
+        #e3e0d2;
+      font-family: "Noto Ethiopic", system-ui, sans-serif;
+    }
+
+    body.dark {
+      --ground: #0a2e27;
+      --surface: #103a31;
+      --ink: #ede8d9;
+      --muted: #a6c2b4;
+      --green: #12463a;
+      --green-soft: #1a5041;
+      --gold: #e0bc65;
+      --gold-soft: #4b3a12;
+      --line: #235043;
+      --hero-ink: #f0ebdc;
+      --hero-muted: #a9c6b6;
+      background: #061f1a;
+    }
+
+    button { font: inherit; }
+
+    .stage {
+      display: grid;
+      grid-template-columns: auto 220px;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .phone {
+      width: min(390px, calc(100vw - 40px));
+      height: min(844px, calc(100vh - 56px));
+      min-height: 650px;
+      border: 8px solid #17221d;
+      border-radius: 42px;
+      overflow: hidden;
+      background: var(--ground);
+      box-shadow: var(--shadow), inset 0 0 0 1px rgba(255,255,255,.18);
+      position: relative;
+    }
+
+    .screen {
+      height: 100%;
+      display: grid;
+      grid-template-rows: 26px minmax(0, 1fr) 76px;
+      background: var(--ground);
+    }
+
+    .status {
+      padding: 8px 22px 0;
+      display: flex;
+      justify-content: space-between;
+      font: 600 11px/1 system-ui, sans-serif;
+      color: var(--ink);
+    }
+
+    .status-icons { letter-spacing: 2px; }
+
+    main {
+      min-height: 0;
+      padding: 10px 20px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: start;
+    }
+
+    .brand {
+      margin: 0;
+      font-size: 27px;
+      line-height: 1.05;
+      letter-spacing: -.02em;
+    }
+
+    .date-primary {
+      margin-top: 5px;
+      font-size: 12px;
+      line-height: 1.35;
+      color: var(--muted);
+    }
+
+    .date-secondary {
+      font: 500 10px/1.4 system-ui, sans-serif;
+      color: color-mix(in srgb, var(--muted) 80%, transparent);
+    }
+
+    .accent-line {
+      margin-top: 3px;
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 650;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-actions { display: flex; gap: 0; }
+
+    .icon-button {
+      width: 42px;
+      height: 42px;
+      border: 0;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .icon-button:hover { background: color-mix(in srgb, var(--surface) 75%, transparent); }
+    .icon-button:focus-visible, .card:focus-visible, .hour-chip:focus-visible, .tab:focus-visible {
+      outline: 3px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    svg { width: 21px; height: 21px; stroke: currentColor; fill: none; stroke-width: 1.9; }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--surface);
+      color: var(--ink);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .hero {
+      min-height: 84px;
+      border: 0;
+      padding: 13px 17px;
+      color: var(--hero-ink);
+      background:
+        radial-gradient(circle at 96% 2%, rgba(224,188,101,.25), transparent 35%),
+        var(--green);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hero-copy { min-width: 0; flex: 1; }
+    .kicker {
+      color: var(--hero-muted);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .hero h2 { margin: 4px 0 2px; font-size: 20px; line-height: 1.2; }
+    .hero-time { color: var(--hero-muted); font-size: 11px; }
+    .hero-action { text-align: right; color: var(--hero-muted); font-size: 10px; white-space: nowrap; }
+    .hero-action svg { display: block; margin: 4px 0 0 auto; }
+
+    .hours-block { padding-top: 0; }
+    .section-line {
+      min-height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-title {
+      margin: 0;
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .section-meta { color: var(--muted); font-size: 10px; }
+    .hours { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 74px; gap: 6px; }
+
+    .hour-chip {
+      min-width: 0;
+      height: 40px;
+      padding: 4px 5px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      color: var(--muted);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 10px;
+      line-height: 1.15;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hour-chip.current {
+      color: var(--green);
+      border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
+      background: var(--gold-soft);
+      font-weight: 750;
+    }
+
+    body.dark .hour-chip.current { color: var(--ink); }
+    .chip-sub { display: block; margin-top: 2px; font: 700 8px/1 system-ui, sans-serif; opacity: .72; }
+
+    .gitsawe-full {
+      min-height: 128px;
+      border: 0;
+      padding: 15px 17px;
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr) 18px;
+      align-items: start;
+      gap: 11px;
+      color: var(--hero-ink);
+      background:
+        radial-gradient(circle at 96% 4%, rgba(224,188,101,.24), transparent 34%),
+        var(--green);
+    }
+
+    .round-icon {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      color: var(--green);
+      background: var(--green-soft);
+    }
+
+    body.dark .round-icon { color: #a6e8cd; }
+    .round-icon svg { width: 18px; }
+    .card-title { color: var(--gold); font-size: 11px; font-weight: 750; }
+    .card-body { margin-top: 2px; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .arrow { color: var(--muted); }
+
+    .gitsawe-full .book-mark { color: var(--hero-muted); margin-top: 2px; }
+    .gitsawe-full .book-mark svg { width: 24px; height: 24px; }
+    .gitsawe-full .gitsawe-kicker { color: var(--hero-muted); font-size: 10px; font-weight: 700; letter-spacing: .06em; }
+    .gitsawe-full h3 { margin: 2px 0 7px; color: var(--hero-ink); font-size: 17px; line-height: 1.2; }
+    .gitsawe-full .feast { color: var(--hero-ink); font-size: 12px; font-weight: 700; line-height: 1.35; }
+    .gitsawe-full .reading {
+      margin-top: 3px;
+      color: var(--hero-muted);
+      font-size: 11px;
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .gitsawe-full .arrow { color: var(--hero-muted); align-self: center; }
+
+    .summary-grid {
+      flex: none;
+      height: 126px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .summary {
+      min-width: 0;
+      padding: 11px 13px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .summary strong { display: block; margin-top: 4px; font-size: 17px; }
+    .summary-bottom { color: var(--muted); font-size: 10px; line-height: 1.25; }
+    .summary-bottom .row { display: flex; justify-content: space-between; align-items: end; gap: 6px; }
+
+    .progress-track { height: 5px; margin: 9px 0 5px; overflow: hidden; border-radius: 20px; background: var(--line); }
+    .progress-fill { width: 42%; height: 100%; border-radius: inherit; background: var(--gold); }
+
+    .mini-heatmap { margin-top: 8px; display: grid; grid-template-columns: repeat(10, 5px); grid-template-rows: repeat(3, 5px); gap: 2px; }
+    .mini-heatmap i { display: block; border-radius: 1.5px; background: var(--line); }
+    .mini-heatmap i:nth-child(3n), .mini-heatmap i:nth-child(7n) { background: color-mix(in srgb, var(--gold) 48%, var(--line)); }
+    .mini-heatmap i:nth-child(11n), .mini-heatmap i:nth-child(13n) { background: var(--gold); }
+
+    .candle {
+      display: inline-block;
+      width: 7px;
+      height: 15px;
+      margin-right: 5px;
+      vertical-align: -3px;
+      border-radius: 4px 4px 2px 2px;
+      background: var(--gold);
+      box-shadow: 0 -5px 7px 1px rgba(224,188,101,.55);
+    }
+
+    nav {
+      padding: 5px 12px 10px;
+      background: var(--ground);
+    }
+
+    .nav-pill {
+      height: 60px;
+      padding: 5px 4px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: var(--surface);
+    }
+
+    .tab {
+      border: 0;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 2px;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      font-size: 9px;
+    }
+
+    .tab svg { width: 19px; height: 19px; }
+    .tab.active { color: var(--gold); font-weight: 750; }
+    .tab.active svg { padding: 3px 9px; width: 38px; height: 24px; border-radius: 20px; background: color-mix(in srgb, var(--gold) 14%, transparent); }
+
+    .popover {
+      position: absolute;
+      z-index: 5;
+      top: 74px;
+      right: 16px;
+      width: 190px;
+      padding: 7px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+      box-shadow: 0 14px 35px rgba(0,0,0,.18);
+    }
+
+    .popover[hidden], .sheet[hidden] { display: none; }
+    .menu-item {
+      width: 100%;
+      min-height: 44px;
+      border: 0;
+      border-radius: 10px;
+      color: var(--ink);
+      background: transparent;
+      text-align: left;
+      padding: 0 10px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .menu-item:hover { background: var(--gold-soft); }
+
+    .sheet {
+      position: absolute;
+      z-index: 8;
+      inset: 0;
+      display: flex;
+      align-items: end;
+      background: rgba(0,0,0,.42);
+    }
+
+    .sheet-panel {
+      width: 100%;
+      padding: 10px 20px 24px;
+      border-radius: 26px 26px 0 0;
+      background: var(--surface);
+      animation: rise .2s ease-out;
+    }
+    @keyframes rise { from { transform: translateY(30px); opacity: 0; } }
+    .handle { width: 38px; height: 4px; margin: 0 auto 15px; border-radius: 4px; background: var(--line); }
+    .sheet-head { display: flex; justify-content: space-between; align-items: center; }
+    .sheet-head h3 { margin: 0; font-size: 18px; }
+    .hour-list { margin-top: 10px; display: grid; gap: 4px; }
+    .hour-row { min-height: 48px; padding: 0 8px; display: flex; justify-content: space-between; align-items: center; border: 0; border-bottom: 1px solid var(--line); color: var(--ink); background: transparent; cursor: pointer; }
+    .hour-row small { color: var(--muted); }
+
+    .note h2 { margin: 0 0 8px; color: #153c32; font: 750 19px/1.2 system-ui, sans-serif; }
+    .note p, .note li { color: #3f5d52; font: 14px/1.5 system-ui, sans-serif; }
+    .note ul { margin: 10px 0 20px; padding-left: 19px; }
+    .theme-toggle { width: 100%; min-height: 44px; border: 1px solid #9a8b63; border-radius: 14px; color: #153c32; background: rgba(255,255,255,.45); cursor: pointer; font-weight: 700; }
+
+    @media (max-width: 760px) {
+      body { padding: 0; background: var(--ground); }
+      .stage { display: block; }
+      .note { display: none; }
+      .phone { width: 100vw; height: 100vh; min-height: 600px; border: 0; border-radius: 0; box-shadow: none; }
+    }
+
+    @media (max-height: 720px) {
+      main { gap: 7px; padding-top: 5px; }
+      .hero { min-height: 78px; padding-block: 11px; }
+      .gitsawe-full { min-height: 110px; padding-block: 11px; }
+      .summary-grid { min-height: 98px; }
+      .summary { padding-block: 9px; }
+      .phone { min-height: 600px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <section class="phone" aria-label="Sinq mobile home screen concept">
+      <div class="screen">
+        <div class="status"><span>9:41</span><span class="status-icons">● ◒ ▰</span></div>
+
+        <main>
+          <header class="header">
+            <div>
+              <h1 class="brand">ስንቅ</h1>
+              <div class="date-primary">ሰኞ፣ ነሐሴ ፲፰ ቀን ፳፻፲፰ ዓ.ም.</div>
+              <div class="date-secondary">MON, AUG 24, 2026</div>
+              <div class="accent-line">ዘመነ ዮሐንስ&nbsp;&nbsp;·&nbsp;&nbsp;ሰላም፣ ገብረ ማርያም</div>
+            </div>
+            <div class="header-actions">
+              <button class="icon-button" aria-label="Search" title="Search">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+              </button>
+              <button class="icon-button" id="moreButton" aria-label="More options" aria-expanded="false" title="More">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg>
+              </button>
+            </div>
+          </header>
+
+          <button class="card hero" data-message="Opening the current prayer">
+            <div class="hero-copy">
+              <div class="kicker">አሁን የሚጸለይ</div>
+              <h2>ጸሎተ ነግህ</h2>
+              <div class="hero-time">Morning prayer · 6:00</div>
+            </div>
+            <div class="hero-action">Begin prayer
+              <svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+            </div>
+          </button>
+
+          <section class="hours-block" aria-labelledby="hoursTitle">
+            <div class="section-line">
+              <h2 class="section-title" id="hoursTitle">የጸሎት ሰዓታት</h2>
+              <span class="section-meta">Now &amp; next</span>
+            </div>
+            <div class="hours">
+              <button class="hour-chip current" data-message="Opening morning prayer">ጸሎተ ነግህ<span class="chip-sub">NOW · 6:00</span></button>
+              <button class="hour-chip" data-message="Opening third hour prayer">ጸሎተ ሠለስት<span class="chip-sub">NEXT · 9:00</span></button>
+              <button class="hour-chip" id="allHours">ሁሉም<span class="chip-sub">VIEW ALL</span></button>
+            </div>
+          </section>
+
+          <button class="card gitsawe-full" data-message="Opening today’s Gitsawe">
+            <span class="book-mark">
+              <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21.5zm16 0A2.5 2.5 0 0 0 17.5 3H13v16h4.5a2.5 2.5 0 0 1 2.5 2.5z"/></svg>
+            </span>
+            <span>
+              <span class="gitsawe-kicker">የዕለቱ ንባብ</span>
+              <h3>ግጻዌ</h3>
+              <span class="feast">የቅዱስ ጊዮርጊስ ዝክረ በዓል</span>
+              <span class="reading">መዝሙር ፻፲፩፥፩–፱ · ወንጌል ዘዮሐንስ ፲፥፩–፲፮</span>
+            </span>
+            <svg class="arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+
+          <section class="summary-grid" aria-label="Today summaries">
+            <button class="card summary" data-message="Opening Journey">
+              <span>
+                <span class="card-title">ዛሬ</span>
+                <strong>2 of 5</strong>
+                <span class="summary-bottom">completed</span>
+                <span class="mini-heatmap" aria-label="Recent prayer activity">
+                  <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                  <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                  <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                </span>
+              </span>
+              <span class="summary-bottom"><span class="candle"></span>Prayer kept today</span>
+            </button>
+
+            <button class="card summary" data-message="Opening today’s Psalms">
+              <span>
+                <span class="card-title">የዕለቱ መዝሙር</span>
+                <strong>መዝሙር ፩–፴</strong>
+              </span>
+              <span class="summary-bottom">
+                <span class="row"><span>Read today’s portion</span><svg class="arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></span>
+              </span>
+            </button>
+          </section>
+        </main>
+
+        <nav aria-label="Primary navigation">
+          <div class="nav-pill">
+            <button class="tab active" aria-current="page">
+              <svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span>Home</span>
+            </button>
+            <button class="tab">
+              <svg viewBox="0 0 24 24"><path d="M5 19c4-1 5-4 7-7s4-5 7-7M7 6h.01M17 18h.01"/><circle cx="7" cy="6" r="2"/><circle cx="17" cy="18" r="2"/></svg><span>Journey</span>
+            </button>
+            <button class="tab">
+              <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5z"/><path d="M4 6.5v13"/></svg><span>Library</span>
+            </button>
+            <button class="tab">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1V21h-4v-.08A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1-.4H3v-4h.08A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1V3h4v.08A1.7 1.7 0 0 0 15.4 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.22.38.57.7 1 .9.31.14.65.2 1 .2H21v4h-.08A1.7 1.7 0 0 0 19.4 15z"/></svg><span>Settings</span>
+            </button>
+          </div>
+        </nav>
+      </div>
+
+      <div class="popover" id="moreMenu" hidden>
+        <button class="menu-item" data-message="Opening fasting calendar">Fasting calendar</button>
+        <button class="menu-item" data-message="Opening bookmarks">Bookmarks</button>
+        <button class="menu-item" data-message="Opening prayer list">Prayer list</button>
+      </div>
+
+      <div class="sheet" id="hoursSheet" hidden>
+        <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+          <div class="handle"></div>
+          <div class="sheet-head">
+            <h3 id="sheetTitle">የጸሎት ሰዓታት</h3>
+            <button class="icon-button" id="closeSheet" aria-label="Close"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+          </div>
+          <div class="hour-list">
+            <button class="hour-row"><span>ጸሎተ ነግህ</span><small>6:00 · Now</small></button>
+            <button class="hour-row"><span>ጸሎተ ሠለስት</span><small>9:00</small></button>
+            <button class="hour-row"><span>ጸሎተ ቀትር</span><small>12:00</small></button>
+            <button class="hour-row"><span>ጸሎተ ተሰዓት</span><small>15:00</small></button>
+            <button class="hour-row"><span>ጸሎተ ሰርክ</span><small>18:00</small></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="note">
+      <h2>No-scroll Home concept</h2>
+      <p>The phone frame demonstrates the compact dashboard at a realistic mobile size.</p>
+      <ul>
+        <li>One dominant prayer action</li>
+        <li>Three visible prayer-hour shortcuts</li>
+        <li>Full list opens as a sheet</li>
+        <li>Progress heatmap moved to Journey</li>
+        <li>Secondary header actions moved to More</li>
+      </ul>
+      <button class="theme-toggle" id="themeToggle">Preview dark theme</button>
+    </aside>
+  </div>
+
+  <script>
+    const moreButton = document.querySelector('#moreButton');
+    const moreMenu = document.querySelector('#moreMenu');
+    const hoursSheet = document.querySelector('#hoursSheet');
+
+    moreButton.addEventListener('click', () => {
+      const willOpen = moreMenu.hidden;
+      moreMenu.hidden = !willOpen;
+      moreButton.setAttribute('aria-expanded', String(willOpen));
+    });
+
+    document.querySelector('#allHours').addEventListener('click', () => {
+      hoursSheet.hidden = false;
+      document.querySelector('#closeSheet').focus();
+    });
+
+    document.querySelector('#closeSheet').addEventListener('click', () => {
+      hoursSheet.hidden = true;
+      document.querySelector('#allHours').focus();
+    });
+
+    hoursSheet.addEventListener('click', event => {
+      if (event.target === hoursSheet) hoursSheet.hidden = true;
+    });
+
+    document.querySelector('#themeToggle').addEventListener('click', event => {
+      document.body.classList.toggle('dark');
+      event.currentTarget.textContent = document.body.classList.contains('dark')
+        ? 'Preview light theme'
+        : 'Preview dark theme';
+    });
+
+    document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(item => {
+        item.classList.remove('active');
+        item.removeAttribute('aria-current');
+      });
+      tab.classList.add('active');
+      tab.setAttribute('aria-current', 'page');
+    }));
+
+    document.querySelectorAll('[data-message]').forEach(button => button.addEventListener('click', () => {
+      button.animate(
+        [{ transform: 'scale(1)' }, { transform: 'scale(.975)' }, { transform: 'scale(1)' }],
+        { duration: 180 }
+      );
+      moreMenu.hidden = true;
+    }));
+  </script>
+</body>
+</html>

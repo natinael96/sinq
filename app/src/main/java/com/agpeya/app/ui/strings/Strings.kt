@@ -132,6 +132,25 @@ interface Strings {
     val bookmarkGroupSynaxarium: String
 
     val settingsTitle: String
+    val prayerSettingsTitle: String
+    val remindersSettingsTitle: String
+    val remindersOff: String
+    val noBackupYet: String
+    val backedUpToday: String
+    val backedUpYesterday: String
+    fun backedUpDays(days: Long): String
+    val lineSpacingLabel: String
+    val lineCompact: String
+    val lineNormal: String
+    val lineRelaxed: String
+    val startTimeLabel: String
+    val endTimeLabel: String
+    val lastBackupLabel: String
+    val backgroundRestrictedTitle: String
+    val backgroundRestrictedBody: String
+    val allowBackground: String
+    val addName: String
+    val addChristianName: String
     val appearance: String
     val themeSystem: String
     val themeLight: String
@@ -535,6 +554,25 @@ object AmharicStrings : Strings {
     override val bookmarkGroupSynaxarium = "ስንክሳር"
 
     override val settingsTitle = "ቅንብሮች"
+    override val prayerSettingsTitle = "ጸሎት"
+    override val remindersSettingsTitle = "ማስታወሻዎች"
+    override val remindersOff = "ጠፍቷል"
+    override val noBackupYet = "እስካሁን ምትኬ የለም"
+    override val backedUpToday = "ዛሬ ምትኬ ተቀምጧል"
+    override val backedUpYesterday = "ትናንት ምትኬ ተቀምጧል"
+    override fun backedUpDays(days: Long) = "ከ$days ቀናት በፊት ምትኬ ተቀምጧል"
+    override val lineSpacingLabel = "የመስመር ክፍተት"
+    override val lineCompact = "ጠባብ"
+    override val lineNormal = "መደበኛ"
+    override val lineRelaxed = "ሰፊ"
+    override val startTimeLabel = "መጀመሪያ"
+    override val endTimeLabel = "መጨረሻ"
+    override val lastBackupLabel = "የመጨረሻ ምትኬ"
+    override val backgroundRestrictedTitle = "የጀርባ እንቅስቃሴ ተገድቧል"
+    override val backgroundRestrictedBody = "የጸሎት ማስታወሻዎች በሰዓቱ እንዲደርሱ የጀርባ እንቅስቃሴን ፍቀድ።"
+    override val allowBackground = "የጀርባ እንቅስቃሴን ፍቀድ"
+    override val addName = "ስም ጨምር"
+    override val addChristianName = "የክርስትና ስም ጨምር"
     override val appearance = "ገጽታ"
     override val themeSystem = "ስርዓት"
     override val themeLight = "ብርሃን"
@@ -762,7 +800,7 @@ object AmharicStrings : Strings {
     override val repentReminderBody = "ንስሐ መግባትን አስብ፤ ለቅዱስ ቁርባን ተዘጋጅ።"
     override val repentChannelName = "የንስሐ ማስታወሻ"
 
-    override val settingsBreathReminder = "የመሃል ጸሎት"
+    override val settingsBreathReminder = "የሕሊና ጸሎት"
     override val settingsBreathReminderDesc = "በቀን አንዴ፣ በሰዓታት መካከል ባልታሰበ ጊዜ አጭር ጸሎት ያስታውስሃል"
     override val breathReminderTitle = "ለአፍታ ጸልይ"
     override val breathChannelName = "የመሃል ጸሎት"
@@ -900,6 +938,25 @@ object EnglishStrings : Strings {
     override val bookmarkGroupSynaxarium = "Synaxarium"
 
     override val settingsTitle = "Settings"
+    override val prayerSettingsTitle = "Prayer"
+    override val remindersSettingsTitle = "Reminders"
+    override val remindersOff = "Off"
+    override val noBackupYet = "No backup yet"
+    override val backedUpToday = "Backed up today"
+    override val backedUpYesterday = "Backed up yesterday"
+    override fun backedUpDays(days: Long) = "Backed up $days days ago"
+    override val lineSpacingLabel = "Line spacing"
+    override val lineCompact = "Compact"
+    override val lineNormal = "Normal"
+    override val lineRelaxed = "Relaxed"
+    override val startTimeLabel = "Start"
+    override val endTimeLabel = "End"
+    override val lastBackupLabel = "Last backup"
+    override val backgroundRestrictedTitle = "Background activity is restricted"
+    override val backgroundRestrictedBody = "Allow background activity so prayer reminders continue on time."
+    override val allowBackground = "Allow background"
+    override val addName = "Add name"
+    override val addChristianName = "Add baptismal name"
     override val appearance = "Appearance"
     override val themeSystem = "System"
     override val themeLight = "Light"
@@ -1017,7 +1074,7 @@ object EnglishStrings : Strings {
     override val backupImport = "Restore from a backup"
     override val backupSaved = "Backup saved."
     override val backupFailed = "Could not save the backup."
-    override val restoreDone = "Restored from the backup."
+    override val restoreDone = "Backup restored."
     override val restoreFailed = "Could not read that file."
     override val previousYear = "Previous year"
     override val nextYear = "Next year"
@@ -1144,7 +1201,7 @@ object EnglishStrings : Strings {
     override val repentReminderBody = "Remember repentance — and prepare for Holy Communion."
     override val repentChannelName = "Repentance reminder"
 
-    override val settingsBreathReminder = "Prayer between the hours"
+    override val settingsBreathReminder = "Prayer of the heart"
     override val settingsBreathReminderDesc = "Once a day, at an unplanned moment between prayers, one short breath prayer"
     override val breathReminderTitle = "A moment to pray"
     override val breathChannelName = "Prayer between the hours"

@@ -6,6 +6,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [1.0.2] — 2026-08-24
+
+_versionCode 42 · the day at a glance, settings with room to breathe_
+
+### Added
+- **Focused Settings pages.** Reading, prayer, reminders, and local data now
+  have dedicated screens, while the Settings landing page keeps only the eight
+  choices people need to scan.
+- **Reading comfort controls.** A real prayer-text preview now accompanies a
+  safely migrated 16–28sp size scale, four Ethiopic font previews, and compact,
+  normal, or relaxed line spacing shared by the app's readers.
+- **Editable quiet hours and reminder health warnings.** Start and end times can
+  be changed directly, and notification or background restrictions are shown
+  while relevant and rechecked when the app resumes.
+- **Backup recency.** Successful local backups record their time so Settings can
+  show whether the last backup was today, yesterday, or earlier.
+
+### Changed
+- **Home is a glanceable dashboard.** Current and next prayer shortcuts replace
+  the expanding hour list, all hours remain available in a sheet, and the full
+  Gitsawe feast and reading card stays visible alongside today's heatmap and
+  Psalter portion.
+- **Reminder controls are coherent.** Prayer level uses an explanatory radio
+  sheet, alert behavior and sound share one sheet, and the randomized reminder
+  is now named የሕሊና ጸሎት (Prayer of the heart).
+- **Settings remain green and gold.** The visual identity, selected checks, and
+  gold accents are preserved while spacing and navigation become calmer.
+
+### Fixed
+- **Home stays current across time boundaries.** The date, suggested prayer,
+  daily Gitsawe, progress, and Psalter portion refresh while Home is visible.
+- **Settings adapt safely.** Narrow screens, large accessibility text, and wide
+  displays reflow instead of truncating localized choices or stretching cards.
+
 ## [1.0.1] — 2026-08-23
 
 _versionCode 41 · prayer that meets people where they are_

@@ -69,11 +69,14 @@ class MainActivity : ComponentActivity() {
             val language by SettingsRepository.language(this).collectAsState(initial = Language.SYSTEM)
             val readingFont by SettingsRepository.readingFont(this)
                 .collectAsState(initial = com.agpeya.app.data.ReadingFont.ABYSSINICA)
+            val readingLineSpacing by SettingsRepository.readingLineSpacing(this)
+                .collectAsState(initial = com.agpeya.app.data.ReadingLineSpacing.NORMAL)
             AgpeyaTheme(themeChoice = themeChoice) {
                 CompositionLocalProvider(
                     LocalStrings provides stringsFor(language),
                     com.agpeya.app.ui.theme.LocalReadingFont provides
                         com.agpeya.app.ui.theme.readingFontFamily(readingFont),
+                    com.agpeya.app.ui.theme.LocalReadingLineSpacing provides readingLineSpacing.multiplier,
                 ) {
                     // The opening reminder sits over the graph rather than inside
                     // it: the start destination already flips once onboarding
@@ -487,14 +490,40 @@ private fun AgpeyaNavHost(
         composable(Tab.SETTINGS.route) {
             SettingsScreen(
                 onSelectTab = navController::switchTab,
-                onOpenModes = { navController.navigate("modes") { launchSingleTop = true } },
-                onOpenCustomize = { navController.navigate("customize") { launchSingleTop = true } },
+                onOpenReading = { navController.navigate("settings/reading") { launchSingleTop = true } },
+                onOpenPrayer = { navController.navigate("settings/prayer") { launchSingleTop = true } },
+                onOpenReminders = { navController.navigate("settings/reminders") { launchSingleTop = true } },
+                onOpenData = { navController.navigate("settings/data") { launchSingleTop = true } },
                 onOpenTutorial = { navController.navigate("tutorial") { launchSingleTop = true } },
                 onOpenAbout = { navController.navigate("about") { launchSingleTop = true } },
+            )
+        }
+        composable("settings/reading") {
+            com.agpeya.app.ui.settings.ReadingSettingsScreen(
+                onBack = { navController.popBackStack() },
+                onOpenFonts = { navController.navigate("settings/reading/fonts") { launchSingleTop = true } },
+            )
+        }
+        composable("settings/reading/fonts") {
+            com.agpeya.app.ui.settings.ReadingFontScreen(onBack = { navController.popBackStack() })
+        }
+        composable("settings/prayer") {
+            com.agpeya.app.ui.settings.PrayerSettingsScreen(
+                onBack = { navController.popBackStack() },
+                onOpenManageHours = { navController.navigate("customize") { launchSingleTop = true } },
+            )
+        }
+        composable("settings/reminders") {
+            com.agpeya.app.ui.settings.RemindersSettingsScreen(
+                onBack = { navController.popBackStack() },
+                onOpenModes = { navController.navigate("modes") { launchSingleTop = true } },
                 onOpenSpecialHabit = { habit ->
                     navController.navigate("intention/${habit.name.lowercase()}") { launchSingleTop = true }
                 },
             )
+        }
+        composable("settings/data") {
+            com.agpeya.app.ui.settings.DataSettingsScreen(onBack = { navController.popBackStack() })
         }
         composable(
             route = "intention/{habit}",
