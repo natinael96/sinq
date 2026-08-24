@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [1.0.4] — 2026-08-24
+
+_versionCode 44 · a clearer Library, an accessible Journey_
+
+### Changed
+- **The year's journey can be explored without tiny touch targets.** Every
+  available heatmap day now has a spoken date, habit count, fasting context,
+  and selected state, while full-size previous and next controls provide a
+  comfortable way to move through the calendar.
+- **Journey controls explain their state.** The prayer-hours disclosure now
+  announces whether it is expanded or collapsed, and the heatmap legend and
+  monthly summaries adapt more safely to narrow screens and larger text.
+- **Library descriptions follow the interface language.** Wudase Maryam and
+  Zewotr supporting copy now appears in Amharic or English as selected.
+
+### Fixed
+- **Journey stays on the right day.** Its date advances at local midnight and
+  refreshes when the app resumes, preventing an overnight session from writing
+  prayer records to yesterday.
+- **Year and day selection remain consistent.** Switching heatmap years now
+  selects a valid day in the displayed year, and dates before Sinq's data epoch
+  are no longer interactive.
+
 ## [1.0.3] — 2026-08-24
 
 _versionCode 43 · today's path, given room to be seen_

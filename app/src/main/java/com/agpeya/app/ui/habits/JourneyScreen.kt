@@ -27,12 +27,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.agpeya.app.data.FastingCalendar
 import com.agpeya.app.data.HabitsRepository
 import com.agpeya.app.data.PrayerJourney
 import com.agpeya.app.model.HabitsState
@@ -56,6 +56,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
+import com.agpeya.app.ui.common.rememberCurrentDate
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.strings.Strings
 import kotlinx.coroutines.launch
@@ -101,7 +105,7 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
     val scope = rememberCoroutineScope()
     val s = LocalStrings.current
     val state by HabitsRepository.state(context).collectAsState(initial = HabitsState())
-    val today = remember { LocalDate.now() }
+    val today by rememberCurrentDate()
     val todayKey = today.toString()
     val hours by androidx.compose.runtime.produceState(emptyList<com.agpeya.app.model.Hour>()) {
         value = com.agpeya.app.data.HoursRepository.visibleHours(context)
@@ -112,14 +116,17 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
     val habitItems = remember(state, s) {
         HabitsRepository.orderedHabitIds(state, includeHidden = false).map { it to habitName(it, state, s) }
     }
-    var prayersExpanded by remember { mutableStateOf(false) }
+    var prayersExpanded by rememberSaveable { mutableStateOf(false) }
     val summary = remember(state, today) { PrayerJourney.summarize(state.records, today) }
     // Per-habit summaries always count the Ethiopian month, even during a fast:
     // the hero speaks the period's language, the private records stay steady.
     val monthStart = remember(today) {
         EthiopianDate.from(today).let { EthiopianDate(it.year, it.month, 1).toGregorian() }
     }
-    var selectedDay by remember { mutableStateOf<LocalDate?>(null) }
+    val currentEcYear = remember(today) { EthiopianDate.from(today).year }
+    var displayedEcYear by rememberSaveable { androidx.compose.runtime.mutableIntStateOf(currentEcYear) }
+    var selectedEpochDay by rememberSaveable { androidx.compose.runtime.mutableLongStateOf(today.toEpochDay()) }
+    val selectedDay = LocalDate.ofEpochDay(selectedEpochDay)
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -179,7 +186,13 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { prayersExpanded = !prayersExpanded }
+                        .semantics {
+                            stateDescription = if (prayersExpanded) s.expandedState else s.collapsedState
+                        }
+                        .clickable(
+                            onClickLabel = if (prayersExpanded) s.collapse else s.expand,
+                            role = Role.Button,
+                        ) { prayersExpanded = !prayersExpanded }
                         .padding(vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -247,28 +260,17 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                 EthiopianYearHeatmap(
                     records = state.records,
                     today = today,
+                    ecYear = displayedEcYear,
+                    selectedDay = selectedDay,
                     maxPossible = hourItems.size + habitItems.size,
                     modifier = Modifier.fillMaxWidth(),
-                    onDayTap = { selectedDay = it },
+                    onYearChange = { year ->
+                        displayedEcYear = year
+                        selectedEpochDay = if (year == currentEcYear) today.toEpochDay()
+                        else EthiopianDate(year, 1, 1).toGregorian().toEpochDay()
+                    },
+                    onDaySelect = { selectedEpochDay = it.toEpochDay() },
                 )
-                selectedDay?.let { day ->
-                    val n = HabitsRepository.dayCount(state.records, day)
-                    // Name the fast the tapped day fell in, if any — the day is
-                    // read inside the Church's year, not a productivity grid.
-                    val fastName = remember(day) {
-                        runCatching { FastingCalendar.fastOn(day)?.nameAm }.getOrNull()
-                    }
-                    Spacer(Modifier.height(10.dp))
-                    Text(
-                        text = listOfNotNull(
-                            com.agpeya.app.ui.common.formatEthiopian(day, s),
-                            s.habitsCount(n),
-                            fastName,
-                        ).joinToString(" · "),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.secondary,
-                    )
-                }
                 Spacer(Modifier.height(Spacing.xxl))
                 SectionHeader(s.habitsHeader)
                 Spacer(Modifier.height(Spacing.xs))
@@ -377,11 +379,20 @@ private fun StatRow(name: String, detail: String, indented: Boolean) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(name, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
+        Text(
+            name,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.weight(1f),
+            maxLines = 2,
+        )
+        Spacer(Modifier.width(Spacing.md))
         Text(
             text = detail,
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.End,
+            maxLines = 2,
         )
     }
 }

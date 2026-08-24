@@ -6,6 +6,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,13 +26,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,7 +51,16 @@ private val GAP = 1.5.dp
 private val COL = 16.dp // CELL + 2*GAP
 
 /** Nothing can be logged before Hamle 1, 2018 EC — the app's first day. */
-private val APP_EPOCH_EC = EthiopianDate(2018, 11, 1)
+internal val APP_EPOCH_EC = EthiopianDate(2018, 11, 1)
+
+/** Days in [ecYear] for which this installation can possibly hold records. */
+internal fun journeyYearSelectableRange(ecYear: Int, today: LocalDate): ClosedRange<LocalDate>? {
+    val yearStart = EthiopianDate(ecYear, 1, 1).toGregorian()
+    val yearEnd = EthiopianDate(ecYear + 1, 1, 1).toGregorian().minusDays(1)
+    val first = maxOf(yearStart, APP_EPOCH_EC.toGregorian())
+    val last = minOf(yearEnd, today)
+    return if (first <= last) first..last else null
+}
 
 /**
  * Calendar heatmap of one Ethiopian year: month labels above, weekday labels
@@ -59,19 +71,21 @@ private val APP_EPOCH_EC = EthiopianDate(2018, 11, 1)
 fun EthiopianYearHeatmap(
     records: Map<String, Set<String>>,
     today: LocalDate,
+    ecYear: Int,
+    selectedDay: LocalDate,
     maxPossible: Int,
     modifier: Modifier = Modifier,
-    onDayTap: (LocalDate) -> Unit,
+    onYearChange: (Int) -> Unit,
+    onDaySelect: (LocalDate) -> Unit,
 ) {
     val s = LocalStrings.current
     val currentEc = remember(today) { EthiopianDate.from(today).year }
-    var ecYear by remember { mutableIntStateOf(currentEc) }
 
     // The whole Ethiopian year, መስከረም 1 → ጳጉሜን end. Future days render as
     // faint placeholders so the year's shape is always visible.
     val start = remember(ecYear) { EthiopianDate(ecYear, 1, 1).toGregorian() }
     val end = remember(ecYear) { EthiopianDate(ecYear + 1, 1, 1).toGregorian().minusDays(1) }
-    val lastLogged = remember(end, today) { minOf(end, today) }
+    val selectableRange = remember(ecYear, today) { journeyYearSelectableRange(ecYear, today) }
 
     // Week columns, Monday-aligned, covering [start..end].
     val weeks = remember(start, end) {
@@ -94,6 +108,12 @@ fun EthiopianYearHeatmap(
         }
     }
     fun inFast(date: LocalDate): Boolean = fasts.any { it.contains(date) }
+
+    fun dayDescription(date: LocalDate): String = listOfNotNull(
+        com.agpeya.app.ui.common.formatEthiopian(date, s),
+        s.habitsCount(HabitsRepository.dayCount(records, date)),
+        fasts.firstOrNull { it.contains(date) }?.nameAm,
+    ).joinToString(" · ")
 
     val empty = MaterialTheme.colorScheme.surfaceVariant
     val gold = MaterialTheme.colorScheme.secondary
@@ -181,7 +201,8 @@ fun EthiopianYearHeatmap(
                     weeks.forEach { week ->
                         Column {
                             week.forEach { date ->
-                                val inRange = !date.isBefore(start) && !date.isAfter(lastLogged)
+                                val inRange = selectableRange?.contains(date) == true
+                                val description = if (inRange) dayDescription(date) else null
                                 Spacer(
                                     Modifier
                                         .padding(GAP)
@@ -189,7 +210,15 @@ fun EthiopianYearHeatmap(
                                         .clip(RoundedCornerShape(2.dp))
                                         .background(cellColor(date))
                                         .then(
-                                            if (inRange) Modifier.clickable { onDayTap(date) }
+                                            if (inRange) Modifier
+                                                .semantics {
+                                                    contentDescription = description.orEmpty()
+                                                    selected = date == selectedDay
+                                                }
+                                                .clickable(
+                                                    role = Role.Button,
+                                                    onClickLabel = description,
+                                                ) { onDaySelect(date) }
                                             else Modifier
                                         ),
                                 )
@@ -202,13 +231,16 @@ fun EthiopianYearHeatmap(
 
         // Legend
         Spacer(Modifier.height(10.dp))
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        FlowRow(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
             Text(s.less, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             listOf(empty, gold.copy(alpha = 0.30f), gold.copy(alpha = 0.50f), gold.copy(alpha = 0.75f), gold).forEach { c ->
                 Spacer(Modifier.padding(GAP).size(CELL).clip(RoundedCornerShape(2.dp)).background(c))
             }
             Text(s.more, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(Modifier.width(Spacing.md))
+            Spacer(Modifier.width(Spacing.sm))
             Spacer(Modifier.padding(GAP).size(CELL).clip(RoundedCornerShape(2.dp)).background(fastWash))
             Text(s.fastLegendLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
@@ -220,7 +252,7 @@ fun EthiopianYearHeatmap(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = { ecYear-- }, enabled = ecYear > APP_EPOCH_EC.year) {
+            IconButton(onClick = { onYearChange(ecYear - 1) }, enabled = ecYear > APP_EPOCH_EC.year) {
                 Icon(
                     Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                     contentDescription = s.previousYear,
@@ -233,13 +265,48 @@ fun EthiopianYearHeatmap(
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
-            IconButton(onClick = { ecYear++ }, enabled = ecYear < currentEc) {
+            IconButton(onClick = { onYearChange(ecYear + 1) }, enabled = ecYear < currentEc) {
                 Icon(
                     Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = s.nextYear,
                     tint = if (ecYear < currentEc) MaterialTheme.colorScheme.onSurface
                     else MaterialTheme.colorScheme.surfaceVariant,
                 )
+            }
+        }
+
+        val selectionStart = selectableRange?.start
+        val selectionEnd = selectableRange?.endInclusive
+        if (selectionStart != null && selectionEnd != null && selectableRange.contains(selectedDay)) {
+            Spacer(Modifier.height(Spacing.sm))
+            Text(
+                text = dayDescription(selectedDay),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                IconButton(
+                    onClick = { onDaySelect(selectedDay.minusDays(1)) },
+                    enabled = selectedDay.isAfter(selectionStart),
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = s.previousDay,
+                    )
+                }
+                IconButton(
+                    onClick = { onDaySelect(selectedDay.plusDays(1)) },
+                    enabled = selectedDay.isBefore(selectionEnd),
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = s.nextDay,
+                    )
+                }
             }
         }
     }

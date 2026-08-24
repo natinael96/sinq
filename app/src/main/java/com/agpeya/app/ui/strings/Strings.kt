@@ -18,6 +18,8 @@ interface Strings {
 
     val libraryTitle: String
     val librarySubtitle: String
+    val wudaseScheduleSubtitle: String
+    val zewotrSubtitle: String
     val scripturesTitle: String
     val scripturesSubtitle: String
     val newTestamentLabel: String
@@ -352,6 +354,8 @@ interface Strings {
     // the chevron's direction alone.
     val expand: String
     val collapse: String
+    val expandedState: String
+    val collapsedState: String
 
     // Settings groups. The screen is long enough that it has to be scannable by
     // heading rather than by reading every row.
@@ -445,6 +449,8 @@ object AmharicStrings : Strings {
     override val tabLibrary = "ቤተ መጻሕፍት"
 
     override val libraryTitle = "ቤተ መጻሕፍት"
+    override val wudaseScheduleSubtitle = "ሰኞ–እሑድ"
+    override val zewotrSubtitle = "የዕለት ጸሎቶች"
     override val librarySubtitle = "የጸሎትና የቅዱሳት መጻሕፍት ስብስብ"
     override val scripturesTitle = "ቅዱሳት መጻሕፍት"
     override val scripturesSubtitle = "የአዲስ ኪዳን መጻሕፍት"
@@ -761,6 +767,8 @@ object AmharicStrings : Strings {
 
     override val expand = "ክፈት"
     override val collapse = "ዝጋ"
+    override val expandedState = "ተከፍቷል"
+    override val collapsedState = "ተዘግቷል"
 
     override val settingsGroupReading = "ንባብ"
     override val settingsGroupPrayer = "ጸሎትና ማስታወሻ"
@@ -831,6 +839,8 @@ object EnglishStrings : Strings {
     override val tabLibrary = "Library"
 
     override val libraryTitle = "Library"
+    override val wudaseScheduleSubtitle = "Monday–Sunday prayers"
+    override val zewotrSubtitle = "Daily prayers"
     override val librarySubtitle = "Prayers and holy scriptures"
     override val scripturesTitle = "Scriptures"
     override val scripturesSubtitle = "The New Testament"
@@ -1162,6 +1172,8 @@ object EnglishStrings : Strings {
 
     override val expand = "Expand"
     override val collapse = "Collapse"
+    override val expandedState = "Expanded"
+    override val collapsedState = "Collapsed"
 
     override val settingsGroupReading = "Reading"
     override val settingsGroupPrayer = "Prayer and reminders"
