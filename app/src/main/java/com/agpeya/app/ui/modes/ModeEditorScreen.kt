@@ -79,7 +79,7 @@ fun ModeEditorScreen(modeId: String, onBack: () -> Unit) {
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
-        // Alarms still fire the full-screen intent; only the notification needs the grant.
+        // The alarm is notification-only, so this grant is required for it to be visible.
         if (!granted) showNotifDenied = true
     }
 
@@ -92,7 +92,10 @@ fun ModeEditorScreen(modeId: String, onBack: () -> Unit) {
         }
     }
 
-    suspend fun reschedule() = ReminderScheduler.rescheduleAll(context, hourNames)
+    suspend fun reschedule() {
+        ReminderScheduler.rescheduleAll(context, hourNames)
+        com.agpeya.app.reminders.BreathPrayerScheduler.schedule(context)
+    }
 
     Scaffold(
         topBar = {

@@ -107,7 +107,6 @@ object SettingsRepository {
     const val DEFAULT_REPENTANCE_REMINDER_MIN = 19 * 60
     private val KEY_BREATH_REMINDER = booleanPreferencesKey("breath_reminder")
     private val KEY_BREATH_LAST_FIRED = stringPreferencesKey("breath_last_fired_day")
-    private val KEY_LAST_PRAYER_RECORDED_AT = longPreferencesKey("last_prayer_recorded_at")
     private val KEY_LAST_BACKUP_AT = longPreferencesKey("last_backup_at")
     private val KEY_QUIET_ENABLED = booleanPreferencesKey("quiet_enabled")
     private val KEY_QUIET_START = intPreferencesKey("quiet_start_min")
@@ -344,18 +343,6 @@ object SettingsRepository {
 
     suspend fun setBreathLastFiredDay(context: Context, day: String) {
         context.settingsDataStore.edit { it[KEY_BREATH_LAST_FIRED] = day }
-    }
-
-    /** Epoch millis of the last recorded prayer hour; 0 if never. */
-    fun lastPrayerRecordedAtBlocking(context: Context): Long =
-        runCatching {
-            kotlinx.coroutines.runBlocking {
-                context.settingsDataStore.data.map { it[KEY_LAST_PRAYER_RECORDED_AT] ?: 0L }.first()
-            }
-        }.getOrDefault(0L)
-
-    suspend fun setLastPrayerRecordedAt(context: Context, epochMillis: Long) {
-        context.settingsDataStore.edit { it[KEY_LAST_PRAYER_RECORDED_AT] = epochMillis }
     }
 
     // ---- Special-habit reminders (ምጽዋት / ንስሐ) ------------------------------

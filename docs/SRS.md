@@ -86,8 +86,8 @@ switch language and theme.
 
 ### 3.1 External Interface Requirements
 - **UI**: Jetpack Compose, Material 3; bottom navigation with Home, Search, Bookmarks, **Streak**, Settings; full-screen pushed screens for reading, reminders, customization, habit management, about, and help.
-- **System interfaces**: Android `AlarmManager` (exact alarm clock), notifications (full-screen intent), foreground service (media-playback type for the ringing alarm), vibrator, `RingtoneManager`, and the system "App details / battery" settings screen (deep-linked from Help).
-- **Hardware interfaces**: speaker (alarm sound), vibration motor, screen wake for full-screen alarm.
+- **System interfaces**: Android `AlarmManager` (exact alarm clock), high-priority notifications, foreground service (system-exempted type for the ringing alarm), vibrator, `RingtoneManager`, and the system "App details / battery" settings screen (deep-linked from Help).
+- **Hardware interfaces**: speaker (alarm sound) and vibration motor.
 - **Files/assets**: bundled JSON content (hours + 150-psalm Psalter + manifest) and TTF fonts.
 
 ### 3.2 Functional Requirements
@@ -121,7 +121,7 @@ switch language and theme.
 - **FR-18** The system SHALL support named **modes**, exactly one active at a time; only the active mode schedules alarms.
 - **FR-19** A built-in mode SHALL ship with the traditional hour times (all initially off); the user MAY duplicate it or start an empty mode.
 - **FR-20** Each **entry** SHALL specify a target hour, time, weekday set (daily or specific days), and enabled flag.
-- **FR-21** On firing, the system SHALL raise a **real alarm**: play the selected sound on the alarm stream and/or vibrate per user preference, show a full-screen alert over the lock screen, and post a notification.
+- **FR-21** On firing, the system SHALL raise a **real alarm**: play the selected sound on the alarm stream and/or vibrate per user preference, and post an ongoing high-priority notification without launching a full-screen activity.
 - **FR-22** The alarm SHALL offer **Open**, **Snooze** (fixed interval), and **Dismiss**; Snooze SHALL reliably re-fire after the interval.
 - **FR-23** The alarm alert text SHALL be discreet ("It's time") and reveal no prayer/hour name.
 - **FR-24** The user SHALL choose alert behavior (sound+vibrate / sound only / vibrate only / silent) and the sound type (alarm / ringtone / notification).
@@ -166,7 +166,7 @@ switch language and theme.
 
 ## 4. Acceptance Criteria (representative)
 - Searching a word typed with a "wrong" homophone still finds it.
-- An enabled reminder rings with a full-screen alert and snoozes correctly; survives a reboot.
+- An enabled reminder rings with a high-priority notification, snoozes correctly, and survives a reboot.
 - Adding a custom hour and psalms makes them appear on Home and in the reader.
 - Checking habits fills today's heatmap cell and increments the shown streaks; data persists after force-stop.
 - The merged manifest contains no `INTERNET` permission.

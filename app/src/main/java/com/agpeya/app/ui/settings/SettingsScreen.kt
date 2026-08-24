@@ -111,10 +111,9 @@ private fun LegacySettingsScreen(
     val alarmSound by SettingsRepository.alarmSound(context)
         .collectAsState(initial = com.agpeya.app.data.AlarmSound.ALARM)
 
-    // The streak and ግጻዌ nudges are notification-only — unlike a prayer alarm,
-    // which rings and shows a full-screen intent regardless, they are silently
-    // dropped when POST_NOTIFICATIONS was never granted. Ask on the way in, so
-    // switching one on here is enough to actually make it arrive.
+    // All reminders are notification-based and are silently dropped when
+    // POST_NOTIFICATIONS was never granted. Ask on the way in, so switching one
+    // on here is enough to actually make it arrive.
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { /* denial is reported by the banner below, not a second dialog */ }

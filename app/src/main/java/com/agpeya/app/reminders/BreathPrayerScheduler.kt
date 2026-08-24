@@ -7,8 +7,8 @@ import android.content.Intent
 import com.agpeya.app.data.ModesRepository
 import com.agpeya.app.data.SettingsRepository
 import kotlinx.coroutines.runBlocking
-import java.time.Instant
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.ZoneId
 import kotlin.random.Random
 
@@ -18,19 +18,14 @@ import kotlin.random.Random
  * exactly these moments. Praying, not reading: the notification carries the
  * whole prayer; there is nothing to open.
  *
- * The moment is drawn at random from the day's in-between window:
- *   - no earlier than [MIN_AFTER_PRAYER_MIN] minutes after the last recorded
- *     prayer hour (and never bang on "now" — [MIN_FROM_NOW_MIN] gives air),
- *   - no later than [BEFORE_NEXT_PRAYER_MIN] minute before the next scheduled
- *     prayer reminder, and never into the night ([LATEST_HOUR]).
- * If the prayers sit too close together right now, nothing is armed — the next
- * recorded prayer reopens the window with a fresh roll.
+ * The moment is drawn at random between the active mode's configured Morning
+ * prayer time and [LATEST_HOUR]. Later prayer times and completion records do
+ * not affect it. When the day's window has passed, tomorrow is armed instead.
  *
- * Re-armed from every place the window can change: a prayer being recorded
- * (JourneyScreen, the Done notification), app launch, boot/time changes, the
- * Settings toggle, and the receiver itself after firing. The receiver marks
- * the day fired, so a day never gets two nudges; scheduling then chains into a
- * fresh window tomorrow even if the app is not opened again.
+ * Re-armed from app launch, boot/time changes, Morning-time or active-mode
+ * edits, the Settings toggle, and the receiver itself after firing. The
+ * receiver marks the day fired, so a day never gets two nudges; scheduling then
+ * chains into a fresh window tomorrow even if the app is not opened again.
  */
 object BreathPrayerScheduler {
 
@@ -55,67 +50,24 @@ object BreathPrayerScheduler {
         "ሰላም ለኪ ማርያም ምልዕተ ጸጋ፥ እግዚአብሔር ምስሌኪ።",
     )
 
-    private const val MIN_AFTER_PRAYER_MIN = 10L
-    private const val MIN_FROM_NOW_MIN = 15L
-    private const val BEFORE_NEXT_PRAYER_MIN = 1L
-    private const val NEXT_DAY_EARLIEST_HOUR = 8
+    internal const val MIN_FROM_NOW_MIN = 15L
+    private const val DEFAULT_MORNING_HOUR = 6
 
     /** No nudges after 21:00 — the evening belongs to the nightly reminder. */
-    private const val LATEST_HOUR = 21
+    internal const val LATEST_HOUR = 21
 
     /** Re-arm or cancel to match the current setting; call after any toggle. */
     fun sync(context: Context, enabled: Boolean) {
         if (enabled) schedule(context) else cancel(context)
     }
 
-    /** A prayer hour was just recorded: move the anchor, re-roll the moment. */
-    suspend fun onPrayerRecorded(context: Context) {
-        SettingsRepository.setLastPrayerRecordedAt(context, System.currentTimeMillis())
-        schedule(context)
-    }
-
     fun schedule(context: Context) {
         if (!SettingsRepository.breathReminderBlocking(context)) return cancel(context)
         val now = LocalDateTime.now()
-        val today = now.toLocalDate()
-        // Once today's nudge has fired, keep the chain alive by arming a fresh
-        // daytime window tomorrow. Prayer completion must never silence it.
-        if (SettingsRepository.breathLastFiredDayBlocking(context) == today.toString()) {
-            val lower = today.plusDays(1).atTime(NEXT_DAY_EARLIEST_HOUR, 0)
-            var upper = today.plusDays(1).atTime(LATEST_HOUR, 0)
-            nextPrayerTime(context, lower)?.let { next ->
-                if (next.toLocalDate() == lower.toLocalDate()) {
-                    val cap = next.minusMinutes(BEFORE_NEXT_PRAYER_MIN)
-                    if (cap.isAfter(lower) && cap.isBefore(upper)) upper = cap
-                }
-            }
-            return armRandom(context, lower, upper)
-        }
-
-        // Lower bound: a while from now, and clear of the last recorded prayer.
-        var lower = now.plusMinutes(MIN_FROM_NOW_MIN)
-        val lastPrayed = SettingsRepository.lastPrayerRecordedAtBlocking(context)
-            .takeIf { it > 0 }
-            ?.let { Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDateTime() }
-        if (lastPrayed != null && lastPrayed.toLocalDate() == today) {
-            val clear = lastPrayed.plusMinutes(MIN_AFTER_PRAYER_MIN)
-            if (clear.isAfter(lower)) lower = clear
-        }
-
-        // Upper bound: short of the next scheduled prayer, and of the night.
-        var upper = today.atTime(LATEST_HOUR, 0)
-        nextPrayerTime(context, now)?.let { next ->
-            if (next.toLocalDate() == today) {
-                val cap = next.minusMinutes(BEFORE_NEXT_PRAYER_MIN)
-                if (cap.isBefore(upper)) upper = cap
-            }
-        }
-
-        // No room between the prayers right now — recording the next prayer
-        // (or tomorrow's launch) rolls again.
-        if (!upper.isAfter(lower)) return cancel(context)
-
-        armRandom(context, lower, upper)
+        val firedToday = SettingsRepository.breathLastFiredDayBlocking(context) ==
+            now.toLocalDate().toString()
+        val window = breathPrayerWindow(now, morningMinute(context), firedToday)
+        armRandom(context, window.lower, window.upper)
     }
 
     private fun armRandom(context: Context, lower: LocalDateTime, upper: LocalDateTime) {
@@ -138,16 +90,14 @@ object BreathPrayerScheduler {
         context.getSystemService(AlarmManager::class.java).cancel(pendingIntent(context))
     }
 
-    /** The next enabled reminder of the active mode, strictly after [now]. */
-    private fun nextPrayerTime(context: Context, now: LocalDateTime): LocalDateTime? =
+    private fun morningMinute(context: Context): Int =
         runCatching {
             runBlocking {
-                ModesRepository.current(context).activeMode?.entries.orEmpty()
-                    .filter { it.enabled }
-                    .mapNotNull { ReminderScheduler.nextOccurrence(it, now) }
-                    .minOrNull()
+                ModesRepository.current(context).activeMode?.entries
+                    ?.firstOrNull { it.hourId == "morning" }
+                    ?.let { it.hour * 60 + it.minute }
             }
-        }.getOrNull()
+        }.getOrNull() ?: DEFAULT_MORNING_HOUR * 60
 
     private fun pendingIntent(context: Context): PendingIntent {
         val intent = Intent(context, BreathPrayerReceiver::class.java).setAction(ACTION)
@@ -158,4 +108,38 @@ object BreathPrayerScheduler {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
     }
+}
+
+internal data class BreathPrayerWindow(
+    val lower: LocalDateTime,
+    val upper: LocalDateTime,
+)
+
+/** Pure window calculation kept separate from Android scheduling for regression tests. */
+internal fun breathPrayerWindow(
+    now: LocalDateTime,
+    configuredMorningMinute: Int,
+    firedToday: Boolean,
+): BreathPrayerWindow {
+    val today = now.toLocalDate()
+    val todayUpper = today.atTime(BreathPrayerScheduler.LATEST_HOUR, 0)
+    val mustUseTomorrow = firedToday ||
+        !todayUpper.isAfter(now.plusMinutes(BreathPrayerScheduler.MIN_FROM_NOW_MIN))
+    val date = if (mustUseTomorrow) today.plusDays(1) else today
+
+    val minute = configuredMorningMinute.coerceIn(0, 23 * 60 + 59)
+    val configuredStart = date.atTime(LocalTime.of(minute / 60, minute % 60))
+    val upper = date.atTime(BreathPrayerScheduler.LATEST_HOUR, 0)
+    val morning = if (configuredStart.isBefore(upper)) {
+        configuredStart
+    } else {
+        date.atTime(6, 0)
+    }
+    val earliestFromNow = now.plusMinutes(BreathPrayerScheduler.MIN_FROM_NOW_MIN)
+    val lower = if (date == today && earliestFromNow.isAfter(morning)) {
+        earliestFromNow
+    } else {
+        morning
+    }
+    return BreathPrayerWindow(lower, upper)
 }

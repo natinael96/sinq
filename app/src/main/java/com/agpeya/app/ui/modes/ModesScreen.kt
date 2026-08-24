@@ -61,6 +61,7 @@ fun ModesScreen(onBack: () -> Unit, onEditMode: (String) -> Unit, onOpenBatteryH
     suspend fun reschedule() {
         val names = com.agpeya.app.data.HoursRepository.visibleHours(context).associate { it.id to it.name }
         ReminderScheduler.rescheduleAll(context, names)
+        com.agpeya.app.reminders.BreathPrayerScheduler.schedule(context)
     }
 
     Scaffold(

@@ -37,10 +37,14 @@ class BreathPrayerReceiver : BroadcastReceiver() {
                     val today = LocalDate.now().toString()
                     // Once a day, however many times the schedule was recomputed.
                     if (SettingsRepository.breathLastFiredDayBlocking(context) == today) return@runBlocking
-                    // Quiet hours: stay silent and leave the day unmarked, so a
-                    // later trigger may still find a daytime window.
+                    // If custom quiet hours overlap the selected moment, treat
+                    // today as handled and move directly to tomorrow's window.
                     val nowMinute = LocalTime.now().let { it.hour * 60 + it.minute }
-                    if (SettingsRepository.quietHoursBlocking(context).covers(nowMinute)) return@runBlocking
+                    if (SettingsRepository.quietHoursBlocking(context).covers(nowMinute)) {
+                        SettingsRepository.setBreathLastFiredDay(context, today)
+                        BreathPrayerScheduler.schedule(context)
+                        return@runBlocking
+                    }
 
                     val s = stringsFor(SettingsRepository.language(context).first())
                     val prayer = BreathPrayerScheduler.PRAYERS.random()

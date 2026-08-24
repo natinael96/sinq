@@ -48,14 +48,14 @@ unidirectional, repository-backed pattern (no heavyweight ViewModel layer):
         └───────────────────┘   └──────────────────────┘
 
         Reminders subsystem (Android framework):
-        AlarmManager → AlarmReceiver → AlarmService (foreground) → AlarmActivity
+        AlarmManager → AlarmReceiver → AlarmService (foreground + notification)
         SystemEventsReceiver (boot/update/time-change → reschedule)
 ```
 
 - **UI layer** — Compose screens read repository `Flow`s via `collectAsState` and one-shot loads via `produceState`; they call `suspend` repository mutators inside `rememberCoroutineScope().launch`. No ViewModels; screen state is local Compose state.
 - **Repository layer** — Kotlin `object` singletons; each owns one DataStore file and (de)serializes a JSON blob via kotlinx.serialization. Pure helper functions (merges, streak math) live here or beside the models for testability.
 - **Content layer** — read-only JSON assets loaded once and cached in memory.
-- **Reminders subsystem** — framework components (receivers, a foreground service, a full-screen activity) driven by the active mode in DataStore.
+- **Reminders subsystem** — framework components (receivers and a foreground service with an ongoing notification) driven by the active mode in DataStore.
 
 ### 2.2 Technology Stack
 - **Language**: Kotlin 2.1; **UI**: Jetpack Compose + Material 3, Navigation-Compose, `material-icons-extended`.
@@ -79,7 +79,7 @@ com.agpeya.app
 │   ├─ HoursRepository             // custom hours, order, hidden, name overrides
 │   ├─ ModesRepository             // reminder modes/entries
 │   └─ HabitsRepository (NEW)      // habits, records, streak math
-├─ reminders/                      // ReminderScheduler, AlarmReceiver, AlarmService, AlarmActivity, SystemEventsReceiver
+├─ reminders/                      // ReminderScheduler, AlarmReceiver, AlarmService, SystemEventsReceiver
 ├─ search/AmharicSearch.kt         // homophone folding + search
 └─ ui/
     ├─ theme/ (Theme, Type)        // fixed brand palette, Ethiopic fonts
@@ -123,7 +123,7 @@ com.agpeya.app
 - **Reading** (`ui/reading`) — loads an hour via `HoursRepository.hourById`, applies `PrayerLayout.visible(base + addedPsalms, layout)`, renders vertical `LazyColumn` or horizontal `HorizontalPager` (pages are `LazyColumn`s so verse taps register); verse tap → highlight palette; contents sheet; font/mode/position persistence.
 - **Search** (`search/AmharicSearch`) — `fold(text)` maps homophone families to a canonical form preserving vowel order; case-insensitive substring over folded haystacks; returns hour/section/snippet.
 - **Personalization** — `LayoutRepository` (+ pure `PrayerLayout`) for per-hour order/hidden/added psalms; `HoursRepository` (+ pure `merge`) for the hour list overlay; `CustomizeHourScreen`/`ManageHoursScreen`; psalm picker searchable by Arabic numeral.
-- **Reminders** — `ReminderScheduler` derives alarms from the active mode; `setAlarmClock` with `SecurityException`→inexact fallback; chain pattern computes next occurrence from time+weekday set; `AlarmReceiver` starts `AlarmService` (foreground, ringing) which shows `AlarmActivity` via full-screen intent; snooze via one-shot alarm; `SystemEventsReceiver` reschedules on boot/update/time change.
+- **Reminders** — `ReminderScheduler` derives alarms from the active mode; `setAlarmClock` with `SecurityException`→inexact fallback; chain pattern computes next occurrence from time+weekday set; `AlarmReceiver` starts `AlarmService` (foreground, ringing) with Open/Snooze/Dismiss notification actions; snooze uses a one-shot alarm; `SystemEventsReceiver` reschedules on boot/update/time change.
 - **Localization/Theme** — `Strings` interface + two objects + `LocalStrings`; `MainActivity.stringsFor(language)`; fixed indigo/gold palette with purpose-built dark scheme.
 
 ---

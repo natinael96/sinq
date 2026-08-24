@@ -19,6 +19,7 @@ import android.os.VibratorManager
 import android.content.pm.ServiceInfo
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import com.agpeya.app.MainActivity
 import com.agpeya.app.R
 import com.agpeya.app.data.AlarmAlert
 import com.agpeya.app.data.AlarmSound
@@ -31,9 +32,8 @@ import kotlinx.coroutines.runBlocking
 
 /**
  * Foreground service that turns a reminder into a real ringing alarm: it plays
- * the device alarm sound on a loop, vibrates, and posts a full-screen-intent
- * notification that launches [AlarmActivity] over the lock screen. It stops
- * when the user dismisses it or after [TIMEOUT_MS].
+ * the device alarm sound on a loop, vibrates, and posts an ongoing high-priority
+ * notification. It stops when the user dismisses it or after [TIMEOUT_MS].
  */
 class AlarmService : Service() {
 
@@ -90,10 +90,12 @@ class AlarmService : Service() {
             val language = runCatching {
                 runBlocking { SettingsRepository.language(this@AlarmService).first() }
             }.getOrDefault(Language.SYSTEM)
-            startRinging(alert, sound)
-            if (language != Language.SYSTEM) {
-                handler.post {
-                    if (activeHourId == hourId) {
+            handler.post {
+                // Dismiss/Snooze may have stopped the service while preferences
+                // were loading. Never let that finished read restart the alarm.
+                if (activeHourId == hourId) {
+                    startRinging(alert, sound)
+                    if (language != Language.SYSTEM) {
                         getSystemService(NotificationManager::class.java).notify(
                             NOTIFICATION_ID,
                             buildNotification(hourId, hourName, stringsFor(language)),
@@ -182,13 +184,12 @@ class AlarmService : Service() {
     }
 
     private fun buildNotification(hourId: String, hourName: String, s: Strings): android.app.Notification {
-        val fullScreen = PendingIntent.getActivity(
+        val open = PendingIntent.getActivity(
             this,
             1,
-            Intent(this, AlarmActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                 putExtra(ReminderScheduler.EXTRA_HOUR_ID, hourId)
-                putExtra(ReminderScheduler.EXTRA_HOUR_NAME, hourName)
             },
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
@@ -207,10 +208,6 @@ class AlarmService : Service() {
             },
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
-        // Android 14+ can revoke full-screen-intent permission; fall back to the
-        // heads-up notification (contentIntent still opens the alarm screen).
-        val canFullScreen = Build.VERSION.SDK_INT < 34 ||
-            getSystemService(NotificationManager::class.java).canUseFullScreenIntent()
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             // "ሰርክ ደርሷል", not "ጊዜው ደርሷል": the hour itself is the summons.
@@ -219,8 +216,8 @@ class AlarmService : Service() {
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setOngoing(true)
             .setAutoCancel(false)
-            .apply { if (canFullScreen) setFullScreenIntent(fullScreen, true) }
-            .setContentIntent(fullScreen)
+            .setContentIntent(open)
+            .addAction(0, s.openShort, open)
             .addAction(0, s.snooze, snooze)
             .addAction(0, s.dismiss, dismiss)
             .build()
@@ -241,6 +238,7 @@ class AlarmService : Service() {
 
     override fun onDestroy() {
         handler.removeCallbacks(autoStop)
+        activeHourId = null
         runCatching { player?.stop() }
         player?.release()
         player = null

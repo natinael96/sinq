@@ -47,7 +47,7 @@ Four functional pillars:
 | Pillar | What it means in code |
 |---|---|
 | **Read** | 8 prayer hours + the complete 150-psalm Psalter, rendered from bundled JSON with Ge'ez verse numerals, two reading modes, five font steps, bookmarks and verse highlights. |
-| **Remind** | Real alarm-clock–grade prayer reminders: exact alarms, a ringing foreground service, a full-screen lock-screen alarm, snooze, and a "did you pray?" follow-up. |
+| **Remind** | Real alarm-clock–grade prayer reminders: exact alarms, a ringing foreground service, an ongoing notification, snooze, and a "did you pray?" follow-up. |
 | **Track** | Daily habit check-offs (per prayer hour + custom habits), a prayer-day count per Ethiopian month or running fast (never a streak), an Ethiopian-calendar contribution heatmap with a fasting-season wash, and today's candle. |
 | **Personalize** | Reorder/hide sections in an hour, add any psalm to any hour, create/rename/hide/reorder whole hours, multiple named reminder "modes", theme + language choice, a local profile name. |
 
@@ -143,8 +143,7 @@ unidirectional state. No ViewModel layer.**
 
 Reminders subsystem (Android framework, outside the Compose tree):
   AlarmManager.setAlarmClock
-        └▶ AlarmReceiver ──▶ AlarmService (foreground, rings)
-                          └▶ AlarmActivity (full-screen, over lock screen)
+        └▶ AlarmReceiver ──▶ AlarmService (foreground, rings + notification)
                           └▶ MarkDoneReceiver ("Done? → Yes" writes the habit record)
   StreakReminderScheduler ──▶ StreakReminderReceiver (nightly nudge, user-set time)
   SystemEventsReceiver (BOOT / MY_PACKAGE_REPLACED / TIME_SET / TZ_CHANGED)
@@ -223,7 +222,6 @@ app/src/main/java/com/agpeya/app/
 │   ├── ReminderScheduler.kt             144  nextOccurrence, rescheduleAll, snooze
 │   ├── AlarmReceiver.kt                  66  Fire → chain next → start service
 │   ├── AlarmService.kt                  264  Ringing FGS + notifications
-│   ├── AlarmActivity.kt                 150  Full-screen lock-screen alarm
 │   ├── MarkDoneReceiver.kt               43  "Done? → Yes" writes the habit record
 │   ├── StreakReminderScheduler.kt        52  Nightly nudge scheduling (user-set time)
 │   ├── StreakReminderReceiver.kt         81  Nudge firing + re-arm
@@ -748,7 +746,7 @@ the Psalter is currently showing today's daily division.
 
 This is the most Android-specific and most defensively written part of the app.
 The goal: a prayer reminder must behave like a real alarm clock — exact, doze-proof,
-audible, and visible over the lock screen — without asking for scary permissions.
+audible, and visible in the notification shade — without asking for scary permissions.
 
 ### 9.1 Permissions declared
 
@@ -756,7 +754,6 @@ audible, and visible over the lock screen — without asking for scary permissio
 <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 <uses-permission android:name="android.permission.VIBRATE" />
-<uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
@@ -919,15 +916,9 @@ phone is on silent, exactly like the clock app.
 **The notification**:
 
 - `CATEGORY_ALARM`, `PRIORITY_MAX`, `setOngoing(true)`, `setAutoCancel(false)`.
-- `setFullScreenIntent(→ AlarmActivity, highPriority = true)` — **guarded**:
-  ```kotlin
-  val canFullScreen = Build.VERSION.SDK_INT < 34 ||
-      getSystemService(NotificationManager::class.java).canUseFullScreenIntent()
-  ```
-  Android 14 can revoke FSI permission; the code degrades to a heads-up
-  notification whose `contentIntent` still opens the alarm screen.
-- Two actions: **Snooze** and **Dismiss**, both `getService` PendingIntents back
-  into this same service.
+- No full-screen intent: the service never launches or wakes an Activity.
+- Three actions: **Open** deep-links `MainActivity` to the hour; **Snooze** and
+  **Dismiss** are `getService` PendingIntents back into this same service.
 
 **The "Done?" follow-up.** When the alarm is dismissed *or* times out,
 `postDonePrompt()` posts a quiet `PRIORITY_DEFAULT` notification asking whether
@@ -947,23 +938,7 @@ matching the alarm itself.
 | Nightly nudge | `streak_reminders` (DEFAULT; channel id is historical) | `7200` |
 | Nightly-nudge alarm request code | — | `9100` |
 
-### 9.7 `AlarmActivity`
-
-A `singleInstance`, `excludeFromRecents`, `taskAffinity=""` activity that shows
-over the lock screen:
-
-```kotlin
-if (Build.VERSION.SDK_INT >= 27) { setShowWhenLocked(true); setTurnScreenOn(true) }
-else window.addFlags(FLAG_SHOW_WHEN_LOCKED or FLAG_TURN_SCREEN_ON or FLAG_KEEP_SCREEN_ON)
-```
-
-Three actions — **Open** (dismisses the service and deep-links `MainActivity` to
-the hour), **Snooze** (+10 min), **Dismiss**. It reads the language as a
-`collectAsState` flow rather than blocking, so the screen never stalls coming up.
-Its palette is hard-coded (deep green ground, gold primary action) rather than
-theme-derived, because it must look right regardless of the user's theme choice.
-
-### 9.8 `MarkDoneReceiver`
+### 9.7 `MarkDoneReceiver`
 
 Tapping **Yes** on the follow-up cancels the notification and idempotently marks
 today's record:
@@ -976,14 +951,14 @@ HabitsRepository.markDone(context, LocalDate.now().toString(), HabitsRepository.
 This is the bridge between the reminders subsystem and the habits subsystem: an
 answered alarm becomes a recorded prayer day without opening the app.
 
-### 9.9 `SystemEventsReceiver`
+### 9.8 `SystemEventsReceiver`
 
 Registered for `BOOT_COMPLETED`, `MY_PACKAGE_REPLACED`, `TIME_SET`,
 `TIMEZONE_CHANGED` — the four events that invalidate every pending alarm. It
 rebuilds the whole schedule and re-arms the nightly nudge, again on a `goAsync()`
 background thread with `runCatching` around the content load.
 
-### 9.10 The nightly nudge
+### 9.9 The nightly nudge
 
 Separate from prayer alarms and deliberately gentler:
 
@@ -1006,7 +981,7 @@ Separate from prayer alarms and deliberately gentler:
 three places: app start (after onboarding), the Settings toggle, and
 `SystemEventsReceiver`.
 
-### 9.11 Notification-permission guidance
+### 9.10 Notification-permission guidance
 
 Three layers of help, because a reminder app that silently doesn't remind is
 worthless:
@@ -1023,8 +998,8 @@ worthless:
    `ACTION_APPLICATION_DETAILS_SETTINGS`, reached from *Reminders not firing?* on
    the Modes screen.
 
-Note that alarms still fire the full-screen intent even without
-`POST_NOTIFICATIONS` — only the visible notification needs the grant.
+Because alarms are notification-only, `POST_NOTIFICATIONS` must be granted for
+their visible controls to appear on Android 13 and later.
 
 ---
 

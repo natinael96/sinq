@@ -228,13 +228,6 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                         onToggle = {
                             scope.launch {
                                 HabitsRepository.toggle(context, todayKey, id)
-                                // Marking an hour prayed moves the የመሃል ጸሎት
-                                // anchor — only when it was turned ON.
-                                val nowDone = HabitsRepository.current(context)
-                                    .records[todayKey]?.contains(id) == true
-                                if (nowDone) {
-                                    com.agpeya.app.reminders.BreathPrayerScheduler.onPrayerRecorded(context)
-                                }
                             }
                         },
                     )

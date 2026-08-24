@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [1.0.5] — 2026-08-24
+
+_versionCode 45 · quieter alarms, daytime breath prayer_
+
+### Changed
+- **Prayer alarms stay in the notification shade.** Ringing reminders no longer
+  launch or wake a full-screen activity; Open, Snooze, and Dismiss remain
+  available directly on the ongoing notification.
+- **Breath prayer follows the waking day.** Its single daily time is now chosen
+  randomly from the active mode's Morning prayer time through 21:00, without
+  being re-rolled by completed prayers or constrained by later prayer alarms.
+
 ## [1.0.4] — 2026-08-24
 
 _versionCode 44 · a clearer Library, an accessible Journey_

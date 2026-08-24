@@ -30,8 +30,6 @@ class MarkDoneReceiver : BroadcastReceiver() {
                         LocalDate.now().toString(),
                         HabitsRepository.hourHabitId(hourId),
                     )
-                    // A recorded prayer re-anchors the የመሃል ጸሎት window.
-                    runCatching { BreathPrayerScheduler.onPrayerRecorded(context) }
                 }
             } finally {
                 pending.finish()
