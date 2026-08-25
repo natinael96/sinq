@@ -28,6 +28,14 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.1.1",
+        title = "Clearer prayer levels",
+        changes = listOf(
+            "Every prayer level now explains exactly how many Psalms it includes.",
+            "Descriptions appear directly in the compact level selector in Amharic or English.",
+        ),
+    ),
+    ReleaseNote(
         version = "1.1.0",
         title = "A cleaner reading journey",
         changes = listOf(

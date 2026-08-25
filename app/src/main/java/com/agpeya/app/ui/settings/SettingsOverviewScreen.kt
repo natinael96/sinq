@@ -98,7 +98,7 @@ fun SettingsScreen(
                 NavRow(s.remindersSettingsTitle, onOpenReminders, subtitle = if (enabledCount == 0) s.remindersOff else s.remindersOn(enabledCount))
                 NavRow(s.settingsGroupData, onOpenData, subtitle = backupRelativeLabel(lastBackupAt, s))
                 NavRow(s.tutorial, onOpenTutorial)
-                NavRow(s.whatsNew, onOpenChangelog, subtitle = "v1.1.0")
+                NavRow(s.whatsNew, onOpenChangelog, subtitle = "v1.1.1")
                 NavRow(s.about, onOpenAbout)
                 Spacer(Modifier.height(8.dp))
             }
@@ -149,6 +149,14 @@ internal fun prayerLevelLabel(level: PrayerLevel): String = when (level) {
     PrayerLevel.GROWTH -> "እድገት"
     PrayerLevel.STEADFAST -> "ጽናት"
     PrayerLevel.FULL -> "ሙሉ"
+}
+
+internal fun prayerLevelDetail(level: PrayerLevel, s: com.agpeya.app.ui.strings.Strings): String = when (level) {
+    PrayerLevel.PSALM_50 -> s.prayerLevelPsalm50Description
+    PrayerLevel.BEGINNING -> s.prayerLevelBeginningDescription
+    PrayerLevel.GROWTH -> s.prayerLevelGrowthDescription
+    PrayerLevel.STEADFAST -> s.prayerLevelSteadfastDescription
+    PrayerLevel.FULL -> s.prayerLevelFullDescription
 }
 
 private fun backupRelativeLabel(epochMillis: Long, s: com.agpeya.app.ui.strings.Strings): String {

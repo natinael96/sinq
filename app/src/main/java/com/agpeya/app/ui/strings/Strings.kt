@@ -364,6 +364,11 @@ interface Strings {
     val settingsGroupPrayer: String
     val prayerLevelTitle: String
     val prayerLevelDescription: String
+    val prayerLevelPsalm50Description: String
+    val prayerLevelBeginningDescription: String
+    val prayerLevelGrowthDescription: String
+    val prayerLevelSteadfastDescription: String
+    val prayerLevelFullDescription: String
     val settingsGroupData: String
     val settingsGroupMore: String
 
@@ -780,6 +785,11 @@ object AmharicStrings : Strings {
     override val settingsGroupPrayer = "ጸሎትና ማስታወሻ"
     override val prayerLevelTitle = "የጸሎት ደረጃ"
     override val prayerLevelDescription = "እንደ ጊዜዎና አቅምዎ የሚነበቡትን መዝሙራት ብዛት ይምረጡ፤ ወንጌል ሁልጊዜ ይነበባል።"
+    override val prayerLevelPsalm50Description = "መዝሙር ፶ ብቻ፤ ከዚያ ሌሎች ጸሎቶችና ወንጌል"
+    override val prayerLevelBeginningDescription = "በእያንዳንዱ ሰዓት 3 መዝሙራት፤ በሌሊት 7"
+    override val prayerLevelGrowthDescription = "በእያንዳንዱ ሰዓት 7 መዝሙራት፤ በሌሊት 14"
+    override val prayerLevelSteadfastDescription = "በእያንዳንዱ ሰዓት 10 መዝሙራት፤ በሌሊት 24"
+    override val prayerLevelFullDescription = "ለእያንዳንዱ ሰዓት የተመደቡት መዝሙራት በሙሉ"
     override val settingsGroupData = "መረጃ"
     override val settingsGroupMore = "ተጨማሪ"
 
@@ -1190,6 +1200,11 @@ object EnglishStrings : Strings {
     override val settingsGroupPrayer = "Prayer and reminders"
     override val prayerLevelTitle = "Prayer level"
     override val prayerLevelDescription = "Choose the number of Psalms for your time and ability. The Gospel is always included."
+    override val prayerLevelPsalm50Description = "Psalm 50 only, followed by the other prayers and Gospel"
+    override val prayerLevelBeginningDescription = "3 Psalms per hour · 7 at Midnight"
+    override val prayerLevelGrowthDescription = "7 Psalms per hour · 14 at Midnight"
+    override val prayerLevelSteadfastDescription = "10 Psalms per hour · 24 at Midnight"
+    override val prayerLevelFullDescription = "Every Psalm assigned to each hour"
     override val settingsGroupData = "Your data"
     override val settingsGroupMore = "More"
 

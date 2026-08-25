@@ -987,7 +987,11 @@ fun PrayerSettingsScreen(onBack: () -> Unit, onOpenManageHours: () -> Unit) {
                 Text(s.prayerLevelDescription, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(Spacing.md))
                 PrayerLevel.entries.forEach { choice ->
-                    SettingsRadioRow(com.agpeya.app.ui.settings.prayerLevelLabel(choice), choice == level) {
+                    SettingsRadioRow(
+                        label = com.agpeya.app.ui.settings.prayerLevelLabel(choice),
+                        selected = choice == level,
+                        subtitle = com.agpeya.app.ui.settings.prayerLevelDetail(choice, s),
+                    ) {
                         scope.launch { SettingsRepository.setPrayerLevel(context, choice) }
                     }
                 }
@@ -1028,11 +1032,18 @@ fun PrayerLevelScreen(onBack: () -> Unit) {
                             onClick = { scope.launch { SettingsRepository.setPrayerLevel(context, level) } },
                         )
                         Spacer(Modifier.width(Spacing.sm))
-                        Text(
-                            com.agpeya.app.ui.settings.prayerLevelLabel(level),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onBackground,
-                        )
+                        Column(Modifier.weight(1f).padding(vertical = Spacing.sm)) {
+                            Text(
+                                com.agpeya.app.ui.settings.prayerLevelLabel(level),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onBackground,
+                            )
+                            Text(
+                                com.agpeya.app.ui.settings.prayerLevelDetail(level, s),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
                 }
             }
@@ -1206,14 +1217,24 @@ private fun ReminderSoundSheetContent(
 }
 
 @Composable
-private fun SettingsRadioRow(label: String, selected: Boolean, onClick: () -> Unit) {
+private fun SettingsRadioRow(
+    label: String,
+    selected: Boolean,
+    subtitle: String? = null,
+    onClick: () -> Unit,
+) {
     Row(
         Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(MaterialTheme.shapes.small).clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         androidx.compose.material3.RadioButton(selected = selected, onClick = onClick)
         Spacer(Modifier.width(Spacing.sm))
-        Text(label, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
+        Column(Modifier.weight(1f).padding(vertical = Spacing.sm)) {
+            Text(label, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
+            subtitle?.let {
+                Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
     }
 }
 
