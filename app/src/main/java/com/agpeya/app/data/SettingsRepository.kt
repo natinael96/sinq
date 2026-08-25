@@ -10,6 +10,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.Serializable
 
 private val Context.settingsDataStore by preferencesDataStore(name = "settings")
 
@@ -61,6 +62,33 @@ enum class MisbakLanguage { GEEZ, AMHARIC }
 /** User preferences: reading mode, font size, theme, keep-screen-on. */
 object SettingsRepository {
 
+    @Serializable
+    data class BackupSettings(
+        val readingMode: String = ReadingMode.VERTICAL.name,
+        val fontStep: Int = DEFAULT_FONT_STEP,
+        val theme: String = ThemeChoice.SYSTEM.name,
+        val readingFont: String = ReadingFont.ABYSSINICA.name,
+        val lineSpacing: String = ReadingLineSpacing.NORMAL.name,
+        val keepScreenOn: Boolean = true,
+        val language: String = Language.SYSTEM.name,
+        val prayerLevel: String = PrayerLevel.FULL.name,
+        val alarmAlert: String = AlarmAlert.SOUND_VIBRATE.name,
+        val alarmSound: String = AlarmSound.ALARM.name,
+        val seatatLanguage: String = SeatatLang.BOTH.name,
+        val misbakLanguage: String = MisbakLanguage.GEEZ.name,
+        val profileName: String = "",
+        val christianName: String = "",
+        val journeyReminder: Boolean = true,
+        val journeyReminderMinute: Int = DEFAULT_STREAK_REMINDER_MIN,
+        val gitsaweReminder: Boolean = true,
+        val breathReminder: Boolean = true,
+        val quietEnabled: Boolean = false,
+        val quietStart: Int = 22 * 60,
+        val quietEnd: Int = 6 * 60,
+        val almsReminders: List<com.agpeya.app.model.SpecialReminder> = emptyList(),
+        val repentanceReminders: List<com.agpeya.app.model.SpecialReminder> = emptyList(),
+    )
+
     private val KEY_READING_MODE = stringPreferencesKey("reading_mode")
     private val KEY_FONT_STEP = intPreferencesKey("font_step")
     private val KEY_FONT_STEP_V2 = intPreferencesKey("font_step_v2")
@@ -111,6 +139,71 @@ object SettingsRepository {
     private val KEY_QUIET_ENABLED = booleanPreferencesKey("quiet_enabled")
     private val KEY_QUIET_START = intPreferencesKey("quiet_start_min")
     private val KEY_QUIET_END = intPreferencesKey("quiet_end_min")
+
+    suspend fun backupSettings(context: Context): BackupSettings {
+        val prefs = context.settingsDataStore.data.first()
+        return BackupSettings(
+            readingMode = prefs[KEY_READING_MODE] ?: ReadingMode.VERTICAL.name,
+            fontStep = fontStep(context).first(),
+            theme = prefs[KEY_THEME] ?: ThemeChoice.SYSTEM.name,
+            readingFont = prefs[KEY_READING_FONT] ?: ReadingFont.ABYSSINICA.name,
+            lineSpacing = prefs[KEY_READING_LINE_SPACING] ?: ReadingLineSpacing.NORMAL.name,
+            keepScreenOn = prefs[KEY_KEEP_SCREEN_ON] ?: true,
+            language = prefs[KEY_LANGUAGE] ?: Language.SYSTEM.name,
+            prayerLevel = prefs[KEY_PRAYER_LEVEL] ?: PrayerLevel.FULL.name,
+            alarmAlert = prefs[KEY_ALARM_ALERT] ?: AlarmAlert.SOUND_VIBRATE.name,
+            alarmSound = prefs[KEY_ALARM_SOUND] ?: AlarmSound.ALARM.name,
+            seatatLanguage = prefs[KEY_SEATAT_LANG] ?: SeatatLang.BOTH.name,
+            misbakLanguage = prefs[KEY_MISBAK_LANGUAGE] ?: MisbakLanguage.GEEZ.name,
+            profileName = prefs[KEY_NAME] ?: "",
+            christianName = prefs[KEY_CHRISTIAN_NAME] ?: "",
+            journeyReminder = prefs[KEY_STREAK_REMINDER] ?: true,
+            journeyReminderMinute = prefs[KEY_STREAK_REMINDER_TIME] ?: DEFAULT_STREAK_REMINDER_MIN,
+            gitsaweReminder = prefs[KEY_GITSAWE_REMINDER] ?: true,
+            breathReminder = prefs[KEY_BREATH_REMINDER] ?: true,
+            quietEnabled = prefs[KEY_QUIET_ENABLED] ?: false,
+            quietStart = prefs[KEY_QUIET_START] ?: 22 * 60,
+            quietEnd = prefs[KEY_QUIET_END] ?: 6 * 60,
+            almsReminders = readReminders(
+                prefs, KEY_ALMS_REMINDERS, KEY_ALMS_REMINDER, false,
+                KEY_ALMS_REMINDER_TIME, DEFAULT_ALMS_REMINDER_MIN,
+                KEY_ALMS_SCHEDULE, com.agpeya.app.model.HabitSchedule.DEFAULT_ALMS,
+            ),
+            repentanceReminders = readReminders(
+                prefs, KEY_REPENTANCE_REMINDERS, KEY_REPENTANCE_REMINDER, true,
+                KEY_REPENTANCE_REMINDER_TIME, DEFAULT_REPENTANCE_REMINDER_MIN,
+                KEY_REPENTANCE_SCHEDULE, com.agpeya.app.model.HabitSchedule.DEFAULT_REPENTANCE,
+            ),
+        )
+    }
+
+    suspend fun restoreSettings(context: Context, value: BackupSettings) {
+        context.settingsDataStore.edit { prefs ->
+            prefs[KEY_READING_MODE] = runCatching { ReadingMode.valueOf(value.readingMode) }.getOrDefault(ReadingMode.VERTICAL).name
+            prefs[KEY_FONT_SIZE_SP] = FONT_STEPS_SP[value.fontStep.coerceIn(FONT_STEPS_SP.indices)]
+            prefs[KEY_THEME] = runCatching { ThemeChoice.valueOf(value.theme) }.getOrDefault(ThemeChoice.SYSTEM).name
+            prefs[KEY_READING_FONT] = runCatching { ReadingFont.valueOf(value.readingFont) }.getOrDefault(ReadingFont.ABYSSINICA).name
+            prefs[KEY_READING_LINE_SPACING] = runCatching { ReadingLineSpacing.valueOf(value.lineSpacing) }.getOrDefault(ReadingLineSpacing.NORMAL).name
+            prefs[KEY_KEEP_SCREEN_ON] = value.keepScreenOn
+            prefs[KEY_LANGUAGE] = runCatching { Language.valueOf(value.language) }.getOrDefault(Language.SYSTEM).name
+            prefs[KEY_PRAYER_LEVEL] = runCatching { PrayerLevel.valueOf(value.prayerLevel) }.getOrDefault(PrayerLevel.FULL).name
+            prefs[KEY_ALARM_ALERT] = runCatching { AlarmAlert.valueOf(value.alarmAlert) }.getOrDefault(AlarmAlert.SOUND_VIBRATE).name
+            prefs[KEY_ALARM_SOUND] = runCatching { AlarmSound.valueOf(value.alarmSound) }.getOrDefault(AlarmSound.ALARM).name
+            prefs[KEY_SEATAT_LANG] = runCatching { SeatatLang.valueOf(value.seatatLanguage) }.getOrDefault(SeatatLang.BOTH).name
+            prefs[KEY_MISBAK_LANGUAGE] = runCatching { MisbakLanguage.valueOf(value.misbakLanguage) }.getOrDefault(MisbakLanguage.GEEZ).name
+            prefs[KEY_NAME] = value.profileName.take(200)
+            prefs[KEY_CHRISTIAN_NAME] = value.christianName.take(200)
+            prefs[KEY_STREAK_REMINDER] = value.journeyReminder
+            prefs[KEY_STREAK_REMINDER_TIME] = value.journeyReminderMinute.coerceIn(0, 1439)
+            prefs[KEY_GITSAWE_REMINDER] = value.gitsaweReminder
+            prefs[KEY_BREATH_REMINDER] = value.breathReminder
+            prefs[KEY_QUIET_ENABLED] = value.quietEnabled
+            prefs[KEY_QUIET_START] = value.quietStart.coerceIn(0, 1439)
+            prefs[KEY_QUIET_END] = value.quietEnd.coerceIn(0, 1439)
+            prefs[KEY_ALMS_REMINDERS] = scheduleJson.encodeToString(value.almsReminders.take(100))
+            prefs[KEY_REPENTANCE_REMINDERS] = scheduleJson.encodeToString(value.repentanceReminders.take(100))
+        }
+    }
 
     /**
      * The reading sizes A−/A+ step through, shared by every reader. The stored

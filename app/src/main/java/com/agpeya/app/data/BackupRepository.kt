@@ -5,6 +5,9 @@ import android.net.Uri
 import com.agpeya.app.model.Bookmark
 import com.agpeya.app.model.HabitsState
 import com.agpeya.app.model.PrayerPerson
+import com.agpeya.app.model.HoursConfig
+import com.agpeya.app.model.HourLayout
+import com.agpeya.app.model.ModesState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -21,7 +24,8 @@ import kotlinx.serialization.json.Json
 object BackupRepository {
 
     /** Bumped only if the shape changes incompatibly; readers tolerate older files. */
-    private const val VERSION = 1
+    private const val VERSION = 2
+    private const val MAX_BACKUP_BYTES = 2 * 1024 * 1024
 
     @Serializable
     data class Backup(
@@ -35,6 +39,11 @@ object BackupRepository {
         val highlights: Map<String, String> = emptyMap(),
         /** Added after v1 shipped; defaulted so older files still decode. */
         val prayerList: List<PrayerPerson> = emptyList(),
+        /** Added in v2. */
+        val modes: ModesState? = null,
+        val hours: HoursConfig? = null,
+        val layouts: Map<String, HourLayout> = emptyMap(),
+        val settings: SettingsRepository.BackupSettings? = null,
     )
 
     private val json = Json {
@@ -51,6 +60,10 @@ object BackupRepository {
             bookmarks = UserDataRepository.bookmarks(context).first(),
             highlights = HighlightRepository.highlights(context).first(),
             prayerList = PrayerListRepository.current(context),
+            modes = ModesRepository.current(context),
+            hours = HoursRepository.current(context),
+            layouts = LayoutRepository.current(context),
+            settings = SettingsRepository.backupSettings(context),
         )
         json.encodeToString(Backup.serializer(), backup)
     }
@@ -123,13 +136,48 @@ object BackupRepository {
             UserDataRepository.mergeBookmarks(context, backup.bookmarks)
             HighlightRepository.merge(context, backup.highlights)
             PrayerListRepository.merge(context, backup.prayerList)
+            backup.modes?.let { ModesRepository.merge(context, it) }
+            backup.hours?.let { HoursRepository.merge(context, it) }
+            LayoutRepository.merge(context, backup.layouts)
+            backup.settings?.let { SettingsRepository.restoreSettings(context, it) }
+            if (backup.modes != null || backup.settings != null || backup.hours != null) {
+                val names = HoursRepository.visibleHours(context).associate { it.id to it.name }
+                com.agpeya.app.reminders.ReminderScheduler.rescheduleAll(context, names)
+                com.agpeya.app.reminders.StreakReminderScheduler.sync(
+                    context, SettingsRepository.streakReminder(context).first(),
+                )
+                com.agpeya.app.reminders.GitsaweReminderScheduler.sync(
+                    context, SettingsRepository.gitsaweReminder(context).first(),
+                )
+                com.agpeya.app.reminders.BreathPrayerScheduler.sync(
+                    context, SettingsRepository.breathReminder(context).first(),
+                )
+                com.agpeya.app.reminders.SpecialHabitReminderScheduler.sync(
+                    context, com.agpeya.app.reminders.SpecialHabit.ALMS,
+                )
+                com.agpeya.app.reminders.SpecialHabitReminderScheduler.sync(
+                    context, com.agpeya.app.reminders.SpecialHabit.REPENTANCE,
+                )
+            }
             true
         }.getOrDefault(false)
     }
 
     private fun parse(context: Context, uri: Uri): Backup? = runCatching {
+        val declared = context.contentResolver.openAssetFileDescriptor(uri, "r")?.use { it.length } ?: -1L
+        if (declared > MAX_BACKUP_BYTES) return null
         val raw = context.contentResolver.openInputStream(uri)?.use {
-            it.readBytes().decodeToString()
+            val output = java.io.ByteArrayOutputStream()
+            val buffer = ByteArray(8 * 1024)
+            var total = 0
+            while (true) {
+                val read = it.read(buffer)
+                if (read < 0) break
+                total += read
+                if (total > MAX_BACKUP_BYTES) return null
+                output.write(buffer, 0, read)
+            }
+            output.toByteArray().decodeToString()
         } ?: return null
         json.decodeFromString(Backup.serializer(), raw)
     }.getOrNull()

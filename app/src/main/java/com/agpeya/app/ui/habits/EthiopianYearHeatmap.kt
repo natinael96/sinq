@@ -72,7 +72,7 @@ fun EthiopianYearHeatmap(
     records: Map<String, Set<String>>,
     today: LocalDate,
     ecYear: Int,
-    selectedDay: LocalDate,
+    selectedDay: LocalDate?,
     maxPossible: Int,
     modifier: Modifier = Modifier,
     onYearChange: (Int) -> Unit,
@@ -245,14 +245,17 @@ fun EthiopianYearHeatmap(
             Text(s.fastLegendLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
-        // Year switcher
+        // Compact year switcher
         Spacer(Modifier.height(4.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = { onYearChange(ecYear - 1) }, enabled = ecYear > APP_EPOCH_EC.year) {
+            IconButton(
+                onClick = { onYearChange(ecYear - 1) },
+                enabled = ecYear > APP_EPOCH_EC.year,
+            ) {
                 Icon(
                     Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                     contentDescription = s.previousYear,
@@ -265,7 +268,10 @@ fun EthiopianYearHeatmap(
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
-            IconButton(onClick = { onYearChange(ecYear + 1) }, enabled = ecYear < currentEc) {
+            IconButton(
+                onClick = { onYearChange(ecYear + 1) },
+                enabled = ecYear < currentEc,
+            ) {
                 Icon(
                     Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = s.nextYear,
@@ -277,18 +283,18 @@ fun EthiopianYearHeatmap(
 
         val selectionStart = selectableRange?.start
         val selectionEnd = selectableRange?.endInclusive
-        if (selectionStart != null && selectionEnd != null && selectableRange.contains(selectedDay)) {
+        if (selectedDay != null && selectionStart != null && selectionEnd != null && selectableRange.contains(selectedDay)) {
             Spacer(Modifier.height(Spacing.sm))
-            Text(
-                text = dayDescription(selectedDay),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.fillMaxWidth(),
-            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
+                Text(
+                    text = dayDescription(selectedDay),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.weight(1f),
+                )
                 IconButton(
                     onClick = { onDaySelect(selectedDay.minusDays(1)) },
                     enabled = selectedDay.isAfter(selectionStart),

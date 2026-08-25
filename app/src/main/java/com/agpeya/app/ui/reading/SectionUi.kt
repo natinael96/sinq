@@ -33,6 +33,7 @@ import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.SaveAlt
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.FormatColorReset
 import androidx.compose.material3.HorizontalDivider
@@ -342,21 +343,26 @@ internal fun HighlightBar(
                         val selected = key == currentColor
                         Box(
                             modifier = Modifier
-                                .size(32.dp)
+                                .size(48.dp)
                                 .clip(CircleShape)
-                                .background(highlightSwatch(key, sinq.highlight(key)))
-                                .then(
-                                    if (selected) Modifier.border(2.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
-                                    else Modifier
-                                )
-                                .semantics {
-                                    contentDescription = "${s.highlight}: ${s.highlightColor(key)}"
-                                }
+                                .semantics { contentDescription = "${s.highlight}: ${s.highlightColor(key)}" }
                                 .clickable {
                                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                     onPick(key)
                                 },
-                        )
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Box(
+                                Modifier
+                                    .size(32.dp)
+                                    .clip(CircleShape)
+                                    .background(highlightSwatch(key, sinq.highlight(key)))
+                                    .then(
+                                        if (selected) Modifier.border(2.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
+                                        else Modifier
+                                    ),
+                            )
+                        }
                     }
                     Spacer(Modifier.weight(1f))
                     IconButton(onClick = { onPick(null) }) {
@@ -379,6 +385,7 @@ internal fun HighlightBar(
                 if (shareText != null) {
                     val ctx = androidx.compose.ui.platform.LocalContext.current
                     val scope = androidx.compose.runtime.rememberCoroutineScope()
+                    val imageBusy = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
                     SelectionActions(
                         onCopy = {
                             com.agpeya.app.ui.common.Sharing.copy(ctx, shareText, s)
@@ -391,7 +398,19 @@ internal fun HighlightBar(
                         onShareImage = shareImage?.let { payload ->
                             {
                                 onDismiss()
-                                scope.launch { com.agpeya.app.ui.common.PassageShare.share(ctx, payload, s) }
+                                if (!imageBusy.value) scope.launch {
+                                    imageBusy.value = true
+                                    try { com.agpeya.app.ui.common.PassageShare.share(ctx, payload, s) } finally { imageBusy.value = false }
+                                }
+                            }
+                        },
+                        onSaveImage = shareImage?.takeIf { android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q }?.let { payload ->
+                            {
+                                onDismiss()
+                                if (!imageBusy.value) scope.launch {
+                                    imageBusy.value = true
+                                    try { com.agpeya.app.ui.common.PassageShare.save(ctx, payload, s) } finally { imageBusy.value = false }
+                                }
                             }
                         },
                     )
@@ -457,6 +476,7 @@ internal fun SelectionShareBar(
                 }
                 if (shareText != null) {
                     val scope = androidx.compose.runtime.rememberCoroutineScope()
+                    val imageBusy = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
                     SelectionActions(
                         onCopy = {
                             com.agpeya.app.ui.common.Sharing.copy(ctx, shareText, s)
@@ -469,7 +489,19 @@ internal fun SelectionShareBar(
                         onShareImage = shareImage?.let { payload ->
                             {
                                 onDismiss()
-                                scope.launch { com.agpeya.app.ui.common.PassageShare.share(ctx, payload, s) }
+                                if (!imageBusy.value) scope.launch {
+                                    imageBusy.value = true
+                                    try { com.agpeya.app.ui.common.PassageShare.share(ctx, payload, s) } finally { imageBusy.value = false }
+                                }
+                            }
+                        },
+                        onSaveImage = shareImage?.takeIf { android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q }?.let { payload ->
+                            {
+                                onDismiss()
+                                if (!imageBusy.value) scope.launch {
+                                    imageBusy.value = true
+                                    try { com.agpeya.app.ui.common.PassageShare.save(ctx, payload, s) } finally { imageBusy.value = false }
+                                }
                             }
                         },
                     )
@@ -484,16 +516,19 @@ private fun ColumnScope.SelectionActions(
     onCopy: () -> Unit,
     onShare: () -> Unit,
     onShareImage: (() -> Unit)?,
+    onSaveImage: (() -> Unit)?,
 ) {
     val s = LocalStrings.current
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-    ) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         SelectionAction(s.copyAction, Icons.Outlined.ContentCopy, onCopy, Modifier.weight(1f))
         SelectionAction(s.shareAction, Icons.Outlined.Share, onShare, Modifier.weight(1f))
-        if (onShareImage != null) {
+    }
+    if (onShareImage != null) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
             SelectionAction(s.shareAsImage, Icons.Outlined.Image, onShareImage, Modifier.weight(1f))
+            if (onSaveImage != null) {
+                SelectionAction(s.saveImage, Icons.Outlined.SaveAlt, onSaveImage, Modifier.weight(1f))
+            }
         }
     }
 }

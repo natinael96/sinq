@@ -48,6 +48,7 @@ fun SettingsScreen(
     onOpenReminders: () -> Unit,
     onOpenData: () -> Unit,
     onOpenTutorial: () -> Unit,
+    onOpenChangelog: () -> Unit,
     onOpenAbout: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -97,6 +98,7 @@ fun SettingsScreen(
                 NavRow(s.remindersSettingsTitle, onOpenReminders, subtitle = if (enabledCount == 0) s.remindersOff else s.remindersOn(enabledCount))
                 NavRow(s.settingsGroupData, onOpenData, subtitle = backupRelativeLabel(lastBackupAt, s))
                 NavRow(s.tutorial, onOpenTutorial)
+                NavRow(s.whatsNew, onOpenChangelog, subtitle = "v1.1.0")
                 NavRow(s.about, onOpenAbout)
                 Spacer(Modifier.height(8.dp))
             }

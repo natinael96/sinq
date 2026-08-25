@@ -20,11 +20,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
@@ -50,7 +50,7 @@ enum class Tab(val route: String, val icon: ImageVector, val selectedIcon: Image
     // A path, not a flame: the tab is about where you have walked, not what
     // you might lose. (Route "journey" replaced "streak" with the rename.)
     JOURNEY("journey", Icons.Outlined.Route, Icons.Filled.Route),
-    LIBRARY("library", Icons.Outlined.MenuBook, Icons.Filled.MenuBook),
+    LIBRARY("library", Icons.AutoMirrored.Outlined.MenuBook, Icons.AutoMirrored.Filled.MenuBook),
     SETTINGS("settings", Icons.Outlined.Settings, Icons.Filled.Settings),
 }
 

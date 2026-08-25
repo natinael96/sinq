@@ -33,9 +33,9 @@ Sinq brings the Agpeya's seven canonical prayer hours and the complete Psalter (
 - **Bookmarks** — prayer sections, psalms, scripture chapters and ስንክሳር passages, in one list.
 - **Highlights** — tap any verse to colour it (four colours), shared across every screen where the verse appears.
 - **Search** — homophone-tolerant Amharic search (ሀ/ሐ/ኀ, ሰ/ሠ, ጸ/ፀ … treated as equal) across the prayers, Psalter, New Testament, ስንክሳር and ውዳሴ ማርያም.
-- **Copy and share** — a verse, a whole ግጻዌ day, or a scripture chapter.
-- **Backup and restore** — streaks, bookmarks and highlights to a file; restoring merges, so it cannot erase newer progress.
-- **Habits & streaks** — track daily practices, keep a streak, and share it as an image card.
+- **Copy, share and save** — export a verse, focused reading, selected ግጻዌ office or scripture chapter as text or paginated image cards; save images to the gallery on Android 10+.
+- **Backup and restore** — Journey history, bookmarks, highlights, prayer lists, custom hours, reminder modes and settings to a file.
+- **Journey & habits** — track daily prayer and personal practices without punitive streaks or broken-run language.
 - **Reminders** — prayer-time notifications with per-mode configuration, plus a nightly streak nudge and a morning ግጻዌ reading.
 - **Home-screen widget** — today's ምስባክ and ወንጌል at a glance.
 

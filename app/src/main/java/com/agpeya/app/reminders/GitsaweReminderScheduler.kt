@@ -34,11 +34,7 @@ object GitsaweReminderScheduler {
         val pi = pendingIntent(context)
         // Exact + doze-exempt so the morning nudge lands on time (see the streak
         // scheduler note); fall back to inexact if a device ever refuses.
-        try {
-            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
-        } catch (_: SecurityException) {
-            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
-        }
+        am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
     }
 
     fun cancel(context: Context) {

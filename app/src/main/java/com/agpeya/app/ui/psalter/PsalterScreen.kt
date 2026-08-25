@@ -65,6 +65,7 @@ import com.agpeya.app.ui.reading.SectionView
 import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.common.rememberCurrentDate
 import com.agpeya.app.ui.common.StatePanel
 import com.agpeya.app.ui.reading.ReadingColumn
 import com.agpeya.app.ui.theme.IconSize
@@ -127,7 +128,7 @@ fun PsalterScreen(
 
     // Opened from a bookmark: show the whole psalter so the target psalm exists.
     var daily by remember { mutableStateOf(initialPsalmIndex < 0) }
-    val today = remember { LocalDate.now() }
+    val today by rememberCurrentDate()
     val range = remember(today) { dailyRange(today.dayOfWeek) }
     // derivedStateOf (not a plain remember) so the pager/list lambdas below read
     // the current list at call time — a recomputed local would leave pageCount and

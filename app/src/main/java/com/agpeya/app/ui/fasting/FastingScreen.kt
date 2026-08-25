@@ -29,6 +29,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +43,7 @@ import com.agpeya.app.ui.strings.Strings
 import com.agpeya.app.ui.common.HeroCard
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.common.SinqCard
+import com.agpeya.app.ui.common.rememberCurrentDate
 import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.sinqColors
 import java.time.LocalDate
@@ -54,7 +56,7 @@ import java.time.LocalDate
 @Composable
 fun FastingScreen(onBack: () -> Unit) {
     val s = LocalStrings.current
-    val today = remember { LocalDate.now() }
+    val today by rememberCurrentDate()
     val ethYear = remember(today) { EthiopianDate.from(today).year }
     val fasts = remember(ethYear) {
         runCatching { FastingCalendar.fastsOf(ethYear) }.getOrDefault(emptyList())
@@ -78,7 +80,7 @@ fun FastingScreen(onBack: () -> Unit) {
         ) {
             item {
                 Spacer(Modifier.height(Spacing.sm))
-                TodayCard(activeFast, weeklyFast, s)
+                TodayCard(activeFast, weeklyFast, today, s)
                 Spacer(Modifier.height(Spacing.xxl))
                 Text(
                     s.fastingYearHeader(ethYear),
@@ -108,6 +110,7 @@ fun FastingScreen(onBack: () -> Unit) {
 private fun TodayCard(
     fast: FastingCalendar.Fast?,
     weeklyFast: Boolean,
+    today: LocalDate,
     s: Strings,
 ) {
     val fasting = fast != null || weeklyFast
@@ -129,7 +132,7 @@ private fun TodayCard(
         if (fast != null) {
             Spacer(Modifier.height(Spacing.xxs))
             Text(
-                text = s.fastingDayOf(fast.dayNumber(LocalDate.now()), fast.days),
+                text = s.fastingDayOf(fast.dayNumber(today), fast.days),
                 style = MaterialTheme.typography.bodyMedium,
                 color = if (fasting) sinq.onHeroMuted else MaterialTheme.colorScheme.onSurfaceVariant,
             )

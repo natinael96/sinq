@@ -65,11 +65,7 @@ object SpecialHabitReminderScheduler {
             // Exact + doze-exempt: inexact alarms get throttled once the app
             // goes App-Standby "rare", and a weekly reminder that lands a day
             // late is worse than none.
-            try {
-                am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
-            } catch (_: SecurityException) {
-                am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
-            }
+            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
             armed += entry.id
         }
         SettingsRepository.setScheduledIds(app, idsKey, armed)
@@ -81,11 +77,7 @@ object SpecialHabitReminderScheduler {
         val triggerAt = at.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         val am = context.getSystemService(AlarmManager::class.java)
         val pi = pendingIntent(context, habit, entry.id)
-        try {
-            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
-        } catch (_: SecurityException) {
-            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
-        }
+        am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
     }
 
     /** Next due day whose firing time is still ahead of [now], or null. */

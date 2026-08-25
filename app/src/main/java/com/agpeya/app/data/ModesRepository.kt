@@ -67,6 +67,19 @@ object ModesRepository {
 
     suspend fun current(context: Context): ModesState = state(context).first()
 
+    /** Restore modes without replacing locally-created modes. A fresh default state adopts the backup fully. */
+    suspend fun merge(context: Context, restored: ModesState) {
+        val current = current(context)
+        if (current == defaultState()) {
+            val valid = restored.modes.ifEmpty { listOf(builtInMode()) }
+            val active = restored.activeModeId.takeIf { id -> valid.any { it.id == id } } ?: BUILT_IN_ID
+            write(context, ModesState(activeModeId = active, modes = valid))
+            return
+        }
+        val have = current.modes.mapTo(mutableSetOf()) { it.id }
+        write(context, current.copy(modes = current.modes + restored.modes.filterNot { it.id in have || it.isBuiltIn }))
+    }
+
     private suspend fun write(context: Context, state: ModesState) {
         context.modesDataStore.edit { it[KEY_STATE] = json.encodeToString(ModesState.serializer(), state) }
     }

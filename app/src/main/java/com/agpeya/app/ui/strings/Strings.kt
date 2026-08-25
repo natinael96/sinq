@@ -165,6 +165,7 @@ interface Strings {
     val langEnglish: String
     val customizePrayers: String
     val reminderModes: String
+    val whatsNew: String
     val about: String
     val alarmSection: String
     val alertSoundVibrate: String
@@ -378,6 +379,10 @@ interface Strings {
 
     /** The "share this passage as a PNG card" action, next to copy/share. */
     val shareAsImage: String
+    val saveImage: String
+    val imageSaved: String
+    val imagePreparing: String
+    val imageSaveFailed: String
     val shareFailed: String
 
     /** የዕለቱ ቅዳሴ — the day's appointed anaphora, at the foot of the ግጻዌ. */
@@ -591,6 +596,7 @@ object AmharicStrings : Strings {
     override val langEnglish = "English"
     override val customizePrayers = "ጸሎቶችን አስተካክል"
     override val reminderModes = "የጸሎት ማንቂያ ሁነታዎች"
+    override val whatsNew = "ምን አዲስ ነገር አለ"
     override val about = "ስለ መተግበሪያው"
     override val alarmSection = "ማንቂያ"
     override val alertSoundVibrate = "ድምፅና ንዝረት"
@@ -786,6 +792,10 @@ object AmharicStrings : Strings {
         "ጽሑፉ በዚህ እትም ውስጥ የለም። የቀሩት ክፍሎች እንደተለመደው ይሠራሉ።"
 
     override val shareAsImage = "እንደ ምስል አጋራ"
+    override val saveImage = "ምስሉን አስቀምጥ"
+    override val imageSaved = "ምስሉ በPictures/Sinq ተቀምጧል"
+    override val imagePreparing = "ምስል በመዘጋጀት ላይ…"
+    override val imageSaveFailed = "ምስሉን ማስቀመጥ አልተቻለም። እንደገና ይሞክሩ።"
     override val shareFailed = "ማጋራት አልተቻለም። እንደገና ይሞክሩ።"
     override val kidaseHeader = "የዕለቱ ቅዳሴ"
 
@@ -979,6 +989,7 @@ object EnglishStrings : Strings {
     override val langEnglish = "English"
     override val customizePrayers = "Customize prayers"
     override val reminderModes = "Prayer reminder modes"
+    override val whatsNew = "What's new"
     override val about = "About"
     override val alarmSection = "Alarm"
     override val alertSoundVibrate = "Sound & vibrate"
@@ -1191,6 +1202,10 @@ object EnglishStrings : Strings {
         "The text isn't part of this edition. Everything else still works as usual."
 
     override val shareAsImage = "Share as image"
+    override val saveImage = "Save image"
+    override val imageSaved = "Saved to Pictures/Sinq"
+    override val imagePreparing = "Preparing image…"
+    override val imageSaveFailed = "Couldn't save the image. Please try again."
     override val shareFailed = "Couldn't share this passage. Please try again."
     override val kidaseHeader = "Kidase of the day"
 

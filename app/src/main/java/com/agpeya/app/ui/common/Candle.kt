@@ -86,8 +86,8 @@ fun Candle(
             drawPath(
                 Path().apply {
                     moveTo(cx, tipY)
-                    quadraticBezierTo(cx + fw / 2f, midY, cx, base)
-                    quadraticBezierTo(cx - fw / 2f, midY, cx, tipY)
+                    quadraticTo(cx + fw / 2f, midY, cx, base)
+                    quadraticTo(cx - fw / 2f, midY, cx, tipY)
                     close()
                 },
                 color = flameColor.copy(alpha = flame),

@@ -7,6 +7,7 @@ import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.SaveAlt
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -22,6 +23,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
+import android.os.Build
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.IconSize
 import kotlinx.coroutines.launch
@@ -44,6 +47,7 @@ fun ShareMenuAction(
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
     var open by remember { mutableStateOf(false) }
+    var imageBusy by remember { mutableStateOf(false) }
 
     Box {
         IconButton(onClick = { open = true }, enabled = enabled) {
@@ -62,9 +66,23 @@ fun ShareMenuAction(
                 open = false
                 payload()?.let { Sharing.share(context, it.asText(), it.title ?: it.kicker, s) }
             }
-            MenuItem(s.shareAsImage, Icons.Outlined.Image) {
+            MenuItem(s.shareAsImage, Icons.Outlined.Image, enabled = !imageBusy) {
                 open = false
-                payload()?.let { scope.launch { PassageShare.share(context, it, s) } }
+                payload()?.let { value -> scope.launch {
+                    imageBusy = true
+                    Toast.makeText(context, s.imagePreparing, Toast.LENGTH_SHORT).show()
+                    try { PassageShare.share(context, value, s) } finally { imageBusy = false }
+                } }
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                MenuItem(s.saveImage, Icons.Outlined.SaveAlt, enabled = !imageBusy) {
+                    open = false
+                    payload()?.let { value -> scope.launch {
+                        imageBusy = true
+                        Toast.makeText(context, s.imagePreparing, Toast.LENGTH_SHORT).show()
+                        try { PassageShare.save(context, value, s) } finally { imageBusy = false }
+                    } }
+                }
             }
         }
     }
@@ -90,6 +108,7 @@ fun ReaderToolsMenu(
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
     var open by remember { mutableStateOf(false) }
+    var imageBusy by remember { mutableStateOf(false) }
 
     Box {
         IconButton(onClick = { open = true }) {
@@ -157,22 +176,42 @@ fun ReaderToolsMenu(
                 DropdownMenuItem(
                     text = { Text(s.shareAsImage) },
                     leadingIcon = { Icon(Icons.Outlined.Image, contentDescription = null) },
-                    enabled = shareEnabled,
+                    enabled = shareEnabled && !imageBusy,
                     onClick = {
                         open = false
-                        sharePayload()?.let { payload -> scope.launch { PassageShare.share(context, payload, s) } }
+                        sharePayload()?.let { payload -> scope.launch {
+                            imageBusy = true
+                            Toast.makeText(context, s.imagePreparing, Toast.LENGTH_SHORT).show()
+                            try { PassageShare.share(context, payload, s) } finally { imageBusy = false }
+                        } }
                     },
                 )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    DropdownMenuItem(
+                        text = { Text(s.saveImage) },
+                        leadingIcon = { Icon(Icons.Outlined.SaveAlt, contentDescription = null) },
+                        enabled = shareEnabled && !imageBusy,
+                        onClick = {
+                            open = false
+                            sharePayload()?.let { payload -> scope.launch {
+                                imageBusy = true
+                                Toast.makeText(context, s.imagePreparing, Toast.LENGTH_SHORT).show()
+                                try { PassageShare.save(context, payload, s) } finally { imageBusy = false }
+                            } }
+                        },
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun MenuItem(label: String, icon: ImageVector, onClick: () -> Unit) {
+private fun MenuItem(label: String, icon: ImageVector, enabled: Boolean = true, onClick: () -> Unit) {
     DropdownMenuItem(
         text = { Text(label) },
         leadingIcon = { Icon(icon, contentDescription = null, modifier = Modifier.size(IconSize.medium)) },
+        enabled = enabled,
         onClick = onClick,
     )
 }

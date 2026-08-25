@@ -1,9 +1,14 @@
-# Sinq (ስንቅ) Android App — Detailed Master Plan
+# Sinq (ስንቅ) Android App — Historical Master Plan
+
+> **Status:** archived planning record. This document describes the original V1 scope and
+> architecture and is no longer the current product contract. For shipped behavior use
+> `README.md`, `docs/IMPLEMENTATION.md`, and the source/tests. Items marked “future” below may
+> already be implemented.
 
 > Ethiopian Orthodox Hours of Prayer app, fully in Amharic.
 > Solo developer learning Kotlin + Android while building.
 > Target: V1 on Google Play in ~12 weeks.
-> This document is the single source of truth. When tempted to add scope, re-read §1.3.
+> This document is retained for decision history, not as the current source of truth.
 
 > **Renamed 2026-07-16:** the app is now **Sinq (ስንቅ — "provisions for the journey")**; repo:
 > [github.com/natinael96/---sinq](https://github.com/natinael96/---sinq). Where "Agpeya" appears

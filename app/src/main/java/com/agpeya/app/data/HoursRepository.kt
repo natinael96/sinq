@@ -36,6 +36,20 @@ object HoursRepository {
 
     suspend fun current(context: Context): HoursConfig = config(context).first()
 
+    suspend fun merge(context: Context, restored: HoursConfig) {
+        update(context) { current ->
+            if (current == DEFAULT) restored else {
+                val have = current.custom.mapTo(mutableSetOf()) { it.id }
+                current.copy(
+                    custom = current.custom + restored.custom.filterNot { it.id in have },
+                    order = (current.order + restored.order).distinct(),
+                    hidden = current.hidden + restored.hidden,
+                    names = restored.names + current.names,
+                )
+            }
+        }
+    }
+
     private suspend fun update(context: Context, transform: (HoursConfig) -> HoursConfig) {
         context.hoursDataStore.edit { prefs ->
             prefs[KEY] = json.encodeToString(HoursConfig.serializer(), transform(decode(prefs[KEY])))

@@ -44,6 +44,7 @@ import com.agpeya.app.ui.modes.ModesScreen
 import com.agpeya.app.ui.reading.ReadingScreen
 import com.agpeya.app.ui.search.SearchScreen
 import com.agpeya.app.ui.settings.AboutScreen
+import com.agpeya.app.ui.settings.ChangelogScreen
 import com.agpeya.app.ui.settings.SettingsScreen
 import com.agpeya.app.ui.theme.AgpeyaTheme
 import com.agpeya.app.ui.theme.Motion
@@ -499,6 +500,7 @@ private fun AgpeyaNavHost(
                 onOpenReminders = { navController.navigate("settings/reminders") { launchSingleTop = true } },
                 onOpenData = { navController.navigate("settings/data") { launchSingleTop = true } },
                 onOpenTutorial = { navController.navigate("tutorial") { launchSingleTop = true } },
+                onOpenChangelog = { navController.navigate("changelog") { launchSingleTop = true } },
                 onOpenAbout = { navController.navigate("about") { launchSingleTop = true } },
             )
         }
@@ -588,6 +590,9 @@ private fun AgpeyaNavHost(
         }
         composable("tutorial") {
             com.agpeya.app.ui.intro.TutorialScreen(onDone = { navController.popBackStack() })
+        }
+        composable("changelog") {
+            ChangelogScreen(onBack = { navController.popBackStack() })
         }
         composable("about") {
             AboutScreen(onBack = { navController.popBackStack() })

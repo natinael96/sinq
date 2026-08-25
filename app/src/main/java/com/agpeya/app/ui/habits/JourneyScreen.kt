@@ -1,7 +1,6 @@
 package com.agpeya.app.ui.habits
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -58,7 +57,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextAlign
 import com.agpeya.app.ui.common.rememberCurrentDate
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.strings.Strings
@@ -125,8 +123,8 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
     }
     val currentEcYear = remember(today) { EthiopianDate.from(today).year }
     var displayedEcYear by rememberSaveable { androidx.compose.runtime.mutableIntStateOf(currentEcYear) }
-    var selectedEpochDay by rememberSaveable { androidx.compose.runtime.mutableLongStateOf(today.toEpochDay()) }
-    val selectedDay = LocalDate.ofEpochDay(selectedEpochDay)
+    var selectedEpochDay by rememberSaveable { androidx.compose.runtime.mutableStateOf<Long?>(null) }
+    val selectedDay = selectedEpochDay?.let(LocalDate::ofEpochDay)
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -136,18 +134,18 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.md),
+            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.sm),
         ) {
             item {
                 Text(s.journeyTitle, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
-                Spacer(Modifier.height(Spacing.lg))
+                Spacer(Modifier.height(Spacing.md))
                 // The one hero on this screen: today's candle and the period's
                 // count of days prayed. Restrained on purpose — the point is a
                 // life of prayer, not a score, and the wording stays true
                 // however many days were missed.
                 HeroCard(
                     glow = summary.prayedToday,
-                    contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.xxl),
+                    contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.lg),
                 ) {
                     Column(Modifier.weight(1f)) {
                         Text(
@@ -175,7 +173,7 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                         modifier = Modifier.size(width = 30.dp, height = 52.dp),
                     )
                 }
-                Spacer(Modifier.height(Spacing.xxl))
+                Spacer(Modifier.height(Spacing.xl))
                 SectionHeader(s.todayLabel)
                 Spacer(Modifier.height(Spacing.xs))
             }
@@ -210,7 +208,9 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                         modifier = Modifier.weight(1f),
                     )
                     Text(
-                        text = "$doneHours/${hourItems.size}",
+                        text = "$doneHours/${hourItems.size} · " + s.daysThisMonth(
+                            HabitsRepository.prayerDaysBetween(state.records, monthStart, today),
+                        ),
                         style = MaterialTheme.typography.labelMedium,
                         color = if (doneHours > 0) MaterialTheme.colorScheme.secondary
                         else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -224,6 +224,9 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                     CheckRow(
                         name = name,
                         done = id in (state.records[todayKey] ?: emptySet()),
+                        detail = s.daysThisMonth(
+                            HabitsRepository.habitDaysBetween(state.records, id, monthStart, today),
+                        ),
                         indented = true,
                         onToggle = {
                             scope.launch {
@@ -239,6 +242,9 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                 CheckRow(
                     name = name,
                     done = id in (state.records[todayKey] ?: emptySet()),
+                    detail = s.daysThisMonth(
+                        HabitsRepository.habitDaysBetween(state.records, id, monthStart, today),
+                    ),
                     indented = false,
                     onToggle = { scope.launch { HabitsRepository.toggle(context, todayKey, id) } },
                 )
@@ -247,7 +253,7 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
             // The year heatmap is the historical view — the story is density
             // and return across the Church's year, not any one unbroken run.
             item {
-                Spacer(Modifier.height(Spacing.xxl))
+                Spacer(Modifier.height(Spacing.xl))
                 SectionHeader(s.yearJourneyHeader)
                 Spacer(Modifier.height(Spacing.md))
                 EthiopianYearHeatmap(
@@ -259,54 +265,16 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     onYearChange = { year ->
                         displayedEcYear = year
-                        selectedEpochDay = if (year == currentEcYear) today.toEpochDay()
-                        else EthiopianDate(year, 1, 1).toGregorian().toEpochDay()
+                        selectedEpochDay = null
                     },
                     onDaySelect = { selectedEpochDay = it.toEpochDay() },
                 )
-                Spacer(Modifier.height(Spacing.xxl))
-                SectionHeader(s.habitsHeader)
-                Spacer(Modifier.height(Spacing.xs))
-            }
-
-            // Private per-habit records: days kept this month. Distinct days,
-            // no runs, no bests — self-knowledge rather than a scoreboard.
-            item {
-                StatRow(
-                    name = s.habitPrayer,
-                    detail = s.daysThisMonth(
-                        HabitsRepository.prayerDaysBetween(state.records, monthStart, today),
-                    ),
-                    indented = false,
-                )
-            }
-            if (prayersExpanded) {
-                items(hourItems.size, key = { "stat_${hourItems[it].first}" }) { i ->
-                    val (id, name) = hourItems[i]
-                    StatRow(
-                        name = name,
-                        detail = s.daysThisMonth(
-                            HabitsRepository.habitDaysBetween(state.records, id, monthStart, today),
-                        ),
-                        indented = true,
-                    )
-                }
-            }
-            items(habitItems.size, key = { "stat_${habitItems[it].first}" }) { i ->
-                val (id, name) = habitItems[i]
-                StatRow(
-                    name = name,
-                    detail = s.daysThisMonth(
-                        HabitsRepository.habitDaysBetween(state.records, id, monthStart, today),
-                    ),
-                    indented = false,
-                )
             }
 
             item {
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(Spacing.xl))
                 NavRow(s.manageHabits, onClick = onManageHabits)
-                Spacer(Modifier.height(Spacing.xxl))
+                Spacer(Modifier.height(Spacing.xl))
             }
         }
     }
@@ -316,6 +284,7 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
 private fun CheckRow(
     name: String,
     done: Boolean,
+    detail: String,
     indented: Boolean,
     onToggle: () -> Unit,
 ) {
@@ -342,7 +311,7 @@ private fun CheckRow(
                     onToggle()
                 },
             )
-            .padding(vertical = Spacing.md)
+            .padding(vertical = Spacing.sm)
             .padding(start = if (indented) 40.dp else 0.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -358,34 +327,14 @@ private fun CheckRow(
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.weight(1f),
-        )
-    }
-}
-
-@Composable
-private fun StatRow(name: String, detail: String, indented: Boolean) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 10.dp)
-            .padding(start = if (indented) 40.dp else 0.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            name,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.weight(1f),
-            maxLines = 2,
+            maxLines = 1,
         )
         Spacer(Modifier.width(Spacing.md))
         Text(
             text = detail,
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.End,
-            maxLines = 2,
+            maxLines = 1,
         )
     }
 }

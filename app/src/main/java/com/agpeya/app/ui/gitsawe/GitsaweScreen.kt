@@ -77,8 +77,9 @@ import com.agpeya.app.ui.common.liturgicalSeasonLabel
 import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.common.LoadingPanel
 import com.agpeya.app.ui.common.SelectPill
-import com.agpeya.app.ui.common.SinqCard
+import com.agpeya.app.ui.common.NavRow
 import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.common.rememberCurrentDate
 import com.agpeya.app.ui.common.StatePanel
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.IconSize
@@ -114,6 +115,7 @@ fun GitsaweScreen(
     // The day being viewed, as an epoch-day so it survives rotation.
     var epochDay by rememberSaveable { mutableLongStateOf(LocalDate.now().toEpochDay()) }
     var showPicker by rememberSaveable { mutableStateOf(false) }
+    val currentDay by rememberCurrentDate()
     val date = LocalDate.ofEpochDay(epochDay)
     val readings by produceState<DayReadings?>(initialValue = null, epochDay) {
         value = GitsaweRepository.readingsFor(context, LocalDate.ofEpochDay(epochDay))
@@ -169,14 +171,13 @@ fun GitsaweScreen(
                 item(key = "day") {
                     DayNavigator(
                         date = date,
+                        today = currentDay,
                         onPrevious = { epochDay-- },
                         onNext = { epochDay++ },
-                        onToday = { epochDay = LocalDate.now().toEpochDay() },
-                        onPick = { showPicker = true },
+                        onToday = { epochDay = currentDay.toEpochDay() },
                     )
                 }
                 item(key = "sinksar") {
-                    Spacer(Modifier.height(Spacing.sm))
                     SynaxariumCard(onClick = { onOpenSynaxarium(epochDay) })
                 }
                 if (active == null) {
@@ -205,7 +206,7 @@ fun GitsaweScreen(
                                     style = MaterialTheme.typography.titleMedium
                                         .inReadingFont(),
                                     color = MaterialTheme.colorScheme.onBackground,
-                                    modifier = Modifier.padding(top = Spacing.md, bottom = Spacing.xs),
+                                    modifier = Modifier.padding(top = Spacing.xs, bottom = Spacing.xxs),
                                 )
                             }
                         }
@@ -220,7 +221,7 @@ fun GitsaweScreen(
                         item(key = "kidase") { KidaseSection(chants) }
                     }
                 }
-                item { Spacer(Modifier.height(Spacing.huge)) }
+                item { Spacer(Modifier.height(Spacing.xl)) }
             }
         }
     }
@@ -281,7 +282,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.serviceSection(
 @Composable
 private fun ServiceHeader(label: String) {
     Row(
-        Modifier.fillMaxWidth().padding(top = Spacing.xxl, bottom = Spacing.sm),
+        Modifier.fillMaxWidth().padding(top = Spacing.xl, bottom = Spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -315,7 +316,7 @@ private fun KidaseSection(chants: List<String>) {
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .padding(vertical = Spacing.sm, horizontal = Spacing.xs),
+                    .padding(vertical = Spacing.xs, horizontal = Spacing.xs),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
@@ -323,7 +324,7 @@ private fun KidaseSection(chants: List<String>) {
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.secondary,
                 )
-                Spacer(Modifier.width(Spacing.md))
+                Spacer(Modifier.width(Spacing.sm))
                 androidx.compose.foundation.text.selection.SelectionContainer {
                     Text(
                         name,
@@ -372,23 +373,24 @@ private fun ReadingRow(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = Spacing.sm)
             .then(if (clickable) Modifier.clickable { onOpenReading(target!!, role) } else Modifier),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(10.dp),
         color = if (isMisbak) MaterialTheme.colorScheme.secondary.copy(alpha = 0.10f)
-        else MaterialTheme.colorScheme.surfaceContainerLow,
-        border = BorderStroke(1.dp, if (isMisbak) MaterialTheme.colorScheme.secondary.copy(alpha = 0.32f) else MaterialTheme.colorScheme.outlineVariant),
+        else Color.Transparent,
+        border = if (isMisbak) BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.32f)) else null,
     ) {
-        Column(Modifier.padding(Spacing.lg)) {
+        Column(Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text(role, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-                    Text(
-                        if (verse != null) verseRef(verse) else "—",
-                        style = MaterialTheme.typography.titleSmall.inReadingFont(),
-                        color = if (clickable) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                Text(role, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                Spacer(Modifier.width(Spacing.sm))
+                Text(
+                    if (verse != null) verseRef(verse) else "—",
+                    style = MaterialTheme.typography.titleSmall.inReadingFont(),
+                    color = if (clickable) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
                 if (isMisbak) {
                     SelectPill(
                         label = if (misbakLanguage == MisbakLanguage.GEEZ) s.wudaseLangGeez else s.wudaseLangAmharic,
@@ -404,12 +406,12 @@ private fun ReadingRow(
                 }
             }
             preview?.takeIf { it.isNotBlank() }?.let {
-                Spacer(Modifier.height(Spacing.sm))
+                Spacer(Modifier.height(Spacing.xs))
                 Text(
                     it,
                     style = MaterialTheme.typography.bodyMedium.inReadingFont(),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 3,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
@@ -422,22 +424,22 @@ private fun ReadingRow(
 }
 
 @Composable
-private fun DayNavigator(date: LocalDate, onPrevious: () -> Unit, onNext: () -> Unit, onToday: () -> Unit, onPick: () -> Unit) {
+private fun DayNavigator(date: LocalDate, today: LocalDate, onPrevious: () -> Unit, onNext: () -> Unit, onToday: () -> Unit) {
     val s = LocalStrings.current
-    val today = remember { LocalDate.now() }
-    Column(Modifier.fillMaxWidth().padding(top = Spacing.md, bottom = Spacing.sm), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(s.gitsaweTitle, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onBackground)
-        Text(
-            formatEthiopianWithGregorian(date, s),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(Modifier.height(Spacing.xs))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+    Column(Modifier.fillMaxWidth().padding(vertical = Spacing.xxs), horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onPrevious) { Icon(Icons.AutoMirrored.Outlined.KeyboardArrowLeft, s.previousDay) }
-            TextButton(onClick = if (date == today) onPick else onToday) {
-                Text(if (date == today) s.gitsaweChangeDay else s.todayLabel)
+            Text(
+                text = formatEthiopianWithGregorian(date, s),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            if (date != today) {
+                TextButton(onClick = onToday) { Text(s.todayLabel) }
             }
             IconButton(onClick = onNext) { Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, s.nextDay) }
         }
@@ -455,35 +457,14 @@ private fun verseRef(v: VerseRef): String = buildString {
 @Composable
 private fun SynaxariumCard(onClick: () -> Unit) {
     val s = LocalStrings.current
-    SinqCard(onClick = onClick) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(
-                    s.synaxariumKicker,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                )
-                Text(
-                    s.synaxariumTitle,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-            }
-            Icon(
-                Icons.AutoMirrored.Outlined.KeyboardArrowRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(IconSize.medium),
-            )
-        }
-    }
+    NavRow(title = s.synaxariumKicker, onClick = onClick)
 }
 
 /** Which office the day's readings are being shown from (daily / seasonal / monthly). */
 @Composable
 private fun SourceSwitcher(sources: List<Source>, selected: Int, onSelect: (Int) -> Unit) {
     LazyRow(
-        modifier = Modifier.padding(vertical = Spacing.md),
+        modifier = Modifier.padding(vertical = Spacing.xs),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         items(sources.size) { i ->

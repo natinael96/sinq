@@ -12,7 +12,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -100,28 +99,28 @@ fun GitsawePassageScreen(
         topBar = {
             SinqTopBar(
                 title = passage?.bookName ?: "",
-                subtitle = passage?.refLine,
                 // The lectionary role is the page's liturgical context — the
                 // same gold accent line the ግጻዌ page itself uses for seasons.
-                accentLine = role?.takeIf { it.isNotBlank() },
+                accentLine = passage?.refLine?.let { ref ->
+                    listOfNotNull(ref, role?.takeIf { it.isNotBlank() }).joinToString(" · ")
+                },
                 onBack = onBack,
                 actions = {
-                    if (isPsalm) {
-                        TextButton(onClick = {
+                    com.agpeya.app.ui.common.ReaderToolsMenu(
+                        fontStep = fontStep,
+                        maxFontStep = FONT_STEPS_SP.lastIndex,
+                        onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
+                        secondaryActionLabel = if (isPsalm) {
+                            if (misbakLanguage == MisbakLanguage.GEEZ) s.wudaseLangAmharic else s.wudaseLangGeez
+                        } else null,
+                        onSecondaryAction = if (isPsalm) ({
                             scope.launch {
                                 SettingsRepository.setMisbakLanguage(
                                     context,
                                     if (misbakLanguage == MisbakLanguage.GEEZ) MisbakLanguage.AMHARIC else MisbakLanguage.GEEZ,
                                 )
                             }
-                        }) {
-                            Text(if (misbakLanguage == MisbakLanguage.GEEZ) s.wudaseLangGeez else s.wudaseLangAmharic)
-                        }
-                    }
-                    com.agpeya.app.ui.common.ReaderToolsMenu(
-                        fontStep = fontStep,
-                        maxFontStep = FONT_STEPS_SP.lastIndex,
-                        onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
+                        }) else null,
                         shareEnabled = passage != null,
                         sharePayload = {
                             passage?.let { p ->
@@ -158,7 +157,7 @@ fun GitsawePassageScreen(
                                 header,
                                 style = MaterialTheme.typography.titleSmall,
                                 color = MaterialTheme.colorScheme.secondary,
-                                modifier = Modifier.padding(top = Spacing.md, bottom = Spacing.xs),
+                                modifier = Modifier.padding(top = Spacing.sm, bottom = Spacing.xxs),
                             )
                         }
                         val annotated = buildAnnotatedString {
@@ -185,24 +184,22 @@ fun GitsawePassageScreen(
                     }
                     // The two doors out, at the same rank as every other NavRow.
                     item(key = "doors") {
-                        Spacer(Modifier.height(Spacing.xl))
+                        Spacer(Modifier.height(Spacing.lg))
                         HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
-                        Spacer(Modifier.height(Spacing.sm))
+                        Spacer(Modifier.height(Spacing.xs))
                         if (isPsalm) {
                             NavRow(
-                                title = s.goToPsalm,
-                                subtitle = "${passage.bookName} ${geezNumeral(psalm)}",
+                                title = "${s.goToPsalm} ${geezNumeral(psalm)}",
                                 onClick = { onOpenChapter(misbakLanguage == MisbakLanguage.GEEZ) },
                             )
                         } else {
                             NavRow(
-                                title = s.goToChapter,
-                                subtitle = "${passage.bookName} ${geezNumeral(chapter)}",
+                                title = "${s.goToChapter} ${geezNumeral(chapter)}",
                                 onClick = { onOpenChapter(false) },
                             )
-                            NavRow(title = s.goToBook, subtitle = passage.bookName, onClick = onOpenBook)
+                            NavRow(title = s.goToBook, onClick = onOpenBook)
                         }
-                        Spacer(Modifier.height(Spacing.huge))
+                        Spacer(Modifier.height(Spacing.xl))
                     }
                 }
             }

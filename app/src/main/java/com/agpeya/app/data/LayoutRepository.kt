@@ -8,6 +8,7 @@ import com.agpeya.app.model.HourLayout
 import com.agpeya.app.model.Section
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -26,6 +27,18 @@ object LayoutRepository {
 
     fun layout(context: Context, hourId: String): Flow<HourLayout> =
         context.layoutDataStore.data.map { decode(it[KEY])[hourId] ?: HourLayout() }
+
+    suspend fun current(context: Context): Map<String, HourLayout> =
+        context.layoutDataStore.data.map { decode(it[KEY]) }.first()
+
+    /** Existing device customizations win; missing hour layouts come from the backup. */
+    suspend fun merge(context: Context, restored: Map<String, HourLayout>) {
+        if (restored.isEmpty()) return
+        context.layoutDataStore.edit { prefs ->
+            val current = decode(prefs[KEY])
+            prefs[KEY] = json.encodeToString(mapSerializer, restored + current)
+        }
+    }
 
     suspend fun setOrder(context: Context, hourId: String, orderedIds: List<String>) {
         update(context, hourId) { it.copy(order = orderedIds) }

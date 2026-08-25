@@ -1,5 +1,7 @@
 package com.agpeya.app.ui.common
 
+import android.content.ClipData
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -10,6 +12,10 @@ import android.graphics.RadialGradient
 import android.graphics.RectF
 import android.graphics.Shader
 import android.graphics.Typeface
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
@@ -24,6 +30,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.util.ArrayList
 
 /**
  * What a reader hands to the share actions: the passage itself plus the context
@@ -38,6 +45,7 @@ data class SharePayload(
 ) {
     /** The payload as plain text, for the clipboard and the text share sheet. */
     fun asText(): String = buildString {
+        kicker?.takeIf { it.isNotBlank() && it != title }?.let { append(it); append("\n") }
         val heading = listOfNotNull(title, dateLabel).joinToString(" — ")
         if (heading.isNotBlank()) {
             append(heading)
@@ -77,30 +85,26 @@ object PassageShare {
     private val MUTED = Color.parseColor("#9DBBAD")
 
     suspend fun share(context: Context, payload: SharePayload, strings: Strings? = null): Boolean = try {
-        withContext(Dispatchers.Default) {
-            val bitmap = render(context, payload)
-            val dir = File(context.cacheDir, "images").apply { mkdirs() }
-            val staleBefore = System.currentTimeMillis() - 24 * 60 * 60 * 1000L
-            dir.listFiles()?.filter { it.lastModified() < staleBefore }?.forEach { it.delete() }
-            // A receiving app can read the URI after the chooser closes. A unique
-            // file prevents a second share from replacing the first one's image.
-            val file = File.createTempFile("passage-", ".png", dir)
-            try {
-                file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
-            } finally {
-                bitmap.recycle()
-            }
-
-            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-            val send = Intent(Intent.ACTION_SEND).apply {
+        val files = withContext(Dispatchers.Default) { renderToCache(context, payload) }
+        val uris = ArrayList(files.map {
+            FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", it)
+        })
+        withContext(Dispatchers.Main) {
+            val send = Intent(if (uris.size == 1) Intent.ACTION_SEND else Intent.ACTION_SEND_MULTIPLE).apply {
                 type = "image/png"
-                putExtra(Intent.EXTRA_STREAM, uri)
+                if (uris.size == 1) putExtra(Intent.EXTRA_STREAM, uris.first())
+                else putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
+                putExtra(Intent.EXTRA_TEXT, Sharing.sign(payload.asText()))
+                putExtra(Intent.EXTRA_TITLE, payload.title ?: payload.kicker)
+                clipData = ClipData.newUri(context.contentResolver, payload.title ?: "Sinq", uris.first()).also { clips ->
+                    uris.drop(1).forEach { clips.addItem(ClipData.Item(it)) }
+                }
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
             val chooser = Intent.createChooser(send, null).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                if (context !is android.app.Activity) addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-            withContext(Dispatchers.Main) { context.startActivity(chooser) }
+            context.startActivity(chooser)
         }
         true
     } catch (cancelled: CancellationException) {
@@ -115,7 +119,95 @@ object PassageShare {
         false
     }
 
-    private fun render(context: Context, payload: SharePayload): Bitmap {
+    /** Save every rendered page into the user's Pictures/Sinq collection. */
+    suspend fun save(context: Context, payload: SharePayload, strings: Strings? = null): Boolean = try {
+        check(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { "Gallery save requires Android 10+" }
+        val files = withContext(Dispatchers.Default) { renderToCache(context, payload) }
+        withContext(Dispatchers.IO) {
+            files.forEachIndexed { index, file -> saveToPictures(context, file, index, files.size) }
+        }
+        strings?.let { s -> withContext(Dispatchers.Main) { Toast.makeText(context, s.imageSaved, Toast.LENGTH_SHORT).show() } }
+        true
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (failure: Exception) {
+        Log.e(TAG, "Unable to render or save passage image", failure)
+        strings?.let { s -> withContext(Dispatchers.Main) { Toast.makeText(context, s.imageSaveFailed, Toast.LENGTH_SHORT).show() } }
+        false
+    }
+
+    private fun renderToCache(context: Context, payload: SharePayload): List<File> {
+        val dir = File(context.cacheDir, "images")
+        check(dir.exists() || dir.mkdirs()) { "Could not create image cache" }
+        val staleBefore = System.currentTimeMillis() - 24 * 60 * 60 * 1000L
+        dir.listFiles()?.filter { it.lastModified() < staleBefore }?.forEach { it.delete() }
+        val bodies = paginateBodies(context, payload)
+        return bodies.mapIndexed { index, body ->
+            val bitmap = render(context, payload, body, index + 1, bodies.size)
+            val file = File.createTempFile("passage-${index + 1}-", ".png", dir)
+            try {
+                val written = file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                check(written && file.length() > 0L) { "PNG encoding failed" }
+                file
+            } catch (failure: Exception) {
+                file.delete()
+                throw failure
+            } finally {
+                bitmap.recycle()
+            }
+        }
+    }
+
+    private fun saveToPictures(context: Context, file: File, index: Int, count: Int): Uri {
+        val resolver = context.contentResolver
+        val suffix = if (count == 1) "" else "-${index + 1}-of-$count"
+        val name = "sinq-${System.currentTimeMillis()}$suffix.png"
+        val values = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, name)
+            put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+            put(MediaStore.Images.Media.RELATIVE_PATH, "${Environment.DIRECTORY_PICTURES}/Sinq")
+            put(MediaStore.Images.Media.IS_PENDING, 1)
+        }
+        val uri = checkNotNull(resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)) {
+            "Gallery insert failed"
+        }
+        try {
+            checkNotNull(resolver.openOutputStream(uri)).use { output -> file.inputStream().use { it.copyTo(output) } }
+            resolver.update(uri, ContentValues().apply { put(MediaStore.Images.Media.IS_PENDING, 0) }, null, null)
+            return uri
+        } catch (failure: Exception) {
+            resolver.delete(uri, null, null)
+            throw failure
+        }
+    }
+
+    private fun paginateBodies(context: Context, payload: SharePayload): List<String> {
+        val ethiopic = ResourcesCompat.getFont(context, R.font.abyssinica_sil) ?: Typeface.SERIF
+        val bodyPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 44f; color = IVORY; typeface = ethiopic }
+        val titlePaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            textSize = 58f; color = IVORY; typeface = Typeface.create(ethiopic, Typeface.BOLD)
+        }
+        val textWidth = (W - 2 * EDGE - 2 * PAD).toInt()
+        val titleHeight = payload.title?.takeIf { it.isNotBlank() }?.let {
+            StaticLayout.Builder.obtain(it, 0, it.length, titlePaint, textWidth).setLineSpacing(0f, 1.2f).setMaxLines(4).build().height
+        } ?: 0
+        val fixed = EDGE + 184f + (if (payload.kicker != null) 90f else 56f) +
+            (if (titleHeight > 0) titleHeight + 28f else 0f) + 44f + 150f + EDGE
+        val maxLines = ((MAX_H - fixed) / (bodyPaint.fontSpacing * 1.5f)).toInt().coerceAtLeast(4)
+        val pages = mutableListOf<String>()
+        var remaining = payload.body.trim()
+        while (remaining.isNotEmpty()) {
+            val full = StaticLayout.Builder.obtain(remaining, 0, remaining.length, bodyPaint, textWidth)
+                .setLineSpacing(0f, 1.5f).build()
+            val takeLines = minOf(maxLines, full.lineCount)
+            val end = full.getLineEnd(takeLines - 1).coerceAtLeast(1)
+            pages += remaining.substring(0, end).trimEnd()
+            remaining = remaining.substring(end).trimStart()
+        }
+        return pages.ifEmpty { listOf("") }
+    }
+
+    private fun render(context: Context, payload: SharePayload, body: String, page: Int, pageCount: Int): Bitmap {
         val ethiopic = ResourcesCompat.getFont(context, R.font.abyssinica_sil) ?: Typeface.SERIF
         fun paint(size: Float, color: Int, bold: Boolean = false) = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             textSize = size
@@ -151,7 +243,7 @@ object PassageShare {
 
         val bodyLineHeight = bodyPaint.fontSpacing * 1.5f
         val maxBodyLines = ((MAX_H - fixed) / bodyLineHeight).toInt().coerceAtLeast(4)
-        val bodyLayout = layout(payload.body.trim(), bodyPaint, 1.5f, maxLines = maxBodyLines)
+        val bodyLayout = layout(body, bodyPaint, 1.5f, maxLines = maxBodyLines)
 
         val h = (fixed + bodyLayout.height).toInt().coerceIn(640, MAX_H)
         val bmp = Bitmap.createBitmap(W, h, Bitmap.Config.ARGB_8888)
@@ -185,7 +277,9 @@ object PassageShare {
         c.drawText("ስንቅ", left, y, paint(58f, GOLD, bold = true))
         payload.dateLabel?.let {
             val p = paint(32f, MUTED)
-            c.drawText(it, right - p.measureText(it), y, p)
+            val available = (right - left - paint(58f, GOLD, bold = true).measureText("ስንቅ") - 40f).coerceAtLeast(120f)
+            val line = TextUtils.ellipsize(it, p, available, TextUtils.TruncateAt.END).toString()
+            c.drawText(line, right - p.measureText(line), y, p)
         }
         y += 44f
         c.drawRect(left, y, right, y + 2f, Paint().apply { color = CARD_LINE })
@@ -212,7 +306,7 @@ object PassageShare {
         // Footnote: the app's name in Ge'ez script, centred at the foot of the
         // card like a colophon, so every shared passage says where it came from.
         val sigPaint = paint(34f, GOLD)
-        val sig = "— ስንቅ —"
+        val sig = if (pageCount > 1) "— ስንቅ —  $page/$pageCount" else "— ስንቅ —"
         c.drawText(sig, (W - sigPaint.measureText(sig)) / 2f, card.bottom - 56f, sigPaint)
 
         return bmp

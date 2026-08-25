@@ -53,6 +53,7 @@ import com.agpeya.app.data.WudaseRepository
 import com.agpeya.app.model.WudaseContent
 import com.agpeya.app.model.WudaseSection
 import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.common.rememberCurrentDate
 import com.agpeya.app.ui.common.LoadingPanel
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.common.StatePanel
@@ -87,8 +88,9 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
 
     // Default to today's weekday portion (1=Mon … 7=Sun), else the first section.
     // -1 means "no explicit choice yet" so a rotation never resets a picked day.
-    val todayIndex = remember(sections) {
-        val wd = LocalDate.now().dayOfWeek.value
+    val today by rememberCurrentDate()
+    val todayIndex = remember(sections, today) {
+        val wd = today.dayOfWeek.value
         sections.indexOfFirst { it.weekday == wd }.takeIf { it >= 0 } ?: 0
     }
     val initialIndex = remember(sections, initialSectionId) {

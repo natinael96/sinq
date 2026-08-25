@@ -79,11 +79,7 @@ object BreathPrayerScheduler {
         // Exact + doze-exempt like the other nudges: an inexact alarm in the
         // App-Standby "rare" bucket drifts hours — which here means into the
         // very prayer this nudge is supposed to stay clear of.
-        try {
-            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent(context))
-        } catch (_: SecurityException) {
-            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent(context))
-        }
+        am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent(context))
     }
 
     fun cancel(context: Context) {

@@ -447,7 +447,7 @@ fun SelectPill(
     )
     Box(
         modifier = modifier
-            .heightIn(min = 40.dp)
+            .heightIn(min = 48.dp)
             .clip(CircleShape)
             .background(background)
             .border(1.dp, border, CircleShape)
@@ -568,7 +568,7 @@ fun SinqTopBar(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleSmall,
-                        maxLines = 1,
+                        maxLines = if (subtitle == null && accentLine == null) 2 else 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     if (subtitle != null) {

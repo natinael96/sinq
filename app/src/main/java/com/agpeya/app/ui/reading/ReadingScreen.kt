@@ -306,19 +306,12 @@ fun ReadingScreen(
                     }
                 },
                 actions = {
-                    if (effectivePrayerLevel != PrayerLevel.FULL) {
-                        TextButton(onClick = { showFullHour = true }) {
-                            Text(
-                                text = s.showFullPsalms,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-                    }
                     com.agpeya.app.ui.common.ReaderToolsMenu(
                         fontStep = fontStep,
                         maxFontStep = FONT_STEPS_SP.lastIndex,
                         onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
+                        secondaryActionLabel = s.showFullPsalms.takeIf { effectivePrayerLevel != PrayerLevel.FULL },
+                        onSecondaryAction = if (effectivePrayerLevel != PrayerLevel.FULL) ({ showFullHour = true }) else null,
                         onToggleReadingMode = {
                             // Preserve the visible passage when changing layout.
                             anchor = if (readingMode == ReadingMode.VERTICAL) {

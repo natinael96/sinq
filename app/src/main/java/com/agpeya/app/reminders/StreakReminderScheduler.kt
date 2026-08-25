@@ -43,11 +43,7 @@ object StreakReminderScheduler {
         // ~once a day and deferred to a Doze maintenance window — the nudge then
         // silently misses days at a time. USE_EXACT_ALARM is declared, so exact
         // scheduling is normally granted; fall back to inexact if ever refused.
-        try {
-            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
-        } catch (_: SecurityException) {
-            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
-        }
+        am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
     }
 
     fun cancel(context: Context) {

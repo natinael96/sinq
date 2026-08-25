@@ -652,8 +652,8 @@ private fun fontDisplayName(font: com.agpeya.app.data.ReadingFont): String =
     FONT_CHOICES.firstOrNull { it.first == font }?.second ?: "Abyssinica SIL"
 
 /**
- * Backup and restore of the things the user can't recover: streak history,
- * bookmarks, highlights. Written through the system file picker — the app has
+ * Backup and restore of the things the user can't recover: Journey history,
+ * bookmarks, highlights, personal lists, custom hours, modes and settings. Written through the system file picker — the app has
  * no network access, so a backup is simply a file the user keeps.
  *
  * Import shows what the file holds and how much of it is new here BEFORE
@@ -1069,7 +1069,7 @@ fun RemindersSettingsScreen(
     }
     val remindersOn = streak || gitsawe || breath || almsEntries.any { it.enabled } || repentanceEntries.any { it.enabled }
     @Suppress("UNUSED_VARIABLE") val refreshPermissions = permissionPulse
-    val batteryRestricted = remindersOn && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+    val batteryRestricted = remindersOn &&
         !(context.getSystemService(android.os.PowerManager::class.java)?.isIgnoringBatteryOptimizations(context.packageName) ?: true)
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
     fun requestNotifications() {
