@@ -28,6 +28,10 @@ import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.FormatAlignCenter
+import androidx.compose.material.icons.outlined.FormatAlignJustify
+import androidx.compose.material.icons.automirrored.outlined.FormatAlignLeft
+import androidx.compose.material.icons.automirrored.outlined.FormatAlignRight
 import androidx.compose.material.icons.outlined.School
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.Upload
@@ -890,6 +894,8 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit) {
     val step by SettingsRepository.fontStep(context).collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
     val lineSpacing by SettingsRepository.readingLineSpacing(context)
         .collectAsState(initial = com.agpeya.app.data.ReadingLineSpacing.NORMAL)
+    val readingAlignment by SettingsRepository.readingAlignment(context)
+        .collectAsState(initial = com.agpeya.app.data.ReadingAlignment.JUSTIFIED)
     val keepOn by SettingsRepository.keepScreenOn(context).collectAsState(initial = true)
     val size = SettingsRepository.FONT_STEPS_SP[step.coerceIn(0, SettingsRepository.FONT_STEPS_SP.lastIndex)]
     Scaffold(
@@ -912,6 +918,12 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit) {
                             fontFamily = com.agpeya.app.ui.theme.readingFontFamily(font),
                             fontSize = size.sp,
                             lineHeight = (size * lineSpacing.multiplier).sp,
+                            textAlign = when (readingAlignment) {
+                                com.agpeya.app.data.ReadingAlignment.JUSTIFIED -> androidx.compose.ui.text.style.TextAlign.Justify
+                                com.agpeya.app.data.ReadingAlignment.LEFT -> androidx.compose.ui.text.style.TextAlign.Left
+                                com.agpeya.app.data.ReadingAlignment.RIGHT -> androidx.compose.ui.text.style.TextAlign.Right
+                                com.agpeya.app.data.ReadingAlignment.CENTER -> androidx.compose.ui.text.style.TextAlign.Center
+                            },
                         ),
                         color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.padding(Spacing.lg),
@@ -949,6 +961,27 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit) {
                                 if (lineSpacing == choice) Icon(Icons.Outlined.Check, contentDescription = null)
                             },
                         ) { Text(label, maxLines = 1) }
+                    }
+                }
+                Spacer(Modifier.height(Spacing.md))
+                Text(s.textAlignmentLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                Spacer(Modifier.height(Spacing.xs))
+                SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                    val choices = listOf(
+                        Triple(com.agpeya.app.data.ReadingAlignment.JUSTIFIED, Icons.Outlined.FormatAlignJustify, s.alignJustified),
+                        Triple(com.agpeya.app.data.ReadingAlignment.LEFT, Icons.AutoMirrored.Outlined.FormatAlignLeft, s.alignLeft),
+                        Triple(com.agpeya.app.data.ReadingAlignment.RIGHT, Icons.AutoMirrored.Outlined.FormatAlignRight, s.alignRight),
+                        Triple(com.agpeya.app.data.ReadingAlignment.CENTER, Icons.Outlined.FormatAlignCenter, s.alignCenter),
+                    )
+                    choices.forEachIndexed { index, (choice, icon, description) ->
+                        SegmentedButton(
+                            selected = readingAlignment == choice,
+                            onClick = { scope.launch { SettingsRepository.setReadingAlignment(context, choice) } },
+                            shape = SegmentedButtonDefaults.itemShape(index, choices.size),
+                            icon = {},
+                        ) {
+                            Icon(icon, contentDescription = description)
+                        }
                     }
                 }
                 ToggleRow(s.keepScreenOn, keepOn, { scope.launch { SettingsRepository.setKeepScreenOn(context, it) } })

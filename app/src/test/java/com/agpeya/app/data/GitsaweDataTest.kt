@@ -1,10 +1,13 @@
 package com.agpeya.app.data
 
 import com.agpeya.app.model.Feast
+import com.agpeya.app.model.AthanasiusEntry
+import com.agpeya.app.model.BahreHasabReference
 import com.agpeya.app.model.GitsaweEntry
 import com.agpeya.app.model.GitsaweMonth
 import com.agpeya.app.model.GitsawePackage
 import com.agpeya.app.model.Mahlet
+import com.agpeya.app.model.SundayCycleEntry
 import com.agpeya.app.model.SubFeast
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
@@ -39,12 +42,22 @@ class GitsaweDataTest {
     fun `every collection decodes with the expected record count`() {
         assertEquals(366, load("daily-gitsawe.json", GitsaweEntry.serializer()).size)
         assertEquals(43, load("seasonal-gitsawe.json", com.agpeya.app.model.SeasonalEntry.serializer()).size)
+        assertEquals(49, load("movable-weekday-gitsawe.json", com.agpeya.app.model.SeasonalEntry.serializer()).size)
+        assertEquals(91, load("sunday-cycle-gitsawe.json", SundayCycleEntry.serializer()).size)
+        assertEquals(25, load("athanasius.json", AthanasiusEntry.serializer()).size)
         assertEquals(9, load("monthly-gitsawe.json", com.agpeya.app.model.MonthlyEntry.serializer()).size)
         assertEquals(21, load("feasts.json", Feast.serializer()).size)
         assertEquals(40, load("sub-feasts.json", SubFeast.serializer()).size)
         assertEquals(37, load("mahlets.json", Mahlet.serializer()).size)
         assertEquals(8, load("months.json", GitsaweMonth.serializer()).size)
         assertEquals(1, load("packages.json", GitsawePackage.serializer()).size)
+        val reference = json.decodeFromString(
+            BahreHasabReference.serializer(),
+            File(assetsDir, "bahre-hasab-reference.json").readText(),
+        )
+        assertEquals(17, reference.columns.size)
+        assertEquals(15, reference.rows.size)
+        assertTrue(reference.rows.all { it.values.size == reference.columns.size })
     }
 
     @Test
@@ -76,17 +89,46 @@ class GitsaweDataTest {
     }
 
     @Test
-    fun `messy verse ranges survive as endNote`() {
-        val entry = load("daily-gitsawe.json", GitsaweEntry.serializer()).first { it.date == "15-01" }
-        val withNote = (entry.negh?.let { svc ->
-            listOf(svc.msbak, svc.wengel, svc.firstDeacon, svc.secondDeacon, svc.secondKahn).flatten()
-        } ?: emptyList()) + (entry.kidassie?.let { svc ->
-            listOf(svc.msbak, svc.wengel, svc.firstDeacon, svc.secondDeacon, svc.secondKahn).flatten()
-        } ?: emptyList())
-        assertTrue(
-            "the (4)-6 annotation is preserved in endNote",
-            withNote.any { it.verse?.endNote == "(4)-6" },
+    fun `malformed printed citations remain visible without a broken link`() {
+        val newYear = load("daily-gitsawe.json", GitsaweEntry.serializer()).first { it.date == "01-01" }
+        val printedWithoutChapter = newYear.kidassie!!.firstDeacon.first()
+        assertEquals("ም ቍ ፩ – ፲፩", printedWithoutChapter.citation)
+        assertEquals(null, printedWithoutChapter.verse)
+    }
+
+    @Test
+    fun `additional liturgy readings are not truncated to three rows`() {
+        val ginbot1 = load("daily-gitsawe.json", GitsaweEntry.serializer()).first { it.date == "01-09" }
+        val liturgy = ginbot1.kidassie!!
+        assertEquals(
+            4,
+            liturgy.firstDeacon.size + liturgy.secondDeacon.size + liturgy.secondKahn.size,
         )
+    }
+
+    @Test
+    fun `Part 3 activates only explicitly classified Sunday rules`() {
+        val entries = load("sunday-cycle-gitsawe.json", SundayCycleEntry.serializer())
+        val fixed = entries.first { it.index == 2 }
+        assertEquals(1, fixed.monthNum)
+        assertEquals(7, fixed.fromDay)
+        assertEquals(7, fixed.toDay)
+        val lent = entries.first { it.index == 44 }
+        assertEquals("abiyTsom", lent.season)
+        assertEquals(5, lent.week)
+        val ambiguous = entries.first { it.index == 8 }
+        assertEquals(null, ambiguous.monthNum)
+        assertEquals(null, ambiguous.season)
+    }
+
+    @Test
+    fun `Part 4 keeps funeral categories and supplications distinct`() {
+        val entries = load("athanasius.json", AthanasiusEntry.serializer())
+        assertEquals("person", entries.first().category)
+        assertEquals("riteChapter", entries.first { it.index == 11 }.category)
+        assertEquals(3, entries.first { it.index == 20 }.memorialDay)
+        assertEquals("memorial", entries.last().category)
+        assertTrue(entries.count { it.supplication != null } == 14)
     }
 
     @Test

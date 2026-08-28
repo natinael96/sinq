@@ -22,8 +22,9 @@ import java.io.File
  * the verse range is only scroll emphasis) from a dead one (book/chapter absent).
  *
  * Locks two facts so regressions surface: linkability stays ≥ 99.5%, and the set
- * of genuinely dead references is exactly the 10 known bad citations in the
- * upstream data (impossible chapters like "Hebrews 15" / "Acts 76").
+ * of genuinely dead references in all bundled fixed/monthly/seasonal collections
+ * stays explicit. Malformed fixed-cycle citations are retained as raw text and
+ * deliberately omitted from this tappable-reference list.
  */
 class GitsaweLinkCoverageTest {
 
@@ -84,16 +85,14 @@ class GitsaweLinkCoverageTest {
     }
 
     @Test
-    fun `dead references are exactly the known-bad upstream citations`() {
+    fun `dead references are exactly the known-bad bundled citations`() {
         val dead = allRefs()
             .filterNot { isLinkable(it) }
             .map { v -> "${ScriptureRepository.resolveBookKey(v.bookTitle!!) ?: v.bookTitle} ${v.chapter}" }
             .toSortedSet()
         val expected = sortedSetOf(
-            "hebrews 15", "acts 76", "2-corinthians 14", "ephesians 8", "ephesians 7",
-            "mark 17", "2-john 2", "2-peter 5", "john 24",
+            "1-john 12", "1-john 13", "2-peter 5", "john 24",
         )
-        // 'ephesians 7' appears twice in the data but collapses to one distinct citation.
         assertEquals(expected, dead)
     }
 }

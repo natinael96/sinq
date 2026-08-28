@@ -4,6 +4,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.io.File
+import com.agpeya.app.model.BahreHasabReference
+import kotlinx.serialization.json.Json
+import com.agpeya.app.ui.common.EthiopianDate
 
 /**
  * Verifies the Ethiopian computus against independently-known dates: Fasika must
@@ -11,6 +15,17 @@ import java.time.LocalDate
  * Hasab numbers must match a worked example (2015 E.C.).
  */
 class BahreHasabTest {
+
+    private fun printedDate(value: String): Pair<Int, Int> {
+        val month = mapOf("ጥር" to 5, "የካ" to 6, "መጋ" to 7, "ሚያ" to 8, "ግን" to 9, "ሰኔ" to 10)
+        val parts = value.split(" ")
+        val digits = mapOf('፩' to 1, '፪' to 2, '፫' to 3, '፬' to 4, '፭' to 5, '፮' to 6, '፯' to 7, '፰' to 8, '፱' to 9, '፲' to 10, '፳' to 20, '፴' to 30)
+        return (month[parts[0]] ?: error("unknown printed month $value")) to
+            parts[1].sumOf { digits[it] ?: error("unknown printed day $value") }
+    }
+
+    private fun ethiopianMonthDay(date: LocalDate): Pair<Int, Int> =
+        EthiopianDate.from(date).let { it.month to it.day }
 
     @Test
     fun `classical values match the 2015 EC worked example`() {
@@ -76,7 +91,72 @@ class BahreHasabTest {
             BahreHasab.SeasonWindow("erget", null),
             BahreHasab.movableSeasonOn(BahreHasab.ascension(e)),
         )
+        assertEquals(
+            BahreHasab.SeasonWindow("tnsae", 12),
+            BahreHasab.movableSeasonOn(BahreHasab.fasika(e).plusDays(77)),
+        )
         // A high-summer date is in no movable season.
         assertEquals(null, BahreHasab.movableSeasonOn(LocalDate.of(2026, 8, 1)))
+    }
+
+    @Test
+    fun `master Part 2 weekdays resolve without collapsing adjacent days`() {
+        val nineveh = BahreHasab.nineveh(2018)
+        assertEquals(
+            BahreHasab.WeekdayWindow("neneweTsom", 1, 1),
+            BahreHasab.movableWeekdayOn(nineveh),
+        )
+        assertEquals(
+            BahreHasab.WeekdayWindow("neneweTsom", 1, 3),
+            BahreHasab.movableWeekdayOn(nineveh.plusDays(2)),
+        )
+        assertEquals(
+            BahreHasab.WeekdayWindow("heraclius", 1, 1),
+            BahreHasab.movableWeekdayOn(nineveh.plusDays(7)),
+        )
+        assertEquals(
+            BahreHasab.WeekdayWindow("abiyTsom", 1, 1),
+            BahreHasab.movableWeekdayOn(nineveh.plusDays(14)),
+        )
+        assertEquals(
+            BahreHasab.WeekdayWindow("abiyTsom", 6, 6),
+            BahreHasab.movableWeekdayOn(nineveh.plusDays(54)),
+        )
+        assertEquals(null, BahreHasab.movableWeekdayOn(nineveh.plusDays(13)))
+    }
+
+    @Test
+    fun `Part 5 printed table validates computus dates for 2001 through 2015 EC`() {
+        val dir = listOf("src/main/assets/content/gitsawe", "app/src/main/assets/content/gitsawe")
+            .map(::File).first { it.isDirectory }
+        val table = Json.decodeFromString(
+            BahreHasabReference.serializer(),
+            File(dir, "bahre-hasab-reference.json").readText(),
+        )
+        val differences = mutableListOf<String>()
+        table.rows.forEachIndexed { index, row ->
+            val year = 2001 + index
+            val checks = listOf(
+                6 to BahreHasab.nineveh(year),
+                7 to BahreHasab.greatLentStart(year),
+                8 to BahreHasab.debreZeit(year),
+                9 to BahreHasab.hosanna(year),
+                10 to BahreHasab.siklet(year),
+                11 to BahreHasab.fasika(year),
+                12 to BahreHasab.rikbeKahnat(year),
+                13 to BahreHasab.ascension(year),
+                14 to BahreHasab.pentecost(year),
+                15 to BahreHasab.apostlesFast(year),
+            )
+            checks.forEach { (column, actual) ->
+                val printed = printedDate(row.values[column])
+                val computed = ethiopianMonthDay(actual)
+                if (printed != computed) differences += "$year:${table.columns[column]}:$printed:$computed"
+            }
+        }
+        // The sole divergence in 150 checked feast dates is printed in the
+        // source itself: 2004 EC gives Nineveh as Tir 27 while its own Fasika
+        // row and the standard 69-day offset resolve to Tir 28.
+        assertEquals(listOf("2004:ጾመ ነነዌ:(5, 27):(5, 28)"), differences)
     }
 }

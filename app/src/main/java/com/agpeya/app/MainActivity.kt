@@ -73,12 +73,20 @@ class MainActivity : ComponentActivity() {
                 .collectAsState(initial = com.agpeya.app.data.ReadingFont.ABYSSINICA)
             val readingLineSpacing by SettingsRepository.readingLineSpacing(this)
                 .collectAsState(initial = com.agpeya.app.data.ReadingLineSpacing.NORMAL)
+            val readingAlignment by SettingsRepository.readingAlignment(this)
+                .collectAsState(initial = com.agpeya.app.data.ReadingAlignment.JUSTIFIED)
             AgpeyaTheme(themeChoice = themeChoice) {
                 CompositionLocalProvider(
                     LocalStrings provides stringsFor(language),
                     com.agpeya.app.ui.theme.LocalReadingFont provides
                         com.agpeya.app.ui.theme.readingFontFamily(readingFont),
                     com.agpeya.app.ui.theme.LocalReadingLineSpacing provides readingLineSpacing.multiplier,
+                    com.agpeya.app.ui.theme.LocalReadingTextAlign provides when (readingAlignment) {
+                        com.agpeya.app.data.ReadingAlignment.JUSTIFIED -> androidx.compose.ui.text.style.TextAlign.Justify
+                        com.agpeya.app.data.ReadingAlignment.LEFT -> androidx.compose.ui.text.style.TextAlign.Left
+                        com.agpeya.app.data.ReadingAlignment.RIGHT -> androidx.compose.ui.text.style.TextAlign.Right
+                        com.agpeya.app.data.ReadingAlignment.CENTER -> androidx.compose.ui.text.style.TextAlign.Center
+                    },
                 ) {
                     // The opening reminder sits over the graph rather than inside
                     // it: the start destination already flips once onboarding
@@ -345,6 +353,19 @@ private fun AgpeyaNavHost(
                 },
             )
         }
+        composable("athanasius") {
+            com.agpeya.app.ui.library.AthanasiusScreen(
+                onBack = { navController.popBackStack() },
+                onOpenReading = { target, role ->
+                    navController.navigate(com.agpeya.app.data.GitsaweLinks.passageRoute(target, role)) {
+                        launchSingleTop = true
+                    }
+                },
+            )
+        }
+        composable("bahreHasabReference") {
+            com.agpeya.app.ui.library.BahreHasabReferenceScreen(onBack = { navController.popBackStack() })
+        }
         composable(
             route = "psalter?section={section}&start={start}&end={end}&lang={lang}",
             arguments = listOf(
@@ -376,6 +397,8 @@ private fun AgpeyaNavHost(
                 onOpenScriptures = { navController.navigate("scriptures") { launchSingleTop = true } },
                 onOpenWudase = { navController.navigate("wudase") { launchSingleTop = true } },
                 onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
+                onOpenAthanasius = { navController.navigate("athanasius") { launchSingleTop = true } },
+                onOpenBahreHasab = { navController.navigate("bahreHasabReference") { launchSingleTop = true } },
                 onSelectTab = navController::switchTab,
             )
         }
@@ -448,6 +471,19 @@ private fun AgpeyaNavHost(
                     ) { launchSingleTop = true }
                 },
                 onOpenSynaxarium = { epochDay -> navController.navigate("synaxarium/$epochDay") { launchSingleTop = true } },
+                onOpenSundayCycle = { day -> navController.navigate("sundayGitsawe/$day") { launchSingleTop = true } },
+            )
+        }
+        composable("sundayGitsawe/{epochDay}") { backStackEntry ->
+            com.agpeya.app.ui.gitsawe.SundayCycleScreen(
+                epochDay = backStackEntry.arguments?.getString("epochDay")?.toLongOrNull()
+                    ?: java.time.LocalDate.now().toEpochDay(),
+                onBack = { navController.popBackStack() },
+                onOpenReading = { target, role ->
+                    navController.navigate(com.agpeya.app.data.GitsaweLinks.passageRoute(target, role)) {
+                        launchSingleTop = true
+                    }
+                },
             )
         }
         composable(

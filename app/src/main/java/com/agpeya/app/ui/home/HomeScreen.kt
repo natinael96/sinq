@@ -424,6 +424,7 @@ private fun GitsaweCard(state: HomeReadingsState, onClick: () -> Unit) {
     val reading = readings?.daily?.title
         ?: readings?.seasonal?.firstOrNull()?.title
         ?: readings?.monthly?.firstOrNull()?.let { it.title ?: it.raw }
+        ?: readings?.sundayCycle?.firstOrNull()?.title
 
     HeroCard(onClick = onClick, contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.md)) {
         Icon(Icons.AutoMirrored.Outlined.MenuBook, contentDescription = null, tint = sinq.onHeroMuted, modifier = Modifier.size(IconSize.large))

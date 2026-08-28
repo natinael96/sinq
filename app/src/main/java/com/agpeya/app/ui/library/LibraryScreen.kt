@@ -33,6 +33,8 @@ fun LibraryScreen(
     onOpenScriptures: () -> Unit,
     onOpenWudase: () -> Unit,
     onOpenZewotr: () -> Unit,
+    onOpenAthanasius: () -> Unit,
+    onOpenBahreHasab: () -> Unit,
     onSelectTab: (Tab) -> Unit,
 ) {
     val s = LocalStrings.current
@@ -45,7 +47,7 @@ fun LibraryScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
             contentPadding = PaddingValues(horizontal = Spacing.screen),
-            verticalArrangement = Arrangement.spacedBy(Spacing.md),
+            verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             item {
                 Spacer(Modifier.height(Spacing.xl))
@@ -78,6 +80,22 @@ fun LibraryScreen(
             item {
                 LibraryCard(icon = Icons.AutoMirrored.Outlined.MenuBook, title = s.zewotrTselot, subtitle = s.zewotrSubtitle, onClick = onOpenZewotr)
             }
+            item {
+                LibraryCard(
+                    icon = Icons.AutoMirrored.Outlined.MenuBook,
+                    title = s.athanasiusTitle,
+                    subtitle = s.athanasiusSubtitle,
+                    onClick = onOpenAthanasius,
+                )
+            }
+            item {
+                LibraryCard(
+                    icon = Icons.AutoMirrored.Outlined.MenuBook,
+                    title = s.bahreHasabTitle,
+                    subtitle = s.bahreHasabSubtitle,
+                    onClick = onOpenBahreHasab,
+                )
+            }
         }
     }
 }
@@ -90,9 +108,13 @@ private fun LibraryCard(
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
-    SinqCard(onClick = onClick, enabled = enabled) {
+    SinqCard(
+        onClick = onClick,
+        enabled = enabled,
+        contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md),
+    ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
         ) {
             Icon(

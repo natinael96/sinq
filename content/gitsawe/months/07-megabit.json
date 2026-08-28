@@ -1,0 +1,2371 @@
+{
+  "README": {
+    "what_this_is": "One month of the ግጻዌ (lectionary) from መጽሐፈ ግጻዌ ወመዝሙር ከነምልክቱ — the readings appointed for each day of the Ethiopian Orthodox Tewahedo liturgical year. Transcribed from page scans; there was no text layer, so every page was read visually.",
+    "how_to_find_a_day": "days[] is sorted by day_number, which is a Ge'ez numeral (፩=1 … ፴=30). Use the geez_numerals map below to convert. Each day carries its commemoration and up to three services.",
+    "the_three_services": {
+      "ዘነግህ": "matins — the morning office",
+      "ዘቅዳሴ": "the Divine Liturgy; the fullest block, carrying the epistles and Acts",
+      "ዘሠርክ": "vespers — the evening office",
+      "note": "A day may legitimately have fewer than three. Absence was recorded, not invented."
+    },
+    "reading_types": {
+      "ምስባክ": "the psalm verses chanted before the gospel; `verses` holds the Ge'ez text",
+      "ወንጌል": "the gospel reading; `incipit` is its opening words",
+      "epistles_and_acts": "Pauline epistle, catholic epistle, and Acts — `reading_type` names which",
+      "ቅዳሴ": "the anaphora appointed for that day (a name, not a reading)",
+      "ምስባክ_ዓዲ / ወንጌል_ዓዲ": "a second ምስባክ or gospel introduced in the book by ዓዲ ('again')"
+    },
+    "citation_format": {
+      "ም·": "ምዕራፍ — chapter",
+      "ቍ·": "ቍጥር — verse",
+      "ፍ፡ም፡": "ፍጻሜ ምዕራፍ — 'to the end of the chapter'",
+      "example": "'ም· ፰ ቍ· ፲፱ – ፳፯' = chapter 8, verses 19–27",
+      "for ምስባክ": "the psalm number comes FIRST, before ቍ· — e.g. '፻፲፰ ቍ· ፹፮ – ፹፯' is Ps 118:86-87"
+    },
+    "read_this_before_trusting_a_citation": [
+      "Everything is transcribed AS PRINTED. Nothing was normalised or corrected — malformed citations, missing ቍ·, descending ranges and duplicated marks are in the book.",
+      "The incipit is the reliable key. It is always legible and identifies the reading unambiguously. The Ge'ez numerals are the fragile part — at scan resolution ፰/፳/፷ share one form, as do ፴/፵ and ፮/፯.",
+      "This edition's verse numbering runs 1–2 LOWER than the Greek/LXX numbering in many places. A one-verse discrepancy against a modern Bible is usually the book's own convention, not an error.",
+      "Some citations are genuinely impossible as printed (a verse beyond the chapter's length). Those are the book's misprints; check_citations.py in the parent directory enumerates them."
+    ],
+    "provenance_fields": {
+      "source_scan_pages": "which scanned page(s) this day was read from",
+      "scan_pages / printed_pages": "the month's range; printed_page = scan_page − 3",
+      "review_notes": "present on some days where a reading was uncertain or the print was odd"
+    },
+    "geez_numerals": {
+      "፩": 1,
+      "፪": 2,
+      "፫": 3,
+      "፬": 4,
+      "፭": 5,
+      "፮": 6,
+      "፯": 7,
+      "፰": 8,
+      "፱": 9,
+      "፲": 10,
+      "፳": 20,
+      "፴": 30,
+      "፵": 40,
+      "፶": 50,
+      "፷": 60,
+      "፸": 70,
+      "፹": 80,
+      "፺": 90,
+      "፻": 100,
+      "note": "compound: ፲፬=14, ፳፭=25; ፻ multiplies what precedes it, so ፪፻=200"
+    }
+  },
+  "book": {
+    "title": "መጽሐፈ ግጻዌ ወመዝሙር ከነምልክቱ",
+    "subtitle": "ዘይትነበብ ወዘይትበሃል እምዓመት እስከ ዓመት ወዘሰናብት ዘየዐብር ምስለ መዝሙራት ወዘአትናቴዎስ",
+    "publisher": "አክሱም ማተሚያ ቤት፣ አዲስ አበባ፣ ኢትዮጵያ",
+    "editor": "ገብረሥላሴ ብርሃኑ",
+    "edition_note": "ተነትመ በ፻፻፱ወ፺ ዓ.ም. (ሽፋን ላይ YK AZ 2010 E.C.)",
+    "scanned_pages": 427,
+    "printed_pages": 426,
+    "page_offset_note": "printed_page = scan_page - 3 (ማውጫው ከመጽሐፉ መጨረሻ ተነስቶ በስካኑ ፊት ለፊት ስለተቀመጠ ገጽ 3-7 ልዩ ናቸው)",
+    "source_dir": "/home/natinael/Desktop/project/new",
+    "file_pattern": "page-{scan}.pdf",
+    "gitsawe_introduction": "በስመ አብ ወወልድ ወመንፈስ ቅዱስ ፩ዱ አምላክ ንዌጥን በረድኤተ እግዚአብሔር መጽሐፈ ግጻዌ ዘአስተጋብእዎ ሊቃውንት እመጻሕፍት ቅዱሳት ያንብብዎ ካህናት በጊዜ ቅዳሴ እምዓመት እስከ ዓመት ሠረቀ መስከረም ።"
+  },
+  "part": {
+    "part": 1,
+    "title": "ግጻዌ ዘወርኃት"
+  },
+  "season": "ዘመነ በጋ",
+  "month": "መጋቢት",
+  "month_index": 7,
+  "scan_pages": [
+    184,
+    211
+  ],
+  "printed_pages": [
+    181,
+    208
+  ],
+  "day_count": 30,
+  "days_extracted": 30,
+  "status": "complete",
+  "days": [
+    {
+      "day_number": "፩",
+      "commemoration": "በርኪሶስ ኤጲስ ቆጶስ ወሰማዕት ወእስክንድሮስ ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፳፭ ቍ· ፭ – ፮",
+            "verses": [
+              "ጸላዕኩ ማኅበረ እኩያን ።",
+              "ወኢይነብር ምስለ ጽልሑዋን።",
+              "ወአሐጽብ በንጹሕ እደውየ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፲ ቍ· ፲፬ – ፲፮",
+            "incipit": "ወለዘሰ ኢተወክፈክሙ ወኢሰምዓክሙ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ጢሞ ፪",
+              "chapter_verse": "ም· ፪ ቍ· ፩ – ፲፯",
+              "incipit": "ወአንተ ወልድየ ጽናዕ በጸጋሁ ።"
+            },
+            {
+              "reading_type": "ያዕቆብ",
+              "chapter_verse": "ም· ፩ ቍ· ፭ – ፲፭",
+              "incipit": "ወእመሰቦ ዘንጥአ ለጥበብ ለይስአል ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፲፭ ቍ· ፩ – ፲፫",
+              "incipit": "ወቦ እለ ወረዱ እምብሔረ ይሁዳ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፲፭ ቍ· ፭ – ፯",
+            "verses": [
+              "አንተ ውእቱ ዘታገብእ ሊተ ርስትየ ።",
+              "አህበለ ወረዉ ሊተ ያአኀዙኒ ።",
+              "ወርስትየሰ እኍዝ ውእቱ ሊተ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፲ ቍ· ፲፯ – ፳፯",
+            "incipit": "ወተዐቀቡ እምሰብእ እስመ ያገብኡክሙ ።"
+          },
+          "ቅዳሴ": "ዘ፫፻ (ግሩም) ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፮ ቍ· ፳ – ፳፩",
+            "verses": [
+              "ንግሩ ለእግዚአብሔር ምሕረቶ ።",
+              "ወመንክሮሂ ለእጓለ እመሕያው ።",
+              "ወይሡዑ ሎቱ መሥዋዕተ ስብሓት ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፰ ቍ· ፴፰ – ፵፩",
+            "incipit": "ወአስተብቍዓ ለእግዚእ ኢየሱስ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        184
+      ]
+    },
+    {
+      "day_number": "፪",
+      "commemoration": "መከራዊ ኤጲስ ቆጶስ ዘተናገረት በድኑ ወጎርጎርዮስ ረዓዬ ኅቡዓት ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፷፱ ቍ· ፭ – ፮",
+            "verses": [
+              "ወእግዚአብሔር ይረድአኒ ።",
+              "ረዳእየ ወምስካይየ አንተ እግዚአብሔር ወኢትጐንዲ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማርቆስ",
+            "chapter_verse": "ም· ፭ ቍ· ፳፩ – ፳፭",
+            "incipit": "ወካዕበ ዐደወ እግዚአ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ሮሜ",
+              "chapter_verse": "ም· ፩ ቍ· ፰ – ፲፰",
+              "incipit": "አቀድም አእኵቶቶ ለእግዚአብሔር ።"
+            },
+            {
+              "reading_type": "ዮሐ ፩",
+              "chapter_verse": "ም· ፩ ቍ· ፩ – ፍ፡ም፡",
+              "incipit": "ንዜንወክሙ በእንተ ውእቱ ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፭ ቍ· ፲፬ – ፳፮",
+              "incipit": "ወሶበ ሰምዑ ሐዋርያት ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፴፮ ቍ· ፴ – ፴፩",
+            "verses": [
+              "አፉሁ ለጻድቅ ይትሜሐር ጥበበ ።",
+              "ወልሳኑ ይነብብ ጽድቀ ።",
+              "ወሕገ አምላኩ ውስተ ልቡ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፭ ቍ· ፳ – ፴፬",
+            "incipit": "ናሁ እብለክሙ ከመ እመ ኢፈድፈደ ጽድቅክሙ ።"
+          },
+          "ቅዳሴ": "ዘባስልዮስ ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፴፱ ቍ· ፲፭ – ፲፱",
+            "verses": [
+              "አንተ እግዚኦ ኢታርኅቅ ሣህለከ እምኔየ ።",
+              "ምሕረትከ ወጽድቅከ ዘልፈ ይርከባኒ ።",
+              "እስመ ረከበተኒ እኪት እንተ አልባቲ ኍልቍ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማርቆስ",
+            "chapter_verse": "ም· ፪ ቍ· ፲፩ – ፲፬",
+            "incipit": "ወካዕበ ይቤሎ ለውእቱ ድዉይ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        184,
+        185
+      ],
+      "continued_from_scan_page": 184
+    },
+    {
+      "day_number": "፫",
+      "commemoration": "ቆዝሞስ ወበርፍንዮስ ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፷፩ ቍ· ፫ – ፬",
+            "verses": [
+              "እስከ ማእዜኑ ትቀውሙ ላዕለ ብእሲ ።",
+              "ወትቀትልዎ ኵልክሙ ።",
+              "ከመ አረፍት ጽንንት ወከመ ጥቅም ንሑል ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፲፪ ቍ· ፳፪ – ፳፱",
+            "incipit": "ወእምዝ አምጽአ ሎቱ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ተሰሎ ፪",
+              "chapter_verse": "ም· ፩ ቍ· ፫ – ፍ፡ም፡",
+              "incipit": "ርቱዕ ናእኵቶ ለእግዚአብሔር ።"
+            },
+            {
+              "reading_type": "ጴጥ ፪",
+              "chapter_verse": "ም· ፫ ቍ· ፲፬ – ፍ፡ም፡",
+              "incipit": "ወይእዜኒ አኀውየ ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፬ ቍ· ፲፫ – ፳፯",
+              "incipit": "ወሶበ ርእይዎሙ ለጴጥሮስ ወለዮሐንስ"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፷፩ ቍ· ፬ – ፭",
+            "verses": [
+              "ወባሕቱ መከሩ ይሠዑሩ ክብርየ ።",
+              "ወሮጽኩ በጽምዕየ ።",
+              "በአፉሆሙ ይድኅፉ ወበልቦሙ ይረግሙ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፲፪ ቍ· ፳፬ – ፴፯",
+            "incipit": "ወአእሚሮ እግዚእ ኢየሱስ ሕሊናሆሙ ።"
+          },
+          "ቅዳሴ": "ዘ፫፻ (ግሩም)"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፳፩ ቍ· ፳፯ – ፳፰",
+            "verses": [
+              "ወይስግዱ ቅድሜሁ ኵሎሙ በሐውርተ አሕዛብ ።",
+              "እስመ ለእግዚአብሔር መንግሥት ።",
+              "ወውእቱ ይኄንኖሙ ለአሕዛብ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፲፯ ቍ· ፲፭ – ፲፯",
+            "incipit": "ወርእዮ አሐዱ እምኔሆሙ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        185,
+        186
+      ],
+      "continued_from_scan_page": 185
+    },
+    {
+      "day_number": "፬",
+      "commemoration": "ኮነ ጉባኤ በእንተ በዓለ ፋሲካ በደሴተ ደቂቀ አሞር ወቅዱስ ሐኑልዮስ ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፹፬ ቍ· ፯ – ፰",
+            "verses": [
+              "አርእየነ እግዚአ ሣህለከ ።",
+              "ወሀበነ አምላክነ አድኅኖተከ ።",
+              "አጽምእ ዘይነብበኒ እግዚአብሔር አምላኪየ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማርቆስ",
+            "chapter_verse": "ም· ፱ ቍ· ፲፮ – ፴፬",
+            "incipit": "ወአውሥአ አሐዱ እምውስተ ሕዝብ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ዮሐ ፪",
+              "chapter_verse": "ም· ፩ · ፩ – ፍ፡ም፡",
+              "incipit": "እምነ ቀሲስ ለንሪት ወለእግዝእት ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፳ ቍ· ፩ – ፯",
+              "incipit": "ወእምድኅረ ኀልቀ ሐከክ ጸውዖ ጳውሎስ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፳፭ ቍ· ፭ – ፮",
+            "verses": [
+              "ጸላዕኩ ማኅበረ እኩያን ።",
+              "ወኢይነብር ምስለ ጽልሑዋን ።",
+              "ወአሐጽብ በንጹሕ እደውየ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፳፪ ቍ· ፩ – ፳፬",
+            "incipit": "ወቀርበ በዓለ መጸለት ዘስሙ ፋሲካ ።"
+          },
+          "ቅዳሴ": "ዲዮስቆሮስ ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፴ ቍ· ፲፮ – ፲፯",
+            "verses": [
+              "አብርህ ገጸከ ላዕለ ገብርከ ።",
+              "ወአድኅነኒ በእንተ ምሕረትከ ።",
+              "ወኢይትኃፈር እግዚአ እስመ ጸዋዕኩከ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማርቆስ",
+            "chapter_verse": "ም· ፰ ቍ· ፳፪ – ፳፯",
+            "incipit": "ወበጽሑ ቤተ ሳይዳ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        186,
+        187
+      ],
+      "continued_from_scan_page": 186
+    },
+    {
+      "day_number": "፭",
+      "commemoration": "ዕረፍቱ ለአቡነ ገብረ መንፈስ ቅዱስ ወአባ ሰረባሞን ዘይበልዕ በበ፪ ዕለት ወአውዶክስያ ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፺ ቍ· ፲፫ – ፲፬",
+            "verses": [
+              "ወትከይድ አንበሳ ወከይሴ ።",
+              "እስመ ብየ ተወከለ አድኅኖ ።",
+              "ወእከድኖ እስመ አእመረ ስምየ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃ",
+            "chapter_verse": "ም· ፳፩ ቍ· ፴፫ – ፴፯",
+            "incipit": "ዑቁ ርእሰክሙ ኢታክብዱ ልበክሙ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ሮሜ",
+              "chapter_verse": "ም· ፲፬ ቍ· ፩ – ፍ፡ም፡",
+              "incipit": "ወለዘኒ ድኩም ሃይማኖቱ ።"
+            },
+            {
+              "reading_type": "ጴጥ ፩",
+              "chapter_verse": "ም· ፬ ቍ· ፩ – ፲፪",
+              "incipit": "ወእመሰ ክርስቶስ ተሰቅለ በሥጋሁ ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፲፯ ቍ· ፲፱ – ፍ፡ም፡",
+              "incipit": "ወወሰድዎ ቤተ ምኵናን ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፲፭ ቍ· ፭ – ፮",
+            "verses": [
+              "እግዚአ አነ ገብርከ ።",
+              "ገብርከ ወልደ ዓመትከ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፮ ቍ· ፲፱ – ፍ፡ም፡",
+            "incipit": "ኢትዝግቡ ለክሙ መዝገበ ።"
+          },
+          "ቅዳሴ": "ዘ፫፻ ግሩም ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፴፰ ቍ· ፲፪ – ፲፫",
+            "verses": [
+              "እስመ ጽልመትኒ ኢይጸልም በኀቤከ ።",
+              "ወሌሊትኒ ብሩህ ከመ መዓልት ።",
+              "በአምጣነ ጽልመታ ከማሁ ብርሃና ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፳፩ ቍ· ፴፭ – ፍ፡ም፡",
+            "incipit": "ወኮነ መዓልተ ይሜህር በምኵራብ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        187,
+        188
+      ],
+      "continued_from_scan_page": 187
+    },
+    {
+      "day_number": "፮",
+      "commemoration": "ዲዮስቆሮስ ሰማዕት ወቴዎድስዮስ ወእንጡንዮስ ወአርከለዲስ ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፵፮ ቍ· ፫ – ፬",
+            "verses": [
+              "ዘይፌውሶሙ ለቍሱላን ልብ ።",
+              "ወያጸምም ሎሙ ቍስሎሙ ።",
+              "ዘይኄልቆሙ ለከዋክብት በምልአሙ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፰ ቍ· ፵፫ – ፵፱",
+            "incipit": "ወእምዝ እንዘ የሐውር ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ቆሮ ፩",
+              "chapter_verse": "ም· ፫ ቍ· ፱ – ፍ፡ም፡",
+              "incipit": "ወአንትሙሰ ሕንጻ እግዚአብሔር አንትሙ ።"
+            },
+            {
+              "reading_type": "ጴጥ ፩",
+              "chapter_verse": "ም· ፭ ቍ· ፭ – ፲፪",
+              "incipit": "ወከማሁ አንትሙኒ ወራዙት ተኰነኑ ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፪ ቍ· ፴፰ – ፍ፡ም፡",
+              "incipit": "ወይቤሎሙ ጴጥሮስ ነስሑ ወተጠመቁ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፩ ቍ· ፩ – ፪",
+            "verses": [
+              "ብፁዕ ብእሲ ዘኢሐረ በምክረ ረሲዓን ።",
+              "ወዘኢቆመ ውስተ ፍኖት ኃጥአን ።",
+              "ወዘኢነበረ ውስተ መንበረ መስተሣልቃን ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፲፭ ቍ· ፲፩ – ፍ፡ም፡",
+            "incipit": "ወይቤ ፩ብእሲ ቦቱ ፪ቱ ደቂቅ ።"
+          },
+          "ቅዳሴ": "ዘ፫፻ ግሩም ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፵፪ ቍ· ፭ – ፮",
+            "verses": [
+              "ለምንት ትቴክዚ ነፍስየ ወለምንት ተሀውኪኒ።",
+              "እምኒ በእግዚአብሔር ከመ እገኒ ሎቱ ።",
+              "መድኃኔ ገጽየ አምላኪየ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፰ ቍ· ፵፯ – ፵፱",
+            "incipit": "ወርእያ ይእቲ ብእሲት ከመ ኢተከብተ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        188,
+        189
+      ],
+      "continued_from_scan_page": 188
+    },
+    {
+      "day_number": "፯",
+      "commemoration": "ፊልሞን ወአብላንዮስ ወቅዱስ ቴዎድሮስ ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፲ ቍ· ፭ – ፮",
+            "verses": [
+              "እሳት ወተይ መንፈስ ዐውሎ መክፈልተ ዕፃያሙ ።",
+              "እስመ ጻድቅ እግዚአብሔር ወጽድቀ አፍቀረ ።",
+              "ወርትዕሰ ትሬእዮ ገጽ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፳፬ ቍ· ፩ – ፭",
+            "incipit": "ወወጺአ እግዚእ ኢየሱስ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ሮሜ",
+              "chapter_verse": "ም· ፰ ቍ· ፴፩ – ፍ፡ም፡",
+              "incipit": "ምንተ እንከ ንብል እንበይነዝ ።"
+            },
+            {
+              "reading_type": "ዮሐ ፩",
+              "chapter_verse": "ም· ፪ ቍ· ፲፬ – ፳",
+              "incipit": "ጸሐፍኩ ለክሙ ወራዙት ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፭ ቍ· ፲፯ – ፴፬",
+              "incipit": "ወተንሥኡ ሊቃነ ካህናት ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፲ ቍ· ፲ – ፲፩",
+            "verses": [
+              "ቀዳሚሃ ለጥበብ ፈሪሀ እግዚአብሔር ።",
+              "ምክር ሠናይት ለኵሉ ዘይገብራ ።",
+              "ወስብሓቲሁኒ ይነብር ለዓለም ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፲ ቍ· ፳፯ – ፍ፡ም፡",
+            "incipit": "ኢትፍርህዎሙኒ እንከ ለእለ ይቀትሉ ሥጋክሙ ።"
+          },
+          "ቅዳሴ": "ዘወልደ ነጐድጓድ ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፵፭ ቍ· ፰ – ፱",
+            "verses": [
+              "እግዚአብሔር ያጠብቦሙ ለዕውራን ።",
+              "እግዚአብሔር ያፈቅሮሙ ለጻድቃን ።",
+              "እግዚአብሔር የዐቅቦሙ ለፈላስያን ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፱ ቍ· ፲፰ – ፳",
+            "incipit": "ወእንዘ ዘንተ ይነግሮሙ ናሁ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        189,
+        190
+      ],
+      "continued_from_scan_page": 189
+    },
+    {
+      "day_number": "፰",
+      "continued_from_scan_page": 190,
+      "services": {
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፷፩ ቍ· ፱ – ፲",
+            "verses": [
+              "እሙንቱስ እምከንቱ ውስተ ከንቱ ከመ ።",
+              "ከመ ኢትሰፈዉዋ ለዐመፃ ።",
+              "ወኢትትአመንዎ ለሀይድ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፲፯ ቍ· ፳፪ – ፳፬",
+            "incipit": "ወእንዘ ያንሶስዉ ውስተ ገሊላ ።"
+          }
+        },
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፳፮ ቍ· ፩ – ፪",
+            "verses": [
+              "እግዚአብሔር ያበርህ ሊተ ያድኅነኒ ምንትኑ ያፈርሁኒ ።",
+              "እግዚአብሔር ምእመና ለሕይወትየ ምንትኑ ያደነግፀኒ ።",
+              "ሶበ ይቀርቡኒ እኩያን ይብልዑኒ ሥጋየ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፲፰ ቍ· ፴፭ – ፍ፡ም፡",
+            "incipit": "ወእምዝ አልጺቆሙ ኢያሪሖ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ሮሜ",
+              "chapter_verse": "ም· ፪ ቍ· ፩ – ፲፱",
+              "incipit": "እንለ እመሕያው በምንትኑ ዘትትዋሥእ ።"
+            },
+            {
+              "reading_type": "ይሁዳ",
+              "chapter_verse": "ም· ፩ ቍ· ፲፯ – ፍ፡ም፡",
+              "incipit": "ወአንትሙሰ አኃዊን ተዘከሩ ቃለ ዘነገሩክሙ"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፩ ቍ· ፲፭ – ፍ፡ም፡",
+              "incipit": "ወውእተ ዓሚረ ተንሥአ ጴጥሮስ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፲፰ ቍ· ፫ – ፬",
+            "verses": [
+              "አልቦ ነገር ወአልቦ ነቢብ ዘኢተሰምዐ ቃሎሙ።",
+              "ውስተ ኵሉ ምድር ወፅአ ነገሮሙ ።",
+              "ወእስከ አጽናፈ ዓለም በጽሐ ነቢቦሙ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፲ ቍ· ፩ – ፲፭",
+            "incipit": "ወጸውያሙ ለ፲ወ፪ አርዳኢሁ ።"
+          },
+          "ቅዳሴ": "ዘሐዋርያት ።"
+        }
+      },
+      "source_scan_pages": [
+        190,
+        191
+      ],
+      "commemoration": "አርያኖስ ወማትያስ ሐዋርያ ወዮልያኖስ ሊቀ ጳጳሳት"
+    },
+    {
+      "day_number": "፱",
+      "commemoration": "አውሳብዮስ ወብእሲቱ አውሳብያኖስ ወአርማ ማኅበራነ አባ ኖብ ፳ወ፬ ወቅዱስ ኵትን ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፸፪ – ፸፫",
+            "verses": [
+              "እግዚአብሔር መክፈልትየ ለዓለም ።",
+              "እስመ ናሁ እለ ይርኅቁ እምኔከ ይትሐጐሉ ።",
+              "ወሠረውከሙ ለኵሎሙ እለ ይዜምዉ እምኔከ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፱ ቍ· ፲፬ – ፲፯",
+            "incipit": "ወእምዝ መጽኡ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ገላትያ",
+              "chapter_verse": "ም· ፩ ቍ· ፩ – ፲፩",
+              "incipit": "ጳውሎስ ሐዋርያ ዘኢኮን በእንተ ሰብእ ።"
+            },
+            {
+              "reading_type": "ያዕቆብ",
+              "chapter_verse": "ም· ፪ ቍ· ፩ – ፲፬",
+              "incipit": "አኃዊነ ኢትኩን ለገጸ ሰብእ ሃይማኖትክሙ ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፬ ቍ· ፲፫ – ፲፱",
+              "incipit": "ወሶበ ርእዮሙ ለጴጥሮስ ወለዮሐንስ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፴፫ ቍ· ፲፩ – ፲፪",
+            "verses": [
+              "ፈሪሀ እግዚአብሔር እምህርክሙ ።",
+              "መኑ ውእቱ ብእሲ ዘይፈቅድ ሕይወተ ።",
+              "ወያፈቅር ይርአይ መዋዕለ ሠናያተ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማርቆስ",
+            "chapter_verse": "ም· ፩ ቍ· ፳፫ – ፳፱",
+            "incipit": "ወሀሎ ብእሲ ዘጋኔን ።"
+          },
+          "ቅዳሴ": "ዘቄርሎስ ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፳፬ ቍ· ፳ – ፳፩",
+            "verses": [
+              "እስመ ተሰፈዉኩክ እግዚኦ ።",
+              "ያድኅኖ እግዚአብሔር ለእስራኤል እምኵሉ ምንዳቤሁ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፳፫ ቍ· ፳፭ – ፳፯",
+            "incipit": "ወሶበ ወሰድዋ አነዘዋ ለስምዖን ቀሬናዊ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        191,
+        192
+      ],
+      "continued_from_scan_page": 191
+    },
+    {
+      "day_number": "፲",
+      "commemoration": "በዓለ መስቀል ክቡር ወአባ ተከሥተ ብርሃን ዘደብረ ድማኅ ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፹፫ ቍ· ፭ – ፯",
+            "verses": [
+              "እስመ መምህረ ሕግ ይሁብ በረከተ ።",
+              "ወየሐውር እምኃይል ውስተ ኃይል ።",
+              "ወያስተርኢ አምላከ አማልክት በጽዮን ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፭ ቍ· ፩ – ፲፮",
+            "incipit": "ወርእዮ ብዙኃነ አሕዛብ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ገላትያ",
+              "chapter_verse": "ም· ፮ ቍ· ፩ – ፍ፡ም፡",
+              "incipit": "አኃዊነ ለእመቦ ብእሲ ዘስሕተ ።"
+            },
+            {
+              "reading_type": "ያዕቆብ",
+              "chapter_verse": "ም· ፬ ቍ· ፩ – ፲፩",
+              "incipit": "እምአይቴ ለክሙ ፀብዕ ወቀትል ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፬ ቍ· ፩ – ፲፫",
+              "incipit": "ወእንዘ ይነግሮሙ ለሕዝብ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፶፱ ቍ· ፫ – ፬",
+            "verses": [
+              "ወወሀብከሙ ትእምርተ ለእለ ይፈርሁከ ።",
+              "ከመ ያምስጡ እምገጸ ቅስት ።",
+              "ወይድኃኑ ፍቁራኒከ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፲፮ ቍ· ፳፬ – ፍ፡ም፡",
+            "incipit": "ወእምዝ ይቤሎሙ ኢየሱስ ።"
+          },
+          "ቅዳሴ": "ዘዮሐንስ አፈ ወርቅ ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፵ ቍ· ፭ – ፮",
+            "verses": [
+              "ወቅብአ ኃጥአንስ ኢይትቀባእ ርእስየ ።",
+              "እስመ ዓዲ ጸሎትየኒ ከመ ኢታሣሕሎሙ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፭ ቍ· ፴፫ – ፴፭",
+            "incipit": "ወይቤልዎ ለምንት አርዳኢሁ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        192,
+        193
+      ],
+      "continued_from_scan_page": 192
+    },
+    {
+      "day_number": "፲፩",
+      "commemoration": "ቴዎጢቂኖስ ወአባ ባስሊያስ ወአባ ኤፍሬም ወአባ አሌፍ ወአውሳብዮስ አርቃድዮስ ወኤልያስ ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፬ ቍ· ፯ – ፰",
+            "verses": [
+              "እምፍሬ ሥርናይ ወወይን ወቅብዕ በዝኁ ።",
+              "በሰላም ቦቱ እስክብ ወእነውም ።",
+              "እስመ አንተ እግዚኦ በተስፋ ባሕቲትከ አኀደርከኒ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃ",
+            "chapter_verse": "ም ፭ ቍ· ፴፭ – ፍ፡ም፡",
+            "incipit": "ወይቤሎሙ ምሳሌ አልቦ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ቲቶ",
+              "chapter_verse": "ም· ፩ ቍ· ፩ – ፯",
+              "incipit": "ጳውሎስ ገብሩ ለእግዚአብሔር ።"
+            },
+            {
+              "reading_type": "ያዕቆብ",
+              "chapter_verse": "ም· ፪ ቍ· ፲፬ – ፍ፡ም፡",
+              "incipit": "ምንተ ይበቍዕ አኃዊነ ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፳፯ ቍ· ፳፪ – ፳፯",
+              "incipit": "ወይእዜኒ እብለክሙ ኢትፍርሁ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፳፭ ቍ· ፩ – ፪",
+            "verses": [
+              "ፍታሕ ሊተ እግዚኦ እስመ አንሰ በየውሃትየ አሐውር ።",
+              "ወተወከልኩ በእግዚአብሔር ከመ ኢይድክም ።",
+              "ፍትነኒ እግዚኦ ወአመክረኒ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፲፯ ቍ· ፩ – ፲፪",
+            "incipit": "ወበይእቲ ሰዓት ቀርቡ ኀቤሁ ።"
+          },
+          "ቅዳሴ": "ዘባስልዮስ ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፷፬ ቍ· ፩ – ፪",
+            "verses": [
+              "ለከ ይደሉ እግዚኦ ስብሐት በጽዮን ።",
+              "ወለከ ይትፌኖ ጸሎት በኢየሩሳሌም ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፬ ቍ· ፴፩ – ፴፫",
+            "incipit": "ወወረደ ቅፍርናሆም ሀገረ ገሊላ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        193,
+        194
+      ],
+      "continued_from_scan_page": 193
+    },
+    {
+      "day_number": "፲፪",
+      "commemoration": "ቅዱስ ሚካኤል ወድሜጥሮስ ሊቀ ጳጳሳት ወመላዚ ሰማዕት ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻ ቍ· ፭ – ፯",
+            "verses": [
+              "አዕይንትየስ ኀበ መሃይምናነ ምድር ።",
+              "ከመ አንብሮሙ ምስሌየ ።",
+              "ዘየሐውር በፍኖት ንጹሕ ውእቱ ይትለአከኒ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፭ ቍ· ፩ – ፲፭",
+            "incipit": "ወርእዮ ብዙኃነ አሕዛብ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ቆር ፩",
+              "chapter_verse": "ም· ፯ ቍ· ፩ – ፰",
+              "incipit": "ወበእንተሰ ዘጸሐፍክሙ ሊተ ።"
+            },
+            {
+              "reading_type": "ጴጥ ፪",
+              "chapter_verse": "ም· ፪ ቍ· ፱ – ፍ፡ም፡",
+              "incipit": "ናሁኬ አእመርነ ከመ እግዚአብሔር ይክል ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፳፯ ቍ· ፩ – ፲፩",
+              "incipit": "ወእምዝ አዘዘ ፌስጦስ ይሰድዋ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፴፫ ቍ· ፯ – ፰",
+            "verses": [
+              "ይትዐየን መልአክ እግዚአብሔር ዐውዶሙ ።",
+              "ለእለ ይፈርህዎ ወያድኅኖሙ ።",
+              "ጠዐሙ ወታእምሩ ከመ ኄር እግዚአብሔር ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፲፯ ቍ· ፲ – ፳፩",
+            "incipit": "ኡቁ ኢታስተሐቅርዎ ለ፩ እምእሉ ።"
+          },
+          "ቅዳሴ": "ያዕቆብ ዘሥሩግ ። (ተንሥኡ)"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፲፯ ቍ· ፸፫ – ፸፬",
+            "verses": [
+              "አለብወኒ ወእትመሀር ትእዛዘከ ።",
+              "እለ ይፈርሁከ ይርአዩኒ ወይትፌሥሑ ።",
+              "እስመ ተወከልኩ በነቢብከ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማርቆስ",
+            "chapter_verse": "ም· ፱ ቍ· ፵፭ – ፍ፡ም፡",
+            "incipit": "እስመ ለኵሉ በእሳት ይሜልህዋ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        194
+      ]
+    },
+    {
+      "day_number": "፲፫",
+      "commemoration": "፵ሐራ ሰማይ ወተሰደት መቃራ ወመቃርስ ወዲዮናስዮስ ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፵፱ ቍ· ፬ – ፭",
+            "verses": [
+              "አስተጋብኡ ሎቱ ጻድቃኑ ።",
+              "እለ ይገብሩ መሥዋዕት ዘበሕጉ ።",
+              "ይነግራ ሰማያት ጽድቀ ዚአሁ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማርቆስ",
+            "chapter_verse": "ም· ፲፫ ቍ· ፴፪ – ፍ፡ም፡",
+            "incipit": "ወበእንተሰ ይእቲ ዕለት ወይእቲ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ጢሞ ፩",
+              "chapter_verse": "ም· ፫ ቍ· ፩ – ፲፩",
+              "incipit": "እሙን ነገር ዘይፈቅድ ።"
+            },
+            {
+              "reading_type": "ጴጥ ፪",
+              "chapter_verse": "ም· ፩ ቍ· ፩ – ፲፪",
+              "incipit": "ስምዖን ኬፋ ገብሩ ወልዑኩ ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፲፯ ቍ· ፭ – ፲፫",
+              "incipit": "ወቀንኡ አይሁድ ላዕሌሆሙ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፴፫ ቍ· ፲፱ – ፳",
+            "verses": [
+              "ወእምኵሉ ያድኅኖሙ እግዚአብሔር ።",
+              "እግዚአብሔር የዐቅብ ኵሎ አዕፅምቲሆሙ ።",
+              "ወኢይትቀጠቀጥ አሐዱ እምውስቴቶሙ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፭ ቍ· ፩ – ፲፯",
+            "incipit": "ወርእዮ ብዙኃነ አሕዛብ ።"
+          },
+          "ቅዳሴ": "ግሩም አው ዘባስልዮስ ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፷፩ ቍ· ፲ – ፲፩",
+            "verses": [
+              "ብዕል ለእመ ሰዝገ ኢታዕብዩ ልበክሙ ።",
+              "ምዕረ ነበበ እግዚአብሔር ወዘንተ ከመ ሰማዕኩ ።",
+              "እስመ እግዚአብሔር ኃያል ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፲፮ ቍ· ፱ – ፲፬",
+            "incipit": "ወአነኒ እብለክሙ ግበሩ ለክሙ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        195
+      ]
+    },
+    {
+      "day_number": "፲፬",
+      "commemoration": "ቄርሎስ ሊቀ ጳጳሳት ወአባ ባጥል ወአባ ሲኖዳ ሰማዕት ወአጋንዮስ ወአውንድርዮስ ወብንድዮስ ወቶማስ ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፮ ቍ· ፵፪ – ፵፫",
+            "verses": [
+              "ይርአዩ ራትዓን ወይትፌሥሑ ።",
+              "ወትትፌፀም አፉሃ ኵላ ዐመፃ ።",
+              "መኑ ጠቢብ ዘየዐቅቦ ለዝ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፳፬ ቍ· ፵፭ – ፍ፡ም፡",
+            "incipit": "መኑ እንጋ ገብር ምእመን ወጠቢብ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ቆር ፩",
+              "chapter_verse": "ም· ፮ ቍ· ፱ – ፍ፡ም፡",
+              "incipit": "ኢተአምሩኑ ከመ ዐማፅያን ኢይሬእዩዋ ።"
+            },
+            {
+              "reading_type": "ያዕቆብ",
+              "chapter_verse": "ም· ፬ ቍ· ፮ – ፍ፡ም፡",
+              "incipit": "ወበእንተ ዝንቱ ይቤ እስመ ለዕቡያን ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፮ ቍ· ፩ – ፯",
+              "incipit": "ወውእቱ ዓሚረ በዝኁ ሕዝብ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፹፫ ቍ· ፭ – ፯",
+            "verses": [
+              "እስመ መምህረ ሕግ ይሁብ በረከተ ።",
+              "ወየሐውር እምኃይል ውስተ ኃይል ።",
+              "ወያስተርኢ አምላከ አማልክት በጽዮን ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፯ ቍ· ፩ – ፲፭",
+            "incipit": "ኢትኰንኑ ከመ ኢትትኰነኑ ።"
+          },
+          "ቅዳሴ": "ዘባስልዮስ ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፭ ቍ· ፲፩",
+            "verses": [
+              "ወይትፌሥሑ ብከ ኵሎሙ እለ ይትዌከሉከ ።",
+              "ለዓለም ይትሐሠዩ ወተኀድር ላዕሌሆሙ ።",
+              "ወይትሜክሑ ብከ ኵሎሙ እለ ያፈቅሩ ስመከ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ዮሐንስ",
+            "chapter_verse": "ም· ፲፯ ቍ· ፳፫ – ፳፭",
+            "incipit": "ወአነኒ ቦሙ ወአንተሂ ብየ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        196
+      ]
+    },
+    {
+      "day_number": "፲፭",
+      "commemoration": "ሣራ መነኮሳይት ወሰላፍኮስ ፈሐሪሃ ለቅድስት አስጠራጦኒቃ ወአባ ሕልያስ ሰማዕት ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፲፬ ቍ· ፯ – ፰",
+            "verses": [
+              "እስመ አድኀንካ ለነፍስየ እሞት ።",
+              "ወለአዕይንትየኒ እምአንብዕ ።",
+              "ወለእገርየኒ እምዳኅፅ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማርቆስ",
+            "chapter_verse": "ም· ፱ ቍ· ፵፫ – ፍ፡ም፡",
+            "incipit": "ወእመኒ እዴከ ታስሕተከ ምትራ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ኤፌሶን",
+              "chapter_verse": "ም· ፭ ቍ· ፳፩ – ፍ፡ም፡",
+              "incipit": "አትሕቱ ርእስክሙ ለቢጽክሙ ።"
+            },
+            {
+              "reading_type": "ዮሐ ፩",
+              "chapter_verse": "ም· ፭ ቍ· ፲፬ – ፍ፡ም፡",
+              "incipit": "ወዛቲ ይእቲ እንተ ብነ ገጽ ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፳፮ ቍ· ፩ – ፍ፡ም፡",
+              "incipit": "ወይቤሎ አግሪጳ ለጳውሎስ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፴፯ ቍ· ፳፱ – ፴",
+            "verses": [
+              "ጻድቃንስ ይወርስዋ ለምድር ።",
+              "ወይነብሩ ውቤታ ለዓለመ ዓለም ።",
+              "አፉሁ ለጻድቅ ይትሜሐር ጥበበ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፲ ቍ· ፲፱ – ፳፬",
+            "incipit": "ወናሁ ወሀብኩክሙ ሥልጣነ ።"
+          },
+          "ቅዳሴ": "ዘባስልዮስ ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፵፬ ቍ· ፲፯ – ፲፰",
+            "verses": [
+              "ጻድቅ እግዚአብሔር በኵሉ ፍናዌሁ ።",
+              "ወኄር በኵሉ ምግባሩ ።",
+              "ቅሩብ እግዚአብሔር ለኵሎሙ እለ ይጼውዕዎ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ዮሐንስ",
+            "chapter_verse": "ም· ፲፯ ቍ· ፳፭ – ፍ፡ም፡",
+            "incipit": "አባ ጻድቅ ወዓለምስ ኢያእመረከ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        197
+      ]
+    },
+    {
+      "day_number": "፲፮",
+      "commemoration": "አባ ሚካኤል ሊቀ ጳጳሳት ዘሀገረ እስክንድርያ ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፲፯ ቍ· ፵፫ – ፵፬",
+            "verses": [
+              "ወትሰይመኒ ውስተ ርእሰ ሕዝብ ።",
+              "ሕዝብ ዘኢየአምር ተቀንየ ሊተ ።",
+              "ውስተ ምስማዕ ዕዝን ተሠጥወኒ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፲፱ ቍ· ፲፪ – ፳፰",
+            "incipit": "ወይቤ አሐዱ ብእሲ ክቡር ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ጢሞ ፩",
+              "chapter_verse": "ም· ፬ ቍ· ፩ – ፍ፡ም፡",
+              "incipit": "ወመንፈስ ገሃደ ይነግር ።"
+            },
+            {
+              "reading_type": "ጴጥ ፪",
+              "chapter_verse": "ም· ፩ ቍ· ፲፪ – ፲፱",
+              "incipit": "ወበእንተዝ እጽሕቅ ለክሙ ዘልፈ ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም፤ ፲፩ ቍ· ፳፫ – ፳፮",
+              "incipit": "ወፈነውዎ ለበርናባስ አንጾኪያ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፷፯ ቍ· ፴ – ፴፩",
+            "verses": [
+              "ዝርዋሙ ለአሕዛብ እለ ይፈቅዱ ቀትለ ።",
+              "ይምጽኡ ተናብልት እምግብጽ ።",
+              "ኢትዮጵያ ታበጽሕ እደዊሃ ኀበ እግዚአብሔር ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፲፬ ቍ· ፲፬ – ፍ፡ም፡",
+            "incipit": "ወእመቦ ፩ እምኔክሙ ዘይፈቅድ ።"
+          },
+          "ቅዳሴ": "ዘ፫፻ ግሩም ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፲፰ ቍ· ፴፯ – ፴፰",
+            "verses": [
+              "ሚጠን ለአዕይንትየ ከመ ኢይርአያ ከንቶ ።",
+              "ወአሕይወኒ በፍኖትከ ።",
+              "አቅም ለገብርከ ዘነበብከ ውስተ ነቢብከ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማርቆስ",
+            "chapter_verse": "ም· ፱ ቍ· ፵፭ – ፵፯",
+            "incipit": "ወእመኒ ዓይንከ ታስሕተከ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        198
+      ]
+    },
+    {
+      "day_number": "፲፯",
+      "commemoration": "አልዓዛር ዘአንሥኦ እግዚእነ እመቃብር ወቴዎቅሪጦስ ወጊዮርጊስ ወተስላስ ወዮሴፍ ወአባ ገሪማ ዘመደራ ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፴ ቍ· ፱ – ፲",
+            "verses": [
+              "ወትሰይመኒ ውስተ ርእሰ ሕዝብ ።",
+              "ሕዝብ ዘኢየአምር ተቀንየ ሊተ ።",
+              "ውስተ ምስማዕ ዕዝን ተሠጥወኒ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ዮሐንስ",
+            "chapter_verse": "ም· ፲፩ ቍ· ፲፯ – ፵፭",
+            "incipit": "ወሐረ ኢየሱስ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ሮሜ",
+              "chapter_verse": "ም· ፲፭ ቍ· ፲፬ – ፍ፡ም፡",
+              "incipit": "ወእትአመንክሙ አነሂ አኃዊነ ።"
+            },
+            {
+              "reading_type": "ያዕቆብ",
+              "chapter_verse": "ም· ፭ ቍ· ፲፬ – ፍ፡ም፡",
+              "incipit": "ወእመቦ ዘይደዊ እምኔክሙ ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፪ ቍ· ፳፪ – ፳፯",
+              "incipit": "ስምዑ ሰብአ እስራኤል ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "ም· ፫ ቍ· ፬ – ፭",
+            "verses": [
+              "ወሰምዐኒ እምደብረ መቅደሱ ።",
+              "አንስ ሰከብኩ ወኖምኩ ።",
+              "ወተንሣእኩ እስመ እግዚአብሔር አንሥአኒ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ዮሐንስ",
+            "chapter_verse": "ም· ፲፩ ቍ· ፩ – ፲፯",
+            "incipit": "ወሀሎ ፩ ብእሲ ይደዊ ።"
+          },
+          "ቅዳሴ": "ዘእግዚእነ ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፳፬ ቍ· ፰ – ፱",
+            "verses": [
+              "ኄርኒ ወጻድቅኒ እግዚአብሔር ።",
+              "በእንተዝ ይመርሆሙ ፍኖት ለእለ ይስሕቱ ።",
+              "ወይመሃሮሙ ፍትሐ ለየዋሃን ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ዮሐንስ",
+            "chapter_verse": "ም· ፯ ቍ· ፶ – ፶፬",
+            "incipit": "ወይቤሎሙ ኒቆዲሞስ ዘሐረ ኀቤሁ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        198,
+        199
+      ],
+      "continued_from_scan_page": 198
+    },
+    {
+      "day_number": "፲፰",
+      "commemoration": "ኤስድሮስ ሰማዕት ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፵ ቍ· ፫ – ፬",
+            "verses": [
+              "ሢም እግዚአ ዐቃቤ ለአፉየ ።",
+              "ወማዕፀዖ ዘዐቅም ለከናፍርየ ።",
+              "ኢታሚጥ ለልብየ ውስተ ነገር እኩይ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፲፱ ቍ· ፳ – ፳፬",
+            "incipit": "ወመጽአ ሣልሱኒ ወይቤሎ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ቆሮ ፩",
+              "chapter_verse": "ም· ፲፮ ቍ· ፩ – ፲፪",
+              "incipit": "ወበእንተ አስተጋብአ ለቅዱሳን ።"
+            },
+            {
+              "reading_type": "ጴጥ ፩",
+              "chapter_verse": "ም· ፪ ቍ· ፩ – ፲፩",
+              "incipit": "አሰስልዋ እንከ እምኔክሙ ለኵላ እከይ ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፳፪ ቍ· ፳፬ – ፍ፡ም፡",
+              "incipit": "ወአዘዘ መልአክ ያብእዎ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፲፰ ቍ· ፩ – ፪",
+            "verses": [
+              "ብፁዓን እለ ንጹሓን በፍኖቶሙ ።",
+              "ወእለ የሐውሩ በሕገ እግዚአብሔር ።",
+              "ብፁዓን እለ የኀሡ ስምዖ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፲፰ ቍ· ፲፰ – ፳፫",
+            "incipit": "ወተስእሎ አሐዱ መልአክ ።"
+          },
+          "ቅዳሴ": "ዘወልደ ነጐድጓድ ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፩ ቍ· ፲፫ – ፲፬",
+            "verses": [
+              "ተንሥእ እግዚአ ወተሣሃላ",
+              "እስመ ጊዜሃ ውእቱ ከመ ትሣሃላ ወበጽሐ ዕድሜሃ ።",
+              "እስመ ሠምሩ አግብርቲከ ዕበኒሃ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፲፱ ቍ· ፵፩ – ፵፬",
+            "incipit": "ወይቤላ ሶበስ ተአምረ ዮም ሰላምኪ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        199,
+        200
+      ],
+      "continued_from_scan_page": 199
+    },
+    {
+      "day_number": "፲፱",
+      "commemoration": "አርስጦቦሎስ ዘእም፸ወ፪ አርድእት እስክንድሮስ ወእለእስክንድሮስ ወአጋቢሁ ወኒሞላ ወሁንስጣ ወዲዮናስዮስ ወተላስዮስ ወእስከናፍር ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "ም· ፲፬ ቍ· ፪ – ፫",
+            "verses": [
+              "ዘየሐውር በንጹሕ ወይገብር ጽድቀ ።",
+              "ወዘይነብብ ጽድቀ በልቡ ።",
+              "ወዘኢያሕለወ በልሳኑ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፳፭ ቍ· ፲፬ – ፲፱",
+            "incipit": "እስመ ከመ ብእሲ ዘይነግድ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ሮሜ",
+              "chapter_verse": "ም· ፲፮ ቍ· ፫ – ፲፯",
+              "incipit": "አምኑ ጵርስቅላሃ ወአቂላሃ ።"
+            },
+            {
+              "reading_type": "ጴጥ ፩",
+              "chapter_verse": "ም· ፫ ቍ· ፯ – ፲፮",
+              "incipit": "ወከማሁ አንትሙኒ እደው ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፳፪ ቍ· ፳፪ – ፍ፡ም፡",
+              "incipit": "ወሶበ ሰምዑ ዘንተ ነገረ እምጸውሎስ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፸፰ ቍ· ፲ – ፲፩",
+            "verses": [
+              "ወይርአዩ አሕዛብ በቅድመ አዕይንቲነ ።",
+              "በቀለ ደሞሙ ለአግብርቲከ ዘተክዕወ ።",
+              "ይባእ ቅድሜከ ገዓሮሙ ለሙቁሓን ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፲ ቍ· ፩ – ፳፩",
+            "incipit": "ወእምዝ ኃረየ እግዚእነ ።"
+          },
+          "ቅዳሴ": "ዘሐዋርያት ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፴፯ ቍ· ፳፩ – ፳፪",
+            "verses": [
+              "ይትሌቃሕ ኃጥእ ወኢይፈዲ ።",
+              "ወጻድቅስ ይምህር ወይሁብ ።",
+              "እስመ እለ ይባርክዎ ይወርስዋ ለምድር ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ዮሐንስ",
+            "chapter_verse": "ም· ፲፩ ቍ· ፳፰ – ፴",
+            "incipit": "ወዘንተ ብሂላ ሐረት ወጸውዐታ ለማርያም ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        200,
+        201
+      ],
+      "continued_from_scan_page": 200
+    },
+    {
+      "day_number": "፳",
+      "commemoration": "እስጡራጡኒቃ ወማንበራኒሃ ፹፻ ወ፳ ወ፭ ሰማዕታት ወሚካኤል ሊቀ ጳጳሳት ወአስቀራን ወትንሣኤ አልዓዛር ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "ም· ፺፮ ቍ· ፰ – ፱",
+            "verses": [
+              "ወተሐሥያ አዋልደ ይሁዳ ።",
+              "በእንተ ፍትሕከ እግዚአ ።",
+              "እስመ አንተ እግዚአብሔር ባሕቲትከ ልዑል ዲበ ኵሉ ምድር ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ዮሐንስ",
+            "chapter_verse": "ም· ፲፩ ቍ· ፴፩ – ፵፭",
+            "incipit": "ወሶበ ርእይዋ ለማርያም አይሁድ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ያዕቆብ",
+              "chapter_verse": "ም· ፭ ቍ· ፩ – ፰",
+              "incipit": "ንዑ ይእዜኒ አብዕልት ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፳፬ ቍ· ፲ – ፳፪",
+              "incipit": "ወቀበቦ መልአክ ለጳውሎስ ከመ ይትናገር ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፵፫ ቍ· ፳፪ – ፳፫",
+            "verses": [
+              "እስመ በእንቲአሁ ይቀትሉነ ኵሎ አሚረ ።",
+              "ወኮነ ከመ አባግዕ ዘይጠብሑ ።",
+              "ንቃሕ እግዚአ ለምንት ትነውም ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ዮሐ",
+            "chapter_verse": "ም· ፲፩ ቍ· ፲፯ – ፵፯",
+            "incipit": "ወሐረ እግዚእ ኢየሱስ ቢታንያ ።"
+          },
+          "ቅዳሴ": "ዘወልደ ነጐድጓድ ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፸፫ ቍ· ፬ – ፭",
+            "verses": [
+              "ወተበውሩ ጸላእትከ በማዕከለ በዓልከ ።",
+              "ወረሰዩ ትእምርቶሙ ትእምርተ ዘኢያእመሩ ።",
+              "ከመ ዘውስተ ላዕላይ ፍኖት ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ዮሐንስ",
+            "chapter_verse": "ም· ፲፩ ቍ· ፶፫ – ፶፬",
+            "incipit": "ወእምይእቲ ዕለት ተማከሩ ሊቃነ ካህናት ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        201,
+        202
+      ],
+      "continued_from_scan_page": 201
+    },
+    {
+      "day_number": "፳፩",
+      "commemoration": "ተዝካረ በዓላ ለእግዝእትነ ማርያም ወማግተሳላ ወጢሞቴዎስ ሰማዕት ወቴዎድሮስ ወተቀብያት እግዚእነ ዕፍረት ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፶ ቍ· ፱ – ፲",
+            "verses": [
+              "ሚጥ ገጸከ እምኃጣውእትየ ።",
+              "ወደምስስ ሊተ ኵሎ አበሳየ ።",
+              "ልበ ንጹሐ ፍጥር ሊተ እግዚአ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ዮሐንስ",
+            "chapter_verse": "ም· ፲፪ ቍ· ፩ – ፲፪",
+            "incipit": "ወእምዝ ሐረ እግዚእ ኢየሱስ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ኤፌ",
+              "chapter_verse": "ም· ፪ ቍ· ፲፫ – ፍ፡ም፡",
+              "incipit": "ወይዜስ ባሕቱ አንትሙ ።"
+            },
+            {
+              "reading_type": "ዮሐ ፪",
+              "chapter_verse": "ም· ፩ ቍ· ፩ – ፰",
+              "incipit": "እምነ ቀሲስ ለንግሥት ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፯ ቍ· ፵፬ – ፶፫",
+              "incipit": "ወደብተራ ስምዕ እንተ ነበረት ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፵፬ ቍ· ፱ – ፲",
+            "verses": [
+              "ወትቀውም ንግሥት በየማንከ ።",
+              "በአልባሰ ወርቅ ዑጽፍት ወኁብርት ።",
+              "ስምዒ ወለትየ ወርእዩ ወአጽምዒ እዝነኪ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፩ ቍ· ፳፯ – ፴፰",
+            "incipit": "ወበሳድስ ወርኅ ተፈነወ ።"
+          },
+          "ቅዳሴ": "ዘእግዚእነ ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፸፬ ቍ· ፬ – ፭",
+            "verses": [
+              "ወእለሂ ይኤብሱ ኢያንሥኡ ቀርኖሙ ።",
+              "ወኢያንሥኡ ቀርኖሙ ውስተ አርያም ።",
+              "ወኢይንብቡ ዐመፃ ላዕለ እግዚአብሔር ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፲፱ ቍ· ፳፯ – ፵፬",
+            "incipit": "ወሶበ በጽሐ ቤተ ፋጌ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        202,
+        203
+      ],
+      "continued_from_scan_page": 202
+    },
+    {
+      "day_number": "፳፪",
+      "continued_from_scan_page": 203,
+      "services": {
+        "ዘቅዳሴ": {
+          "ምስባክ": {
+            "verses": [
+              "በእንተ ጽላዔ ።",
+              "ከመ ትንሥቶ ለጸላዒ ወለገፋዒ ።"
+            ],
+            "book": "መዝ·",
+            "chapter_verse": "፰ ቍ· ፪ – ፫"
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፳፩ ቍ· ፩ – ፲፯",
+            "incipit": "ወቀሪቦ ኢየሩሳሌም በጽሐ ።"
+          },
+          "ቅዳሴ": "ዘቄርሎስ ።",
+          "epistles_and_acts": [
+            {
+              "reading_type": "ቆሮ ፩",
+              "chapter_verse": "ም· ፬ ቍ· ፩ – ፯",
+              "incipit": "ከመዝኬ የሐልዩ ሰብእ በእንቲአነ ።"
+            },
+            {
+              "reading_type": "ዮሐ ፪",
+              "chapter_verse": "ም· ፩ ቍ· ፰ – ፍ፡ም፡",
+              "incipit": "ዑቁ ርእሰክሙ ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፭ ቍ· ፩ – ፲፯",
+              "incipit": "ወሀሎ ብእሲ ዘስሙ ሐናንያ ።"
+            }
+          ]
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፵፯ ቍ· ፩ – ፪",
+            "verses": [
+              "ትቤብሒ ኢየሩሳሌም ለእግዚአብሔር ።",
+              "ወሰብሒዮ ለአምላክኪ ጽዮን ።",
+              "እስመ አጽንዐ መናስግተ ኆኃትኪ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ዮሐንስ",
+            "chapter_verse": "ም· ፲፪ ቍ· ፲፪ – ፳",
+            "incipit": "ወበሳኒታ ሰብእ ብዙኃን እለ መጽኡ ።"
+          }
+        },
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፲፯ ቍ· ፳፭ – ፳፮",
+            "verses": [
+              "አ እግዚአ አድኅንሶ ።",
+              "አ እግዚአ ሠርንሶ ።",
+              "ቡሩክ ዘይመጽእ በስመ እግዚአብሔር ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፳፩ ቍ· ፯ – ፲፪",
+            "incipit": "ወሐዊሮሙ አርዳኢሁ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        203,
+        204
+      ],
+      "commemoration": "መንፈሳዊ ቄርሎስ ወበዐቱ ለእግዚእነ ኢየሩሳሌም በተዕእኖ እድግት ወዕዋላ ።"
+    },
+    {
+      "day_number": "፳፫",
+      "commemoration": "ዳንኤል ነቢይ ወተማከሩ ሊቃነ ካህናት ከመ ይቀትልዎ ለእግዚእነ ወረገማ ለበለስ ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፷፯ ቍ· ፴፫ – ፴፬",
+            "verses": [
+              "ናሁ ይሁብ ቃሎ ቃለ ኃይል ።",
+              "ሀቡ አኰቴተ ለእግዚአብሔር ።",
+              "ላዕለ እስራኤል ዐቢይ ስብሐቲሁ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ዮሐንስ",
+            "chapter_verse": "ም· ፲፪ ቍ· ፬ – ፲፩",
+            "incipit": "ወይቤ ይሁዳ ስምዖን አስቆሮታዊ ።"
+          },
+          "ወንጌל": {
+            "book": "ማር",
+            "chapter_verse": "ም· ፲፩ ቍ· ፲፰ – ፳፫",
+            "incipit": "ወሰምዑ ሊቃነ ካህናት ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ዕብራ",
+              "chapter_verse": "ም· ፲፩ ቍ· ፴፪ – ፍ፡ም፡",
+              "incipit": "ምንተ እንከ እብል ።"
+            },
+            {
+              "reading_type": "ጴጥ ፪",
+              "chapter_verse": "ም· ፩ ቍ· ፲፱ – ፍ፡ም፡",
+              "incipit": "ወብነ ዓዲ ዘእምዝኒ ይቀድም ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፯ ቍ· ፶፩ – ፶፬",
+              "incipit": "አጽኑኣነ ክሣድ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፬ ቍ· ፲፬ – ፲፭",
+            "verses": [
+              "እግዚአብሔር ቆመ ውስተ ማኅበረ አማልክት ።",
+              "ወይኴንን በማዕከለ አማልክት ።",
+              "እስከ ማዕዜኑ ትኴንኑ ዐመፃ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፳፩ ቍ· ፲፰ – ፳፫",
+            "incipit": "ወጸቢሓ እንዘ የዐርግ ።"
+          },
+          "ቅዳሴ": "ዘእግዝእትነ ። (ጐሥዓ)"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፰ ቍ· ፪ – ፫",
+            "verses": [
+              "እምአፈ ደቂቅ ወሕፃናት አስተዳሎከ ስብሓተ ።",
+              "በእንተ ጸላኢ ።",
+              "ከመ ትንሥቶ ለጸላኢ ወለገፋዒ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፳፩ ቍ· ፲፬ – ፲፯",
+            "incipit": "ወመጽኡ ኀቤሁ ዕውራን ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        204,
+        205
+      ],
+      "continued_from_scan_page": 204
+    },
+    {
+      "day_number": "፳፬",
+      "commemoration": "አባ መቃርስ ሊቀ ጳጳሳት ወአፈድፈዱ ምክረ ላዕለ እግዚእነ ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፲፮ ቍ· ፯ – ፰",
+            "verses": [
+              "ስብሓ ለምሕረትከ ።",
+              "ዘያድኅኖሙ ለእለ ይትዌከሉከ ።",
+              "እም እለ ይትቃወምዎ ለየማንከ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ዮሐንስ",
+            "chapter_verse": "ም· ፲፪ ቍ· ፬ – ፲፩",
+            "incipit": "ወይቤ ይሁዳ ስምዖን አስቆሮታዊ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ገላትያ",
+              "chapter_verse": "ም· ፬ ቍ· ፲፪ – ፳፭",
+              "incipit": "አኀዊነ አስተበቍዖክሙ ።"
+            },
+            {
+              "reading_type": "ጴጥ ፩",
+              "chapter_verse": "ም· ፩ ቍ· ፳፩ – ፍ፡ም፡",
+              "incipit": "ወይእዜኒ ሃይማኖትክሙ ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፳፰ ቍ· ፳፰ – ፍ፡ም፡",
+              "incipit": "አእምሩ እንከ ከመ ለአሕዛብ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፹፩ ቍ· ፩ – ፪",
+            "verses": [
+              "እግዚአብሔር ቆመ ውስተ ማኅበረ አማልክት ።",
+              "ወይኴንን በማዕከለ አማልክት ።",
+              "እስከ ማዕዜኑ ትኴንኑ ዐመፃ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፳፮ ቍ· ፩ – ፭",
+            "incipit": "ወሶበ ፈጸመ እግዚእ ኢየሱስ ።"
+          },
+          "ቅዳሴ": "ዘ፫፻፲፰ ግሩም ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፵፱ ቍ· ፲፱ – ፳",
+            "verses": [
+              "አፉከ አብዝኀ ለእኪት ።",
+              "ወልሳንከ ጸፈራ ለሀብል ።",
+              "ትነብር ወተሐምዮ ለእኁከ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ዮሐንስ",
+            "chapter_verse": "ም· ፲፪ ቍ· ፬ – ፳",
+            "incipit": "ወይቤ ይሁዳ ስምዖን አስቆሮታዊ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        205,
+        206
+      ],
+      "continued_from_scan_page": 205
+    },
+    {
+      "day_number": "፳፭",
+      "commemoration": "አንሲፎሮስ ፩ እም፸ ወ፪ አርድእት ወጸውሎስ ዘአምነ ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፵፱ ቍ· ፳፪ – ፳፫",
+            "verses": [
+              "ለብዉ ዘንተ ኵልክሙ እለ ትረስዕዎ ለእግዚአብሔር ።",
+              "ወእመ አኮሰ ይመስጥ ወአልቦ ዘያድኅን ።",
+              "መሥዋዕት ክብርት ትሴብሐኒ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማርቆስ",
+            "chapter_verse": "ም· ፲፫ ቍ· ፲፬ – ፳፬",
+            "incipit": "ወሶበ ርኢክሙ ጐሣቆ ለሙስና ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ጢሞ ፪",
+              "chapter_verse": "ም· ፩ ቍ· ፲ – ፍ፡ም፡",
+              "incipit": "ወአስተርአየ ይእዜ በምጽአቱ ለእግዚእነ ።"
+            },
+            {
+              "reading_type": "ጴጥ ፪",
+              "chapter_verse": "ም· ፪ ቍ· ፩ – ፯",
+              "incipit": "ወቦ ባሕቱ ሐሳውያነ ነቢያት ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፳ ቍ· ፳፪ – ፳፫",
+              "incipit": "ወይእዜኒ ናሁ ተዐሠርኩ በመንፈስየ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፲፰ ቍ· ፫ – ፬",
+            "verses": [
+              "አልቦ ነገር ወአልቦ ነቢብ ዘኢተሰምዐ ቃሎሙ ።",
+              "ውስተ ኵሉ ምድር ወፅአ ነገሮሙ ።",
+              "ወእስከ አጽናፈ ዓለም በጽሐ ነቢቦሙ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፯ ቍ· ፲፩ – ፲፫",
+            "incipit": "ወበሳኒታ ሖረ ሀገረ እንተ ስማ ናይን ።"
+          },
+          "ቅዳሴ": "ዘሐዋርያት ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "ም· ፻፵፬ ቍ· ፬ – ፭",
+            "verses": [
+              "ወይዜንዉ ኃይለከ ።",
+              "ወይነግሩ ዕበየ ክብረ ስብሓተ ቅድሳቲከ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ዮሐንስ",
+            "chapter_verse": "ም· ፲፫ ቍ· ፩ – ፫",
+            "incipit": "ወእምቅድመ በዓለ ፋሲካ ሶበ ኮነ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        206,
+        207
+      ],
+      "continued_from_scan_page": 206
+    },
+    {
+      "day_number": "፳፮",
+      "commemoration": "ኢዮጵራቅስያ ወሐፀበ እግዚእነ እግረ አርዳኢሁ ወነሥአ ይሁዳ ፴ ብሩረ እምሊቃነ ካህናት ወቅዱስ ፍርፍርዮስ ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፶ ቍ· ፰ – ፱",
+            "verses": [
+              "እስመ ናሁ ጽድቀ አፍቀርከ ።",
+              "ዘኢይትነበብ ኀቡአ ጥበበከ አይዳዕከኒ ።",
+              "ትነዝኀኒ በአዛብ ወእነጽሕ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ዮሐንስ",
+            "chapter_verse": "ም· ፲፫ ቍ· ፫ – ፲፪",
+            "incipit": "ወሶበ ኮነ የአምር እግዚእ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ቆሮ ፩",
+              "chapter_verse": "ም· ፲፩ ቍ· ፳ – ፴",
+              "incipit": "ወአንትሙኒ እንከ አመ ትትጋብኡ ።"
+            },
+            {
+              "reading_type": "ዮሐ ፩",
+              "chapter_verse": "ም· ፫ ቍ· ፲፰ – ፍ፡ም፡",
+              "incipit": "ደቂቅየ ኢንትፋቀር በቃል ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፬ ቍ· ፳፬ – ፴፩",
+              "incipit": "ወሰሚዖሙ አንሥኡ ቃሎሙ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፶ ቍ· ፱ – ፲",
+            "verses": [
+              "ታሐፅበኒ እምበረድ አዐዑ ።",
+              "ታሰምዐኒ ትፍሥሕተ ወሐሤተ ።",
+              "ወይትፌሥሑ አዕፅምተ ጻድቃን ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፳፮ ቍ· ፲፬ – ፴፭",
+            "incipit": "ወእምዝ ሖረ ፩ እም፲ወ፪ቱ አርዳኢሁ ።"
+          },
+          "ቅዳሴ": "ዘኤጲፋንዮስ አው ዘእግዚእነ ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፵ ቍ· ፩ – ፪",
+            "verses": [
+              "እግዚአ ጸራኅኩ ኀቤከ ስምዐኒ ።",
+              "ወአዕምኀ ቃለ ስእለትየ ዘጸራኅኩ ኀቤከ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፳፪ ቍ· ፴፱ – ፵፫",
+            "incipit": "ወወዲአ ሖረ በከመ ያለምድ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        207,
+        208
+      ],
+      "continued_from_scan_page": 207
+    },
+    {
+      "day_number": "፳፯",
+      "commemoration": "ተሰቅለ እግዚእነ ኢየሱስ ክርስቶስ ወመቃርዮስ ዘየዐቢ ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "ም· ፴፬ ቍ· ፲፩ – ፲፪",
+            "verses": [
+              "ተንሥኡ ላዕሌየ ሰማዕተ ዐመፃ ።",
+              "ወዘኢየአምር ነበቡ ላዕሌየ ።",
+              "ፈደዩኒ እኪተ ህየንተ ሠናይት ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፳፫ ቍ· ፩ – ፲፯",
+            "incipit": "ወተንሥኡ ኵሎሙ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ዕብራ",
+              "chapter_verse": "ም· ፲፪ ቍ· ፪ – ፲፫",
+              "incipit": "ወንትልዎ ለፍጹም መልአክነ ።"
+            },
+            {
+              "reading_type": "ጴጥ ፩",
+              "chapter_verse": "ም· ፫ ቍ· ፲፭ – ፳",
+              "incipit": "ወድልዋኒክሙ ሀልዉ በኵሉ ጊዜ ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፲ ቍ· ፴ – ፴፫",
+              "incipit": "ወይቤሎ ቆርኔሌዎስ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፸፫ ቍ· ፲፪ – ፲፫",
+            "verses": [
+              "እግዚአብሔርሰ ንጉሥ ውእቱ እምቅድመ ዓለም ።",
+              "ወገብረ መድኃኒተ በማዕከለ ምድር ።",
+              "አንተ አጽናእካ ለባሕር ኀይለከ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፳፯ ቍ· ፩ – ፶፮",
+            "incipit": "ወጸቢሓ ተማከሩ ።"
+          },
+          "ቅዳሴ": "ዘዮሐንስ አፈ ወርቅ ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፹፯ ቍ· ፬ – ፭",
+            "verses": [
+              "ወተኈለቁ ምስለ እለ ይወርዱ ውስተ ዐዘቅት ።",
+              "ወኮንኩ ከመ ብእሲ ዘአልቦ ረዳኢ ።",
+              "ግዑዝ ውስተ ምዉታን ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማርቆስ",
+            "chapter_verse": "ም· ፲፭ ቍ· ፵፪ – ፵፯",
+            "incipit": "መጽአ ዮሴፍ እምአርማትያስ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        208
+      ]
+    },
+    {
+      "day_number": "፳፰",
+      "commemoration": "ቈስጠንጢኖስ ንጉሥ አብርሃም ይስሐቅ ወያዕቆብ ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፹፯ ቍ· ፮ – ፯",
+            "verses": [
+              "ወአንበሩኒ ውስተ ዐዘቅት ታሕት ።",
+              "ውስተ ጽልመት ወጽላሎተ ሞት ።",
+              "ላዕሌየ ጸንዐ መዐትከ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፳፫ ቍ· ፶ – ፶፮",
+            "incipit": "ወመጽአ ብእሲ ዘስሙ ዮሴፍ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ፊልጵ",
+              "chapter_verse": "ም· ፪ ቍ· ፭ – ፲፪",
+              "incipit": "ኵልክሙ ዘንተ ሐልዩ ።"
+            },
+            {
+              "reading_type": "ጴጥ ፩",
+              "chapter_verse": "ም· ፩ ቍ· ፩ – ፲",
+              "incipit": "እምጴጥሮስ ልኡክ እግዚእነ ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፫ ቍ· ፲፪ – ፲፯",
+              "incipit": "ወሶበ ርእዮሙ ጴጥሮስ ለሕዝብ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፬ ቍ· ፱ – ፲",
+            "verses": [
+              "ዘሠርዐ ለአብርሃም ።",
+              "ወመሐለ ለይስሐቅ ።",
+              "ወአቀም ስምዐ ለያዕቆብ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፳፯ ቍ· ፷፪ – ፍ፡ም፡",
+            "incipit": "ወበሳኒታ እንተ ይእቲ እምድኅረ ዐርብ ።"
+          },
+          "ቅዳሴ": "ዘዮሐንስ አፈ ወርቅ ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፲፩ ቍ· ፯ – ፰",
+            "verses": [
+              "ይእዜ እትነሣእ ይቤ እግዚአብሔር ።",
+              "እሬሲ መድኃኒተ ወአግህድ ቦቱ ።",
+              "ቃለ እግዚአብሔር ቃል ንጹሕ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፳፯ ቍ· ፷፪ – ፷፮",
+            "incipit": "ወበሳኒታ እንተ ይእቲ እምድኅረ ዓርብ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        209
+      ]
+    },
+    {
+      "day_number": "፳፱",
+      "commemoration": "አብሠራ ገብርኤል ለእግዝእትነ ወፀነሰቶ ለመድኃኒነ ወፍጥረተ ዓለም ወትንሣኤሁ ለእግዚእነ ወስብከት ጸውሎስ ዘዕልዋሪቆን ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፪ ቍ· ፯ – ፰",
+            "verses": [
+              "በጽዮን በደብረ መቅደሱ ።",
+              "ከመ እንግር ትእዛዞ ለእግዚአብሔር ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፩ ቍ· ፳፮ – ፴፰",
+            "incipit": "ወበሳድስ ወርኅ ተፈነወ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ዕብራ",
+              "chapter_verse": "ም· ፩ ቍ· ፩ – ፍ፡ም፡",
+              "incipit": "በብዙኅ ነገር ወብዙኅ መክፈልት ።"
+            },
+            {
+              "reading_type": "ጴጥ ፩",
+              "chapter_verse": "ም· ፩ ቍ· ፲፫ – ፳፭",
+              "incipit": "ወይእዜኒ ቅንቱ ሐቌ ልብክሙ ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፲፯ ቍ· ፲፫ – ፴",
+              "incipit": "ወአእሚሮሙ አይሁድ እለ በተሰሎንቄ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፩ ቍ· ፳፭ – ፳፮",
+            "verses": [
+              "አንተ እግዚኦ አቅደምከ ሣርሮታ ለምድር ።",
+              "ወግብረ እደዊከ እማንቱ ሰማያት ።",
+              "እማንቱሰ ይትኀጐላ ወአንተሰ ትሄሉ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ዮሐንስ",
+            "chapter_verse": "ም· ፩ ቍ· ፩ – ፲፰",
+            "incipit": "ቀዳሚሁ ቃል ።"
+          },
+          "ቅዳሴ": "ዘእግዝእትነ ። (ጐሥዓ)"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፲፯ ቍ· ፳፬ – ፳፭",
+            "verses": [
+              "ዛቲ ዕለት እንተ ገብረ እግዚአብሔር ።",
+              "ንትፌሣሕ ወንትሐሠይ ባቲ ።",
+              "አ እግዚኦ አድኅንሶ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ዮሐንስ",
+            "chapter_verse": "ም· ፳ ቍ· ፲፱ – ፴",
+            "incipit": "ዘከመ አስተርአዮሙ ኢየሱስ ለሐዋርያት ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        209,
+        210
+      ],
+      "continued_from_scan_page": 209
+    },
+    {
+      "day_number": "፴",
+      "commemoration": "ሶምሶን ወከፈሎ ለማይ ኀበ ፫ ክፍል ወበዓለ ቅዱስ ገብርኤል ፀዋሬ ብሥራት ።",
+      "services": {
+        "ዘነግህ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፭ ቍ· ፲፪ – ፲፫",
+            "verses": [
+              "ወተአመኑ በቃሉ ።",
+              "ወሰብሕዎ በስብሓቲሁ ።",
+              "ወአፍጠኑ ረሲዖ ምግባሪሁ ።"
+            ]
+          },
+          "ወንጌል": {
+            "chapter_verse": "ም· ፲፮ ቍ· ፲፪ – ፲፬",
+            "incipit": "ወእምዝ አስተርአዮሙ ለ፪ቱ ።"
+          }
+        },
+        "ዘቅዳሴ": {
+          "epistles_and_acts": [
+            {
+              "reading_type": "ዕብራ",
+              "chapter_verse": "ም· ፲፩ ቍ· ፴፪ – ፴፭",
+              "incipit": "ምንተ እንከ እብል ።"
+            },
+            {
+              "reading_type": "ጴጥ ፪",
+              "chapter_verse": "ም· ፫ ቍ· ፫ – ፯",
+              "incipit": "ወዘንተኒ ቅድሙ አእምሮ ።"
+            },
+            {
+              "reading_type": "ግብ፡ ሐዋ፡",
+              "chapter_verse": "ም· ፲፪ ቍ· ፯ – ፲፯",
+              "incipit": "ወበይእቲ ሌሊት እንተ ጸቢሓ ።"
+            }
+          ],
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፴፯ ቍ· ፩ – ፪",
+            "verses": [
+              "በቅድመ መላእክቲከ እዜምር ለከ ።",
+              "ወእሰግድ ውስተ ጽርሐ መቅደስከ ።",
+              "ወእገኒ ለስምከ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ሉቃስ",
+            "chapter_verse": "ም· ፩ ቍ· ፳፮ – ፴፰",
+            "incipit": "ወበሳድስ ወርኅ ተፈነወ ።"
+          },
+          "ቅዳሴ": "ግሩም አው ዘእግዝእትነ ።"
+        },
+        "ዘሠርክ": {
+          "ምስባክ": {
+            "book": "መዝ·",
+            "chapter_verse": "፻፴፩ ቍ· ፯ – ፰",
+            "verses": [
+              "ወንሰግድ ውስተ መካን ኀበ ቆመ እግረ እግዚእነ ።",
+              "ተንሥእ እግዚኦ ውስተ ዕረፍትከ ።",
+              "አንተ ወታቦት መቅደስከ ።"
+            ]
+          },
+          "ወንጌል": {
+            "book": "ማቴዎስ",
+            "chapter_verse": "ም· ፳፰ ቍ· ፲፮ – ፳",
+            "incipit": "ወአርዳኢሁስ ዓሠርቱ ወአሐዱ ።"
+          }
+        }
+      },
+      "source_scan_pages": [
+        210,
+        211
+      ],
+      "continued_from_scan_page": 210
+    }
+  ]
+}

@@ -18,14 +18,19 @@ Sinq brings the Agpeya's seven canonical prayer hours and the complete Psalter (
 - **ውዳሴ ማርያም and ዘወትር ጸሎት** — a portion for each weekday plus ይወድስዋ መላእክት and አንቀጸ ብርሃን, in Amharic with a Ge'ez toggle.
 
 ### Calendar and lectionary
-- **ግጻዌ** — the daily lectionary for any date, with the movable seasons resolved through the Bahre Hasab. Each reading opens the cited passage in the unified Scripture system.
+- **ግጻዌ** — the complete source-backed lectionary: all 366 fixed dates,
+  movable weekday seasons, and the Sunday/mezmur cycle, resolved through the
+  Bahre Hasab. Each valid citation opens in the unified Scripture system.
 - **ስንክሳር** — the Amharic synaxarium, a day's commemorations with its አርኬ hymn, and the fixed closing ጸሎት.
 - **አጽዋማት** — the fasting calendar: what is in effect today, and every fast of the Ethiopian year.
+- **አትናቴዎስ and Bahre Hasab reference** — funeral and memorial readings plus
+  the printed 2001–2015 EC annual table, available from the Library.
 
 ### Reading
 - **Bible** — the bundled Amharic 1980 Ethiopian Orthodox canon, organized into Old and New Testaments without a network connection.
 - Two reading modes: vertical scroll or page-by-page swiping, remembered per preference.
-- Five font-size steps and four selectable Ethiopic faces, Ge'ez verse numerals, optically matched so the page reads the same whichever face is chosen.
+- Five font-size steps, four selectable Ethiopic faces, three line-spacing
+  choices, and four text alignments, optically matched across reading surfaces.
 - Keep-screen-on while praying; scroll position remembered per hour.
 - Light and dark themes; Amharic and English interface languages.
 
@@ -92,6 +97,13 @@ python tools/extract_content.py
 
 `extract_content.py` assembles the prayer hours. `extract_bible_editions.py` losslessly bundles the three Scripture editions and writes their catalog. Section IDs and legacy reader routes remain permanent compatibility contracts for bookmarks and highlights.
 
+The separately licensed Gitsawe transcription is preserved under
+`content/gitsawe/`. `tools/split_gitsawe_months.py` and
+`tools/split_gitsawe_parts.py` produce auditable source splits; the five
+`tools/import_gitsawe_*.py` importers generate the app assets for the fixed,
+movable, Sunday, Athanasius, and Bahre Hasab collections. See
+`content/gitsawe/README.md` for provenance and regeneration commands.
+
 ## Architecture
 
 Single-module Compose app, offline-only, no runtime database — content loads from assets and is cached in memory; user data lives in Preferences DataStore as serialized JSON.
@@ -127,7 +139,8 @@ Issues and pull requests are welcome — especially corrections to prayer text m
 The code and the bundled prayer text are under **different licenses**. If you fork this repo, that distinction matters — the content does not inherit the code's license.
 
 - **Code:** [Apache License 2.0](LICENSE).
-- **Prayer text:** the 80-weahadu Amharic Bible by [EOTCOpenSource](https://github.com/EOTCOpenSource/80-weahadu), used under [**CC BY-NC-ND 4.0**](https://creativecommons.org/licenses/by-nc-nd/4.0/). Passages are selected and arranged into the hours of prayer; verse text is reproduced unchanged, except that the acrostic letters of Psalm 118 are rendered as stanza headings. This means the bundled content under `app/src/main/assets/content/` **may not be used commercially, and may not be redistributed in modified form** — by this project or by anyone forking it. Sinq is and will remain non-commercial: no ads, no in-app purchases, no subscriptions.
+- **Prayer and Scripture text:** the 80-weahadu Amharic Bible by [EOTCOpenSource](https://github.com/EOTCOpenSource/80-weahadu), used under [**CC BY-NC-ND 4.0**](https://creativecommons.org/licenses/by-nc-nd/4.0/). Passages are selected and arranged into the hours of prayer; verse text is reproduced unchanged, except that the acrostic letters of Psalm 118 are rendered as stanza headings. This material may not be used commercially or redistributed in modified form. Sinq is and will remain non-commercial: no ads, no in-app purchases, no subscriptions.
+- **ግጻዌ:** the fixed 366-day lectionary is compiled from the maintainer's separately licensed source transcription. That source and its content are not covered by Apache-2.0 or the Bible's CC licence; forks and redistributors must obtain their own permission.
 - **ውዳሴ ማርያም (Wudase Maryam):** the Ge'ez and Amharic text is a centuries-old, public-domain Ethiopian Orthodox liturgical prayer. This particular digitization is from [tecleet/wudase-mariam](https://github.com/tecleet/wudase-mariam) (no license stated), reshaped into stanzas by `tools/build_wudase.py`. If you hold rights to that transcription and want it removed or re-credited, please open an issue.
 - **Font:** [Abyssinica SIL](https://software.sil.org/abyssinica/) and Noto Sans Ethiopic, under the [SIL Open Font License 1.1](docs/AbyssinicaSIL-OFL.txt).
 - **Reader fonts:** the selectable faces — Ethiopic Abay Light (abass alamnehe), Bela Bereka (Abel Daniel), and Zemenay (Abel Yeshewalem) — are distributed by [Font.et](https://www.font.et/) under the SIL Open Font License; per-font notices are in [docs/fonts/](docs/fonts/). OFL permits bundling and redistribution with software provided the fonts are not sold on their own. *Note: Zemenay's embedded metadata names an "ETHL" license (t.me/ethelglyphs) while Font.et distributes it as OFL; we follow the distributor's stated terms.*

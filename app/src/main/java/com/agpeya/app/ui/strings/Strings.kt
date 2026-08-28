@@ -22,6 +22,19 @@ interface Strings {
     val zewotrSubtitle: String
     val scripturesTitle: String
     val scripturesSubtitle: String
+    val athanasiusTitle: String
+    val athanasiusSubtitle: String
+    val bahreHasabTitle: String
+    val bahreHasabSubtitle: String
+    val annualTable: String
+    val sundayCycleTitle: String
+    val sundayCycleSubtitle: String
+    val supplicationLabel: String
+    val athanasiusPeople: String
+    val athanasiusRiteChapters: String
+    val athanasiusBurialPrayers: String
+    val athanasiusMemorials: String
+    fun memorialDay(day: Int): String
     val newTestamentLabel: String
     val oldTestamentLabel: String
     val bibleTitle: String
@@ -142,6 +155,11 @@ interface Strings {
     val backedUpYesterday: String
     fun backedUpDays(days: Long): String
     val lineSpacingLabel: String
+    val textAlignmentLabel: String
+    val alignJustified: String
+    val alignLeft: String
+    val alignRight: String
+    val alignCenter: String
     val lineCompact: String
     val lineNormal: String
     val lineRelaxed: String
@@ -464,6 +482,19 @@ object AmharicStrings : Strings {
     override val librarySubtitle = "የጸሎትና የቅዱሳት መጻሕፍት ስብስብ"
     override val scripturesTitle = "ቅዱሳት መጻሕፍት"
     override val scripturesSubtitle = "የአዲስ ኪዳን መጻሕፍት"
+    override val athanasiusTitle = "አትናቴዎስ"
+    override val athanasiusSubtitle = "ሥርዓተ ፍትሐት ወተዝካረ ሙታን"
+    override val bahreHasabTitle = "ባሕረ ሐሳብ"
+    override val bahreHasabSubtitle = "የበዓላትና የአጽዋማት ዓመታዊ ሠንጠረዥ"
+    override val annualTable = "ዓመታዊ ሠንጠረዥ"
+    override val sundayCycleTitle = "ግጻዌ ዘሰናብት ወመዝሙር"
+    override val sundayCycleSubtitle = "የዕለቱ የሰንበት ሥርዓት"
+    override val supplicationLabel = "መስተበቍዕ"
+    override val athanasiusPeople = "ዘሰብእ"
+    override val athanasiusRiteChapters = "ምዕራፍ"
+    override val athanasiusBurialPrayers = "ጸሎተ ፍትሐት"
+    override val athanasiusMemorials = "ተዝካረ ሙታን"
+    override fun memorialDay(day: Int) = "$day ቀን"
     override val newTestamentLabel = "አዲስ ኪዳን"
     override val oldTestamentLabel = "ቀዳማዊ ኪዳን"
     override val bibleTitle = "መጽሐፍ ቅዱስ"
@@ -578,6 +609,11 @@ object AmharicStrings : Strings {
     override val backedUpYesterday = "ትናንት ምትኬ ተቀምጧል"
     override fun backedUpDays(days: Long) = "ከ$days ቀናት በፊት ምትኬ ተቀምጧል"
     override val lineSpacingLabel = "የመስመር ክፍተት"
+    override val textAlignmentLabel = "የጽሑፍ አሰላለፍ"
+    override val alignJustified = "በሁለቱም ጠርዝ"
+    override val alignLeft = "በግራ"
+    override val alignRight = "በቀኝ"
+    override val alignCenter = "መሃል"
     override val lineCompact = "ጠባብ"
     override val lineNormal = "መደበኛ"
     override val lineRelaxed = "ሰፊ"
@@ -864,6 +900,19 @@ object EnglishStrings : Strings {
     override val librarySubtitle = "Prayers and holy scriptures"
     override val scripturesTitle = "Scriptures"
     override val scripturesSubtitle = "The New Testament"
+    override val athanasiusTitle = "Athanasius"
+    override val athanasiusSubtitle = "Burial and memorial readings"
+    override val bahreHasabTitle = "Bahre Hasab"
+    override val bahreHasabSubtitle = "Annual feasts and fasts table"
+    override val annualTable = "Annual table"
+    override val sundayCycleTitle = "Sunday Gitsawe and hymns"
+    override val sundayCycleSubtitle = "Sunday readings for the day"
+    override val supplicationLabel = "Supplication"
+    override val athanasiusPeople = "Readings by person"
+    override val athanasiusRiteChapters = "Rite chapters"
+    override val athanasiusBurialPrayers = "Burial prayers"
+    override val athanasiusMemorials = "Memorial readings"
+    override fun memorialDay(day: Int) = "Day $day"
     override val newTestamentLabel = "New Testament"
     override val oldTestamentLabel = "Old Testament"
     override val bibleTitle = "Bible"
@@ -976,6 +1025,11 @@ object EnglishStrings : Strings {
     override val backedUpYesterday = "Backed up yesterday"
     override fun backedUpDays(days: Long) = "Backed up $days days ago"
     override val lineSpacingLabel = "Line spacing"
+    override val textAlignmentLabel = "Text alignment"
+    override val alignJustified = "Justified"
+    override val alignLeft = "Align left"
+    override val alignRight = "Align right"
+    override val alignCenter = "Center"
     override val lineCompact = "Compact"
     override val lineNormal = "Normal"
     override val lineRelaxed = "Relaxed"

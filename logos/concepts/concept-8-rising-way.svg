@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" role="img" aria-label="Sinq — The Rising Way">
+<title>Sinq — The Rising Way</title>
+<defs><mask id="m_concept-8-rising-way" maskUnits="userSpaceOnUse" x="0" y="0" width="108" height="108">
+<rect width="108" height="108" fill="#000"/>
+<g fill="#fff"><rect x="49.40" y="54.80" width="9.20" height="3.10" rx="1.30"/><rect x="47.45" y="58.80" width="13.10" height="3.10" rx="1.30"/><rect x="45.50" y="62.80" width="17.00" height="3.10" rx="1.30"/><rect x="43.55" y="66.80" width="20.90" height="3.10" rx="1.30"/><rect x="41.60" y="70.80" width="24.80" height="3.10" rx="1.30"/><rect x="39.65" y="74.80" width="28.70" height="3.10" rx="1.30"/><rect x="37.70" y="78.80" width="32.60" height="3.10" rx="1.30"/><rect x="30.00" y="49.50" width="48.00" height="4.60" rx="2.30"/><path d="M 36.5 49.5 A 17.5 17.5 0 0 1 71.5 49.5 Z"/></g>
+<g fill="#000"><path d="M 50.00 34.50 L 58.00 34.50 Q 56.50 36.08 56.50 39.00 Q 59.42 39.00 61.00 37.50 L 61.00 45.50 Q 59.42 44.00 56.50 44.00 Q 56.50 46.92 58.00 48.50 L 50.00 48.50 Q 51.50 46.92 51.50 44.00 Q 48.58 44.00 47.00 45.50 L 47.00 37.50 Q 48.58 39.00 51.50 39.00 Q 51.50 36.08 50.00 34.50 Z"/></g>
+</mask></defs>
+<g id="background"><rect width="108" height="108" fill="#0E3B31"/></g>
+<g id="foreground"><rect width="108" height="108" fill="#E8C46B" mask="url(#m_concept-8-rising-way)"/></g>
+</svg>

@@ -7,6 +7,7 @@ import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -46,6 +47,7 @@ private fun opticalScale(family: FontFamily): Float = when (family) {
 const val READING_LINE_HEIGHT = 1.62f
 
 val LocalReadingLineSpacing = staticCompositionLocalOf { READING_LINE_HEIGHT }
+val LocalReadingTextAlign = staticCompositionLocalOf { TextAlign.Justify }
 
 /** Tighter leading for headings and single-line labels, which don't need the air. */
 const val TITLE_LINE_HEIGHT = 1.35f
@@ -78,6 +80,7 @@ fun readingBodyStyle(
         lineHeight = (size * lineHeightMultiplier).sp,
         platformStyle = NoFontPadding,
         lineHeightStyle = EvenLines,
+        textAlign = LocalReadingTextAlign.current,
     )
 }
 
@@ -134,5 +137,6 @@ fun TextStyle.inReadingFont(lineHeightMultiplier: Float = TITLE_LINE_HEIGHT): Te
         lineHeight = size * lineHeightMultiplier,
         platformStyle = NoFontPadding,
         lineHeightStyle = EvenLines,
+        textAlign = LocalReadingTextAlign.current,
     )
 }

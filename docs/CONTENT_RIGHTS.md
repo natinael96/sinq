@@ -68,3 +68,25 @@ but the clean fix is to correct the encoding upstream in 80-weahadu and drop the
 - Noto Sans Ethiopic (UI) — SIL Open Font License 1.1
 - Abyssinica SIL 2.300 (prayer text) — SIL Open Font License 1.1; license copy saved at docs/AbyssinicaSIL-OFL.txt
 - Both license texts must appear in the app's licenses page
+
+## 7. ግጻዌ
+- Source: the maintainer's licensed transcription of the printed ግጻዌ. The
+  preserved master and structural reference live under `content/gitsawe/`.
+- Scope: all 366 fixed Ethiopian calendar days, including Pagumen 6, plus the
+  separately preserved movable, Sunday/mezmur, Athanasius funeral, and Bahre
+  Hasab collections in Parts 2–5. Morning, liturgy, and evening offices are
+  retained wherever present in the source.
+- Provenance: `sourcePages` in `daily-gitsawe.json` records the supplied scan-page
+  references. The first 40 records have no page metadata because none was
+  supplied; no page numbers are inferred.
+- Transformation: `tools/import_gitsawe_months.py` maps the transcription into
+  Sinq's data model without rewriting the Ge'ez text, keeps alternate readings,
+  and leaves malformed printed citations visible but unlinked.
+  `tools/split_gitsawe_parts.py` makes source-preserving splits of Parts 2–5;
+  `tools/import_gitsawe_part2.py` through `tools/import_gitsawe_part5.py` then
+  normalize those splits into the app's movable weekday, Sunday-cycle,
+  Athanasius, and historical Bahre Hasab assets. Only unambiguous printed
+  calendar selectors are activated automatically.
+- Rights: separately licensed to the Sinq maintainer. This content is not
+  granted under Apache-2.0 or the Bible's CC BY-NC-ND licence; forks and
+  redistributors must obtain their own permission.

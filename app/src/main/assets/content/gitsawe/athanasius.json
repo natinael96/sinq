@@ -1,0 +1,1811 @@
+[
+ {
+  "index": 1,
+  "title": "ምንባብ ዘሥርዓተ ቅዳሴ ሰብ ይመውቱ ጳጳሳት ዘይትበሀል ።",
+  "category": "person",
+  "sourcePages": [
+   415
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "እስመ መምሕረ ሕግ ይሁብ በረከተ ። ወየሐውር እምኃይል ውስተ ኃይል ። ወያስተርኢ አምላከ አማልክት በጽዮን ።"
+     },
+     "citation": "፹፫ ቍ· ፭ – ፯",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 83,
+      "citation": "፹፫ ቍ· ፭ – ፯",
+      "start": 5,
+      "end": 7
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወይቤ አሐዱ ብእሲ ክቡር ።"
+     },
+     "citation": "ም· ፲፱ ቍ· ፲፪ – ፳፯",
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 19,
+      "citation": "ም· ፲፱ ቍ· ፲፪ – ፳፯",
+      "start": 12,
+      "end": 27
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "እስመ ኵሉ ሊቀ ካህናት ።"
+     },
+     "citation": "ም· ፭ ቍ· ፩ – ፯",
+     "verse": {
+      "bookTitle": "ወደ ዕብራውያን",
+      "chapter": 5,
+      "citation": "ም· ፭ ቍ· ፩ – ፯",
+      "start": 1,
+      "end": 7
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወለእለኒ ይትለጐቁ እምኔክሙ ።"
+     },
+     "citation": "ም· ፭ ቍ· ፩ – ፬",
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት 1",
+      "chapter": 5,
+      "citation": "ም· ፭ ቍ· ፩ – ፬",
+      "start": 1,
+      "end": 4
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወናሁ አአምዕ ለክሙ።"
+     },
+     "citation": "ም· ፳ ቍ· ፳፭ – ፴፫",
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 20,
+      "citation": "ም· ፳ ቍ· ፳፭ – ፴፫",
+      "start": 25,
+      "end": 33
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 2,
+  "title": "ምንባብ ዘሥርዓተ ቅዳሴ ሰብ ይመውቱ ካህናት ዘይትበሀል ።",
+  "category": "person",
+  "supplication": "እግዚአ ሕያዋን ።",
+  "sourcePages": [
+   415
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ካህናቲከ ይለብሱ ጽድቀ። ወጻድቃኒከ ትፍሥሕተ ይትፌሥሑ ። በእንተ ዳዊት ገብርከ ።"
+     },
+     "citation": "፻፴፩ ቍ· ፱ – ፲",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 131,
+      "citation": "፻፴፩ ቍ· ፱ – ፲",
+      "start": 9,
+      "end": 10
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "እስመ ከመ ብእሲ ዘይነግድ ።"
+     },
+     "citation": "ም· ፳፭ ቍ· ፲፬ – ፴፩",
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 25,
+      "citation": "ም· ፳፭ ቍ· ፲፬ – ፴፩",
+      "start": 14,
+      "end": 31
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወዘልፈ ንጸውር ሞቶ ለክርስቶስ ።"
+     },
+     "citation": "ም· ፬ ቍ· ፲ – ፲፯",
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች",
+      "chapter": 4,
+      "citation": "ም· ፬ ቍ· ፲ – ፲፯",
+      "start": 10,
+      "end": 17
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወይእቲ እብን እንተ በጎበ ሰብእ ምንንት ።"
+     },
+     "citation": "ም· ፪ ቍ· ፬ – ፲",
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት 1",
+      "chapter": 2,
+      "citation": "ም· ፪ ቍ· ፬ – ፲",
+      "start": 4,
+      "end": 10
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወእምነ መሊጡ ለአከ ኤፌሶን ።"
+     },
+     "citation": "ም· ፳ ቍ· ፲፯ – ፴፮",
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 20,
+      "citation": "ም· ፳ ቍ· ፲፯ – ፴፮",
+      "start": 17,
+      "end": 36
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 3,
+  "title": "ምንባብ ሰብ ይመውቱ ዲያቆናት ዘይትበሀል ።",
+  "category": "person",
+  "supplication": "እግዚአ ሕያዋን ።",
+  "sourcePages": [
+   415,
+   416
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "እገኒ ለከ እግዚአ እስመ ግሩም ተሰባሕከ ። መንክር ግብርከ ወነፍስየ ትጤይቆ ጥቀ ።"
+     },
+     "citation": "፻፴፰ ቍ· ፱ – ፲",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 138,
+      "citation": "፻፴፰ ቍ· ፱ – ፲",
+      "start": 9,
+      "end": 10
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወቦ እምውስተ አረሚሂ ።"
+     },
+     "citation": "ም· ፲፪ ቍ· ፳ – ፴፪",
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 12,
+      "citation": "ም· ፲፪ ቍ· ፳ – ፴፪",
+      "start": 20,
+      "end": 32
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወኵሉ በበሥርዓቱ ቀዳሚ ክርስቶስ ውእቱ ።"
+     },
+     "citation": "ም· ፲፭ ቍ· ፳፫ – ፴፫",
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች 1",
+      "chapter": 15,
+      "citation": "ም· ፲፭ ቍ· ፳፫ – ፴፫",
+      "start": 23,
+      "end": 33
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "እስመ ክርስቶስ ምዕረ ሞተ ።"
+     },
+     "citation": "ም· ፫ ቍ· ፲፰ – ፳፪",
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት",
+      "chapter": 3,
+      "citation": "ም· ፫ ቍ· ፲፰ – ፳፪",
+      "start": 18,
+      "end": 22
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወመልአ መንፈስ ቅዱስ ።"
+     },
+     "citation": "ም· ፯ ቍ· ፶፭ – ፷",
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 7,
+      "citation": "ም· ፯ ቍ· ፶፭ – ፷",
+      "start": 55,
+      "end": 60
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 4,
+  "title": "ምንባብ ሰብ ይመውቱ ሕፃናት ዘይትበሀል ።",
+  "category": "person",
+  "supplication": "በእንተ እለ ኖሙ ።",
+  "sourcePages": [
+   416
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "እስመ አቡየ ወእምየ ገደፉኒ ። ወእግዚአብሔር ተወክፈኒ ። ምርሐኒ እግዚአ ፍኖተከ ።"
+     },
+     "citation": "፳፮ ቍ· ፲ – ፲፩",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 26,
+      "citation": "፳፮ ቍ· ፲ – ፲፩",
+      "start": 10,
+      "end": 11
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወበሳኒታ ሓረ ሀገረ እንተ ስማ ናይን ።"
+     },
+     "citation": "ም· ፯ ቍ· ፲፩ – ፲፯",
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 7,
+      "citation": "ም· ፯ ቍ· ፲፩ – ፲፯",
+      "start": 11,
+      "end": 17
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወንፈቅድ ታእምሩ አኃዊነ በእንተ እለ ኖሙ ።"
+     },
+     "citation": "ም· ፬ ቍ· ፲፫ – ፲፯",
+     "verse": {
+      "bookTitle": "ወደ ተሰሎንቄ ሰዎች",
+      "chapter": 4,
+      "citation": "ም· ፬ ቍ· ፲፫ – ፲፯",
+      "start": 13,
+      "end": 17
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወይእዜኒ ቅንቱ ሐቌ ልብክሙ ።"
+     },
+     "citation": "ም· ፩ ቍ· ፲፫ – ፴፪",
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት",
+      "chapter": 1,
+      "citation": "ም· ፩ ቍ· ፲፫ – ፴፪",
+      "start": 13,
+      "end": 32
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "አእምሩ እንከ ጥዮቀ ኵልክሙ ።"
+     },
+     "citation": "ም· ፪ ቍ· ፲፫ – ፴፪",
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 2,
+      "citation": "ም· ፪ ቍ· ፲፫ – ፴፪",
+      "start": 13,
+      "end": 32
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 5,
+  "title": "ምንባብ ዘሥርዓተ ቅዳሴ ሰብ ይመውቱ መነኮሳት ዘይትበሀል ።",
+  "category": "person",
+  "supplication": "በእንተ ዕለ ኖሙ ።",
+  "sourcePages": [
+   416,
+   417
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ኪያከ ተወከልኩ እግዚአ ወኢትኃፈር ለዓለም ። ወበጽድቅከ አንግፈኒ ወባልሃኒ ። አጽምእ ዕዝነከ ኃቤየ ወፍጡነ አድኅነኒ ።"
+     },
+     "citation": "፴ ቍ· ፩ – ፪",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 30,
+      "citation": "፴ ቍ· ፩ – ፪",
+      "start": 1,
+      "end": 2
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "እስመ ትመስል መንግሥተ ሰማያት ።"
+     },
+     "citation": "ም· ፳፭ ቍ· ፩ – ፲",
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 25,
+      "citation": "ም· ፳፭ ቍ· ፩ – ፲",
+      "start": 1,
+      "end": 10
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ኢትዘንፉ ወኢትትዐበዩ ።"
+     },
+     "citation": "ም· ፪ ቍ· ፫ – ፲፫",
+     "verse": {
+      "bookTitle": "ወደ ፊልጵስዩስ ሰዎች",
+      "chapter": 2,
+      "citation": "ም· ፪ ቍ· ፫ – ፲፫",
+      "start": 3,
+      "end": 13
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "አሆ በልዎ ለእግዚአብሔር ።"
+     },
+     "citation": "ም· ፬ ቍ· ፯ – ፲፭",
+     "verse": {
+      "bookTitle": "የያዕቆብ መልእክት",
+      "chapter": 4,
+      "citation": "ም· ፬ ቍ· ፯ – ፲፭",
+      "start": 7,
+      "end": 15
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወወረደ ፩ ነቢይ እምይሁዳ ።"
+     },
+     "citation": "ም· ፳፩ ቍ· ፲ – ፲፬",
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 21,
+      "citation": "ም· ፳፩ ቍ· ፲ – ፲፬",
+      "start": 10,
+      "end": 14
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 6,
+  "title": "ምንባብ ዘሥርዓተ ቅዳሴ ሰብ ይመውቱ አበው መሓይምናን ዘይትበሀል ። ።",
+  "category": "person",
+  "supplication": "በእንተ እለ ኖሙ ።",
+  "sourcePages": [
+   417
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ብጹዕ ዘኀረይኮ ወዘተወከፍኮ ። ወዘአንደርኮ ። ውስተ አዕጻዳቲከ ሃሌ ሉያ ።"
+     },
+     "citation": "፷፬ ቍ· ፬ – ፭",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 64,
+      "citation": "፷፬ ቍ· ፬ – ፭",
+      "start": 4,
+      "end": 5
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወእምዝ አውሥአ እግዚእነ ኢየሱስ ።"
+     },
+     "citation": "ም· ፭ ቍ· ፲፱ – ፴፪",
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 5,
+      "citation": "ም· ፭ ቍ· ፲፱ – ፴፪",
+      "start": 19,
+      "end": 32
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወአጤይቀክሙ አኃዊነ ።"
+     },
+     "citation": "ም· ፲፭ ቍ· ፩ – ፴፪",
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች 1",
+      "chapter": 15,
+      "citation": "ም· ፲፭ ቍ· ፩ – ፴፪",
+      "start": 1,
+      "end": 32
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወዛቲ ይእቲ አኃውየ ።"
+     },
+     "citation": "ም· ፫ ቍ· ፩ –",
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት 1",
+      "chapter": 3,
+      "citation": "ም· ፫ ቍ· ፩ –",
+      "start": 1
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወይቤ ስምዑ አኃዊነ ወአበዊነ ።"
+     },
+     "citation": "ም· ፯ ቍ· ፩ – ፲፯",
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 7,
+      "citation": "ም· ፯ ቍ· ፩ – ፲፯",
+      "start": 1,
+      "end": 17
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 7,
+  "title": "ምንባብ ሰብ ይመውታ አዋልድ ንኡሳት ዘይትበሀል ።",
+  "category": "person",
+  "supplication": "በእንተ እለ ኖሙ ።",
+  "sourcePages": [
+   417
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "እስመ ፈላሲ አነ ውስተ ምድር ። ወነግድ ከመ ኵሉ አበውየ ። ስሕተኒ ከመ አዕርፍ ።"
+     },
+     "citation": "፴፰ ቍ· ፲፪ – ፲፫",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 38,
+      "citation": "፴፰ ቍ· ፲፪ – ፲፫",
+      "start": 12,
+      "end": 13
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወእንዘ ዘንተ ይነግሮሙ ።"
+     },
+     "citation": "ም· ፱ ቍ· ፲፰ – ፴፪",
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 9,
+      "citation": "ም· ፱ ቍ· ፲፰ – ፴፪",
+      "start": 18,
+      "end": 32
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወዘንተ እብለክሙ አኃዊነ ።"
+     },
+     "citation": "ም· ፲፭ ቍ· ፶ – ፶፯",
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች 1",
+      "chapter": 15,
+      "citation": "ም· ፲፭ ቍ· ፶ – ፶፯",
+      "start": 50,
+      "end": 57
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወአንትንሂ አዋልዲሃ ኩና ።"
+     },
+     "citation": "ም· ፫ ቍ· ፯ – ፲፩",
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት 1",
+      "chapter": 3,
+      "citation": "ም· ፫ ቍ· ፯ – ፲፩",
+      "start": 7,
+      "end": 11
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወእንዘ ነሐውር ለጸሎት ።"
+     },
+     "citation": "ም· ፲፮ ቍ· ፲፮ –",
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 16,
+      "citation": "ም· ፲፮ ቍ· ፲፮ –",
+      "start": 16
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 8,
+  "title": "ምንባብ ሰብ ይመውታ መነኮሳይያት ዘይትበሀል ።",
+  "category": "person",
+  "supplication": "በእንተ እለ ኖሙ ።",
+  "sourcePages": [
+   417,
+   418
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ነጽር ስእለትየ እስመ ሐመምኩ ፈድፋደ ። ወአድኅነኒ እምእለ ሮዱኒ እስመ ይኄይሉኒ ። ወአውፅአ እሞቅሕ ለነፍስየ ።"
+     },
+     "citation": "፻፵፩ ቍ· ፯ – ፰",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 141,
+      "citation": "፻፵፩ ቍ· ፯ – ፰",
+      "start": 7,
+      "end": 8
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወእምዝ ሐዊሮሙ ቦኡ አሐተ ሀገረ ።"
+     },
+     "citation": "ም· ፲ ቍ· ፴፰ – ፵፪",
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 10,
+      "citation": "ም· ፲ ቍ· ፴፰ – ፵፪",
+      "start": 38,
+      "end": 42
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወእንበይነ ዘናእምር ጽድቀ እግዚአብሔር ።"
+     },
+     "citation": "ም· ፭ ቍ· ፲፩ – ፳",
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች 2",
+      "chapter": 5,
+      "citation": "ም· ፭ ቍ· ፲፩ – ፳",
+      "start": 11,
+      "end": 20
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "እምነ ቀሲስ ለነገሪት ።"
+     },
+     "citation": "ም· ቍ· ፩ – ፯"
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወበሳኒታ ሐርነ ሀገረ ።"
+     },
+     "citation": "ም· ፲፮ ቍ· ፲፩ – ፲፬",
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 16,
+      "citation": "ም· ፲፮ ቍ· ፲፩ – ፲፬",
+      "start": 11,
+      "end": 14
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 9,
+  "title": "ምንባብ ሰብ ይመውታ ዐበይት አንስት ዘይትበሀል ።",
+  "category": "person",
+  "supplication": "በእንተ እለ ኖሙ ።",
+  "sourcePages": [
+   418
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ግብኢ ነፍስየ ውስተ ዕረፍትኪ ። እስመ እግዚአብሔር ረዳኢኪ ። እስመ አድኀና ለነፍስየ እሞት ።"
+     },
+     "citation": "፻፲፬ – ቍ· ፯ – ፰",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 114,
+      "citation": "፻፲፬ – ቍ· ፯ – ፰",
+      "start": 7,
+      "end": 8
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "አሜሃ ትመስል መንግሥተ ሰማያት ።"
+     },
+     "citation": "ም· ፲ ቍ· ፴፰ – ፵፪",
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 10,
+      "citation": "ም· ፲ ቍ· ፴፰ – ፵፪",
+      "start": 38,
+      "end": 42
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "እስመ ኢኮነ ፩ደ ሥጋሁ ለነፍስተ ኵሉ ።"
+     },
+     "citation": "ም· ፲፭ ቍ· ፵፬ – ፶",
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች 1",
+      "chapter": 15,
+      "citation": "ም· ፲፭ ቍ· ፵፬ – ፶",
+      "start": 44,
+      "end": 50
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወከማሁ አንትንሂ አንስት ።"
+     },
+     "citation": "ም· ፫ ቍ· ፩ – ፯",
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት 1",
+      "chapter": 3,
+      "citation": "ም· ፫ ቍ· ፩ – ፯",
+      "start": 1,
+      "end": 7
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወበሀገረ ኢዮጴ ሀለወት አሐቲ ረድእት ።"
+     },
+     "citation": "ም· ፱ ቍ· ፴፮ –",
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 9,
+      "citation": "ም· ፱ ቍ· ፴፮ –",
+      "start": 36
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 10,
+  "title": "ምንባብ ዘአንስት ሶበ ይመውታ በወሊድ ዘይትበሀል ።",
+  "category": "person",
+  "sourcePages": [
+   418,
+   419
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ውእቱሰ መሐሪ ውእቱ ። ወይሠሪ ሎሙ ኵሎ ኃጣውኢቶሙ ። ወያስግን መይጠ መአቱ ።"
+     },
+     "citation": "፸፯ – ቍ· ፴፰ – ፴፱",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 77,
+      "citation": "፸፯ – ቍ· ፴፰ – ፴፱",
+      "start": 38,
+      "end": 39
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "አማን አማን እብለክሙ ።"
+     },
+     "citation": "ም· ፲፮ ቍ· ፳ – ፴፬",
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 16,
+      "citation": "ም· ፲፮ ቍ· ፳ – ፴፬",
+      "start": 20,
+      "end": 34
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ጽደቁ እንከ በአሚን ።"
+     },
+     "citation": "ም· ፭ ቍ· ፩ – ፲፭",
+     "verse": {
+      "bookTitle": "ወደ ሮሜ ሰዎች",
+      "chapter": 5,
+      "citation": "ም· ፭ ቍ· ፩ – ፲፭",
+      "start": 1,
+      "end": 15
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወአንትንሂ አዋልዲሃ ኮና ።"
+     },
+     "citation": "ም· ፫ ቍ· ፯ – ፲፩",
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት 1",
+      "chapter": 3,
+      "citation": "ም· ፫ ቍ· ፯ – ፲፩",
+      "start": 7,
+      "end": 11
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወነበርን ወአሀገነ ከመ ንንግር ።"
+     },
+     "citation": "ም· ፲፯ ቍ· ፲፭ – ፲፱",
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 17,
+      "citation": "ም· ፲፯ ቍ· ፲፭ – ፲፱",
+      "start": 15,
+      "end": 19
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 11,
+  "title": "ምንባብ ዘአሐዱ ምዕራፍ ዘይትበሀል ።",
+  "category": "riteChapter",
+  "sourcePages": [
+   419
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "አኀዘኒ ጸዐረ ሞት ። ወውኂዘ ዐመፃ ሆከኒ ። ወዐገተኒ ጸዐረ ሲኦል ።"
+     },
+     "citation": "፲፯ ቍ· ፬ – ፭",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 17,
+      "citation": "፲፯ ቍ· ፬ – ፭",
+      "start": 4,
+      "end": 5
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወበእንተስ ይእቲ ዕለት ወኪያሃ ሰዓት ።"
+     },
+     "citation": "ም· ፳፬ ቍ· ፴፮ – ፶፩ ።",
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 24,
+      "citation": "ም· ፳፬ ቍ· ፴፮ – ፶፩ ።",
+      "start": 36,
+      "end": 51
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 12,
+  "title": "ካልዕ ምዕራፍ ዘይትበሀል ።",
+  "category": "riteChapter",
+  "sourcePages": [
+   419
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ወመጽአኒ ድንጋጼ ሞት ። ፍርሀት ወረአድ አኀዘኒ ። ወደፈነኒ ጽልመት ።"
+     },
+     "citation": "፶፬ ቍ· ፬ – ፭",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 54,
+      "citation": "፶፬ ቍ· ፬ – ፭",
+      "start": 4,
+      "end": 5
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወእንዘ ይመስል ሎሙ ወይቤሎሙ ።"
+     },
+     "citation": "ም· ፲፪ ቍ· ፩ – ፴",
+     "verse": {
+      "bookTitle": "የማርቆስ ወንጌል",
+      "chapter": 12,
+      "citation": "ም· ፲፪ ቍ· ፩ – ፴",
+      "start": 1,
+      "end": 30
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 13,
+  "title": "ዘሣልስ ምዕራፍ ዘይትበሀል ።",
+  "category": "riteChapter",
+  "sourcePages": [
+   419
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ወአጽምአ እዝኖ ኃቤየ ። ወጸዋዕክዎ በመዋዕልየ ። አኀዘኒ ጸዐረ ሞት ።"
+     },
+     "citation": "፻፲፬ ቍ· ፩ – ፪",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 114,
+      "citation": "፻፲፬ ቍ· ፩ – ፪",
+      "start": 1,
+      "end": 2
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወመጽኡ ኀቤሁ ሰዱቃውያን ።"
+     },
+     "citation": "ም· ፳ ቍ· ፳፯ – ፶፬",
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 20,
+      "citation": "ም· ፳ ቍ· ፳፯ – ፶፬",
+      "start": 27,
+      "end": 54
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 14,
+  "title": "ምንባብ ዘ፬ – ፯ ምዕራፍ ዘይትበሀል ።",
+  "category": "riteChapter",
+  "sourcePages": [
+   420
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ወየብስ ከመ ገልዕ ኀይልየ ። ወጠግዐ ልሳንየ በጕርዔየ ። ወአውረድከኒ ውስተ መሬተ ሞት ።"
+     },
+     "citation": "፳፩ ቍ· ፮ – ፲፯",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 21,
+      "citation": "፳፩ ቍ· ፮ – ፲፯",
+      "start": 6,
+      "end": 17
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "አማን አማን እብለክሙ"
+     },
+     "citation": "ም· ፲፪ ቍ· ፳ – ፴፫",
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 12,
+      "citation": "ም· ፲፪ ቍ· ፳ – ፴፫",
+      "start": 20,
+      "end": 33
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 15,
+  "title": "ዘሐምስ ምዕራፍ ዘይትበሀል ።",
+  "category": "riteChapter",
+  "sourcePages": [
+   420
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "እስመ ፈላሲ አነ ውስተ ምድር ። ወነግድ ከመ ኵሉ አበውየ ። ሥገተኒ ከመ አዕርፍ ።"
+     },
+     "citation": "፴፰ ቍ· ፲፪ – ፲፫",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 38,
+      "citation": "፴፰ ቍ· ፲፪ – ፲፫",
+      "start": 12,
+      "end": 13
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወአመ ይመጽእ ወልደ እጓለ እመሕያው ።"
+     },
+     "citation": "ም· ፳፭ ቍ· ፴፩ – ፵፮",
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 25,
+      "citation": "ም· ፳፭ ቍ· ፴፩ – ፵፮",
+      "start": 31,
+      "end": 46
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 16,
+  "title": "ዘሣድስ ምዕራፍ ዘይትበሀል ።",
+  "category": "riteChapter",
+  "sourcePages": [
+   420
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ወመዋዕልየኒ ከመ ጽላሎት ኀለፉ ። ሃሌ ሉያ ። ወአነኒ ከመ ሣዕር የብስኩ ።"
+     },
+     "citation": "፻፩ ቍ· ፬ ፭",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 101,
+      "citation": "፻፩ ቍ· ፬ ፭",
+      "start": 4,
+      "end": 5
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወበእንተ ይእቲ ዕለት ወይእቲ ሰዓት ።"
+     },
+     "citation": "ም· ፲፫ ቍ· ፴፪ – ፴፯",
+     "verse": {
+      "bookTitle": "የማርቆስ ወንጌል",
+      "chapter": 13,
+      "citation": "ም· ፲፫ ቍ· ፴፪ – ፴፯",
+      "start": 32,
+      "end": 37
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 17,
+  "title": "ዘሳብዕ ምዕራፍ ዘይትበሀል ።",
+  "category": "riteChapter",
+  "sourcePages": [
+   420,
+   421
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ግብኢ ነፍስየ ውስተ ዕረፍትኪ ። እስመ እግዚአብሔር ረዳእኪ ።"
+     },
+     "citation": "፻፲፬ ቍ· ፯ – ፰",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 114,
+      "citation": "፻፲፬ ቍ· ፯ – ፰",
+      "start": 7,
+      "end": 8
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወሀሎ ፩ዱ ብእሲ ።"
+     },
+     "citation": "ም· ፲፮ ቍ· ፲፱ – ፴፩",
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 16,
+      "citation": "ም· ፲፮ ቍ· ፲፱ – ፴፩",
+      "start": 19,
+      "end": 31
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 18,
+  "title": "ጸሎተ ፍትሐት በቤተ ክርስቲያን ።",
+  "category": "burialPrayer",
+  "sourcePages": [
+   421
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ተዘከር እግዚአ ከመ መሬት ንሕነ ። ሰብእሰ ከመ ሣዕር መዋዕሊሁ ። ወከመ ጽጌ ገዳም ከማሁ ይፈሪ ።"
+     },
+     "citation": "፻፪ ቍ· ፲፬ – ፲፮",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 102,
+      "citation": "፻፪ ቍ· ፲፬ – ፲፮",
+      "start": 14,
+      "end": 16
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወይቤሎሙ ኢየሱስ አነ ውእቱ ኅብስተ ሕይወት ።"
+     },
+     "citation": "ም· ፳፭ ቍ· ፴፬ – ፵፮",
+     "verse": {
+      "bookTitle": "የማቴዎስ ወንጌል",
+      "chapter": 25,
+      "citation": "ም· ፳፭ ቍ· ፴፬ – ፵፮",
+      "start": 34,
+      "end": 46
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወክርስቶስ ዘመጽአ ከዊኖ ሊቀ ካህናት ።"
+     },
+     "citation": "ም· ፱ ቍ· ፲፩ – ፲፬",
+     "verse": {
+      "bookTitle": "ወደ ዕብራውያን",
+      "chapter": 9,
+      "citation": "ም· ፱ ቍ· ፲፩ – ፲፬",
+      "start": 11,
+      "end": 14
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወበዝንቱ አእመርናሁ ለተፋቅሮቱ ።"
+     },
+     "citation": "ም· ፫ ቍ· ፲፮ – ፳፬",
+     "verse": {
+      "bookTitle": "የዮሐንስ መልእክት 1",
+      "chapter": 3,
+      "citation": "ም· ፫ ቍ· ፲፮ – ፳፬",
+      "start": 16,
+      "end": 24
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወይቤሎ አግሪጳ ለጳውሎስ ።"
+     },
+     "citation": "ም· ፳፮ ቍ· ፩ – ፱",
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 26,
+      "citation": "ም· ፳፮ ቍ· ፩ – ፱",
+      "start": 1,
+      "end": 9
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 19,
+  "title": "ጸሎተ ፍትሐት ዘግብእተ መሬት ።",
+  "category": "burialPrayer",
+  "sourcePages": [
+   421
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ቦኑ ለከንቱ ፈጠርኮ ለኵሉ እጓለ እመሕያው ። መኑ ሰብእ ዘየሐዩ ወኢይሬእያ ለሞት ። ወመኑ ዘያድኅና ለነፍሱ እምእደ ሲኦል ።"
+     },
+     "citation": "፹፰ ቍ· ፵፯ – ፵፰",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 88,
+      "citation": "፹፰ ቍ· ፵፯ – ፵፰",
+      "start": 47,
+      "end": 48
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወመሰለ ሎሙ ወይቤሎሙ ።"
+     },
+     "citation": "ም· ፲፪ ቍ· ፲፭ – ፳፩",
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 12,
+      "citation": "ም· ፲፪ ቍ· ፲፭ – ፳፩",
+      "start": 15,
+      "end": 21
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወናሁኬ ተዐውቀ ከመ ሀሎ ዕረፍት ።"
+     },
+     "citation": "ም· ፬ ቍ· ፱ – ፲፬",
+     "verse": {
+      "bookTitle": "ወደ ዕብራውያን",
+      "chapter": 4,
+      "citation": "ም· ፬ ቍ· ፱ – ፲፬",
+      "start": 9,
+      "end": 14
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ንዑ ይእዜኒ አብዕልት ።"
+     },
+     "citation": "ም· ፭ ቍ· ፩ – ፯",
+     "verse": {
+      "bookTitle": "የያዕቆብ መልእክት",
+      "chapter": 5,
+      "citation": "ም· ፭ ቍ· ፩ – ፯",
+      "start": 1,
+      "end": 7
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ናሁኬ ረአይ ከመ ዘኢተአምሩ ።"
+     },
+     "citation": "ም· ፲፫ ቍ· ፩ – ፱",
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 13,
+      "citation": "ም· ፲፫ ቍ· ፩ – ፱",
+      "start": 1,
+      "end": 9
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 20,
+  "title": "ምንባብ ዘይትበሃል በሣልስት ዕለት ።",
+  "category": "memorial",
+  "memorialDay": 3,
+  "supplication": "በእንተ እለ ኖሙ አው እግዚአ ሕያዋን ።",
+  "sourcePages": [
+   421,
+   422
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ወገደፉ እንዋየሆሙ ከመ በድን ርኩስ ። አንተ ኢትግድፈኒ እግዚአ አምላኪየ ኢትርሐቅ እምኔየ ። ወነጽር ውስተ ረዲአትየ እግዚአ አምላከ መድኃኒትየ ።"
+     },
+     "citation": "፴፯ ቍ· ፳፩ – ፳፪",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 37,
+      "citation": "፴፯ ቍ· ፳፩ – ፳፪",
+      "start": 21,
+      "end": 22
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወሀሎ ፩ዱ ብእሲ ዘይደዊ ዘስሙ አልአዛር ።"
+     },
+     "citation": "ም· ፲፩ ቍ· ፩ – ፶፯",
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 11,
+      "citation": "ም· ፲፩ ቍ· ፩ – ፶፯",
+      "start": 1,
+      "end": 57
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወእመሰ ተንሣእክሙ ምስለ ክርስቶስ ።"
+     },
+     "citation": "ም· ፫ ቍ· ፩ – ፲፫",
+     "verse": {
+      "bookTitle": "ወደ ቆላስይስ ሰዎች",
+      "chapter": 3,
+      "citation": "ም· ፫ ቍ· ፩ – ፲፫",
+      "start": 1,
+      "end": 13
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "እስመ ጸጋ እግዚአብሔር ትትወሀብ ።"
+     },
+     "citation": "ም· ፬ ቍ· ፲፱ – ፍ፡ም፡",
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት 1",
+      "chapter": 4,
+      "citation": "ም· ፬ ቍ· ፲፱ – ፍ፡ም፡",
+      "start": 19
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 21,
+  "title": "ምንባብ ዘ፯ቱ ዕለት ዘይትበሀል ።",
+  "category": "memorial",
+  "memorialDay": 7,
+  "supplication": "እግዚአ ሕያዋን አው በእንተ እለ ኖሙ ።",
+  "sourcePages": [
+   422
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ወአንበሩኒ ውስተ አዘቅት ታሕት ። ውስተ ጽልመት ወጽላሎተ ሞት ። ላዕሌየ ጸንዐ መዓትከ ።"
+     },
+     "citation": "፹፯ ቍ· ፮ – ፯",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 87,
+      "citation": "፹፯ ቍ· ፮ – ፯",
+      "start": 6,
+      "end": 7
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወይኩን ቅኑተ ሐቌክሙ ።"
+     },
+     "citation": "ም· ፲፪ ቍ· ፴፭ – ፵",
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 12,
+      "citation": "ም· ፲፪ ቍ· ፴፭ – ፵",
+      "start": 35,
+      "end": 40
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወዘንተ ባሕቱ አእምሩ ኵልክሙ ።"
+     },
+     "citation": "ም· ፯ ቍ· ፫ – ፲",
+     "verse": {
+      "bookTitle": "ወደ ሮሜ ሰዎች",
+      "chapter": 7,
+      "citation": "ም· ፯ ቍ· ፫ – ፲",
+      "start": 3,
+      "end": 10
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ወዘንተ ባሕቱ ኢትርስዑ አኃዊነ ።"
+     },
+     "citation": "ም· ፫ ቍ· ፰ – ፲፬",
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት 2",
+      "chapter": 3,
+      "citation": "ም· ፫ ቍ· ፰ – ፲፬",
+      "start": 8,
+      "end": 14
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወፈነውዎ ለጳውሎስ ቢጹ ሶቤሃ ።"
+     },
+     "citation": "ም· ፲፯ ቍ· ፲፭ – ፲፱",
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 17,
+      "citation": "ም· ፲፯ ቍ· ፲፭ – ፲፱",
+      "start": 15,
+      "end": 19
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 22,
+  "title": "ምንባብ ዘይትበሀል በ፲ወ፪ቱ ዕለት ።",
+  "category": "memorial",
+  "memorialDay": 12,
+  "supplication": "እግዚአ ሕያዋን አው በእንተ እለ ኖሙ ።",
+  "sourcePages": [
+   422,
+   423
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ወአስተፍስሕ ለነፍስ ገብርከ ። እስመ ኀቤከ አንቃዕደኩ ነፍስየ ።"
+     },
+     "citation": "፹፭ ቍ· ፫ – ፬",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 85,
+      "citation": "፹፭ ቍ· ፫ – ፬",
+      "start": 3,
+      "end": 4
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወበእንተ ይእቲ ዕለት ።"
+     },
+     "citation": "ም· ፲፫ ቍ· ፴፪ – ፍ፡ም፡",
+     "verse": {
+      "bookTitle": "የማርቆስ ወንጌል",
+      "chapter": 13,
+      "citation": "ም· ፲፫ ቍ· ፴፪ – ፍ፡ም፡",
+      "start": 32
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወእፈቅድ ታእምሩ አኃዊነ ።"
+     },
+     "citation": "ም· ፩ ቍ· ፰ – ፲፬",
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች 2",
+      "chapter": 1,
+      "citation": "ም· ፩ ቍ· ፰ – ፲፬",
+      "start": 8,
+      "end": 14
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "በከመ ተነበየ ሄኖክ በእንቲአሆሙ ።"
+     },
+     "citation": "ም· ፩ ቍ· ፲፯ – ፳፬",
+     "verse": {
+      "bookTitle": "የይሁዳ መልእክት",
+      "chapter": 1,
+      "citation": "ም· ፩ ቍ· ፲፯ – ፳፬",
+      "start": 17,
+      "end": 24
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወተሠጥዎሙ ጴጥሮስ ምስለ ሐዋርያት ።"
+     },
+     "citation": "ም· ፬ ቍ· ፴፱ – ፶፫",
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 4,
+      "citation": "ም· ፬ ቍ· ፴፱ – ፶፫",
+      "start": 39,
+      "end": 53
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 23,
+  "title": "ምንባብ ዘይትበሀል በ፴ ዕለት ።",
+  "category": "memorial",
+  "memorialDay": 30,
+  "supplication": "እግዚአ ሕያዋን አው በእንተ እለ ኖሙ ።",
+  "sourcePages": [
+   423
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ኑጽረኒ ወስምዐኒ እግዚአ አምላኪየ ። አብርሆን ለአዕይንትየ ከመ ኢይኑማ ለመዊት ። ወከመ ኢይበሉኒ ጸላእትየ ሞዕናሁ ።"
+     },
+     "citation": "፲፪ ቍ· ፫ – ፬",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 12,
+      "citation": "፲፪ ቍ· ፫ – ፬",
+      "start": 3,
+      "end": 4
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "አማን አማን እብለክሙ ።"
+     },
+     "citation": "ም· ፲፪ ቍ· ፴፬ – ፶",
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 12,
+      "citation": "ም· ፲፪ ቍ· ፴፬ – ፶",
+      "start": 34,
+      "end": 50
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ወበእንተ ፍሥሓ ተአሚንየ መከርኩ ።"
+     },
+     "citation": "ም· ፩ ቍ· ፲፭ – ፍ፡ም፡",
+     "verse": {
+      "bookTitle": "ወደ ቆሮንቶስ ሰዎች 2",
+      "chapter": 1,
+      "citation": "ም· ፩ ቍ· ፲፭ – ፍ፡ም፡",
+      "start": 15
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ምስለ ስልምኖስ እኁነ ።"
+     },
+     "citation": "ም· ፩ ቍ· ፲፱ – ፳፬",
+     "verse": {
+      "bookTitle": "የይሁዳ መልእክት",
+      "chapter": 1,
+      "citation": "ም· ፩ ቍ· ፲፱ – ፳፬",
+      "start": 19,
+      "end": 24
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወእምዝ መፅአ ጳውሎስ እምአቴና ።"
+     },
+     "citation": "ም· ፬ ቍ· ፴፱ – ፶፫",
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 4,
+      "citation": "ም· ፬ ቍ· ፴፱ – ፶፫",
+      "start": 39,
+      "end": 53
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 24,
+  "title": "ምንባብ ዘይትበሀል በ፵ ዕለት ።",
+  "category": "memorial",
+  "memorialDay": 40,
+  "supplication": "እግዚአ ሕያዋን አው በእንተ እለ ኖሙ ።",
+  "sourcePages": [
+   423
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "እስመ አንተ ረዳእየ እግዚአ ። ውስተ እዴከ አመሐጽን ነፍስየ ። ቤዘወኒ እግዚአብሔር አምላከ ጽድቅ ።"
+     },
+     "citation": "፴ ቍ· ፬ – ፭",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 30,
+      "citation": "፴ ቍ· ፬ – ፭",
+      "start": 4,
+      "end": 5
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወኵሉ ዘወሀበኒ አቡየ ይመጽእ ኀቤየ ።"
+     },
+     "citation": "ም· ፮ ቍ· ፴፯ – ፵፯",
+     "verse": {
+      "bookTitle": "የዮሐንስ ወንጌል",
+      "chapter": 6,
+      "citation": "ም· ፮ ቍ· ፴፯ – ፵፯",
+      "start": 37,
+      "end": 47
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "ተዘክር ለኢየሱስ ክርስቶስ ።"
+     },
+     "citation": "ም· ፪ ቍ· ፰ – ፲፱",
+     "verse": {
+      "bookTitle": "ወደ ጢሞቴዎስ 2",
+      "chapter": 2,
+      "citation": "ም· ፪ ቍ· ፰ – ፲፱",
+      "start": 8,
+      "end": 19
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "አንጽሑ ነፍስተክሙ ።"
+     },
+     "citation": "ም· ፩ ቍ· ፳፪ – ፮",
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት 1",
+      "chapter": 1,
+      "citation": "ም· ፩ ቍ· ፳፪ – ፮",
+      "start": 22,
+      "end": 6
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወንሕነ ኵልነ ሰማዕቱ ።"
+     },
+     "citation": "ም· ፲ ቍ· ፵፬ – ፵፯",
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 10,
+      "citation": "ም· ፲ ቍ· ፵፬ – ፵፯",
+      "start": 44,
+      "end": 47
+     }
+    }
+   ]
+  }
+ },
+ {
+  "index": 25,
+  "title": "ምንባብ ዘይትበሀል ዘ፹ ወዘ፻ ወዘመንፈቅ ወዘዓመት ወበኵሉ ተዝካረ ሙታን ።",
+  "category": "memorial",
+  "observance": "80th, 100th, half-year, annual, or any memorial",
+  "supplication": "እግዚአ ሕያዋን አው በእንተ እለ ኖሙ ።",
+  "sourcePages": [
+   424
+  ],
+  "kidassie": {
+   "msbak": [
+    {
+     "text": {
+      "geez": "ቀብጹኒ እምልብ ከመ ዘሞት ። ወኮንኩ ከመ ንዋይ ዘተነጕለ ። እስመ ሰማዕኩ ድምፀ ብዙኃን እለ አገቱኒ ዐውድየ ።"
+     },
+     "citation": "፶ ቍ· ፲፪ – ፲፫",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 50,
+      "citation": "፶ ቍ· ፲፪ – ፲፫",
+      "start": 12,
+      "end": 13
+     }
+    }
+   ],
+   "wengel": [
+    {
+     "text": {
+      "geez": "ወመሰለ ሎሙ ።"
+     },
+     "citation": "ም· ፲፬ ቍ· ፯ – ፲፭",
+     "verse": {
+      "bookTitle": "የሉቃስ ወንጌል",
+      "chapter": 14,
+      "citation": "ም· ፲፬ ቍ· ፯ – ፲፭",
+      "start": 7,
+      "end": 15
+     }
+    }
+   ],
+   "firstDeacon": [
+    {
+     "text": {
+      "geez": "አእኵትዎ ለእግዚአብሔር ።"
+     },
+     "citation": "ም· ፩ ቍ· ፲፪ – ፳",
+     "verse": {
+      "bookTitle": "ወደ ቆላስይስ ሰዎች",
+      "chapter": 1,
+      "citation": "ም· ፩ ቍ· ፲፪ – ፳",
+      "start": 12,
+      "end": 20
+     }
+    }
+   ],
+   "secondDeacon": [
+    {
+     "text": {
+      "geez": "ይትባረክ እግዚአብሔር ።"
+     },
+     "citation": "ም· ፩ ቍ· ፫ – ፱",
+     "verse": {
+      "bookTitle": "የጴጥሮስ መልእክት 1",
+      "chapter": 1,
+      "citation": "ም· ፩ ቍ· ፫ – ፱",
+      "start": 3,
+      "end": 9
+     }
+    }
+   ],
+   "secondKahn": [
+    {
+     "text": {
+      "geez": "ወነጺር ጳውሎስ ዐውደ ።"
+     },
+     "citation": "ም· ፳፩ ቍ· ፩ – ፲፪",
+     "verse": {
+      "bookTitle": "ግብረ ሐዋርያት",
+      "chapter": 21,
+      "citation": "ም· ፳፩ ቍ· ፩ – ፲፪",
+      "start": 1,
+      "end": 12
+     }
+    }
+   ]
+  }
+ }
+]

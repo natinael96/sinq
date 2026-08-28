@@ -3,6 +3,8 @@ package com.agpeya.app.data
 import android.content.Context
 import android.util.Log
 import com.agpeya.app.model.Feast
+import com.agpeya.app.model.AthanasiusEntry
+import com.agpeya.app.model.BahreHasabReference
 import com.agpeya.app.model.GitsaweEntry
 import com.agpeya.app.model.GitsaweMonth
 import com.agpeya.app.model.GitsawePackage
@@ -10,6 +12,7 @@ import com.agpeya.app.model.Mahlet
 import com.agpeya.app.model.MonthlyEntry
 import com.agpeya.app.model.SeasonalEntry
 import com.agpeya.app.model.SubFeast
+import com.agpeya.app.model.SundayCycleEntry
 import com.agpeya.app.ui.common.EthiopianDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -37,7 +40,11 @@ object GitsaweRepository {
 
     @Volatile private var dailyCache: List<GitsaweEntry>? = null
     @Volatile private var seasonalCache: List<SeasonalEntry>? = null
+    @Volatile private var movableWeekdayCache: List<SeasonalEntry>? = null
     @Volatile private var monthlyCache: List<MonthlyEntry>? = null
+    @Volatile private var sundayCycleCache: List<SundayCycleEntry>? = null
+    @Volatile private var athanasiusCache: List<AthanasiusEntry>? = null
+    @Volatile private var bahreHasabCache: BahreHasabReference? = null
     @Volatile private var feastsCache: List<Feast>? = null
     @Volatile private var subFeastsCache: List<SubFeast>? = null
     @Volatile private var mahletsCache: List<Mahlet>? = null
@@ -58,10 +65,37 @@ object GitsaweRepository {
                 ?.also { seasonalCache = it } ?: emptyList()
         }
 
+    private suspend fun movableWeekdays(context: Context): List<SeasonalEntry> =
+        movableWeekdayCache ?: withContext(Dispatchers.IO) {
+            load(context, "movable-weekday-gitsawe.json", ListSerializer(SeasonalEntry.serializer()))
+                ?.also { movableWeekdayCache = it } ?: emptyList()
+        }
+
     suspend fun monthly(context: Context): List<MonthlyEntry> =
         monthlyCache ?: withContext(Dispatchers.IO) {
             load(context, "monthly-gitsawe.json", ListSerializer(MonthlyEntry.serializer()))
                 ?.also { monthlyCache = it } ?: emptyList()
+        }
+
+    /** Ordered, losslessly normalized master Part 3 rows. */
+    suspend fun sundayCycle(context: Context): List<SundayCycleEntry> =
+        sundayCycleCache ?: withContext(Dispatchers.IO) {
+            load(context, "sunday-cycle-gitsawe.json", ListSerializer(SundayCycleEntry.serializer()))
+                ?.also { sundayCycleCache = it } ?: emptyList()
+        }
+
+    /** Master Part 4; selected explicitly by funeral or memorial context. */
+    suspend fun athanasius(context: Context): List<AthanasiusEntry> =
+        athanasiusCache ?: withContext(Dispatchers.IO) {
+            load(context, "athanasius.json", ListSerializer(AthanasiusEntry.serializer()))
+                ?.also { athanasiusCache = it } ?: emptyList()
+        }
+
+    /** The finite printed Part 5 table; live dates still use [BahreHasab]. */
+    suspend fun bahreHasabReference(context: Context): BahreHasabReference? =
+        bahreHasabCache ?: withContext(Dispatchers.IO) {
+            loadOne(context, "bahre-hasab-reference.json", BahreHasabReference.serializer())
+                ?.also { bahreHasabCache = it }
         }
 
     suspend fun feasts(context: Context): List<Feast> =
@@ -117,10 +151,31 @@ object GitsaweRepository {
 
     /** Seasonal (movable) entries for a date, located via the [BahreHasab] computus. */
     suspend fun seasonalFor(context: Context, date: LocalDate): List<SeasonalEntry> {
-        val window = BahreHasab.movableSeasonOn(date) ?: return emptyList()
-        return seasonal(context).filter {
-            it.season == window.season && (window.week == null || it.week == null || it.week == window.week)
+        val sunday = BahreHasab.movableSeasonOn(date)
+        val weekday = BahreHasab.movableWeekdayOn(date)
+        val sundayEntries = if (sunday == null) emptyList() else seasonal(context).filter {
+            it.season == sunday.season && (sunday.week == null || it.week == null || it.week == sunday.week)
         }
+        val weekdayEntries = if (weekday == null) emptyList() else movableWeekdays(context).filter {
+            it.season == weekday.season && it.week == weekday.week && it.part == weekday.part
+        }
+        return sundayEntries + weekdayEntries
+    }
+
+    /** Part 3 rows whose printed rule unambiguously selects this Sunday. */
+    suspend fun sundayCycleFor(context: Context, date: LocalDate): List<SundayCycleEntry> {
+        if (date.dayOfWeek != DayOfWeek.SUNDAY) return emptyList()
+        val eth = EthiopianDate.from(date)
+        val window = BahreHasab.movableSeasonOn(date)
+        val candidates = sundayCycle(context).filter { entry ->
+            val fixed = entry.monthNum == eth.month &&
+                entry.fromDay != null && entry.toDay != null && eth.day in entry.fromDay..entry.toDay
+            val movable = window != null && entry.season == window.season && entry.week == window.week
+            fixed || movable
+        }
+        // An exact-date rubric overrides a broader range covering the same day.
+        val exact = candidates.filter { it.monthNum != null && it.fromDay == eth.day && it.toDay == eth.day }
+        return exact.ifEmpty { candidates }
     }
 
     /**
@@ -133,6 +188,7 @@ object GitsaweRepository {
         daily = dailyFor(context, date),
         seasonal = seasonalFor(context, date),
         monthly = monthlyFor(context, date),
+        sundayCycle = sundayCycleFor(context, date),
         feasts = feastsOn(context, date),
     )
 
@@ -174,6 +230,12 @@ object GitsaweRepository {
                 .open("$DIR/$file").readBytes().decodeToString()
             json.decodeFromString(serializer, raw)
         }.onFailure { Log.e(TAG, "Failed to load $file", it) }.getOrNull()
+
+    private fun <T> loadOne(context: Context, file: String, serializer: KSerializer<T>): T? =
+        runCatching {
+            val raw = context.applicationContext.assets.open("$DIR/$file").readBytes().decodeToString()
+            json.decodeFromString(serializer, raw)
+        }.onFailure { Log.e(TAG, "Failed to load $file", it) }.getOrNull()
 }
 
 /**
@@ -187,8 +249,9 @@ data class DayReadings(
     val daily: GitsaweEntry?,
     val seasonal: List<SeasonalEntry>,
     val monthly: List<MonthlyEntry>,
+    val sundayCycle: List<SundayCycleEntry>,
     val feasts: List<Feast>,
 ) {
     val hasChoice: Boolean
-        get() = listOfNotNull(daily).size + seasonal.size + monthly.size + feasts.size > 1
+        get() = listOfNotNull(daily).size + seasonal.size + monthly.size + sundayCycle.size + feasts.size > 1
 }

@@ -7,9 +7,9 @@ import kotlinx.serialization.Serializable
  * synaxarium commemorations, and chants belong to each day, fasting/feast
  * season, and month of the church year.
  *
- * Deserialized from the bundled JSON under assets/content/gitsawe/ — extracted
- * and normalized from the open `gitsawe` npm dataset, never hand-edited. Text is
- * Ge'ez-first with partial Amharic and English. The fixed calendar covers all
+ * Deserialized from the bundled JSON under assets/content/gitsawe/, structured
+ * from the licensed scan transcription supplied for Sinq. Text is Ge'ez-first.
+ * The fixed calendar covers all
  * 366 possible Ethiopian month-days, including leap-year Pagumen 6.
  */
 
@@ -34,6 +34,8 @@ data class GitsaweEntry(
     val title: String? = null,
     /** ስንክሳር — the day's synaxarium (saints and commemorations). */
     val snksar: List<GitsaweNote> = emptyList(),
+    /** Scan pages from which this fixed-cycle day was transcribed. */
+    val sourcePages: List<Int> = emptyList(),
     /** ነግህ — the morning-office readings. */
     override val negh: GitsaweService? = null,
     /** ቅዳሴ — the Divine Liturgy readings. */
@@ -56,6 +58,8 @@ data class SeasonalEntry(
     val raw: String,
     val movable: Boolean = true,
     val title: String? = null,
+    /** Scan pages from which this seasonal entry was transcribed. */
+    val sourcePages: List<Int> = emptyList(),
     override val negh: GitsaweService? = null,
     override val kidassie: GitsaweService? = null,
     override val serk: GitsaweService? = null,
@@ -83,6 +87,65 @@ data class MonthlyEntry(
     override val kidassie: GitsaweService? = null,
     override val serk: GitsaweService? = null,
 ) : GitsaweServices
+
+/**
+ * One ordered row from the book's Sunday/mezmur cycle (master Part 3).
+ * [period] is the printed selection rule; it remains source text until a rule
+ * has been classified as fixed-date or computus-relative. Partial rows and
+ * rubrics are intentionally retained rather than expanded into guessed services.
+ */
+@Serializable
+data class SundayCycleEntry(
+    val index: Int,
+    val title: String,
+    val period: String? = null,
+    val heading: String? = null,
+    val mezmur: String? = null,
+    val gize: String? = null,
+    val rubric: String? = null,
+    val reviewNotes: String? = null,
+    val sourcePages: List<Int> = emptyList(),
+    /** Unambiguous fixed Ethiopian-date selector, when printed by the source. */
+    val monthNum: Int? = null,
+    val fromDay: Int? = null,
+    val toDay: Int? = null,
+    /** Unambiguous computus-relative selector, when printed by the source. */
+    val season: String? = null,
+    val week: Int? = null,
+    override val negh: GitsaweService? = null,
+    override val kidassie: GitsaweService? = null,
+    override val serk: GitsaweService? = null,
+) : GitsaweServices
+
+/** A separately selected funeral or memorial reading from master Part 4. */
+@Serializable
+data class AthanasiusEntry(
+    val index: Int,
+    val title: String,
+    /** person, riteChapter, burialPrayer, or memorial. */
+    val category: String,
+    val memorialDay: Int? = null,
+    val observance: String? = null,
+    /** መስተበቍዕ, kept distinct from the scripture-reading slots. */
+    val supplication: String? = null,
+    val sourcePages: List<Int> = emptyList(),
+    override val negh: GitsaweService? = null,
+    override val kidassie: GitsaweService? = null,
+    override val serk: GitsaweService? = null,
+) : GitsaweServices
+
+/** The historical 2001–2015 EC reference table printed in master Part 5. */
+@Serializable
+data class BahreHasabReference(
+    val title: String,
+    val note: String,
+    val sourcePages: List<Int> = emptyList(),
+    val columns: List<String>,
+    val rows: List<BahreHasabReferenceRow>,
+)
+
+@Serializable
+data class BahreHasabReferenceRow(val values: List<String>)
 
 /** A synaxarium note. In the current data only [amharic] is populated. */
 @Serializable

@@ -1,0 +1,556 @@
+{
+  "book": {
+    "title": "መጽሐፈ ግጻዌ ወመዝሙር ከነምልክቱ",
+    "subtitle": "ዘይትነበብ ወዘይትበሃል እምዓመት እስከ ዓመት ወዘሰናብት ዘየዐብር ምስለ መዝሙራት ወዘአትናቴዎስ",
+    "publisher": "አክሱም ማተሚያ ቤት፣ አዲስ አበባ፣ ኢትዮጵያ",
+    "editor": "ገብረሥላሴ ብርሃኑ",
+    "edition_note": "ተነትመ በ፻፻፱ወ፺ ዓ.ም. (ሽፋን ላይ YK AZ 2010 E.C.)",
+    "scanned_pages": 427,
+    "printed_pages": 426,
+    "page_offset_note": "printed_page = scan_page - 3 (ማውጫው ከመጽሐፉ መጨረሻ ተነስቶ በስካኑ ፊት ለፊት ስለተቀመጠ ገጽ 3-7 ልዩ ናቸው)",
+    "source_dir": "/home/natinael/Desktop/project/new",
+    "file_pattern": "page-{scan}.pdf"
+  },
+  "front_matter": [
+    {
+      "section": "የሽፋን ገጽ",
+      "scan_pages": [
+        1,
+        1
+      ]
+    },
+    {
+      "section": "የአሳታሚ መረጃ",
+      "scan_pages": [
+        2,
+        2
+      ]
+    },
+    {
+      "section": "መክስተ አርእስት (ማውጫ)",
+      "scan_pages": [
+        3,
+        7
+      ],
+      "printed_pages": [
+        422,
+        426
+      ]
+    },
+    {
+      "section": "መቅድም",
+      "scan_pages": [
+        8,
+        8
+      ]
+    },
+    {
+      "section": "መባቢያ",
+      "scan_pages": [
+        9,
+        10
+      ]
+    },
+    {
+      "section": "ትዕዛዝ",
+      "scan_pages": [
+        11,
+        12
+      ]
+    }
+  ],
+  "parts": [
+    {
+      "part": 1,
+      "title": "ግጻዌ ዘወርኃት",
+      "description": "ከመስከረም እስከ ጳጉሜን ያለው በየዕለቱ የሚነበብ ግጻዌ",
+      "scan_pages": [
+        13,
+        356
+      ],
+      "printed_pages": [
+        10,
+        353
+      ],
+      "seasons": [
+        {
+          "season": "ዘመነ መጸው",
+          "months": [
+            {
+              "month": "መስከረም",
+              "index": 1,
+              "days": 30,
+              "scan_pages": [
+                13,
+                40
+              ],
+              "printed_pages": [
+                10,
+                37
+              ]
+            },
+            {
+              "month": "ጥቅምት",
+              "index": 2,
+              "days": 30,
+              "scan_pages": [
+                41,
+                69
+              ],
+              "printed_pages": [
+                38,
+                66
+              ]
+            },
+            {
+              "month": "ኅዳር",
+              "index": 3,
+              "days": 30,
+              "scan_pages": [
+                70,
+                97
+              ],
+              "printed_pages": [
+                67,
+                94
+              ]
+            }
+          ]
+        },
+        {
+          "season": "ዘመነ ሐጋይ",
+          "months": [
+            {
+              "month": "ታኅሣሥ",
+              "index": 4,
+              "days": 30,
+              "scan_pages": [
+                98,
+                126
+              ],
+              "printed_pages": [
+                95,
+                123
+              ]
+            },
+            {
+              "month": "ጥር",
+              "index": 5,
+              "days": 30,
+              "scan_pages": [
+                127,
+                155
+              ],
+              "printed_pages": [
+                124,
+                152
+              ]
+            },
+            {
+              "month": "የካቲት",
+              "index": 6,
+              "days": 30,
+              "scan_pages": [
+                156,
+                183
+              ],
+              "printed_pages": [
+                153,
+                180
+              ]
+            }
+          ]
+        },
+        {
+          "season": "ዘመነ በጋ",
+          "months": [
+            {
+              "month": "መጋቢት",
+              "index": 7,
+              "days": 30,
+              "scan_pages": [
+                184,
+                211
+              ],
+              "printed_pages": [
+                181,
+                208
+              ]
+            },
+            {
+              "month": "ሚያዝያ",
+              "index": 8,
+              "days": 30,
+              "scan_pages": [
+                212,
+                239
+              ],
+              "printed_pages": [
+                209,
+                236
+              ]
+            },
+            {
+              "month": "ግንቦት",
+              "index": 9,
+              "days": 30,
+              "scan_pages": [
+                240,
+                268
+              ],
+              "printed_pages": [
+                237,
+                265
+              ]
+            }
+          ]
+        },
+        {
+          "season": "ዘመነ ክረምት",
+          "months": [
+            {
+              "month": "ሰኔ",
+              "index": 10,
+              "days": 30,
+              "scan_pages": [
+                269,
+                295
+              ],
+              "printed_pages": [
+                266,
+                292
+              ]
+            },
+            {
+              "month": "ሐምሌ",
+              "index": 11,
+              "days": 30,
+              "scan_pages": [
+                296,
+                322
+              ],
+              "printed_pages": [
+                293,
+                319
+              ]
+            },
+            {
+              "month": "ነሐሴ",
+              "index": 12,
+              "days": 30,
+              "scan_pages": [
+                323,
+                350
+              ],
+              "printed_pages": [
+                320,
+                347
+              ]
+            }
+          ]
+        },
+        {
+          "season": "ጳጉሜን",
+          "months": [
+            {
+              "month": "ጳጉሜን",
+              "index": 13,
+              "days": 6,
+              "scan_pages": [
+                351,
+                356
+              ],
+              "printed_pages": [
+                348,
+                353
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "part": 2,
+      "title": "በተውሳክ ለሚወጡ ለሚወርዱ በዓላትና አጽዋማት",
+      "description": "የሚንቀሳቀሱ በዓላትና አጽዋማት ግጻዌ",
+      "scan_pages": [
+        357,
+        378
+      ],
+      "printed_pages": [
+        354,
+        375
+      ],
+      "sections": [
+        {
+          "section": "ግጻዌ ዘነነዌ ሰኑይ",
+          "boundary_note": "verified — heading ፩ ዘነነዌ ሰኑይ on scan 357",
+          "starts_scan_page": 357,
+          "starts_printed_page": 354
+        },
+        {
+          "section": "ግጻዌ ዘጾመ ሕርቃል ሰኑይ",
+          "boundary_note": "verified — heading በጾመ ሕርቃል ዘሰኑይ",
+          "starts_scan_page": 360,
+          "starts_printed_page": 357
+        },
+        {
+          "section": "ግጻዌ ዘበዐተ ዐቢይ ጾም ቅድስት ዘሰኑይ",
+          "boundary_note": "verified — heading በቅድስት ዘዐቢይ ጾም ዘሰኑይ",
+          "starts_scan_page": 363,
+          "starts_printed_page": 360
+        },
+        {
+          "section": "ግጻዌ በዐቢይ ጾም ምኩራብ ዘሰኑይ",
+          "boundary_note": "verified — heading በዐቢይ ጾም ምኩራብ ዘሰኑይ",
+          "starts_scan_page": 365,
+          "starts_printed_page": 362
+        },
+        {
+          "section": "ግጻዌ በዐቢይ ጾም መጻጉዕ ዘሰኑይ",
+          "boundary_note": "verified — heading በዐቢይ ጾም መጻጉዕ ዘሰኑይ",
+          "starts_scan_page": 368,
+          "starts_printed_page": 365
+        },
+        {
+          "section": "ግጻዌ በዐቢይ ጾም ደብረዘይት ዘሰኑይ",
+          "boundary_note": "NOT FOUND in header band — falls between መጻጉዕ (368) and ገብርኄር (371)"
+        },
+        {
+          "section": "ግጻዌ በዐቢይ ጾም ገብርኄር ዘሰኑይ",
+          "boundary_note": "verified — heading በዐቢይ ጾም ገብር ኄር ዘሰኑይ",
+          "starts_scan_page": 371,
+          "starts_printed_page": 368
+        },
+        {
+          "section": "ግጻዌ በዐቢይ ጾም ኒቆዲሞስ ዘሰኑይ",
+          "boundary_note": "verified — heading በዐቢይ ጾም ኒቆዲሞስ ዘሰኑይ",
+          "starts_scan_page": 375,
+          "starts_printed_page": 372
+        },
+        {
+          "section": "ግጻዌ ዘዖርብ ተፍጻሜተ ጾም ፱ ዘውእቱ ተጊዒኖ",
+          "boundary_note": "not located — expected in scans 376-378"
+        },
+        {
+          "section": "ግጻዌ ዘርክበ ካህናት",
+          "boundary_note": "not located — expected in scans 376-378"
+        },
+        {
+          "section": "ግጻዌ ዘዕርገት",
+          "boundary_note": "not located — expected in scans 376-378"
+        },
+        {
+          "section": "ግጻዌ ዘሰኑይ ሣኒታ ጰራቅሊጦስ (ጾመ ሐዋርያት)",
+          "boundary_note": "not located — expected in scans 376-378"
+        },
+        {
+          "section": "ግጻዌ ዘዕለተ ምህላ",
+          "boundary_note": "not located — expected in scans 376-378"
+        }
+      ]
+    },
+    {
+      "part": 3,
+      "title": "ግጻዌ ዘሰናብት ዘየዐብር ምስለ መዝሙራት",
+      "description": "የሰንበታት ግጻዌ ከመዝሙር ጋር፤ በ፲፩ ክፍል የተከፈለ",
+      "scan_pages": [
+        379,
+        414
+      ],
+      "printed_pages": [
+        376,
+        411
+      ],
+      "chapters": [
+        {
+          "chapter": 1,
+          "title": "ክፍል ፩",
+          "sub": "መስከረም",
+          "scan_pages": [
+            379,
+            381
+          ],
+          "printed_pages": [
+            376,
+            378
+          ],
+          "boundary_source": "running head መስከረም; part opens here",
+          "boundary_confidence": "derived from printed markers (no ክፍል heading exists)"
+        },
+        {
+          "chapter": 2,
+          "title": "ክፍል ፪ ዘጥቅምት",
+          "sub": "ጥቅምት",
+          "scan_pages": [
+            382,
+            385
+          ],
+          "printed_pages": [
+            379,
+            382
+          ],
+          "boundary_source": "hymn ordinal resets to ፩ኛ መዝሙር ዘጽጌ on 382; head flips to ጥቅምት",
+          "boundary_confidence": "derived from printed markers (no ክፍል heading exists)"
+        },
+        {
+          "chapter": 3,
+          "title": "ክፍል ፫ ኅዳር",
+          "sub": "ኅዳር",
+          "scan_pages": [
+            386,
+            388
+          ],
+          "printed_pages": [
+            383,
+            385
+          ],
+          "boundary_source": "hymn ordinal resets to ፩ኛ መዝሙር ዘአስተምህሮ on 386; head flips to ኅዳር; ornament closes 388",
+          "boundary_confidence": "derived from printed markers (no ክፍል heading exists)"
+        },
+        {
+          "chapter": 4,
+          "title": "ክፍል ፬ ኅዳር",
+          "sub": "ኅዳር",
+          "scan_pages": [
+            389,
+            390
+          ],
+          "printed_pages": [
+            386,
+            387
+          ],
+          "boundary_source": "running head ታኅሣሥ; ornament closes 390",
+          "boundary_confidence": "derived from printed markers (no ክፍል heading exists)"
+        },
+        {
+          "chapter": 5,
+          "title": "ክፍል ፭ ከጥር – የካቲት",
+          "sub": "ጥር፣ የካቲት",
+          "scan_pages": [
+            391,
+            394
+          ],
+          "printed_pages": [
+            388,
+            391
+          ],
+          "boundary_source": "running head ጥር then የካቲት",
+          "boundary_confidence": "derived from printed markers (no ክፍል heading exists)"
+        },
+        {
+          "chapter": 6,
+          "title": "ክፍል ፮ ዘዐቢይ ጾም",
+          "sub": "ዘመነ ዐቢይ ጾም",
+          "scan_pages": [
+            395,
+            400
+          ],
+          "printed_pages": [
+            392,
+            397
+          ],
+          "boundary_source": "running head ዘዐቢይ ጾም throughout",
+          "boundary_confidence": "derived from printed markers (no ክፍል heading exists)"
+        },
+        {
+          "chapter": 7,
+          "title": "ክፍል ፯ ዘሆሣዕና",
+          "sub": "ሆሣዕና",
+          "scan_pages": [
+            397,
+            400
+          ],
+          "printed_pages": [
+            394,
+            397
+          ],
+          "boundary_source": "ሆሣዕና enters at 397 as an ORDINARY section — no ክፍል number and no መዝሙር ordinal; head stays ዘዐቢይ ጾም. Not a printed division.",
+          "boundary_confidence": "derived from printed markers (no ክፍል heading exists)"
+        },
+        {
+          "chapter": 8,
+          "title": "ክፍል ፰ ዘዘመነ ትንሣኤ",
+          "sub": "ዘመነ ትንሣኤ",
+          "scan_pages": [
+            401,
+            403
+          ],
+          "printed_pages": [
+            398,
+            400
+          ],
+          "boundary_source": "head changes ዘዐቢይ ጾም -> ዘትንሣኤ at 401, first block ፶ ዘቅዳሜ ሥዑር",
+          "boundary_confidence": "derived from printed markers (no ክፍል heading exists)"
+        },
+        {
+          "chapter": 9,
+          "title": "ክፍል ፱ ዘዕርገት",
+          "sub": "ዕርገት",
+          "scan_pages": [
+            404,
+            406
+          ],
+          "printed_pages": [
+            401,
+            403
+          ],
+          "boundary_source": "red divider እምዕርገት እስከ ጸራቅሊጦስ on 404 (previously guessed 406)",
+          "boundary_confidence": "derived from printed markers (no ክፍል heading exists)"
+        },
+        {
+          "chapter": 10,
+          "title": "ክፍል ፲ ሰኔ ዘአስተምህሮ",
+          "sub": "ሰኔ / ዘአስተምህሮ",
+          "scan_pages": [
+            407,
+            407
+          ],
+          "printed_pages": [
+            404,
+            404
+          ],
+          "boundary_source": "red divider ፷፮ እም፲ወ፯ ለሰኔ … አስተምህሮ on 407; head reads ዘአስተምህሮ, one page only",
+          "boundary_confidence": "derived from printed markers (no ክፍል heading exists)"
+        },
+        {
+          "chapter": 11,
+          "title": "ክፍል ፲፩ ሐምሌ ዘክረምት",
+          "sub": "ሐምሌ / ዘመነ ክረምት",
+          "scan_pages": [
+            408,
+            414
+          ],
+          "printed_pages": [
+            405,
+            411
+          ],
+          "boundary_source": "red divider ፷፰ … በአተ ክረምት on 408; head ዘክረምት through 414; colophon closes Part 3",
+          "boundary_confidence": "derived from printed markers (no ክፍል heading exists)"
+        }
+      ],
+      "chapter_note": "No ክፍል heading is printed anywhere in Part 3 — three agents checked all 36 pages. The 11 ክፍል are a table-of-contents scheme. The ranges below are derived from what the book DOES print: red divider lines, hymn-ordinal resets to ፩ኛ, running-head changes, and section-closing ornaments. Each carries its evidence."
+    },
+    {
+      "part": 4,
+      "title": "አትናቴዎስ",
+      "scan_pages": [
+        415,
+        424
+      ],
+      "printed_pages": [
+        412,
+        421
+      ]
+    },
+    {
+      "part": 5,
+      "title": "ተጨማሪ ሠንጠረዦች (ባሕረ ሐሳብ)",
+      "description": "ዓመተ ምሕረት፣ ወንጌላዊ፣ ባሕት፣ አበቅቴ፣ መጥቅዕ፣ መባጃ ሐመር፣ ጾመ ነነዌ፣ ዐቢይ ጾም፣ ደብረ ዘይት፣ ሆሣዕና፣ ስቅለት፣ ትንሣኤ፣ ርክበ ካህናት፣ ዕርገት፣ ጰራቅሊጦስ፣ ጾመ ሐዋርያት፣ ጾመ ድኅነት",
+      "scan_pages": [
+        425,
+        427
+      ]
+    }
+  ]
+}

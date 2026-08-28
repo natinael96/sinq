@@ -6,6 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [1.3.0] — 2026-08-28
+
+_versionCode 49 · the complete source-backed Gitsawe_
+
+### Added
+- **Movable weekday Gitsawe.** Readings for Nineveh, Heraclius, Great Lent,
+  Rikbe Kahnat, Ascension, and the Apostles' Fast now follow the Ethiopian
+  computus instead of being limited to the fixed calendar.
+- **Sunday Gitsawe and mezmur.** Sundays with an unambiguous printed date or
+  movable-season rule expose their additional readings and hymns from the daily
+  Gitsawe, with valid citations opening directly in Scripture.
+- **Athanasius funeral and memorial lectionary.** The Library now includes the
+  source's funeral, burial, supplication, and memorial collections.
+- **Bahre Hasab reference.** The printed 2001–2015 EC table is available in the
+  Library as a historical reference, while live dates continue to use the
+  app's computus.
+- **Text alignment controls.** Reading settings now offer justified, left,
+  right, and centred text across the app's reading surfaces.
+
+### Changed
+- **A new Sinq launcher mark.** Seven pieces form the Provision cross, tying
+  the app icon to the seven canonical prayer hours and Sinq's name.
+- **The complete licensed Gitsawe source is reproducible.** Parts 1–5 retain
+  scan provenance, source-preserving splits, importers, and validation tests.
+- **Content rights are explicit.** Repository and in-app asset notices now
+  distinguish the separately licensed Gitsawe transcription from Apache-2.0
+  code and CC-licensed Scripture.
+
 ## [1.2.0] — 2026-08-28
 
 _versionCode 48 · the complete fixed-cycle Gitsawe_

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" role="img" aria-label="Sinq — The Seven Beads">
+<title>Sinq — The Seven Beads</title>
+<defs><mask id="m_concept-4-seven-beads" maskUnits="userSpaceOnUse" x="0" y="0" width="108" height="108">
+<rect width="108" height="108" fill="#000"/>
+<g fill="#fff"><circle cx="54.00" cy="32.50" r="9.33"/><circle cx="37.19" cy="40.59" r="9.33"/><circle cx="33.04" cy="58.78" r="9.33"/><circle cx="44.67" cy="73.37" r="9.33"/><circle cx="63.33" cy="73.37" r="9.33"/><circle cx="74.96" cy="58.78" r="9.33"/><circle cx="70.81" cy="40.59" r="9.33"/><path d="M 48.80 44.00 L 59.20 44.00 Q 57.40 46.31 57.40 50.60 Q 61.69 50.60 64.00 48.80 L 64.00 59.20 Q 61.69 57.40 57.40 57.40 Q 57.40 61.69 59.20 64.00 L 48.80 64.00 Q 50.60 61.69 50.60 57.40 Q 46.31 57.40 44.00 59.20 L 44.00 48.80 Q 46.31 50.60 50.60 50.60 Q 50.60 46.31 48.80 44.00 Z"/></g>
+<g fill="#000"></g>
+</mask></defs>
+<g id="background"><rect width="108" height="108" fill="#0E3B31"/></g>
+<g id="foreground"><rect width="108" height="108" fill="#E8C46B" mask="url(#m_concept-4-seven-beads)"/></g>
+</svg>

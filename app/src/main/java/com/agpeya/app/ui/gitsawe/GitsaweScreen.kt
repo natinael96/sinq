@@ -106,6 +106,7 @@ fun GitsaweScreen(
     onBack: () -> Unit,
     onOpenReading: (ReadingTarget, String) -> Unit,
     onOpenSynaxarium: (Long) -> Unit,
+    onOpenSundayCycle: (Long) -> Unit,
     initialEpochDay: Long? = null,
 ) {
     val context = LocalContext.current
@@ -219,6 +220,16 @@ fun GitsaweScreen(
                     val chants = dayChants(active.services)
                     if (chants.isNotEmpty()) {
                         item(key = "kidase") { KidaseSection(chants) }
+                    }
+                }
+                if (data?.sundayCycle?.isNotEmpty() == true) {
+                    item(key = "sunday_cycle") {
+                        NavRow(
+                            title = s.sundayCycleTitle,
+                            subtitle = s.sundayCycleSubtitle,
+                            onClick = { onOpenSundayCycle(epochDay) },
+                            modifier = Modifier.padding(top = Spacing.lg),
+                        )
                     }
                 }
                 item { Spacer(Modifier.height(Spacing.xl)) }

@@ -19,6 +19,7 @@ enum class ThemeChoice { SYSTEM, LIGHT, DARK }
 enum class Language { SYSTEM, AMHARIC, ENGLISH }
 enum class PrayerLevel { PSALM_50, BEGINNING, GROWTH, STEADFAST, FULL }
 enum class ReadingLineSpacing(val multiplier: Float) { COMPACT(1.3f), NORMAL(1.5f), RELAXED(1.75f) }
+enum class ReadingAlignment { JUSTIFIED, LEFT, RIGHT, CENTER }
 
 /**
  * Which bundled Ethiopic face renders the prayer text. [ABYSSINICA] is the
@@ -69,6 +70,7 @@ object SettingsRepository {
         val theme: String = ThemeChoice.SYSTEM.name,
         val readingFont: String = ReadingFont.ABYSSINICA.name,
         val lineSpacing: String = ReadingLineSpacing.NORMAL.name,
+        val readingAlignment: String = ReadingAlignment.JUSTIFIED.name,
         val keepScreenOn: Boolean = true,
         val language: String = Language.SYSTEM.name,
         val prayerLevel: String = PrayerLevel.FULL.name,
@@ -96,6 +98,7 @@ object SettingsRepository {
     private val KEY_THEME = stringPreferencesKey("theme")
     private val KEY_READING_FONT = stringPreferencesKey("reading_font")
     private val KEY_READING_LINE_SPACING = stringPreferencesKey("reading_line_spacing")
+    private val KEY_READING_ALIGNMENT = stringPreferencesKey("reading_alignment")
     private val KEY_KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
     private val KEY_LANGUAGE = stringPreferencesKey("language")
     private val KEY_PRAYER_LEVEL = stringPreferencesKey("prayer_level")
@@ -148,6 +151,7 @@ object SettingsRepository {
             theme = prefs[KEY_THEME] ?: ThemeChoice.SYSTEM.name,
             readingFont = prefs[KEY_READING_FONT] ?: ReadingFont.ABYSSINICA.name,
             lineSpacing = prefs[KEY_READING_LINE_SPACING] ?: ReadingLineSpacing.NORMAL.name,
+            readingAlignment = prefs[KEY_READING_ALIGNMENT] ?: ReadingAlignment.JUSTIFIED.name,
             keepScreenOn = prefs[KEY_KEEP_SCREEN_ON] ?: true,
             language = prefs[KEY_LANGUAGE] ?: Language.SYSTEM.name,
             prayerLevel = prefs[KEY_PRAYER_LEVEL] ?: PrayerLevel.FULL.name,
@@ -184,6 +188,7 @@ object SettingsRepository {
             prefs[KEY_THEME] = runCatching { ThemeChoice.valueOf(value.theme) }.getOrDefault(ThemeChoice.SYSTEM).name
             prefs[KEY_READING_FONT] = runCatching { ReadingFont.valueOf(value.readingFont) }.getOrDefault(ReadingFont.ABYSSINICA).name
             prefs[KEY_READING_LINE_SPACING] = runCatching { ReadingLineSpacing.valueOf(value.lineSpacing) }.getOrDefault(ReadingLineSpacing.NORMAL).name
+            prefs[KEY_READING_ALIGNMENT] = runCatching { ReadingAlignment.valueOf(value.readingAlignment) }.getOrDefault(ReadingAlignment.JUSTIFIED).name
             prefs[KEY_KEEP_SCREEN_ON] = value.keepScreenOn
             prefs[KEY_LANGUAGE] = runCatching { Language.valueOf(value.language) }.getOrDefault(Language.SYSTEM).name
             prefs[KEY_PRAYER_LEVEL] = runCatching { PrayerLevel.valueOf(value.prayerLevel) }.getOrDefault(PrayerLevel.FULL).name
@@ -275,6 +280,16 @@ object SettingsRepository {
 
     suspend fun setReadingLineSpacing(context: Context, value: ReadingLineSpacing) {
         context.settingsDataStore.edit { it[KEY_READING_LINE_SPACING] = value.name }
+    }
+
+    fun readingAlignment(context: Context): Flow<ReadingAlignment> =
+        context.settingsDataStore.data.map {
+            runCatching { ReadingAlignment.valueOf(it[KEY_READING_ALIGNMENT] ?: "") }
+                .getOrDefault(ReadingAlignment.JUSTIFIED)
+        }
+
+    suspend fun setReadingAlignment(context: Context, value: ReadingAlignment) {
+        context.settingsDataStore.edit { it[KEY_READING_ALIGNMENT] = value.name }
     }
 
     /** The ሰዓታት reader's language mode. Paired Ge'ez + Amharic by default. */

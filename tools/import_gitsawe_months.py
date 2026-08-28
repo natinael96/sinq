@@ -1,13 +1,13 @@
-"""Fill missing daily ግጻዌ entries from the compiled month JSON files.
+"""Build Sinq's fixed-cycle ግጻዌ from the licensed month transcriptions.
 
-Existing entries are deliberately preserved: they contain translations and
-synaxarium notes which are not present in the scan transcription. Their missing
-evening office is added from the transcription. New entries retain the Ge'ez
-incipits, misbak text, scripture references, all three offices, and the printed
-citation as provenance.
+The compiled source is authoritative for all 366 possible Ethiopian dates. The
+output retains Ge'ez incipits, full misbak verses, printed citations, alternate
+readings, source scan pages, and all three offices. Invalid printed references
+remain readable but are not turned into broken passage links.
 
 Usage:
-  python3 tools/import_gitsawe_months.py /path/to/new/json/months
+  python3 tools/import_gitsawe_months.py
+  python3 tools/import_gitsawe_months.py /alternate/months
 """
 import json
 import re
@@ -16,6 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "app/src/main/assets/content/gitsawe/daily-gitsawe.json"
+DEFAULT_MONTHS = ROOT / "content/gitsawe/months"
 
 DIGITS = {"፩": 1, "፪": 2, "፫": 3, "፬": 4, "፭": 5, "፮": 6, "፯": 7,
           "፰": 8, "፱": 9, "፲": 10, "፳": 20, "፴": 30, "፵": 40,
@@ -64,6 +65,31 @@ def title_for(raw, fallback=None):
     return None
 
 
+def epistle_title(raw):
+    """Normalize an epistle/Acts label without mistaking ዮሐ for the Gospel."""
+    raw = (raw or "").replace("ዓዲ", "").replace("ዘቅዳሴ", "").strip()
+    base = (
+        (("ግብ",), "ግብረ ሐዋርያት"), (("ሮሜ",), "ወደ ሮሜ ሰዎች"),
+        (("ቆሮ", "ቆር"), "ወደ ቆሮንቶስ ሰዎች"), (("ገላ", "ጌላ"), "ወደ ገላትያ ሰዎች"),
+        (("ኤፌ", "ፌሶ"), "ወደ ኤፌሶን ሰዎች"), (("ፊልጵ", "ፈልጽ"), "ወደ ፊልጵስዩስ ሰዎች"),
+        (("ቈላ", "ቄላ", "ቴላ"), "ወደ ቆላስይስ ሰዎች"), (("ተሰሎ", "ተስሎ"), "ወደ ተሰሎንቄ ሰዎች"),
+        (("ጢሞ",), "ወደ ጢሞቴዎስ"), (("ቲቶ",), "ወደ ቲቶ"),
+        (("ፊልሞ",), "ወደ ፊልሞና"), (("ዕብ",), "ወደ ዕብራውያን"),
+        (("ያዕ",), "የያዕቆብ መልእክት"), (("ጴጥ",), "የጴጥሮስ መልእክት"),
+        (("ይሁዳ",), "የይሁዳ መልእክት"), (("ራእ", "ራዕ"), "የዮሐንስ ራእይ"),
+        (("ዮሐ",), "የዮሐንስ መልእክት"),
+    )
+    for needles, title in base:
+        if any(n in raw for n in needles):
+            # A numeral after a chapter marker belongs to the citation, not to
+            # the book name (one source label includes both).
+            ordinal = None if "ም" in raw else geez_number(raw)
+            if ordinal in (1, 2, 3) and any(n in raw for n in ("ቆሮ", "ቆር", "ተሰሎ", "ጢሞ", "ዮሐ", "ጴጥ")):
+                return f"{title} {ordinal}"
+            return title
+    return None
+
+
 def verse_ref(citation, book, psalm=False):
     citation = citation or ""
     clean = citation.replace("ỻ", "")
@@ -96,13 +122,13 @@ def valid_chapter(book, chapter):
         "የያዕቆብ መልእክት": 5, "የይሁዳ መልእክት": 1, "የዮሐንስ ራእይ": 22,
     }
     if book.startswith("ወደ ቆሮንቶስ"):
-        limit = 16 if book.endswith(" 1") else 13
+        limit = 13 if book.endswith(" 2") else 16
     elif book.startswith("ወደ ተሰሎንቄ"):
-        limit = 5 if book.endswith(" 1") else 3
+        limit = 3 if book.endswith(" 2") else 5
     elif book.startswith("ወደ ጢሞቴዎስ"):
-        limit = 6 if book.endswith(" 1") else 4
+        limit = 4 if book.endswith(" 2") else 6
     elif book.startswith("የጴጥሮስ"):
-        limit = 5 if book.endswith(" 1") else 3
+        limit = 3 if book.endswith(" 2") else 5
     elif book.startswith("የዮሐንስ ወንጌል"):
         limit = 21
     elif book.startswith("የዮሐንስ መልእክት"):
@@ -135,9 +161,25 @@ def convert_service(source):
             out["msbak"].append(reading(item, "msbak"))
         elif "ወንጌ" in key or "ወንጌ" in key.replace("ל", "ል"):
             out["wengel"].append(reading(item, "gospel"))
-    slots = ("firstDeacon", "secondDeacon", "secondKahn")
-    for slot, item in zip(slots, source.get("epistles_and_acts", [])):
-        out[slot].append(reading(item, "epistle", title_for(item.get("reading_type"))))
+    previous_slot = "secondKahn"
+    previous_book = None
+    for index, item in enumerate(source.get("epistles_and_acts", [])):
+        book = epistle_title(item.get("reading_type"))
+        if book == "ግብረ ሐዋርያት":
+            slot = "secondKahn"
+        elif book and any(name in book for name in ("ጴጥሮስ", "ያዕቆብ", "ዮሐንስ", "ይሁዳ", "ራእይ")):
+            slot = "secondDeacon"
+        elif book:
+            slot = "firstDeacon"
+        elif (item.get("reading_type") or "").strip() == "ዓዲ":
+            slot = previous_slot
+            book = previous_book
+        else:
+            # Preserve an unrecognized row in its traditional positional slot.
+            slot = ("firstDeacon", "secondDeacon", "secondKahn")[min(index, 2)]
+        out[slot].append(reading(item, "epistle", book))
+        previous_slot = slot
+        previous_book = book
     kidassie = source.get("ቅዳሴ")
     if kidassie:
         out["kidassie"] = [kidassie.strip()]
@@ -145,46 +187,35 @@ def convert_service(source):
 
 
 def main(months_dir):
-    existing = json.loads(OUT.read_text(encoding="utf-8"))
-    by_date = {entry["date"]: entry for entry in existing}
-    added = []
-    enriched = []
+    entries = []
     for path in sorted(months_dir.glob("*.json")):
         month = json.loads(path.read_text(encoding="utf-8"))
         month_num = month["month_index"]
         for day in month["days"]:
             day_num = geez_number(day["day_number"])
             key = f"{day_num:02d}-{month_num:02d}"
-            if key in by_date:
-                services = day.get("services", {})
-                imported = any(
-                    reading.get("citation") or (reading.get("verse") or {}).get("citation")
-                    for office in ("negh", "kidassie")
-                    for role in ("msbak", "wengel", "firstDeacon", "secondDeacon", "secondKahn")
-                    for reading in by_date[key].get(office, {}).get(role, [])
-                )
-                if imported:
-                    for source_key, target_key in (("ዘነግህ", "negh"), ("ዘቅዳሴ", "kidassie"), ("ዘሠርክ", "serk")):
-                        if source_key in services:
-                            by_date[key][target_key] = convert_service(services[source_key])
-                if "ዘሠርክ" in services:
-                    by_date[key]["serk"] = convert_service(services["ዘሠርክ"])
-                    enriched.append(key)
-                continue
             services = day.get("services", {})
-            entry = {"date": key, "title": day.get("commemoration", "").strip()}
+            pages = sorted(set(day.get("source_scan_pages", [])) | {
+                p for p in (day.get("continued_from_scan_page"), day.get("continues_on_scan_page"))
+                if isinstance(p, int)
+            })
+            entry = {
+                "date": key,
+                "title": day.get("commemoration", "").strip(),
+                "sourcePages": pages,
+            }
             for source_key, target_key in (("ዘነግህ", "negh"), ("ዘቅዳሴ", "kidassie"), ("ዘሠርክ", "serk")):
                 if source_key in services:
                     entry[target_key] = convert_service(services[source_key])
-            by_date[key] = entry
-            added.append(key)
-    merged = sorted(by_date.values(), key=lambda e: tuple(map(int, reversed(e["date"].split("-")))))
-    OUT.write_text(json.dumps(merged, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    print(f"Added {len(added)} entries and enriched {len(enriched)} with ሠርክ; "
-          f"daily coverage is now {len(merged)} days")
+            entries.append(entry)
+    entries.sort(key=lambda e: tuple(map(int, reversed(e["date"].split("-")))))
+    if len(entries) != 366 or len({entry["date"] for entry in entries}) != 366:
+        raise SystemExit("source must contain exactly 366 unique fixed-cycle dates")
+    OUT.write_text(json.dumps(entries, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    print(f"Built {len(entries)} authoritative fixed-cycle days from {len(list(months_dir.glob('*.json')))} months")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        raise SystemExit("usage: import_gitsawe_months.py /path/to/json/months")
-    main(Path(sys.argv[1]))
+    if len(sys.argv) > 2:
+        raise SystemExit("usage: import_gitsawe_months.py [/path/to/json/months]")
+    main(Path(sys.argv[1]) if len(sys.argv) == 2 else DEFAULT_MONTHS)

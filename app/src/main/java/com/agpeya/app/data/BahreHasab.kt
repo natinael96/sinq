@@ -63,6 +63,29 @@ object BahreHasab {
     /** A movable season and, where it has weekly readings, the week within it. */
     data class SeasonWindow(val season: String, val week: Int?)
 
+    /** A Monday–Saturday movable entry from master Part 2. */
+    data class WeekdayWindow(val season: String, val week: Int?, val part: Int)
+
+    /**
+     * Locates the weekday collections in master Part 2. [part] follows ISO
+     * weekday numbering (Monday = 1 … Saturday = 6).
+     */
+    fun movableWeekdayOn(date: LocalDate): WeekdayWindow? {
+        val year = EthiopianDate.from(date).year
+        val off = ChronoUnit.DAYS.between(nineveh(year), date).toInt()
+        val part = date.dayOfWeek.value
+        return when {
+            off in 0..2 -> WeekdayWindow("neneweTsom", 1, part)
+            off in 7..12 -> WeekdayWindow("heraclius", 1, part)
+            off in 14..54 && part in 1..6 ->
+                WeekdayWindow("abiyTsom", (off - 14) / 7 + 1, part)
+            off == 93 -> WeekdayWindow("rikbeKahnat", null, part)
+            off == 108 -> WeekdayWindow("erget", null, part)
+            off == 119 -> WeekdayWindow("apostlesFast", null, part)
+            else -> null
+        }
+    }
+
     /**
      * Which movable season a date falls in, matching the `season` keys used by
      * the seasonal ግጻዌ data — or null if the date isn't within a movable window.
@@ -82,7 +105,7 @@ object BahreHasab {
             off in 13..62 -> SeasonWindow("abiyTsom", (off - 13) / 7 + 1)
             off == 66 -> SeasonWindow("holy_thursday", null)             // ዘጸሎተ ሐሙስ
             off == 108 -> SeasonWindow("erget", null)                    // ዕርገት (Ascension)
-            off in 69..117 && (off - 69) % 7 == 0 ->                     // Resurrection Sundays
+            off in 69..146 && (off - 69) % 7 == 0 ->                     // Resurrection and post-Pentecost Sundays
                 SeasonWindow("tnsae", (off - 69) / 7 + 1)
             else -> null
         }

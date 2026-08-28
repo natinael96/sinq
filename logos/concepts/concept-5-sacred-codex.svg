@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" role="img" aria-label="Sinq — The Sacred Codex">
+<title>Sinq — The Sacred Codex</title>
+<defs><mask id="m_concept-5-sacred-codex" maskUnits="userSpaceOnUse" x="0" y="0" width="108" height="108">
+<rect width="108" height="108" fill="#000"/>
+<g fill="#fff"><rect x="30.00" y="32.00" width="35.50" height="44.00" rx="3.50"/><rect x="68.00" y="34.00" width="11.50" height="40.40" rx="2.00"/></g>
+<g fill="#000"><path d="M 40.80 41.00 L 55.20 41.00 Q 52.60 43.94 52.60 49.40 Q 58.06 49.40 61.00 46.80 L 61.00 61.20 Q 58.06 58.60 52.60 58.60 Q 52.60 64.06 55.20 67.00 L 40.80 67.00 Q 43.40 64.06 43.40 58.60 Q 37.94 58.60 35.00 61.20 L 35.00 46.80 Q 37.94 49.40 43.40 49.40 Q 43.40 43.94 40.80 41.00 Z"/><rect x="67.00" y="38.40" width="13.50" height="1.60" rx="0.80"/><rect x="67.00" y="44.40" width="13.50" height="1.60" rx="0.80"/><rect x="67.00" y="50.40" width="13.50" height="1.60" rx="0.80"/><rect x="67.00" y="56.40" width="13.50" height="1.60" rx="0.80"/><rect x="67.00" y="62.40" width="13.50" height="1.60" rx="0.80"/><rect x="67.00" y="68.40" width="13.50" height="1.60" rx="0.80"/></g>
+</mask></defs>
+<g id="background"><rect width="108" height="108" fill="#0E3B31"/></g>
+<g id="foreground"><rect width="108" height="108" fill="#E8C46B" mask="url(#m_concept-5-sacred-codex)"/></g>
+</svg>
