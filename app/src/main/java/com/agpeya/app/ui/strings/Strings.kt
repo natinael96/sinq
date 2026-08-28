@@ -22,18 +22,17 @@ interface Strings {
     val zewotrSubtitle: String
     val scripturesTitle: String
     val scripturesSubtitle: String
-    val athanasiusTitle: String
-    val athanasiusSubtitle: String
     val bahreHasabTitle: String
     val bahreHasabSubtitle: String
+    val bahreHasabRange: String
+    val bahreHasabCurrentYear: String
+    val bahreHasabCycleValues: String
+    val bahreHasabMovableDates: String
+    val bahreHasabFasika: String
     val annualTable: String
     val sundayCycleTitle: String
     val sundayCycleSubtitle: String
     val supplicationLabel: String
-    val athanasiusPeople: String
-    val athanasiusRiteChapters: String
-    val athanasiusBurialPrayers: String
-    val athanasiusMemorials: String
     fun memorialDay(day: Int): String
     val newTestamentLabel: String
     val oldTestamentLabel: String
@@ -251,12 +250,8 @@ interface Strings {
     val wudaseMariam: String
     val wudaseLangAmharic: String
     val wudaseLangGeez: String
-    // ሰዓታት — the Horologion. The name is content and stays in Ge'ez script.
-    val seatatTitle: String
-    val seatatSubtitle: String
-    /** The paired Ge'ez + Amharic mode of the ሰዓታት reader. */
-    val seatatLangBoth: String
     val contentUnavailable: String
+    val retryAction: String
     val mementoMoriGloss: String
     val fastingTitle: String
     val fastingToday: String
@@ -482,18 +477,17 @@ object AmharicStrings : Strings {
     override val librarySubtitle = "የጸሎትና የቅዱሳት መጻሕፍት ስብስብ"
     override val scripturesTitle = "ቅዱሳት መጻሕፍት"
     override val scripturesSubtitle = "የአዲስ ኪዳን መጻሕፍት"
-    override val athanasiusTitle = "አትናቴዎስ"
-    override val athanasiusSubtitle = "ሥርዓተ ፍትሐት ወተዝካረ ሙታን"
     override val bahreHasabTitle = "ባሕረ ሐሳብ"
     override val bahreHasabSubtitle = "የበዓላትና የአጽዋማት ዓመታዊ ሠንጠረዥ"
+    override val bahreHasabRange = "የአሁኑ ዓመት እና ቀጣዮቹ ፳፭ ዓመታት"
+    override val bahreHasabCurrentYear = "የአሁኑ ዓመት"
+    override val bahreHasabCycleValues = "የዓመቱ ስሌት"
+    override val bahreHasabMovableDates = "ተንቀሳቃሽ በዓላትና አጽዋማት"
+    override val bahreHasabFasika = "ትንሣኤ"
     override val annualTable = "ዓመታዊ ሠንጠረዥ"
     override val sundayCycleTitle = "ግጻዌ ዘሰናብት ወመዝሙር"
     override val sundayCycleSubtitle = "የዕለቱ የሰንበት ሥርዓት"
     override val supplicationLabel = "መስተበቍዕ"
-    override val athanasiusPeople = "ዘሰብእ"
-    override val athanasiusRiteChapters = "ምዕራፍ"
-    override val athanasiusBurialPrayers = "ጸሎተ ፍትሐት"
-    override val athanasiusMemorials = "ተዝካረ ሙታን"
     override fun memorialDay(day: Int) = "$day ቀን"
     override val newTestamentLabel = "አዲስ ኪዳን"
     override val oldTestamentLabel = "ቀዳማዊ ኪዳን"
@@ -699,10 +693,8 @@ object AmharicStrings : Strings {
     override val wudaseMariam = "ውዳሴ ማርያም"
     override val wudaseLangAmharic = "አማርኛ"
     override val wudaseLangGeez = "ግዕዝ"
-    override val seatatTitle = "ሰዓታት"
-    override val seatatSubtitle = "Seatat — ዘሌሊት ወዘነግህ፣ ግዕዝ ከአማርኛ ጋር"
-    override val seatatLangBoth = "ግዕዝና አማርኛ"
     override val contentUnavailable = "ይዘቱን ማግኘት አልተቻለም"
+    override val retryAction = "እንደገና ይሞክሩ"
     override val mementoMoriGloss = "ሞትን አስብ"
     override val fastingTitle = "አጽዋማት"
     override val fastingToday = "ዛሬ"
@@ -900,18 +892,17 @@ object EnglishStrings : Strings {
     override val librarySubtitle = "Prayers and holy scriptures"
     override val scripturesTitle = "Scriptures"
     override val scripturesSubtitle = "The New Testament"
-    override val athanasiusTitle = "Athanasius"
-    override val athanasiusSubtitle = "Burial and memorial readings"
     override val bahreHasabTitle = "Bahre Hasab"
     override val bahreHasabSubtitle = "Annual feasts and fasts table"
+    override val bahreHasabRange = "Current year and the next 25 years"
+    override val bahreHasabCurrentYear = "Current Ethiopian year"
+    override val bahreHasabCycleValues = "Cycle values"
+    override val bahreHasabMovableDates = "Movable feasts and fasts"
+    override val bahreHasabFasika = "Fasika"
     override val annualTable = "Annual table"
     override val sundayCycleTitle = "Sunday Gitsawe and hymns"
     override val sundayCycleSubtitle = "Sunday readings for the day"
     override val supplicationLabel = "Supplication"
-    override val athanasiusPeople = "Readings by person"
-    override val athanasiusRiteChapters = "Rite chapters"
-    override val athanasiusBurialPrayers = "Burial prayers"
-    override val athanasiusMemorials = "Memorial readings"
     override fun memorialDay(day: Int) = "Day $day"
     override val newTestamentLabel = "New Testament"
     override val oldTestamentLabel = "Old Testament"
@@ -1133,10 +1124,8 @@ object EnglishStrings : Strings {
     override val wudaseMariam = "ውዳሴ ማርያም"
     override val wudaseLangAmharic = "Amharic"
     override val wudaseLangGeez = "Ge'ez"
-    override val seatatTitle = "ሰዓታት"
-    override val seatatSubtitle = "Seatat — the night & dawn office, Ge'ez with Amharic"
-    override val seatatLangBoth = "Ge'ez + Amharic"
     override val contentUnavailable = "Content unavailable"
+    override val retryAction = "Try again"
     override val mementoMoriGloss = "Remember death"
     override val fastingTitle = "Fasts"
     override val fastingToday = "Today"

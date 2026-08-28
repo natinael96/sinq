@@ -353,16 +353,6 @@ private fun AgpeyaNavHost(
                 },
             )
         }
-        composable("athanasius") {
-            com.agpeya.app.ui.library.AthanasiusScreen(
-                onBack = { navController.popBackStack() },
-                onOpenReading = { target, role ->
-                    navController.navigate(com.agpeya.app.data.GitsaweLinks.passageRoute(target, role)) {
-                        launchSingleTop = true
-                    }
-                },
-            )
-        }
         composable("bahreHasabReference") {
             com.agpeya.app.ui.library.BahreHasabReferenceScreen(onBack = { navController.popBackStack() })
         }
@@ -397,18 +387,8 @@ private fun AgpeyaNavHost(
                 onOpenScriptures = { navController.navigate("scriptures") { launchSingleTop = true } },
                 onOpenWudase = { navController.navigate("wudase") { launchSingleTop = true } },
                 onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
-                onOpenAthanasius = { navController.navigate("athanasius") { launchSingleTop = true } },
                 onOpenBahreHasab = { navController.navigate("bahreHasabReference") { launchSingleTop = true } },
                 onSelectTab = navController::switchTab,
-            )
-        }
-        composable(
-            route = "seatat?sec={sec}",
-            arguments = listOf(navArgument("sec") { type = NavType.StringType; nullable = true; defaultValue = null }),
-        ) { backStackEntry ->
-            com.agpeya.app.ui.library.SeatatScreen(
-                onBack = { navController.popBackStack() },
-                initialSectionId = backStackEntry.arguments?.getString("sec"),
             )
         }
         composable(

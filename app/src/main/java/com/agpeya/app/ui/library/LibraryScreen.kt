@@ -33,7 +33,6 @@ fun LibraryScreen(
     onOpenScriptures: () -> Unit,
     onOpenWudase: () -> Unit,
     onOpenZewotr: () -> Unit,
-    onOpenAthanasius: () -> Unit,
     onOpenBahreHasab: () -> Unit,
     onSelectTab: (Tab) -> Unit,
 ) {
@@ -74,19 +73,8 @@ fun LibraryScreen(
             item {
                 LibraryCard(icon = Icons.AutoMirrored.Outlined.MenuBook, title = s.wudaseMariam, subtitle = s.wudaseScheduleSubtitle, onClick = onOpenWudase)
             }
-            // ሰዓታት is hidden for now — the bundled digitization is partial
-            // (መሐረነ አብ and other portions are missing). Restore the card once
-            // the content is complete; the reader, route and data are intact.
             item {
                 LibraryCard(icon = Icons.AutoMirrored.Outlined.MenuBook, title = s.zewotrTselot, subtitle = s.zewotrSubtitle, onClick = onOpenZewotr)
-            }
-            item {
-                LibraryCard(
-                    icon = Icons.AutoMirrored.Outlined.MenuBook,
-                    title = s.athanasiusTitle,
-                    subtitle = s.athanasiusSubtitle,
-                    onClick = onOpenAthanasius,
-                )
             }
             item {
                 LibraryCard(

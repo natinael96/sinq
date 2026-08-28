@@ -41,7 +41,7 @@ object AmharicSearch {
     }
 
     /** Where a result came from — lets the UI label it and route the tap. */
-    enum class Source { HOUR, PSALTER, SCRIPTURE, SYNAXARIUM, WUDASE, SEATAT }
+    enum class Source { HOUR, PSALTER, SCRIPTURE, SYNAXARIUM, WUDASE }
 
     data class Result(
         val source: Source,
@@ -126,9 +126,6 @@ object AmharicSearch {
             )
         }
 
-        // ሰዓታት is hidden for now (see LibraryScreen) — not indexed, so it
-        // never surfaces in search. Restore this loop when the card returns;
-        // the ፡-separator normalization it needs is preserved in git history.
         return docs
     }
 
@@ -267,7 +264,6 @@ object AmharicSearch {
         val scripture: String,
         val synaxarium: String,
         val wudase: String,
-        val seatat: String,
     )
 
     /** One pass over the pre-folded index, capped per source. */
@@ -299,7 +295,6 @@ object AmharicSearch {
             val label = when (doc.source) {
                 Source.SCRIPTURE -> labels.scripture
                 Source.SYNAXARIUM -> labels.synaxarium
-                Source.SEATAT -> labels.seatat
                 else -> labels.wudase
             }
             out += Result(

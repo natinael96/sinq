@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,6 +34,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -45,6 +47,8 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -64,7 +68,9 @@ import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.common.LoadingPanel
 import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.common.StatePanel
 import com.agpeya.app.ui.theme.Spacing
+import com.agpeya.app.ui.theme.ReadingMaxWidth
 import com.agpeya.app.ui.theme.scaledReadingSp
 import com.agpeya.app.ui.theme.inReadingFont
 import com.agpeya.app.ui.theme.readingBodyStyle
@@ -92,8 +98,9 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     val date = remember(epochDay) { LocalDate.ofEpochDay(epochDay) }
     val eth = remember(date) { EthiopianDate.from(date) }
-    val entries by produceState<List<SynaxariumEntry>?>(initialValue = null, epochDay) {
-        value = SynaxariumRepository.forDate(context, date)
+    var loadAttempt by rememberSaveable(epochDay) { mutableIntStateOf(0) }
+    val entriesResult by produceState<Result<List<SynaxariumEntry>>?>(initialValue = null, epochDay, loadAttempt) {
+        value = runCatching { SynaxariumRepository.forDate(context, date) }
     }
     val fontStep by SettingsRepository.fontStep(context).collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
@@ -118,7 +125,7 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
                 subtitle = formatEthiopianWithGregorian(date, s),
                 onBack = onBack,
                 actions = {
-                    val list = entries.orEmpty()
+                    val list = entriesResult?.getOrNull().orEmpty()
                     com.agpeya.app.ui.common.ReaderToolsMenu(
                         fontStep = fontStep,
                         maxFontStep = FONT_STEPS_SP.lastIndex,
@@ -140,12 +147,20 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
             )
         },
     ) { innerPadding ->
-        val list = entries
-        androidx.compose.foundation.layout.Box(Modifier.fillMaxSize()) {
+        val list = entriesResult?.getOrNull()
+        androidx.compose.foundation.layout.Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         when {
-            list == null -> LoadingPanel(Modifier.padding(innerPadding))
+            entriesResult == null -> LoadingPanel(Modifier.padding(innerPadding))
 
-            list.isEmpty() -> Box(
+            entriesResult?.isFailure == true -> StatePanel(
+                title = s.contentUnavailable,
+                body = s.contentMissingBody,
+                actionLabel = s.retryAction,
+                onAction = { loadAttempt++ },
+                modifier = Modifier.padding(innerPadding),
+            )
+
+            list?.isEmpty() == true -> Box(
                 Modifier.fillMaxSize().padding(innerPadding).padding(32.dp),
                 contentAlignment = Alignment.Center,
             ) {
@@ -158,10 +173,10 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
             }
 
             else -> LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(innerPadding),
+                modifier = Modifier.fillMaxSize().padding(innerPadding).widthIn(max = ReadingMaxWidth),
                 contentPadding = PaddingValues(horizontal = Spacing.screen),
             ) {
-                itemsIndexed(list) { i, entry ->
+                itemsIndexed(list.orEmpty()) { i, entry ->
                     Column(Modifier.fillMaxWidth()) {
                         if (i > 0) {
                             Spacer(Modifier.height(20.dp))
@@ -310,7 +325,6 @@ private fun ClosingPrayer(fontSp: Int) {
                 text = highlightHolyNames(verse, ArkeRed),
                 style = style,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Justify,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
@@ -373,7 +387,6 @@ private fun NarrativePara(
             },
             style = readingBodyStyle(fontSp),
             color = MaterialTheme.colorScheme.onBackground,
-            textAlign = TextAlign.Justify,
             modifier = Modifier
                 .fillMaxWidth()
                 .paragraphSelection(selected, onTap)
@@ -391,7 +404,8 @@ private fun Modifier.paragraphSelection(selected: Boolean, onTap: (() -> Unit)?)
                 .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
                 .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.22f))
         else this
-        if (onTap != null) tinted.clickable(onClick = onTap) else tinted
+        (if (onTap != null) tinted.clickable(onClick = onTap) else tinted)
+            .semantics { this.selected = selected }
     }
 
 /** The centered "አርኬ" heading above the hymn. */
@@ -459,7 +473,6 @@ private fun ScriptureBody(
             text = quote,
             style = readingBodyStyle(fontSp),
             color = MaterialTheme.colorScheme.onBackground,
-            textAlign = TextAlign.Justify,
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(14.dp))

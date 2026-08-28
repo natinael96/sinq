@@ -2,7 +2,6 @@ package com.agpeya.app.widget
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
@@ -19,11 +18,11 @@ import com.agpeya.app.ui.reading.geezNumeral
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 /**
- * Feeds the widget's StackView its two cards: today's ግጻዌ and tomorrow's —
- * only tomorrow's, deliberately; the widget is for the day at hand and for
- * preparing, not a calendar to page through.
+ * Feeds the widget's collection its single current card: today by day, tomorrow
+ * from 19:00 so the evening glance helps prepare for the coming liturgical day.
  */
 class GitsaweWidgetService : RemoteViewsService() {
     override fun onGetViewFactory(intent: Intent): RemoteViewsFactory =
@@ -58,22 +57,13 @@ private class GitsaweWidgetFactory(
         pages = runCatching { buildPages() }.getOrDefault(emptyList())
     }
 
-    /**
-     * Today's card, and tomorrow's ONLY when tomorrow actually has readings —
-     * an empty second page would make the swipe a disappointment. Today's card
-     * always exists: when the day has no bundled reading it says so honestly
-     * rather than letting tomorrow slide forward and pose as today.
-     */
+    /** One honest card: today's by day, tomorrow's after the evening rollover. */
     private fun buildPages(): List<Page> = runBlocking {
         val s = stringsFor(SettingsRepository.language(context).first())
-        val today = LocalDate.now()
-        val todayPage = pageFor(today, "${s.todayLabel}  ·  ${formatEthiopian(today, s)}", s)
-        val tomorrowPage = pageFor(
-            today.plusDays(1),
-            "${s.tomorrowLabel}  ·  ${formatEthiopian(today.plusDays(1), s)}",
-            s,
-        )
-        if (tomorrowPage.hasContent) listOf(todayPage, tomorrowPage) else listOf(todayPage)
+        val now = LocalDateTime.now()
+        val date = gitsaweWidgetDate(now)
+        val label = if (date == now.toLocalDate()) s.todayLabel else s.tomorrowLabel
+        listOf(pageFor(date, "$label  ·  ${formatEthiopian(date, s)}", s))
     }
 
     private suspend fun pageFor(date: LocalDate, header: String, s: com.agpeya.app.ui.strings.Strings): Page {
@@ -130,18 +120,7 @@ private class GitsaweWidgetFactory(
         } else {
             views.setViewVisibility(R.id.widget_cta, View.GONE)
         }
-        // Page dots, baked per card so they always agree with the visible page:
-        // gold marks this card's position, the muted dot is the other day.
-        // With a single page there is nothing to swipe to — no dots at all.
-        if (pages.size > 1) {
-            views.setViewVisibility(R.id.widget_dots, View.VISIBLE)
-            val active = Color.parseColor("#E4BC5A")
-            val inactive = Color.parseColor("#527065")
-            views.setTextColor(R.id.widget_dot_1, if (position == 0) active else inactive)
-            views.setTextColor(R.id.widget_dot_2, if (position == 1) active else inactive)
-        } else {
-            views.setViewVisibility(R.id.widget_dots, View.GONE)
-        }
+        views.setViewVisibility(R.id.widget_dots, View.GONE)
         // Fills the provider's PendingIntent template: any card opens the app's
         // ግጻዌ screen (which has its own change-day control for going further).
         views.setOnClickFillInIntent(

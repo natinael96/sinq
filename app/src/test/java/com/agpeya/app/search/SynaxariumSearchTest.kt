@@ -20,7 +20,6 @@ class SynaxariumSearchTest {
         scripture = "መጽሐፍ ቅዱስ",
         synaxarium = "ስንክሳር",
         wudase = "ውዳሴ ማርያም",
-        seatat = "ሰዓታት",
     )
 
     // 2015 E.C. has Pagume 6, so every valid bundled day receives a route.

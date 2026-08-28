@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -44,6 +45,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -58,6 +61,7 @@ import com.agpeya.app.ui.common.LoadingPanel
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.common.StatePanel
 import com.agpeya.app.ui.theme.Spacing
+import com.agpeya.app.ui.theme.ReadingMaxWidth
 import com.agpeya.app.ui.theme.inReadingFont
 import com.agpeya.app.ui.theme.readingBodyStyle
 import kotlinx.coroutines.launch
@@ -75,15 +79,16 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
 
-    val content by produceState<WudaseContent?>(initialValue = null) {
-        value = WudaseRepository.load(context)
+    var loadAttempt by rememberSaveable { mutableIntStateOf(0) }
+    val contentResult by produceState<Result<WudaseContent>?>(initialValue = null, loadAttempt) {
+        value = runCatching { WudaseRepository.load(context) }
     }
     val fontStep by SettingsRepository.fontStep(context).collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
 
     var geez by rememberSaveable { mutableStateOf(false) }
 
-    val data = content
+    val data = contentResult?.getOrNull()
     val sections = data?.sections ?: emptyList()
 
     // Default to today's weekday portion (1=Mon … 7=Sun), else the first section.
@@ -127,8 +132,18 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
             )
         },
     ) { innerPadding ->
-        if (data == null) {
+        if (contentResult == null) {
             LoadingPanel(Modifier.padding(innerPadding))
+            return@Scaffold
+        }
+        if (data == null) {
+            StatePanel(
+                title = s.contentUnavailable,
+                body = s.contentMissingBody,
+                actionLabel = s.retryAction,
+                onAction = { loadAttempt++ },
+                modifier = Modifier.padding(innerPadding),
+            )
             return@Scaffold
         }
         if (sections.isEmpty()) {
@@ -156,10 +171,10 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
             if (lastShown != -1 && lastShown != selected) listState.scrollToItem(0)
             lastShown = selected
         }
-        Box(Modifier.fillMaxSize().padding(innerPadding)) {
+        Box(Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.TopCenter) {
         LazyColumn(
             state = listState,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().widthIn(max = ReadingMaxWidth),
             contentPadding = PaddingValues(horizontal = Spacing.screen),
         ) {
             item(key = "lang") {
@@ -197,6 +212,7 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
                                         MaterialTheme.colorScheme.secondary.copy(alpha = 0.22f)
                                     else androidx.compose.ui.graphics.Color.Transparent
                                 )
+                                .semantics { this.selected = i in selRange }
                                 .clickable {
                                     val (a, bSel) = com.agpeya.app.ui.reading.advanceFlatSelection(selA, i)
                                     selA = a

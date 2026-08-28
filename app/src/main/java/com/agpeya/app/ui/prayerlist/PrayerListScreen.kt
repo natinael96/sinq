@@ -188,7 +188,7 @@ private fun PrayerPersonCard(
                     )
                 }
             }
-            IconButton(onClick = onRemove, modifier = Modifier.size(32.dp).align(Alignment.TopEnd)) {
+            IconButton(onClick = onRemove, modifier = Modifier.size(48.dp).align(Alignment.TopEnd)) {
                 Icon(Icons.Outlined.Close, contentDescription = removeLabel, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(IconSize.small))
             }
         }

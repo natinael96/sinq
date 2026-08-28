@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Sinq "Provision" mark: seven pieces form a cross, expressing the seven
-     canonical prayer hours as provisions carried through the day. -->
+<!-- Dawn horizon with six rays and the cross as the seventh ray. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <path android:fillColor="#E8C46B" android:pathData="M50.22,22.15h7.56a1.47,1.47 0,0 1,1.47 1.47v7.56a1.47,1.47 0,0 1,-1.47 1.47h-7.56a1.47,1.47 0,0 1,-1.47 -1.47v-7.56a1.47,1.47 0,0 1,1.47 -1.47z"/>
-    <path android:fillColor="#E8C46B" android:pathData="M50.22,34.75h7.56a1.47,1.47 0,0 1,1.47 1.47v7.56a1.47,1.47 0,0 1,-1.47 1.47h-7.56a1.47,1.47 0,0 1,-1.47 -1.47v-7.56a1.47,1.47 0,0 1,1.47 -1.47z"/>
-    <path android:fillColor="#E8C46B" android:pathData="M37.62,34.75h7.56a1.47,1.47 0,0 1,1.47 1.47v7.56a1.47,1.47 0,0 1,-1.47 1.47h-7.56a1.47,1.47 0,0 1,-1.47 -1.47v-7.56a1.47,1.47 0,0 1,1.47 -1.47z"/>
-    <path android:fillColor="#E8C46B" android:pathData="M62.82,34.75h7.56a1.47,1.47 0,0 1,1.47 1.47v7.56a1.47,1.47 0,0 1,-1.47 1.47h-7.56a1.47,1.47 0,0 1,-1.47 -1.47v-7.56a1.47,1.47 0,0 1,1.47 -1.47z"/>
-    <path android:fillColor="#E8C46B" android:pathData="M50.22,47.35h7.56a1.47,1.47 0,0 1,1.47 1.47v7.56a1.47,1.47 0,0 1,-1.47 1.47h-7.56a1.47,1.47 0,0 1,-1.47 -1.47v-7.56a1.47,1.47 0,0 1,1.47 -1.47z"/>
-    <path android:fillColor="#E8C46B" android:pathData="M50.22,59.95h7.56a1.47,1.47 0,0 1,1.47 1.47v7.56a1.47,1.47 0,0 1,-1.47 1.47h-7.56a1.47,1.47 0,0 1,-1.47 -1.47v-7.56a1.47,1.47 0,0 1,1.47 -1.47z"/>
-    <path android:fillColor="#E8C46B" android:pathData="M50.22,72.55h7.56a1.47,1.47 0,0 1,1.47 1.47v7.56a1.47,1.47 0,0 1,-1.47 1.47h-7.56a1.47,1.47 0,0 1,-1.47 -1.47v-7.56a1.47,1.47 0,0 1,1.47 -1.47z"/>
+    <path android:fillColor="#E8C46B" android:pathData="M51.2,26 h5.6 v8 h9.2 v5.6 h-9.2 v12.4 h-5.6 v-12.4 h-9.2 v-5.6 h9.2 Z" />
+    <path android:fillColor="#E8C46B" android:pathData="M43.5,66 A10.5,10.5 0 0 1 64.5,66 Z" />
+    <path android:strokeColor="#E8C46B" android:strokeWidth="2.5" android:strokeLineCap="round" android:pathData="M29,66 L79,66" />
+    <path android:strokeColor="#E8C46B" android:strokeWidth="2.5" android:strokeLineCap="round" android:pathData="M60.3,52.4 L62.9,47 M65.5,56.4 L70.1,52.5 M68.5,62.1 L74.3,60.6 M47.7,52.4 L45.1,47 M42.5,56.4 L37.9,52.5 M39.5,62.1 L33.7,60.6" />
 </vector>

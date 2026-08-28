@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   የዕለቱ ግጻዌ widget: a single, stationary surface whose content swipes between
-  today and tomorrow. StackView remains the RemoteViews container because it is
-  the platform widget container that accepts swipe gestures; putting the surface
+  today, switching automatically to tomorrow in the evening. StackView remains
+  the RemoteViews collection container; putting the surface
   on this outer root and keeping each page transparent removes the stacked-card
   appearance. Pages come from GitsaweWidgetService's factory.
 -->

@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [1.3.1] — 2026-08-28
+
+_versionCode 50 · a focused, more accessible reading experience_
+
+### Changed
+- **The Gitsawe widget follows the day automatically.** It shows today's
+  readings during the day and tomorrow's from 19:00, with a single uncluttered
+  page and the restored dawn-and-cross Sinq mark.
+- **Long-form readers are easier to use.** Scripture, Synaxarium, and Wudase
+  Maryam now share the reading-alignment setting, readable tablet-width limits,
+  explicit retry states, and clearer accessibility selection state.
+- **Bahre Hasab is now a live year explorer.** A highlighted current year and
+  horizontal year rail expose computus values and movable observances for the
+  current Ethiopian year plus the next 25 years.
+- **Incomplete specialist readers have been removed from the interface.** The
+  dedicated Se'atat reader and Athanasius funeral collection no longer appear;
+  the app's canonical prayer hours remain unchanged.
+
+### Fixed
+- **Small UI controls and widget text are more accessible.** The prayer-list
+  remove action now has a full touch target, and compact widget labels meet the
+  minimum supported text size.
+
 ## [1.3.0] — 2026-08-28
 
 _versionCode 49 · the complete source-backed Gitsawe_

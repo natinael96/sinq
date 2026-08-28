@@ -1,21 +1,26 @@
 package com.agpeya.app.widget
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
+import android.app.AlarmManager
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.widget.RemoteViews
 import com.agpeya.app.MainActivity
 import com.agpeya.app.R
 import com.agpeya.app.reminders.GitsaweReminderScheduler
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 /**
  * የዕለቱ ግጻዌ — a home-screen widget showing today's ምስባክ and ወንጌል at a glance,
- * with tomorrow's one swipe away (to prepare — only tomorrow, on purpose).
- * Tapping either card opens the ግጻዌ screen.
+ * changing automatically to tomorrow's readings at 19:00 for preparation.
+ * Tapping the card opens the ግጻዌ screen.
  *
  * The stack's cards come from [GitsaweWidgetService]'s factory, which reads
  * content on a binder thread; the provider itself only wires the adapter and
@@ -55,16 +60,40 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
             // template must accept each card's fill-in intent, and an immutable
             // one silently drops it.
             views.setPendingIntentTemplate(R.id.widget_stack, openGitsaweTemplate(context))
-            // Today is the default card, every time: a refresh (date rollover,
-            // boot, language change, the periodic safety net) snaps the stack
-            // back to the front so yesterday's browse to "tomorrow" never
-            // lingers as the first thing seen.
+            // There is one automatic card; keep the collection on that card
+            // after every date, language, boot, or evening refresh.
             views.setDisplayedChild(R.id.widget_stack, 0)
             manager.updateAppWidget(id, views)
         }
-        // Make the factory re-read both days' content, not just re-lay-out.
+        // Make the factory re-read the selected day's content, not just re-lay-out.
         manager.notifyAppWidgetViewDataChanged(ids, R.id.widget_stack)
+        scheduleEveningRefresh(context)
     }
+
+    /** Refresh exactly when the widget changes from today to tomorrow. */
+    @SuppressLint("MissingPermission") // Guarded by canScheduleExactAlarms; otherwise uses an inexact alarm.
+    private fun scheduleEveningRefresh(context: Context) {
+        val now = LocalDateTime.now()
+        var next = now.toLocalDate().atTime(GITSAWE_WIDGET_EVENING)
+        if (!next.isAfter(now)) next = next.plusDays(1)
+        val alarm = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val triggerAt = next.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        val intent = eveningRefreshIntent(context)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarm.canScheduleExactAlarms()) {
+            alarm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, intent)
+        } else {
+            // A user can revoke exact-alarm access. The inexact fallback still
+            // rolls the card forward without making widget refresh fragile.
+            alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, intent)
+        }
+    }
+
+    private fun eveningRefreshIntent(context: Context): PendingIntent = PendingIntent.getBroadcast(
+        context,
+        EVENING_REFRESH_REQUEST_CODE,
+        Intent(context, GitsaweWidgetProvider::class.java).setAction(ACTION_EVENING_REFRESH),
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+    )
 
     private fun openGitsaweTemplate(context: Context): PendingIntent = PendingIntent.getActivity(
         context,
@@ -80,6 +109,8 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
         const val EXTRA_GITSAWE_EPOCH_DAY = "gitsaweWidgetEpochDay"
         /** Distinct from the reminder PendingIntents (0, 1, 2, 5, 6) — see the audit. */
         private const val REQUEST_CODE = 3
+        private const val EVENING_REFRESH_REQUEST_CODE = 7
+        private const val ACTION_EVENING_REFRESH = "com.agpeya.app.widget.EVENING_REFRESH"
 
         private val REFRESH_ACTIONS = setOf(
             Intent.ACTION_DATE_CHANGED,
@@ -87,6 +118,7 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
             Intent.ACTION_TIMEZONE_CHANGED,
             Intent.ACTION_BOOT_COMPLETED,
             Intent.ACTION_LOCALE_CHANGED,
+            ACTION_EVENING_REFRESH,
         )
 
         private fun componentOf(context: Context) =

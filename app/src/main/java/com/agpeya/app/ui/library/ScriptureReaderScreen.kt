@@ -48,6 +48,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -68,6 +70,7 @@ import com.agpeya.app.ui.theme.LocalReadingFont
 import com.agpeya.app.ui.common.LoadingPanel
 import com.agpeya.app.ui.common.SelectPill
 import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.common.StatePanel
 import com.agpeya.app.ui.reading.ReadingColumn
 import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
@@ -95,8 +98,9 @@ fun ScriptureReaderScreen(
     val context = LocalContext.current
     val s = LocalStrings.current
     val scope = androidx.compose.runtime.rememberCoroutineScope()
-    val book by produceState<ScriptureBook?>(initialValue = null, bookKey) {
-        value = ScriptureRepository.book(context, bookKey)
+    var loadAttempt by rememberSaveable(bookKey) { mutableIntStateOf(0) }
+    val bookResult by produceState<Result<ScriptureBook?>?>(initialValue = null, bookKey, loadAttempt) {
+        value = runCatching { ScriptureRepository.book(context, bookKey) }
     }
     val fontStep by SettingsRepository.fontStep(context).collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
@@ -108,14 +112,21 @@ fun ScriptureReaderScreen(
         bookmarks.filter { it.hourId == "scripture_library" }.mapTo(HashSet()) { it.sectionId }
     }
 
-    val b = book ?: run {
+    val b = bookResult?.getOrNull() ?: run {
         // Keep a back arrow visible: if the book never loads (stale bookmark,
         // bad key), the spinner would otherwise trap the user on this screen.
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
             topBar = { SinqTopBar(title = "", onBack = onBack) },
         ) { padding ->
-            LoadingPanel(Modifier.padding(padding))
+            if (bookResult == null) LoadingPanel(Modifier.padding(padding))
+            else StatePanel(
+                title = s.contentUnavailable,
+                body = s.contentMissingBody,
+                actionLabel = s.retryAction,
+                onAction = { loadAttempt++ },
+                modifier = Modifier.padding(padding),
+            )
         }
         return
     }
@@ -302,6 +313,7 @@ fun ScriptureReaderScreen(
                                     highlights[HighlightRepository.verseKey(highlightSectionId, verse.n)]
                                 ).takeUnless { it == Color.Transparent } ?: Color.Transparent
                             })
+                            .semantics { selected = verse.n in selRange }
                             .clickable {
                                 val (a, bSel) = com.agpeya.app.ui.reading.advanceFlatSelection(selA, verse.n)
                                 selA = a
