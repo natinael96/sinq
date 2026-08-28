@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [1.3.2] — 2026-08-28
+
+_versionCode 51 · Bahre Hasab renders correctly_
+
+### Fixed
+- **The Bahre Hasab year card shows real values.** The hero card no longer
+  displays raw template text in place of the year, evangelist, and Fasika date.
+- **Ge'ez numerals are correct beyond 199.** Years and ዓመተ ዓለም now render in
+  proper positional notation (e.g. ፳፻፲፰ for 2018) instead of a run of repeated
+  ፻ marks, across the year rail and cycle-value chips.
+
 ## [1.3.1] — 2026-08-28
 
 _versionCode 50 · a focused, more accessible reading experience_

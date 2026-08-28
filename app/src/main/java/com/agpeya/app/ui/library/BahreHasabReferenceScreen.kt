@@ -158,13 +158,13 @@ private fun YearHero(year: BahreHasabYear, current: Boolean) {
                 Spacer(Modifier.height(Spacing.xs))
             }
             Text(
-                "\${geezNumeral(year.year)} \${s.eraSuffix}",
+                "${geezNumeral(year.year)} ${s.eraSuffix}",
                 style = MaterialTheme.typography.headlineMedium.inReadingFont(),
                 fontWeight = FontWeight.Bold,
             )
             Spacer(Modifier.height(Spacing.xs))
             Text(
-                "\${year.evangelist} · \${s.bahreHasabFasika} \${formatEthiopianWithGregorian(year.observances[5].second, s)}",
+                "${year.evangelist} · ${s.bahreHasabFasika} ${formatEthiopianWithGregorian(year.observances[5].second, s)}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.78f),
                 textAlign = TextAlign.Center,

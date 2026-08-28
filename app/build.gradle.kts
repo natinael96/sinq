@@ -28,8 +28,8 @@ android {
         // Versioning policy (semver-style):
         //   MINOR for features, PATCH for fixes/small tweaks.
         //   versionCode increments by 1 on EVERY update, no exceptions.
-        versionCode = 50
-        versionName = "1.3.1"
+        versionCode = 51
+        versionName = "1.3.2"
 
     }
 
