@@ -25,8 +25,8 @@ import java.time.LocalDate
  * Mirrors [ContentRepository]: offline, no database, decode-once.
  *
  * Daily entries are keyed by the Ethiopian "DD-MM" date; [toGitsaweDateKey]
- * converts a Gregorian [LocalDate] to that key (algorithm ported from the
- * `gitsawe` package). Daily coverage is partial, so date lookups may return null.
+ * converts a Gregorian [LocalDate] to that key. The fixed calendar contains all
+ * 366 possible Ethiopian month-days.
  */
 object GitsaweRepository {
 

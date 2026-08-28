@@ -181,9 +181,7 @@ fun GitsaweScreen(
                     SynaxariumCard(onClick = { onOpenSynaxarium(epochDay) })
                 }
                 if (active == null) {
-                    // Daily coverage is partial by design — say what's missing
-                    // and that the day itself is fine, rather than showing a
-                    // bare line of grey text.
+                    // A load failure can still leave the day without content.
                     item(key = "empty") {
                         StatePanel(
                             icon = Icons.Outlined.EditCalendar,
@@ -216,6 +214,7 @@ fun GitsaweScreen(
                     }
                     active.services.negh?.let { svc -> serviceSection("ነግህ", svc, s, misbakLanguage, setMisbakLanguage, onOpenReading) }
                     active.services.kidassie?.let { svc -> serviceSection("ቅዳሴ", svc, s, misbakLanguage, setMisbakLanguage, onOpenReading) }
+                    active.services.serk?.let { svc -> serviceSection("ሠርክ", svc, s, misbakLanguage, setMisbakLanguage, onOpenReading) }
                     val chants = dayChants(active.services)
                     if (chants.isNotEmpty()) {
                         item(key = "kidase") { KidaseSection(chants) }
@@ -384,7 +383,7 @@ private fun ReadingRow(
                 Text(role, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
                 Spacer(Modifier.width(Spacing.sm))
                 Text(
-                    if (verse != null) verseRef(verse) else "—",
+                    if (verse != null) verseRef(verse) else reading.citation ?: "—",
                     style = MaterialTheme.typography.titleSmall.inReadingFont(),
                     color = if (clickable) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f),
@@ -492,15 +491,18 @@ private fun gitsaweShareBody(services: GitsaweServices): String = buildString {
     }
     service("ነግህ", services.negh)
     service("ቅዳሴ", services.kidassie)
+    service("ሠርክ", services.serk)
     dayChants(services).takeIf { it.isNotEmpty() }?.let {
         if (isNotEmpty()) append("\n")
         append(it.joinToString("\n"))
     }
 }
 
-/** The day's appointed ቅዳሴ chants, across both services, deduplicated. */
+/** The day's appointed ቅዳሴ chants, across all available offices, deduplicated. */
 private fun dayChants(services: GitsaweServices?): List<String> =
-    ((services?.negh?.kidassie ?: emptyList()) + (services?.kidassie?.kidassie ?: emptyList()))
+    ((services?.negh?.kidassie ?: emptyList()) +
+        (services?.kidassie?.kidassie ?: emptyList()) +
+        (services?.serk?.kidassie ?: emptyList()))
         .map { it.trim() }
         .filter { it.isNotEmpty() }
         .distinct()

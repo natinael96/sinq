@@ -9,23 +9,24 @@ import kotlinx.serialization.Serializable
  *
  * Deserialized from the bundled JSON under assets/content/gitsawe/ — extracted
  * and normalized from the open `gitsawe` npm dataset, never hand-edited. Text is
- * Ge'ez-first with partial Amharic and English. Daily coverage is incomplete
- * (~301 of the ~365 days), so lookups may legitimately return null.
+ * Ge'ez-first with partial Amharic and English. The fixed calendar covers all
+ * 366 possible Ethiopian month-days, including leap-year Pagumen 6.
  */
 
-/** Anything carrying the two lectionary services — daily, seasonal, monthly. */
+/** Anything carrying the three lectionary offices — daily, seasonal, monthly. */
 interface GitsaweServices {
     val negh: GitsaweService?
     val kidassie: GitsaweService?
+    val serk: GitsaweService?
 }
 
-/** Every reading in both services, flattened across the fixed slots. */
+/** Every reading in all available offices, flattened across the fixed slots. */
 fun GitsaweServices.readings(): List<GitsaweReading> =
-    listOfNotNull(negh, kidassie).flatMap {
+    listOfNotNull(negh, kidassie, serk).flatMap {
         it.msbak + it.wengel + it.firstDeacon + it.secondDeacon + it.secondKahn
     }
 
-/** A daily entry, keyed by the Ethiopian "DD-MM" date, with its two services. */
+/** A daily entry, keyed by the Ethiopian "DD-MM" date, with its three offices. */
 @Serializable
 data class GitsaweEntry(
     /** Ethiopian "DD-MM" date. */
@@ -37,6 +38,8 @@ data class GitsaweEntry(
     override val negh: GitsaweService? = null,
     /** ቅዳሴ — the Divine Liturgy readings. */
     override val kidassie: GitsaweService? = null,
+    /** ሠርክ — the evening-office readings. */
+    override val serk: GitsaweService? = null,
 ) : GitsaweServices
 
 /**
@@ -55,6 +58,7 @@ data class SeasonalEntry(
     val title: String? = null,
     override val negh: GitsaweService? = null,
     override val kidassie: GitsaweService? = null,
+    override val serk: GitsaweService? = null,
 ) : GitsaweServices
 
 /**
@@ -77,6 +81,7 @@ data class MonthlyEntry(
     val title: String? = null,
     override val negh: GitsaweService? = null,
     override val kidassie: GitsaweService? = null,
+    override val serk: GitsaweService? = null,
 ) : GitsaweServices
 
 /** A synaxarium note. In the current data only [amharic] is populated. */
@@ -109,6 +114,8 @@ data class GitsaweService(
 data class GitsaweReading(
     val text: GitsaweText? = null,
     val verse: VerseRef? = null,
+    /** Citation as printed when it could not safely become a passage link. */
+    val citation: String? = null,
 )
 
 @Serializable
@@ -132,6 +139,8 @@ data class VerseRef(
     val end: Int? = null,
     val endNote: String? = null,
     val endText: String? = null,
+    /** Citation exactly as printed in the transcribed source. */
+    val citation: String? = null,
 )
 
 /**

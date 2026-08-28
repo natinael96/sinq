@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [1.2.0] — 2026-08-28
+
+_versionCode 48 · the complete fixed-cycle Gitsawe_
+
+### Added
+- **Every Ethiopian calendar day now has a fixed-cycle Gitsawe entry.** The 65
+  previously missing dates are bundled, bringing coverage to all 366 possible
+  month-days, including leap-year Pagumen 6.
+- **The evening office is now visible.** Source-backed ሠርክ readings appear after
+  ነግህ and ቅዳሴ and are included when sharing the day's Gitsawe. Hidar 28
+  remains without ሠርክ because the transcribed source explicitly omits it.
+
+### Changed
+- **Printed but malformed citations remain readable without becoming broken
+  links.** Sinq preserves their source text while only making validated chapter
+  references tappable.
+- **The fixed calendar import is reproducible.** A checked-in importer merges
+  newly transcribed days and evening offices without replacing existing
+  translations or synaxarium notes.
+
 ## [1.0.5] — 2026-08-24
 
 _versionCode 45 · quieter alarms, daytime breath prayer_

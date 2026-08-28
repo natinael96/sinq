@@ -37,7 +37,7 @@ class GitsaweDataTest {
 
     @Test
     fun `every collection decodes with the expected record count`() {
-        assertEquals(301, load("daily-gitsawe.json", GitsaweEntry.serializer()).size)
+        assertEquals(366, load("daily-gitsawe.json", GitsaweEntry.serializer()).size)
         assertEquals(43, load("seasonal-gitsawe.json", com.agpeya.app.model.SeasonalEntry.serializer()).size)
         assertEquals(9, load("monthly-gitsawe.json", com.agpeya.app.model.MonthlyEntry.serializer()).size)
         assertEquals(21, load("feasts.json", Feast.serializer()).size)
@@ -58,6 +58,21 @@ class GitsaweDataTest {
         assertEquals("መዝሙረ ዳዊት", msbak.verse!!.bookTitle)
         assertEquals(141, msbak.verse!!.chapter)   // proves string->int normalization stuck
         assertEquals(6, msbak.verse!!.start)
+    }
+
+    @Test
+    fun `fixed calendar covers every regular and leap day with evening readings`() {
+        val daily = load("daily-gitsawe.json", GitsaweEntry.serializer())
+        val expected = buildSet {
+            for (month in 1..12) for (day in 1..30) add("%02d-%02d".format(day, month))
+            for (day in 1..6) add("%02d-13".format(day))
+        }
+        assertEquals(expected, daily.map { it.date }.toSet())
+        assertEquals(
+            "the source has ሠርክ on every day except Hidar 28",
+            listOf("28-03"),
+            daily.filter { it.serk == null }.map { it.date },
+        )
     }
 
     @Test
@@ -95,7 +110,6 @@ class GitsaweDataTest {
             if (GitsaweRepository.toGitsaweDateKey(d) in daily) hits++
             d = d.plusDays(1)
         }
-        // 301 of ~366 days have data; require most of them to be reachable.
-        assertTrue("conversion reaches the data key space (got $hits)", hits >= 295)
+        assertEquals("every day in the leap-year calendar is reachable", 366, hits)
     }
 }
