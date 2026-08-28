@@ -44,6 +44,7 @@ private class GitsaweWidgetFactory(
         /** The day genuinely has something to read (not just a fallback title). */
         val hasContent: Boolean,
         val ctaText: String,
+        val epochDay: Long,
     )
 
     private var pages: List<Page> = emptyList()
@@ -91,6 +92,7 @@ private class GitsaweWidgetFactory(
             emptyText = s.noGitsaweToday,
             hasContent = rows.isNotEmpty() || realTitle != null,
             ctaText = "${s.readGitsawe} →",
+            epochDay = date.toEpochDay(),
         )
     }
 
@@ -144,7 +146,9 @@ private class GitsaweWidgetFactory(
         // ግጻዌ screen (which has its own change-day control for going further).
         views.setOnClickFillInIntent(
             R.id.widget_page_root,
-            Intent().putExtra(GitsaweReminderScheduler.EXTRA_OPEN_GITSAWE, true),
+            Intent()
+                .putExtra(GitsaweReminderScheduler.EXTRA_OPEN_GITSAWE, true)
+                .putExtra(GitsaweWidgetProvider.EXTRA_GITSAWE_EPOCH_DAY, page.epochDay),
         )
         return views
     }
@@ -174,6 +178,7 @@ private class GitsaweWidgetFactory(
 
     private fun summarize(reading: GitsaweReading): String =
         reading.verse?.let { verseRef(it) }?.takeIf { it.isNotBlank() }
+            ?: reading.citation
             ?: reading.text?.amharic
             ?: reading.text?.geez
             ?: ""

@@ -60,6 +60,7 @@ class MainActivity : ComponentActivity() {
 
     // Set when opened from the morning ግጻዌ-reminder notification.
     private val pendingOpenGitsawe = mutableStateOf(false)
+    private val pendingGitsaweEpochDay = mutableStateOf<Long?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,7 +93,11 @@ class MainActivity : ComponentActivity() {
                             openJourney = pendingOpenJourney.value,
                             onJourneyHandled = { pendingOpenJourney.value = false },
                             openGitsawe = pendingOpenGitsawe.value,
-                            onGitsaweHandled = { pendingOpenGitsawe.value = false },
+                            gitsaweEpochDay = pendingGitsaweEpochDay.value,
+                            onGitsaweHandled = {
+                                pendingOpenGitsawe.value = false
+                                pendingGitsaweEpochDay.value = null
+                            },
                         )
                         if (!opened) {
                             com.agpeya.app.ui.intro.MementoMoriScreen(onDone = { opened = true })
@@ -125,7 +130,11 @@ class MainActivity : ComponentActivity() {
         }
         if (intent.getBooleanExtra(com.agpeya.app.reminders.GitsaweReminderScheduler.EXTRA_OPEN_GITSAWE, false)) {
             pendingOpenGitsawe.value = true
+            pendingGitsaweEpochDay.value = intent
+                .takeIf { it.hasExtra(com.agpeya.app.widget.GitsaweWidgetProvider.EXTRA_GITSAWE_EPOCH_DAY) }
+                ?.getLongExtra(com.agpeya.app.widget.GitsaweWidgetProvider.EXTRA_GITSAWE_EPOCH_DAY, 0L)
             intent.removeExtra(com.agpeya.app.reminders.GitsaweReminderScheduler.EXTRA_OPEN_GITSAWE)
+            intent.removeExtra(com.agpeya.app.widget.GitsaweWidgetProvider.EXTRA_GITSAWE_EPOCH_DAY)
         }
     }
 }
@@ -152,6 +161,7 @@ private fun AgpeyaNavHost(
     openJourney: Boolean,
     onJourneyHandled: () -> Unit,
     openGitsawe: Boolean,
+    gitsaweEpochDay: Long?,
     onGitsaweHandled: () -> Unit,
 ) {
     val navController = rememberNavController()
@@ -231,9 +241,10 @@ private fun AgpeyaNavHost(
     }
 
     // Opened from the morning ግጻዌ-reminder notification → open the ግጻዌ screen.
-    LaunchedEffect(ready, openGitsawe) {
+    LaunchedEffect(ready, openGitsawe, gitsaweEpochDay) {
         if (ready && openGitsawe) {
-            navController.navigate("gitsawe") { launchSingleTop = true }
+            val route = gitsaweEpochDay?.let { "gitsawe?epochDay=$it" } ?: "gitsawe"
+            navController.navigate(route) { launchSingleTop = true }
             onGitsaweHandled()
         }
     }
@@ -418,8 +429,16 @@ private fun AgpeyaNavHost(
                 onBack = { navController.popBackStack() },
             )
         }
-        composable("gitsawe") {
+        composable(
+            route = "gitsawe?epochDay={epochDay}",
+            arguments = listOf(
+                navArgument("epochDay") { type = NavType.LongType; defaultValue = Long.MIN_VALUE },
+            ),
+        ) { backStackEntry ->
+            val epochDay = backStackEntry.arguments?.getLong("epochDay")
+                ?.takeUnless { it == Long.MIN_VALUE }
             com.agpeya.app.ui.gitsawe.GitsaweScreen(
+                initialEpochDay = epochDay,
                 onBack = { navController.popBackStack() },
                 // A section opens its own focused passage page; the full reader
                 // is reached from there ("open the book / chapter"), not here.

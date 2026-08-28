@@ -77,6 +77,7 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
     )
 
     companion object {
+        const val EXTRA_GITSAWE_EPOCH_DAY = "gitsaweWidgetEpochDay"
         /** Distinct from the reminder PendingIntents (0, 1, 2, 5, 6) — see the audit. */
         private const val REQUEST_CODE = 3
 

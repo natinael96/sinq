@@ -311,6 +311,7 @@ object SettingsRepository {
 
     suspend fun setLanguage(context: Context, value: Language) {
         context.settingsDataStore.edit { it[KEY_LANGUAGE] = value.name }
+        com.agpeya.app.widget.GitsaweWidgetProvider.refreshAll(context)
     }
 
     fun prayerLevel(context: Context): Flow<PrayerLevel> =

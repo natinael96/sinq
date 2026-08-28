@@ -3,9 +3,13 @@
      on any wallpaper (widgets sit on the launcher, not on our theme surface). -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="#0E3B31" />
+    <gradient
+        android:angle="315"
+        android:startColor="#123E34"
+        android:centerColor="#0E342C"
+        android:endColor="#092A24" />
     <stroke
         android:width="1dp"
-        android:color="#1B4A3E" />
-    <corners android:radius="20dp" />
+        android:color="#5C72532F" />
+    <corners android:radius="22dp" />
 </shape>

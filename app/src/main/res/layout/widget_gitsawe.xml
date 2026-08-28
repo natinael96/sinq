@@ -1,18 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  የዕለቱ ግጻዌ home-screen widget: a two-card stack — today on top, tomorrow
-  behind it. Swiping the stack flips to tomorrow's readings (to prepare), and
-  swiping again comes back; StackView is the one RemoteViews container that
-  actually responds to a swipe. The cards themselves live in
-  widget_gitsawe_page.xml and come from GitsaweWidgetService's factory.
+  የዕለቱ ግጻዌ widget: a single, stationary surface whose content swipes between
+  today and tomorrow. StackView remains the RemoteViews container because it is
+  the platform widget container that accepts swipe gestures; putting the surface
+  on this outer root and keeping each page transparent removes the stacked-card
+  appearance. Pages come from GitsaweWidgetService's factory.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:clipToPadding="false">
 
     <StackView
         android:id="@+id/widget_stack"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent" />
 </FrameLayout>

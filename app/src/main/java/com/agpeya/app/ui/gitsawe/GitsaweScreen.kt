@@ -106,6 +106,7 @@ fun GitsaweScreen(
     onBack: () -> Unit,
     onOpenReading: (ReadingTarget, String) -> Unit,
     onOpenSynaxarium: (Long) -> Unit,
+    initialEpochDay: Long? = null,
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
@@ -113,7 +114,7 @@ fun GitsaweScreen(
     val misbakLanguage by SettingsRepository.misbakLanguage(context)
         .collectAsState(initial = MisbakLanguage.GEEZ)
     // The day being viewed, as an epoch-day so it survives rotation.
-    var epochDay by rememberSaveable { mutableLongStateOf(LocalDate.now().toEpochDay()) }
+    var epochDay by rememberSaveable { mutableLongStateOf(initialEpochDay ?: LocalDate.now().toEpochDay()) }
     var showPicker by rememberSaveable { mutableStateOf(false) }
     val currentDay by rememberCurrentDate()
     val date = LocalDate.ofEpochDay(epochDay)

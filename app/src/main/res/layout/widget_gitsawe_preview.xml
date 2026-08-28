@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Static picker preview for the flat widget surface. Runtime pages are supplied
+     by GitsaweWidgetService inside widget_gitsawe.xml. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background">
+
+    <include layout="@layout/widget_gitsawe_page" />
+</FrameLayout>
