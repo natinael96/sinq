@@ -8,7 +8,7 @@
 
 *Sinq (ስንቅ) — "provisions for the journey."*
 
-Sinq brings the Agpeya's seven canonical prayer hours and the complete Psalter (መዝሙረ ዳዊት) to your phone in a focused, distraction-free reading experience — deep liturgical green, gold accents, and Ge'ez verse numerals. No account, no network, no analytics: everything ships in the APK and stays on your device.
+Sinq brings the Agpeya's seven canonical prayer hours and the complete Psalter (መዝሙረ ዳዊት) to your phone in a focused, distraction-free reading experience — deep liturgical green, gold accents, and Ge'ez verse numerals. No account, no network, no analytics: everything ships in the APK and stays on your device ([privacy policy](https://natinael96.github.io/sinq/privacy-policy.html)).
 
 ## Features
 
