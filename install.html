@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-lang="en">
+<html data->
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,12 +8,11 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="style.css">
-<script>try{if(localStorage.getItem('sinq-lang')==='am'){document.documentElement.setAttribute('data-lang','am');document.documentElement.setAttribute('lang','am');}}catch(e){}</script>
 <script src="site.js" defer></script>
 </head>
 <body>
 
-<a class="skip" href="#main"><span lang="en">Skip to content</span><span lang="am">ወደ ይዘቱ ዝለል</span></a>
+<a class="skip" href="#main"><span>Skip to content</span></a>
 
 <nav class="nav">
   <div class="nav-in">
@@ -22,94 +21,91 @@
       <span class="name ethi">ስንቅ</span>
     </a>
     <div class="nav-links">
-      <a href="install.html" aria-current="page"><span lang="en">Install</span><span lang="am" class="ethi">አጫጫን</span></a>
-      <a href="changelog.html"><span lang="en">Changes</span><span lang="am" class="ethi">ለውጦች</span></a>
-      <a href="credits.html"><span lang="en">Sources</span><span lang="am" class="ethi">ምንጮች</span></a>
-      <a href="privacy-policy.html"><span lang="en">Privacy</span><span lang="am" class="ethi">ግላዊነት</span></a>
+      <a href="install.html" aria-current="page"><span>Install</span></a>
+      <a href="changelog.html"><span>Changes</span></a>
+      <a href="credits.html"><span>Sources</span></a>
+      <a href="privacy-policy.html"><span>Privacy</span></a>
       <a href="https://github.com/natinael96/sinq">GitHub</a>
     </div>
-    <button id="lang" type="button" aria-label="ወደ አማርኛ ቀይር"><span lang="en" class="ethi">አማርኛ</span><span lang="am">English</span></button>
   </div>
 </nav>
 
 <main id="main">
 
 <div class="page-head">
-  <h1><span lang="en">Installing Sinq</span><span lang="am" class="ethi">ስንቅን መጫን</span></h1>
+  <h1><span>Installing Sinq</span></h1>
   <p>
-    <span lang="en">Sinq is distributed as a signed APK from its releases page, not through an app store. Installing it takes three steps the first time, and none after that.</span>
-    <span lang="am" class="ethi">ስንቅ በመተግበሪያ መደብር ሳይሆን፣ ከዝማኔዎች ገጹ በተፈረመ APK ይሰራጫል። ለመጀመሪያ ጊዜ መጫኑ ሦስት ደረጃዎችን ይወስዳል፤ ከዚያ በኋላ ምንም።</span>
+    <span>Sinq is distributed as a signed APK from its releases page, not through an app store. Installing it takes three steps the first time, and none after that.</span>
   </p>
 </div>
 
 <section>
-  <h2><span lang="en">Before you start</span><span lang="am" class="ethi">ከመጀመርዎ በፊት</span></h2>
+  <h2><span>Before you start</span></h2>
   <ul class="plain">
-    <li><span lang="en"><b>Android 8.0 (Oreo) or newer.</b> Older versions cannot install it.</span><span lang="am" class="ethi"><b>አንድሮይድ 8.0 (ኦሪዮ) ወይም ከዚያ በላይ።</b> ከዚያ በታች ያሉት ስሪቶች መጫን አይችሉም።</span></li>
-    <li><span lang="en"><b>About 60–90 MB of free space.</b> The whole Bible, the lectionary and four Ethiopic typefaces ship inside the file.</span><span lang="am" class="ethi"><b>ከ60–90 ሜባ ገደማ ነጻ ቦታ።</b> ሙሉው መጽሐፍ ቅዱስ፣ ግጻዌውና አራት የግእዝ ፊደላት በፋይሉ ውስጥ አሉ።</span></li>
-    <li><span lang="en"><b>No account, and no connection after the download.</b> Nothing needs to be set up.</span><span lang="am" class="ethi"><b>መለያ አያስፈልግም፤ ካወረዱ በኋላም ኢንተርኔት አያስፈልግም።</b> ምንም ማዋቀር የለም።</span></li>
+    <li><span><b>Android 8.0 (Oreo) or newer.</b> Older versions cannot install it.</span></li>
+    <li><span><b>About 60–90 MB of free space.</b> The whole Bible, the lectionary and four Ethiopic typefaces ship inside the file.</span></li>
+    <li><span><b>No account, and no connection after the download.</b> Nothing needs to be set up.</span></li>
   </ul>
 </section>
 
 <section>
-  <h2><span lang="en">The three steps</span><span lang="am" class="ethi">ሦስቱ ደረጃዎች</span></h2>
+  <h2><span>The three steps</span></h2>
   <ol class="steps">
     <li>
-      <h3><span lang="en">Download the APK</span><span lang="am" class="ethi">APK ያውርዱ</span></h3>
-      <p><span lang="en">Open the releases page and download the file named <code>Sinq-v1.6.1.apk</code> (or whatever the newest version number is) from the assets list.</span><span lang="am" class="ethi">የዝማኔዎችን ገጽ ከፍተው <code>Sinq-v1.6.1.apk</code> የሚለውን ፋይል (ወይም አዲሱን የስሪት ቁጥር) ከዝርዝሩ ውስጥ ያውርዱ።</span></p>
-      <p><a class="btn btn-primary" href="https://github.com/natinael96/sinq/releases/latest" style="font-size:15px;padding:10px 22px"><span lang="en">Go to the latest release</span><span lang="am" class="ethi">ወደ አዲሱ ዝማኔ</span></a></p>
+      <h3><span>Download the APK</span></h3>
+      <p><span>Open the releases page and download the file named <code>Sinq-v1.6.1.apk</code> (or whatever the newest version number is) from the assets list.</span></p>
+      <p><a class="btn btn-primary" href="https://github.com/natinael96/sinq/releases/latest" style="font-size:15px;padding:10px 22px"><span>Go to the latest release</span></a></p>
     </li>
     <li>
-      <h3><span lang="en">Allow your browser to install apps</span><span lang="am" class="ethi">አሳሹ መተግበሪያ እንዲጭን ይፍቀዱ</span></h3>
-      <p><span lang="en">Android blocks installs from outside the Play Store until you permit them, per app. When you open the downloaded file, Android will offer the setting directly, or find it yourself under <b>Settings → Apps → Special app access → Install unknown apps</b>, and turn it on for the browser or file manager you downloaded with.</span><span lang="am" class="ethi">አንድሮይድ ከፕሌይ ስቶር ውጭ የሚደረግ አጫጫንን እስከሚፈቀድለት ድረስ ይከለክላል፤ ለእያንዳንዱ መተግበሪያ ለብቻው። ያወረዱትን ፋይል ሲከፍቱ አንድሮይድ ራሱ ቅንብሩን ያቀርብልዎታል፤ ወይም <b>ቅንብሮች → መተግበሪያዎች → ልዩ የመተግበሪያ መዳረሻ → ያልታወቁ መተግበሪያዎችን መጫን</b> ውስጥ አግኝተው ላወረዱበት አሳሽ ወይም ፋይል አስተዳዳሪ ያብሩት።</span></p>
+      <h3><span>Allow your browser to install apps</span></h3>
+      <p><span>Android blocks installs from outside the Play Store until you permit them, per app. When you open the downloaded file, Android will offer the setting directly, or find it yourself under <b>Settings → Apps → Special app access → Install unknown apps</b>, and turn it on for the browser or file manager you downloaded with.</span></p>
     </li>
     <li>
-      <h3><span lang="en">Open the file and install</span><span lang="am" class="ethi">ፋይሉን ከፍተው ይጫኑ</span></h3>
-      <p><span lang="en">Tap the downloaded APK and confirm. Sinq opens with an introduction; the first thing worth doing is choosing your interface language and text size in Settings.</span><span lang="am" class="ethi">ያወረዱትን APK ነክተው ያረጋግጡ። ስንቅ በመግቢያ ይከፈታል፤ በመጀመሪያ የሚሻለው በቅንብሮች ውስጥ የመተግበሪያውን ቋንቋና የጽሑፍ መጠን መምረጥ ነው።</span></p>
+      <h3><span>Open the file and install</span></h3>
+      <p><span>Tap the downloaded APK and confirm. Sinq opens with an introduction; the first thing worth doing is choosing your interface language and text size in Settings.</span></p>
     </li>
   </ol>
 </section>
 
 
 <section>
-  <h2><span lang="en">Permissions it will ask for</span><span lang="am" class="ethi">የሚጠይቃቸው ፈቃዶች</span></h2>
-  <p><span lang="en">Only when you turn on a feature that needs them, and never for anything else:</span><span lang="am" class="ethi">የሚጠይቀው የሚያስፈልጋቸውን ባህሪያት ሲያበሩ ብቻ ነው፤ ለሌላ ምንም ነገር አይደለም፦</span></p>
+  <h2><span>Permissions it will ask for</span></h2>
+  <p><span>Only when you turn on a feature that needs them, and never for anything else:</span></p>
   <dl class="terms">
-    <dt><span lang="en">Notifications</span><span lang="am" class="ethi">ማሳወቂያዎች</span></dt>
-    <dd><span lang="en">To show the prayer reminders you set. Asked the first time you enable one.</span><span lang="am" class="ethi">እርስዎ ያዘጋጇቸውን የጸሎት አስታዋሾች ለማሳየት። ለመጀመሪያ ጊዜ ሲያበሩ ይጠየቃል።</span></dd>
-    <dt><span lang="en">Exact alarms</span><span lang="am" class="ethi">ትክክለኛ ማንቂያዎች</span></dt>
-    <dd><span lang="en">So a prayer alarm rings at the hour you chose rather than whenever Android gets around to it.</span><span lang="am" class="ethi">የጸሎት ማንቂያው አንድሮይድ በፈለገው ጊዜ ሳይሆን፣ እርስዎ በመረጡት ሰዓት እንዲጮህ።</span></dd>
-    <dt><span lang="en">Run at startup, and vibration</span><span lang="am" class="ethi">በማስነሻ ላይ መሮጥና ንዝረት</span></dt>
-    <dd><span lang="en">To re-arm your reminders after the phone restarts, and for the alarm's vibration.</span><span lang="am" class="ethi">ስልኩ ከተነሳ በኋላ አስታዋሾችዎን መልሶ ለማዘጋጀት፣ እንዲሁም ለማንቂያው ንዝረት።</span></dd>
+    <dt><span>Notifications</span></dt>
+    <dd><span>To show the prayer reminders you set. Asked the first time you enable one.</span></dd>
+    <dt><span>Exact alarms</span></dt>
+    <dd><span>So a prayer alarm rings at the hour you chose rather than whenever Android gets around to it.</span></dd>
+    <dt><span>Run at startup, and vibration</span></dt>
+    <dd><span>To re-arm your reminders after the phone restarts, and for the alarm's vibration.</span></dd>
   </dl>
   <p>
-    <span lang="en">There is no internet, location, camera, microphone, contacts or storage-scanning permission. The app does not have them to ask for. <a href="privacy-policy.html">Full privacy policy</a>.</span>
-    <span lang="am" class="ethi">የኢንተርኔት፣ የአካባቢ፣ የካሜራ፣ የማይክሮፎን፣ የእውቂያ ወይም የማከማቻ ፍተሻ ፈቃድ የለም። መተግበሪያው እነዚህን የሚጠይቅበት ፈቃድ ራሱ የለውም። <a href="privacy-policy.html">ሙሉውን የግላዊነት ፖሊሲ</a>።</span>
+    <span>There is no internet, location, camera, microphone, contacts or storage-scanning permission. The app does not have them to ask for. <a href="privacy-policy.html">Full privacy policy</a>.</span>
   </p>
 </section>
 
 <section>
-  <h2><span lang="en">If something goes wrong</span><span lang="am" class="ethi">ችግር ካጋጠመ</span></h2>
+  <h2><span>If something goes wrong</span></h2>
   <dl class="terms">
-    <dt><span lang="en">“App not installed”</span><span lang="am" class="ethi">“መተግበሪያው አልተጫነም”</span></dt>
-    <dd><span lang="en">Usually there is already a copy of Sinq on the phone signed with a different key: one built from source, or from a very early release. Uninstall that copy first, then install the new APK. Your data is in that copy, so export a backup from Settings → Data before uninstalling.</span><span lang="am" class="ethi">ብዙውን ጊዜ በስልኩ ላይ በተለየ ቁልፍ የተፈረመ ሌላ የስንቅ ቅጂ አለ፤ ከምንጭ ኮድ የተገነባ ወይም በጣም ቀደም ያለ ስሪት። መጀመሪያ ያንን ያራግፉ፤ ከዚያ አዲሱን APK ይጫኑ። መረጃዎ በዚያ ቅጂ ውስጥ ስለሆነ፣ ከማራገፍዎ በፊት ከቅንብሮች → መረጃ ምትኬ ያውጡ።</span></dd>
-    <dt><span lang="en">“There was a problem parsing the package”</span><span lang="am" class="ethi">“ጥቅሉን በማንበብ ላይ ችግር ተፈጥሯል”</span></dt>
-    <dd><span lang="en">The download did not finish, or the file is not the APK. Only the file ending in <code>.apk</code> installs on a phone. Download it again, on a stable connection.</span><span lang="am" class="ethi">ማውረዱ አልተጠናቀቀም፣ ወይም ፋይሉ APK አይደለም። በስልክ ላይ የሚጫነው በ<code>.apk</code> የሚያልቀው ፋይል ብቻ ነው። በተረጋጋ ግንኙነት እንደገና ያውርዱት።</span></dd>
-    <dt><span lang="en">Play Protect warns about an unknown app</span><span lang="am" class="ethi">Play Protect ስለማይታወቅ መተግበሪያ ሲያስጠነቅቅ</span></dt>
-    <dd><span lang="en">Expected. Google shows this for anything installed from outside the Play Store, whatever it contains. You can install anyway, or verify for yourself: the <a href="https://github.com/natinael96/sinq">source is public</a> and every release is built in the open by GitHub Actions from a tagged commit.</span><span lang="am" class="ethi">የሚጠበቅ ነው። ጉግል ይህንን ከፕሌይ ስቶር ውጭ ለተጫነ ማንኛውም ነገር ያሳያል፤ ይዘቱ ምንም ይሁን ምን። ቢሆንም መጫን ይችላሉ፤ ወይም ራስዎ ያረጋግጡ፦ <a href="https://github.com/natinael96/sinq">ኮዱ ይፋ ነው</a>፤ እያንዳንዱ ዝማኔም በGitHub Actions ከታተመ ኮድ በግልጽ ይገነባል።</span></dd>
-    <dt><span lang="en">Reminders never arrive</span><span lang="am" class="ethi">አስታዋሾች ካልደረሱ</span></dt>
-    <dd><span lang="en">Check that notifications and exact alarms are permitted for Sinq, that battery optimisation is not restricting it, and that the reminder is not scheduled inside your quiet hours. Sinq warns about that last one in Settings.</span><span lang="am" class="ethi">ለስንቅ ማሳወቂያዎችና ትክክለኛ ማንቂያዎች መፈቀዳቸውን፣ የባትሪ ቁጠባ እያገደው አለመሆኑን፣ አስታዋሹም በጸጥታ ሰዓትዎ ውስጥ አለመመደቡን ያረጋግጡ። የመጨረሻውን ስንቅ ራሱ በቅንብሮች ውስጥ ያስጠነቅቃል።</span></dd>
+    <dt><span>“App not installed”</span></dt>
+    <dd><span>Usually there is already a copy of Sinq on the phone signed with a different key: one built from source, or from a very early release. Uninstall that copy first, then install the new APK. Your data is in that copy, so export a backup from Settings → Data before uninstalling.</span></dd>
+    <dt><span>“There was a problem parsing the package”</span></dt>
+    <dd><span>The download did not finish, or the file is not the APK. Only the file ending in <code>.apk</code> installs on a phone. Download it again, on a stable connection.</span></dd>
+    <dt><span>Play Protect warns about an unknown app</span></dt>
+    <dd><span>Expected. Google shows this for anything installed from outside the Play Store, whatever it contains. You can install anyway, or verify for yourself: the <a href="https://github.com/natinael96/sinq">source is public</a> and every release is built in the open by GitHub Actions from a tagged commit.</span></dd>
+    <dt><span>Reminders never arrive</span></dt>
+    <dd><span>Check that notifications and exact alarms are permitted for Sinq, that battery optimisation is not restricting it, and that the reminder is not scheduled inside your quiet hours. Sinq warns about that last one in Settings.</span></dd>
   </dl>
-  <p><span lang="en">Anything else: <a href="https://github.com/natinael96/sinq/issues">open an issue</a>.</span><span lang="am" class="ethi">ሌላ ማንኛውም ነገር፦ <a href="https://github.com/natinael96/sinq/issues">ጉዳይ ይክፈቱ</a>።</span></p>
+  <p><span>Anything else: <a href="https://github.com/natinael96/sinq/issues">open an issue</a>.</span></p>
 </section>
 
 <section>
-  <h2><span lang="en">Building it yourself</span><span lang="am" class="ethi">ራስዎ መገንባት</span></h2>
-  <p><span lang="en">You need JDK 17 and the Android SDK (compileSdk 36). The content is bundled in the repository, so no content pipeline needs to run for a normal build.</span><span lang="am" class="ethi">JDK 17 እና የAndroid SDK (compileSdk 36) ያስፈልጋሉ። ይዘቱ በማከማቻው ውስጥ አብሮ ስላለ፣ ለተለመደ ግንባታ ምንም ተጨማሪ ሂደት ማስኬድ አያስፈልግም።</span></p>
+  <h2><span>Building it yourself</span></h2>
+  <p><span>You need JDK 17 and the Android SDK (compileSdk 36). The content is bundled in the repository, so no content pipeline needs to run for a normal build.</span></p>
   <pre><code>git clone https://github.com/natinael96/sinq.git
 cd sinq
 ./gradlew assembleDebug</code></pre>
-  <p><span lang="en">The APK lands in <code>app/build/outputs/apk/debug/</code>. A build of your own is signed with your own key, so it will not install over a release copy and cannot be updated by one.</span><span lang="am" class="ethi">APK-ው <code>app/build/outputs/apk/debug/</code> ውስጥ ይቀመጣል። የራስዎ ግንባታ በራስዎ ቁልፍ ስለሚፈረም፣ በተለቀቀው ቅጂ ላይ አይጫንም፤ በእሱም አይዘመንም።</span></p>
+  <p><span>The APK lands in <code>app/build/outputs/apk/debug/</code>. A build of your own is signed with your own key, so it will not install over a release copy and cannot be updated by one.</span></p>
 </section>
 
 </main>
@@ -117,13 +113,13 @@ cd sinq
 <footer>
   <div class="foot-in">
     <ul class="foot-links">
-      <li><a href="index.html"><span lang="en">Home</span><span lang="am" class="ethi">መነሻ</span></a></li>
+      <li><a href="index.html"><span>Home</span></a></li>
       <li><a href="https://github.com/natinael96/sinq">GitHub</a></li>
-      <li><a href="https://github.com/natinael96/sinq/releases"><span lang="en">Releases</span><span lang="am" class="ethi">ዝማኔዎች</span></a></li>
-      <li><a href="credits.html"><span lang="en">Sources and licences</span><span lang="am" class="ethi">ምንጮችና ፈቃዶች</span></a></li>
-      <li><a href="privacy-policy.html"><span lang="en">Privacy policy</span><span lang="am" class="ethi">የግላዊነት ፖሊሲ</span></a></li>
+      <li><a href="https://github.com/natinael96/sinq/releases"><span>Releases</span></a></li>
+      <li><a href="credits.html"><span>Sources and licences</span></a></li>
+      <li><a href="privacy-policy.html"><span>Privacy policy</span></a></li>
     </ul>
-    <p class="fine"><span lang="en">ስንቅ, provisions for the journey.</span><span lang="am" class="ethi">ስንቅ፦ ለመንገድ የሚሆን።</span></p>
+    <p class="fine"><span>ስንቅ, provisions for the journey.</span></p>
   </div>
 </footer>
 

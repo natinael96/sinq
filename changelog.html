@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-lang="en">
+<html data->
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,12 +8,11 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="style.css">
-<script>try{if(localStorage.getItem('sinq-lang')==='am'){document.documentElement.setAttribute('data-lang','am');document.documentElement.setAttribute('lang','am');}}catch(e){}</script>
 <script src="site.js" defer></script>
 </head>
 <body>
 
-<a class="skip" href="#main"><span lang="en">Skip to content</span><span lang="am">ወደ ይዘቱ ዝለል</span></a>
+<a class="skip" href="#main"><span>Skip to content</span></a>
 
 <nav class="nav">
   <div class="nav-in">
@@ -22,39 +21,37 @@
       <span class="name ethi">ስንቅ</span>
     </a>
     <div class="nav-links">
-      <a href="install.html"><span lang="en">Install</span><span lang="am" class="ethi">አጫጫን</span></a>
-      <a href="changelog.html" aria-current="page"><span lang="en">Changes</span><span lang="am" class="ethi">ለውጦች</span></a>
-      <a href="credits.html"><span lang="en">Sources</span><span lang="am" class="ethi">ምንጮች</span></a>
-      <a href="privacy-policy.html"><span lang="en">Privacy</span><span lang="am" class="ethi">ግላዊነት</span></a>
+      <a href="install.html"><span>Install</span></a>
+      <a href="changelog.html" aria-current="page"><span>Changes</span></a>
+      <a href="credits.html"><span>Sources</span></a>
+      <a href="privacy-policy.html"><span>Privacy</span></a>
       <a href="https://github.com/natinael96/sinq">GitHub</a>
     </div>
-    <button id="lang" type="button" aria-label="ወደ አማርኛ ቀይር"><span lang="en" class="ethi">አማርኛ</span><span lang="am">English</span></button>
   </div>
 </nav>
 
 <main id="main">
 
 <div class="page-head">
-  <h1><span lang="en">What changed</span><span lang="am" class="ethi">የተለወጠው</span></h1>
+  <h1><span>What changed</span></h1>
   <p>
-    <span lang="en">The most recent releases, in short. Each version's full notes, including why a bug happened, are in the <a href="https://github.com/natinael96/sinq/blob/master/CHANGELOG.md">changelog</a>.</span>
-    <span lang="am" class="ethi">የቅርብ ጊዜዎቹ ዝማኔዎች፣ በአጭሩ። የእያንዳንዱ ስሪት ሙሉ ማስታወሻ፣ ስህተቱ ለምን እንደተፈጠረም ጭምር፣ በ<a href="https://github.com/natinael96/sinq/blob/master/CHANGELOG.md">ለውጦች መዝገብ</a> ውስጥ አለ።</span>
+    <span>The most recent releases, in short. Each version's full notes, including why a bug happened, are in the <a href="https://github.com/natinael96/sinq/blob/master/CHANGELOG.md">changelog</a>.</span>
   </p>
 </div>
 
 <article class="release">
   <header>
     <h2>1.6.1 <span class="date">31 August 2026</span></h2>
-    <p class="motto"><span lang="en">the journal keeps what you wrote</span><span lang="am" class="ethi">ማስታወሻው የጻፉትን ይይዛል</span></p>
+    <p class="motto"><span>the journal keeps what you wrote</span></p>
   </header>
   <div class="body">
-  <h3><span lang="en">Fixed</span><span lang="am" class="ethi">የተስተካከለ</span></h3>
+  <h3><span>Fixed</span></h3>
   <ul>
-    <li><span lang="en"><b>Journal entries could be lost when the editor closed.</b> Nothing was written to disk until you left the screen, so switching apps at the wrong moment left no record at all. Entries now save a second after you stop typing, and a save that starts always finishes.</span><span lang="am" class="ethi"><b>አርታኢው ሲዘጋ ማስታወሻዎች ሊጠፉ ይችሉ ነበር።</b> ገጹን እስከሚለቁ ድረስ ምንም ወደ ማከማቻ አይጻፍም ነበር፤ ስለዚህ በተሳሳተ ጊዜ መተግበሪያ መቀየር ምንም መዝገብ ሳያስቀር ያልፍ ነበር። አሁን መጻፍ ካቆሙ ከአንድ ሰከንድ በኋላ ይቀመጣል፤ የተጀመረ ቅጂም ሁልጊዜ ይጠናቀቃል።</span></li>
+    <li><span><b>Journal entries could be lost when the editor closed.</b> Nothing was written to disk until you left the screen, so switching apps at the wrong moment left no record at all. Entries now save a second after you stop typing, and a save that starts always finishes.</span></li>
   </ul>
-  <h3><span lang="en">Changed</span><span lang="am" class="ethi">የተቀየረ</span></h3>
+  <h3><span>Changed</span></h3>
   <ul>
-    <li><span lang="en"><b>The journal says when it has saved.</b> A tick appears in the entry header once the text is on disk. There is still no Save button, but “is this saved?” now has an answer.</span><span lang="am" class="ethi"><b>ማስታወሻው መቀመጡን ይነግርዎታል።</b> ጽሑፉ ከተቀመጠ በኋላ በራስጌው ላይ ምልክት ይታያል። አሁንም የማስቀመጫ ቁልፍ የለም፤ ነገር ግን “ተቀምጧል?” ለሚለው ጥያቄ መልስ አለ።</span></li>
+    <li><span><b>The journal says when it has saved.</b> A tick appears in the entry header once the text is on disk. There is still no Save button, but “is this saved?” now has an answer.</span></li>
   </ul>
   </div>
 </article>
@@ -62,22 +59,22 @@
 <article class="release">
   <header>
     <h2>1.6.0 <span class="date">31 August 2026</span></h2>
-    <p class="motto"><span lang="en">what is owed, what was promised, what was thought</span><span lang="am" class="ethi">የሚገባው፣ የተሳለው፣ የታሰበው</span></p>
+    <p class="motto"><span>what is owed, what was promised, what was thought</span></p>
   </header>
   <div class="body">
-  <h3><span lang="en">Added</span><span lang="am" class="ethi">የተጨመረ</span></h3>
+  <h3><span>Added</span></h3>
   <ul>
-    <li><span lang="en"><b>አስራት.</b> A ledger for the tithe: record what you receive and the tenth is worked out for you; record what you give and it shows what is still owed, over an Ethiopian month or year. The share is adjustable, amounts are counted in a currency you name, and giving beyond the tithe is shown as a surplus rather than a negative debt.</span><span lang="am" class="ethi"><b>አስራት።</b> የአስራት መዝገብ፦ የተቀበሉትን ያስመዝግቡ፣ አሥራቱ ይሰላል፤ የሰጡትን ያስመዝግቡ፣ በግእዝ ወር ወይም ዓመት ውስጥ ቀሪው ዕዳ ይታያል። ድርሻው ሊስተካከል ይችላል፤ መጠኖቹ በሚሰይሙት ገንዘብ ይቆጠራሉ፤ ከአስራት በላይ መስጠትም እንደ ትርፍ እንጂ እንደ አሉታዊ ዕዳ አይታይም።</span></li>
-    <li><span lang="en"><b>ስዕለት.</b> Vows and pledges, each tied to the feast it was promised on, with what was promised set against what has been kept. A one-time vow stops reminding once it is fulfilled; a standing one keeps its rhythm.</span><span lang="am" class="ethi"><b>ስዕለት።</b> ስዕለቶችና ቃል ኪዳኖች፣ እያንዳንዱ በተሳለበት በዓል ተይዞ፣ የተሳለው ከተፈጸመው ጋር ተነጻጽሮ። የአንድ ጊዜ ስዕለት ከተፈጸመ በኋላ ማስታወሱን ያቆማል፤ ቋሚው ግን ሪትሙን ይይዛል።</span></li>
-    <li><span lang="en"><b>ማስታወሻ, a journal.</b> Write the day down, browsed a ግእዝ month at a time. Every entry keeps the Church's day it was written on (the feast, the fast, that day's ግጻዌ), so an old entry reads as more than a date. Entries can be locked behind a passphrase, and the journal never appears in screenshots or the app switcher.</span><span lang="am" class="ethi"><b>ማስታወሻ።</b> ዕለቱን ይጻፉት፤ በግእዝ ወር እየተዘዋወሩ ያንብቡት። እያንዳንዱ ማስታወሻ የተጻፈበትን የቤተ ክርስቲያን ቀን ይይዛል (በዓሉን፣ ጾሙን፣ የዕለቱን ግጻዌ)፤ ስለዚህ የቆየ ማስታወሻ ከቀን በላይ ሆኖ ይነበባል። ማስታወሻዎች በይለፍ ቃል ሊቆለፉ ይችላሉ፤ በስክሪንሾት ወይም በመተግበሪያ መቀያየሪያውም ላይ አይታዩም።</span></li>
-    <li><span lang="en"><b>Preparing for ንስሐ.</b> A kind of entry built to be destroyed: it never leaves the device, never enters a backup, and “ንስሐ ገብቻለሁ” deletes it rather than filing it away.</span><span lang="am" class="ethi"><b>ለንስሐ መዘጋጀት።</b> ሊጠፋ ተብሎ የተሠራ ዓይነት ማስታወሻ፦ ከመሣሪያው አይወጣም፣ በምትኬ ውስጥ አይገባም፤ “ንስሐ ገብቻለሁ” ማለትም ያስቀምጠዋል ሳይሆን ያጠፋዋል።</span></li>
-    <li><span lang="en"><b>Feast-anchored reminders.</b> A reminder can now recur on a yearly date or a named feast. The ወርኀዊ በዓላት come from the bundled ስንክሳር itself, and movable feasts such as ፋሲካ are computed each year from the ባሕረ ሓሳብ.</span><span lang="am" class="ethi"><b>በበዓል ላይ የተመሠረቱ አስታዋሾች።</b> አንድ አስታዋሽ አሁን በዓመታዊ ቀን ወይም በተሰየመ በዓል ሊደገም ይችላል። ወርኀዊ በዓላቱ ከአብሮ ከተጫነው ስንክሳር ራሱ ይመጣሉ፤ እንደ ፋሲካ ያሉ ተንቀሳቃሽ በዓላትም በየዓመቱ ከባሕረ ሓሳብ ይሰላሉ።</span></li>
-    <li><span lang="en"><b>Choose what a backup contains.</b> Export is now a checklist rather than all-or-nothing. The journal is off by default and asks for your passphrase before it can be included.</span><span lang="am" class="ethi"><b>ምትኬው ምን እንደሚይዝ ይምረጡ።</b> ወደ ውጭ መላክ አሁን ሁሉንም-ወይም-ምንም ሳይሆን ዝርዝር ምርጫ ነው። ማስታወሻው በነባሪ ጠፍቷል፤ ከመካተቱ በፊትም የይለፍ ቃልዎን ይጠይቃል።</span></li>
+    <li><span><b>አስራት.</b> A ledger for the tithe: record what you receive and the tenth is worked out for you; record what you give and it shows what is still owed, over an Ethiopian month or year. The share is adjustable, amounts are counted in a currency you name, and giving beyond the tithe is shown as a surplus rather than a negative debt.</span></li>
+    <li><span><b>ስዕለት.</b> Vows and pledges, each tied to the feast it was promised on, with what was promised set against what has been kept. A one-time vow stops reminding once it is fulfilled; a standing one keeps its rhythm.</span></li>
+    <li><span><b>ማስታወሻ, a journal.</b> Write the day down, browsed a ግእዝ month at a time. Every entry keeps the Church's day it was written on (the feast, the fast, that day's ግጻዌ), so an old entry reads as more than a date. Entries can be locked behind a passphrase, and the journal never appears in screenshots or the app switcher.</span></li>
+    <li><span><b>Preparing for ንስሐ.</b> A kind of entry built to be destroyed: it never leaves the device, never enters a backup, and “ንስሐ ገብቻለሁ” deletes it rather than filing it away.</span></li>
+    <li><span><b>Feast-anchored reminders.</b> A reminder can now recur on a yearly date or a named feast. The ወርኀዊ በዓላት come from the bundled ስንክሳር itself, and movable feasts such as ፋሲካ are computed each year from the ባሕረ ሓሳብ.</span></li>
+    <li><span><b>Choose what a backup contains.</b> Export is now a checklist rather than all-or-nothing. The journal is off by default and asks for your passphrase before it can be included.</span></li>
   </ul>
-  <h3><span lang="en">Changed</span><span lang="am" class="ethi">የተቀየረ</span></h3>
+  <h3><span>Changed</span></h3>
   <ul>
-    <li><span lang="en"><b>Quiet hours now silence every reminder.</b> They previously applied only to the ringing prayer alarms; the nightly, ግጻዌ, ምጽዋት and ንስሐ notifications ignored them. Because the silence is now total, Settings warns when a reminder is timed inside the window and would never arrive.</span><span lang="am" class="ethi"><b>የጸጥታ ሰዓት አሁን ሁሉንም አስታዋሽ ያጠፋል።</b> ከዚህ በፊት የሚሠራው በሚጮሁ የጸሎት ማንቂያዎች ላይ ብቻ ነበር፤ የሌሊቱ፣ የግጻዌ፣ የምጽዋትና የንስሐ ማሳወቂያዎች ችላ ይሉት ነበር። ጸጥታው አሁን ሙሉ ስለሆነ፣ አንድ አስታዋሽ በዚያ ሰዓት ውስጥ ተመድቦ ፈጽሞ የማይደርስ ከሆነ ቅንብሮች ያስጠነቅቃል።</span></li>
-    <li><span lang="en"><b>The Reminders page is grouped</b> (daily, giving, and sound) instead of one flat run of rows.</span><span lang="am" class="ethi"><b>የአስታዋሾች ገጽ በቡድን ተከፍሏል</b> (ዕለታዊ፣ ምጽዋትና ድምፅ) ከአንድ ጠፍጣፋ ዝርዝር ይልቅ።</span></li>
+    <li><span><b>Quiet hours now silence every reminder.</b> They previously applied only to the ringing prayer alarms; the nightly, ግጻዌ, ምጽዋት and ንስሐ notifications ignored them. Because the silence is now total, Settings warns when a reminder is timed inside the window and would never arrive.</span></li>
+    <li><span><b>The Reminders page is grouped</b> (daily, giving, and sound) instead of one flat run of rows.</span></li>
   </ul>
   </div>
 </article>
@@ -85,16 +82,16 @@
 <article class="release">
   <header>
     <h2>1.5.2 <span class="date">31 August 2026</span></h2>
-    <p class="motto"><span lang="en">the alarm asks again</span><span lang="am" class="ethi">ማንቂያው እንደገና ይጠይቃል</span></p>
+    <p class="motto"><span>the alarm asks again</span></p>
   </header>
   <div class="body">
-  <h3><span lang="en">Fixed</span><span lang="am" class="ethi">የተስተካከለ</span></h3>
+  <h3><span>Fixed</span></h3>
   <ul>
-    <li><span lang="en"><b>“ጨርሰዋል?” comes back after an alarm.</b> The follow-up used to appear only if you swiped the notification away, not after Dismiss, Open, or the timeout. Every ending now asks, except Snooze.</span><span lang="am" class="ethi"><b>“ጨርሰዋል?” ከማንቂያ በኋላ ተመልሶ ይመጣል።</b> ከዚህ በፊት ጥያቄው የሚታየው ማሳወቂያውን ካጠፉት ብቻ ነበር፤ Dismiss፣ Open ወይም ጊዜው ካለቀ በኋላ አልነበረም። አሁን ከSnooze በስተቀር ሁሉም መጨረሻ ይጠይቃል።</span></li>
+    <li><span><b>“ጨርሰዋል?” comes back after an alarm.</b> The follow-up used to appear only if you swiped the notification away, not after Dismiss, Open, or the timeout. Every ending now asks, except Snooze.</span></li>
   </ul>
-  <h3><span lang="en">Changed</span><span lang="am" class="ethi">የተቀየረ</span></h3>
+  <h3><span>Changed</span></h3>
   <ul>
-    <li><span lang="en"><b>The ጉዞ page is more compact</b>: a tighter heading, hero and section rhythm, so more of the day's habits sit on screen.</span><span lang="am" class="ethi"><b>የጉዞ ገጽ ይበልጥ ተጠቅልሏል</b>፦ አጠር ያለ ራስጌና አቀማመጥ፤ ስለዚህ የዕለቱ ልማዶች በስክሪኑ ላይ ይበልጥ ይታያሉ።</span></li>
+    <li><span><b>The ጉዞ page is more compact</b>: a tighter heading, hero and section rhythm, so more of the day's habits sit on screen.</span></li>
   </ul>
   </div>
 </article>
@@ -102,26 +99,25 @@
 <article class="release">
   <header>
     <h2>1.5.1 <span class="date">31 August 2026</span></h2>
-    <p class="motto"><span lang="en">the home page, restored</span><span lang="am" class="ethi">መነሻ ገጹ ተመልሷል</span></p>
+    <p class="motto"><span>the home page, restored</span></p>
   </header>
   <div class="body">
-  <h3><span lang="en">Fixed</span><span lang="am" class="ethi">የተስተካከለ</span></h3>
+  <h3><span>Fixed</span></h3>
   <ul>
-    <li><span lang="en"><b>The daily-psalms and ጸሎት ዘዘወትር cards are back on the home page.</b> A fix for clipped text at large sizes had let the cards grow into the whole page and push the bottom two off a dashboard that does not scroll.</span><span lang="am" class="ethi"><b>የዕለቱ መዝሙራትና የጸሎት ዘዘወትር ካርዶች ወደ መነሻ ገጹ ተመልሰዋል።</b> በትልቅ ጽሑፍ የሚቆረጠውን ለማስተካከል የተደረገ ለውጥ ካርዶቹ ገጹን ሙሉ እንዲይዙና የታችኞቹ ሁለቱ ከማይንሸራተተው ገጽ እንዲወጡ አድርጎ ነበር።</span></li>
-    <li><span lang="en"><b>The streak grid grows with its card</b> instead of sitting adrift in a half-empty box at large text sizes.</span><span lang="am" class="ethi"><b>የተከታታይ ቀናት ሰንጠረዥ ከካርዱ ጋር ያድጋል</b>፤ በትልቅ ጽሑፍ ውስጥ በግማሽ ባዶ ሳጥን ውስጥ ከመንሳፈፍ ይልቅ።</span></li>
+    <li><span><b>The daily-psalms and ጸሎት ዘዘወትር cards are back on the home page.</b> A fix for clipped text at large sizes had let the cards grow into the whole page and push the bottom two off a dashboard that does not scroll.</span></li>
+    <li><span><b>The streak grid grows with its card</b> instead of sitting adrift in a half-empty box at large text sizes.</span></li>
   </ul>
-  <h3><span lang="en">Changed</span><span lang="am" class="ethi">የተቀየረ</span></h3>
+  <h3><span>Changed</span></h3>
   <ul>
-    <li><span lang="en"><b>The ስንክሳር button says which day it opens</b> (“የሐምሌ ፰ ስንክሳር”), so moving between days relabels it.</span><span lang="am" class="ethi"><b>የስንክሳር ቁልፍ የሚከፍተውን ቀን ይናገራል</b> (“የሐምሌ ፰ ስንክሳር”)፤ ስለዚህ በቀናት መካከል ሲንቀሳቀሱ ስሙ ይቀየራል።</span></li>
+    <li><span><b>The ስንክሳር button says which day it opens</b> (“የሐምሌ ፰ ስንክሳር”), so moving between days relabels it.</span></li>
   </ul>
   </div>
 </article>
 
 <section>
-  <h2><span lang="en">Everything before this</span><span lang="am" class="ethi">ከዚህ በፊት ያለው ሁሉ</span></h2>
+  <h2><span>Everything before this</span></h2>
   <p>
-    <span lang="en">Every release back to the first is recorded in the <a href="https://github.com/natinael96/sinq/blob/master/CHANGELOG.md">changelog</a>, and each one has its <a href="https://github.com/natinael96/sinq/releases">signed APK on the releases page</a>.</span>
-    <span lang="am" class="ethi">ከመጀመሪያው ጀምሮ ያለው እያንዳንዱ ዝማኔ በ<a href="https://github.com/natinael96/sinq/blob/master/CHANGELOG.md">ለውጦች መዝገብ</a> ውስጥ ተመዝግቧል፤ እያንዳንዱም <a href="https://github.com/natinael96/sinq/releases">የተፈረመ APK በዝማኔዎች ገጽ</a> ላይ አለው።</span>
+    <span>Every release back to the first is recorded in the <a href="https://github.com/natinael96/sinq/blob/master/CHANGELOG.md">changelog</a>, and each one has its <a href="https://github.com/natinael96/sinq/releases">signed APK on the releases page</a>.</span>
   </p>
 </section>
 
@@ -130,13 +126,13 @@
 <footer>
   <div class="foot-in">
     <ul class="foot-links">
-      <li><a href="index.html"><span lang="en">Home</span><span lang="am" class="ethi">መነሻ</span></a></li>
-      <li><a href="https://github.com/natinael96/sinq/releases"><span lang="en">Releases</span><span lang="am" class="ethi">ዝማኔዎች</span></a></li>
-      <li><a href="install.html"><span lang="en">Install</span><span lang="am" class="ethi">አጫጫን</span></a></li>
-      <li><a href="credits.html"><span lang="en">Sources and licences</span><span lang="am" class="ethi">ምንጮችና ፈቃዶች</span></a></li>
-      <li><a href="privacy-policy.html"><span lang="en">Privacy policy</span><span lang="am" class="ethi">የግላዊነት ፖሊሲ</span></a></li>
+      <li><a href="index.html"><span>Home</span></a></li>
+      <li><a href="https://github.com/natinael96/sinq/releases"><span>Releases</span></a></li>
+      <li><a href="install.html"><span>Install</span></a></li>
+      <li><a href="credits.html"><span>Sources and licences</span></a></li>
+      <li><a href="privacy-policy.html"><span>Privacy policy</span></a></li>
     </ul>
-    <p class="fine"><span lang="en">ስንቅ, provisions for the journey.</span><span lang="am" class="ethi">ስንቅ፦ ለመንገድ የሚሆን።</span></p>
+    <p class="fine"><span>ስንቅ, provisions for the journey.</span></p>
   </div>
 </footer>
 

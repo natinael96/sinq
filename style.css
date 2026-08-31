@@ -55,7 +55,7 @@ body {
 }
 
 /* Ethiopic wants a touch more air between lines than Latin does. */
-[lang="am"], .ethi {
+.ethi {
   font-family: "Noto Sans Ethiopic", "Abyssinica SIL", "Nyala",
                system-ui, -apple-system, sans-serif;
   line-height: 1.85;
@@ -73,8 +73,7 @@ a { color: var(--link); text-underline-offset: 3px; }
 a:hover { text-decoration-thickness: 2px; }
 
 h1, h2, h3 { line-height: 1.22; font-weight: 700; letter-spacing: -.012em; }
-h1 [lang="am"], h2 [lang="am"], h3 [lang="am"],
-h1.ethi, h2.ethi, h3.ethi { letter-spacing: 0; }
+h1.ethi, h2.ethi, h3.ethi, .ethi { letter-spacing: 0; }
 
 ::selection { background: rgba(228,188,90,.3); color: var(--ink); }
 
@@ -112,13 +111,6 @@ h1.ethi, h2.ethi, h3.ethi { letter-spacing: 0; }
 .nav-links a:hover, .nav-links a[aria-current="page"] {
   color: #F6F2E6; border-bottom-color: var(--gold-lit);
 }
-#lang {
-  font: inherit; font-size: 14px; cursor: pointer;
-  background: transparent; color: var(--gold-lit);
-  border: 1px solid rgba(228,188,90,.45); border-radius: 999px;
-  padding: 5px 15px; min-height: 34px; transition: background .18s;
-}
-#lang:hover { background: rgba(228,188,90,.13); }
 
 /* ---- Layout ------------------------------------------------------------- */
 main { max-width: 880px; margin: 0 auto; padding: 0 20px 96px; }
@@ -138,12 +130,11 @@ section > h2::before {
   content: ""; width: 26px; height: 2px; flex: none;
   background: var(--gold); border-radius: 2px;
 }
-section > h2[lang="am"] { text-transform: none; letter-spacing: .04em; font-size: 15px; }
 section > .lede {
   font-size: clamp(24px, 3vw, 30px); margin: 0 0 26px;
   line-height: 1.28; max-width: 20em; letter-spacing: -.015em;
 }
-section > .lede[lang="am"], section > .lede .ethi { letter-spacing: 0; line-height: 1.5; }
+section > .lede .ethi { letter-spacing: 0; line-height: 1.5; }
 
 .page-head { padding: 68px 0 10px; }
 .page-head h1 { font-size: clamp(32px, 5vw, 46px); margin: 0 0 14px; }
@@ -180,7 +171,6 @@ section > .lede[lang="am"], section > .lede .ethi { letter-spacing: 0; line-heig
   line-height: 1.1; letter-spacing: -.015em;
   margin: 0; color: #FFFDF7;
 }
-.hero h1[lang="am"] { line-height: 1.34; letter-spacing: 0; }
 
 /* The one word each line turns on. */
 .hl { color: var(--gold-lit); }
@@ -221,7 +211,6 @@ section > .lede[lang="am"], section > .lede .ethi { letter-spacing: 0; line-heig
   font-size: 12.5px; letter-spacing: .18em; text-transform: uppercase;
   color: var(--gold-lit); margin: 0 0 16px; font-weight: 600;
 }
-.hours h2[lang="am"] { text-transform: none; letter-spacing: .05em; font-size: 14px; }
 .hours ol { list-style: none; margin: 0; padding: 0; }
 .hours li {
   display: flex; align-items: baseline; gap: 14px;
@@ -257,7 +246,6 @@ section > .lede[lang="am"], section > .lede .ethi { letter-spacing: 0; line-heig
   content: ""; width: 26px; height: 2px; flex: none;
   background: var(--gold-lit); border-radius: 2px;
 }
-.band h2[lang="am"] { text-transform: none; letter-spacing: .04em; font-size: 15px; }
 .band p { margin: 0 0 18px; font-size: 18px; line-height: 1.66; }
 .band p:last-child { margin-bottom: 0; }
 .band strong { color: #FFFDF7; }
@@ -350,7 +338,6 @@ dl.terms dd.fine { font-size: 14.5px; margin-top: 10px; }
   border: 1px solid rgba(126,95,30,.22);
   vertical-align: middle;
 }
-.chip[lang="am"] { text-transform: none; letter-spacing: .02em; }
 @media (prefers-color-scheme: dark) { .chip { border-color: rgba(211,176,74,.28); } }
 
 code {
@@ -395,7 +382,6 @@ ul.plain li:first-child::before { top: 11px; }
   background: var(--chip-bg); color: var(--gold);
   border: 1px solid rgba(126,95,30,.22);
 }
-.release h3[lang="am"] { text-transform: none; }
 .release .body > *:first-child { margin-top: 0; }
 .release .body h3 { margin-top: 30px; }
 .release .body > h3:first-child { margin-top: 0; }
@@ -487,11 +473,3 @@ footer .fine { color: #8FA99C; font-size: 13.5px; }
   html { scroll-behavior: smooth; }
 }
 
-
-/* ---- The language switch, last word -------------------------------------
-   These sit at the end and carry :root so they outrank any display rule
-   written for a translated element (.group h3 .sub, .group li b and the
-   rest). Without that, a two-class selector ties and source order decides,
-   which is how an English gloss ends up showing in Amharic. */
-html:root:not([data-lang="am"]) [lang="am"] { display: none; }
-html:root[data-lang="am"]       [lang="en"] { display: none; }
