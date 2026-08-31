@@ -6,10 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
-## [Unreleased]
+## [1.5.0] — 2026-08-31
 
-_Play-Store readiness: everything from the pre-flight audit except the
-Bible-rights question (deliberately held open)._
+_versionCode 53 · Play-Store readiness: everything from the pre-flight audit
+except the Bible-rights question (deliberately held open)._
 
 ### Changed
 - **Alarms ring without a foreground service.** The prayer alarm is now an
@@ -46,6 +46,11 @@ Bible-rights question (deliberately held open)._
   follows the app language, and "coming soon" wording states facts instead.
 - **Dead weight removed:** the Se'atat settings remnants, an unreferenced
   legacy settings screen, and an unused asset file.
+- **The version is visible.** The What's New row shows the installed version
+  (read from the package, never hardcoded again) and the Settings page closes
+  with a quiet version footer. A hosted privacy policy now backs the Play
+  listing, and the licenses screen records the Gitsawe transcription's
+  open-content release and the Font.et provenance of all three local fonts.
 
 ## [1.4.0] — 2026-08-31
 

@@ -99,14 +99,28 @@ fun SettingsScreen(
                 NavRow(s.remindersSettingsTitle, onOpenReminders, subtitle = if (enabledCount == 0) s.remindersOff else s.remindersOn(enabledCount))
                 NavRow(s.settingsGroupData, onOpenData, subtitle = backupRelativeLabel(lastBackupAt, s))
                 NavRow(s.tutorial, onOpenTutorial)
-                NavRow(s.whatsNew, onOpenChangelog, subtitle = "v1.1.1")
+                NavRow(s.whatsNew, onOpenChangelog, subtitle = "v${appVersion(context)}")
                 NavRow(s.about, onOpenAbout)
                 NavRow(s.licensesTitle, onOpenLicenses)
+                Spacer(Modifier.height(16.dp))
+                // The installed version, quietly closing the page.
+                Text(
+                    "ስንቅ · v${appVersion(context)}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
                 Spacer(Modifier.height(8.dp))
             }
         }
     }
 }
+
+/** The installed versionName, straight from the package — never a hardcoded copy. */
+private fun appVersion(context: android.content.Context): String = runCatching {
+    context.packageManager.getPackageInfo(context.packageName, 0).versionName
+}.getOrNull() ?: ""
 
 @Composable
 private fun CompactSegmented(label: String, options: List<String>, selected: Int, onSelect: (Int) -> Unit) {

@@ -31,6 +31,25 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.5.0",
+        title = "Ready for the Play Store",
+        titleAm = "ለፕሌይ ስቶር ዝግጁ",
+        changes = listOf(
+            "Prayer alarms ring as a true alarm notification — same exact timing, snooze, and dismiss, with no background service; alarms on Android 12 are now exact too.",
+            "The ግጻዌ widget always shows today and fits any size you resize it to.",
+            "A new Licenses & sources page in Settings credits every bundled text and font.",
+            "All Amharic text now addresses you in the polite plural, and What's New reads in Amharic.",
+            "Restoring a damaged backup can no longer cause crashes, and search uses far less memory.",
+        ),
+        changesAm = listOf(
+            "የጸሎት ማንቂያዎች እንደ እውነተኛ የማንቂያ ማሳወቂያ ይጮኻሉ — ያው ትክክለኛ ሰዓት፣ ማሸለብና መዝጋት፤ በአንድሮይድ 12 ላይም ማንቂያዎች አሁን ትክክለኛ ናቸው።",
+            "የግጻዌ ዊጀቱ ሁልጊዜ ዛሬን ያሳያል፤ በማንኛውም መጠን ሲስተካከልም ይመጥናል።",
+            "አዲሱ «ፈቃዶች እና ምንጮች» ገጽ በቅንብሮች ውስጥ እያንዳንዱን የታጨቀ ጽሑፍና ቅርጸ-ቁምፊ ያመሰግናል።",
+            "ሁሉም የአማርኛ ጽሑፍ አሁን በአክብሮት ብዙ ቁጥር ያናግርዎታል፤ «ምን አዲስ ነገር አለ»ም በአማርኛ ይነበባል።",
+            "የተበላሸ ምትኬን መመለስ ከእንግዲህ ብልሽት አያመጣም፤ ፍለጋም በጣም ያነሰ ማህደረ ትውስታ ይጠቀማል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.4.0",
         title = "The Psalter and the ግጻዌ agree",
         titleAm = "መዝሙረ ዳዊትና ግጻዌው ተስማምተዋል",
