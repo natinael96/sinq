@@ -1,30 +1,297 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ስንቅ · Sinq</title>
-<style>
-  :root { color-scheme: light dark; }
-  body {
-    font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Ethiopic", sans-serif;
-    margin: 0; min-height: 100vh; display: grid; place-items: center;
-    background: #0b3129; color: #f2edde; text-align: center; padding: 24px;
-  }
-  h1 { font-size: 44px; margin: 0 0 4px; }
-  p { color: #a9c1b6; margin: 6px 0; }
-  a { color: #e4bc5a; }
-  .links { margin-top: 22px; display: flex; gap: 22px; justify-content: center; flex-wrap: wrap; }
-</style>
+<title>ስንቅ · Sinq: the Ethiopian Orthodox Book of Hours for Android</title>
+<meta name="description" content="Sinq (ስንቅ) brings the seven canonical prayer hours, the complete Psalter, ግጻዌ and ስንክሳር to Android in Amharic, entirely offline, with no account and no data collection.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ስንቅ · Sinq">
+<meta property="og:description" content="The Ethiopian Orthodox Tewahedo Book of Hours for Android. Offline, Amharic-first, no accounts, no tracking.">
+<meta property="og:url" content="https://natinael96.github.io/sinq/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+<script>try{if(localStorage.getItem('sinq-lang')==='am'){document.documentElement.setAttribute('data-lang','am');document.documentElement.setAttribute('lang','am');}}catch(e){}</script>
+<script src="site.js" defer></script>
 </head>
 <body>
-<div>
-  <h1>ስንቅ</h1>
-  <p>Sinq — an Ethiopian Orthodox Tewahedo prayer companion.<br>Offline. No accounts. No data collection.</p>
-  <div class="links">
-    <a href="https://github.com/natinael96/sinq">Source &amp; releases</a>
-    <a href="privacy-policy.html">Privacy policy</a>
+
+<a class="skip" href="#main"><span lang="en">Skip to content</span><span lang="am">ወደ ይዘቱ ዝለል</span></a>
+
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html">
+      <svg viewBox="0 0 108 108" aria-hidden="true"><rect width="108" height="108" rx="24" fill="#0E3B31"/><g fill="#E8C46B"><path d="M51.2,26 h5.6 v8 h9.2 v5.6 h-9.2 v12.4 h-5.6 v-12.4 h-9.2 v-5.6 h9.2 Z"/><path d="M43.5,66 A10.5,10.5 0 0 1 64.5,66 Z"/></g><g fill="none" stroke="#E8C46B" stroke-width="2.5" stroke-linecap="round"><path d="M29,66 L79,66"/><path d="M60.3,52.4 L62.9,47 M65.5,56.4 L70.1,52.5 M68.5,62.1 L74.3,60.6 M47.7,52.4 L45.1,47 M42.5,56.4 L37.9,52.5 M39.5,62.1 L33.7,60.6"/></g></svg>
+      <span class="name ethi">ስንቅ</span>
+    </a>
+    <div class="nav-links">
+      <a href="install.html"><span lang="en">Install</span><span lang="am" class="ethi">አጫጫን</span></a>
+      <a href="changelog.html"><span lang="en">Changes</span><span lang="am" class="ethi">ለውጦች</span></a>
+      <a href="credits.html"><span lang="en">Sources</span><span lang="am" class="ethi">ምንጮች</span></a>
+      <a href="privacy-policy.html"><span lang="en">Privacy</span><span lang="am" class="ethi">ግላዊነት</span></a>
+      <a href="https://github.com/natinael96/sinq">GitHub</a>
+    </div>
+    <button id="lang" type="button" aria-label="ወደ አማርኛ ቀይር"><span lang="en" class="ethi">አማርኛ</span><span lang="am">English</span></button>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-in">
+
+    <div class="hero-copy">
+      <p class="eyebrow">
+        <svg class="mark" viewBox="26 23 56 46" role="img" aria-label="Sinq"><g fill="#E8C46B"><path d="M51.2,26 h5.6 v8 h9.2 v5.6 h-9.2 v12.4 h-5.6 v-12.4 h-9.2 v-5.6 h9.2 Z"/><path d="M43.5,66 A10.5,10.5 0 0 1 64.5,66 Z"/></g><g fill="none" stroke="#E8C46B" stroke-width="2.5" stroke-linecap="round"><path d="M29,66 L79,66"/><path d="M60.3,52.4 L62.9,47 M65.5,56.4 L70.1,52.5 M68.5,62.1 L74.3,60.6 M47.7,52.4 L45.1,47 M42.5,56.4 L37.9,52.5 M39.5,62.1 L33.7,60.6"/></g></svg>
+        <span class="wordmark ethi">ስንቅ · Sinq</span>
+      </p>
+      <p class="motto">
+        <span lang="en">provisions for the journey</span>
+        <span lang="am" class="ethi">ለመንገድ የሚሆን ስንቅ</span>
+      </p>
+
+      <h1 lang="en">Pray the <span class="hl">hours</span>.</h1>
+      <h1 lang="am" class="ethi"><span class="hl">ሰዓታትን</span> ይጸልዩ።</h1>
+
+      <p class="sub">
+        <span lang="en">The Ethiopian Orthodox Tewahedo Book of Hours for Android. The seven hours, the whole Psalter, ግጻዌ and ስንክሳር, <span class="hl">entirely offline</span>.</span>
+        <span lang="am" class="ethi">የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ የሰዓታት ጸሎት ለአንድሮይድ። ሰባቱ ሰዓታት፣ ሙሉው መዝሙረ ዳዊት፣ ግጻዌና ስንክሳር፤ <span class="hl">ሙሉ በሙሉ ከመስመር ውጭ</span>።</span>
+      </p>
+
+      <div class="cta">
+        <a class="btn btn-primary" href="https://github.com/natinael96/sinq/releases/latest"><span lang="en">Download for Android</span><span lang="am" class="ethi">ለአንድሮይድ ያውርዱ</span></a>
+        <a class="cta-link" href="install.html"><span lang="en">How to install</span><span lang="am" class="ethi">እንዴት እንደሚጫን</span></a>
+      </div>
+
+      <p class="hero-fine">
+        <span lang="en">v1.6.1 · Android 8.0+ · no account, no network, no ads</span>
+        <span lang="am" class="ethi">v1.6.1 · አንድሮይድ 8.0+ · መለያ የለም፣ ኢንተርኔት የለም፣ ማስታወቂያ የለም</span>
+      </p>
+    </div>
+
+    <div class="hours">
+      <h2 lang="en">The seven hours</h2>
+      <h2 lang="am" class="ethi">ሰባቱ ሰዓታት</h2>
+      <ol>
+        <li><span class="num">፩</span><span class="nm ethi">ጸሎተ ነግህ</span><span class="gl"><span lang="en">Morning</span><span lang="am" class="ethi">ጠዋት</span></span></li>
+        <li><span class="num">፪</span><span class="nm ethi">ሠለስት</span><span class="gl"><span lang="en">Terce</span><span lang="am" class="ethi">፫ ሰዓት</span></span></li>
+        <li><span class="num">፫</span><span class="nm ethi">ቀትር</span><span class="gl"><span lang="en">Sext</span><span lang="am" class="ethi">እኩለ ቀን</span></span></li>
+        <li><span class="num">፬</span><span class="nm ethi">ተሰዓት</span><span class="gl"><span lang="en">None</span><span lang="am" class="ethi">፱ ሰዓት</span></span></li>
+        <li><span class="num">፭</span><span class="nm ethi">ሰርክ</span><span class="gl"><span lang="en">Vespers</span><span lang="am" class="ethi">ማታ</span></span></li>
+        <li><span class="num">፮</span><span class="nm ethi">ንዋም</span><span class="gl"><span lang="en">Compline</span><span lang="am" class="ethi">መኝታ</span></span></li>
+        <li><span class="num">፯</span><span class="nm ethi">መንፈቀ ሌሊት</span><span class="gl"><span lang="en">Midnight</span><span lang="am" class="ethi">እኩለ ሌሊት</span></span></li>
+      </ol>
+      <p class="note-row">
+        <span lang="en">መንፈቀ ሌሊት keeps its three watches, and the Veil prayer sits beside them.</span>
+        <span lang="am" class="ethi">መንፈቀ ሌሊት ሦስቱን ክፍሎቹን ይይዛል፤ የመንጦላዕት ጸሎትም ከጎናቸው አለ።</span>
+      </p>
+    </div>
+
+  </div>
+</header>
+
+<main id="main">
+
+<section>
+  <h2><span lang="en">What it is</span><span lang="am" class="ethi">ምንድን ነው</span></h2>
+  <p class="lede">
+    <span lang="en">An app for praying the hours, not for reading about them.</span>
+    <span lang="am" class="ethi">ስለ ጸሎት ለማንበብ ሳይሆን፣ ለመጸለይ የተሠራ መተግበሪያ።</span>
+  </p>
+  <p>
+    <span lang="en">Sinq holds the prayers a day is built from, ጸሎተ ነግህ at dawn through መንፈቀ ሌሊት at night, and opens on whichever one the hour suggests. Around them sit the readings that place the day in the Church's year: the ግጻዌ appointed for the date, the ስንክሳር commemoration with its አርኬ, and whichever fast is in effect.</span>
+    <span lang="am" class="ethi">ስንቅ ቀኑ የተሠራባቸውን ጸሎቶች ይዟል፤ ከጠዋቱ ጸሎተ ነግህ እስከ ሌሊቱ መንፈቀ ሌሊት፤ ሰዓቱ የሚጠቁመውንም ከፍቶ ይጠብቅዎታል። በዙሪያቸው ቀኑን በቤተ ክርስቲያኒቱ ዓመት ውስጥ የሚያስቀምጡ ንባባት አሉ፦ ለዕለቱ የተመደበው ግጻዌ፣ የዕለቱ ስንክሳር ከአርኬው ጋር፣ እና በሥራ ላይ ያለው ጾም።</span>
+  </p>
+  <p>
+    <span lang="en">The interface is Amharic first and English if you prefer it. Everything is set in Ethiopic type chosen for reading at length, on a deep liturgical green with gold marking what matters.</span>
+    <span lang="am" class="ethi">የመተግበሪያው ቋንቋ በዋናነት አማርኛ ነው፤ እንግሊዝኛም አለ። ጽሑፉ ረጅም ንባብ እንዲመች ተብለው በተመረጡ የግእዝ ፊደላት፣ በጥልቅ አረንጓዴ ላይ ተቀምጧል።</span>
+  </p>
+</section>
+
+</main>
+
+<div class="band">
+  <div class="band-in">
+    <h2><span lang="en">Offline by construction</span><span lang="am" class="ethi">ከመሠረቱ ከመስመር ውጭ</span></h2>
+    <p>
+      <span lang="en"><strong>Sinq has no internet permission.</strong> This is not a promise not to collect data: the app is built without the ability to reach a network at all. Every psalm, every reading, all 366 days of the lectionary are inside the file before you install it.</span>
+      <span lang="am" class="ethi"><strong>ስንቅ የኢንተርኔት ፈቃድ የለውም።</strong> ይህ “መረጃ አንሰበስብም” የሚል ተስፋ ብቻ አይደለም፦ መተግበሪያው ወደ አውታረ መረብ የመድረስ አቅም ሳይኖረው ነው የተሠራው። እያንዳንዱ መዝሙር፣ እያንዳንዱ ንባብ፣ የግጻዌ ሦስት መቶ ስድሳ ስድስቱም ቀናት ከመጫኑ በፊት በፋይሉ ውስጥ አሉ።</span>
+    </p>
+    <p>
+      <span lang="en">It works on a phone with no SIM, in a basement, on a plane, on a bundle that ran out. Nothing you mark, write or highlight leaves the device, and Android's automatic cloud backup is deliberately switched off for this app, so your prayer records don't reach Google either.</span>
+      <span lang="am" class="ethi">ሲም ካርድ በሌለው ስልክ፣ በምድር ቤት፣ በአውሮፕላን ላይ፣ ጥቅሉ ባለቀበት ጊዜም ይሠራል። የሚያስቀምጡት፣ የሚጽፉት ወይም የሚያመለክቱት ምንም ነገር ከመሣሪያዎ አይወጣም፤ የአንድሮይድ ራስ-ሰር የደመና ምትኬም ለዚህ መተግበሪያ ሆን ተብሎ ተዘግቷል፤ ስለዚህ የጸሎት መዝገብዎ ወደ ጉግልም አይደርስም።</span>
+    </p>
+    <p><a href="privacy-policy.html" style="color:#E4BC5A"><span lang="en">Read the privacy policy →</span><span lang="am" class="ethi">የግላዊነት ፖሊሲውን ያንብቡ →</span></a></p>
   </div>
 </div>
+
+<main>
+
+<section>
+  <h2><span lang="en">Inside the app</span><span lang="am" class="ethi">በመተግበሪያው ውስጥ</span></h2>
+
+  <div class="group">
+    <h3 class="ethi">ጸሎት <span class="sub" lang="en">Prayer</span></h3>
+    <ul>
+      <li>
+        <b lang="en">The seven hours</b><b lang="am" class="ethi">ሰባቱ ሰዓታት</b>
+        <span lang="en">ጸሎተ ነግህ, ሠለስት, ቀትር, ተሰዓት, ሰርክ, ንዋም and መንፈቀ ሌሊት with its three watches, plus the Veil prayer. The home screen suggests the hour the time of day calls for.</span>
+        <span lang="am" class="ethi">ጸሎተ ነግህ፣ ሠለስት፣ ቀትር፣ ተሰዓት፣ ሰርክ፣ ንዋም እና መንፈቀ ሌሊት ከሦስቱ ክፍሎቹ ጋር፣ እንዲሁም የመንጦላዕት ጸሎት። መነሻ ገጹ ሰዓቱ የሚጠይቀውን ጸሎት ይጠቁማል።</span>
+      </li>
+      <li>
+        <b lang="en">ውዳሴ ማርያም and ጸሎት ዘዘወትር</b><b lang="am" class="ethi">ውዳሴ ማርያምና ጸሎት ዘዘወትር</b>
+        <span lang="en">A portion for each weekday, with ይወድስዋ መላእክት and አንቀጸ ብርሃን, in Amharic, with a Ge'ez toggle.</span>
+        <span lang="am" class="ethi">ለእያንዳንዱ ዕለት የሚሆን ክፍል፣ ከይወድስዋ መላእክትና ከአንቀጸ ብርሃን ጋር፤ በአማርኛ፣ ወደ ግእዝ በሚቀይር አማራጭ።</span>
+      </li>
+      <li>
+        <b lang="en">Hours you shape yourself</b><b lang="am" class="ethi">የራስዎ ሰዓታት</b>
+        <span lang="en">Build a custom hour from the psalms and passages you actually pray, and keep a prayer list of your own.</span>
+        <span lang="am" class="ethi">በእውነት ከሚጸልዩት መዝሙራትና ንባባት የራስዎን ሰዓት ይገንቡ፤ የግል የጸሎት ዝርዝርም ይያዙ።</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="group">
+    <h3 class="ethi">የቀን መቁጠሪያ <span class="sub" lang="en">Calendar and lectionary</span></h3>
+    <ul>
+      <li>
+        <b lang="en">ግጻዌ, the complete lectionary</b><b lang="am" class="ethi">ሙሉው ግጻዌ</b>
+        <span lang="en">All 366 fixed dates, the movable weekday seasons and the Sunday and mezmur cycle, resolved for the year through the ባሕረ ሓሳብ. Every citation opens in the reader.</span>
+        <span lang="am" class="ethi">ሦስት መቶ ስድሳ ስድስቱም ቋሚ ቀናት፣ ተንቀሳቃሽ የሳምንት ወቅቶች፣ የእሑድና የመዝሙር ዑደት፤ ለዓመቱ በባሕረ ሓሳብ ተሰልተው። እያንዳንዱ ጥቅስ በአንባቢው ውስጥ ይከፈታል።</span>
+      </li>
+      <li>
+        <b lang="en">ስንክሳር</b><b lang="am" class="ethi">ስንክሳር</b>
+        <span lang="en">The day's commemorations in Amharic, with its አርኬ hymn and the fixed closing prayer.</span>
+        <span lang="am" class="ethi">የዕለቱ በዓለ ቅዱሳን በአማርኛ፣ ከአርኬውና ከመዝጊያው ጸሎት ጋር።</span>
+      </li>
+      <li>
+        <b lang="en">አጽዋማት</b><b lang="am" class="ethi">አጽዋማት</b>
+        <span lang="en">What fast is in effect today, and every fast of the Ethiopian year.</span>
+        <span lang="am" class="ethi">ዛሬ በሥራ ላይ ያለው ጾም፣ እንዲሁም የዓመቱ ጾማት በሙሉ።</span>
+      </li>
+      <li>
+        <b lang="en">አትናቴዎስ and the ባሕረ ሓሳብ table</b><b lang="am" class="ethi">አትናቴዎስና የባሕረ ሓሳብ ሠንጠረዥ</b>
+        <span lang="en">Funeral and memorial readings, and the printed 2001–2015 EC annual table, both from the Library.</span>
+        <span lang="am" class="ethi">የፍትሐትና የተዝካር ንባባት፣ እንዲሁም የታተመው የ፳፻፩–፳፻፲፭ ዓ.ም ዓመታዊ ሠንጠረዥ፤ ሁለቱም ከቤተ መጻሕፍቱ።</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="group">
+    <h3 class="ethi">ንባብ <span class="sub" lang="en">Reading</span></h3>
+    <ul>
+      <li>
+        <b lang="en">The whole Bible, bundled</b><b lang="am" class="ethi">ሙሉው መጽሐፍ ቅዱስ፣ አብሮ የተጫነ</b>
+        <span lang="en">The Amharic 1980 Ethiopian Orthodox canon, Old and New Testament, with no connection needed.</span>
+        <span lang="am" class="ethi">የአማርኛ ፲፱፻፹ የኢትዮጵያ ኦርቶዶክስ ቀኖና፣ ብሉይና ሐዲስ ኪዳን፣ ያለ ኢንተርኔት።</span>
+      </li>
+      <li>
+        <b lang="en">All 150 psalms</b><b lang="am" class="ethi">፻፶ው መዝሙራት</b>
+        <span lang="en">Amharic by default with a Ge'ez 1980 switch in the reader, numbered as the Ge'ez Psalter numbers them.</span>
+        <span lang="am" class="ethi">በነባሪ በአማርኛ፣ በአንባቢው ውስጥ ወደ ግእዝ ፲፱፻፹ በሚቀይር አማራጭ፤ ቁጥራቸውም እንደ ግእዙ መዝሙረ ዳዊት።</span>
+      </li>
+      <li>
+        <b lang="en">Type that suits your eyes</b><b lang="am" class="ethi">ለዓይንዎ የሚስማማ ጽሑፍ</b>
+        <span lang="en">Scroll or turn page by page; five text sizes, four Ethiopic faces, three line spacings and four alignments, matched across every reading surface. The screen can stay awake while you pray, and each hour remembers where you stopped.</span>
+        <span lang="am" class="ethi">በማንሸራተት ወይም ገጽ በገጽ ያንብቡ፤ አምስት የጽሑፍ መጠኖች፣ አራት የግእዝ ፊደላት፣ ሦስት የመስመር ክፍተቶችና አራት አሰላለፎች፤ በሁሉም የንባብ ገጾች ተመሳሳይ። ሲጸልዩ ስክሪኑ ሳይጠፋ ሊቆይ ይችላል፤ እያንዳንዱ ሰዓትም ያቆሙበትን ያስታውሳል።</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="group">
+    <h3 class="ethi">የግል <span class="sub" lang="en">Yours</span></h3>
+    <ul>
+      <li>
+        <b lang="en">ማስታወሻ, a journal that knows the day</b><b lang="am" class="ethi">ቀኑን የሚያውቅ ማስታወሻ</b>
+        <span lang="en">Write the day down, browsed a ግእዝ month at a time. Each entry keeps the Church's day it was written on (the feast, the fast, that day's ግጻዌ), so an old entry reads as more than a date. Entries can be locked behind a passphrase, and the journal never appears in screenshots or the app switcher.</span>
+        <span lang="am" class="ethi">ዕለቱን ይጻፉት፤ በግእዝ ወር እየተዘዋወሩ ያንብቡት። እያንዳንዱ ማስታወሻ የተጻፈበትን የቤተ ክርስቲያን ቀን ይይዛል (በዓሉን፣ ጾሙን፣ የዕለቱን ግጻዌ)፤ ስለዚህ የቆየ ማስታወሻ ከቀን በላይ ሆኖ ይነበባል። ማስታወሻዎች በይለፍ ቃል ሊቆለፉ ይችላሉ፤ ማስታወሻውም በስክሪንሾት ወይም በመተግበሪያ መቀያየሪያው ላይ ፈጽሞ አይታይም።</span>
+      </li>
+      <li>
+        <b lang="en">አስራት and ስዕለት</b><b lang="am" class="ethi">አስራትና ስዕለት</b>
+        <span lang="en">A ledger for the tithe: record what you receive and the tenth is worked out, record what you give and it shows what is still owed. Vows are tied to the feast they were promised on, setting what was promised against what has been kept.</span>
+        <span lang="am" class="ethi">የአስራት መዝገብ፦ የተቀበሉትን ያስመዝግቡ፣ አሥራቱ ይሰላል፤ የሰጡትን ያስመዝግቡ፣ ቀሪው ዕዳ ይታያል። ስዕለቶች በተሳሉበት በዓል ተይዘው፣ የተሳሉትን ከተፈጸመው ጋር ያነጻጽራሉ።</span>
+      </li>
+      <li>
+        <b lang="en">ጉዞ, a record without punishment</b><b lang="am" class="ethi">ያለ ቅጣት የሚያዝ መዝገብ</b>
+        <span lang="en">Track daily prayer and your own habits. There is no broken-streak language here; a missed day is a missed day.</span>
+        <span lang="am" class="ethi">ዕለታዊ ጸሎትዎንና ልማዶችዎን ይከታተሉ። “ተቋረጠ” የሚል ቋንቋ የለም፤ ያመለጠ ቀን ያመለጠ ቀን ነው።</span>
+      </li>
+      <li>
+        <b lang="en">Reminders that respect the night</b><b lang="am" class="ethi">ሌሊቱን የሚያከብሩ አስታዋሾች</b>
+        <span lang="en">Prayer-time notifications with per-mode settings, a nightly nudge, a morning ግጻዌ reading, and quiet hours that silence all of them.</span>
+        <span lang="am" class="ethi">ለእያንዳንዱ ሁኔታ የሚስተካከሉ የጸሎት ሰዓት ማሳወቂያዎች፣ የሌሊት ማስታወሻ፣ የጠዋት ግጻዌ ንባብ፣ እና ሁሉንም የሚያጠፋ የጸጥታ ሰዓት።</span>
+      </li>
+      <li>
+        <b lang="en">Search that forgives spelling</b><b lang="am" class="ethi">ፊደል የማይለይ ፍለጋ</b>
+        <span lang="en">Amharic search treating ሀ/ሐ/ኀ, ሰ/ሠ and ጸ/ፀ as equal, across the prayers, the Psalter, the New Testament, ስንክሳር and ውዳሴ ማርያም.</span>
+        <span lang="am" class="ethi">ሀ/ሐ/ኀ፣ ሰ/ሠ እና ጸ/ፀ እኩል ተደርገው የሚያዙበት የአማርኛ ፍለጋ፤ በጸሎቶቹ፣ በመዝሙረ ዳዊት፣ በሐዲስ ኪዳን፣ በስንክሳርና በውዳሴ ማርያም ውስጥ።</span>
+      </li>
+      <li>
+        <b lang="en">Bookmarks, highlights, sharing</b><b lang="am" class="ethi">ምልክቶች፣ ማድመቂያዎችና ማጋራት</b>
+        <span lang="en">Colour any verse in one of four colours and it stays coloured everywhere it appears. Copy or share a verse, a reading or a chapter as text or as paginated image cards, and save them to the gallery.</span>
+        <span lang="am" class="ethi">ማንኛውንም ቁጥር በአራት ቀለማት አንዱ ያድምቁ፤ በሚታይበት ቦታ ሁሉ የደመቀ ሆኖ ይቆያል። ቁጥር፣ ንባብ ወይም ምዕራፍ በጽሑፍ ወይም በምስል ካርዶች ይቅዱ፣ ያጋሩ፣ ወደ ማዕከለ ሥዕላትም ያስቀምጡ።</span>
+      </li>
+      <li>
+        <b lang="en">Backup you choose the contents of</b><b lang="am" class="ethi">ይዘቱን እርስዎ የሚመርጡት ምትኬ</b>
+        <span lang="en">Export is a checklist, not all-or-nothing. The journal is off by default and asks for your passphrase before it can be included; confession drafts are never exportable at all.</span>
+        <span lang="am" class="ethi">ወደ ውጭ መላክ ሁሉንም-ወይም-ምንም ሳይሆን ዝርዝር ምርጫ ነው። ማስታወሻው በነባሪ ጠፍቷል፤ ከመካተቱ በፊትም የይለፍ ቃልዎን ይጠይቃል። የንስሐ ማስታወሻዎች ደግሞ ፈጽሞ ወደ ውጭ አይላኩም።</span>
+      </li>
+      <li>
+        <b lang="en">A home-screen widget</b><b lang="am" class="ethi">የመነሻ ገጽ ዊጅት</b>
+        <span lang="en">Today's ምስባክ and ወንጌል, without opening anything.</span>
+        <span lang="am" class="ethi">የዛሬው ምስባክና ወንጌል፣ ምንም ሳይከፍቱ።</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2><span lang="en">Where to go next</span><span lang="am" class="ethi">ቀጥሎ</span></h2>
+  <div class="cards">
+    <div class="card">
+      <h3><span lang="en">Install it</span><span lang="am" class="ethi">ይጫኑት</span></h3>
+      <p><span lang="en">Sinq is distributed as a signed APK. Three steps, plus a way to get updates automatically.</span><span lang="am" class="ethi">ስንቅ በተፈረመ APK ይሰራጫል። ሦስት ደረጃዎች፣ እንዲሁም ዝማኔን በራስ-ሰር የሚያገኙበት መንገድ።</span></p>
+      <p><a href="install.html"><span lang="en">Install guide →</span><span lang="am" class="ethi">የአጫጫን መመሪያ →</span></a></p>
+    </div>
+    <div class="card">
+      <h3><span lang="en">Where the text comes from</span><span lang="am" class="ethi">ጽሑፉ ከየት እንደመጣ</span></h3>
+      <p><span lang="en">Every source, its licence, and who transcribed it. The prayer text and the code are under different terms.</span><span lang="am" class="ethi">እያንዳንዱ ምንጭ፣ ፈቃዱና ገልባጩ። የጸሎቱ ጽሑፍና ኮዱ በተለያዩ ውሎች ሥር ናቸው።</span></p>
+      <p><a href="credits.html"><span lang="en">Sources and licences →</span><span lang="am" class="ethi">ምንጮችና ፈቃዶች →</span></a></p>
+    </div>
+    <div class="card">
+      <h3><span lang="en">What changed</span><span lang="am" class="ethi">የተለወጠው</span></h3>
+      <p><span lang="en">Release notes for recent versions, written for the people using the app.</span><span lang="am" class="ethi">የቅርብ ጊዜ ዝማኔዎች ማስታወሻ፣ ለተጠቃሚዎች ተብሎ የተጻፈ።</span></p>
+      <p><a href="changelog.html"><span lang="en">Recent releases →</span><span lang="am" class="ethi">የቅርብ ዝማኔዎች →</span></a></p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span lang="en">Corrections</span><span lang="am" class="ethi">እርማት</span></h2>
+  <p>
+    <span lang="en">If a reading is mapped to the wrong day, a translation reads wrongly, or a commemoration is missing, that is worth reporting. Corrections to the prayer text mapping and the Amharic are the most useful contribution anyone can make. Open an issue on <a href="https://github.com/natinael96/sinq/issues">GitHub</a>.</span>
+    <span lang="am" class="ethi">አንድ ንባብ ከተሳሳተ ቀን ጋር ከተያያዘ፣ ትርጉም ካልተስተካከለ፣ ወይም አንድ በዓል ከጎደለ፣ ማሳወቁ ተገቢ ነው። በጸሎቱ ጽሑፍ አመዳደብና በአማርኛው ላይ የሚደረግ እርማት ከሁሉ የሚበልጥ አስተዋጽኦ ነው። በ<a href="https://github.com/natinael96/sinq/issues">GitHub</a> ላይ ጉዳይ ይክፈቱ።</span>
+  </p>
+</section>
+
+</main>
+
+<footer>
+  <div class="foot-in">
+    <ul class="foot-links">
+      <li><a href="https://github.com/natinael96/sinq">GitHub</a></li>
+      <li><a href="https://github.com/natinael96/sinq/releases"><span lang="en">Releases</span><span lang="am" class="ethi">ዝማኔዎች</span></a></li>
+      <li><a href="install.html"><span lang="en">Install</span><span lang="am" class="ethi">አጫጫን</span></a></li>
+      <li><a href="credits.html"><span lang="en">Sources and licences</span><span lang="am" class="ethi">ምንጮችና ፈቃዶች</span></a></li>
+      <li><a href="privacy-policy.html"><span lang="en">Privacy policy</span><span lang="am" class="ethi">የግላዊነት ፖሊሲ</span></a></li>
+      <li><a href="https://github.com/natinael96/sinq/issues"><span lang="en">Report a correction</span><span lang="am" class="ethi">እርማት ያሳውቁ</span></a></li>
+    </ul>
+    <p>
+      <span lang="en">Sinq is non-commercial and will remain so: no ads, no in-app purchases, no subscriptions. The source code is Apache-2.0; the bundled prayer and Scripture text is not. See <a href="credits.html">sources and licences</a>.</span>
+      <span lang="am" class="ethi">ስንቅ ለንግድ አልተሠራም፤ እንዲሁም ሆኖ ይቀጥላል፦ ማስታወቂያ የለም፣ የውስጥ ግዢ የለም፣ የደንበኝነት ክፍያ የለም። ኮዱ በApache-2.0 ሥር ነው፤ አብሮ የተጫነው የጸሎትና የቅዱሳት መጻሕፍት ጽሑፍ ግን አይደለም። <a href="credits.html">ምንጮችና ፈቃዶች</a> ይመልከቱ።</span>
+    </p>
+    <p class="fine"><span lang="en">Built by Natinael. ስንቅ, provisions for the journey.</span><span lang="am" class="ethi">በናትናኤል የተሠራ። ስንቅ፦ ለመንገድ የሚሆን።</span></p>
+  </div>
+</footer>
+
 </body>
 </html>

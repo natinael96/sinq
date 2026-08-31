@@ -1,0 +1,343 @@
+/* Sinq site: one stylesheet, no external requests.
+   Colours follow the app's design system (docs/DESIGN_SYSTEM.md):
+   deep liturgical green as the constant brand ground, gold for what matters. */
+
+:root {
+  color-scheme: light dark;
+  --hero:    #0B3129;
+  --brand:   #0E3B31;
+  --gold:    #7E5F1E;   /* bronzed; #E4BC5A only reaches 3.1:1 on ivory */
+  --gold-lit:#E4BC5A;   /* the true brand gold, for use on the green ground */
+  --bg:      #FAF9F6;
+  --surface: #FFFFFF;
+  --sunken:  #F2F0E9;
+  --ink:     #14231D;
+  --muted:   #4D5D55;
+  --line:    #E3E1D8;
+  --link:    #1F6B4A;
+  --radius:  14px;
+  --radius-lg: 20px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --gold:    #D3B04A;
+    --bg:      #101613;
+    --surface: #16201B;
+    --sunken:  #131A16;
+    --ink:     #E4E8E2;
+    --muted:   #A9B4AC;
+    --line:    #253029;
+    --link:    #9FD0B8;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 17px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-synthesis-weight: none;
+}
+
+/* Ethiopic wants a touch more air between lines than Latin does. */
+[lang="am"], .ethi {
+  font-family: "Noto Sans Ethiopic", "Abyssinica SIL", "Nyala",
+               system-ui, -apple-system, sans-serif;
+  line-height: 1.85;
+}
+
+/* ---- Language switching -------------------------------------------------
+   Every translated string ships as a pair of elements. CSS decides which one
+   is in the document; the hidden half leaves the accessibility tree too. */
+html:not([data-lang="am"]) [lang="am"] { display: none; }
+html[data-lang="am"]       [lang="en"] { display: none; }
+
+a { color: var(--link); text-underline-offset: 3px; }
+a:hover { text-decoration-thickness: 2px; }
+
+h1, h2, h3 { line-height: 1.25; font-weight: 700; }
+
+.skip {
+  position: absolute; left: -9999px;
+  background: var(--gold-lit); color: #14231D;
+  padding: 10px 16px; border-radius: 0 0 var(--radius) 0; z-index: 10;
+}
+.skip:focus { left: 0; top: 0; }
+
+/* ---- Nav ---------------------------------------------------------------- */
+.nav {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--hero);
+  border-bottom: 1px solid rgba(228,188,90,.22);
+}
+.nav-in {
+  max-width: 940px; margin: 0 auto; padding: 10px 20px;
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+}
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  color: #F2EDDE; text-decoration: none; font-weight: 700; margin-right: auto;
+}
+.brand svg { width: 26px; height: 26px; display: block; }
+.brand .name { font-size: 19px; letter-spacing: .01em; }
+.nav-links { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+.nav-links a {
+  color: #C9DCD2; text-decoration: none; font-size: 15px; padding: 6px 0;
+  border-bottom: 2px solid transparent;
+}
+.nav-links a:hover, .nav-links a[aria-current="page"] {
+  color: #F2EDDE; border-bottom-color: var(--gold-lit);
+}
+#lang {
+  font: inherit; font-size: 14px; cursor: pointer;
+  background: transparent; color: var(--gold-lit);
+  border: 1px solid rgba(228,188,90,.5); border-radius: 999px;
+  padding: 5px 14px; min-height: 34px;
+}
+#lang:hover { background: rgba(228,188,90,.12); }
+
+/* ---- Layout ------------------------------------------------------------- */
+main { max-width: 760px; margin: 0 auto; padding: 0 20px 72px; }
+main.wide { max-width: 940px; }
+section { margin: 56px 0; }
+section > h2 {
+  font-size: 15px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--gold); margin: 0 0 6px;
+}
+section > h2[lang="am"] { text-transform: none; letter-spacing: .04em; }
+section > .lede { font-size: 26px; margin: 0 0 24px; line-height: 1.3; }
+
+.page-head { padding: 52px 0 8px; }
+.page-head h1 { font-size: 34px; margin: 0 0 10px; }
+.page-head p { color: var(--muted); margin: 0; }
+
+/* ---- Hero ---------------------------------------------------------------
+   Split layout: identity and the ask on the left, the seven hours on the
+   right so the page shows what the app holds instead of only claiming it. */
+.hero {
+  background: var(--hero); color: #F6F2E6;
+  padding: 88px 20px 84px;
+}
+.hero-in {
+  max-width: 1040px; margin: 0 auto;
+  display: grid; grid-template-columns: 1.06fr .94fr;
+  gap: 72px; align-items: center;
+}
+
+.eyebrow {
+  display: flex; align-items: center; gap: 11px;
+  margin: 0 0 18px; color: #A9C1B6;
+  font-size: 14px; letter-spacing: .2em; text-transform: uppercase;
+}
+.eyebrow .mark { width: 32px; height: auto; display: block; }
+.eyebrow .wordmark { font-weight: 600; }
+
+.motto {
+  margin: 0 0 26px; color: #8FA99C;
+  font-style: italic; font-size: 16px;
+}
+
+.hero h1 {
+  font-size: clamp(38px, 5.2vw, 58px);
+  line-height: 1.1; letter-spacing: -.015em;
+  margin: 0; color: #FFFDF7;
+}
+.hero h1[lang="am"] { line-height: 1.34; letter-spacing: 0; }
+
+/* The one word each line turns on. */
+.hl { color: var(--gold-lit); }
+.hero .sub .hl { font-weight: 600; }
+
+.hero .sub {
+  font-size: 18.5px; line-height: 1.62; color: #A9C1B6;
+  margin: 22px 0 0; max-width: 42ch;
+}
+
+.cta {
+  display: flex; gap: 12px 26px; align-items: center;
+  flex-wrap: wrap; margin: 34px 0 0;
+}
+.btn {
+  display: inline-block; text-decoration: none; font-weight: 600; font-size: 16px;
+  padding: 14px 30px; border-radius: 999px; border: 1px solid transparent;
+}
+.btn-primary { background: var(--gold-lit); color: #14231D; }
+.btn-primary:hover { background: #EFCD76; }
+.btn-ghost { border-color: rgba(228,188,90,.5); color: var(--gold-lit); }
+.btn-ghost:hover { background: rgba(228,188,90,.12); }
+.cta-link {
+  color: #C9DCD2; font-size: 16px; text-decoration: none;
+  border-bottom: 1px solid rgba(201,220,210,.35); padding-bottom: 2px;
+}
+.cta-link:hover { color: #F6F2E6; border-bottom-color: var(--gold-lit); }
+
+.hero-fine { margin: 30px 0 0; font-size: 13.5px; color: #8FA99C; }
+
+/* The right-hand panel: the day's hours, as the app names them. */
+.hours {
+  background: rgba(255,255,255,.045);
+  border: 1px solid rgba(228,188,90,.2);
+  border-radius: 22px; padding: 26px 30px 20px;
+}
+.hours h2 {
+  font-size: 12.5px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--gold-lit); margin: 0 0 16px; font-weight: 600;
+}
+.hours h2[lang="am"] { text-transform: none; letter-spacing: .05em; font-size: 14px; }
+.hours ol { list-style: none; margin: 0; padding: 0; }
+.hours li {
+  display: flex; align-items: baseline; gap: 14px;
+  padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.hours li:last-of-type { border-bottom: none; }
+.hours .num { color: var(--gold-lit); font-size: 15px; min-width: 18px; }
+.hours .nm { color: #F6F2E6; font-size: 17px; }
+.hours .gl { color: #8FA99C; font-size: 13.5px; margin-left: auto; padding-left: 12px; }
+.hours .note-row {
+  margin: 14px 0 6px; font-size: 13px; color: #8FA99C;
+  border-top: 1px solid rgba(255,255,255,.07); padding-top: 14px;
+}
+
+@media (max-width: 900px) {
+  .hero-in { grid-template-columns: 1fr; gap: 48px; }
+  .hero .sub { max-width: none; }
+}
+
+/* ---- Bands and cards ---------------------------------------------------- */
+.band {
+  background: var(--hero); color: #E7EFE9;
+  padding: 52px 20px; margin: 64px 0;
+}
+.band-in { max-width: 720px; margin: 0 auto; }
+.band h2 { color: var(--gold-lit); font-size: 15px; letter-spacing: .12em;
+           text-transform: uppercase; margin: 0 0 12px; }
+.band h2[lang="am"] { text-transform: none; letter-spacing: .04em; }
+.band p { margin: 0 0 14px; }
+.band p:last-child { margin-bottom: 0; }
+.band strong { color: #FFF; }
+
+.group { margin: 0 0 42px; }
+.group h3 {
+  font-size: 22px; margin: 0 0 4px;
+  padding-bottom: 10px; border-bottom: 1px solid var(--line);
+}
+.group h3 .sub { color: var(--muted); font-weight: 400; font-size: 15px; }
+.group ul { list-style: none; padding: 0; margin: 18px 0 0; }
+.group li { margin: 0 0 16px; }
+.group li b { display: block; }
+.group li span { color: var(--muted); }
+
+.cards { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(205px, 1fr)); }
+.card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius-lg); padding: 22px;
+}
+.card h3 { margin: 0 0 8px; font-size: 18px; }
+.card p { margin: 0; color: var(--muted); font-size: 15px; }
+.card a { font-weight: 600; }
+
+/* ---- Steps -------------------------------------------------------------- */
+.steps { list-style: none; counter-reset: step; padding: 0; margin: 0; }
+.steps > li {
+  counter-increment: step; position: relative;
+  padding: 0 0 28px 56px; margin: 0;
+  border-left: 1px solid var(--line); margin-left: 17px;
+}
+.steps > li:last-child { border-left-color: transparent; padding-bottom: 0; }
+.steps > li::before {
+  content: counter(step);
+  position: absolute; left: -18px; top: -2px;
+  width: 35px; height: 35px; border-radius: 50%;
+  background: var(--hero); color: var(--gold-lit);
+  display: grid; place-items: center; font-size: 15px; font-weight: 700;
+}
+.steps h3 { margin: 4px 0 6px; font-size: 19px; }
+.steps p { margin: 0 0 10px; color: var(--muted); }
+
+/* ---- Notes, tables, code ------------------------------------------------ */
+.note {
+  border-left: 3px solid var(--gold); background: var(--sunken);
+  padding: 16px 20px; border-radius: 0 var(--radius) var(--radius) 0;
+  margin: 24px 0; font-size: 15px;
+}
+.note p { margin: 0 0 10px; }
+.note p:last-child { margin: 0; }
+
+dl.terms { margin: 0; }
+dl.terms dt { font-weight: 700; margin: 26px 0 4px; }
+dl.terms dt:first-child { margin-top: 0; }
+dl.terms dd { margin: 0; color: var(--muted); }
+dl.terms dd + dd { margin-top: 6px; }
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .88em;
+  background: var(--sunken); padding: 2px 6px; border-radius: 5px;
+  overflow-wrap: anywhere;
+}
+pre {
+  background: var(--sunken); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 16px; overflow-x: auto;
+}
+pre code { background: none; padding: 0; }
+
+ul.plain { list-style: none; padding: 0; }
+ul.plain li { margin: 0 0 14px; }
+
+/* ---- Release entries ---------------------------------------------------- */
+.release { margin: 0 0 48px; }
+.release header { border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 18px; }
+.release h2 { font-size: 26px; margin: 0; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.release .date { font-size: 14px; color: var(--muted); font-weight: 400; }
+.release .motto { color: var(--gold); font-style: italic; margin: 8px 0 0; }
+.release h3 {
+  font-size: 13px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin: 22px 0 8px;
+}
+.release h3[lang="am"] { text-transform: none; letter-spacing: .04em; }
+.release ul { margin: 0; padding-left: 20px; }
+.release li { margin: 0 0 10px; }
+
+/* ---- Footer ------------------------------------------------------------- */
+footer {
+  background: var(--hero); color: #A9C1B6;
+  padding: 44px 20px; font-size: 15px;
+}
+.foot-in { max-width: 940px; margin: 0 auto; }
+.foot-links { display: flex; gap: 10px 24px; flex-wrap: wrap; margin: 0 0 20px; padding: 0; list-style: none; }
+.foot-links a { color: #F2EDDE; text-decoration: none; border-bottom: 1px solid rgba(228,188,90,.4); }
+.foot-links a:hover { border-bottom-color: var(--gold-lit); }
+footer p { margin: 0 0 10px; max-width: 620px; }
+footer .fine { color: #8FA99C; font-size: 13.5px; }
+
+@media (max-width: 560px) {
+  /* The nav wrapped to three rows and, being sticky, ate a fifth of the
+     screen. On phones it releases the top and the links become one
+     swipeable row beneath the brand. */
+  .nav { position: static; }
+  .nav-in { padding: 10px 16px; gap: 10px; }
+  .nav-links {
+    order: 3; width: 100%; flex-wrap: nowrap;
+    overflow-x: auto; gap: 18px; scrollbar-width: none;
+  }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-links a { font-size: 14px; white-space: nowrap; }
+
+  .hero { padding: 56px 20px 56px; }
+  .hero .sub { font-size: 17px; }
+  .cta { flex-direction: column; align-items: stretch; gap: 18px; }
+  .btn { width: 100%; text-align: center; }
+  .cta-link { text-align: center; }
+  .hours { padding: 22px 22px 18px; }
+  .hours .gl { display: none; }
+  section > .lede { font-size: 22px; }
+  .nav-in { gap: 12px; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
