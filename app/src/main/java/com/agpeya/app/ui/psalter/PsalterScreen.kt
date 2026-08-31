@@ -270,8 +270,8 @@ fun PsalterScreen(
                 selEnd = b
             }
             if (daily && range == null) {
-                // Sunday's division isn't defined yet — say so, and offer the
-                // way out (the whole Psalter) instead of a dead end.
+                // No daily division is appointed for Sunday — state the fact,
+                // and offer the way out (the whole Psalter) instead of a dead end.
                 Column(
                     modifier = Modifier.fillMaxSize().padding(innerPadding),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -279,7 +279,7 @@ fun PsalterScreen(
                 ) {
                     StatePanel(
                         icon = Icons.Outlined.LibraryMusic,
-                        title = s.comingSoon,
+                        title = s.noSundayDivision,
                         actionLabel = s.wholePsalter,
                         onAction = { daily = false },
                     )

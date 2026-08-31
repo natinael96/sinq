@@ -5,12 +5,13 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <!-- Auto-granted; lets a prayer-alarm app fire exact alarms (setAlarmClock). -->
+    <!-- Auto-granted on 13+; lets a prayer-alarm app fire exact alarms (setAlarmClock). -->
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <!-- Alarm-clock FGS type: apps holding USE_EXACT_ALARM are the documented
-         eligible case for systemExempted (mediaPlayback was a policy mismatch). -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
+    <!-- USE_EXACT_ALARM only exists from API 33; on 12/12L setAlarmClock needs
+         this companion (auto-granted there), or every alarm degrades to inexact. -->
+    <uses-permission
+        android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        android:maxSdkVersion="32" />
 
     <application
         android:allowBackup="false"
@@ -31,19 +32,14 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".reminders.AlarmService"
-            android:exported="false"
-            android:foregroundServiceType="systemExempted" />
-
-        <!-- Feeds the ግጻዌ widget's swipeable today/tomorrow stack. -->
-        <service
-            android:name=".widget.GitsaweWidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS"
-            android:exported="false" />
 
         <receiver
             android:name=".reminders.AlarmReceiver"
+            android:exported="false" />
+
+        <!-- The ringing notification's Snooze/Dismiss/removed controls. -->
+        <receiver
+            android:name=".reminders.AlarmActionReceiver"
             android:exported="false" />
 
         <receiver

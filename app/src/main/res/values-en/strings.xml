@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- English-system launchers see these in the widget picker. app_name stays
+     ስንቅ everywhere — it is the brand, not a translatable label. -->
+<resources>
+    <string name="widget_gitsawe_label">Today\'s Gitsawe</string>
+    <string name="widget_gitsawe_description">See today\'s misbak and gospel reading on your home screen.</string>
+</resources>

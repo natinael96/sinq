@@ -69,7 +69,12 @@ object AmharicSearch {
      *
      * The scripture, ስንክሳር and ውዳሴ ማርያም corpora together are megabytes of text;
      * folding them on every keystroke would allocate all of it each time. They're
-     * folded once into [Doc]s and kept for the process lifetime instead.
+     * folded once into [Doc]s and kept until memory pressure ([trimCaches]).
+     *
+     * [haystack] and [folded] are both kept deliberately: matching needs the
+     * folded form, but folding is lossy (ሠ→ሰ, ሐ→ሀ …), so snippets must be cut
+     * from the original or the user would see the wrong letters. The parsed
+     * book models behind them are NOT retained — see [buildIndex].
      */
     internal class Doc(
         val source: Source,
@@ -83,15 +88,26 @@ object AmharicSearch {
 
     @Volatile private var docIndex: List<Doc>? = null
 
+    /** Drop the rebuildable index under memory pressure (see [CacheTrimmer]). */
+    fun trimCaches() {
+        docIndex = null
+    }
+
     /** Build (once) the folded index over the bundled corpora. */
     private suspend fun index(context: Context): List<Doc> =
-        docIndex ?: buildIndex(context).also { docIndex = it }
+        docIndex ?: buildIndex(context).also {
+            docIndex = it
+            com.agpeya.app.data.CacheTrimmer.ensureRegistered(context)
+        }
 
     private suspend fun buildIndex(context: Context): List<Doc> {
         val docs = mutableListOf<Doc>()
 
+        // cache = false: indexing walks every NT book once; letting those loads
+        // fill ScriptureRepository's cache would pin megabytes of parsed books
+        // (and evict the ones actually being read) for a one-shot pass.
         for (meta in ScriptureRepository.books(context)) {
-            val book = ScriptureRepository.book(context, meta.key) ?: continue
+            val book = ScriptureRepository.book(context, meta.key, cache = false) ?: continue
             for (chapter in book.chapters) {
                 val hay = chapter.verses.joinToString(" ") { it.text }
                 docs += Doc(

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -246,20 +247,22 @@ private fun HomeDashboard(
             today,
             hours.size + (habitIds.size - 1),
             onOpenJourney,
-            Modifier.fillMaxWidth().height(132.dp),
+            Modifier.fillMaxWidth().heightIn(min = 132.dp),
         )
         Spacer(Modifier.height(Spacing.sm))
         if (stackReadingCards) {
-            DailyPsalmCard(today, onOpenPsalter, Modifier.fillMaxWidth().height(88.dp))
+            DailyPsalmCard(today, onOpenPsalter, Modifier.fillMaxWidth().heightIn(min = 88.dp))
             Spacer(Modifier.height(Spacing.sm))
-            ZewotrCard(onOpenZewotr, Modifier.fillMaxWidth().height(88.dp))
+            ZewotrCard(onOpenZewotr, Modifier.fillMaxWidth().heightIn(min = 88.dp))
         } else {
+            // The row takes its height from the taller card, so both grow
+            // together at large font scales instead of clipping their text.
             Row(
-                modifier = Modifier.height(96.dp).fillMaxWidth(),
+                modifier = Modifier.height(IntrinsicSize.Min).fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
-                DailyPsalmCard(today, onOpenPsalter, Modifier.weight(1f).fillMaxHeight())
-                ZewotrCard(onOpenZewotr, Modifier.weight(1f).fillMaxHeight())
+                DailyPsalmCard(today, onOpenPsalter, Modifier.weight(1f).fillMaxHeight().heightIn(min = 96.dp))
+                ZewotrCard(onOpenZewotr, Modifier.weight(1f).fillMaxHeight().heightIn(min = 96.dp))
             }
         }
         if (flexibleSummary) Spacer(Modifier.weight(1f))
@@ -433,7 +436,7 @@ private fun GitsaweCard(state: HomeReadingsState, onClick: () -> Unit) {
             Text(s.gitsaweKicker, style = MaterialTheme.typography.labelMedium, color = sinq.onHeroMuted)
             Text(s.gitsaweTitle, style = MaterialTheme.typography.titleMedium, color = sinq.onHero)
             when (state) {
-                HomeReadingsState.Loading -> Text("…", style = MaterialTheme.typography.bodySmall, color = sinq.onHeroMuted)
+                HomeReadingsState.Loading -> Text(s.loadingLabel, style = MaterialTheme.typography.bodySmall, color = sinq.onHeroMuted)
                 HomeReadingsState.Unavailable -> Text(s.contentMissingTitle, style = MaterialTheme.typography.bodySmall, color = sinq.onHeroMuted)
                 is HomeReadingsState.Ready -> {
                     feast?.let { Text(it, style = MaterialTheme.typography.labelMedium, color = sinq.onHeroMuted, maxLines = 1, overflow = TextOverflow.Ellipsis) }

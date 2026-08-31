@@ -126,9 +126,9 @@ class MainActivity : ComponentActivity() {
     private fun consumeDeepLink(intent: Intent?) {
         intent ?: return
         intent.getStringExtra(ReminderScheduler.EXTRA_HOUR_ID)?.let {
-            // Opening a ringing reminder is also an answer: stop its foreground
-            // service before navigating to the requested prayer hour.
-            com.agpeya.app.reminders.AlarmService.dismiss(this)
+            // Opening a ringing reminder is also an answer: take the ringing
+            // notification down before navigating to the requested prayer hour.
+            com.agpeya.app.reminders.AlarmRinger.stop(this)
             pendingDeepLinkHourId.value = it
             intent.removeExtra(ReminderScheduler.EXTRA_HOUR_ID)
         }
@@ -537,6 +537,7 @@ private fun AgpeyaNavHost(
                 onOpenTutorial = { navController.navigate("tutorial") { launchSingleTop = true } },
                 onOpenChangelog = { navController.navigate("changelog") { launchSingleTop = true } },
                 onOpenAbout = { navController.navigate("about") { launchSingleTop = true } },
+                onOpenLicenses = { navController.navigate("licenses") { launchSingleTop = true } },
             )
         }
         composable("settings/reading") {
@@ -631,6 +632,9 @@ private fun AgpeyaNavHost(
         }
         composable("about") {
             AboutScreen(onBack = { navController.popBackStack() })
+        }
+        composable("licenses") {
+            com.agpeya.app.ui.settings.LicensesScreen(onBack = { navController.popBackStack() })
         }
     }
 }

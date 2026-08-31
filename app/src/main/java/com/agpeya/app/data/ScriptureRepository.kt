@@ -25,8 +25,20 @@ object ScriptureRepository {
     private val json = Json { ignoreUnknownKeys = true }
 
     @Volatile private var manifestCache: List<ScriptureBookMeta>? = null
-    private val bookCache = ConcurrentHashMap<String, ScriptureBook>()
+
+    /**
+     * Recently read books only — a whole parsed book is hundreds of kilobytes,
+     * and holding all 26 NT books (as an unbounded map once did) costs tens of
+     * megabytes for chapters nobody is reading. LruCache is synchronized.
+     */
+    private val bookCache = android.util.LruCache<String, ScriptureBook>(8)
     private val psalmCache = ConcurrentHashMap<Boolean, List<com.agpeya.app.model.Section>>()
+
+    /** Drop the rebuildable caches under memory pressure (see [CacheTrimmer]). */
+    fun trimCaches() {
+        bookCache.evictAll()
+        psalmCache.clear()
+    }
 
     /** All Bible books except Psalms, which has its own translation selector. */
     suspend fun books(context: Context): List<ScriptureBookMeta> =
@@ -58,9 +70,14 @@ object ScriptureRepository {
                 .getOrNull()?.also { manifestCache = it } ?: emptyList()
         }
 
-    /** Load one book by its key (e.g. "luke"), cached after first read. */
-    suspend fun book(context: Context, key: String): ScriptureBook? =
-        bookCache[key] ?: withContext(Dispatchers.IO) {
+    /**
+     * Load one book by its key (e.g. "luke"), cached after first read.
+     * [cache] false reads without populating the cache — the search indexer
+     * walks every book once and must not evict what the reader is using.
+     */
+    suspend fun book(context: Context, key: String, cache: Boolean = true): ScriptureBook? =
+        bookCache.get(key) ?: withContext(Dispatchers.IO) {
+            CacheTrimmer.ensureRegistered(context)
             runCatching {
                 val meta = books(context.applicationContext).first { it.key == key }
                 val raw = context.applicationContext.assets
@@ -68,12 +85,13 @@ object ScriptureRepository {
                     .readBytes().decodeToString()
                 parseBook(json.parseToJsonElement(raw).jsonObject, meta)
             }.onFailure { Log.e(TAG, "Failed to load book $key", it) }
-                .getOrNull()?.also { bookCache[key] = it }
+                .getOrNull()?.also { if (cache) bookCache.put(key, it) }
         }
 
     /** Psalms as the shared Section model used by prayer and scripture readers. */
     suspend fun psalms(context: Context, geez: Boolean = false): List<com.agpeya.app.model.Section> =
         psalmCache[geez] ?: withContext(Dispatchers.IO) {
+            CacheTrimmer.ensureRegistered(context)
             val edition = if (geez) PSALMS_GEEZ_EDITION else PSALMS_AMHARIC_EDITION
             runCatching {
                 val raw = context.applicationContext.assets

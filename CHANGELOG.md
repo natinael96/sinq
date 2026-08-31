@@ -6,6 +6,47 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [Unreleased]
+
+_Play-Store readiness: everything from the pre-flight audit except the
+Bible-rights question (deliberately held open)._
+
+### Changed
+- **Alarms ring without a foreground service.** The prayer alarm is now an
+  insistent alarm-channel notification (alarm-stream sound + vibration looping
+  up to 60s) — the `systemExempted` service and both foreground-service
+  permissions are gone, and `SCHEDULE_EXACT_ALARM` (≤ API 32) fixes silently
+  inexact alarms on Android 12/12L. Snooze, dismiss, and the "done?" follow-up
+  are unchanged.
+- **The ግጻዌ widget shows today, always, at any size.** No more 19:00 flip to
+  tomorrow; the card renders directly (no collection service), adapts its
+  rows/kidase/footer to the granted size, can shrink to a slim strip, rolls
+  over just past midnight, and stops its refresh alarm when removed. The
+  widget picker now has English text on English-system devices.
+- **All Amharic UI text addresses the user in the polite plural.** Notification,
+  backup, reminder, and prayer-list strings no longer slip into familiar
+  masculine singular.
+- **What's New is bilingual.** Every release entry now has an Amharic
+  rendering; the page follows the app language.
+- **A Licenses & sources screen.** Settings now carries the full attribution
+  record: scripture (corrected scope), ግጻዌ, both Synaxarium sources (with the
+  MIT notice), Wudase Maryam, all five fonts with the full OFL 1.1 text, and
+  the app's own Apache-2.0.
+
+### Fixed
+- **A corrupted backup can no longer plant later crashes.** Restored reminder
+  times are clamped and duplicate added-psalms deduplicated.
+- **Search no longer permanently retains ~25–35 MB.** Indexing stops pinning
+  parsed books, the book cache became an 8-entry LRU, and all content caches
+  release under memory pressure.
+- **Small hardening and polish.** Distinct alarm-notification request codes
+  (taps can't misroute), negative-numeral and empty-book guards, home cards
+  grow instead of clipping at large font scales, Synaxarium red meets light
+  contrast, 48dp touch targets for the week-day toggle, memento-mori text
+  follows the app language, and "coming soon" wording states facts instead.
+- **Dead weight removed:** the Se'atat settings remnants, an unreferenced
+  legacy settings screen, and an unused asset file.
+
 ## [1.4.0] — 2026-08-31
 
 _versionCode 52 · the Psalter and the ግጻዌ agree_

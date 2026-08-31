@@ -8,6 +8,9 @@ import com.agpeya.app.ui.reading.geezNumeral
  * text, gospels) is never translated — it stays in Amharic as data.
  */
 interface Strings {
+    /** True for the Amharic chrome — lets bilingual UI (What's New, the memento
+     *  mori gloss) pick the right member of a language pair. */
+    val isAmharic: Boolean
     val back: String
     val tabHome: String
     val tabSearch: String
@@ -183,6 +186,7 @@ interface Strings {
     val customizePrayers: String
     val reminderModes: String
     val whatsNew: String
+    val licensesTitle: String
     val about: String
     val alarmSection: String
     val alertSoundVibrate: String
@@ -245,7 +249,10 @@ interface Strings {
     val psalterTitle: String
     val wholePsalter: String
     val dailyPsalms: String
-    val comingSoon: String
+    /** The Psalter's Sunday state: no daily division is appointed — a fact, not a promise. */
+    val noSundayDivision: String
+    /** Generic in-progress label while a card's content loads. */
+    val loadingLabel: String
     val zewotrTselot: String
     val wudaseMariam: String
     val wudaseLangAmharic: String
@@ -463,6 +470,7 @@ interface Strings {
 }
 
 object AmharicStrings : Strings {
+    override val isAmharic = true
     override val back = "ተመለስ"
     override val tabHome = "ቤት"
     override val tabSearch = "ፍለጋ"
@@ -567,7 +575,7 @@ object AmharicStrings : Strings {
     }
     override val removeHighlight = "ማድመቅ አስወግድ"
 
-    override val searchHint = "በጸሎቶችና በመዝሙራት ውስጥ ፈልግ"
+    override val searchHint = "በጸሎቶችና በመዝሙራት ውስጥ ይፈልጉ"
     override val noResults = "ምንም አልተገኘም"
     override val recentSearches = "የቅርብ ጊዜ ፍለጋዎች"
     override val clearAction = "አጽዳ"
@@ -578,14 +586,14 @@ object AmharicStrings : Strings {
     override fun nightReminderPending(items: String) = "ዛሬ ያልተመዘገቡ፦ $items"
     override val nightReminderChannel = "የሌሊት ማስታወሻ"
     override val gitsaweReminderTitle = "የዕለቱ ግጻዌ"
-    override val gitsaweReminderBody = "የዛሬን ምንባብ ተመልከት"
+    override val gitsaweReminderBody = "የዛሬን ምንባብ ይመልከቱ"
     override val gitsaweChannelName = "የዕለቱ ግጻዌ ማስታወሻ"
     override val settingsGitsaweReminder = "የዕለቱ ግጻዌ ማስታወሻ"
     override val settingsGitsaweReminderDesc = "በየቀኑ ጠዋት የዕለቱን ግጻዌ ምንባብ አስታውሰኝ"
     override val settingsNightReminder = "የሌሊት ማስታወሻ"
     override val settingsNightReminderDesc = "ጸሎት ቢመዘገብም ስንክሳርን፣ ቤተ ክርስቲያንንና ስግደትን ለማስታወስ በየሌሊቱ ይልካል"
     override val notifDisabledTitle = "ማሳወቂያዎች ጠፍተዋል"
-    override val notifDisabledBody = "ማንቂያዎችህ እንዲደርሱህ የመተግበሪያውን ማሳወቂያዎች ከቅንብሮች አብራ።"
+    override val notifDisabledBody = "ማንቂያዎችዎ እንዲደርሱዎት የመተግበሪያውን ማሳወቂያዎች ከቅንብሮች ያብሩ።"
 
     override val bookmarksTitle = "ምልክቶች"
     override val noBookmarksTitle = "ገና ምልክት አላደረጉም"
@@ -615,7 +623,7 @@ object AmharicStrings : Strings {
     override val endTimeLabel = "መጨረሻ"
     override val lastBackupLabel = "የመጨረሻ ምትኬ"
     override val backgroundRestrictedTitle = "የጀርባ እንቅስቃሴ ተገድቧል"
-    override val backgroundRestrictedBody = "የጸሎት ማስታወሻዎች በሰዓቱ እንዲደርሱ የጀርባ እንቅስቃሴን ፍቀድ።"
+    override val backgroundRestrictedBody = "የጸሎት ማስታወሻዎች በሰዓቱ እንዲደርሱ የጀርባ እንቅስቃሴን ይፍቀዱ።"
     override val allowBackground = "የጀርባ እንቅስቃሴን ፍቀድ"
     override val addName = "ስም ጨምር"
     override val addChristianName = "የክርስትና ስም ጨምር"
@@ -632,6 +640,7 @@ object AmharicStrings : Strings {
     override val customizePrayers = "ጸሎቶችን አስተካክል"
     override val reminderModes = "የጸሎት ማንቂያ ሁነታዎች"
     override val whatsNew = "ምን አዲስ ነገር አለ"
+    override val licensesTitle = "ፈቃዶች እና ምንጮች"
     override val about = "ስለ መተግበሪያው"
     override val alarmSection = "ማንቂያ"
     override val alertSoundVibrate = "ድምፅና ንዝረት"
@@ -688,7 +697,8 @@ object AmharicStrings : Strings {
     override val psalterTitle = "መዝሙረ ዳዊት"
     override val wholePsalter = "ሙሉ"
     override val dailyPsalms = "የዕለቱ"
-    override val comingSoon = "በቅርቡ..."
+    override val noSundayDivision = "ለእሑድ የተመደበ የዕለት ክፍል የለም"
+    override val loadingLabel = "በመጫን ላይ…"
     override val zewotrTselot = "ዘወትር ጸሎት"
     override val wudaseMariam = "ውዳሴ ማርያም"
     override val wudaseLangAmharic = "አማርኛ"
@@ -737,7 +747,7 @@ object AmharicStrings : Strings {
     override fun psalmRange(from: Int, to: Int) = "መዝሙር $from–$to"
     override val snooze = "አሳድር"
     override val addPsalm = "መዝሙር ጨምር"
-    override val choosePsalm = "መዝሙር ምረጥ"
+    override val choosePsalm = "መዝሙር ይምረጡ"
     override val remove = "አስወግድ"
     override val manageHours = "ሰዓታት አስተካክል"
     override val newHour = "አዲስ ሰዓት"
@@ -774,10 +784,10 @@ object AmharicStrings : Strings {
 
     override val batteryHelp = "ማስታወሻ አይሰራም?"
     override val batteryHelpIntro = "አንዳንድ ስልኮች ባትሪ ለመቆጠብ መተግበሪያዎችን ያቆማሉ። ማስታወሻዎች በሰዓቱ እንዲሰሩ የሚከተሉትን ያድርጉ።"
-    override val batteryStepUnrestrict = "ባትሪ ገደብ አንሳ"
-    override val batteryStepUnrestrictBody = "ቅንብሮች → ባትሪ → ይህን መተግበሪያ ያልተገደበ አድርግ (Unrestricted)።"
-    override val batteryStepAutostart = "በራስ ማስጀመር ፍቀድ"
-    override val batteryStepAutostartBody = "Xiaomi/Samsung ላሉ ስልኮች Autostart ፍቀድ፤ ከ«የሚተኙ መተግበሪያዎች» አስወግድ።"
+    override val batteryStepUnrestrict = "የባትሪ ገደብ ያንሱ"
+    override val batteryStepUnrestrictBody = "ቅንብሮች → ባትሪ → ይህን መተግበሪያ ያልተገደበ ያድርጉ (Unrestricted)።"
+    override val batteryStepAutostart = "በራስ ማስጀመር ይፍቀዱ"
+    override val batteryStepAutostartBody = "Xiaomi/Samsung ላሉ ስልኮች Autostart ይፍቀዱ፤ ከ«የሚተኙ መተግበሪያዎች» ያስወግዱ።"
     override val openSettings = "ቅንብሮችን ክፈት"
     override val remindersNotFiringTitle = "ማስታወሻ አይሰራም?"
 
@@ -822,9 +832,9 @@ object AmharicStrings : Strings {
     override val settingsGroupMore = "ተጨማሪ"
 
     override val backupFailedBody =
-        "ምትኬው አልተቀመጠም። በመተግበሪያው ውስጥ ያለው መረጃህ እንደነበረ አለ። ሌላ ቦታ ወይም ሌላ ስም መርጠህ እንደገና ሞክር።"
+        "ምትኬው አልተቀመጠም። በመተግበሪያው ውስጥ ያለው መረጃዎ እንደነበረ አለ። ሌላ ቦታ ወይም ሌላ ስም መርጠው እንደገና ይሞክሩ።"
     override val restoreFailedBody =
-        "ፋይሉ አልተነበበም። ያለህ ጉዞ፣ ምልክቶችና ማድመቂያዎች አልተነኩም። የስንቅ ምትኬ ፋይል (.json) መሆኑን አረጋግጠህ እንደገና ሞክር።"
+        "ፋይሉ አልተነበበም። ያለዎት ጉዞ፣ ምልክቶችና ማድመቂያዎች አልተነኩም። የስንቅ ምትኬ ፋይል (.json) መሆኑን አረጋግጠው እንደገና ይሞክሩ።"
     override val contentMissingTitle = "ይህ ክፍል አልተገኘም"
     override val contentMissingBody =
         "ጽሑፉ በዚህ እትም ውስጥ የለም። የቀሩት ክፍሎች እንደተለመደው ይሠራሉ።"
@@ -843,22 +853,22 @@ object AmharicStrings : Strings {
     override val personNameLabel = "ስም"
     override val prayerNoteLabel = "ማስታወሻ (አማራጭ)"
     override val noPrayerListTitle = "ገና ማንም አልተጨመረም"
-    override val noPrayerListBody = "በጸሎት የምታስባቸውን ሰዎች እዚህ ጨምር።"
+    override val noPrayerListBody = "በጸሎት የሚያስቧቸውን ሰዎች እዚህ ይጨምሩ።"
 
     override val settingsAlmsReminder = "የምጽዋት ማስታወሻ"
-    override val settingsAlmsReminderDesc = "በመረጥከው ቀን ምጽዋት እንድትሰጥ ያስታውስሃል"
+    override val settingsAlmsReminderDesc = "በመረጡት ቀን ምጽዋት እንዲሰጡ ያስታውስዎታል"
     override val settingsRepentReminder = "የንስሐ ማስታወሻ"
-    override val settingsRepentReminderDesc = "ንስሐ እንድትገባና ቅዱስ ቁርባን እንድትቀበል ያስታውስሃል"
+    override val settingsRepentReminderDesc = "ንስሐ እንዲገቡና ቅዱስ ቁርባን እንዲቀበሉ ያስታውስዎታል"
     override val almsReminderTitle = "የምጽዋት ቀን"
-    override val almsReminderBody = "ዛሬ ምጽዋት የምትሰጥበት ቀን ነው።"
+    override val almsReminderBody = "ዛሬ ምጽዋት የሚሰጡበት ቀን ነው።"
     override val almsChannelName = "የምጽዋት ማስታወሻ"
     override val repentReminderTitle = "ንስሐ"
-    override val repentReminderBody = "ንስሐ መግባትን አስብ፤ ለቅዱስ ቁርባን ተዘጋጅ።"
+    override val repentReminderBody = "ንስሐ መግባትን ያስቡ፤ ለቅዱስ ቁርባን ይዘጋጁ።"
     override val repentChannelName = "የንስሐ ማስታወሻ"
 
     override val settingsBreathReminder = "የሕሊና ጸሎት"
-    override val settingsBreathReminderDesc = "በቀን አንዴ፣ በሰዓታት መካከል ባልታሰበ ጊዜ አጭር ጸሎት ያስታውስሃል"
-    override val breathReminderTitle = "ለአፍታ ጸልይ"
+    override val settingsBreathReminderDesc = "በቀን አንዴ፣ በሰዓታት መካከል ባልታሰበ ጊዜ አጭር ጸሎት ያስታውስዎታል"
+    override val breathReminderTitle = "ለአፍታ ይጸልዩ"
     override val breathChannelName = "የመሃል ጸሎት"
 
     override fun nextDue(date: String) = "ቀጣይ ማስታወሻ፦ $date"
@@ -878,6 +888,7 @@ object AmharicStrings : Strings {
 }
 
 object EnglishStrings : Strings {
+    override val isAmharic = false
     override val back = "Back"
     override val tabHome = "Home"
     override val tabSearch = "Search"
@@ -1045,6 +1056,7 @@ object EnglishStrings : Strings {
     override val customizePrayers = "Customize prayers"
     override val reminderModes = "Prayer reminder modes"
     override val whatsNew = "What's new"
+    override val licensesTitle = "Licenses & sources"
     override val about = "About"
     override val alarmSection = "Alarm"
     override val alertSoundVibrate = "Sound & vibrate"
@@ -1119,7 +1131,8 @@ object EnglishStrings : Strings {
     override val psalterTitle = "መዝሙረ ዳዊት"
     override val wholePsalter = "All"
     override val dailyPsalms = "Today's"
-    override val comingSoon = "Coming soon..."
+    override val noSundayDivision = "No daily division is appointed for Sunday"
+    override val loadingLabel = "Loading…"
     override val zewotrTselot = "ዘወትር ጸሎት"
     override val wudaseMariam = "ውዳሴ ማርያም"
     override val wudaseLangAmharic = "Amharic"

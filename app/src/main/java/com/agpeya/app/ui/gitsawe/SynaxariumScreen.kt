@@ -71,6 +71,7 @@ import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.common.StatePanel
 import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.ReadingMaxWidth
+import com.agpeya.app.ui.theme.sinqColors
 import com.agpeya.app.ui.theme.scaledReadingSp
 import com.agpeya.app.ui.theme.inReadingFont
 import com.agpeya.app.ui.theme.readingBodyStyle
@@ -79,8 +80,8 @@ import java.time.LocalDate
 
 private val FONT_STEPS_SP = SettingsRepository.FONT_STEPS_SP
 
-/** Warm liturgical red for the አርኬ hymn — distinct from the app's gold accent. */
-private val ArkeRed = androidx.compose.ui.graphics.Color(0xFFF0776A)
+// The warm liturgical አርኬ red lives in SinqColors.arke, tuned per theme so it
+// keeps its contrast on the ivory ground as well as the dark green one.
 
 /** The hymn is verse, not prose: a little more air than the running text. */
 private const val ArkeLineHeight = 1.78f
@@ -322,7 +323,7 @@ private fun ClosingPrayer(fontSp: Int) {
             // Fall back to the Ge'ez when a stanza has no Amharic rendering.
             val verse = if (showAmharic) stanza.amharic ?: stanza.geez else stanza.geez
             Text(
-                text = highlightHolyNames(verse, ArkeRed),
+                text = highlightHolyNames(verse, sinqColors.arke),
                 style = style,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth(),
@@ -414,7 +415,7 @@ private fun ArkeLabel(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelLarge.inReadingFont(),
-        color = ArkeRed,
+        color = sinqColors.arke,
         textAlign = TextAlign.Center,
         letterSpacing = 6.sp,
         modifier = Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 10.dp),
@@ -433,7 +434,7 @@ private fun ArkeVerse(
         Text(
             text = text,
             style = readingBodyStyle(fontSp, ArkeLineHeight).copy(fontStyle = FontStyle.Italic),
-            color = ArkeRed,
+            color = sinqColors.arke,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()

@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import com.agpeya.app.data.ModesRepository
 import com.agpeya.app.data.SettingsRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -86,9 +87,12 @@ object BreathPrayerScheduler {
         context.getSystemService(AlarmManager::class.java).cancel(pendingIntent(context))
     }
 
+    // Dispatchers.IO: schedule() is reached from the main thread (launch-time
+    // self-heal, Settings toggles), and plain runBlocking would decode the
+    // modes JSON on that thread. Same shape as the SettingsRepository helpers.
     private fun morningMinute(context: Context): Int =
         runCatching {
-            runBlocking {
+            runBlocking(Dispatchers.IO) {
                 ModesRepository.current(context).activeMode?.entries
                     ?.firstOrNull { it.hourId == "morning" }
                     ?.let { it.hour * 60 + it.minute }

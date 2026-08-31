@@ -50,6 +50,7 @@ fun SettingsScreen(
     onOpenTutorial: () -> Unit,
     onOpenChangelog: () -> Unit,
     onOpenAbout: () -> Unit,
+    onOpenLicenses: () -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -100,6 +101,7 @@ fun SettingsScreen(
                 NavRow(s.tutorial, onOpenTutorial)
                 NavRow(s.whatsNew, onOpenChangelog, subtitle = "v1.1.1")
                 NavRow(s.about, onOpenAbout)
+                NavRow(s.licensesTitle, onOpenLicenses)
                 Spacer(Modifier.height(8.dp))
             }
         }

@@ -69,15 +69,22 @@ object ModesRepository {
 
     /** Restore modes without replacing locally-created modes. A fresh default state adopts the backup fully. */
     suspend fun merge(context: Context, restored: ModesState) {
+        // A hand-edited backup can carry impossible times; persisting them
+        // would crash the scheduler's LocalTime.of later. Clamp on the way in.
+        val safeModes = restored.modes.map { mode ->
+            mode.copy(entries = mode.entries.map {
+                it.copy(hour = it.hour.coerceIn(0, 23), minute = it.minute.coerceIn(0, 59))
+            })
+        }
         val current = current(context)
         if (current == defaultState()) {
-            val valid = restored.modes.ifEmpty { listOf(builtInMode()) }
+            val valid = safeModes.ifEmpty { listOf(builtInMode()) }
             val active = restored.activeModeId.takeIf { id -> valid.any { it.id == id } } ?: BUILT_IN_ID
             write(context, ModesState(activeModeId = active, modes = valid))
             return
         }
         val have = current.modes.mapTo(mutableSetOf()) { it.id }
-        write(context, current.copy(modes = current.modes + restored.modes.filterNot { it.id in have || it.isBuiltIn }))
+        write(context, current.copy(modes = current.modes + safeModes.filterNot { it.id in have || it.isBuiltIn }))
     }
 
     private suspend fun write(context: Context, state: ModesState) {

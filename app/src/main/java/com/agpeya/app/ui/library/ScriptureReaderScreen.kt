@@ -131,6 +131,22 @@ fun ScriptureReaderScreen(
         return
     }
 
+    // A book with no chapters at all (corrupt or truncated asset) would throw
+    // in the coerceIn/first() below; show the same unavailable state instead.
+    if (b.chapters.isEmpty()) {
+        Scaffold(
+            containerColor = MaterialTheme.colorScheme.background,
+            topBar = { SinqTopBar(title = b.nameAm, onBack = onBack) },
+        ) { padding ->
+            StatePanel(
+                title = s.contentUnavailable,
+                body = s.contentMissingBody,
+                modifier = Modifier.padding(padding),
+            )
+        }
+        return
+    }
+
     // Clamp into the book's real range: a few bundled ግጻዌ citations name chapters
     // that don't exist (e.g. Mark 17). Landing on the nearest real chapter — with
     // the title, chapter strip, and bookmark all agreeing — beats silently showing

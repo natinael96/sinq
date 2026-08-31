@@ -142,6 +142,9 @@ private val LightSinq = SinqColors(
     onHeroMuted = Color(0xFFB9CCC0),
     heroGlow = Color(0x57E4BC5A),
     success = Color(0xFF44654F),
+    // The coral that reads on the dark ground fails contrast on ivory; the
+    // light theme deepens it to a brick red that still says "liturgical red".
+    arke = Color(0xFFB23A2E),
     // On ivory, a light tint needs enough body to be visible without shouting.
     highlightYellow = Color(0x66E8C46B),
     highlightGreen = Color(0x554CAF50),
@@ -155,6 +158,7 @@ private val DarkSinq = SinqColors(
     onHeroMuted = Color(0xFFA9C6B6),
     heroGlow = Color(0x4DE0BC65),
     success = Color(0xFF9EC7AB),
+    arke = Color(0xFFF0776A),
     // Over a dark green ground the same tints go muddy — they need to be lighter
     // and a touch more opaque to stay distinguishable from one another.
     highlightYellow = Color(0x59FFD980),

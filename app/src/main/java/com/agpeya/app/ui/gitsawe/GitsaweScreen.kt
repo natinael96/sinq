@@ -126,7 +126,8 @@ fun GitsaweScreen(
     }
 
     val data = readings
-    val sources = remember(data) {
+    // Keyed on the strings too, so the source labels re-localize on a language switch.
+    val sources = remember(data, s) {
         if (data == null) emptyList() else buildList {
             data.daily?.let { add(Source(s.srcDaily, it.title, it)) }
             data.seasonal.forEach { add(Source(s.srcSeasonal, it.title, it)) }

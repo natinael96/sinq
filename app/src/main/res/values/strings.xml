@@ -5,7 +5,6 @@
     <!-- Shown in the launcher's widget picker. Amharic, matching the app's default. -->
     <string name="widget_gitsawe_label">የዕለቱ ግጻዌ</string>
     <string name="widget_gitsawe_description">የዕለቱን ምስባክና ወንጌል በመነሻ ገጽ ላይ ይመልከቱ።</string>
-    <string name="widget_page_dot" translatable="false">●</string>
     <string name="widget_preview_date" translatable="false">ዛሬ · ፳፪ መስከረም</string>
     <string name="widget_preview_title" translatable="false">የዕለቱ ግጻዌ</string>
     <string name="widget_preview_msbak" translatable="false">ምስባክ</string>

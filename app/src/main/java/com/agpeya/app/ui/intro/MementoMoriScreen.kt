@@ -49,6 +49,9 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.agpeya.app.ui.strings.AmharicStrings
+import com.agpeya.app.ui.strings.EnglishStrings
+import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.Abyssinica
 import com.agpeya.app.ui.theme.LocalMotion
 import kotlinx.coroutines.delay
@@ -68,13 +71,14 @@ private const val TITLE = "Memento Mori"
  * The opening breath: *memento mori* — remember that you will die — the ancient
  * monastic reminder that frames why one prays at all. Rather than a spinner, the
  * words are written onto the screen letter by letter under a soft gold nib, then
- * underlined by hand; "Remember Death / ሞትን አስብ" settles beneath. Held a moment,
- * then the app opens.
+ * underlined by hand; the gloss ([Strings.mementoMoriGloss] in the app language,
+ * its counterpart beneath) settles under it. Held a moment, then the app opens.
  *
  * [onDone] is called exactly once, whether by timeout or by tap.
  */
 @Composable
 fun MementoMoriScreen(onDone: () -> Unit) {
+    val s = LocalStrings.current
     var dismissed by remember { mutableStateOf(false) }
     var shown by remember { mutableStateOf(false) }
 
@@ -132,6 +136,7 @@ fun MementoMoriScreen(onDone: () -> Unit) {
             .clickable(
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() },
+                onClickLabel = s.dismiss,
             ) { finish() },
         contentAlignment = Alignment.Center,
     ) {
@@ -170,17 +175,19 @@ fun MementoMoriScreen(onDone: () -> Unit) {
             }
 
             Spacer(Modifier.height(22.dp))
+            // The gloss leads in the app language; its counterpart in the other
+            // language settles quietly beneath.
             Text(
-                text = "Remember Death",
-                style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = 1.sp),
+                text = s.mementoMoriGloss,
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.alpha(subtitle.value),
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                text = "ሞትን አስብ",
-                style = MaterialTheme.typography.bodyLarge,
+                text = if (s.isAmharic) EnglishStrings.mementoMoriGloss else AmharicStrings.mementoMoriGloss,
+                style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = 1.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.alpha(subtitle.value),

@@ -25,10 +25,16 @@ object SynaxariumRepository {
     private val json = Json { ignoreUnknownKeys = true }
     private val monthCache = ConcurrentHashMap<Int, List<SynaxariumDay>>()
 
+    /** Drop the rebuildable month cache under memory pressure (see [CacheTrimmer]). */
+    fun trimCaches() {
+        monthCache.clear()
+    }
+
     /** All days of an Ethiopian month (1–13), cached after first successful load
      *  (a failed read is NOT cached, so a transient error doesn't stick). */
     suspend fun month(context: Context, month: Int): List<SynaxariumDay> =
         monthCache[month] ?: withContext(Dispatchers.IO) {
+            CacheTrimmer.ensureRegistered(context)
             runCatching {
                 val raw = context.applicationContext.assets
                     .open("$DIR/$month.json").readBytes().decodeToString()

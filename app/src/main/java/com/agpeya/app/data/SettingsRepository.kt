@@ -55,8 +55,6 @@ data class QuietHours(
 enum class AlarmAlert { SOUND_VIBRATE, SOUND_ONLY, VIBRATE_ONLY, SILENT }
 /** Which sound a ringing alarm plays. */
 enum class AlarmSound { ALARM, RINGTONE, NOTIFICATION }
-/** How the ሰዓታት reader shows its bilingual text: paired lines, or one language. */
-enum class SeatatLang { BOTH, GEEZ, AMHARIC }
 /** Language used only for Gitsawe Misbak/Psalm readings. */
 enum class MisbakLanguage { GEEZ, AMHARIC }
 
@@ -76,7 +74,6 @@ object SettingsRepository {
         val prayerLevel: String = PrayerLevel.FULL.name,
         val alarmAlert: String = AlarmAlert.SOUND_VIBRATE.name,
         val alarmSound: String = AlarmSound.ALARM.name,
-        val seatatLanguage: String = SeatatLang.BOTH.name,
         val misbakLanguage: String = MisbakLanguage.GEEZ.name,
         val profileName: String = "",
         val christianName: String = "",
@@ -104,7 +101,6 @@ object SettingsRepository {
     private val KEY_PRAYER_LEVEL = stringPreferencesKey("prayer_level")
     private val KEY_ALARM_ALERT = stringPreferencesKey("alarm_alert")
     private val KEY_ALARM_SOUND = stringPreferencesKey("alarm_sound")
-    private val KEY_SEATAT_LANG = stringPreferencesKey("seatat_lang")
     private val KEY_MISBAK_LANGUAGE = stringPreferencesKey("misbak_language")
     private val KEY_ONBOARDED = booleanPreferencesKey("onboarded")
     private val KEY_NAME = stringPreferencesKey("profile_name")
@@ -157,7 +153,6 @@ object SettingsRepository {
             prayerLevel = prefs[KEY_PRAYER_LEVEL] ?: PrayerLevel.FULL.name,
             alarmAlert = prefs[KEY_ALARM_ALERT] ?: AlarmAlert.SOUND_VIBRATE.name,
             alarmSound = prefs[KEY_ALARM_SOUND] ?: AlarmSound.ALARM.name,
-            seatatLanguage = prefs[KEY_SEATAT_LANG] ?: SeatatLang.BOTH.name,
             misbakLanguage = prefs[KEY_MISBAK_LANGUAGE] ?: MisbakLanguage.GEEZ.name,
             profileName = prefs[KEY_NAME] ?: "",
             christianName = prefs[KEY_CHRISTIAN_NAME] ?: "",
@@ -194,7 +189,6 @@ object SettingsRepository {
             prefs[KEY_PRAYER_LEVEL] = runCatching { PrayerLevel.valueOf(value.prayerLevel) }.getOrDefault(PrayerLevel.FULL).name
             prefs[KEY_ALARM_ALERT] = runCatching { AlarmAlert.valueOf(value.alarmAlert) }.getOrDefault(AlarmAlert.SOUND_VIBRATE).name
             prefs[KEY_ALARM_SOUND] = runCatching { AlarmSound.valueOf(value.alarmSound) }.getOrDefault(AlarmSound.ALARM).name
-            prefs[KEY_SEATAT_LANG] = runCatching { SeatatLang.valueOf(value.seatatLanguage) }.getOrDefault(SeatatLang.BOTH).name
             prefs[KEY_MISBAK_LANGUAGE] = runCatching { MisbakLanguage.valueOf(value.misbakLanguage) }.getOrDefault(MisbakLanguage.GEEZ).name
             prefs[KEY_NAME] = value.profileName.take(200)
             prefs[KEY_CHRISTIAN_NAME] = value.christianName.take(200)
@@ -205,10 +199,20 @@ object SettingsRepository {
             prefs[KEY_QUIET_ENABLED] = value.quietEnabled
             prefs[KEY_QUIET_START] = value.quietStart.coerceIn(0, 1439)
             prefs[KEY_QUIET_END] = value.quietEnd.coerceIn(0, 1439)
-            prefs[KEY_ALMS_REMINDERS] = scheduleJson.encodeToString(value.almsReminders.take(100))
-            prefs[KEY_REPENTANCE_REMINDERS] = scheduleJson.encodeToString(value.repentanceReminders.take(100))
+            prefs[KEY_ALMS_REMINDERS] = scheduleJson.encodeToString(sanitizeReminders(value.almsReminders))
+            prefs[KEY_REPENTANCE_REMINDERS] = scheduleJson.encodeToString(sanitizeReminders(value.repentanceReminders))
         }
     }
+
+    /**
+     * A hand-edited or corrupted backup must not persist values that crash
+     * later: an out-of-range minute would throw in LocalTime.of when the
+     * scheduler next arms the entry. Clamp into a real minute-of-day.
+     */
+    private fun sanitizeReminders(
+        list: List<com.agpeya.app.model.SpecialReminder>,
+    ): List<com.agpeya.app.model.SpecialReminder> =
+        list.take(100).map { it.copy(minute = it.minute.coerceIn(0, 1439)) }
 
     /**
      * The reading sizes A−/A+ step through, shared by every reader. The stored
@@ -292,16 +296,6 @@ object SettingsRepository {
         context.settingsDataStore.edit { it[KEY_READING_ALIGNMENT] = value.name }
     }
 
-    /** The ሰዓታት reader's language mode. Paired Ge'ez + Amharic by default. */
-    fun seatatLang(context: Context): Flow<SeatatLang> =
-        context.settingsDataStore.data.map {
-            runCatching { SeatatLang.valueOf(it[KEY_SEATAT_LANG] ?: "") }.getOrDefault(SeatatLang.BOTH)
-        }
-
-    suspend fun setSeatatLang(context: Context, lang: SeatatLang) {
-        context.settingsDataStore.edit { it[KEY_SEATAT_LANG] = lang.name }
-    }
-
     fun misbakLanguage(context: Context): Flow<MisbakLanguage> =
         context.settingsDataStore.data.map {
             runCatching { MisbakLanguage.valueOf(it[KEY_MISBAK_LANGUAGE] ?: "") }
@@ -348,10 +342,15 @@ object SettingsRepository {
         context.settingsDataStore.edit { it[KEY_ALARM_ALERT] = value.name }
     }
 
+    // Every *Blocking helper below runs its coroutine on Dispatchers.IO: some
+    // callers (the launch-time scheduler self-heal, Settings toggles) reach
+    // these from the main thread, and plain runBlocking would run the flow
+    // collection — including JSON decoding — on that thread.
+
     /** Blocking read for use inside the alarm service. */
     fun alarmAlertBlocking(context: Context): AlarmAlert =
         runCatching {
-            kotlinx.coroutines.runBlocking { alarmAlert(context).first() }
+            kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) { alarmAlert(context).first() }
         }.getOrDefault(AlarmAlert.SOUND_VIBRATE)
 
     fun alarmSound(context: Context): Flow<AlarmSound> =
@@ -372,7 +371,7 @@ object SettingsRepository {
 
     fun alarmSoundBlocking(context: Context): AlarmSound =
         runCatching {
-            kotlinx.coroutines.runBlocking { alarmSound(context).first() }
+            kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) { alarmSound(context).first() }
         }.getOrDefault(AlarmSound.ALARM)
 
     // Local profile — never leaves the device (the app has no network access).
@@ -412,7 +411,7 @@ object SettingsRepository {
      *  [alarmAlertBlocking]); falls back to the 21:30 default on any failure. */
     fun streakReminderTimeBlocking(context: Context): Int =
         runCatching {
-            kotlinx.coroutines.runBlocking { streakReminderTime(context).first() }
+            kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) { streakReminderTime(context).first() }
         }.getOrDefault(DEFAULT_STREAK_REMINDER_MIN)
 
     /** Morning nudge (~06:00) with today's ግጻዌ reading heading. On by default. */
@@ -439,13 +438,13 @@ object SettingsRepository {
     }
 
     fun breathReminderBlocking(context: Context): Boolean =
-        runCatching { kotlinx.coroutines.runBlocking { breathReminder(context).first() } }
+        runCatching { kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) { breathReminder(context).first() } }
             .getOrDefault(true)
 
     /** "yyyy-MM-dd" of the last day the nudge fired; empty if never. */
     fun breathLastFiredDayBlocking(context: Context): String =
         runCatching {
-            kotlinx.coroutines.runBlocking {
+            kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) {
                 context.settingsDataStore.data.map { it[KEY_BREATH_LAST_FIRED] ?: "" }.first()
             }
         }.getOrDefault("")
@@ -533,11 +532,11 @@ object SettingsRepository {
     }
 
     fun almsRemindersBlocking(context: Context): List<com.agpeya.app.model.SpecialReminder> =
-        runCatching { kotlinx.coroutines.runBlocking { almsReminders(context).first() } }
+        runCatching { kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) { almsReminders(context).first() } }
             .getOrDefault(emptyList())
 
     fun repentanceRemindersBlocking(context: Context): List<com.agpeya.app.model.SpecialReminder> =
-        runCatching { kotlinx.coroutines.runBlocking { repentanceReminders(context).first() } }
+        runCatching { kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) { repentanceReminders(context).first() } }
             .getOrDefault(emptyList())
 
     /** Whether any alms entry is enabled — drives the Settings state subtitle. */
@@ -555,7 +554,7 @@ object SettingsRepository {
         key: androidx.datastore.preferences.core.Preferences.Key<String>,
     ): Set<String> =
         runCatching {
-            kotlinx.coroutines.runBlocking {
+            kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) {
                 context.settingsDataStore.data.first()[key]
                     ?.split('\n')?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
             }
@@ -567,7 +566,7 @@ object SettingsRepository {
         ids: Set<String>,
     ) {
         runCatching {
-            kotlinx.coroutines.runBlocking {
+            kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) {
                 context.settingsDataStore.edit { it[key] = ids.joinToString("\n") }
             }
         }
@@ -601,7 +600,7 @@ object SettingsRepository {
 
     /** Blocking read for the alarm receiver, which has no coroutine scope. */
     fun quietHoursBlocking(context: Context): QuietHours =
-        runCatching { kotlinx.coroutines.runBlocking { quietHours(context).first() } }
+        runCatching { kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) { quietHours(context).first() } }
             .getOrDefault(QuietHours())
 
     fun onboarded(context: Context): Flow<Boolean> =

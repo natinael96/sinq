@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
@@ -418,8 +419,8 @@ private fun ScheduleEditorDialog(
  * One day of the week, as a small pill toggle. Its width comes from the row
  * that holds it (a seventh of the space) rather than from its own content, so
  * the full week always fits a dialog whatever the screen width or font scale;
- * the height is fixed so the target stays comfortably tappable even when that
- * seventh is narrow.
+ * a minimum height keeps the target comfortably tappable even when that
+ * seventh is narrow, while still letting it grow with large font scales.
  */
 @Composable
 private fun DayToggle(
@@ -430,7 +431,7 @@ private fun DayToggle(
 ) {
     Box(
         modifier = modifier
-            .height(40.dp)
+            .heightIn(min = 48.dp)
             .clip(CircleShape)
             .background(
                 if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,

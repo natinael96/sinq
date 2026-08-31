@@ -2,22 +2,25 @@
 <!--
   የዕለቱ ግጻዌ widget. updatePeriodMillis is only a safety net (the system clamps it
   to ≥30 min and won't wake the device for it) — the real refresh is driven by
-  ACTION_DATE_CHANGED / TIME_SET / boot in the provider's manifest filter, so the
-  widget rolls over to the new day's readings.
+  the provider's own just-past-midnight alarm plus the date/time/locale filters
+  in the manifest, so the card always shows today.
+
+  The provider adapts its content tiers to the granted size, so the widget can
+  be resized well below the default 4×3 card and stay legible.
 -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:minWidth="250dp"
-    android:minHeight="180dp"
+    android:minHeight="110dp"
     android:targetCellWidth="4"
-    android:targetCellHeight="3"
-    android:minResizeWidth="180dp"
-    android:minResizeHeight="170dp"
-    android:maxResizeWidth="360dp"
-    android:maxResizeHeight="260dp"
+    android:targetCellHeight="2"
+    android:minResizeWidth="140dp"
+    android:minResizeHeight="60dp"
+    android:maxResizeWidth="480dp"
+    android:maxResizeHeight="320dp"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="21600000"
     android:initialLayout="@layout/widget_gitsawe"
     android:initialKeyguardLayout="@layout/widget_gitsawe"
-    android:previewLayout="@layout/widget_gitsawe_preview"
+    android:previewLayout="@layout/widget_gitsawe"
     android:description="@string/widget_gitsawe_description"
     android:widgetCategory="home_screen|keyguard" />

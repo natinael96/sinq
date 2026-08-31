@@ -34,9 +34,14 @@ object LayoutRepository {
     /** Existing device customizations win; missing hour layouts come from the backup. */
     suspend fun merge(context: Context, restored: Map<String, HourLayout>) {
         if (restored.isEmpty()) return
+        // A hand-edited backup can repeat a psalm number or section id; the
+        // duplicates would render twice and collide as lazy-list keys.
+        val safe = restored.mapValues { (_, layout) ->
+            layout.copy(order = layout.order.distinct(), added = layout.added.distinct())
+        }
         context.layoutDataStore.edit { prefs ->
             val current = decode(prefs[KEY])
-            prefs[KEY] = json.encodeToString(mapSerializer, restored + current)
+            prefs[KEY] = json.encodeToString(mapSerializer, safe + current)
         }
     }
 
@@ -85,7 +90,9 @@ object PrayerLayout {
      * order (anything not explicitly ordered is appended). Hidden included.
      */
     fun ordered(sections: List<Section>, addedPsalms: List<Section>, layout: HourLayout): List<Section> {
-        val all = sections + addedPsalms
+        // distinctBy: ids double as lazy-list keys downstream, and an added
+        // psalm that duplicates one already in the hour must not crash there.
+        val all = (sections + addedPsalms).distinctBy { it.id }
         if (layout.order.isEmpty()) return all
         val byId = all.associateBy { it.id }
         val inOrder = layout.order.mapNotNull { byId[it] }

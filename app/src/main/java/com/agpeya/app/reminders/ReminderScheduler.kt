@@ -13,8 +13,9 @@ import java.time.ZoneId
 /**
  * Derives the alarm schedule from the active mode (PLAN.md §8.3–8.4).
  * Chain pattern: each alarm fires once; AlarmReceiver schedules the entry's
- * next occurrence. Uses setAlarmClock for true alarm-clock behaviour: exact,
- * doze-exempt, and allowed without the SCHEDULE_EXACT_ALARM permission.
+ * next occurrence. Uses setAlarmClock for true alarm-clock behaviour: exact and
+ * doze-exempt — via USE_EXACT_ALARM on 13+ and SCHEDULE_EXACT_ALARM (capped at
+ * API 32, auto-granted there) on 12/12L.
  */
 object ReminderScheduler {
 

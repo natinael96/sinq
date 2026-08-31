@@ -67,7 +67,14 @@ but the clean fix is to correct the encoding upstream in 80-weahadu and drop the
 ## 6. Fonts
 - Noto Sans Ethiopic (UI) — SIL Open Font License 1.1
 - Abyssinica SIL 2.300 (prayer text) — SIL Open Font License 1.1; license copy saved at docs/AbyssinicaSIL-OFL.txt
-- Both license texts must appear in the app's licenses page
+- ☑ Both license texts must appear in the app's licenses page — satisfied 2026-08-31:
+  an in-app "Licenses & sources" screen was added (Settings → Licenses & sources,
+  `ui/settings/LicensesScreen.kt`, route "licenses"). It lists every bundled font
+  (Abyssinica SIL, Noto Sans Ethiopic, Ethiopic Abay Light, Bela Bereka, Zemenay)
+  with its copyright holder, carries the full OFL 1.1 text verbatim, and also holds
+  the scripture/Gitsawe/Synaxarium/Wudase attributions plus the MIT notice for the
+  Hugging Face synaxarium dataset. English-only, like the About page, so the legal
+  wording never drifts.
 
 ## 7. ግጻዌ
 - Source: the maintainer's licensed transcription of the printed ግጻዌ. The
