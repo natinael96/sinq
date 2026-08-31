@@ -45,10 +45,11 @@ fun LicensesScreen(onBack: () -> Unit) {
                 LicPara(
                     "All bundled scripture — the Bible books readable in the Library, the Psalter " +
                         "in Amharic and Ge'ez, and the psalms and gospels arranged into the hours " +
-                        "of prayer — is drawn from the 80-weahadu open-source Amharic Bible by " +
-                        "EOTCOpenSource (github.com/EOTCOpenSource/80-weahadu), used under the " +
-                        "Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International " +
-                        "licence (creativecommons.org/licenses/by-nc-nd/4.0).",
+                        "of prayer — is drawn from 80-weahadu, the open-source Ethiopian Orthodox " +
+                        "Tewahedo Bible published by the EOTCOpenSource community " +
+                        "(github.com/EOTCOpenSource/80-weahadu), used under the Creative Commons " +
+                        "Attribution-NonCommercial-NoDerivatives 4.0 International licence " +
+                        "(creativecommons.org/licenses/by-nc-nd/4.0).",
                 )
                 LicPara(
                     "The verse text is reproduced unchanged, with two disclosed exceptions: the " +
@@ -63,12 +64,13 @@ fun LicensesScreen(onBack: () -> Unit) {
                 LicSection("Gitsawe (ግጻዌ)")
                 LicPara(
                     "The ግጻዌ lectionary — the fixed 366-day cycle together with the movable, " +
-                        "Sunday, Athanasius, and Bahre Hasab collections — is compiled from a " +
-                        "transcription of the printed ግጻዌ licensed privately to the Sinq " +
-                        "maintainer. It is not covered by the app's Apache-2.0 licence or by the " +
-                        "Bible's CC BY-NC-ND licence; forks and redistributors must obtain their " +
-                        "own permission. Scripture citations inside the readings open the bundled " +
-                        "scripture credited above.",
+                        "Sunday, Athanasius, and Bahre Hasab collections — was scanned and " +
+                        "transcribed from the printed ግጻዌ by the Sinq maintainer, and is released " +
+                        "as open content under the Creative Commons " +
+                        "Attribution-NonCommercial-NoDerivatives 4.0 International licence, the " +
+                        "same terms as the bundled scripture. The underlying lectionary is " +
+                        "traditional Ethiopian Orthodox liturgical material. Scripture citations " +
+                        "inside the readings open the bundled scripture credited above.",
                 )
             }
             item {
@@ -107,15 +109,9 @@ fun LicensesScreen(onBack: () -> Unit) {
                         "“Abyssinica” and “SIL”; Modern Gurage glyphs " +
                         "Copyright (c) The Ge'ez Frontier Foundation\n" +
                         "• Noto Sans Ethiopic — Copyright (c) Google\n" +
-                        "• Ethiopic Abay Light — abass alamnehe, via Font.et\n" +
-                        "• Bela Bereka — Abel Daniel, via Font.et\n" +
-                        "• Zemenay — Abel Yeshewalem, via Font.et",
-                )
-                LicPara(
-                    "Note on Zemenay: Font.et distributes this face under the SIL OFL, but the " +
-                        "font's own embedded metadata names an “ETHL” licence. Sinq " +
-                        "follows the distributor's stated terms; anyone redistributing should " +
-                        "confirm this independently.",
+                        "• Ethiopic Abay Light — abass alamnehe, via the Font.et open font library\n" +
+                        "• Bela Bereka — Abel Daniel, via the Font.et open font library\n" +
+                        "• Zemenay — Abel Yeshewalem, via the Font.et open font library (font.et)",
                 )
             }
             item {

@@ -94,6 +94,7 @@ but the clean fix is to correct the encoding upstream in 80-weahadu and drop the
   normalize those splits into the app's movable weekday, Sunday-cycle,
   Athanasius, and historical Bahre Hasab assets. Only unambiguous printed
   calendar selectors are activated automatically.
-- Rights: separately licensed to the Sinq maintainer. This content is not
-  granted under Apache-2.0 or the Bible's CC BY-NC-ND licence; forks and
-  redistributors must obtain their own permission.
+- Rights: scanned and transcribed by the Sinq maintainer, who — decision
+  dated 2026-08-31 — releases the transcription as open content under
+  CC BY-NC-ND 4.0 (matching the bundled Bible text). The underlying lectionary
+  is traditional EOTC liturgical material.

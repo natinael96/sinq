@@ -55,10 +55,12 @@ the full SIL OFL 1.1 and MIT licence texts.
    liturgical content.
 
 4. ግጻዌ (GITSAWE)
-   The fixed 366-day lectionary is compiled from a source transcription
-   separately licensed to the Sinq maintainer. It is not covered by the
-   Apache-2.0 source-code licence or the Bible's CC BY-NC-ND licence. Forks and
-   redistributors must obtain their own permission to use this material.
+   The lectionary (the fixed 366-day cycle plus the movable, Sunday,
+   Athanasius, and Bahre Hasab collections) was scanned and transcribed from
+   the printed ግጻዌ by the Sinq maintainer, who releases it as open content
+   under CC BY-NC-ND 4.0 — the same terms as the bundled Bible text. The
+   underlying lectionary is traditional Ethiopian Orthodox liturgical
+   material.
 
 --------------------------------------------------------------------------------
 FONTS
@@ -78,10 +80,10 @@ reserved names are not used by derivative works.
 
   Per-font notices are in docs/fonts/.
 
-  NOTE ON ZEMENAY: Font.et distributes this face under the SIL OFL, but the
-  font's own embedded metadata names an "ETHL" licence (t.me/ethelglyphs). We
-  follow the distributor's stated terms. Anyone redistributing should confirm
-  this independently.
+  All three Font.et faces are obtained from the Font.et open font library
+  (https://font.et), which distributes them under the SIL OFL. (Zemenay's
+  embedded metadata also names an "ETHL" licence; per the maintainer, the
+  Font.et open-library terms are the ones this app relies on.)
 
 --------------------------------------------------------------------------------
 THIRD-PARTY LIBRARIES
