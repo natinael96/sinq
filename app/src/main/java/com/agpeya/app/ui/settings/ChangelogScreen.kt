@@ -31,6 +31,29 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.6.0",
+        title = "What is owed, what was promised, what was thought",
+        titleAm = "የሚገባው፣ የተሳሉት፣ የታሰበው",
+        changes = listOf(
+            "አስራት — record what you receive and the tenth is worked out; record what you give and see what is still owed, by Ethiopian month or year.",
+            "ስዕለት — vows tied to the feast you promised them on, with what was promised set against what you have kept.",
+            "Reminders can now fall on a yearly date or a named feast. The monthly commemorations come from the bundled ስንክሳር, and ፋሲካ and its train are computed each year from the ባሕረ ሓሳብ.",
+            "ማስታወሻ — a journal, browsed a ግእዝ month at a time. Every entry keeps the feast and fast of the day it was written on, and can be locked behind a passphrase.",
+            "A kind of entry for preparing for ንስሐ: it never leaves your device, never enters a backup, and is deleted once you have confessed.",
+            "Backups are now a checklist. The journal is off by default and asks for your passphrase before it is included.",
+            "Quiet hours now silence every reminder, not only the prayer alarms — and warn you when a reminder is timed inside the window.",
+        ),
+        changesAm = listOf(
+            "አስራት — ገቢዎን ሲመዘግቡ አሥራቱ ይሰላል፤ የሰጡትንም መዝግበው በወር ወይም በዓመት ቀሪውን ያዩታል።",
+            "ስዕለት — የተሳሉትን ከበዓል ቀን ጋር አስረው፣ የተሳሉትንና የፈጸሙትን ጎን ለጎን ይመልከቱ።",
+            "ማስታወሻዎች አሁን በዓመታዊ ቀን ወይም በበዓል ስም ሊቀመጡ ይችላሉ። ወርኀዊ በዓላቱ ከመተግበሪያው ስንክሳር የተወሰዱ ናቸው፤ ፋሲካና ተከታዮቹም በባሕረ ሓሳብ በየዓመቱ ይሰላሉ።",
+            "ማስታወሻ — በየግእዝ ወሩ የሚነበብ ማስታወሻ። እያንዳንዱ የተጻፈበትን ቀን በዓልና ጾም ይዞ ይቀመጣል፤ በይለፍ ቃልም ሊቆለፍ ይችላል።",
+            "ለንስሐ የሚዘጋጅ ማስታወሻ፦ ከመሣሪያዎ አይወጣም፣ በምትኬ ውስጥ አይገባም፣ ንስሐ ከገቡ በኋላም ይሰረዛል።",
+            "ምትኬ አሁን በምርጫ ነው። ማስታወሻው በነባሪ ጠፍቷል፤ ሲመርጡትም የይለፍ ቃልዎን ይጠይቃል።",
+            "የጸጥታ ሰዓታት አሁን ሁሉንም ማስታወሻዎች ያዘጋሉ፤ ማስታወሻ በዚያ ክፍተት ውስጥ ከዋለም ያስጠነቅቃል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.5.2",
         title = "The alarm asks again",
         titleAm = "ማንቂያው እንደገና ይጠይቃል",

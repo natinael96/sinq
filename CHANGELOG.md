@@ -6,6 +6,58 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [1.6.0] — 2026-08-31
+
+_versionCode 56 · what is owed, what was promised, what was thought_
+
+### Added
+- **አስራት.** A ledger for the tithe: record what you receive and the tenth is
+  worked out for you; record what you give and it shows what is still owed,
+  over an Ethiopian month or year. The share is adjustable for those who keep
+  a different fraction, and amounts are counted in a currency you name. Giving
+  beyond the tithe is shown as a surplus rather than a negative debt.
+- **ስዕለት.** Vows and pledges, each tied to the feast it was promised on, with
+  what was promised set against what has been kept. A one-time vow stops
+  reminding once it is fulfilled; a standing one keeps its rhythm.
+- **Feast-anchored reminders.** Cadences now include a yearly date and a named
+  feast, alongside the weekly, every-other-day and monthly ones. The ወርኀዊ
+  በዓላት come from the bundled ስንክሳር itself, so choosing "ቀን ፲፱" and choosing
+  "ቅዱስ ገብርኤል" are the same act; movable feasts such as ፋሲካ are computed each
+  year from the ባሕረ ሓሳብ.
+- **ማስታወሻ — a journal.** Write the day down, browsed a ግእዝ month at a time.
+  Every entry keeps the Church's day it was written on — the feast, the fast,
+  the day's ግጻዌ — so an old entry reads as more than a date. A "write about
+  this" action in the Psalter and the ግጻዌ reader starts an entry linked back
+  to the passage. Entries can be locked behind a passphrase, and the journal
+  never appears in screenshots or the app switcher.
+- **Preparing for ንስሐ.** A kind of entry built to be destroyed: it never
+  leaves the device, never enters a backup, and "ንስሐ ገብቻለሁ" deletes it rather
+  than filing it away.
+- **Choose what a backup contains.** Export is now a checklist rather than
+  all-or-nothing. The journal is off by default and asks for your passphrase
+  before it can be included — the file itself is plain text, so what happens
+  to it afterwards is yours to look after.
+
+### Changed
+- **Quiet hours now silence every reminder.** They previously applied only to
+  the ringing prayer alarms and the ሕሊና prayer; the nightly, ግጻዌ, ምጽዋት and
+  ንስሐ notifications ignored them entirely. A silenced reminder still keeps its
+  schedule — only that one occurrence is dropped. Because the silence is now
+  total, the setting warns when a reminder is timed inside the window and
+  would never arrive.
+- **The Reminders page is grouped** — daily, giving, and sound — rather than
+  one flat run of rows, and the reminder descriptions now speak in one voice
+  instead of three.
+
+### Fixed
+- **The text-size control was labelled "የንባብ ፊደል"**, the same as the font
+  picker directly above it, leaving the size stepper with no label of its own.
+- **"Keep screen on" never showed its explanation**, though one was written
+  and translated.
+- **The last-backup date** was printed as a raw Gregorian date in an app that
+  is otherwise ግእዝ-first everywhere.
+- **"1 reminders on."** The English count had no singular form.
+
 ## [1.5.2] — 2026-08-31
 
 _versionCode 55 · the alarm asks again_
