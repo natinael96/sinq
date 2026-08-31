@@ -1,5 +1,7 @@
 package com.agpeya.app.reminders
 
+import android.annotation.SuppressLint
+import android.app.AlarmManager
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -9,6 +11,7 @@ import android.content.Intent
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.net.Uri
+import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.agpeya.app.MainActivity
 import com.agpeya.app.R
@@ -26,9 +29,9 @@ import kotlinx.coroutines.runBlocking
  * stream) and the vibration pattern; FLAG_INSISTENT loops both until the
  * notification is removed, and [TIMEOUT_MS] removes it on its own.
  *
- * Any removal — Dismiss, tapping Open, a swipe, or the timeout — fires the
- * delete intent, which posts the quiet "done?" follow-up. Snooze suppresses
- * that one follow-up and re-arms the alarm instead.
+ * Every ending — Dismiss, tapping Open, a swipe, or the timeout — routes
+ * through [AlarmActionReceiver], which posts the quiet "done?" follow-up.
+ * Snooze is the exception: it re-arms the alarm and asks nothing.
  *
  * Channels are immutable once created, so each (alert, sound) setting pair
  * gets its own channel variant; stale variants are dropped so the app's
@@ -43,20 +46,17 @@ object AlarmRinger {
     private const val DONE_NOTIFICATION_BASE = 7100
     private const val TIMEOUT_MS = 60_000L
 
-    // Request codes 8-11: distinct from the reminder PendingIntents (0-3, 5-7).
+    // Request codes 8-12: distinct from the reminder PendingIntents (0-3, 5-7).
     private const val OPEN_REQUEST_CODE = 8
     private const val SNOOZE_REQUEST_CODE = 9
     private const val DISMISS_REQUEST_CODE = 10
     private const val DELETE_REQUEST_CODE = 11
+    private const val TIMEOUT_REQUEST_CODE = 12
 
     const val ACTION_SNOOZE = "com.agpeya.app.ALARM_SNOOZE"
     const val ACTION_DISMISS = "com.agpeya.app.ALARM_DISMISS"
     const val ACTION_REMOVED = "com.agpeya.app.ALARM_REMOVED"
-
-    /** Set right before a snooze cancels the notification, so the resulting
-     *  removal doesn't ask "done?" about a prayer that was only postponed. */
-    @Volatile
-    var suppressFollowUp: Boolean = false
+    const val ACTION_TIMEOUT = "com.agpeya.app.ALARM_TIMEOUT"
 
     /** Post the ringing notification. Call from a background thread — it reads settings. */
     fun ring(context: Context, hourId: String, hourName: String) {
@@ -111,11 +111,76 @@ object AlarmRinger {
             .build()
         notification.flags = notification.flags or Notification.FLAG_INSISTENT
         nm.notify(NOTIFICATION_ID, notification)
+        // setTimeoutAfter removes the notification but tells us nothing, so the
+        // unanswered alarm still has to ask "done?" — that needs our own alarm.
+        scheduleTimeout(app, hourId)
     }
 
-    /** Take the ringing notification down (its removal posts the follow-up). */
+    /** Fires [ACTION_TIMEOUT] once the alarm has rung itself out unanswered. */
+    @SuppressLint("MissingPermission") // Guarded by canScheduleExactAlarms.
+    private fun scheduleTimeout(context: Context, hourId: String) {
+        val alarm = context.getSystemService(AlarmManager::class.java)
+        val at = System.currentTimeMillis() + TIMEOUT_MS
+        val pi = timeoutIntent(context, hourId)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarm.canScheduleExactAlarms()) {
+            alarm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi)
+        } else {
+            alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi)
+        }
+    }
+
+    /**
+     * Drop a pending timeout so an answered alarm is never asked about twice.
+     * Looks the intent up with NO_CREATE rather than rebuilding it: matching
+     * ignores extras, so UPDATE_CURRENT here would blank the hour id the
+     * scheduled alarm still carries.
+     */
+    fun cancelTimeout(context: Context) {
+        val app = context.applicationContext
+        val pending = PendingIntent.getBroadcast(
+            app,
+            TIMEOUT_REQUEST_CODE,
+            Intent(app, AlarmActionReceiver::class.java).setAction(ACTION_TIMEOUT),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE,
+        ) ?: return
+        app.getSystemService(AlarmManager::class.java).cancel(pending)
+        pending.cancel()
+    }
+
+    private fun timeoutIntent(context: Context, hourId: String): PendingIntent =
+        PendingIntent.getBroadcast(
+            context,
+            TIMEOUT_REQUEST_CODE,
+            Intent(context, AlarmActionReceiver::class.java).apply {
+                action = ACTION_TIMEOUT
+                // Outside the match criteria (extras are ignored there) but
+                // carried so the receiver knows which hour rang.
+                putExtra(ReminderScheduler.EXTRA_HOUR_ID, hourId)
+            },
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+
+    /**
+     * Take the ringing notification down. This does NOT post the follow-up:
+     * an app-side cancel() never fires the delete intent (only a user clearing
+     * the notification does), so every path that ends an alarm asks for the
+     * "done?" prompt explicitly.
+     */
     fun stop(context: Context) {
         context.getSystemService(NotificationManager::class.java).cancel(NOTIFICATION_ID)
+    }
+
+    /**
+     * The alarm was answered from inside the app (the user tapped Open). Routed
+     * through the receiver so the settings read stays off the main thread.
+     */
+    fun answered(context: Context, hourId: String) {
+        context.sendBroadcast(
+            Intent(context, AlarmActionReceiver::class.java).apply {
+                action = ACTION_DISMISS
+                putExtra(ReminderScheduler.EXTRA_HOUR_ID, hourId)
+            },
+        )
     }
 
     /** Quiet follow-up after the alarm ends: "Done?" with a Yes that marks the hour. */

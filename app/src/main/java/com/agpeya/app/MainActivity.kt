@@ -126,9 +126,9 @@ class MainActivity : ComponentActivity() {
     private fun consumeDeepLink(intent: Intent?) {
         intent ?: return
         intent.getStringExtra(ReminderScheduler.EXTRA_HOUR_ID)?.let {
-            // Opening a ringing reminder is also an answer: take the ringing
-            // notification down before navigating to the requested prayer hour.
-            com.agpeya.app.reminders.AlarmRinger.stop(this)
+            // Opening a ringing reminder is also an answer: end the alarm (and
+            // let it ask "done?") before navigating to the requested hour.
+            com.agpeya.app.reminders.AlarmRinger.answered(this, it)
             pendingDeepLinkHourId.value = it
             intent.removeExtra(ReminderScheduler.EXTRA_HOUR_ID)
         }
