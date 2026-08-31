@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [1.6.1] — 2026-08-31
+
+_versionCode 57 · the journal keeps what you wrote_
+
+### Fixed
+- **Journal entries could be lost when the editor closed.** The final save was
+  launched from the screen's own `rememberCoroutineScope`, which Compose
+  cancels at exactly the moment `onDispose` runs — so the write raced its own
+  cancellation and could drop what had just been typed. The last write now goes
+  to a process-lived scope, so a save that starts always finishes.
+- **Nothing was written until the editor closed.** Switching apps or the system
+  reclaiming the process left no record at all, despite a comment claiming
+  otherwise. Entries now save a second after typing stops, so leaving the
+  screen cleanly is no longer what the text depends on.
+
+### Changed
+- **The journal says when it has saved.** A tick appears in the entry header
+  once the text is on disk. The editor still has no Save button, but "is this
+  saved?" was a question the screen previously gave no way to answer.
+
 ## [1.6.0] — 2026-08-31
 
 _versionCode 56 · what is owed, what was promised, what was thought_

@@ -31,6 +31,21 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.6.1",
+        title = "The journal keeps what you wrote",
+        titleAm = "ማስታወሻው የጻፉትን ይይዛል",
+        changes = listOf(
+            "Journal entries could be lost when you left the editor — the save raced the screen being torn down. Fixed.",
+            "Entries now save a second after you stop typing, so switching apps or the system closing Sinq no longer loses anything.",
+            "A tick in the entry header tells you when your writing is safely saved.",
+        ),
+        changesAm = listOf(
+            "ከማስታወሻው ሲወጡ የጻፉት ሊጠፋ ይችል ነበር — ማስቀመጡ ገጹ ከመዘጋቱ ጋር ይሽቀዳደም ነበር። ተስተካክሏል።",
+            "ማስታወሻዎች ጽሑፍ ካቆሙ ከአንድ ሰከንድ በኋላ ይቀመጣሉ፤ ስለዚህ መተግበሪያ ቢቀያይሩ ወይም ስልኩ ስንቅን ቢዘጋው ምንም አይጠፋም።",
+            "በማስታወሻው ራስጌ ላይ ያለው ምልክት የጻፉት መቀመጡን ያሳውቅዎታል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.6.0",
         title = "What is owed, what was promised, what was thought",
         titleAm = "የሚገባው፣ የተሳሉት፣ የታሰበው",
