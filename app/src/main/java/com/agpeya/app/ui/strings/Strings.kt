@@ -65,6 +65,8 @@ interface Strings {
     val synaxariumTitle: String
     val synaxariumKicker: String
     val noSynaxariumToday: String
+    /** The ስንክሳር of a day other than today, e.g. "የሐምሌ 8 ስንክሳር". */
+    fun synaxariumFor(dateLabel: String): String
 
     /** Language of the closing ጸሎት, and the hint that tapping switches it. */
     val closingPrayerGeez: String
@@ -524,6 +526,7 @@ object AmharicStrings : Strings {
     override val synaxariumTitle = "ስንክሳር"
     override val synaxariumKicker = "የዕለቱ ስንክሳር"
     override val noSynaxariumToday = "ለዛሬ የተመዘገበ ስንክሳር የለም"
+    override fun synaxariumFor(dateLabel: String) = "የ$dateLabel ስንክሳር"
 
     override val closingPrayerGeez = "ግዕዝ"
     override val closingPrayerAmharic = "አማርኛ"
@@ -942,6 +945,7 @@ object EnglishStrings : Strings {
     override val synaxariumTitle = "Synaxarium"
     override val synaxariumKicker = "Today's Synaxarium"
     override val noSynaxariumToday = "No synaxarium recorded for today"
+    override fun synaxariumFor(dateLabel: String) = "Synaxarium for $dateLabel"
 
     override val closingPrayerGeez = "Ge'ez"
     override val closingPrayerAmharic = "Amharic"

@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.EditCalendar
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.Share
@@ -74,6 +75,7 @@ import com.agpeya.app.model.GitsaweService
 import com.agpeya.app.model.GitsaweServices
 import com.agpeya.app.model.VerseRef
 import com.agpeya.app.ui.common.formatEthiopian
+import com.agpeya.app.ui.common.formatEthiopianShort
 import com.agpeya.app.ui.common.formatEthiopianWithGregorian
 import com.agpeya.app.ui.common.liturgicalSeasonLabel
 import com.agpeya.app.ui.reading.geezNumeral
@@ -81,11 +83,13 @@ import com.agpeya.app.ui.common.LoadingPanel
 import com.agpeya.app.ui.common.SelectPill
 import com.agpeya.app.ui.common.NavRow
 import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.common.HeroCard
 import com.agpeya.app.ui.common.rememberCurrentDate
 import com.agpeya.app.ui.common.StatePanel
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
+import com.agpeya.app.ui.theme.sinqColors
 import com.agpeya.app.ui.theme.inReadingFont
 import com.agpeya.app.ui.strings.Strings
 import java.time.LocalDate
@@ -198,7 +202,11 @@ fun GitsaweScreen(
                     )
                 }
                 item(key = "sinksar") {
-                    SynaxariumCard(onClick = { onOpenSynaxarium(epochDay) })
+                    SynaxariumCard(
+                        date = date,
+                        today = currentDay,
+                        onClick = { onOpenSynaxarium(epochDay) },
+                    )
                 }
                 if (active == null) {
                     // A load failure can still leave the day without content.
@@ -483,10 +491,48 @@ private fun verseRef(v: VerseRef): String = buildString {
     v.end?.let { append("–"); append(geezNumeral(it)) }
 }
 
+/**
+ * The day's ስንክሳር — a filled hero button, so the page's second destination
+ * reads as something to press rather than another line of text. It names the
+ * day actually in view: "የዕለቱ ስንክሳር" only while the page is on today.
+ */
 @Composable
-private fun SynaxariumCard(onClick: () -> Unit) {
+private fun SynaxariumCard(date: LocalDate, today: LocalDate, onClick: () -> Unit) {
     val s = LocalStrings.current
-    NavRow(title = s.synaxariumKicker, onClick = onClick)
+    val sinq = sinqColors
+    HeroCard(
+        onClick = onClick,
+        modifier = Modifier.padding(top = Spacing.sm, bottom = Spacing.xs),
+        contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.md),
+    ) {
+        Icon(
+            Icons.AutoMirrored.Outlined.MenuBook,
+            contentDescription = null,
+            tint = sinq.onHeroMuted,
+            modifier = Modifier.size(IconSize.large),
+        )
+        Spacer(Modifier.width(Spacing.md))
+        Column(Modifier.weight(1f)) {
+            Text(
+                s.synaxariumTitle,
+                style = MaterialTheme.typography.labelMedium,
+                color = sinq.onHeroMuted,
+            )
+            Text(
+                if (date == today) s.synaxariumKicker
+                else s.synaxariumFor(formatEthiopianShort(date, s)),
+                style = MaterialTheme.typography.titleMedium,
+                color = sinq.onHero,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Icon(
+            Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+            contentDescription = null,
+            tint = sinq.onHeroMuted,
+        )
+    }
 }
 
 /** Which office the day's readings are being shown from (daily / seasonal / monthly). */

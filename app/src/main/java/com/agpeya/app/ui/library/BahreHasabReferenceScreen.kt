@@ -145,15 +145,19 @@ private fun YearRail(
 @Composable
 private fun YearHero(year: BahreHasabYear, current: Boolean) {
     val s = LocalStrings.current
+    val sinq = sinqColors
     Surface(
         Modifier.fillMaxWidth().padding(horizontal = Spacing.screen),
         shape = RoundedCornerShape(24.dp),
-        color = MaterialTheme.colorScheme.primary,
-        contentColor = MaterialTheme.colorScheme.onPrimary,
+        // The app's own hero green, not colorScheme.primary — in dark theme that
+        // resolves to a pale mint that sits outside the green-and-gold palette
+        // every other surface here is built from.
+        color = sinq.hero,
+        contentColor = sinq.onHero,
     ) {
         Column(Modifier.padding(Spacing.xl), horizontalAlignment = Alignment.CenterHorizontally) {
             if (current) {
-                Text(s.bahreHasabCurrentYear, color = MaterialTheme.colorScheme.secondary,
+                Text(s.bahreHasabCurrentYear, color = sinq.onHeroMuted,
                     style = MaterialTheme.typography.labelMedium)
                 Spacer(Modifier.height(Spacing.xs))
             }
@@ -166,7 +170,7 @@ private fun YearHero(year: BahreHasabYear, current: Boolean) {
             Text(
                 "${year.evangelist} · ${s.bahreHasabFasika} ${formatEthiopianWithGregorian(year.observances[5].second, s)}",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.78f),
+                color = sinq.onHeroMuted,
                 textAlign = TextAlign.Center,
             )
         }

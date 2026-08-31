@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -229,6 +228,11 @@ private fun HomeDashboard(
     onOpenPsalter: () -> Unit,
     onOpenZewotr: () -> Unit,
 ) {
+    // Every card below holds an internal weight() — an unbounded height would
+    // let that weight swallow the rest of the page, pushing the cards under it
+    // off a dashboard that does not always scroll. So heights stay fixed, and
+    // grow with the text instead of being outgrown by it.
+    val cardScale = LocalDensity.current.fontScale.coerceIn(1f, 2f)
     Column(modifier) {
         DayHeader(today, seasonLabel, onOpenSearch, onOpenFasting, onOpenBookmarks, onOpenPrayerList)
         Spacer(Modifier.height(Spacing.md))
@@ -247,22 +251,20 @@ private fun HomeDashboard(
             today,
             hours.size + (habitIds.size - 1),
             onOpenJourney,
-            Modifier.fillMaxWidth().heightIn(min = 132.dp),
+            Modifier.fillMaxWidth().height(132.dp * cardScale),
         )
         Spacer(Modifier.height(Spacing.sm))
         if (stackReadingCards) {
-            DailyPsalmCard(today, onOpenPsalter, Modifier.fillMaxWidth().heightIn(min = 88.dp))
+            DailyPsalmCard(today, onOpenPsalter, Modifier.fillMaxWidth().height(88.dp * cardScale))
             Spacer(Modifier.height(Spacing.sm))
-            ZewotrCard(onOpenZewotr, Modifier.fillMaxWidth().heightIn(min = 88.dp))
+            ZewotrCard(onOpenZewotr, Modifier.fillMaxWidth().height(88.dp * cardScale))
         } else {
-            // The row takes its height from the taller card, so both grow
-            // together at large font scales instead of clipping their text.
             Row(
-                modifier = Modifier.height(IntrinsicSize.Min).fillMaxWidth(),
+                modifier = Modifier.height(96.dp * cardScale).fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
-                DailyPsalmCard(today, onOpenPsalter, Modifier.weight(1f).fillMaxHeight().heightIn(min = 96.dp))
-                ZewotrCard(onOpenZewotr, Modifier.weight(1f).fillMaxHeight().heightIn(min = 96.dp))
+                DailyPsalmCard(today, onOpenPsalter, Modifier.weight(1f).fillMaxHeight())
+                ZewotrCard(onOpenZewotr, Modifier.weight(1f).fillMaxHeight())
             }
         }
         if (flexibleSummary) Spacer(Modifier.weight(1f))
