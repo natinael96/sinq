@@ -5,7 +5,11 @@ import com.agpeya.app.model.DayContext
 import com.agpeya.app.model.JournalEntry
 import com.agpeya.app.model.JournalKind
 import com.agpeya.app.ui.common.EthiopianDate
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.UUID
 
@@ -22,6 +26,17 @@ import java.util.UUID
 object JournalRepository {
 
     private fun dao(context: Context) = JournalDatabase.get(context).journalDao()
+
+    /**
+     * A scope that outlives any screen.
+     *
+     * The editor's last write happens as it is being removed from composition,
+     * and a `rememberCoroutineScope()` is cancelled at exactly that moment — so
+     * launching the save from the screen's own scope raced the cancellation and
+     * could drop what someone had just written. This scope belongs to the
+     * process instead, so a write that has started always finishes.
+     */
+    private val writeScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     // ── Reading ──────────────────────────────────────────────────────────────
 
@@ -82,6 +97,16 @@ object JournalRepository {
         }
         dao(context).upsert(entry.copy(updatedAt = now))
         return true
+    }
+
+    /**
+     * Save without a caller to wait on it — for the editor closing, where the
+     * screen's own scope is already being torn down. Uses the application
+     * context so a detached write cannot hold on to a dead Activity.
+     */
+    fun saveDetached(context: Context, entry: JournalEntry) {
+        val app = context.applicationContext
+        writeScope.launch { save(app, entry) }
     }
 
     suspend fun delete(context: Context, id: String) = dao(context).deleteById(id)

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
@@ -40,14 +41,21 @@ import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.common.formatEthiopian
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.Spacing
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+
+/** How long typing must pause before the entry is written. */
+private const val AUTOSAVE_DELAY_MS = 1000L
 
 /**
  * Writing, or re-reading, one entry.
  *
- * There is no Save button. The entry is written when the screen leaves, which
- * is how a notebook behaves — you do not commit a page, you simply close it.
+ * There is no Save button: the entry saves itself a moment after you stop
+ * typing, and again as the screen closes. A tick in the header says when it is
+ * safely down — without that, "is this saved?" is a question the screen gives
+ * no way to answer, which is worse than a button would have been.
+ *
  * An entry left blank is deleted rather than stored, so the month view never
  * claims a day was written on when it was not.
  */
@@ -86,21 +94,34 @@ fun JournalEntryScreen(
         kind = loaded.kind
     }
 
-    // Persist on the way out — including a system back, a process death, or the
-    // user switching apps. rememberUpdatedState keeps the effect reading the
-    // latest text rather than whatever was typed when it was first composed.
+    // Saved a second after typing stops, so nothing depends on leaving the
+    // screen cleanly: switching apps, a crash, or the system killing the
+    // process all leave the text on disk. `saved` drives the header, because a
+    // journal that saves invisibly is indistinguishable from one that does not.
+    var saved by remember { mutableStateOf(false) }
+    LaunchedEffect(body, kind) {
+        val current = entry ?: return@LaunchedEffect
+        if (body == current.body && kind == current.kind) return@LaunchedEffect
+        saved = false
+        delay(AUTOSAVE_DELAY_MS)
+        JournalRepository.save(context, current.copy(body = body.trim(), kind = kind))
+        saved = body.isNotBlank()
+    }
+
+    // The last write, as the screen goes. It must NOT use the screen's own
+    // scope: Compose cancels a rememberCoroutineScope at exactly the moment
+    // onDispose runs, so a save launched there raced the cancellation and could
+    // lose the final keystrokes. saveDetached hands it to a process-lived scope.
     val latestBody by rememberUpdatedState(body)
     val latestKind by rememberUpdatedState(kind)
     val latestEntry by rememberUpdatedState(entry)
     DisposableEffect(Unit) {
         onDispose {
             val current = latestEntry ?: return@onDispose
-            scope.launch {
-                JournalRepository.save(
-                    context,
-                    current.copy(body = latestBody.trim(), kind = latestKind),
-                )
-            }
+            JournalRepository.saveDetached(
+                context,
+                current.copy(body = latestBody.trim(), kind = latestKind),
+            )
         }
     }
 
@@ -119,6 +140,13 @@ fun JournalEntryScreen(
                 ).joinToString(" · ").takeIf { it.isNotBlank() },
                 onBack = onBack,
                 actions = {
+                    if (saved) {
+                        Icon(
+                            Icons.Outlined.Check,
+                            contentDescription = s.entrySaved,
+                            tint = MaterialTheme.colorScheme.secondary,
+                        )
+                    }
                     if (loaded != null && entryId != null) {
                         IconButton(onClick = { deleting = true }) {
                             Icon(

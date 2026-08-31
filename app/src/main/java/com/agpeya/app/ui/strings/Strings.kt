@@ -489,6 +489,8 @@ interface Strings {
     /** The Church's day an entry was written on, joined for the entry header. */
     fun writtenOn(date: String): String
     val journalMonthHeader: String
+    /** Shown in the entry header once the text is on disk. */
+    val entrySaved: String
     /** Reader menu: start a journal entry about the passage on screen. */
     val writeAboutThis: String
 
@@ -1044,6 +1046,7 @@ object AmharicStrings : Strings {
     override val deleteEntryConfirm = "ይህ ማስታወሻ ይሰረዛል።"
     override fun writtenOn(date: String) = "የተጻፈው፦ $date"
     override val journalMonthHeader = "የወሩ ማስታወሻዎች"
+    override val entrySaved = "ተቀምጧል"
     override val writeAboutThis = "ስለዚህ ጻፍ"
 
     override val journalLockTitle = "ማስታወሻ ተቆልፏል"
@@ -1599,6 +1602,7 @@ object EnglishStrings : Strings {
     override val deleteEntryConfirm = "This entry will be deleted."
     override fun writtenOn(date: String) = "Written on $date"
     override val journalMonthHeader = "This month"
+    override val entrySaved = "Saved"
     override val writeAboutThis = "Write about this"
 
     override val journalLockTitle = "Journal locked"
