@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [1.5.1] — 2026-08-31
+
+_versionCode 54 · the home page, restored_
+
+### Fixed
+- **The daily-psalms and ጸሎት ዘዘወትር cards are back on the home page.** 1.5.0
+  removed the upper bound on the cards' heights to stop large text clipping,
+  but each card holds an internal `weight()`; unbounded, those weights grew
+  into the whole page and pushed the bottom two cards off a dashboard that
+  does not scroll at normal text size. Heights are bounded again and now scale
+  with the text instead of being outgrown by it.
+- **The streak grid grows with its card.** The heatmap and candle are drawn in
+  dp, so a card stretched by a large text size left them adrift in a
+  half-empty box; they now scale with the card (capped so the grid cannot
+  crowd out the reading beside it).
+
+### Changed
+- **The ስንክሳር button says which day it opens.** It is now a filled button
+  rather than a list row, and outside today it names the day in view —
+  "የሐምල ፰ ስንክሳር" — so moving between days relabels it.
+- **The ባሕረ ሐሳብ year card matches the rest of the app.** It used the Material
+  primary colour, which resolves to a pale mint in dark theme; it now uses
+  Sinq's own deep green and muted ivory like every other hero surface.
+
 ## [1.5.0] — 2026-08-31
 
 _versionCode 53 · Play-Store readiness: everything from the pre-flight audit

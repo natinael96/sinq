@@ -31,6 +31,23 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.5.1",
+        title = "The home page, restored",
+        titleAm = "የመነሻ ገጹ ተመልሷል",
+        changes = listOf(
+            "The daily psalms and ጸሎት ዘዘወትር cards are back on the home page — a layout change in 1.5.0 had pushed them off the bottom of the screen.",
+            "Home cards and the streak grid now grow together with your chosen text size.",
+            "The ስንክሳር button on the ግጻዌ page is unmistakably a button, and names the day you are viewing as you move between days.",
+            "The ባሕረ ሐሳብ year card now carries the app's own green instead of a pale colour that clashed with the page.",
+        ),
+        changesAm = listOf(
+            "የዕለቱ መዝሙራትና የጸሎት ዘዘወትር ካርዶች ወደ መነሻ ገጽ ተመልሰዋል — በ1.5.0 የገባ የአቀማመጥ ለውጥ ከማያ ገጹ ግርጌ ውጭ ገፍቷቸው ነበር።",
+            "የመነሻ ገጽ ካርዶችና የተከታታይነት ፍርግርግ አሁን ከመረጡት የጽሑፍ መጠን ጋር አብረው ያድጋሉ።",
+            "በግጻዌ ገጽ ላይ ያለው የስንክሳር አዝራር በግልጽ አዝራር ሆኗል፤ በቀናት መካከል ሲንቀሳቀሱም የሚመለከቱትን ቀን ይሰይማል።",
+            "የባሕረ ሐሳብ የዓመት ካርድ ከገጹ ጋር የማይስማማውን ደብዛዛ ቀለም ትቶ የመተግበሪያውን አረንጓዴ ይጠቀማል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.5.0",
         title = "Ready for the Play Store",
         titleAm = "ለፕሌይ ስቶር ዝግጁ",
