@@ -14,7 +14,6 @@ import com.agpeya.app.stringsFor
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import java.time.LocalDate
-import java.time.LocalTime
 
 /**
  * The የመሃል ጸሎት moment arriving. The notification IS the prayer — one of the
@@ -39,8 +38,7 @@ class BreathPrayerReceiver : BroadcastReceiver() {
                     if (SettingsRepository.breathLastFiredDayBlocking(context) == today) return@runBlocking
                     // If custom quiet hours overlap the selected moment, treat
                     // today as handled and move directly to tomorrow's window.
-                    val nowMinute = LocalTime.now().let { it.hour * 60 + it.minute }
-                    if (SettingsRepository.quietHoursBlocking(context).covers(nowMinute)) {
+                    if (SettingsRepository.inQuietHoursNow(context)) {
                         SettingsRepository.setBreathLastFiredDay(context, today)
                         BreathPrayerScheduler.schedule(context)
                         return@runBlocking

@@ -59,6 +59,7 @@ class MainActivity : ComponentActivity() {
     private val pendingOpenJourney = mutableStateOf(false)
 
     // Set when opened from the morning ግጻዌ-reminder notification.
+    private val pendingOpenOffering = mutableStateOf<String?>(null)
     private val pendingOpenGitsawe = mutableStateOf(false)
     private val pendingGitsaweEpochDay = mutableStateOf<Long?>(null)
 
@@ -100,6 +101,8 @@ class MainActivity : ComponentActivity() {
                             onDeepLinkHandled = { pendingDeepLinkHourId.value = null },
                             openJourney = pendingOpenJourney.value,
                             onJourneyHandled = { pendingOpenJourney.value = false },
+                            openOffering = pendingOpenOffering.value,
+                            onOfferingHandled = { pendingOpenOffering.value = null },
                             openGitsawe = pendingOpenGitsawe.value,
                             gitsaweEpochDay = pendingGitsaweEpochDay.value,
                             onGitsaweHandled = {
@@ -114,6 +117,14 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    companion object {
+        /**
+         * Which offering page a fired አስራት / ስዕለት reminder wants opened —
+         * the [com.agpeya.app.reminders.SpecialHabit] name.
+         */
+        const val EXTRA_OPEN_OFFERING = "openOffering"
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -135,6 +146,10 @@ class MainActivity : ComponentActivity() {
         if (intent.getBooleanExtra(StreakReminderScheduler.EXTRA_OPEN_STREAK, false)) {
             pendingOpenJourney.value = true
             intent.removeExtra(StreakReminderScheduler.EXTRA_OPEN_STREAK)
+        }
+        intent.getStringExtra(EXTRA_OPEN_OFFERING)?.let {
+            pendingOpenOffering.value = it
+            intent.removeExtra(EXTRA_OPEN_OFFERING)
         }
         if (intent.getBooleanExtra(com.agpeya.app.reminders.GitsaweReminderScheduler.EXTRA_OPEN_GITSAWE, false)) {
             pendingOpenGitsawe.value = true
@@ -168,6 +183,8 @@ private fun AgpeyaNavHost(
     onDeepLinkHandled: () -> Unit,
     openJourney: Boolean,
     onJourneyHandled: () -> Unit,
+    openOffering: String?,
+    onOfferingHandled: () -> Unit,
     openGitsawe: Boolean,
     gitsaweEpochDay: Long?,
     onGitsaweHandled: () -> Unit,
@@ -215,17 +232,10 @@ private fun AgpeyaNavHost(
                     SettingsRepository.breathReminder(context).first(),
                 )
             }
+            // ምጽዋት, ንስሐ, አስራት and ስዕለት together — one call, so adding a
+            // fifth intention never means remembering to re-arm it here.
             runCatching {
-                com.agpeya.app.reminders.SpecialHabitReminderScheduler.sync(
-                    context,
-                    com.agpeya.app.reminders.SpecialHabit.ALMS,
-                )
-            }
-            runCatching {
-                com.agpeya.app.reminders.SpecialHabitReminderScheduler.sync(
-                    context,
-                    com.agpeya.app.reminders.SpecialHabit.REPENTANCE,
-                )
+                com.agpeya.app.reminders.SpecialHabitReminderScheduler.syncAll(context)
             }
         }
     }
@@ -248,6 +258,15 @@ private fun AgpeyaNavHost(
         }
     }
 
+    // Opened from an አስራት or ስዕለት reminder → the page that records it.
+    LaunchedEffect(ready, openOffering) {
+        if (ready && openOffering != null) {
+            val route = if (openOffering == com.agpeya.app.reminders.SpecialHabit.VOW.name) "vows" else "tithe"
+            runCatching { navController.navigate(route) { launchSingleTop = true } }
+            onOfferingHandled()
+        }
+    }
+
     // Opened from the morning ግጻዌ-reminder notification → open the ግጻዌ screen.
     LaunchedEffect(ready, openGitsawe, gitsaweEpochDay) {
         if (ready && openGitsawe) {
@@ -261,6 +280,12 @@ private fun AgpeyaNavHost(
     // onboarding writes the flag asynchronously; when that emits, `ready` flips
     // and an expression here would re-anchor the graph under the user — who may
     // by then have navigated somewhere else. The intro navigates on explicitly.
+    // A note started from a reading carries the route back to it and a label
+    // naming the passage, so the entry still says what it was about later.
+    fun writeNoteRoute(route: String, label: String): String =
+        "journal/entry?kind=${com.agpeya.app.model.JournalKind.PASSAGE.name}" +
+            "&route=${android.net.Uri.encode(route)}&label=${android.net.Uri.encode(label)}"
+
     val startDestination = rememberSaveable { if (ready) Tab.HOME.route else "intro" }
 
     // One motion for the whole graph: the page fades and drifts a fraction of a
@@ -377,6 +402,38 @@ private fun AgpeyaNavHost(
             com.agpeya.app.ui.habits.JourneyScreen(
                 onSelectTab = navController::switchTab,
                 onManageHabits = { navController.navigate("habits") { launchSingleTop = true } },
+                onOpenJournal = { navController.navigate("journal") { launchSingleTop = true } },
+            )
+        }
+        composable("journal") {
+            com.agpeya.app.ui.journal.JournalScreen(
+                onBack = { navController.popBackStack() },
+                onOpenEntry = { id ->
+                    navController.navigate("journal/entry?id=$id") { launchSingleTop = true }
+                },
+                onNewEntry = { kind ->
+                    navController.navigate("journal/entry?kind=${kind.name}") { launchSingleTop = true }
+                },
+            )
+        }
+        composable(
+            route = "journal/entry?id={id}&kind={kind}&route={route}&label={label}",
+            arguments = listOf(
+                navArgument("id") { type = NavType.StringType; nullable = true; defaultValue = null },
+                navArgument("kind") { type = NavType.StringType; nullable = true; defaultValue = null },
+                navArgument("route") { type = NavType.StringType; nullable = true; defaultValue = null },
+                navArgument("label") { type = NavType.StringType; nullable = true; defaultValue = null },
+            ),
+        ) { backStackEntry ->
+            val args = backStackEntry.arguments
+            com.agpeya.app.ui.journal.JournalEntryScreen(
+                entryId = args?.getString("id"),
+                initialKind = runCatching {
+                    com.agpeya.app.model.JournalKind.valueOf(args?.getString("kind") ?: "")
+                }.getOrDefault(com.agpeya.app.model.JournalKind.REFLECTION),
+                anchorRoute = args?.getString("route"),
+                anchorLabel = args?.getString("label"),
+                onBack = { navController.popBackStack() },
             )
         }
         composable("habits") {
@@ -501,6 +558,9 @@ private fun AgpeyaNavHost(
                 )
             }
             com.agpeya.app.ui.gitsawe.GitsawePassageScreen(
+                onWriteNote = { route, label ->
+                    navController.navigate(writeNoteRoute(route, label)) { launchSingleTop = true }
+                },
                 psalm = psalm,
                 bookKey = bookKey,
                 chapter = chapter,
@@ -562,6 +622,8 @@ private fun AgpeyaNavHost(
                 onOpenSpecialHabit = { habit ->
                     navController.navigate("intention/${habit.name.lowercase()}") { launchSingleTop = true }
                 },
+                onOpenTithe = { navController.navigate("tithe") { launchSingleTop = true } },
+                onOpenVows = { navController.navigate("vows") { launchSingleTop = true } },
             )
         }
         composable("settings/data") {
@@ -573,12 +635,24 @@ private fun AgpeyaNavHost(
         ) { backStackEntry ->
             val habit = when (backStackEntry.arguments?.getString("habit")) {
                 "repentance" -> com.agpeya.app.reminders.SpecialHabit.REPENTANCE
+                "tithe" -> com.agpeya.app.reminders.SpecialHabit.TITHE
                 else -> com.agpeya.app.reminders.SpecialHabit.ALMS
             }
             com.agpeya.app.ui.settings.SpecialHabitScreen(
                 habit = habit,
                 onBack = { navController.popBackStack() },
             )
+        }
+        composable("tithe") {
+            com.agpeya.app.ui.settings.TitheScreen(
+                onBack = { navController.popBackStack() },
+                onOpenReminders = {
+                    navController.navigate("intention/tithe") { launchSingleTop = true }
+                },
+            )
+        }
+        composable("vows") {
+            com.agpeya.app.ui.settings.VowScreen(onBack = { navController.popBackStack() })
         }
         composable(
             route = "reading/{hourId}?section={section}&sectionId={sectionId}",

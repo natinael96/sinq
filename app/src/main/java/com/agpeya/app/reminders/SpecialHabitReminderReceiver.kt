@@ -9,20 +9,25 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.agpeya.app.MainActivity
 import com.agpeya.app.R
+import com.agpeya.app.data.OfferingRepository
 import com.agpeya.app.data.SettingsRepository
+import com.agpeya.app.model.ScheduledReminder
+import com.agpeya.app.model.Vow
 import com.agpeya.app.stringsFor
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
 /**
- * One entry of a special reminder (ምጽዋት or ንስሐ) fired on its due day. Re-arms
- * THAT entry for its next due day, then (unless it was disabled or removed
- * meanwhile) posts a notification whose tap simply opens the app.
+ * One entry of an intention reminder (ምጽዋት, ንስሐ, አስራት or ስዕለት) fired on its
+ * due day. Re-arms THAT entry for its next due day, then — unless it was
+ * disabled, removed, or (for a one-time vow) already kept meanwhile — posts a
+ * notification.
  *
- * Deliberately no "Done" action and no record: these are intentions, not
- * habits. The app's part ends at the reminder — whether alms were given or
- * repentance made is not the app's to know. The entry's label, when set, rides
- * in the notification title so several reminders read apart in the tray.
+ * There is still no "Done" action here, for any of the four. ምጽዋት and ንስሐ are
+ * not the app's to know at all; አስራት and ስዕለት ARE recorded, but recording an
+ * amount is not something to guess from a notification tap, so the tap opens
+ * the page where the real figure can be entered. The entry's label, when set,
+ * rides in the notification title so several reminders read apart in the tray.
  */
 class SpecialHabitReminderReceiver : BroadcastReceiver() {
 
@@ -33,21 +38,40 @@ class SpecialHabitReminderReceiver : BroadcastReceiver() {
         Thread {
             try {
                 runBlocking {
-                    val list = when (habit) {
+                    val list: List<ScheduledReminder> = when (habit) {
                         SpecialHabit.ALMS -> SettingsRepository.almsReminders(context).first()
                         SpecialHabit.REPENTANCE -> SettingsRepository.repentanceReminders(context).first()
+                        SpecialHabit.TITHE -> SettingsRepository.titheReminders(context).first()
+                        SpecialHabit.VOW -> OfferingRepository.vows(context).first()
                     }
                     val entry = list.firstOrNull { it.id == entryId } ?: return@runBlocking
+                    // A one-time ስዕለት that has been kept stops here: no
+                    // notification, and no re-arming to ask again next year.
+                    if (entry is Vow && !entry.remindsStill) return@runBlocking
                     if (!entry.enabled) return@runBlocking
-                    // Chain: always re-arm this entry for its next due day.
+                    // Chain: always re-arm this entry for its next due day,
+                    // then fall silent if the quiet window covers right now.
                     SpecialHabitReminderScheduler.scheduleNext(context, habit, entry)
+                    if (SettingsRepository.inQuietHoursNow(context)) return@runBlocking
 
                     val s = stringsFor(SettingsRepository.language(context).first())
-                    val (defaultTitle, body, channelName) = when (habit) {
+                    val (defaultTitle, defaultBody, channelName) = when (habit) {
                         SpecialHabit.ALMS ->
                             Triple(s.almsReminderTitle, s.almsReminderBody, s.almsChannelName)
                         SpecialHabit.REPENTANCE ->
                             Triple(s.repentReminderTitle, s.repentReminderBody, s.repentChannelName)
+                        SpecialHabit.TITHE ->
+                            Triple(s.titheReminderTitle, s.titheReminderBody, s.titheChannelName)
+                        SpecialHabit.VOW ->
+                            Triple(s.vowReminderTitle, s.vowReminderBody, s.vowChannelName)
+                    }
+                    // A vow that named an amount says what is still owed on it;
+                    // one that promised prayer or fasting has no figure to give.
+                    val body = if (entry is Vow && entry.remaining > 0) {
+                        val currency = OfferingRepository.currency(context).first()
+                        s.vowReminderOwing(formatAmount(entry.remaining, currency.ifBlank { s.currencyDefault }))
+                    } else {
+                        defaultBody
                     }
                     val title = entry.label.ifBlank { defaultTitle }
                     ensureChannel(context, habit, channelName)
@@ -60,6 +84,12 @@ class SpecialHabitReminderReceiver : BroadcastReceiver() {
                         tapCode,
                         Intent(context, MainActivity::class.java).apply {
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                            // አስራት and ስዕለት land on their own page, where the
+                            // amount can actually be recorded; the other two
+                            // have nothing to record and just open the app.
+                            if (habit == SpecialHabit.TITHE || habit == SpecialHabit.VOW) {
+                                putExtra(MainActivity.EXTRA_OPEN_OFFERING, habit.name)
+                            }
                         },
                         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
                     )
@@ -80,6 +110,10 @@ class SpecialHabitReminderReceiver : BroadcastReceiver() {
             }
         }.start()
     }
+
+    /** "1,500.00 ብር" — the same shape the ledger shows. */
+    private fun formatAmount(cents: Long, currency: String): String =
+        "%,.2f %s".format(cents / 100.0, currency).trim()
 
     private fun ensureChannel(context: Context, habit: SpecialHabit, name: String) {
         val nm = context.getSystemService(NotificationManager::class.java)

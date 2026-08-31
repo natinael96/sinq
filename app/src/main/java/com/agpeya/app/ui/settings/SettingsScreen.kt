@@ -2,12 +2,10 @@
 
 package com.agpeya.app.ui.settings
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,15 +23,11 @@ import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Download
-import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.FormatAlignCenter
 import androidx.compose.material.icons.outlined.FormatAlignJustify
 import androidx.compose.material.icons.automirrored.outlined.FormatAlignLeft
 import androidx.compose.material.icons.automirrored.outlined.FormatAlignRight
-import androidx.compose.material.icons.outlined.School
-import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.Upload
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.DropdownMenu
@@ -59,8 +53,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.style.TextOverflow
@@ -88,14 +80,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 
-
-private fun prayerLevelName(level: PrayerLevel): String = when (level) {
-    PrayerLevel.PSALM_50 -> "መዝሙር ፶"
-    PrayerLevel.BEGINNING -> "መጀመሪያ"
-    PrayerLevel.GROWTH -> "እድገት"
-    PrayerLevel.STEADFAST -> "ጽናት"
-    PrayerLevel.FULL -> "ሙሉ"
-}
 
 /**
  * Shown when a notification-only reminder is switched on but the system will
@@ -184,7 +168,12 @@ private fun <T> DropdownSetting(
 
 /** Label + current value; tapping opens a dialog with a single text field. */
 @Composable
-private fun EditableRow(label: String, value: String, onSave: (String) -> Unit) {
+private fun EditableRow(
+    label: String,
+    value: String,
+    emptyLabel: String,
+    onSave: (String) -> Unit,
+) {
     val s = com.agpeya.app.ui.strings.LocalStrings.current
     var editing by remember { mutableStateOf(false) }
     Row(
@@ -198,7 +187,6 @@ private fun EditableRow(label: String, value: String, onSave: (String) -> Unit) 
     ) {
         Text(label, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
         Spacer(Modifier.weight(1f))
-        val emptyLabel = if (label == s.christianNameLabel) s.addChristianName else s.addName
         Text(
             text = value.ifBlank { emptyLabel },
             style = MaterialTheme.typography.bodyMedium,
@@ -320,6 +308,14 @@ private fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
     // The file the user chose, held while they confirm the preview.
     var pending by remember { mutableStateOf<android.net.Uri?>(null) }
     var preview by remember { mutableStateOf<com.agpeya.app.data.BackupRepository.Summary?>(null) }
+    // What to write, chosen before the file dialog opens. A backup is no longer
+    // all-or-nothing: it can now carry money and the journal, and neither
+    // should ride along unasked.
+    var choosing by remember { mutableStateOf(false) }
+    var selection by remember { mutableStateOf(com.agpeya.app.data.BackupRepository.Selection()) }
+    var askingPassphrase by remember { mutableStateOf(false) }
+    val journalLocked by com.agpeya.app.data.JournalLock.isLocked(context)
+        .collectAsState(initial = false)
 
     val createDoc = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/json"),
@@ -327,7 +323,7 @@ private fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
         if (uri == null) return@rememberLauncherForActivityResult
         scope.launch {
             val today = java.time.LocalDate.now().toString()
-            val ok = com.agpeya.app.data.BackupRepository.writeTo(context, uri, today)
+            val ok = com.agpeya.app.data.BackupRepository.writeTo(context, uri, today, selection)
             if (ok) SettingsRepository.setLastBackupAt(context, System.currentTimeMillis())
             message = if (ok) s.backupSaved to null else s.backupFailed to s.backupFailedBody
         }
@@ -350,7 +346,7 @@ private fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
 
     NavRow(
         s.backupExport,
-        onClick = { createDoc.launch("sinq-backup-${java.time.LocalDate.now()}.json") },
+        onClick = { choosing = true },
         leadingIcon = Icons.Outlined.Upload,
     )
     NavRow(
@@ -407,6 +403,37 @@ private fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
         )
     }
 
+    fun launchWriter() = createDoc.launch("sinq-backup-${java.time.LocalDate.now()}.json")
+
+    if (choosing) {
+        ExportPickerDialog(
+            s = s,
+            selection = selection,
+            onSelection = { selection = it },
+            onDismiss = { choosing = false },
+            onConfirm = {
+                choosing = false
+                // Including the journal means proving it is yours first. The
+                // gate protects the act, not the file — the file is plaintext,
+                // which the dialog says in as many words.
+                if (selection.journal && journalLocked) askingPassphrase = true else launchWriter()
+            },
+        )
+    }
+
+    if (askingPassphrase) {
+        com.agpeya.app.ui.journal.PassphrasePrompt(
+            title = s.exportSectionJournal,
+            body = s.exportJournalWarning,
+            s = s,
+            onDismiss = { askingPassphrase = false },
+            onVerified = {
+                askingPassphrase = false
+                launchWriter()
+            },
+        )
+    }
+
     message?.let { (headline, detail) ->
         androidx.compose.material3.AlertDialog(
             onDismissRequest = { message = null },
@@ -415,6 +442,85 @@ private fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
             text = { if (detail != null) Text(detail, style = MaterialTheme.typography.bodyMedium) },
         )
     }
+}
+
+/**
+ * What goes into the backup file.
+ *
+ * Everything is on by default except the journal, which has to be asked for:
+ * a backup gets mailed to oneself and handed to relatives, and the journal is
+ * the one thing in the app whose accidental inclusion would be a real harm.
+ */
+@Composable
+private fun ExportPickerDialog(
+    s: com.agpeya.app.ui.strings.Strings,
+    selection: com.agpeya.app.data.BackupRepository.Selection,
+    onSelection: (com.agpeya.app.data.BackupRepository.Selection) -> Unit,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    val rows = listOf<Triple<String, Boolean, (Boolean) -> com.agpeya.app.data.BackupRepository.Selection>>(
+        Triple(s.exportSectionHabits, selection.habits) { selection.copy(habits = it) },
+        Triple(s.exportSectionBookmarks, selection.bookmarks) { selection.copy(bookmarks = it) },
+        Triple(s.exportSectionHighlights, selection.highlights) { selection.copy(highlights = it) },
+        Triple(s.exportSectionPrayerList, selection.prayerList) { selection.copy(prayerList = it) },
+        Triple(s.exportSectionSetup, selection.setup) { selection.copy(setup = it) },
+        Triple(s.exportSectionOfferings, selection.offerings) { selection.copy(offerings = it) },
+        Triple(s.exportSectionJournal, selection.journal) { selection.copy(journal = it) },
+    )
+    val anyChosen = rows.any { it.second }
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(s.exportChooseTitle) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
+                Text(
+                    s.exportChooseBody,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(Spacing.sm))
+                rows.forEach { (label, checked, toggle) ->
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 48.dp)
+                            .clip(MaterialTheme.shapes.small)
+                            .toggleable(
+                                value = checked,
+                                role = androidx.compose.ui.semantics.Role.Checkbox,
+                                onValueChange = { onSelection(toggle(it)) },
+                            ),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        androidx.compose.material3.Checkbox(checked = checked, onCheckedChange = null)
+                        Spacer(Modifier.width(Spacing.sm))
+                        Text(label, style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+                if (selection.journal) {
+                    Spacer(Modifier.height(Spacing.sm))
+                    Text(
+                        s.exportJournalWarning,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+                if (!anyChosen) {
+                    Spacer(Modifier.height(Spacing.sm))
+                    Text(
+                        s.exportNothingChosen,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(enabled = anyChosen, onClick = onConfirm) { Text(s.continueAction) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
+    )
 }
 
 /**
@@ -466,7 +572,14 @@ private fun StreakReminderTimeRow(s: com.agpeya.app.ui.strings.Strings) {
     }
 }
 
-/** A nightly window in which prayer reminders stay silent. */
+/**
+ * A nightly window in which every reminder stays silent.
+ *
+ * Because the silence is now total — the ringing prayer alarms and all the
+ * notification nudges alike — a reminder timed inside the window simply never
+ * arrives. That is what was asked for, but it must not be invisible, so the row
+ * counts the reminders it is swallowing and says so.
+ */
 @Composable
 private fun QuietHoursRow(s: com.agpeya.app.ui.strings.Strings) {
     val context = LocalContext.current
@@ -476,6 +589,31 @@ private fun QuietHoursRow(s: com.agpeya.app.ui.strings.Strings) {
     var editingStart by remember { mutableStateOf<Boolean?>(null) }
 
     fun fmt(minute: Int) = "%02d:%02d".format(minute / 60, minute % 60)
+
+    // Every reminder whose firing time is known in advance. The ሕሊና prayer is
+    // left out on purpose: its moment is drawn at random inside a daytime
+    // window and it already defers itself to tomorrow when silenced, so there
+    // is no single time to warn about.
+    val streakOn by SettingsRepository.streakReminder(context).collectAsState(initial = true)
+    val streakMinute by SettingsRepository.streakReminderTime(context)
+        .collectAsState(initial = SettingsRepository.DEFAULT_STREAK_REMINDER_MIN)
+    val gitsaweOn by SettingsRepository.gitsaweReminder(context).collectAsState(initial = true)
+    val alms by SettingsRepository.almsReminders(context).collectAsState(initial = emptyList())
+    val repentance by SettingsRepository.repentanceReminders(context).collectAsState(initial = emptyList())
+    val tithe by SettingsRepository.titheReminders(context).collectAsState(initial = emptyList())
+    val vows by com.agpeya.app.data.OfferingRepository.vows(context).collectAsState(initial = emptyList())
+    val modes by com.agpeya.app.data.ModesRepository.state(context)
+        .collectAsState(initial = null as com.agpeya.app.model.ModesState?)
+
+    val swallowed = if (!quiet.enabled) 0 else buildList {
+        if (streakOn) add(streakMinute)
+        val gitsaweTime = com.agpeya.app.reminders.GitsaweReminderScheduler.REMINDER_TIME
+        if (gitsaweOn) add(gitsaweTime.hour * 60 + gitsaweTime.minute)
+        (alms + repentance + tithe).filter { it.enabled }.forEach { add(it.minute) }
+        vows.filter { it.remindsStill }.forEach { add(it.minute) }
+        // Only the active mode arms alarms, so only its entries can be lost.
+        modes?.activeMode?.entries?.filter { it.enabled }?.forEach { add(it.hour * 60 + it.minute) }
+    }.count { quiet.covers(it) }
 
     // The shared ToggleRow, not a hand-rolled Row+Switch: the whole width
     // toggles, and TalkBack announces one switch with its state instead of an
@@ -500,6 +638,14 @@ private fun QuietHoursRow(s: com.agpeya.app.ui.strings.Strings) {
             subtitle = fmt(quiet.endMinute),
             onClick = { editingStart = false },
         )
+        if (swallowed > 0) {
+            Text(
+                s.quietHoursConflict(swallowed),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(vertical = Spacing.xs),
+            )
+        }
     }
     editingStart?.let { isStart ->
         val minute = if (isStart) quiet.startMinute else quiet.endMinute
@@ -576,7 +722,7 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit) {
                 }
                 Spacer(Modifier.height(Spacing.lg))
                 NavRow(s.readingFontTitle, onOpenFonts, subtitle = com.agpeya.app.ui.settings.fontLabel(font))
-                Text(s.readingFontTitle, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                Text(s.fontSizeLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     TextButton(
                         onClick = { scope.launch { SettingsRepository.setFontStep(context, step - 1) } },
@@ -629,7 +775,12 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit) {
                         }
                     }
                 }
-                ToggleRow(s.keepScreenOn, keepOn, { scope.launch { SettingsRepository.setKeepScreenOn(context, it) } })
+                ToggleRow(
+                    s.keepScreenOn,
+                    keepOn,
+                    { scope.launch { SettingsRepository.setKeepScreenOn(context, it) } },
+                    subtitle = s.keepScreenOnDesc,
+                )
             }
         }
     }
@@ -678,63 +829,14 @@ fun PrayerSettingsScreen(onBack: () -> Unit, onOpenManageHours: () -> Unit) {
     }
 }
 
-@Composable
-fun PrayerLevelScreen(onBack: () -> Unit) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val s = com.agpeya.app.ui.strings.LocalStrings.current
-    val selected by SettingsRepository.prayerLevel(context).collectAsState(initial = PrayerLevel.FULL)
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = { com.agpeya.app.ui.common.SinqTopBar(s.prayerLevelTitle, onBack) },
-    ) { inner ->
-        LazyColumn(
-            Modifier.fillMaxSize().padding(inner),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-        ) {
-            item {
-                Text(s.prayerLevelDescription, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(Modifier.height(Spacing.md))
-                PrayerLevel.entries.forEach { level ->
-                    val active = level == selected
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 56.dp)
-                            .clip(MaterialTheme.shapes.small)
-                            .clickable { scope.launch { SettingsRepository.setPrayerLevel(context, level) } },
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        androidx.compose.material3.RadioButton(
-                            selected = active,
-                            onClick = { scope.launch { SettingsRepository.setPrayerLevel(context, level) } },
-                        )
-                        Spacer(Modifier.width(Spacing.sm))
-                        Column(Modifier.weight(1f).padding(vertical = Spacing.sm)) {
-                            Text(
-                                com.agpeya.app.ui.settings.prayerLevelLabel(level),
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onBackground,
-                            )
-                            Text(
-                                com.agpeya.app.ui.settings.prayerLevelDetail(level, s),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 /** All notification and alarm behavior in one place. */
 @Composable
 fun RemindersSettingsScreen(
     onBack: () -> Unit,
     onOpenModes: () -> Unit,
     onOpenSpecialHabit: (com.agpeya.app.reminders.SpecialHabit) -> Unit,
+    onOpenTithe: () -> Unit,
+    onOpenVows: () -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -744,6 +846,8 @@ fun RemindersSettingsScreen(
     val breath by SettingsRepository.breathReminder(context).collectAsState(initial = true)
     val almsEntries by SettingsRepository.almsReminders(context).collectAsState(initial = emptyList())
     val repentanceEntries by SettingsRepository.repentanceReminders(context).collectAsState(initial = emptyList())
+    val titheEntries by SettingsRepository.titheReminders(context).collectAsState(initial = emptyList())
+    val vowEntries by com.agpeya.app.data.OfferingRepository.vows(context).collectAsState(initial = emptyList())
     val alert by SettingsRepository.alarmAlert(context).collectAsState(initial = com.agpeya.app.data.AlarmAlert.SOUND_VIBRATE)
     val sound by SettingsRepository.alarmSound(context).collectAsState(initial = com.agpeya.app.data.AlarmSound.ALARM)
     var soundSheetOpen by remember { mutableStateOf(false) }
@@ -756,7 +860,9 @@ fun RemindersSettingsScreen(
         lifecycleOwner?.lifecycle?.addObserver(observer)
         onDispose { lifecycleOwner?.lifecycle?.removeObserver(observer) }
     }
-    val remindersOn = streak || gitsawe || breath || almsEntries.any { it.enabled } || repentanceEntries.any { it.enabled }
+    val remindersOn = streak || gitsawe || breath ||
+        almsEntries.any { it.enabled } || repentanceEntries.any { it.enabled } ||
+        titheEntries.any { it.enabled } || vowEntries.any { it.remindsStill }
     @Suppress("UNUSED_VARIABLE") val refreshPermissions = permissionPulse
     val batteryRestricted = remindersOn &&
         !(context.getSystemService(android.os.PowerManager::class.java)?.isIgnoringBatteryOptimizations(context.packageName) ?: true)
@@ -791,6 +897,7 @@ fun RemindersSettingsScreen(
                     }
                     Spacer(Modifier.height(Spacing.md))
                 }
+                SectionHeader(s.remindersGroupDaily)
                 ToggleRow(s.settingsNightReminder, streak, { on ->
                     if (on) requestNotifications()
                     scope.launch {
@@ -813,8 +920,14 @@ fun RemindersSettingsScreen(
                         com.agpeya.app.reminders.BreathPrayerScheduler.sync(context, on)
                     }
                 }, subtitle = s.settingsBreathReminderDesc)
+                Spacer(Modifier.height(Spacing.lg))
+                SectionHeader(s.remindersGroupGiving)
                 NavRow(s.settingsAlmsReminder, { onOpenSpecialHabit(com.agpeya.app.reminders.SpecialHabit.ALMS) }, subtitle = s.settingsAlmsReminderDesc)
                 NavRow(s.settingsRepentReminder, { onOpenSpecialHabit(com.agpeya.app.reminders.SpecialHabit.REPENTANCE) }, subtitle = s.settingsRepentReminderDesc)
+                NavRow(s.settingsTitheTitle, onOpenTithe, subtitle = s.settingsTitheDesc)
+                NavRow(s.settingsVowTitle, onOpenVows, subtitle = s.settingsVowDesc)
+                Spacer(Modifier.height(Spacing.lg))
+                SectionHeader(s.remindersGroupSound)
                 NavRow(s.reminderModes, onOpenModes)
                 val alertLabel = when (alert) {
                     com.agpeya.app.data.AlarmAlert.SOUND_VIBRATE -> s.alertSoundVibrate
@@ -934,11 +1047,17 @@ fun DataSettingsScreen(onBack: () -> Unit) {
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
         ) {
             item {
-                EditableRow(s.yourNameLabel, name) { scope.launch { SettingsRepository.setProfileName(context, it) } }
-                EditableRow(s.christianNameLabel, christianName) { scope.launch { SettingsRepository.setChristianName(context, it) } }
+                EditableRow(s.yourNameLabel, name, s.addName) {
+                    scope.launch { SettingsRepository.setProfileName(context, it) }
+                }
+                EditableRow(s.christianNameLabel, christianName, s.addChristianName) {
+                    scope.launch { SettingsRepository.setChristianName(context, it) }
+                }
                 if (lastBackupAt > 0L) {
+                    val saved = java.time.Instant.ofEpochMilli(lastBackupAt)
+                        .atZone(java.time.ZoneId.systemDefault()).toLocalDate()
                     Text(
-                        "${s.lastBackupLabel}: ${java.time.Instant.ofEpochMilli(lastBackupAt).atZone(java.time.ZoneId.systemDefault()).toLocalDate()}",
+                        "${s.lastBackupLabel}: ${com.agpeya.app.ui.common.formatEthiopian(saved, s)}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

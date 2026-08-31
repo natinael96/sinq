@@ -100,6 +100,7 @@ fun PsalterScreen(
     initialEndVerse: Int = -1,
     initialGeez: Boolean = false,
     onBack: () -> Unit,
+    onWriteNote: (route: String, label: String) -> Unit = { _, _ -> },
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
@@ -207,6 +208,19 @@ fun PsalterScreen(
                         fontStep = fontStep,
                         maxFontStep = FONT_STEPS_SP.lastIndex,
                         onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
+                        onWriteNote = {
+                            // Which psalm is actually on screen, derived the
+                            // same way the layout toggle derives it.
+                            val index = if (readingMode == ReadingMode.VERTICAL) {
+                                (listState.firstVisibleItemIndex - headerCount()).coerceAtLeast(0)
+                            } else {
+                                pagerState.currentPage
+                            }
+                            onWriteNote(
+                                "psalter?section=$index",
+                                psalms.getOrNull(index)?.title ?: s.psalterTitle,
+                            )
+                        },
                         secondaryActionLabel = if (daily) s.wholePsalter else s.dailyPsalms,
                         onSecondaryAction = {
                             selStart = null

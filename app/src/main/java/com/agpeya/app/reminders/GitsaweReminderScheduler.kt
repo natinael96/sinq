@@ -18,7 +18,8 @@ object GitsaweReminderScheduler {
     const val ACTION_GITSAWE_REMINDER = "com.agpeya.app.GITSAWE_REMINDER"
     const val EXTRA_OPEN_GITSAWE = "openGitsawe"
     private const val REQUEST_CODE = 9200
-    private val REMINDER_TIME: LocalTime = LocalTime.of(6, 0)
+    /** Fixed at 06:00. Public so Settings can tell when quiet hours cover it. */
+    val REMINDER_TIME: LocalTime = LocalTime.of(6, 0)
 
     /** Re-arm or cancel to match the current setting; call after any toggle. */
     fun sync(context: Context, enabled: Boolean) {

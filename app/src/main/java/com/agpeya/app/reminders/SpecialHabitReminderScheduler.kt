@@ -4,24 +4,32 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import com.agpeya.app.data.OfferingRepository
 import com.agpeya.app.data.SettingsRepository
-import com.agpeya.app.model.SpecialReminder
+import com.agpeya.app.model.ScheduledReminder
+import com.agpeya.app.model.Vow
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 
 /**
- * The two scheduled intentions — ምጽዋት and ንስሐ. Deliberately NOT habits: the
- * app reminds and then looks away. Nothing is recorded, streaked, or shown as
- * done — alms and repentance are between the person and God, not the app
- * ("let not your left hand know what your right hand is doing").
+ * The scheduled intentions the app nudges: ምጽዋት, ንስሐ, አስራት and ስዕለት.
  *
- * Each intention now holds a LIST of reminders (see [SpecialReminder]); a
- * person can keep several, each with its own label, cadence and time. The enum
- * carries only what is shared per intention: the broadcast [action] (used by
- * the receiver to tell alms from repentance) and the notification [channelId].
- * Per-entry PendingIntent request codes and notification ids are derived from
- * the entry id so siblings never collide.
+ * The first two are deliberately NOT habits — the app reminds and then looks
+ * away, recording nothing, because alms and repentance are between the person
+ * and God ("let not your left hand know what your right hand is doing").
+ *
+ * አስራት and ስዕለት are different in kind and are tracked (see
+ * [OfferingRepository]): a tithe is a reckoning and a vow is a debt willingly
+ * taken on, and neither can be kept by someone who cannot see where they
+ * stand. The reminder machinery is identical for all four, so it is shared;
+ * only the source of the entries and the notification wording differ.
+ *
+ * Each intention holds a LIST of entries, each with its own label, cadence and
+ * time. The enum carries what is shared per intention: the broadcast [action]
+ * (the receiver's way of telling them apart) and the notification [channelId].
+ * Per-entry PendingIntent request codes and notification ids derive from the
+ * entry id so siblings never collide.
  */
 enum class SpecialHabit(
     val action: String,
@@ -29,13 +37,15 @@ enum class SpecialHabit(
 ) {
     ALMS("com.agpeya.app.ALMS_REMINDER", "alms_reminders"),
     REPENTANCE("com.agpeya.app.REPENTANCE_REMINDER", "repentance_reminders"),
+    TITHE("com.agpeya.app.TITHE_REMINDER", "tithe_reminders"),
+    VOW("com.agpeya.app.VOW_REMINDER", "vow_reminders"),
 }
 
 /**
- * Schedules the ምጽዋት and ንስሐ nudges (gentle notifications, not ringing
- * alarms). Each enabled entry is armed for its next DUE day at its chosen time;
- * the receiver re-arms that entry on fire (chain pattern), and boot / update /
- * time changes plus app launch re-arm the whole list.
+ * Schedules the intention nudges (gentle notifications, not ringing alarms).
+ * Each armable entry is armed for its next DUE day at its chosen time; the
+ * receiver re-arms that entry on fire (chain pattern), and boot / update / time
+ * changes plus app launch re-arm every list.
  */
 object SpecialHabitReminderScheduler {
 
@@ -58,7 +68,7 @@ object SpecialHabitReminderScheduler {
         val now = LocalDateTime.now()
         val armed = mutableSetOf<String>()
         for (entry in list) {
-            if (!entry.enabled) continue
+            if (!entry.armable()) continue
             val at = nextOccurrence(entry, now) ?: continue
             val triggerAt = at.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
             val pi = pendingIntent(app, habit, entry.id)
@@ -71,8 +81,16 @@ object SpecialHabitReminderScheduler {
         SettingsRepository.setScheduledIds(app, idsKey, armed)
     }
 
+    /**
+     * Whether an entry should hold an alarm at all. For most intentions that is
+     * simply its switch; a one-time ስዕለት also stops once it has been kept, so
+     * a discharged vow does not go on asking to be paid.
+     */
+    private fun ScheduledReminder.armable(): Boolean =
+        if (this is Vow) remindsStill else enabled
+
     /** Re-arm one entry for its next due day — used by the chain after a fire. */
-    fun scheduleNext(context: Context, habit: SpecialHabit, entry: SpecialReminder) {
+    fun scheduleNext(context: Context, habit: SpecialHabit, entry: ScheduledReminder) {
         val at = nextOccurrence(entry, LocalDateTime.now()) ?: return
         val triggerAt = at.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         val am = context.getSystemService(AlarmManager::class.java)
@@ -81,7 +99,7 @@ object SpecialHabitReminderScheduler {
     }
 
     /** Next due day whose firing time is still ahead of [now], or null. */
-    fun nextOccurrence(entry: SpecialReminder, now: LocalDateTime): LocalDateTime? {
+    fun nextOccurrence(entry: ScheduledReminder, now: LocalDateTime): LocalDateTime? {
         val time = LocalTime.of(entry.minute / 60, entry.minute % 60)
         var dueDate = entry.schedule.nextDueOnOrAfter(now.toLocalDate()) ?: return null
         if (!dueDate.atTime(time).isAfter(now)) {
@@ -90,14 +108,23 @@ object SpecialHabitReminderScheduler {
         return dueDate.atTime(time)
     }
 
-    fun remindersOf(context: Context, habit: SpecialHabit): List<SpecialReminder> = when (habit) {
+    fun remindersOf(context: Context, habit: SpecialHabit): List<ScheduledReminder> = when (habit) {
         SpecialHabit.ALMS -> SettingsRepository.almsRemindersBlocking(context)
         SpecialHabit.REPENTANCE -> SettingsRepository.repentanceRemindersBlocking(context)
+        SpecialHabit.TITHE -> SettingsRepository.titheRemindersBlocking(context)
+        SpecialHabit.VOW -> OfferingRepository.vowsBlocking(context)
+    }
+
+    /** Arm every intention at once — app launch, boot, time change. */
+    fun syncAll(context: Context) {
+        SpecialHabit.entries.forEach { sync(context, it) }
     }
 
     private fun scheduledIdsKey(habit: SpecialHabit) = when (habit) {
         SpecialHabit.ALMS -> SettingsRepository.KEY_ALMS_SCHEDULED_IDS_PUBLIC
         SpecialHabit.REPENTANCE -> SettingsRepository.KEY_REPENTANCE_SCHEDULED_IDS_PUBLIC
+        SpecialHabit.TITHE -> SettingsRepository.KEY_TITHE_SCHEDULED_IDS_PUBLIC
+        SpecialHabit.VOW -> SettingsRepository.KEY_VOW_SCHEDULED_IDS_PUBLIC
     }
 
     private fun requestCode(habit: SpecialHabit, entryId: String): Int =

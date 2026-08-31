@@ -65,8 +65,18 @@ fun SettingsScreen(
     val breath by SettingsRepository.breathReminder(context).collectAsState(initial = true)
     val alms by SettingsRepository.almsReminders(context).collectAsState(initial = emptyList())
     val repentance by SettingsRepository.repentanceReminders(context).collectAsState(initial = emptyList())
+    val tithe by SettingsRepository.titheReminders(context).collectAsState(initial = emptyList())
+    val vows by com.agpeya.app.data.OfferingRepository.vows(context).collectAsState(initial = emptyList())
     val lastBackupAt by SettingsRepository.lastBackupAt(context).collectAsState(initial = 0L)
-    val enabledCount = listOf(night, gitsawe, breath, alms.any { it.enabled }, repentance.any { it.enabled }).count { it }
+    val enabledCount = listOf(
+        night,
+        gitsawe,
+        breath,
+        alms.any { it.enabled },
+        repentance.any { it.enabled },
+        tithe.any { it.enabled },
+        vows.any { it.remindsStill },
+    ).count { it }
     val size = SettingsRepository.FONT_STEPS_SP[fontStep.coerceIn(0, SettingsRepository.FONT_STEPS_SP.lastIndex)]
 
     Scaffold(

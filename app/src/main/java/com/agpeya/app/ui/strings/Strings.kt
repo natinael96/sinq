@@ -153,11 +153,18 @@ interface Strings {
     val settingsTitle: String
     val prayerSettingsTitle: String
     val remindersSettingsTitle: String
+    // The Reminders page's three groups: what arrives daily, what concerns
+    // giving, and how any of it is allowed to sound.
+    val remindersGroupDaily: String
+    val remindersGroupGiving: String
+    val remindersGroupSound: String
     val remindersOff: String
     val noBackupYet: String
     val backedUpToday: String
     val backedUpYesterday: String
     fun backedUpDays(days: Long): String
+    /** The text-size stepper. Distinct from the font NAME above it. */
+    val fontSizeLabel: String
     val lineSpacingLabel: String
     val textAlignmentLabel: String
     val alignJustified: String
@@ -288,6 +295,8 @@ interface Strings {
     val quietHours: String
     val quietHoursDesc: String
     fun quietHoursRange(from: String, to: String): String
+    /** Warning: [count] reminders are timed inside the quiet window. */
+    fun quietHoursConflict(count: Int): String
     val filterAll: String
     /** Screen-reader state for a completed habit dot. */
     val doneLabel: String
@@ -462,6 +471,133 @@ interface Strings {
     val reminderNameHintAlms: String
     val reminderNameHintRepent: String
     val untitledReminder: String
+    // ── ማስታወሻ (journal) ──────────────────────────────────────────────────────
+
+    val journalTitle: String
+    val journalSubtitle: String
+    val journalEmpty: String
+    val journalTodayHeader: String
+    val newEntry: String
+    val entryBodyHint: String
+    val journalKindReflection: String
+    val journalKindPassage: String
+    val journalKindConfession: String
+    val journalKindConfessionNote: String
+    val confessedAction: String
+    val confessedConfirm: String
+    val deleteEntryConfirm: String
+    /** The Church's day an entry was written on, joined for the entry header. */
+    fun writtenOn(date: String): String
+    val journalMonthHeader: String
+    /** Reader menu: start a journal entry about the passage on screen. */
+    val writeAboutThis: String
+
+    // The passphrase gate.
+    val journalLockTitle: String
+    val journalLockPrompt: String
+    val journalSetPassphrase: String
+    val journalChangePassphrase: String
+    val journalRemovePassphrase: String
+    val passphraseLabel: String
+    val passphraseConfirmLabel: String
+    val passphraseMismatch: String
+    val passphraseWrong: String
+    val passphraseTooShort: String
+    val passphraseNoRecovery: String
+    val unlockAction: String
+
+    // The export picker.
+    val exportChooseTitle: String
+    val exportChooseBody: String
+    val exportSectionHabits: String
+    val exportSectionBookmarks: String
+    val exportSectionHighlights: String
+    val exportSectionPrayerList: String
+    val exportSectionSetup: String
+    val exportSectionOfferings: String
+    val exportSectionJournal: String
+    val exportJournalWarning: String
+    val exportNothingChosen: String
+    val continueAction: String
+    // ── አስራት and ስዕለት ───────────────────────────────────────────────────────
+    //
+    // The two obligations the app keeps a record of. Amounts are shown in a
+    // currency the person names themselves, so the label is a string, not a
+    // hardcoded ብር.
+
+    val settingsTitheTitle: String
+    val settingsTitheDesc: String
+    val settingsVowTitle: String
+    val settingsVowDesc: String
+    val titheReminderTitle: String
+    val titheReminderBody: String
+    val titheChannelName: String
+    val vowReminderTitle: String
+    val vowReminderBody: String
+    val vowChannelName: String
+    /** Notification body for a vow that still owes [amount]. */
+    fun vowReminderOwing(amount: String): String
+    val reminderNameHintTithe: String
+
+    /** Currency shown until the person names their own. */
+    val currencyDefault: String
+    val currencyLabel: String
+
+    // The አስራት page: a reckoning over a period, then the ledger behind it.
+    val titheTitle: String
+    val titheIntro: String
+    val periodMonth: String
+    val periodYear: String
+    val titheIncome: String
+    val titheDue: String
+    val titheGiven: String
+    val titheOwed: String
+    val titheSurplus: String
+    val titheSettledNote: String
+    val tithePercentLabel: String
+    val addIncome: String
+    val addGiven: String
+    val incomeLabel: String
+    val givenLabel: String
+    val amountLabel: String
+    val noteLabel: String
+    val dateLabel: String
+    val titheLedgerHeader: String
+    val noTitheEntries: String
+    val titheRemindersRow: String
+    /** Subtitle of the reminders row: how many are switched on. */
+    fun remindersOnCount(count: Int): String
+    val previousPeriod: String
+    val nextPeriod: String
+
+    // The ስዕለት page.
+    val vowsTitle: String
+    val vowsIntro: String
+    val addVow: String
+    val noVows: String
+    val vowNameLabel: String
+    val vowNameHint: String
+    val vowPledgeLabel: String
+    val vowPledged: String
+    val vowGiven: String
+    val vowRemaining: String
+    val vowSettled: String
+    val vowOneTime: String
+    val vowOneTimeDesc: String
+    val recordPayment: String
+    val vowPaymentsHeader: String
+    val noVowPayments: String
+    val deleteVowConfirm: String
+
+    // Feast-anchored cadences, for a vow kept on a saint's day.
+    val scheduleYearly: String
+    val scheduleFeast: String
+    /** Summary for a yearly schedule, e.g. "በየዓመቱ መስከረም 17". */
+    fun yearlyOn(month: String, day: Int): String
+    val chooseFeast: String
+    val feastMovableNote: String
+    /** The saint kept on this day of every Ethiopian month. */
+    fun monthlyFeastOf(name: String): String
     val noSpecialReminders: String
 
     /** Header of the widget's second card: tomorrow's ግጻዌ, for preparing. */
@@ -592,9 +728,9 @@ object AmharicStrings : Strings {
     override val gitsaweReminderBody = "የዛሬን ምንባብ ይመልከቱ"
     override val gitsaweChannelName = "የዕለቱ ግጻዌ ማስታወሻ"
     override val settingsGitsaweReminder = "የዕለቱ ግጻዌ ማስታወሻ"
-    override val settingsGitsaweReminderDesc = "በየቀኑ ጠዋት የዕለቱን ግጻዌ ምንባብ አስታውሰኝ"
+    override val settingsGitsaweReminderDesc = "በየቀኑ ጠዋት የዕለቱን የግጻዌ ምንባብ ያስታውስዎታል"
     override val settingsNightReminder = "የሌሊት ማስታወሻ"
-    override val settingsNightReminderDesc = "ጸሎት ቢመዘገብም ስንክሳርን፣ ቤተ ክርስቲያንንና ስግደትን ለማስታወስ በየሌሊቱ ይልካል"
+    override val settingsNightReminderDesc = "ጸሎት ቢመዘገብም በየሌሊቱ ስንክሳርን፣ ቤተ ክርስቲያንንና ስግደትን ያስታውስዎታል"
     override val notifDisabledTitle = "ማሳወቂያዎች ጠፍተዋል"
     override val notifDisabledBody = "ማንቂያዎችዎ እንዲደርሱዎት የመተግበሪያውን ማሳወቂያዎች ከቅንብሮች ያብሩ።"
 
@@ -608,11 +744,15 @@ object AmharicStrings : Strings {
     override val settingsTitle = "ቅንብሮች"
     override val prayerSettingsTitle = "ጸሎት"
     override val remindersSettingsTitle = "ማስታወሻዎች"
+    override val remindersGroupDaily = "ዕለታዊ"
+    override val remindersGroupGiving = "ምጽዋትና ስዕለት"
+    override val remindersGroupSound = "ድምፅና ጸጥታ"
     override val remindersOff = "ጠፍቷል"
     override val noBackupYet = "እስካሁን ምትኬ የለም"
     override val backedUpToday = "ዛሬ ምትኬ ተቀምጧል"
     override val backedUpYesterday = "ትናንት ምትኬ ተቀምጧል"
     override fun backedUpDays(days: Long) = "ከ$days ቀናት በፊት ምትኬ ተቀምጧል"
+    override val fontSizeLabel = "የፊደል መጠን"
     override val lineSpacingLabel = "የመስመር ክፍተት"
     override val textAlignmentLabel = "የጽሑፍ አሰላለፍ"
     override val alignJustified = "በሁለቱም ጠርዝ"
@@ -735,8 +875,10 @@ object AmharicStrings : Strings {
     override val previousYear = "ያለፈው ዓመት"
     override val nextYear = "የሚቀጥለው ዓመት"
     override val quietHours = "ጸጥታ ሰዓታት"
-    override val quietHoursDesc = "በሌሊት ማሳሰቢያዎች ድምፅ አያሰሙም"
+    override val quietHoursDesc = "በሌሊት ማንኛውም ማስታወሻ ድምፅ አያሰማም"
     override fun quietHoursRange(from: String, to: String) = "ከ$from እስከ $to ድምፅ የለም"
+    override fun quietHoursConflict(count: Int) =
+        "$count ማስታወሻ በዚህ ክፍተት ውስጥ ተይዟል፤ በጸጥታው ጊዜ አይደርስዎትም።"
     override val filterAll = "ሁሉም"
     override val doneLabel = "ተጠናቋል"
     override val currentHourBadge = "አሁን"
@@ -885,6 +1027,119 @@ object AmharicStrings : Strings {
     override val reminderNameHintAlms = "ለምሳሌ፦ ለቤተ ክርስቲያን"
     override val reminderNameHintRepent = "ለምሳሌ፦ የሳምንት ንስሐ"
     override val untitledReminder = "ስም የሌለው"
+
+    override val journalTitle = "ማስታወሻ"
+    override val journalSubtitle = "የዕለቱን ሐሳብ ይጻፉ"
+    override val journalEmpty = "ገና ምንም አልተጻፈም።"
+    override val journalTodayHeader = "የዛሬ"
+    override val newEntry = "አዲስ ማስታወሻ"
+    override val entryBodyHint = "ዛሬ ምን ሆነ? ምን ተሰማዎት?"
+    override val journalKindReflection = "ሐሳብ"
+    override val journalKindPassage = "ከምንባብ"
+    override val journalKindConfession = "የንስሐ መዘጋጃ"
+    override val journalKindConfessionNote =
+        "ይህ ከመሣሪያዎ አይወጣም፤ በምትኬም ውስጥ አይገባም። ንስሐ ከገቡ በኋላ ይሰረዛል።"
+    override val confessedAction = "ንስሐ ገብቻለሁ"
+    override val confessedConfirm = "ሁሉም የንስሐ መዘጋጃዎች ይሰረዛሉ። ይህ አይመለስም።"
+    override val deleteEntryConfirm = "ይህ ማስታወሻ ይሰረዛል።"
+    override fun writtenOn(date: String) = "የተጻፈው፦ $date"
+    override val journalMonthHeader = "የወሩ ማስታወሻዎች"
+    override val writeAboutThis = "ስለዚህ ጻፍ"
+
+    override val journalLockTitle = "ማስታወሻ ተቆልፏል"
+    override val journalLockPrompt = "ለመክፈት የይለፍ ቃልዎን ያስገቡ"
+    override val journalSetPassphrase = "የይለፍ ቃል አዘጋጅ"
+    override val journalChangePassphrase = "የይለፍ ቃል ቀይር"
+    override val journalRemovePassphrase = "ቁልፉን አንሳ"
+    override val passphraseLabel = "የይለፍ ቃል"
+    override val passphraseConfirmLabel = "እንደገና ያስገቡ"
+    override val passphraseMismatch = "ሁለቱ አይመሳሰሉም"
+    override val passphraseWrong = "የይለፍ ቃሉ ተሳስቷል"
+    override val passphraseTooShort = "ቢያንስ 4 ፊደል ይሁን"
+    override val passphraseNoRecovery =
+        "ይህን የይለፍ ቃል ከረሱት የሚመልስበት መንገድ የለም። ማስታወሻዎችዎም አይከፈቱም።"
+    override val unlockAction = "ክፈት"
+
+    override val exportChooseTitle = "ምን ይቀመጥ?"
+    override val exportChooseBody = "ወደ ፋይል የሚወጣውን ይምረጡ።"
+    override val exportSectionHabits = "የጉዞ መዝገብ"
+    override val exportSectionBookmarks = "ዕልባቶች"
+    override val exportSectionHighlights = "ማድመቂያዎች"
+    override val exportSectionPrayerList = "የጸሎት ዝርዝር"
+    override val exportSectionSetup = "ቅንብሮችና ሰዓታት"
+    override val exportSectionOfferings = "አስራትና ስዕለት"
+    override val exportSectionJournal = "ማስታወሻ"
+    override val exportJournalWarning =
+        "ማስታወሻዎቹ በፋይሉ ውስጥ በግልጽ ይጻፋሉ፤ ፋይሉን የከፈተ ሁሉ ያነባቸዋል። የንስሐ መዘጋጃዎች ግን አይወጡም።"
+    override val exportNothingChosen = "ቢያንስ አንዱን ይምረጡ"
+    override val continueAction = "ቀጥል"
+
+    override val settingsTitheTitle = "አስራት"
+    override val settingsTitheDesc = "ገቢዎን መዝግበው አስራትዎን ይከታተሉ"
+    override val settingsVowTitle = "ስዕለት"
+    override val settingsVowDesc = "የተሳሉትን በበዓል ቀን ያስታውሱ፤ አፈጻጸሙንም ይከታተሉ"
+    override val titheReminderTitle = "የአስራት ቀን"
+    override val titheReminderBody = "አስራትዎን የሚያወጡበት ቀን ነው።"
+    override val titheChannelName = "የአስራት ማስታወሻ"
+    override val vowReminderTitle = "ስዕለት"
+    override val vowReminderBody = "ዛሬ የተሳሉትን የሚፈጽሙበት ቀን ነው።"
+    override val vowChannelName = "የስዕለት ማስታወሻ"
+    override fun vowReminderOwing(amount: String) = "ዛሬ የስዕለትዎ ቀን ነው። ቀሪ፦ $amount"
+    override val reminderNameHintTithe = "ለምሳሌ፦ የወር አስራት"
+
+    override val currencyDefault = "ብር"
+    override val currencyLabel = "ገንዘብ"
+
+    override val titheTitle = "አስራት"
+    override val titheIntro = "ገቢዎን ሲመዘግቡ አሥራቱ ራሱ ይሰላል፤ የሰጡትንም መዝግበው ቀሪውን ያዩታል።"
+    override val periodMonth = "ወር"
+    override val periodYear = "ዓመት"
+    override val titheIncome = "ገቢ"
+    override val titheDue = "የሚገባ"
+    override val titheGiven = "የተሰጠ"
+    override val titheOwed = "ቀሪ"
+    override val titheSurplus = "ትርፍ"
+    override val titheSettledNote = "የዚህ ጊዜ አስራት ተሟልቷል።"
+    override val tithePercentLabel = "የአስራት ድርሻ (%)"
+    override val addIncome = "ገቢ መዝግብ"
+    override val addGiven = "የሰጡትን መዝግብ"
+    override val incomeLabel = "ገቢ"
+    override val givenLabel = "የተሰጠ"
+    override val amountLabel = "መጠን"
+    override val noteLabel = "ማስታወሻ (አማራጭ)"
+    override val dateLabel = "ቀን"
+    override val titheLedgerHeader = "መዝገብ"
+    override val noTitheEntries = "ገና ምንም አልተመዘገበም።"
+    override val titheRemindersRow = "የአስራት ማስታወሻዎች"
+    override fun remindersOnCount(count: Int) =
+        if (count == 0) "ማስታወሻ የለም" else "$count ማስታወሻ በሥራ ላይ"
+    override val previousPeriod = "ያለፈው"
+    override val nextPeriod = "ቀጣዩ"
+
+    override val vowsTitle = "ስዕለት"
+    override val vowsIntro = "የተሳሉትን ስዕለት ከበዓል ቀን ጋር አስረው ያስቀምጡ፤ ሲፈጽሙም ይመዝግቡ።"
+    override val addVow = "ስዕለት ጨምር"
+    override val noVows = "ገና ስዕለት አልተጨመረም።"
+    override val vowNameLabel = "ስም"
+    override val vowNameHint = "ለምሳሌ፦ ለቅዱስ ገብርኤል"
+    override val vowPledgeLabel = "የተሳሉት መጠን (አማራጭ)"
+    override val vowPledged = "የተሳሉት"
+    override val vowGiven = "የተከፈለ"
+    override val vowRemaining = "ቀሪ"
+    override val vowSettled = "ተፈጽሟል"
+    override val vowOneTime = "አንድ ጊዜ ብቻ"
+    override val vowOneTimeDesc = "ከተፈጸመ በኋላ ማስታወሱ ይቆማል"
+    override val recordPayment = "ክፍያ መዝግብ"
+    override val vowPaymentsHeader = "የተፈጸመ"
+    override val noVowPayments = "ገና አልተፈጸመም።"
+    override val deleteVowConfirm = "ይህ ስዕለት ከነመዝገቡ ይሰረዛል።"
+
+    override val scheduleYearly = "በዓመት"
+    override val scheduleFeast = "በበዓል"
+    override fun yearlyOn(month: String, day: Int) = "በየዓመቱ $month $day"
+    override val chooseFeast = "በዓል ይምረጡ"
+    override val feastMovableNote = "በባሕረ ሓሳብ በየዓመቱ ይሰላል"
+    override fun monthlyFeastOf(name: String) = "የዕለቱ በዓል፦ $name"
     override val noSpecialReminders = "ገና ማስታወሻ አልተጨመረም።"
     override val tomorrowLabel = "ነገ"
     override val readGitsawe = "ግጻዌውን ክፈት"
@@ -1009,9 +1264,9 @@ object EnglishStrings : Strings {
     override val gitsaweReminderBody = "See today's reading"
     override val gitsaweChannelName = "Daily Gitsawe reminder"
     override val settingsGitsaweReminder = "Daily Gitsawe reminder"
-    override val settingsGitsaweReminderDesc = "Each morning, remind me of today's Gitsawe reading"
+    override val settingsGitsaweReminderDesc = "Reminds you of today's Gitsawe reading each morning"
     override val settingsNightReminder = "Nightly reminder"
-    override val settingsNightReminderDesc = "Sent every evening—even after prayer is marked—to review Synaxarium, church, and prostrations"
+    override val settingsNightReminderDesc = "Reminds you each evening — even after prayer is marked — of the Synaxarium, church, and prostrations"
     override val notifDisabledTitle = "Notifications are off"
     override val notifDisabledBody = "Turn on notifications in settings so your reminders can reach you."
 
@@ -1025,11 +1280,15 @@ object EnglishStrings : Strings {
     override val settingsTitle = "Settings"
     override val prayerSettingsTitle = "Prayer"
     override val remindersSettingsTitle = "Reminders"
+    override val remindersGroupDaily = "Daily"
+    override val remindersGroupGiving = "Giving and vows"
+    override val remindersGroupSound = "Sound and silence"
     override val remindersOff = "Off"
     override val noBackupYet = "No backup yet"
     override val backedUpToday = "Backed up today"
     override val backedUpYesterday = "Backed up yesterday"
     override fun backedUpDays(days: Long) = "Backed up $days days ago"
+    override val fontSizeLabel = "Text size"
     override val lineSpacingLabel = "Line spacing"
     override val textAlignmentLabel = "Text alignment"
     override val alignJustified = "Justified"
@@ -1099,7 +1358,8 @@ object EnglishStrings : Strings {
     override val delete = "Delete"
     override val cancel = "Cancel"
     override val builtInBadge = "Built-in"
-    override fun remindersOn(count: Int) = "$count reminders on"
+    override fun remindersOn(count: Int) =
+        if (count == 1) "1 reminder on" else "$count reminders on"
     override val newModeName = "New mode"
 
     override val modeNameLabel = "Mode name"
@@ -1170,8 +1430,11 @@ object EnglishStrings : Strings {
     override val previousYear = "Previous year"
     override val nextYear = "Next year"
     override val quietHours = "Quiet hours"
-    override val quietHoursDesc = "Silence reminders overnight"
+    override val quietHoursDesc = "Silence every reminder overnight"
     override fun quietHoursRange(from: String, to: String) = "Silent from $from to $to"
+    override fun quietHoursConflict(count: Int) =
+        if (count == 1) "1 reminder is set inside this window and will not reach you"
+        else "$count reminders are set inside this window and will not reach you"
     override val filterAll = "All"
     override val doneLabel = "Done"
     override val currentHourBadge = "Now"
@@ -1293,9 +1556,9 @@ object EnglishStrings : Strings {
     override val noPrayerListBody = "Add the people you want to remember in prayer."
 
     override val settingsAlmsReminder = "Almsgiving reminder"
-    override val settingsAlmsReminderDesc = "Remind me to give alms on the days I choose"
+    override val settingsAlmsReminderDesc = "Reminds you to give alms on the days you choose"
     override val settingsRepentReminder = "Repentance reminder"
-    override val settingsRepentReminderDesc = "Remind me to repent and prepare for Holy Communion"
+    override val settingsRepentReminderDesc = "Reminds you to repent and prepare for Holy Communion"
     override val almsReminderTitle = "A day to give"
     override val almsReminderBody = "Today is your day to give alms."
     override val almsChannelName = "Almsgiving reminder"
@@ -1304,7 +1567,7 @@ object EnglishStrings : Strings {
     override val repentChannelName = "Repentance reminder"
 
     override val settingsBreathReminder = "Prayer of the heart"
-    override val settingsBreathReminderDesc = "Once a day, at an unplanned moment between prayers, one short breath prayer"
+    override val settingsBreathReminderDesc = "Reminds you once a day, at an unplanned moment between the hours, with one short prayer"
     override val breathReminderTitle = "A moment to pray"
     override val breathChannelName = "Prayer between the hours"
 
@@ -1319,6 +1582,119 @@ object EnglishStrings : Strings {
     override val reminderNameHintAlms = "e.g. For the church"
     override val reminderNameHintRepent = "e.g. Weekly repentance"
     override val untitledReminder = "Untitled"
+
+    override val journalTitle = "Journal"
+    override val journalSubtitle = "Write down the day"
+    override val journalEmpty = "Nothing written yet."
+    override val journalTodayHeader = "Today"
+    override val newEntry = "New entry"
+    override val entryBodyHint = "What happened today? What did you feel?"
+    override val journalKindReflection = "Reflection"
+    override val journalKindPassage = "From a reading"
+    override val journalKindConfession = "Preparing for confession"
+    override val journalKindConfessionNote =
+        "This never leaves your device and is never put in a backup. It is deleted once you have confessed."
+    override val confessedAction = "I have confessed"
+    override val confessedConfirm = "Every confession draft will be deleted. This cannot be undone."
+    override val deleteEntryConfirm = "This entry will be deleted."
+    override fun writtenOn(date: String) = "Written on $date"
+    override val journalMonthHeader = "This month"
+    override val writeAboutThis = "Write about this"
+
+    override val journalLockTitle = "Journal locked"
+    override val journalLockPrompt = "Enter your passphrase to open it"
+    override val journalSetPassphrase = "Set a passphrase"
+    override val journalChangePassphrase = "Change passphrase"
+    override val journalRemovePassphrase = "Remove the lock"
+    override val passphraseLabel = "Passphrase"
+    override val passphraseConfirmLabel = "Enter it again"
+    override val passphraseMismatch = "These do not match"
+    override val passphraseWrong = "That passphrase is not right"
+    override val passphraseTooShort = "Use at least 4 characters"
+    override val passphraseNoRecovery =
+        "If you forget this passphrase there is no way to recover it, and your journal will not open."
+    override val unlockAction = "Unlock"
+
+    override val exportChooseTitle = "What should be saved?"
+    override val exportChooseBody = "Choose what goes into the file."
+    override val exportSectionHabits = "Journey record"
+    override val exportSectionBookmarks = "Bookmarks"
+    override val exportSectionHighlights = "Highlights"
+    override val exportSectionPrayerList = "Prayer list"
+    override val exportSectionSetup = "Settings and hours"
+    override val exportSectionOfferings = "Tithe and vows"
+    override val exportSectionJournal = "Journal"
+    override val exportJournalWarning =
+        "Journal entries are written into the file as plain text — anyone who opens it can read them. Confession drafts are never included."
+    override val exportNothingChosen = "Choose at least one"
+    override val continueAction = "Continue"
+
+    override val settingsTitheTitle = "Tithe"
+    override val settingsTitheDesc = "Record what you receive and track the tithe on it"
+    override val settingsVowTitle = "Vows and pledges"
+    override val settingsVowDesc = "Be reminded on the feast you promised, and record what you keep"
+    override val titheReminderTitle = "Tithe day"
+    override val titheReminderBody = "Today is the day you set your tithe aside."
+    override val titheChannelName = "Tithe reminder"
+    override val vowReminderTitle = "A vow to keep"
+    override val vowReminderBody = "Today is the day you promised."
+    override val vowChannelName = "Vow reminder"
+    override fun vowReminderOwing(amount: String) = "Today is the day you promised. Still owing: $amount"
+    override val reminderNameHintTithe = "e.g. Monthly tithe"
+
+    override val currencyDefault = "Birr"
+    override val currencyLabel = "Currency"
+
+    override val titheTitle = "Tithe"
+    override val titheIntro = "Record what you receive and the tenth is worked out for you; record what you give and you can see what is left."
+    override val periodMonth = "Month"
+    override val periodYear = "Year"
+    override val titheIncome = "Received"
+    override val titheDue = "Owed"
+    override val titheGiven = "Given"
+    override val titheOwed = "Remaining"
+    override val titheSurplus = "Beyond the tithe"
+    override val titheSettledNote = "This period's tithe is fully given."
+    override val tithePercentLabel = "Share of income (%)"
+    override val addIncome = "Record income"
+    override val addGiven = "Record giving"
+    override val incomeLabel = "Received"
+    override val givenLabel = "Given"
+    override val amountLabel = "Amount"
+    override val noteLabel = "Note (optional)"
+    override val dateLabel = "Date"
+    override val titheLedgerHeader = "Ledger"
+    override val noTitheEntries = "Nothing recorded yet."
+    override val titheRemindersRow = "Tithe reminders"
+    override fun remindersOnCount(count: Int) =
+        if (count == 0) "No reminders" else "$count reminder${if (count == 1) "" else "s"} on"
+    override val previousPeriod = "Previous"
+    override val nextPeriod = "Next"
+
+    override val vowsTitle = "Vows and pledges"
+    override val vowsIntro = "Tie a vow to the feast you promised it on, and record it when you keep it."
+    override val addVow = "Add a vow"
+    override val noVows = "No vows yet."
+    override val vowNameLabel = "Name"
+    override val vowNameHint = "e.g. For St Gabriel"
+    override val vowPledgeLabel = "Amount promised (optional)"
+    override val vowPledged = "Promised"
+    override val vowGiven = "Kept"
+    override val vowRemaining = "Remaining"
+    override val vowSettled = "Fulfilled"
+    override val vowOneTime = "Once only"
+    override val vowOneTimeDesc = "Stops reminding once it has been kept"
+    override val recordPayment = "Record what you kept"
+    override val vowPaymentsHeader = "Kept so far"
+    override val noVowPayments = "Nothing recorded yet."
+    override val deleteVowConfirm = "This vow and its record will be deleted."
+
+    override val scheduleYearly = "Yearly"
+    override val scheduleFeast = "On a feast"
+    override fun yearlyOn(month: String, day: Int) = "Every year, $month $day"
+    override val chooseFeast = "Choose a feast"
+    override val feastMovableNote = "Computed each year from the Bahre Hasab"
+    override fun monthlyFeastOf(name: String) = "Feast of the day: $name"
     override val noSpecialReminders = "No reminders yet."
     override val tomorrowLabel = "Tomorrow"
     override val readGitsawe = "Read the Gitsawe"

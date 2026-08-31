@@ -29,8 +29,10 @@ class GitsaweReminderReceiver : BroadcastReceiver() {
             try {
                 runBlocking {
                     if (!SettingsRepository.gitsaweReminder(context).first()) return@runBlocking
-                    // Chain: always re-arm for tomorrow while enabled.
+                    // Chain: always re-arm for tomorrow while enabled — even
+                    // when this morning's nudge is about to be silenced.
                     GitsaweReminderScheduler.schedule(context)
+                    if (SettingsRepository.inQuietHoursNow(context)) return@runBlocking
 
                     val s = stringsFor(SettingsRepository.language(context).first())
                     val heading = runCatching {

@@ -17,9 +17,9 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class SpecialReminder(
-    val id: String,
-    val label: String = "",
-    val schedule: HabitSchedule = HabitSchedule(),
-    val minute: Int = 9 * 60,
-    val enabled: Boolean = true,
-)
+    override val id: String,
+    override val label: String = "",
+    override val schedule: HabitSchedule = HabitSchedule(),
+    override val minute: Int = 9 * 60,
+    override val enabled: Boolean = true,
+) : ScheduledReminder

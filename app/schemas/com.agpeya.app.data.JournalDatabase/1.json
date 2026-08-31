@@ -1,0 +1,124 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "6ba94a61e6720e14d070888b9eb80152",
+    "entities": [
+      {
+        "tableName": "journal_entries",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `date` TEXT NOT NULL, `kind` TEXT NOT NULL, `body` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, `anchorRoute` TEXT, `anchorLabel` TEXT, `ctx_ethYear` INTEGER NOT NULL, `ctx_ethMonth` INTEGER NOT NULL, `ctx_ethDay` INTEGER NOT NULL, `ctx_monthlyFeast` TEXT, `ctx_fast` TEXT, `ctx_gitsawe` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "body",
+            "columnName": "body",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "anchorRoute",
+            "columnName": "anchorRoute",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "anchorLabel",
+            "columnName": "anchorLabel",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "context.ethYear",
+            "columnName": "ctx_ethYear",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "context.ethMonth",
+            "columnName": "ctx_ethMonth",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "context.ethDay",
+            "columnName": "ctx_ethDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "context.monthlyFeast",
+            "columnName": "ctx_monthlyFeast",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "context.fast",
+            "columnName": "ctx_fast",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "context.gitsawe",
+            "columnName": "ctx_gitsawe",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_journal_entries_date",
+            "unique": false,
+            "columnNames": [
+              "date"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_journal_entries_date` ON `${TABLE_NAME}` (`date`)"
+          },
+          {
+            "name": "index_journal_entries_kind",
+            "unique": false,
+            "columnNames": [
+              "kind"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_journal_entries_kind` ON `${TABLE_NAME}` (`kind`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6ba94a61e6720e14d070888b9eb80152')"
+    ]
+  }
+}

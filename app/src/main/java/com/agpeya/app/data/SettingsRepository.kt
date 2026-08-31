@@ -85,6 +85,7 @@ object SettingsRepository {
         val quietStart: Int = 22 * 60,
         val quietEnd: Int = 6 * 60,
         val almsReminders: List<com.agpeya.app.model.SpecialReminder> = emptyList(),
+        val titheReminders: List<com.agpeya.app.model.SpecialReminder> = emptyList(),
         val repentanceReminders: List<com.agpeya.app.model.SpecialReminder> = emptyList(),
     )
 
@@ -127,8 +128,19 @@ object SettingsRepository {
     private val KEY_ALMS_SCHEDULED_IDS = stringPreferencesKey("alms_scheduled_ids")
     private val KEY_REPENTANCE_SCHEDULED_IDS = stringPreferencesKey("repentance_scheduled_ids")
 
+    // አስራት keeps its reminders here beside the other intentions; the ledger
+    // itself lives in OfferingRepository, since records are not preferences.
+    private val KEY_TITHE_REMINDERS = stringPreferencesKey("tithe_reminders")
+    private val KEY_TITHE_SCHEDULED_IDS = stringPreferencesKey("tithe_scheduled_ids")
+    // ስዕለት reminders ARE the vows, stored in OfferingRepository — only the
+    // armed-alarm bookkeeping belongs here.
+    private val KEY_VOW_SCHEDULED_IDS = stringPreferencesKey("vow_scheduled_ids")
+
     /** 09:00 — morning of the chosen alms day, before the day fills up. */
     const val DEFAULT_ALMS_REMINDER_MIN = 9 * 60
+
+    /** 09:00 on the day the tithe is set aside. */
+    const val DEFAULT_TITHE_REMINDER_MIN = 9 * 60
 
     /** 19:00 — the eve; ንስሐ and communion preparation are an evening's work. */
     const val DEFAULT_REPENTANCE_REMINDER_MIN = 19 * 60
@@ -163,6 +175,11 @@ object SettingsRepository {
             quietEnabled = prefs[KEY_QUIET_ENABLED] ?: false,
             quietStart = prefs[KEY_QUIET_START] ?: 22 * 60,
             quietEnd = prefs[KEY_QUIET_END] ?: 6 * 60,
+            titheReminders = prefs[KEY_TITHE_REMINDERS]?.let { raw ->
+                runCatching {
+                    scheduleJson.decodeFromString<List<com.agpeya.app.model.SpecialReminder>>(raw)
+                }.getOrDefault(emptyList())
+            } ?: emptyList(),
             almsReminders = readReminders(
                 prefs, KEY_ALMS_REMINDERS, KEY_ALMS_REMINDER, false,
                 KEY_ALMS_REMINDER_TIME, DEFAULT_ALMS_REMINDER_MIN,
@@ -200,6 +217,7 @@ object SettingsRepository {
             prefs[KEY_QUIET_START] = value.quietStart.coerceIn(0, 1439)
             prefs[KEY_QUIET_END] = value.quietEnd.coerceIn(0, 1439)
             prefs[KEY_ALMS_REMINDERS] = scheduleJson.encodeToString(sanitizeReminders(value.almsReminders))
+            prefs[KEY_TITHE_REMINDERS] = scheduleJson.encodeToString(sanitizeReminders(value.titheReminders))
             prefs[KEY_REPENTANCE_REMINDERS] = scheduleJson.encodeToString(sanitizeReminders(value.repentanceReminders))
         }
     }
@@ -531,6 +549,28 @@ object SettingsRepository {
         }
     }
 
+    /**
+     * አስራት reminders. Unlike alms and repentance there is no legacy single
+     * reminder to migrate — the feature arrived as a list — so an unwritten key
+     * simply means no reminders yet, and the person adds the first one.
+     */
+    fun titheReminders(context: Context): Flow<List<com.agpeya.app.model.SpecialReminder>> =
+        context.settingsDataStore.data.map { prefs ->
+            prefs[KEY_TITHE_REMINDERS]?.let { raw ->
+                runCatching {
+                    scheduleJson.decodeFromString<List<com.agpeya.app.model.SpecialReminder>>(raw)
+                }.getOrDefault(emptyList())
+            } ?: emptyList()
+        }
+
+    suspend fun setTitheReminders(context: Context, list: List<com.agpeya.app.model.SpecialReminder>) {
+        context.settingsDataStore.edit { it[KEY_TITHE_REMINDERS] = scheduleJson.encodeToString(list) }
+    }
+
+    fun titheRemindersBlocking(context: Context): List<com.agpeya.app.model.SpecialReminder> =
+        runCatching { kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) { titheReminders(context).first() } }
+            .getOrDefault(emptyList())
+
     fun almsRemindersBlocking(context: Context): List<com.agpeya.app.model.SpecialReminder> =
         runCatching { kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) { almsReminders(context).first() } }
             .getOrDefault(emptyList())
@@ -574,6 +614,8 @@ object SettingsRepository {
 
     val KEY_ALMS_SCHEDULED_IDS_PUBLIC get() = KEY_ALMS_SCHEDULED_IDS
     val KEY_REPENTANCE_SCHEDULED_IDS_PUBLIC get() = KEY_REPENTANCE_SCHEDULED_IDS
+    val KEY_TITHE_SCHEDULED_IDS_PUBLIC get() = KEY_TITHE_SCHEDULED_IDS
+    val KEY_VOW_SCHEDULED_IDS_PUBLIC get() = KEY_VOW_SCHEDULED_IDS
 
     // ---- Quiet hours --------------------------------------------------------
     //
@@ -596,6 +638,21 @@ object SettingsRepository {
             it[KEY_QUIET_START] = value.startMinute.coerceIn(0, 24 * 60 - 1)
             it[KEY_QUIET_END] = value.endMinute.coerceIn(0, 24 * 60 - 1)
         }
+    }
+
+    /**
+     * Whether quiet hours cover this very moment.
+     *
+     * Every reminder in the app consults this before alerting: the ringing
+     * prayer alarms, and — since they were the obvious omission — the nightly,
+     * ግጻዌ, ሕሊና, ምጽዋት, ንስሐ, አስራት and ስዕለት notifications too. The rule they all
+     * follow is the same: re-arm the chain first, then stay silent. A quiet
+     * window suppresses one occurrence; it never stops the schedule, or
+     * tomorrow's reminder would be lost along with tonight's.
+     */
+    fun inQuietHoursNow(context: Context): Boolean {
+        val now = java.time.LocalTime.now()
+        return quietHoursBlocking(context).covers(now.hour * 60 + now.minute)
     }
 
     /** Blocking read for the alarm receiver, which has no coroutine scope. */

@@ -41,8 +41,10 @@ class StreakReminderReceiver : BroadcastReceiver() {
             try {
                 runBlocking {
                     if (!SettingsRepository.streakReminder(context).first()) return@runBlocking
-                    // Chain: always re-arm for tomorrow while enabled.
+                    // Chain: always re-arm for tomorrow while enabled — even
+                    // when tonight's nudge is about to be silenced.
                     StreakReminderScheduler.schedule(context)
+                    if (SettingsRepository.inQuietHoursNow(context)) return@runBlocking
 
                     val s = stringsFor(SettingsRepository.language(context).first())
                     // Completion never suppresses this notification. Instead,

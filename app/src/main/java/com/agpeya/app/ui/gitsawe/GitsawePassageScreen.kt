@@ -71,6 +71,7 @@ fun GitsawePassageScreen(
     end: Int,
     role: String?,
     onBack: () -> Unit,
+    onWriteNote: (route: String, label: String) -> Unit = { _, _ -> },
     onOpenBook: () -> Unit,
     onOpenChapter: (Boolean) -> Unit,
 ) {
@@ -110,6 +111,18 @@ fun GitsawePassageScreen(
                         fontStep = fontStep,
                         maxFontStep = FONT_STEPS_SP.lastIndex,
                         onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
+                        // The passage is named in the note so it still reads
+                        // as being about something years later, and the route
+                        // takes the person straight back to it.
+                        onWriteNote = passage?.let { p ->
+                            {
+                                onWriteNote(
+                                    "gitsawePassage?psalm=$psalm&book=${bookKey.orEmpty()}" +
+                                        "&chapter=$chapter&start=$start&end=$end&role=${role.orEmpty()}",
+                                    listOfNotNull(p.bookName, p.refLine).joinToString(" · "),
+                                )
+                            }
+                        },
                         secondaryActionLabel = if (isPsalm) {
                             if (misbakLanguage == MisbakLanguage.GEEZ) s.wudaseLangAmharic else s.wudaseLangGeez
                         } else null,

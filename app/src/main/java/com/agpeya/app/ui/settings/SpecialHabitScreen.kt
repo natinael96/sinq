@@ -85,6 +85,9 @@ fun SpecialHabitScreen(habit: SpecialHabit, onBack: () -> Unit) {
     val reminders by when (habit) {
         SpecialHabit.ALMS -> SettingsRepository.almsReminders(context)
         SpecialHabit.REPENTANCE -> SettingsRepository.repentanceReminders(context)
+        // ስዕለት never routes here — a vow carries an amount and a record, so it
+        // has its own page — but the branch keeps the `when` exhaustive.
+        SpecialHabit.TITHE, SpecialHabit.VOW -> SettingsRepository.titheReminders(context)
     }.collectAsState(initial = emptyList())
 
     // Notification-only nudges, so switching one on asks for POST_NOTIFICATIONS.
@@ -108,6 +111,7 @@ fun SpecialHabitScreen(habit: SpecialHabit, onBack: () -> Unit) {
             when (habit) {
                 SpecialHabit.ALMS -> SettingsRepository.setAlmsReminders(context, newList)
                 SpecialHabit.REPENTANCE -> SettingsRepository.setRepentanceReminders(context, newList)
+                SpecialHabit.TITHE, SpecialHabit.VOW -> SettingsRepository.setTitheReminders(context, newList)
             }
             if (reschedule) SpecialHabitReminderScheduler.sync(context, habit)
         }
@@ -123,6 +127,11 @@ fun SpecialHabitScreen(habit: SpecialHabit, onBack: () -> Unit) {
                 HabitSchedule.DEFAULT_ALMS to SettingsRepository.DEFAULT_ALMS_REMINDER_MIN
             SpecialHabit.REPENTANCE ->
                 HabitSchedule.DEFAULT_REPENTANCE to SettingsRepository.DEFAULT_REPENTANCE_REMINDER_MIN
+            // A tithe is reckoned by the month, so a new one starts monthly
+            // rather than on a weekday.
+            SpecialHabit.TITHE, SpecialHabit.VOW ->
+                HabitSchedule(kind = HabitSchedule.Kind.MONTHLY, monthDay = 1) to
+                    SettingsRepository.DEFAULT_TITHE_REMINDER_MIN
         }
         persist(
             reminders + SpecialReminder(
@@ -137,14 +146,17 @@ fun SpecialHabitScreen(habit: SpecialHabit, onBack: () -> Unit) {
     val title = when (habit) {
         SpecialHabit.ALMS -> s.settingsAlmsReminder
         SpecialHabit.REPENTANCE -> s.settingsRepentReminder
+        SpecialHabit.TITHE, SpecialHabit.VOW -> s.titheRemindersRow
     }
     val description = when (habit) {
         SpecialHabit.ALMS -> s.settingsAlmsReminderDesc
         SpecialHabit.REPENTANCE -> s.settingsRepentReminderDesc
+        SpecialHabit.TITHE, SpecialHabit.VOW -> s.settingsTitheDesc
     }
     val nameHint = when (habit) {
         SpecialHabit.ALMS -> s.reminderNameHintAlms
         SpecialHabit.REPENTANCE -> s.reminderNameHintRepent
+        SpecialHabit.TITHE, SpecialHabit.VOW -> s.reminderNameHintTithe
     }
 
     Scaffold(
@@ -264,235 +276,5 @@ private fun ReminderCard(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun ScheduleRow(schedule: HabitSchedule, s: Strings, onChange: (HabitSchedule) -> Unit) {
-    var editing by remember { mutableStateOf(false) }
-    ListRow(
-        title = s.scheduleLabel,
-        subtitle = scheduleSummary(schedule, s),
-        onClick = { editing = true },
-    )
-    if (editing) {
-        ScheduleEditorDialog(
-            s = s,
-            initial = schedule,
-            onDismiss = { editing = false },
-            onSave = {
-                editing = false
-                onChange(it)
-            },
-        )
-    }
-}
-
-private fun scheduleSummary(schedule: HabitSchedule, s: Strings): String = when (schedule.kind) {
-    HabitSchedule.Kind.WEEKLY -> when {
-        schedule.days.size == 7 -> s.daysSummaryDaily
-        schedule.days.isEmpty() -> s.noDaySelected
-        else -> schedule.days.sorted().joinToString(" ") { s.dayLabels[it - 1] }
-    }
-    HabitSchedule.Kind.EVERY_OTHER_DAY -> s.scheduleEveryOtherDay
-    HabitSchedule.Kind.MONTHLY -> s.monthlyOnDay(schedule.monthDay)
-}
-
-/**
- * Cadence editor: weekly (with day chips), every other day, or monthly on an
- * Ethiopian month day. Choosing every-other-day anchors on today, so it is due
- * immediately and then alternates; an existing anchor is kept so re-saving
- * can't shift the rhythm.
- */
-@Composable
-private fun ScheduleEditorDialog(
-    s: Strings,
-    initial: HabitSchedule,
-    onDismiss: () -> Unit,
-    onSave: (HabitSchedule) -> Unit,
-) {
-    var kind by remember { mutableStateOf(initial.kind) }
-    var days by remember { mutableStateOf(initial.days) }
-    var monthDay by remember { mutableIntStateOf(initial.monthDay) }
-
-    androidx.compose.material3.AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(s.scheduleLabel) },
-        text = {
-            Column {
-                val kinds = listOf(
-                    HabitSchedule.Kind.WEEKLY to s.scheduleWeekly,
-                    HabitSchedule.Kind.EVERY_OTHER_DAY to s.scheduleEveryOtherDay,
-                    HabitSchedule.Kind.MONTHLY to s.scheduleMonthly,
-                )
-                // A dialog is narrower than a full screen: the three cadence
-                // chips don't fit on one line, so they wrap instead of being
-                // squeezed to one letter per line.
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    kinds.forEach { (k, label) ->
-                        androidx.compose.material3.FilterChip(
-                            selected = kind == k,
-                            onClick = { kind = k },
-                            label = { Text(label, maxLines = 1) },
-                        )
-                    }
-                }
-                Spacer(Modifier.height(Spacing.md))
-                when (kind) {
-                    HabitSchedule.Kind.WEEKLY -> {
-                        Text(
-                            text = s.daysLabel,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Spacer(Modifier.height(Spacing.sm))
-                        // Seven chips don't fit a dialog's width, and the last
-                        // two (ቅ/እ — Saturday, Sunday) were being clipped off
-                        // the edge. Each day takes an equal share of the row
-                        // instead, so all seven are always reachable.
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            s.dayLabels.forEachIndexed { index, label ->
-                                val day = index + 1
-                                DayToggle(
-                                    label = label,
-                                    selected = day in days,
-                                    onToggle = { days = if (day in days) days - day else days + day },
-                                    modifier = Modifier.weight(1f),
-                                )
-                            }
-                        }
-                    }
-                    HabitSchedule.Kind.EVERY_OTHER_DAY -> {
-                        // Nothing to configure: the rhythm starts today.
-                    }
-                    HabitSchedule.Kind.MONTHLY -> {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            TextButton(onClick = { monthDay = if (monthDay > 1) monthDay - 1 else 30 }) {
-                                Text("−")
-                            }
-                            Text(
-                                text = s.monthlyOnDay(monthDay),
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.weight(1f),
-                                textAlign = TextAlign.Center,
-                            )
-                            TextButton(onClick = { monthDay = if (monthDay < 30) monthDay + 1 else 1 }) {
-                                Text("+")
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                enabled = kind != HabitSchedule.Kind.WEEKLY || days.isNotEmpty(),
-                onClick = {
-                    onSave(
-                        initial.copy(
-                            kind = kind,
-                            days = days,
-                            monthDay = monthDay.coerceIn(1, 30),
-                            anchor = if (initial.kind == HabitSchedule.Kind.EVERY_OTHER_DAY &&
-                                initial.anchor.isNotBlank()
-                            ) {
-                                initial.anchor
-                            } else {
-                                LocalDate.now().toString()
-                            },
-                        ),
-                    )
-                },
-            ) { Text(s.save) }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
-    )
-}
-
-/**
- * One day of the week, as a small pill toggle. Its width comes from the row
- * that holds it (a seventh of the space) rather than from its own content, so
- * the full week always fits a dialog whatever the screen width or font scale;
- * a minimum height keeps the target comfortably tappable even when that
- * seventh is narrow, while still letting it grow with large font scales.
- */
-@Composable
-private fun DayToggle(
-    label: String,
-    selected: Boolean,
-    onToggle: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier
-            .heightIn(min = 48.dp)
-            .clip(CircleShape)
-            .background(
-                if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
-            )
-            .border(
-                width = 1.dp,
-                color = if (selected) {
-                    MaterialTheme.colorScheme.secondary
-                } else {
-                    MaterialTheme.colorScheme.outline
-                },
-                shape = CircleShape,
-            )
-            .toggleable(value = selected, role = Role.Checkbox, onValueChange = { onToggle() }),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            color = if (selected) {
-                MaterialTheme.colorScheme.onSecondaryContainer
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            },
-            maxLines = 1,
-        )
-    }
-}
-
-/**
- * When the reminder fires on its due day. Same clock dialog as the nightly
- * nudge's time row.
- */
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
-@Composable
-private fun TimeRow(minute: Int, s: Strings, onChange: (Int) -> Unit) {
-    var picking by remember { mutableStateOf(false) }
-    ListRow(
-        title = s.timeLabel,
-        subtitle = "%02d:%02d".format(minute / 60, minute % 60),
-        onClick = { picking = true },
-    )
-    if (picking) {
-        val timeState = androidx.compose.material3.rememberTimePickerState(
-            initialHour = minute / 60,
-            initialMinute = minute % 60,
-            is24Hour = true,
-        )
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { picking = false },
-            title = { Text(s.timeLabel) },
-            text = { androidx.compose.material3.TimePicker(state = timeState) },
-            confirmButton = {
-                TextButton(onClick = {
-                    picking = false
-                    onChange(timeState.hour * 60 + timeState.minute)
-                }) { Text(s.save) }
-            },
-            dismissButton = {
-                TextButton(onClick = { picking = false }) { Text(s.cancel) }
-            },
-        )
     }
 }

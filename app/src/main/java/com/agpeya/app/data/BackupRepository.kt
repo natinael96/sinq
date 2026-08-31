@@ -7,7 +7,10 @@ import com.agpeya.app.model.HabitsState
 import com.agpeya.app.model.PrayerPerson
 import com.agpeya.app.model.HoursConfig
 import com.agpeya.app.model.HourLayout
+import com.agpeya.app.model.JournalEntry
 import com.agpeya.app.model.ModesState
+import com.agpeya.app.model.TitheEntry
+import com.agpeya.app.model.Vow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -44,6 +47,41 @@ object BackupRepository {
         val hours: HoursConfig? = null,
         val layouts: Map<String, HourLayout> = emptyMap(),
         val settings: SettingsRepository.BackupSettings? = null,
+        /**
+         * The አስራት ledger and ስዕለት list. Records of money given and promises
+         * made are exactly the kind of thing a person cannot reconstruct after
+         * losing a phone, so they belong in the backup even though nothing else
+         * about giving is stored. Defaulted, so a v2 file without them decodes.
+         */
+        val titheEntries: List<TitheEntry> = emptyList(),
+        val tithePercent: Int = OfferingRepository.DEFAULT_TITHE_PERCENT,
+        val currency: String = "",
+        val vows: List<Vow> = emptyList(),
+        /**
+         * Journal entries, in PLAINTEXT. Exporting them is opt-in and gated on
+         * the journal passphrase, but the file itself is readable by anyone who
+         * opens it — see [JournalLock]. ንስሐ drafts are never written here.
+         */
+        val journal: List<JournalEntry> = emptyList(),
+    )
+
+    /**
+     * What the person chose to put in the file.
+     *
+     * A backup used to be all-or-nothing, which was fine while everything in it
+     * was innocuous. It no longer is: the አስራት ledger is money and the journal
+     * is the interior life, and neither should ride along unasked in a file
+     * destined for someone's email. Everything defaults to on except the
+     * journal, which must be asked for.
+     */
+    data class Selection(
+        val habits: Boolean = true,
+        val bookmarks: Boolean = true,
+        val highlights: Boolean = true,
+        val prayerList: Boolean = true,
+        val setup: Boolean = true,
+        val offerings: Boolean = true,
+        val journal: Boolean = false,
     )
 
     private val json = Json {
@@ -52,27 +90,43 @@ object BackupRepository {
         encodeDefaults = true
     }
 
-    /** Everything worth keeping, as a JSON document. */
-    suspend fun export(context: Context, today: String): String = withContext(Dispatchers.IO) {
+    /** The chosen parts, as a JSON document. */
+    suspend fun export(
+        context: Context,
+        today: String,
+        selection: Selection = Selection(),
+    ): String = withContext(Dispatchers.IO) {
         val backup = Backup(
             created = today,
-            habits = HabitsRepository.current(context),
-            bookmarks = UserDataRepository.bookmarks(context).first(),
-            highlights = HighlightRepository.highlights(context).first(),
-            prayerList = PrayerListRepository.current(context),
-            modes = ModesRepository.current(context),
-            hours = HoursRepository.current(context),
-            layouts = LayoutRepository.current(context),
-            settings = SettingsRepository.backupSettings(context),
+            habits = if (selection.habits) HabitsRepository.current(context) else HabitsState(),
+            bookmarks = if (selection.bookmarks) UserDataRepository.bookmarks(context).first() else emptyList(),
+            highlights = if (selection.highlights) HighlightRepository.highlights(context).first() else emptyMap(),
+            prayerList = if (selection.prayerList) PrayerListRepository.current(context) else emptyList(),
+            modes = if (selection.setup) ModesRepository.current(context) else null,
+            hours = if (selection.setup) HoursRepository.current(context) else null,
+            layouts = if (selection.setup) LayoutRepository.current(context) else emptyMap(),
+            settings = if (selection.setup) SettingsRepository.backupSettings(context) else null,
+            titheEntries = if (selection.offerings) OfferingRepository.titheEntries(context).first() else emptyList(),
+            tithePercent = OfferingRepository.tithePercent(context).first(),
+            currency = OfferingRepository.currency(context).first(),
+            vows = if (selection.offerings) OfferingRepository.vows(context).first() else emptyList(),
+            // Already filtered of ንስሐ drafts by the repository, so a bug in
+            // the picker can never be the thing that lets one out.
+            journal = if (selection.journal) JournalRepository.exportable(context) else emptyList(),
         )
         json.encodeToString(Backup.serializer(), backup)
     }
 
     /** Write the backup to a picker-provided [uri]. */
-    suspend fun writeTo(context: Context, uri: Uri, today: String): Boolean =
+    suspend fun writeTo(
+        context: Context,
+        uri: Uri,
+        today: String,
+        selection: Selection = Selection(),
+    ): Boolean =
         withContext(Dispatchers.IO) {
             runCatching {
-                val body = export(context, today)
+                val body = export(context, today, selection)
                 context.contentResolver.openOutputStream(uri)?.use { it.write(body.toByteArray()) }
                     ?: return@runCatching false
                 true
@@ -140,6 +194,32 @@ object BackupRepository {
             backup.hours?.let { HoursRepository.merge(context, it) }
             LayoutRepository.merge(context, backup.layouts)
             backup.settings?.let { SettingsRepository.restoreSettings(context, it) }
+            // Ledger lines and vows merge by id rather than replacing: restoring
+            // an old backup must not delete what has been given since.
+            if (backup.titheEntries.isNotEmpty()) {
+                val existing = OfferingRepository.titheEntries(context).first()
+                val merged = (existing + backup.titheEntries.filter { entry ->
+                    existing.none { it.id == entry.id }
+                }).sortedByDescending { it.date }
+                OfferingRepository.setTitheEntries(context, merged)
+            }
+            if (backup.vows.isNotEmpty()) {
+                val existing = OfferingRepository.vows(context).first()
+                OfferingRepository.setVows(
+                    context,
+                    existing + backup.vows.filter { vow -> existing.none { it.id == vow.id } },
+                )
+            }
+            // Journal entries merge last-write-wins; any ንስሐ draft that
+            // somehow appears in a file is discarded rather than restored.
+            if (backup.journal.isNotEmpty()) JournalRepository.merge(context, backup.journal)
+            OfferingRepository.setTithePercent(context, backup.tithePercent)
+            if (backup.currency.isNotBlank()) OfferingRepository.setCurrency(context, backup.currency)
+            if (backup.vows.isNotEmpty()) {
+                com.agpeya.app.reminders.SpecialHabitReminderScheduler.sync(
+                    context, com.agpeya.app.reminders.SpecialHabit.VOW,
+                )
+            }
             if (backup.modes != null || backup.settings != null || backup.hours != null) {
                 val names = HoursRepository.visibleHours(context).associate { it.id to it.name }
                 com.agpeya.app.reminders.ReminderScheduler.rescheduleAll(context, names)
@@ -152,12 +232,7 @@ object BackupRepository {
                 com.agpeya.app.reminders.BreathPrayerScheduler.sync(
                     context, SettingsRepository.breathReminder(context).first(),
                 )
-                com.agpeya.app.reminders.SpecialHabitReminderScheduler.sync(
-                    context, com.agpeya.app.reminders.SpecialHabit.ALMS,
-                )
-                com.agpeya.app.reminders.SpecialHabitReminderScheduler.sync(
-                    context, com.agpeya.app.reminders.SpecialHabit.REPENTANCE,
-                )
+                com.agpeya.app.reminders.SpecialHabitReminderScheduler.syncAll(context)
             }
             true
         }.getOrDefault(false)

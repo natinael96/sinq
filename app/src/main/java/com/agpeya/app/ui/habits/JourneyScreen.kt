@@ -98,7 +98,11 @@ fun journeyLine(summary: PrayerJourney.Summary, s: Strings): String {
  * faithful one, with today's candle waiting.
  */
 @Composable
-fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
+fun JourneyScreen(
+    onSelectTab: (Tab) -> Unit,
+    onManageHabits: () -> Unit,
+    onOpenJournal: () -> Unit,
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val s = LocalStrings.current
@@ -274,6 +278,9 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
 
             item {
                 Spacer(Modifier.height(Spacing.md))
+                // The journal sits with ጉዞ because both are the day looked back
+                // on — but it is never counted or scored alongside the habits.
+                NavRow(s.journalTitle, onClick = onOpenJournal, subtitle = s.journalSubtitle)
                 NavRow(s.manageHabits, onClick = onManageHabits)
                 Spacer(Modifier.height(Spacing.md))
             }

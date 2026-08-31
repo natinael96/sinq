@@ -102,6 +102,8 @@ fun ReaderToolsMenu(
     sharePayload: (() -> SharePayload?)? = null,
     secondaryActionLabel: String? = null,
     onSecondaryAction: (() -> Unit)? = null,
+    /** Opens a journal entry anchored to what is being read. */
+    onWriteNote: (() -> Unit)? = null,
     onToggleReadingMode: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
@@ -141,6 +143,15 @@ fun ReaderToolsMenu(
                     onClick = {
                         open = false
                         onSecondaryAction()
+                    },
+                )
+            }
+            if (onWriteNote != null) {
+                DropdownMenuItem(
+                    text = { Text(s.writeAboutThis) },
+                    onClick = {
+                        open = false
+                        onWriteNote()
                     },
                 )
             }
