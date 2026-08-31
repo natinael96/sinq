@@ -134,10 +134,10 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.sm),
+            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.xs),
         ) {
             item {
-                Text(s.journeyTitle, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
+                Text(s.journeyTitle, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
                 Spacer(Modifier.height(Spacing.sm))
                 // The one hero on this screen: today's candle and the period's
                 // count of days prayed. Restrained on purpose — the point is a
@@ -145,7 +145,7 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                 // however many days were missed.
                 HeroCard(
                     glow = summary.prayedToday,
-                    contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.md),
+                    contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.sm),
                 ) {
                     Column(Modifier.weight(1f)) {
                         Text(
@@ -157,7 +157,7 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                             style = MaterialTheme.typography.labelMedium,
                             color = sinqColors.onHeroMuted,
                         )
-                        Spacer(Modifier.height(Spacing.xs))
+                        Spacer(Modifier.height(Spacing.xxs))
                         Text(
                             journeyLine(summary, s),
                             style = MaterialTheme.typography.titleLarge,
@@ -173,7 +173,7 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                         modifier = Modifier.size(width = 26.dp, height = 44.dp),
                     )
                 }
-                Spacer(Modifier.height(Spacing.lg))
+                Spacer(Modifier.height(Spacing.md))
                 SectionHeader(s.todayLabel)
                 Spacer(Modifier.height(Spacing.xs))
             }
@@ -254,9 +254,9 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
             // The year heatmap is the historical view — the story is density
             // and return across the Church's year, not any one unbroken run.
             item {
-                Spacer(Modifier.height(Spacing.lg))
+                Spacer(Modifier.height(Spacing.md))
                 SectionHeader(s.yearJourneyHeader)
-                Spacer(Modifier.height(Spacing.sm))
+                Spacer(Modifier.height(Spacing.xs))
                 EthiopianYearHeatmap(
                     records = state.records,
                     today = today,
@@ -273,9 +273,9 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
             }
 
             item {
-                Spacer(Modifier.height(Spacing.lg))
+                Spacer(Modifier.height(Spacing.md))
                 NavRow(s.manageHabits, onClick = onManageHabits)
-                Spacer(Modifier.height(Spacing.xl))
+                Spacer(Modifier.height(Spacing.md))
             }
         }
     }
