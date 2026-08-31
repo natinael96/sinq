@@ -251,6 +251,7 @@ private fun HomeDashboard(
             today,
             hours.size + (habitIds.size - 1),
             onOpenJourney,
+            cardScale,
             Modifier.fillMaxWidth().height(132.dp * cardScale),
         )
         Spacer(Modifier.height(Spacing.sm))
@@ -458,11 +459,18 @@ private fun TodayCard(
     today: LocalDate,
     maxPossible: Int,
     onClick: () -> Unit,
+    /** Matches the card's own font-driven growth — see [HomeDashboard]. */
+    scale: Float,
     modifier: Modifier = Modifier,
 ) {
     val s = LocalStrings.current
     val doneCount = habitIds.count { it in doneToday }
     val summary = remember(records, today) { PrayerJourney.summarize(records, today) }
+    // The heatmap is drawn in dp, so it ignores the font scale that stretches
+    // this card — left alone it would sit adrift in a half-empty box. It grows
+    // with the card, but capped: past 1.5x it would take the width the reading
+    // beside it needs.
+    val glyphScale = scale.coerceAtMost(1.5f)
     SinqCard(onClick = onClick, modifier = modifier, contentPadding = PaddingValues(Spacing.md)) {
         Text(s.todayLabel, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.secondary, maxLines = 1)
         Spacer(Modifier.height(Spacing.xs))
@@ -479,7 +487,7 @@ private fun TodayCard(
                         contentDescription = if (summary.prayedToday) s.journeyTodayLit else s.journeyTodayUnlit,
                         bodyColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         flameColor = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(width = 13.dp, height = 22.dp),
+                        modifier = Modifier.size(width = 13.dp * glyphScale, height = 22.dp * glyphScale),
                     )
                 }
                 Text(
@@ -497,8 +505,8 @@ private fun TodayCard(
                 maxPossible = maxPossible.coerceAtLeast(1),
                 weeksBack = 10,
                 showLegend = false,
-                cell = 6.dp,
-                gap = 1.dp,
+                cell = 6.dp * glyphScale,
+                gap = 1.dp * glyphScale,
             )
         }
     }
