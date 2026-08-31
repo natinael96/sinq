@@ -138,14 +138,14 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
         ) {
             item {
                 Text(s.journeyTitle, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
-                Spacer(Modifier.height(Spacing.md))
+                Spacer(Modifier.height(Spacing.sm))
                 // The one hero on this screen: today's candle and the period's
                 // count of days prayed. Restrained on purpose — the point is a
                 // life of prayer, not a score, and the wording stays true
                 // however many days were missed.
                 HeroCard(
                     glow = summary.prayedToday,
-                    contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.lg),
+                    contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.md),
                 ) {
                     Column(Modifier.weight(1f)) {
                         Text(
@@ -170,10 +170,10 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                         contentDescription = if (summary.prayedToday) s.journeyTodayLit else s.journeyTodayUnlit,
                         bodyColor = sinqColors.onHeroMuted,
                         flameColor = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(width = 30.dp, height = 52.dp),
+                        modifier = Modifier.size(width = 26.dp, height = 44.dp),
                     )
                 }
-                Spacer(Modifier.height(Spacing.xl))
+                Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(s.todayLabel)
                 Spacer(Modifier.height(Spacing.xs))
             }
@@ -191,7 +191,8 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
                             onClickLabel = if (prayersExpanded) s.collapse else s.expand,
                             role = Role.Button,
                         ) { prayersExpanded = !prayersExpanded }
-                        .padding(vertical = 12.dp),
+                        .heightIn(min = 48.dp)
+                        .padding(vertical = Spacing.xs),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
@@ -253,9 +254,9 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
             // The year heatmap is the historical view — the story is density
             // and return across the Church's year, not any one unbroken run.
             item {
-                Spacer(Modifier.height(Spacing.xl))
+                Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(s.yearJourneyHeader)
-                Spacer(Modifier.height(Spacing.md))
+                Spacer(Modifier.height(Spacing.sm))
                 EthiopianYearHeatmap(
                     records = state.records,
                     today = today,
@@ -272,7 +273,7 @@ fun JourneyScreen(onSelectTab: (Tab) -> Unit, onManageHabits: () -> Unit) {
             }
 
             item {
-                Spacer(Modifier.height(Spacing.xl))
+                Spacer(Modifier.height(Spacing.lg))
                 NavRow(s.manageHabits, onClick = onManageHabits)
                 Spacer(Modifier.height(Spacing.xl))
             }
@@ -311,7 +312,7 @@ private fun CheckRow(
                     onToggle()
                 },
             )
-            .padding(vertical = Spacing.sm)
+            .padding(vertical = Spacing.xs)
             .padding(start = if (indented) 40.dp else 0.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
