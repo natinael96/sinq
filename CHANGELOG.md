@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [1.5.2] — 2026-08-31
+
+_versionCode 55 · the alarm asks again_
+
+### Fixed
+- **"ጨርሰዋል?" comes back after an alarm.** The 1.5.0 notification rework hung
+  that follow-up on the notification's delete intent, which only fires when a
+  user clears a notification — not on the app-side cancel behind Dismiss, the
+  auto-cancel behind Open, or the 60-second timeout. Only swiping the alarm
+  away reached it. Every ending now posts the prompt explicitly, with the
+  timeout carried by its own alarm; Snooze stays the one ending that asks
+  nothing.
+
+### Changed
+- **The ጉዞ page is more compact.** About 80dp less chrome — a tighter heading,
+  hero, and section rhythm — so more of the day's habits sit on screen. The
+  year heatmap and the habit rows' touch targets are untouched.
+
 ## [1.5.1] — 2026-08-31
 
 _versionCode 54 · the home page, restored_

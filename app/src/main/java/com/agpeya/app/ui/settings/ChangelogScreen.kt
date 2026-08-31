@@ -31,6 +31,19 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.5.2",
+        title = "The alarm asks again",
+        titleAm = "ማንቂያው እንደገና ይጠይቃል",
+        changes = listOf(
+            "\"Done?\" appears again after you dismiss or open a prayer alarm — since 1.5.0 it had only been showing if you swiped the alarm away.",
+            "The ጉዞ page is more compact, so more of the day's habits fit on screen.",
+        ),
+        changesAm = listOf(
+            "«ጨርሰዋል?» የሚለው ጥያቄ የጸሎት ማንቂያውን ሲዘጉ ወይም ሲከፍቱ እንደገና ይታያል — ከ1.5.0 ጀምሮ ማንቂያውን ጠራርገው ሲያስወግዱ ብቻ ነበር የሚታየው።",
+            "የጉዞ ገጽ ይበልጥ ተጨምቋል፤ ስለዚህ ከዕለቱ ልማዶች ተጨማሪዎቹ በማያ ገጹ ላይ ይታያሉ።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.5.1",
         title = "The home page, restored",
         titleAm = "የመነሻ ገጹ ተመልሷል",
