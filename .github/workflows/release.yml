@@ -62,13 +62,21 @@ jobs:
           cp app/build/outputs/apk/release/app-release.apk "Sinq-${GITHUB_REF_NAME}.apk"
           cp app/build/outputs/bundle/release/app-release.aab "Sinq-${GITHUB_REF_NAME}.aab"
 
+      # Only the APK goes on the public release page: phones cannot install
+      # an .aab, and users tapping the wrong asset saw "problem parsing the
+      # package". The AAB (for a future Play upload) stays as a run artifact.
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             Sinq-*.apk
-            Sinq-*.aab
           generate_release_notes: true
+
+      - name: Keep AAB as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sinq-${{ github.ref_name }}-aab
+          path: Sinq-*.aab
 
       # Keep the signing key out of the runner's workspace afterwards.
       - name: Remove keystore

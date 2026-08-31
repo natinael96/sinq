@@ -475,9 +475,13 @@ private fun PagedReader(
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.weight(1f),
-            key = { sections[it].id },
+            // The pager's pageCount lambda reads the live section list while
+            // these lambdas hold the one from the current composition; when the
+            // list changes size (the full-psalms toggle), the pager can measure
+            // a page index the captured list doesn't have yet — index safely.
+            key = { sections.getOrNull(it)?.id ?: it },
         ) { page ->
-            val section = sections[page]
+            val section = sections.getOrNull(page) ?: return@HorizontalPager
             // LazyColumn (not Column+verticalScroll) so verse taps register inside
             // the pager — the scroll Column was consuming them.
             ReadingColumn(innerPadding = PaddingValues(0.dp)) {

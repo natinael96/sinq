@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Visibility
@@ -64,11 +62,6 @@ fun ManageHoursScreen(onBack: () -> Unit, onEditHour: (String) -> Unit) {
     var renaming by remember { mutableStateOf<Hour?>(null) }
     var creating by remember { mutableStateOf(false) }
 
-    fun move(from: Int, to: Int) {
-        val ids = hours.map { it.id }.toMutableList().apply { add(to, removeAt(from)) }
-        scope.launch { HoursRepository.setOrder(context, ids) }
-    }
-
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -96,14 +89,10 @@ fun ManageHoursScreen(onBack: () -> Unit, onEditHour: (String) -> Unit) {
                 HourManageRow(
                     hour = hour,
                     hidden = hour.id in config.hidden,
-                    canMoveUp = index > 0,
-                    canMoveDown = index < hours.size - 1,
                     isCustom = isCustom,
                     onOpen = { onEditHour(hour.id) },
                     onToggleHidden = { scope.launch { HoursRepository.setHidden(context, hour.id, hour.id !in config.hidden) } },
                     onRename = { renaming = hour },
-                    onMoveUp = { move(index, index - 1) },
-                    onMoveDown = { move(index, index + 1) },
                     onDelete = { scope.launch { HoursRepository.deleteCustomHour(context, hour.id) } },
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -150,14 +139,10 @@ fun ManageHoursScreen(onBack: () -> Unit, onEditHour: (String) -> Unit) {
 private fun HourManageRow(
     hour: Hour,
     hidden: Boolean,
-    canMoveUp: Boolean,
-    canMoveDown: Boolean,
     isCustom: Boolean,
     onOpen: () -> Unit,
     onToggleHidden: () -> Unit,
     onRename: () -> Unit,
-    onMoveUp: () -> Unit,
-    onMoveDown: () -> Unit,
     onDelete: () -> Unit,
 ) {
     val s = LocalStrings.current
@@ -185,18 +170,6 @@ private fun HourManageRow(
         )
         IconButton(onClick = onRename) {
             Icon(Icons.Outlined.Edit, contentDescription = s.rename, modifier = Modifier.size(20.dp))
-        }
-        IconButton(onClick = onMoveUp, enabled = canMoveUp) {
-            Icon(
-                Icons.Filled.KeyboardArrowUp, contentDescription = s.moveUp, modifier = Modifier.size(20.dp),
-                tint = if (canMoveUp) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceVariant,
-            )
-        }
-        IconButton(onClick = onMoveDown, enabled = canMoveDown) {
-            Icon(
-                Icons.Filled.KeyboardArrowDown, contentDescription = s.moveDown, modifier = Modifier.size(20.dp),
-                tint = if (canMoveDown) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceVariant,
-            )
         }
         if (isCustom) {
             IconButton(onClick = onDelete) {

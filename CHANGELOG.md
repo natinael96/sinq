@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [1.4.0] — 2026-08-31
+
+_versionCode 52 · the Psalter and the ግጻዌ agree_
+
+### Changed
+- **The Psalter now uses the Ge'ez (LXX) psalm numbering everywhere.** Both
+  bundled editions were renumbered (`tools/renumber_psalms_geez.py`) so መዝሙር ፶
+  is the Miserere and the numbers match every ግጻዌ citation — misbak links no
+  longer land one psalm off (the reported 150/151 mismatch). Existing psalm
+  bookmarks/highlights keyed by number will shift accordingly.
+- **The ግጻዌ page turns with a swipe.** Sliding the page horizontally moves to
+  the neighbouring day, and a permanent "ዛሬ" pill button returns to (and marks)
+  today's ግጻዌ.
+- **Manage-hours no longer offers manual reordering.** The up/down arrows are
+  gone; hours keep their canonical order.
+
+### Fixed
+- **Prayer-list Marian conclusion spelling.** ጠጣሳት/ጠጣስ corrected to ጳጳሳት/ጳጳስ.
+- **Toggling "Full Psalms" in an hour no longer crashes.** The paged reader
+  guarded against the section list changing size mid-frame.
+- **Release page only offers the installable APK.** The `.aab` (not installable
+  on phones) moved off the public release assets into a workflow artifact.
+
 ## [1.3.2] — 2026-08-28
 
 _versionCode 51 · Bahre Hasab renders correctly_

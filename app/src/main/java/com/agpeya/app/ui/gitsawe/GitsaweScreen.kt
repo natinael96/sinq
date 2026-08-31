@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -167,7 +169,22 @@ fun GitsaweScreen(
             LoadingPanel(Modifier.padding(innerPadding))
         } else {
             LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(innerPadding),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    // Sliding the page horizontally turns to the neighbouring
+                    // day, mirroring the arrows in the day navigator.
+                    .pointerInput(Unit) {
+                        var drag = 0f
+                        detectHorizontalDragGestures(
+                            onDragStart = { drag = 0f },
+                            onDragEnd = {
+                                val threshold = 48.dp.toPx()
+                                if (drag <= -threshold) epochDay++
+                                else if (drag >= threshold) epochDay--
+                            },
+                        ) { _, amount -> drag += amount }
+                    },
                 contentPadding = PaddingValues(horizontal = Spacing.screen),
             ) {
                 item(key = "day") {
@@ -449,9 +466,9 @@ private fun DayNavigator(date: LocalDate, today: LocalDate, onPrevious: () -> Un
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            if (date != today) {
-                TextButton(onClick = onToday) { Text(s.todayLabel) }
-            }
+            // Always present: lit when the page is on today's ግጻዌ, and a
+            // one-tap way home from any other day.
+            SelectPill(label = s.todayLabel, selected = date == today, onClick = onToday)
             IconButton(onClick = onNext) { Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, s.nextDay) }
         }
     }

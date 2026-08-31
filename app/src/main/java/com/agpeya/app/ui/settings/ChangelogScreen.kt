@@ -28,6 +28,54 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.4.0",
+        title = "The Psalter and the ግጻዌ agree",
+        changes = listOf(
+            "The Psalter now follows the Ge'ez (LXX) numbering, so መዝሙር ፶ is the Miserere and every ግጻዌ citation opens the psalm it names.",
+            "Slide the ግጻዌ page left or right to turn to the neighbouring day; a permanent ዛሬ button returns to today.",
+            "Toggling Full Psalms inside an hour no longer crashes the paged reader.",
+            "The prayer list's Marian conclusion spelling was corrected (ጳጳሳት).",
+            "Manage hours is simpler: the up/down reordering arrows are gone.",
+        ),
+    ),
+    ReleaseNote(
+        version = "1.3.2",
+        title = "Bahre Hasab renders correctly",
+        changes = listOf(
+            "The year card shows the real year, evangelist, and Fasika date instead of template text.",
+            "Ge'ez numerals beyond 199 render in proper positional notation (e.g. ፳፻፲፰).",
+        ),
+    ),
+    ReleaseNote(
+        version = "1.3.1",
+        title = "A focused, more accessible reading experience",
+        changes = listOf(
+            "The ግጻዌ widget follows the day automatically — today's readings by day, tomorrow's from 19:00.",
+            "Scripture, Synaxarium, and Wudase Maryam readers share the reading-alignment setting and tablet-friendly widths.",
+            "Bahre Hasab became a live year explorer covering the current Ethiopian year plus the next 25.",
+            "Touch targets and widget text sizes were raised to accessibility minimums.",
+        ),
+    ),
+    ReleaseNote(
+        version = "1.3.0",
+        title = "The complete source-backed ግጻዌ",
+        changes = listOf(
+            "Movable readings for Nineveh, Great Lent, Ascension, and the other computus seasons.",
+            "Sunday ግጻዌ readings and hymns, with valid citations opening directly in Scripture.",
+            "The printed Bahre Hasab reference table in the Library.",
+            "Justified, left, and center text-alignment controls for reading, and a new Sinq launcher mark.",
+        ),
+    ),
+    ReleaseNote(
+        version = "1.2.0",
+        title = "The complete fixed-cycle ግጻዌ",
+        changes = listOf(
+            "Every Ethiopian calendar day now has a fixed-cycle ግጻዌ entry — all 366 month-days, including leap-year Pagumen 6.",
+            "The evening office (ሠርክ) appears after ነግህ and ቅዳሴ and is included when sharing the day.",
+            "Printed but malformed citations stay readable without becoming broken links.",
+        ),
+    ),
+    ReleaseNote(
         version = "1.1.1",
         title = "Clearer prayer levels",
         changes = listOf(
