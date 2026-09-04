@@ -837,6 +837,7 @@ fun RemindersSettingsScreen(
     onOpenSpecialHabit: (com.agpeya.app.reminders.SpecialHabit) -> Unit,
     onOpenTithe: () -> Unit,
     onOpenVows: () -> Unit,
+    onOpenPenance: () -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -848,6 +849,8 @@ fun RemindersSettingsScreen(
     val repentanceEntries by SettingsRepository.repentanceReminders(context).collectAsState(initial = emptyList())
     val titheEntries by SettingsRepository.titheReminders(context).collectAsState(initial = emptyList())
     val vowEntries by com.agpeya.app.data.OfferingRepository.vows(context).collectAsState(initial = emptyList())
+    val penanceEntries by com.agpeya.app.data.PenanceRepository.penances(context).collectAsState(initial = emptyList())
+    val updateCheck by SettingsRepository.updateCheck(context).collectAsState(initial = false)
     val alert by SettingsRepository.alarmAlert(context).collectAsState(initial = com.agpeya.app.data.AlarmAlert.SOUND_VIBRATE)
     val sound by SettingsRepository.alarmSound(context).collectAsState(initial = com.agpeya.app.data.AlarmSound.ALARM)
     var soundSheetOpen by remember { mutableStateOf(false) }
@@ -862,7 +865,8 @@ fun RemindersSettingsScreen(
     }
     val remindersOn = streak || gitsawe || breath ||
         almsEntries.any { it.enabled } || repentanceEntries.any { it.enabled } ||
-        titheEntries.any { it.enabled } || vowEntries.any { it.remindsStill }
+        titheEntries.any { it.enabled } || vowEntries.any { it.remindsStill } ||
+        penanceEntries.any { it.remindsStill }
     @Suppress("UNUSED_VARIABLE") val refreshPermissions = permissionPulse
     val batteryRestricted = remindersOn &&
         !(context.getSystemService(android.os.PowerManager::class.java)?.isIgnoringBatteryOptimizations(context.packageName) ?: true)
@@ -926,6 +930,13 @@ fun RemindersSettingsScreen(
                 NavRow(s.settingsRepentReminder, { onOpenSpecialHabit(com.agpeya.app.reminders.SpecialHabit.REPENTANCE) }, subtitle = s.settingsRepentReminderDesc)
                 NavRow(s.settingsTitheTitle, onOpenTithe, subtitle = s.settingsTitheDesc)
                 NavRow(s.settingsVowTitle, onOpenVows, subtitle = s.settingsVowDesc)
+                NavRow(s.settingsPenanceTitle, onOpenPenance, subtitle = s.settingsPenanceDesc)
+                Spacer(Modifier.height(Spacing.lg))
+                Spacer(Modifier.height(Spacing.lg))
+                SectionHeader(s.settingsUpdateCheck)
+                ToggleRow(s.settingsUpdateCheck, updateCheck, { on ->
+                    scope.launch { SettingsRepository.setUpdateCheck(context, on) }
+                }, subtitle = s.settingsUpdateCheckDesc)
                 Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(s.remindersGroupSound)
                 NavRow(s.reminderModes, onOpenModes)

@@ -40,10 +40,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,6 +76,7 @@ import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.sinqColors
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -92,6 +95,7 @@ fun HomeScreen(
     onOpenPsalter: () -> Unit,
     onOpenZewotr: () -> Unit,
     onOpenGitsawe: () -> Unit,
+    onOpenReading: () -> Unit,
     onSelectTab: (Tab) -> Unit,
 ) {
     val context = LocalContext.current
@@ -135,13 +139,67 @@ fun HomeScreen(
                 onFailure = { HomeReadingsState.Unavailable },
             )
     }
+    // Today's plan line, or null when no plan is being kept.
+    val planContent by produceState(com.agpeya.app.model.ReadingPlanContent()) {
+        value = com.agpeya.app.data.ReadingPlanRepository.content(context)
+    }
+    val planState by com.agpeya.app.data.ReadingPlanRepository.state(context)
+        .collectAsState(initial = com.agpeya.app.model.ReadingPlanState())
+    val planLine = remember(planContent, planState, today) {
+        planContent.plans.firstOrNull { it.id == planState.activePlanId }?.let { plan ->
+            val day = com.agpeya.app.data.ReadingPlanRepository
+                .dayOn(planState.startedOn, today, plan.days)
+            val passages = plan.day(day)?.r.orEmpty().joinToString(" · ") { r ->
+                val name = r.b.split('-').joinToString(" ") { part ->
+                    part.replaceFirstChar { c -> if (c.isLowerCase()) c.titlecase() else c.toString() }
+                }
+                if (r.to > r.c) "$name ${r.c}–${r.to}" else "$name ${r.c}"
+            }
+            day to passages
+        }
+    }
+
     var showHours by remember { mutableStateOf(false) }
+
+    // The only network-facing thing on this screen, and it draws nothing unless
+    // the check is on AND a newer release was found AND it wasn't waved away.
+    val scope = rememberCoroutineScope()
+    val updateEnabled by com.agpeya.app.data.SettingsRepository.updateCheck(context)
+        .collectAsState(initial = false)
+    val update by com.agpeya.app.data.UpdateRepository.available(context)
+        .collectAsState(initial = null)
+    LaunchedEffect(updateEnabled) {
+        com.agpeya.app.data.UpdateRepository.checkIfDue(context, updateEnabled)
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = { AgpeyaBottomBar(current = Tab.HOME, onSelect = onSelectTab) },
     ) { innerPadding ->
-        BoxWithConstraints(Modifier.fillMaxSize().padding(innerPadding)) {
+      Column(Modifier.fillMaxSize().padding(innerPadding)) {
+        // Above the day, outside the screen margin: a notice about the app
+        // itself has no business indenting the date beneath it.
+        update?.let { found ->
+            com.agpeya.app.ui.common.UpdateLine(
+                version = found.version,
+                onOpen = {
+                    runCatching {
+                        context.startActivity(
+                            android.content.Intent(
+                                android.content.Intent.ACTION_VIEW,
+                                android.net.Uri.parse(found.url),
+                            ),
+                        )
+                    }
+                },
+                onDismiss = {
+                    scope.launch {
+                        com.agpeya.app.data.UpdateRepository.dismiss(context, found.version)
+                    }
+                },
+            )
+        }
+        BoxWithConstraints(Modifier.fillMaxWidth().weight(1f)) {
             val fontScale = LocalDensity.current.fontScale
             val stackReadingCards = maxWidth < 360.dp || fontScale > 1.15f
             val needsScroll = maxHeight < 650.dp || stackReadingCards || fontScale > 1.25f
@@ -176,8 +234,11 @@ fun HomeScreen(
                 onOpenJourney = { onSelectTab(Tab.JOURNEY) },
                 onOpenPsalter = onOpenPsalter,
                 onOpenZewotr = onOpenZewotr,
+                planLine = planLine,
+                onOpenReading = onOpenReading,
             )
         }
+      }
     }
 
     if (showHours) {
@@ -227,6 +288,8 @@ private fun HomeDashboard(
     onOpenJourney: () -> Unit,
     onOpenPsalter: () -> Unit,
     onOpenZewotr: () -> Unit,
+    planLine: Pair<Int, String>?,
+    onOpenReading: () -> Unit,
 ) {
     // Every card below holds an internal weight() — an unbounded height would
     // let that weight swallow the rest of the page, pushing the cards under it
@@ -268,6 +331,8 @@ private fun HomeDashboard(
                 ZewotrCard(onOpenZewotr, Modifier.weight(1f).fillMaxHeight())
             }
         }
+        Spacer(Modifier.height(Spacing.sm))
+        ReadingCard(planLine, onOpenReading, Modifier.fillMaxWidth())
         if (flexibleSummary) Spacer(Modifier.weight(1f))
         else Spacer(Modifier.height(Spacing.md))
     }
@@ -530,6 +595,47 @@ private fun DailyPsalmCard(today: LocalDate, onClick: () -> Unit, modifier: Modi
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(s.psalterTitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
             Icon(Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(IconSize.small))
+        }
+    }
+}
+
+/**
+ * ንባብ — the day of the reading plan, below the Psalter and ዘወትር.
+ *
+ * Placed last on ቤት and below [GitsaweCard] on purpose: the appointed readings
+ * lead, and the plan follows. It reads what the ግጻዌ does not.
+ */
+@Composable
+private fun ReadingCard(planLine: Pair<Int, String>?, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val s = LocalStrings.current
+    SinqCard(onClick = onClick, modifier = modifier, contentPadding = PaddingValues(Spacing.md)) {
+        Text(
+            s.readingTitle,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.secondary,
+        )
+        Spacer(Modifier.height(Spacing.xs))
+        if (planLine == null) {
+            Text(s.readingNoPlan, style = MaterialTheme.typography.titleSmall, maxLines = 1,
+                overflow = TextOverflow.Ellipsis)
+        } else {
+            val (day, passages) = planLine
+            Text(
+                listOf(
+                    s.readingDayLabel(com.agpeya.app.ui.reading.geezNumeral(day)),
+                    passages,
+                ).filter { it.isNotBlank() }.joinToString(" · "),
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(Modifier.height(Spacing.xxs))
+            Text(
+                s.readingWithGitsawe,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+            )
         }
     }
 }

@@ -34,6 +34,8 @@ fun LibraryScreen(
     onOpenWudase: () -> Unit,
     onOpenZewotr: () -> Unit,
     onOpenBahreHasab: () -> Unit,
+    onOpenKurban: () -> Unit,
+    onOpenReading: () -> Unit,
     onSelectTab: (Tab) -> Unit,
 ) {
     val s = LocalStrings.current
@@ -82,6 +84,22 @@ fun LibraryScreen(
                     title = s.bahreHasabTitle,
                     subtitle = s.bahreHasabSubtitle,
                     onClick = onOpenBahreHasab,
+                )
+            }
+            item {
+                LibraryCard(
+                    icon = Icons.AutoMirrored.Outlined.MenuBook,
+                    title = s.readingTitle,
+                    subtitle = s.readingIntro,
+                    onClick = onOpenReading,
+                )
+            }
+            item {
+                LibraryCard(
+                    icon = Icons.AutoMirrored.Outlined.MenuBook,
+                    title = s.kurbanPrepTitle,
+                    subtitle = s.kurbanPrepDesc,
+                    onClick = onOpenKurban,
                 )
             }
         }

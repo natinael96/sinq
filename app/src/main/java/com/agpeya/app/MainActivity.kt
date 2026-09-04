@@ -258,10 +258,14 @@ private fun AgpeyaNavHost(
         }
     }
 
-    // Opened from an አስራት or ስዕለት reminder → the page that records it.
+    // Opened from an አስራት, ስዕለት or ቀኖና reminder → the page that records it.
     LaunchedEffect(ready, openOffering) {
         if (ready && openOffering != null) {
-            val route = if (openOffering == com.agpeya.app.reminders.SpecialHabit.VOW.name) "vows" else "tithe"
+            val route = when (openOffering) {
+                com.agpeya.app.reminders.SpecialHabit.VOW.name -> "vows"
+                com.agpeya.app.reminders.SpecialHabit.PENANCE.name -> "penance"
+                else -> "tithe"
+            }
             runCatching { navController.navigate(route) { launchSingleTop = true } }
             onOfferingHandled()
         }
@@ -329,6 +333,7 @@ private fun AgpeyaNavHost(
                 onOpenPrayerList = { navController.navigate("prayerlist") { launchSingleTop = true } },
                 onOpenPsalter = { navController.navigate("psalter") { launchSingleTop = true } },
                 onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
+                onOpenReading = { navController.navigate("reading") { launchSingleTop = true } },
                 onOpenGitsawe = { navController.navigate("gitsawe") { launchSingleTop = true } },
                 onSelectTab = navController::switchTab,
             )
@@ -414,6 +419,10 @@ private fun AgpeyaNavHost(
                 onNewEntry = { kind ->
                     navController.navigate("journal/entry?kind=${kind.name}") { launchSingleTop = true }
                 },
+                onStartConfessionPrep = {
+                    navController.navigate("confessionPrep") { launchSingleTop = true }
+                },
+                onOpenPenance = { navController.navigate("penance") { launchSingleTop = true } },
             )
         }
         composable(
@@ -445,6 +454,8 @@ private fun AgpeyaNavHost(
                 onOpenWudase = { navController.navigate("wudase") { launchSingleTop = true } },
                 onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
                 onOpenBahreHasab = { navController.navigate("bahreHasabReference") { launchSingleTop = true } },
+                onOpenKurban = { navController.navigate("communionPrep") { launchSingleTop = true } },
+                onOpenReading = { navController.navigate("reading") { launchSingleTop = true } },
                 onSelectTab = navController::switchTab,
             )
         }
@@ -624,6 +635,7 @@ private fun AgpeyaNavHost(
                 },
                 onOpenTithe = { navController.navigate("tithe") { launchSingleTop = true } },
                 onOpenVows = { navController.navigate("vows") { launchSingleTop = true } },
+                onOpenPenance = { navController.navigate("penance") { launchSingleTop = true } },
             )
         }
         composable("settings/data") {
@@ -641,6 +653,10 @@ private fun AgpeyaNavHost(
             com.agpeya.app.ui.settings.SpecialHabitScreen(
                 habit = habit,
                 onBack = { navController.popBackStack() },
+                onOpenConfessionPrep = {
+                    navController.navigate("confessionPrep") { launchSingleTop = true }
+                },
+                onOpenPenance = { navController.navigate("penance") { launchSingleTop = true } },
             )
         }
         composable("tithe") {
@@ -653,6 +669,40 @@ private fun AgpeyaNavHost(
         }
         composable("vows") {
             com.agpeya.app.ui.settings.VowScreen(onBack = { navController.popBackStack() })
+        }
+        composable("penance") {
+            com.agpeya.app.ui.nisiha.PenanceScreen(onBack = { navController.popBackStack() })
+        }
+        composable("confessionPrep") {
+            com.agpeya.app.ui.nisiha.ConfessionPrepScreen(
+                onBack = { navController.popBackStack() },
+                onOpenEntry = { id ->
+                    navController.navigate("journal/entry?id=$id") { launchSingleTop = true }
+                },
+                onOpenPenance = { navController.navigate("penance") { launchSingleTop = true } },
+            )
+        }
+        composable("reading") {
+            com.agpeya.app.ui.reading.ReadingPlanScreen(
+                onBack = { navController.popBackStack() },
+                onOpenRoute = { route -> navController.navigate(route) { launchSingleTop = true } },
+                onOpenGitsawe = { navController.navigate("gitsawe") { launchSingleTop = true } },
+                onOpenAllDays = { navController.navigate("reading/days") { launchSingleTop = true } },
+            )
+        }
+        composable("reading/days") {
+            com.agpeya.app.ui.reading.ReadingPlanDaysScreen(
+                onBack = { navController.popBackStack() },
+                onOpenRoute = { route -> navController.navigate(route) { launchSingleTop = true } },
+            )
+        }
+        composable("communionPrep") {
+            com.agpeya.app.ui.nisiha.CommunionPrepScreen(
+                onBack = { navController.popBackStack() },
+                onOpenConfessionPrep = {
+                    navController.navigate("confessionPrep") { launchSingleTop = true }
+                },
+            )
         }
         composable(
             route = "reading/{hourId}?section={section}&sectionId={sectionId}",
