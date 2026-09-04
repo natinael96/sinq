@@ -48,6 +48,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
@@ -202,17 +203,18 @@ fun HomeScreen(
         BoxWithConstraints(Modifier.fillMaxWidth().weight(1f)) {
             val fontScale = LocalDensity.current.fontScale
             val stackReadingCards = maxWidth < 360.dp || fontScale > 1.15f
-            val needsScroll = maxHeight < 650.dp || stackReadingCards || fontScale > 1.25f
             HomeDashboard(
                 modifier = Modifier
-                    .fillMaxHeight()
                     // A tablet should gain calm margins, not comically wide cards.
                     .widthIn(max = 600.dp)
                     .fillMaxWidth()
                     .align(Alignment.TopCenter)
-                    .then(if (needsScroll) Modifier.verticalScroll(rememberScrollState()) else Modifier)
+                    // Always scrollable. The cards size to their own text now, so
+                    // the page is as tall as the day's content makes it — on a
+                    // short screen that is taller than the viewport, and the
+                    // alternative to scrolling is squeezing.
+                    .verticalScroll(rememberScrollState())
                     .padding(horizontal = Spacing.screen, vertical = Spacing.md),
-                flexibleSummary = !needsScroll,
                 stackReadingCards = stackReadingCards,
                 today = today,
                 seasonLabel = seasonLabel,
@@ -266,7 +268,6 @@ private fun prayerShortcuts(hours: List<Hour>, currentId: String?): List<Hour> {
 @Composable
 private fun HomeDashboard(
     modifier: Modifier,
-    flexibleSummary: Boolean,
     stackReadingCards: Boolean,
     today: LocalDate,
     seasonLabel: String?,
@@ -291,10 +292,11 @@ private fun HomeDashboard(
     planLine: Pair<Int, String>?,
     onOpenReading: () -> Unit,
 ) {
-    // Every card below holds an internal weight() — an unbounded height would
-    // let that weight swallow the rest of the page, pushing the cards under it
-    // off a dashboard that does not always scroll. So heights stay fixed, and
-    // grow with the text instead of being outgrown by it.
+    // Cards size to their content. They used to be pinned to fixed heights
+    // scaled by the font, which held the page to one screen — but a card whose
+    // text outgrew its box got squeezed rather than given room, and the ንባብ
+    // card at the foot was the one that showed it first on a small phone.
+    // The page scrolls instead.
     val cardScale = LocalDensity.current.fontScale.coerceIn(1f, 2f)
     Column(modifier) {
         DayHeader(today, seasonLabel, onOpenSearch, onOpenFasting, onOpenBookmarks, onOpenPrayerList)
@@ -315,16 +317,18 @@ private fun HomeDashboard(
             hours.size + (habitIds.size - 1),
             onOpenJourney,
             cardScale,
-            Modifier.fillMaxWidth().height(132.dp * cardScale),
+            Modifier.fillMaxWidth(),
         )
         Spacer(Modifier.height(Spacing.sm))
         if (stackReadingCards) {
-            DailyPsalmCard(today, onOpenPsalter, Modifier.fillMaxWidth().height(88.dp * cardScale))
+            DailyPsalmCard(today, onOpenPsalter, Modifier.fillMaxWidth())
             Spacer(Modifier.height(Spacing.sm))
-            ZewotrCard(onOpenZewotr, Modifier.fillMaxWidth().height(88.dp * cardScale))
+            ZewotrCard(onOpenZewotr, Modifier.fillMaxWidth())
         } else {
+            // IntrinsicSize.Min so the pair matches the taller of the two
+            // rather than a guessed height — they read as one row either way.
             Row(
-                modifier = Modifier.height(96.dp * cardScale).fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
                 DailyPsalmCard(today, onOpenPsalter, Modifier.weight(1f).fillMaxHeight())
@@ -333,8 +337,7 @@ private fun HomeDashboard(
         }
         Spacer(Modifier.height(Spacing.sm))
         ReadingCard(planLine, onOpenReading, Modifier.fillMaxWidth())
-        if (flexibleSummary) Spacer(Modifier.weight(1f))
-        else Spacer(Modifier.height(Spacing.md))
+        Spacer(Modifier.height(Spacing.md))
     }
 }
 
@@ -540,7 +543,7 @@ private fun TodayCard(
         Text(s.todayLabel, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.secondary, maxLines = 1)
         Spacer(Modifier.height(Spacing.xs))
         Row(
-            modifier = Modifier.fillMaxWidth().weight(1f),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1f)) {
@@ -591,7 +594,7 @@ private fun DailyPsalmCard(today: LocalDate, onClick: () -> Unit, modifier: Modi
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
         )
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(Spacing.sm))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(s.psalterTitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
             Icon(Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(IconSize.small))
@@ -659,7 +662,7 @@ private fun ZewotrCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(Spacing.sm))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 "ጸሎት ዘዘወትር",
