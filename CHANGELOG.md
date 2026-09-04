@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [1.7.1] — 2026-09-04
+
+_versionCode 59 · ንስሐ and ቁርባን wait for their text_
+
+### Changed
+- **ንስሐ ዝግጅት and ቁርባን ዝግጅት now say በቅርቡ.** Both shipped in 1.7.0 with text
+  written for the app rather than received from the Church — an examination of
+  conscience, the ሥርዓተ መቅረቢያ, and prayers before and after receiving. These are
+  the two screens in Sinq that teach rather than record, and that is the wrong
+  provenance for them, so the text is removed and the screens wait.
+- The entry points stay visible and say so. The state follows the bundled
+  content being empty, so adding the text turns the screens on with no code
+  change.
+- ቀኖና is unaffected and still works: it holds only what its owner enters.
+
 ## [1.7.0] — 2026-09-04
 
 _versionCode 58 · what the Church does not read to you_
