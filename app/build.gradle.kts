@@ -25,7 +25,11 @@ android {
 
     defaultConfig {
         applicationId = "com.agpeya.app"
-        minSdk = 26
+        // Android 6.0. Below this the alarm architecture loses the APIs it is
+        // built on (setAndAllowWhileIdle, FLAG_IMMUTABLE, the battery-optimisation
+        // settings screen), all of which arrived in 23. java.time and
+        // java.util.Base64 are carried down from 26 by desugaring, below.
+        minSdk = 23
         targetSdk = 36
         // Versioning policy (semver-style):
         //   MINOR for features, PATCH for fixes/small tweaks.
@@ -44,6 +48,12 @@ android {
                 keyAlias = signingValue("keyAlias", "SINQ_KEY_ALIAS")
                 keyPassword = signingValue("keyPassword", "SINQ_KEY_PASSWORD")
             }
+            // v2 only covers API 24+. With the floor at 23 the APK must also
+            // carry the old JAR signature, or it will not install on Android 6
+            // at all — the very devices this drop is for.
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
         }
     }
 
@@ -61,6 +71,9 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        // Backports java.time (~50 files) and java.util.Base64 to the new floor,
+        // so lowering minSdk costs no source changes for either.
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
         jvmTarget = "11"
@@ -91,6 +104,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
     testImplementation(libs.junit)
     testImplementation(libs.sqlite.jdbc)
 }

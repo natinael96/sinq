@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.agpeya.app.MainActivity
 import com.agpeya.app.R
@@ -77,7 +78,10 @@ class BreathPrayerReceiver : BroadcastReceiver() {
 
     private fun ensureChannel(context: Context, name: String) {
         val nm = context.getSystemService(NotificationManager::class.java)
-        if (nm.getNotificationChannel(BreathPrayerScheduler.CHANNEL_ID) == null) {
+        // Channels only exist from Oreo; below it there is nothing to create.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+            nm.getNotificationChannel(BreathPrayerScheduler.CHANNEL_ID) == null
+        ) {
             nm.createNotificationChannel(
                 NotificationChannel(
                     BreathPrayerScheduler.CHANNEL_ID,

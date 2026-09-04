@@ -41,6 +41,10 @@ object JournalLock {
 
     private val KEY_SALT = stringPreferencesKey("passphrase_salt")
     private val KEY_HASH = stringPreferencesKey("passphrase_hash")
+    // Which PBKDF2 the stored hash was made with. Absent on every passphrase
+    // set before the app supported Android 6 — and those can only have been
+    // created on 26+, so absent means SHA-256.
+    private val KEY_ALGO = stringPreferencesKey("passphrase_algo")
 
     // PBKDF2 with a deliberately high iteration count: the passphrase is
     // typed by a person, so it is short and low-entropy, and the only defence
@@ -48,7 +52,12 @@ object JournalLock {
     private const val ITERATIONS = 210_000
     private const val KEY_BITS = 256
     private const val SALT_BYTES = 16
-    private const val PBKDF2 = "PBKDF2WithHmacSHA256"
+    // SHA-256 needs API 26; below it the platform offers only SHA-1. The one
+    // actually used is recorded with the hash, so a passphrase set on either
+    // keeps verifying after an upgrade — being locked out of your own journal
+    // by a system update would be the worst possible bug in this file.
+    private const val PBKDF2_SHA256 = "PBKDF2WithHmacSHA256"
+    private const val PBKDF2_SHA1 = "PBKDF2WithHmacSHA1"
 
     private val random = SecureRandom()
 
@@ -67,10 +76,12 @@ object JournalLock {
      */
     suspend fun setPassphrase(context: Context, passphrase: String) {
         val salt = ByteArray(SALT_BYTES).also(random::nextBytes)
-        val hash = withContext(Dispatchers.Default) { derive(passphrase, salt) }
+        val algorithm = preferredAlgorithm()
+        val hash = withContext(Dispatchers.Default) { derive(passphrase, salt, algorithm) }
         context.journalLockStore.edit {
             it[KEY_SALT] = salt.encode()
             it[KEY_HASH] = hash.encode()
+            it[KEY_ALGO] = algorithm
         }
     }
 
@@ -79,6 +90,7 @@ object JournalLock {
         context.journalLockStore.edit {
             it.remove(KEY_SALT)
             it.remove(KEY_HASH)
+            it.remove(KEY_ALGO)
         }
     }
 
@@ -90,14 +102,26 @@ object JournalLock {
         val prefs = context.journalLockStore.data.first()
         val salt = prefs[KEY_SALT]?.decode() ?: return false
         val expected = prefs[KEY_HASH]?.decode() ?: return false
-        val actual = withContext(Dispatchers.Default) { derive(passphrase, salt) }
+        // Verify with whatever the hash was made with, not with what this
+        // device would choose today.
+        val algorithm = prefs[KEY_ALGO] ?: PBKDF2_SHA256
+        val actual = withContext(Dispatchers.Default) { derive(passphrase, salt, algorithm) }
         return constantTimeEquals(expected, actual)
     }
 
     // ── Internals ────────────────────────────────────────────────────────────
 
-    internal fun derive(passphrase: String, salt: ByteArray): ByteArray =
-        SecretKeyFactory.getInstance(PBKDF2)
+    /** The strongest PBKDF2 this device actually provides. */
+    internal fun preferredAlgorithm(): String =
+        if (runCatching { SecretKeyFactory.getInstance(PBKDF2_SHA256) }.isSuccess) PBKDF2_SHA256
+        else PBKDF2_SHA1
+
+    internal fun derive(
+        passphrase: String,
+        salt: ByteArray,
+        algorithm: String = preferredAlgorithm(),
+    ): ByteArray =
+        SecretKeyFactory.getInstance(algorithm)
             .generateSecret(PBEKeySpec(passphrase.toCharArray(), salt, ITERATIONS, KEY_BITS))
             .encoded
 
@@ -108,10 +132,10 @@ object JournalLock {
         return diff == 0
     }
 
-    // java.util.Base64 (API 26+, which is this app's minSdk) rather than
-    // android.util.Base64: it is unwrapped by default, so the values ride
-    // safely inside a JSON document, and — unlike the Android one — it is real
-    // code in a JVM unit test rather than a stub that throws.
+    // java.util.Base64 rather than android.util.Base64: it is unwrapped by
+    // default, so the values ride safely inside a JSON document, and — unlike
+    // the Android one — it is real code in a JVM unit test rather than a stub
+    // that throws. Core library desugaring carries it below API 26.
     private fun ByteArray.encode(): String = Base64.getEncoder().encodeToString(this)
     private fun String.decode(): ByteArray = Base64.getDecoder().decode(this)
 }

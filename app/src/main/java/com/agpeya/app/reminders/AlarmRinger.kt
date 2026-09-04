@@ -192,7 +192,11 @@ object AlarmRinger {
             }.getOrDefault(Language.SYSTEM),
         )
         val nm = app.getSystemService(NotificationManager::class.java)
-        if (nm.getNotificationChannel(FOLLOWUP_CHANNEL_ID) == null) {
+        // Channels only exist from Oreo. Below it a notification carries its own
+        // sound and importance, so there is simply nothing to create.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+            nm.getNotificationChannel(FOLLOWUP_CHANNEL_ID) == null
+        ) {
             nm.createNotificationChannel(
                 NotificationChannel(FOLLOWUP_CHANNEL_ID, "የጸሎት ማንቂያ ክትትል", NotificationManager.IMPORTANCE_DEFAULT).apply {
                     description = "Prayer alarm follow-up"
@@ -222,7 +226,13 @@ object AlarmRinger {
         nm.notify(notifId, notification)
     }
 
-    /** Create (once) the channel for this settings pair, dropping stale variants. */
+    /**
+     * Create (once) the channel for this settings pair, dropping stale variants.
+     *
+     * Pre-Oreo there are no channels at all: the returned id is still used as
+     * the builder's channel name (harmless and ignored there), and the alarm's
+     * sound and vibration come from the notification itself instead.
+     */
     private fun ensureChannel(
         context: Context,
         nm: NotificationManager,
@@ -230,6 +240,7 @@ object AlarmRinger {
         sound: AlarmSound,
     ): String {
         val id = CHANNEL_PREFIX + "${alert.name}_${sound.name}".lowercase()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return id
         // One alarm channel at a time: remove the pre-notification-alarm channel
         // and any variant left over from an earlier settings choice.
         nm.deleteNotificationChannel(LEGACY_CHANNEL_ID)
