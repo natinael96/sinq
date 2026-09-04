@@ -63,6 +63,10 @@ object BackupRepository {
          * opens it — see [JournalLock]. ንስሐ drafts are never written here.
          */
         val journal: List<JournalEntry> = emptyList(),
+        // Defaulted, so an older backup restores unchanged and VERSION need not
+        // bump — the same shape titheEntries and vows were added in.
+        val readingPlan: com.agpeya.app.model.ReadingPlanState =
+            com.agpeya.app.model.ReadingPlanState(),
     )
 
     /**
@@ -113,6 +117,10 @@ object BackupRepository {
             // Already filtered of ንስሐ drafts by the repository, so a bug in
             // the picker can never be the thing that lets one out.
             journal = if (selection.journal) JournalRepository.exportable(context) else emptyList(),
+            // Reading progress travels with habits: it is a record of days
+            // kept, not a preference, and it is not confessional.
+            readingPlan = if (selection.habits) ReadingPlanRepository.current(context)
+            else com.agpeya.app.model.ReadingPlanState(),
         )
         json.encodeToString(Backup.serializer(), backup)
     }
@@ -209,6 +217,13 @@ object BackupRepository {
                     context,
                     existing + backup.vows.filter { vow -> existing.none { it.id == vow.id } },
                 )
+            }
+            // Days read union rather than replace, so restoring an old file
+            // never erases reading done since it was written.
+            if (backup.readingPlan.completedDays.isNotEmpty() ||
+                backup.readingPlan.activePlanId.isNotBlank()
+            ) {
+                ReadingPlanRepository.merge(context, backup.readingPlan)
             }
             // Journal entries merge last-write-wins; any ንስሐ draft that
             // somehow appears in a file is discarded rather than restored.
