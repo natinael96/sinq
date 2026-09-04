@@ -177,9 +177,9 @@ fun JourneyScreen(
                         modifier = Modifier.size(width = 26.dp, height = 44.dp),
                     )
                 }
-                Spacer(Modifier.height(Spacing.md))
+                Spacer(Modifier.height(Spacing.sm))
                 SectionHeader(s.todayLabel)
-                Spacer(Modifier.height(Spacing.xs))
+                Spacer(Modifier.height(Spacing.xxs))
             }
 
             item {
@@ -196,7 +196,7 @@ fun JourneyScreen(
                             role = Role.Button,
                         ) { prayersExpanded = !prayersExpanded }
                         .heightIn(min = 48.dp)
-                        .padding(vertical = Spacing.xs),
+                        .padding(vertical = Spacing.xxs),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
@@ -205,10 +205,10 @@ fun JourneyScreen(
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    Spacer(Modifier.width(16.dp))
+                    Spacer(Modifier.width(Spacing.md))
                     Text(
                         text = s.habitPrayer,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.weight(1f),
                     )
@@ -216,7 +216,7 @@ fun JourneyScreen(
                         text = "$doneHours/${hourItems.size} · " + s.daysThisMonth(
                             HabitsRepository.prayerDaysBetween(state.records, monthStart, today),
                         ),
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelSmall,
                         color = if (doneHours > 0) MaterialTheme.colorScheme.secondary
                         else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -258,9 +258,9 @@ fun JourneyScreen(
             // The year heatmap is the historical view — the story is density
             // and return across the Church's year, not any one unbroken run.
             item {
-                Spacer(Modifier.height(Spacing.md))
+                Spacer(Modifier.height(Spacing.sm))
                 SectionHeader(s.yearJourneyHeader)
-                Spacer(Modifier.height(Spacing.xs))
+                Spacer(Modifier.height(Spacing.xxs))
                 EthiopianYearHeatmap(
                     records = state.records,
                     today = today,
@@ -277,7 +277,7 @@ fun JourneyScreen(
             }
 
             item {
-                Spacer(Modifier.height(Spacing.md))
+                Spacer(Modifier.height(Spacing.xs))
                 // The journal sits with ጉዞ because both are the day looked back
                 // on — but it is never counted or scored alongside the habits.
                 NavRow(s.journalTitle, onClick = onOpenJournal, subtitle = s.journalSubtitle)
@@ -319,8 +319,11 @@ private fun CheckRow(
                     onToggle()
                 },
             )
-            .padding(vertical = Spacing.xs)
-            .padding(start = if (indented) 40.dp else 0.dp),
+            // xxs, not xs: inside the 48dp floor this changes nothing, but at
+            // large font scales — where content outgrows the floor and the
+            // padding starts to count — it keeps the list from ballooning.
+            .padding(vertical = Spacing.xxs)
+            .padding(start = if (indented) 32.dp else 0.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
@@ -329,18 +332,18 @@ private fun CheckRow(
             tint = tint,
             modifier = Modifier.size(IconSize.medium),
         )
-        Spacer(Modifier.width(Spacing.lg))
+        Spacer(Modifier.width(Spacing.md))
         Text(
             text = name,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.weight(1f),
             maxLines = 1,
         )
-        Spacer(Modifier.width(Spacing.md))
+        Spacer(Modifier.width(Spacing.sm))
         Text(
             text = detail,
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
         )
