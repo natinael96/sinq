@@ -613,6 +613,9 @@ interface Strings {
     // Nothing here is scored or streaked: the examination is read, not filled,
     // and its only product is a confession draft that discharge deletes.
 
+    /** Shown where a screen exists but its content has not been written yet. */
+    val comingSoon: String
+    val comingSoonBody: String
     val confessionPrepTitle: String
     val confessionPrepDesc: String
     /** Step indicator, e.g. "፪ / ፭". */
@@ -1254,6 +1257,8 @@ object AmharicStrings : Strings {
 
     // ── ንስሐ ዝግጅት ────────────────────────────────────────────────────────────
 
+    override val comingSoon = "በቅርቡ"
+    override val comingSoonBody = "ይህ ክፍል በዝግጅት ላይ ነው። ጽሑፉ ሲዘጋጅ ይታያል።"
     override val confessionPrepTitle = "የንስሐ ዝግጅት"
     override val confessionPrepDesc = "ልብን መርምሮ ለንስሐ መዘጋጀት"
     override fun confessionPrepStepOf(step: Int, total: Int) = "$step / $total"
@@ -1899,6 +1904,8 @@ object EnglishStrings : Strings {
 
     // ── Confession preparation ───────────────────────────────────────────────
 
+    override val comingSoon = "Coming soon"
+    override val comingSoonBody = "This section is being prepared. It will appear once its text is ready."
     override val confessionPrepTitle = "Preparing for confession"
     override val confessionPrepDesc = "Examine the heart and prepare for confession"
     override fun confessionPrepStepOf(step: Int, total: Int) = "$step / $total"

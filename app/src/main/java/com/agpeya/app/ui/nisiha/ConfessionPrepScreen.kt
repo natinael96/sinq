@@ -148,16 +148,15 @@ fun ConfessionPrepScreen(
                     OutlinedButton(onClick = onOpenPenance) { Text(s.penanceTitle) }
                 }
 
+                // No examination bundled yet: the screen exists, and says so.
+                sections.isEmpty() -> ComingSoon()
+
                 step == 0 -> {
-                    Text(
-                        content.intro,
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                    Spacer(Modifier.height(Spacing.lg))
-                    Button(
-                        onClick = { step = 1 },
-                        enabled = sections.isNotEmpty(),
-                    ) { Text(s.confessionPrepStart) }
+                    if (content.intro.isNotBlank()) {
+                        Text(content.intro, style = MaterialTheme.typography.bodyLarge)
+                        Spacer(Modifier.height(Spacing.lg))
+                    }
+                    Button(onClick = { step = 1 }) { Text(s.confessionPrepStart) }
                 }
 
                 step in 1..sections.size -> {

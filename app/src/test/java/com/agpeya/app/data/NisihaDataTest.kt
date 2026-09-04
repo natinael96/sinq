@@ -20,14 +20,18 @@ class NisihaDataTest {
 
     private val content: ExaminationContent by lazy { json.decodeFromString(file.readText()) }
 
+    // The examination ships empty on purpose: its text is the Church's to give,
+    // and the screen shows "coming soon" until it is written. These tests
+    // therefore guard the SHAPE, and hold whether or not content is present —
+    // so they keep their value on the day the questions land.
+
     @Test
-    fun `decodes with an intro and sections`() {
-        assertTrue(content.intro.isNotBlank())
-        assertTrue(content.sections.isNotEmpty())
+    fun `decodes, whether or not the examination has been written yet`() {
+        assertTrue(content.contentVersion >= 1)
     }
 
     @Test
-    fun `section ids are unique and titled, and none is empty of questions`() {
+    fun `any section present is unique, titled, and has questions`() {
         assertEquals(content.sections.size, content.sections.map { it.id }.toSet().size)
         for (s in content.sections) {
             assertTrue("${s.id} title", s.title.isNotBlank())
@@ -38,14 +42,16 @@ class NisihaDataTest {
 
     @Test
     fun `body carries only the sections that were written under`() {
-        val notes = mapOf(content.sections.first().id to "የግል ማስታወሻ", "no-such-section" to "x")
-        val body = NisihaRepository.buildConfessionBody(content.sections, notes, "ተመርምሯል")
+        val sections = listOf(
+            com.agpeya.app.model.ExaminationSection(id = "a", title = "አንድ", questions = listOf("?")),
+            com.agpeya.app.model.ExaminationSection(id = "b", title = "ሁለት", questions = listOf("?")),
+        )
+        val notes = mapOf("a" to "የግል ማስታወሻ", "no-such-section" to "x")
+        val body = NisihaRepository.buildConfessionBody(sections, notes, "ተመርምሯል")
         assertTrue(body.startsWith("ተመርምሯል"))
-        assertTrue(content.sections.first().title in body)
+        assertTrue("አንድ" in body)
         assertTrue("የግል ማስታወሻ" in body)
-        for (other in content.sections.drop(1)) {
-            assertFalse("${other.id} leaked", other.title in body)
-        }
+        assertFalse("unnoted section leaked", "ሁለት" in body)
     }
 
     @Test
@@ -56,8 +62,11 @@ class NisihaDataTest {
 
     @Test
     fun `a whitespace-only note counts as nothing written`() {
-        val notes = mapOf(content.sections.first().id to "   ")
-        val body = NisihaRepository.buildConfessionBody(content.sections, notes, "ተመርምሯል")
+        val sections = listOf(
+            com.agpeya.app.model.ExaminationSection(id = "a", title = "አንድ", questions = listOf("?")),
+        )
+        val notes = mapOf("a" to "   ")
+        val body = NisihaRepository.buildConfessionBody(sections, notes, "ተመርምሯል")
         assertEquals("ተመርምሯል", body)
     }
 }

@@ -74,6 +74,15 @@ fun CommunionPrepScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = { SinqTopBar(title = s.kurbanPrepTitle, onBack = onBack) },
     ) { inner ->
+        // Nothing bundled yet: the rules and prayers are the Church's to give,
+        // and the screen waits for them rather than inventing its own.
+        if (content.checklist.isEmpty() &&
+            content.prePrayers.isEmpty() &&
+            content.postPrayers.isEmpty()
+        ) {
+            ComingSoon(Modifier.padding(inner))
+            return@Scaffold
+        }
         Column(
             Modifier
                 .fillMaxSize()
@@ -81,7 +90,10 @@ fun CommunionPrepScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = Spacing.screen, vertical = Spacing.md),
         ) {
-            SectionHeader(s.kurbanChecklistHeader)
+            // Every block below draws only when it has something to say, so an
+            // empty bundle leaves a screen with the status lines and nothing
+            // invented to fill the space.
+            if (content.checklist.isNotEmpty()) SectionHeader(s.kurbanChecklistHeader)
             for (item in content.checklist) {
                 val isChecked = item.id in checked
                 Row(
@@ -135,13 +147,17 @@ fun CommunionPrepScreen(
                 }
             }
 
-            Spacer(Modifier.height(Spacing.lg))
-            SectionHeader(s.kurbanPrePrayersHeader)
-            for (prayer in content.prePrayers) PrayerCard(prayer)
+            if (content.prePrayers.isNotEmpty()) {
+                Spacer(Modifier.height(Spacing.lg))
+                SectionHeader(s.kurbanPrePrayersHeader)
+                for (prayer in content.prePrayers) PrayerCard(prayer)
+            }
 
-            Spacer(Modifier.height(Spacing.lg))
-            SectionHeader(s.kurbanPostPrayersHeader)
-            for (prayer in content.postPrayers) PrayerCard(prayer)
+            if (content.postPrayers.isNotEmpty()) {
+                Spacer(Modifier.height(Spacing.lg))
+                SectionHeader(s.kurbanPostPrayersHeader)
+                for (prayer in content.postPrayers) PrayerCard(prayer)
+            }
 
             Spacer(Modifier.height(Spacing.huge))
         }

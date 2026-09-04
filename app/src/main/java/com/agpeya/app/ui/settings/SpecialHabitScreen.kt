@@ -224,7 +224,7 @@ fun SpecialHabitScreen(
                     com.agpeya.app.ui.common.NavRow(
                         title = s.confessionPrepTitle,
                         onClick = it,
-                        subtitle = s.confessionPrepDesc,
+                        subtitle = "${s.confessionPrepDesc} · ${s.comingSoon}",
                     )
                 }
                 onOpenPenance?.let {

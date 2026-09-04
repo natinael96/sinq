@@ -98,7 +98,7 @@ fun LibraryScreen(
                 LibraryCard(
                     icon = Icons.AutoMirrored.Outlined.MenuBook,
                     title = s.kurbanPrepTitle,
-                    subtitle = s.kurbanPrepDesc,
+                    subtitle = "${s.kurbanPrepDesc} · ${s.comingSoon}",
                     onClick = onOpenKurban,
                 )
             }

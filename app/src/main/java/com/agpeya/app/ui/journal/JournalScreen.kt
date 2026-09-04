@@ -163,7 +163,7 @@ fun JournalScreen(
                 com.agpeya.app.ui.common.NavRow(
                     title = s.confessionPrepTitle,
                     onClick = onStartConfessionPrep,
-                    subtitle = s.confessionPrepDesc,
+                    subtitle = "${s.confessionPrepDesc} · ${s.comingSoon}",
                 )
             }
 
