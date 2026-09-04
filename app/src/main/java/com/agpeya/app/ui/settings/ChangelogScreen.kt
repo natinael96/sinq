@@ -31,6 +31,27 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.7.0",
+        title = "What the Church does not read to you",
+        titleAm = "ግጻዌው የማያነብልዎት",
+        changes = listOf(
+            "Sinq now installs on Android 6 and later, instead of Android 8 and later.",
+            "ንስሐ ዝግጅት — examine your conscience section by section; what you write becomes a private draft that is deleted once you have confessed.",
+            "ቀኖና — keep the penance you were given. It reminds you until it is finished, stays on this device only, and never shows its name in a notification.",
+            "ቁርባን ዝግጅት — the order of approach, with the prayers before and after receiving.",
+            "ንባብ — read the Old Testament and the books the ግጻዌ does not reach, over a year or six months, with the day's ግጻዌ shown above it.",
+            "A quiet line on the home page when a new version is out. Off until you turn it on; it is the app's only use of the internet.",
+        ),
+        changesAm = listOf(
+            "ስንቅ አሁን ከአንድሮይድ ፮ ጀምሮ ይጫናል፤ ከዚህ በፊት ከ፰ ጀምሮ ነበር።",
+            "ንስሐ ዝግጅት — ልብዎን ክፍል በክፍል ይመርምሩ፤ የጻፉት ንስሐ እስኪገቡ ድረስ ተጠብቆ ይቆያል፣ ከዚያም ይሰረዛል።",
+            "ቀኖና — የተቀበሉትን ቀኖና ይያዙ። እስኪፈጸም ያስታውሰዎታል፣ በዚህ መሣሪያ ብቻ ይቀራል፣ ስሙም በማሳወቂያ ላይ አይታይም።",
+            "ቁርባን ዝግጅት — ሥርዓተ መቅረቢያውና ከቁርባን በፊትና በኋላ የሚጸለዩ ጸሎቶች።",
+            "ንባብ — ግጻዌው የማያነብልዎትን ብሉይ ኪዳንና መጻሕፍት በአንድ ዓመት ወይም በስድስት ወር ያንብቡ፤ የዕለቱ ግጻዌ ከላዩ ይታያል።",
+            "አዲስ እትም ሲወጣ በመነሻ ገጹ ላይ ጸጥ ያለ መስመር ይታያል። እስኪከፍቱት ድረስ አይሠራም፤ የመተግበሪያው ብቸኛ የኢንተርኔት አገልግሎት ነው።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.6.1",
         title = "The journal keeps what you wrote",
         titleAm = "ማስታወሻው የጻፉትን ይይዛል",

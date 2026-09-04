@@ -6,6 +6,44 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [1.7.0] — 2026-09-04
+
+_versionCode 58 · what the Church does not read to you_
+
+### Fixed
+- **The app would not install on anything below Android 8.0.** `minSdk` was 26,
+  held there only by `java.time` (used in some 50 files) and `java.util.Base64`
+  in the journal lock. Core library desugaring carries both down, so the floor
+  is now 23 — Android 6.0. Notification channels, which do not exist before
+  Oreo, are behind version checks; `PBKDF2WithHmacSHA256`, which also needs 26,
+  now records which algorithm hashed a passphrase so one set on Android 6 keeps
+  verifying after its owner upgrades.
+- **Release APKs now carry the v1 JAR signature.** v2 alone covers API 24 and
+  up, which would have excluded the Android 6 devices the change is for.
+- Two long-standing lint errors that were keeping the CI workflow red.
+
+### Added
+- **ንስሐ ዝግጅት** — a guided examination of conscience, walked one section at a
+  time. The questions are read, never ticked, and the walk produces a single
+  confession draft that "ንስሐ ገብቻለሁ" deletes.
+- **ቀኖና** — the penance received from a ንስሐ አባት, with its measure and what has
+  been done against it. It reminds until it is finished and then falls silent.
+  Kept on the device only: never in a backup, and its label never appears in a
+  notification.
+- **ቁርባን ዝግጅት** — the order of approach as the tradition states it, with the
+  prayers before and after receiving.
+- **ንባብ** — a reading plan for the 1,067 chapters of the Old Testament and
+  deuterocanon that the ግጻዌ never reaches, over a year or six months. The day's
+  ግጻዌ is shown inside the plan, above the plan's own reading and never marked
+  done. It is also the first screen to reach ሲራክ, ኩፋሌ, ሄኖክ and መቃብያን, which
+  have been bundled all along with no way in.
+- **A line on ቤት when a new version is out.** Opt-in and off by default; one
+  request a day, the app's only use of the network. It opens the release page
+  in the browser and never downloads anything itself.
+
+### Changed
+- The Journey page's vertical rhythm is a little tighter again.
+
 ## [1.6.1] — 2026-08-31
 
 _versionCode 57 · the journal keeps what you wrote_
