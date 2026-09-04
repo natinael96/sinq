@@ -110,6 +110,10 @@ interface JournalDao {
     @Query("SELECT COUNT(*) FROM journal_entries")
     fun count(): Flow<Int>
 
+    /** How many ንስሐ drafts wait unconfessed — a number, never their text. */
+    @Query("SELECT COUNT(*) FROM journal_entries WHERE kind = 'CONFESSION_DRAFT'")
+    fun draftCount(): Flow<Int>
+
     @Upsert
     suspend fun upsert(entry: JournalEntry)
 

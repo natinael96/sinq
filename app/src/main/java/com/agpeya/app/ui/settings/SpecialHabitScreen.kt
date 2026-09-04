@@ -77,7 +77,12 @@ import java.util.UUID
  */
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-fun SpecialHabitScreen(habit: SpecialHabit, onBack: () -> Unit) {
+fun SpecialHabitScreen(
+    habit: SpecialHabit,
+    onBack: () -> Unit,
+    onOpenConfessionPrep: (() -> Unit)? = null,
+    onOpenPenance: (() -> Unit)? = null,
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val s = LocalStrings.current
@@ -85,9 +90,10 @@ fun SpecialHabitScreen(habit: SpecialHabit, onBack: () -> Unit) {
     val reminders by when (habit) {
         SpecialHabit.ALMS -> SettingsRepository.almsReminders(context)
         SpecialHabit.REPENTANCE -> SettingsRepository.repentanceReminders(context)
-        // ስዕለት never routes here — a vow carries an amount and a record, so it
-        // has its own page — but the branch keeps the `when` exhaustive.
-        SpecialHabit.TITHE, SpecialHabit.VOW -> SettingsRepository.titheReminders(context)
+        // ስዕለት and ቀኖና never route here — each carries a record of its own, so
+        // each has its own page — but the branch keeps the `when` exhaustive.
+        SpecialHabit.TITHE, SpecialHabit.VOW, SpecialHabit.PENANCE ->
+            SettingsRepository.titheReminders(context)
     }.collectAsState(initial = emptyList())
 
     // Notification-only nudges, so switching one on asks for POST_NOTIFICATIONS.
@@ -111,7 +117,8 @@ fun SpecialHabitScreen(habit: SpecialHabit, onBack: () -> Unit) {
             when (habit) {
                 SpecialHabit.ALMS -> SettingsRepository.setAlmsReminders(context, newList)
                 SpecialHabit.REPENTANCE -> SettingsRepository.setRepentanceReminders(context, newList)
-                SpecialHabit.TITHE, SpecialHabit.VOW -> SettingsRepository.setTitheReminders(context, newList)
+                SpecialHabit.TITHE, SpecialHabit.VOW, SpecialHabit.PENANCE ->
+                    SettingsRepository.setTitheReminders(context, newList)
             }
             if (reschedule) SpecialHabitReminderScheduler.sync(context, habit)
         }
@@ -129,7 +136,7 @@ fun SpecialHabitScreen(habit: SpecialHabit, onBack: () -> Unit) {
                 HabitSchedule.DEFAULT_REPENTANCE to SettingsRepository.DEFAULT_REPENTANCE_REMINDER_MIN
             // A tithe is reckoned by the month, so a new one starts monthly
             // rather than on a weekday.
-            SpecialHabit.TITHE, SpecialHabit.VOW ->
+            SpecialHabit.TITHE, SpecialHabit.VOW, SpecialHabit.PENANCE ->
                 HabitSchedule(kind = HabitSchedule.Kind.MONTHLY, monthDay = 1) to
                     SettingsRepository.DEFAULT_TITHE_REMINDER_MIN
         }
@@ -146,17 +153,17 @@ fun SpecialHabitScreen(habit: SpecialHabit, onBack: () -> Unit) {
     val title = when (habit) {
         SpecialHabit.ALMS -> s.settingsAlmsReminder
         SpecialHabit.REPENTANCE -> s.settingsRepentReminder
-        SpecialHabit.TITHE, SpecialHabit.VOW -> s.titheRemindersRow
+        SpecialHabit.TITHE, SpecialHabit.VOW, SpecialHabit.PENANCE -> s.titheRemindersRow
     }
     val description = when (habit) {
         SpecialHabit.ALMS -> s.settingsAlmsReminderDesc
         SpecialHabit.REPENTANCE -> s.settingsRepentReminderDesc
-        SpecialHabit.TITHE, SpecialHabit.VOW -> s.settingsTitheDesc
+        SpecialHabit.TITHE, SpecialHabit.VOW, SpecialHabit.PENANCE -> s.settingsTitheDesc
     }
     val nameHint = when (habit) {
         SpecialHabit.ALMS -> s.reminderNameHintAlms
         SpecialHabit.REPENTANCE -> s.reminderNameHintRepent
-        SpecialHabit.TITHE, SpecialHabit.VOW -> s.reminderNameHintTithe
+        SpecialHabit.TITHE, SpecialHabit.VOW, SpecialHabit.PENANCE -> s.reminderNameHintTithe
     }
 
     Scaffold(
@@ -207,6 +214,26 @@ fun SpecialHabitScreen(habit: SpecialHabit, onBack: () -> Unit) {
                 Icon(Icons.Outlined.Add, contentDescription = null)
                 Spacer(Modifier.width(Spacing.sm))
                 Text(s.addSpecialReminder)
+            }
+
+            // The ንስሐ page also opens the preparation that reminding is FOR:
+            // the examination, and the ቀኖና carried home from it.
+            if (habit == SpecialHabit.REPENTANCE) {
+                Spacer(Modifier.height(Spacing.lg))
+                onOpenConfessionPrep?.let {
+                    com.agpeya.app.ui.common.NavRow(
+                        title = s.confessionPrepTitle,
+                        onClick = it,
+                        subtitle = s.confessionPrepDesc,
+                    )
+                }
+                onOpenPenance?.let {
+                    com.agpeya.app.ui.common.NavRow(
+                        title = s.settingsPenanceTitle,
+                        onClick = it,
+                        subtitle = s.settingsPenanceDesc,
+                    )
+                }
             }
             Spacer(Modifier.height(Spacing.huge))
         }

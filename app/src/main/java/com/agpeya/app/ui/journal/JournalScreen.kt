@@ -66,6 +66,8 @@ fun JournalScreen(
     onBack: () -> Unit,
     onOpenEntry: (String) -> Unit,
     onNewEntry: (kind: JournalKind) -> Unit,
+    onStartConfessionPrep: () -> Unit,
+    onOpenPenance: () -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -90,6 +92,7 @@ fun JournalScreen(
         .collectAsState(initial = emptyList())
 
     var confessing by remember { mutableStateOf(false) }
+    var penancePrompt by remember { mutableStateOf(false) }
     var settingPassphrase by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -153,6 +156,17 @@ fun JournalScreen(
                 EntryRow(entry = entry, s = s, onClick = { onOpenEntry(entry.id) })
             }
 
+            // The guided examination — the journal is where its draft lands, so
+            // the journal is where it begins.
+            item {
+                Spacer(Modifier.height(Spacing.md))
+                com.agpeya.app.ui.common.NavRow(
+                    title = s.confessionPrepTitle,
+                    onClick = onStartConfessionPrep,
+                    subtitle = s.confessionPrepDesc,
+                )
+            }
+
             // Discharging drafts is an action on the whole journal, not on one
             // entry, so it lives at the foot of the list rather than in a card.
             if (entries.any { it.isDraft }) {
@@ -174,9 +188,27 @@ fun JournalScreen(
                 TextButton(onClick = {
                     confessing = false
                     scope.launch { JournalRepository.dischargeDrafts(context) }
+                    // The one moment a ቀኖና is fresh in hand is on the way home
+                    // from confessing, so it is offered here and nowhere else.
+                    penancePrompt = true
                 }) { Text(s.confessedAction) }
             },
             dismissButton = { TextButton(onClick = { confessing = false }) { Text(s.cancel) } },
+        )
+    }
+
+    if (penancePrompt) {
+        AlertDialog(
+            onDismissRequest = { penancePrompt = false },
+            title = { Text(s.penanceTitle) },
+            text = { Text(s.confessionPrepPenancePrompt) },
+            confirmButton = {
+                TextButton(onClick = {
+                    penancePrompt = false
+                    onOpenPenance()
+                }) { Text(s.penanceTitle) }
+            },
+            dismissButton = { TextButton(onClick = { penancePrompt = false }) { Text(s.cancel) } },
         )
     }
 

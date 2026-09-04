@@ -607,6 +607,111 @@ interface Strings {
 
     /** The widget card's action line; an arrow is appended in the layout. */
     val readGitsawe: String
+
+    // ── ንስሐ ዝግጅት (confession preparation) ───────────────────────────────────
+    //
+    // Nothing here is scored or streaked: the examination is read, not filled,
+    // and its only product is a confession draft that discharge deletes.
+
+    val confessionPrepTitle: String
+    val confessionPrepDesc: String
+    /** Step indicator, e.g. "፪ / ፭". */
+    fun confessionPrepStepOf(step: Int, total: Int): String
+    val confessionPrepStart: String
+    val confessionPrepNoteHint: String
+    val confessionPrepReviewHeader: String
+    val confessionPrepNothingNoted: String
+    val confessionPrepSave: String
+    val confessionPrepSavedTitle: String
+    val confessionPrepOpenDraft: String
+    /** Leads the draft body so it is never blank; a dated fact, not a score. */
+    val confessionPrepStamp: String
+    /** Offered after discharge: was a ቀኖና received? */
+    val confessionPrepPenancePrompt: String
+
+    // ── ቀኖና (penance) ────────────────────────────────────────────────────────
+
+    val settingsPenanceTitle: String
+    val settingsPenanceDesc: String
+    val penanceTitle: String
+    val penanceIntro: String
+    val penanceAdd: String
+    val noPenances: String
+    val penanceNameLabel: String
+    val penanceNameHint: String
+    val penanceKindLabel: String
+    val penanceKindProstrations: String
+    val penanceKindFastingDays: String
+    val penanceKindAlms: String
+    val penanceKindPrayers: String
+    val penanceKindOther: String
+    val penanceQuotaLabel: String
+    val penanceDone: String
+    val penanceRemaining: String
+    val penanceSettled: String
+    val penanceLogProgress: String
+    val penanceProgressHeader: String
+    val noPenanceProgress: String
+    val deletePenanceConfirm: String
+    /** Deliberately generic: a ቀኖና's label never rides in a notification. */
+    val penanceReminderTitle: String
+    val penanceReminderBody: String
+    val penanceChannelName: String
+    val penancePrivacyNote: String
+
+    // ── ንባብ (reading plan) ──────────────────────────────────────────────────
+    //
+    // A supplement to the ግጻዌ, never a replacement: the lectionary is what the
+    // Church appoints, and the plan reads what it does not reach.
+
+    val readingTitle: String
+    val readingIntro: String
+    val readingChoose: String
+    val readingStart: String
+    val readingStop: String
+    val readingStopConfirm: String
+    /** Home card and screen header, e.g. "ቀን ፵፫". */
+    fun readingDayLabel(day: String): String
+    val readingTodayHeader: String
+    val readingGitsaweHeader: String
+    val readingWithGitsawe: String
+    val readingMarkDone: String
+    val readingDone: String
+    val readingAllDays: String
+    /** Footer line: days read in the current period. Never a streak. */
+    fun readingDaysRead(count: Int): String
+    val readingBehindTitle: String
+    val readingCatchToday: String
+    val readingCatchOldest: String
+    val readingRedistribute: String
+    /** e.g. "፫፻፷ ቀን · በቀን ፫ ምዕራፍ". */
+    fun readingPlanMeta(days: String, perDay: String): String
+    val readingNoPlan: String
+
+    // ── የአዲስ እትም ማሳወቂያ (update notice) ─────────────────────────────────────
+    //
+    // The app's only network-facing feature, and the only strings that mention
+    // the internet at all.
+
+    /** The Home line, e.g. "አዲስ እትም · 1.7.0". */
+    fun updateAvailable(version: String): String
+    val updateDownload: String
+    val updateDismiss: String
+    val settingsUpdateCheck: String
+    val settingsUpdateCheckDesc: String
+    /** About row when the check is off, or nothing has been found yet. */
+    val updateNoneFound: String
+
+    // ── ቁርባን ዝግጅት (communion preparation) ──────────────────────────────────
+
+    val kurbanPrepTitle: String
+    val kurbanPrepDesc: String
+    val kurbanChecklistHeader: String
+    val kurbanStatusHeader: String
+    val kurbanConfessionPending: String
+    val kurbanPenanceUnsettled: String
+    val kurbanPrePrayersHeader: String
+    val kurbanPostPrayersHeader: String
 }
 
 object AmharicStrings : Strings {
@@ -1073,7 +1178,7 @@ object AmharicStrings : Strings {
     override val exportSectionOfferings = "አስራትና ስዕለት"
     override val exportSectionJournal = "ማስታወሻ"
     override val exportJournalWarning =
-        "ማስታወሻዎቹ በፋይሉ ውስጥ በግልጽ ይጻፋሉ፤ ፋይሉን የከፈተ ሁሉ ያነባቸዋል። የንስሐ መዘጋጃዎች ግን አይወጡም።"
+        "ማስታወሻዎቹ በፋይሉ ውስጥ በግልጽ ይጻፋሉ፤ ፋይሉን የከፈተ ሁሉ ያነባቸዋል። የንስሐ መዘጋጃዎችና ቀኖና ግን አይወጡም።"
     override val exportNothingChosen = "ቢያንስ አንዱን ይምረጡ"
     override val continueAction = "ቀጥል"
 
@@ -1146,6 +1251,95 @@ object AmharicStrings : Strings {
     override val noSpecialReminders = "ገና ማስታወሻ አልተጨመረም።"
     override val tomorrowLabel = "ነገ"
     override val readGitsawe = "ግጻዌውን ክፈት"
+
+    // ── ንስሐ ዝግጅት ────────────────────────────────────────────────────────────
+
+    override val confessionPrepTitle = "የንስሐ ዝግጅት"
+    override val confessionPrepDesc = "ልብን መርምሮ ለንስሐ መዘጋጀት"
+    override fun confessionPrepStepOf(step: Int, total: Int) = "$step / $total"
+    override val confessionPrepStart = "መመርመር ጀምር"
+    override val confessionPrepNoteHint = "የሚያስታውሱት ካለ ይጻፉ (አማራጭ)"
+    override val confessionPrepReviewHeader = "የተጻፈባቸው ክፍሎች"
+    override val confessionPrepNothingNoted = "ምንም አልተጻፈም፤ መመርመሩ ብቻ ይመዘገባል።"
+    override val confessionPrepSave = "እንደ ረቂቅ አስቀምጥ"
+    override val confessionPrepSavedTitle = "ተቀምጧል"
+    override val confessionPrepOpenDraft = "ረቂቁን ክፈት"
+    override val confessionPrepStamp = "የኅሊና ምርመራ ተደርጓል።"
+    override val confessionPrepPenancePrompt = "ከንስሐ አባትዎ ቀኖና ተቀብለዋል? ለማስታወስ ይመዝግቡት።"
+
+    // ── ቀኖና ─────────────────────────────────────────────────────────────────
+
+    override val settingsPenanceTitle = "ቀኖና"
+    override val settingsPenanceDesc = "የተቀበሉትን ቀኖና ይከታተሉ፤ በዚህ መሣሪያ ብቻ ይቀራል"
+    override val penanceTitle = "ቀኖና"
+    override val penanceIntro = "ከንስሐ አባትዎ የተቀበሉትን ቀኖና እዚህ ይያዙ። እስኪፈጸም ያስታውሰዎታል፤ ከተፈጸመ በኋላ ዝም ይላል።"
+    override val penanceAdd = "ቀኖና ጨምር"
+    override val noPenances = "ምንም ቀኖና የለም"
+    override val penanceNameLabel = "መግለጫ (አማራጭ)"
+    override val penanceNameHint = "ለምሳሌ፦ ፵ ስግደት"
+    override val penanceKindLabel = "ዓይነት"
+    override val penanceKindProstrations = "ስግደት"
+    override val penanceKindFastingDays = "ጾም (ቀናት)"
+    override val penanceKindAlms = "ምጽዋት"
+    override val penanceKindPrayers = "ጸሎት"
+    override val penanceKindOther = "ሌላ"
+    override val penanceQuotaLabel = "መጠን"
+    override val penanceDone = "የተፈጸመ"
+    override val penanceRemaining = "የቀረ"
+    override val penanceSettled = "ተፈጽሟል"
+    override val penanceLogProgress = "መዝግብ"
+    override val penanceProgressHeader = "የተመዘገበ"
+    override val noPenanceProgress = "ገና ምንም አልተመዘገበም"
+    override val deletePenanceConfirm = "ይህ ቀኖና ይሰረዛል። አይመለስም።"
+    override val penanceReminderTitle = "ቀኖና"
+    override val penanceReminderBody = "የያዙት ቀኖና አለ።"
+    override val penanceChannelName = "የቀኖና ማስታወሻ"
+    override val penancePrivacyNote = "ቀኖና በመጠባበቂያ ቅጂ ውስጥ አይካተትም፤ በዚህ መሣሪያ ብቻ ይቀራል።"
+
+    // ── ንባብ ────────────────────────────────────────────────────────────────
+
+    override val readingTitle = "ንባብ"
+    override val readingIntro =
+        "ግጻዌው ወንጌልንና መልእክታትን ያነብልዎታል፤ ይህ ንባብ ደግሞ ብሉይ ኪዳንንና መጻሕፍቱን ያስነብብዎታል።"
+    override val readingChoose = "ንባብ ይምረጡ"
+    override val readingStart = "ጀምር"
+    override val readingStop = "አቁም"
+    override val readingStopConfirm = "ንባቡ ይቆማል። ያነበቡት ግን ተጠብቆ ይቀራል።"
+    override fun readingDayLabel(day: String) = "ቀን $day"
+    override val readingTodayHeader = "የዕለቱ ንባብ"
+    override val readingGitsaweHeader = "የዕለቱ ግጻዌ"
+    override val readingWithGitsawe = "ከዕለቱ ግጻዌ ጋር"
+    override val readingMarkDone = "አነበብኩ"
+    override val readingDone = "ተነቧል"
+    override val readingAllDays = "ሁሉንም ቀናት"
+    override fun readingDaysRead(count: Int) = "$count ቀናት ተነብቧል"
+    override val readingBehindTitle = "ያልተነበቡ ቀናት አሉ"
+    override val readingCatchToday = "ዛሬ ላይ ቀጥል"
+    override val readingCatchOldest = "ካልተነበበው ቀጥል"
+    override val readingRedistribute = "ቀሪውን አከፋፍል"
+    override fun readingPlanMeta(days: String, perDay: String) = "$days ቀን · በቀን $perDay ምዕራፍ"
+    override val readingNoPlan = "ገና ንባብ አልጀመሩም"
+
+    // ── የአዲስ እትም ማሳወቂያ ────────────────────────────────────────────────────
+
+    override fun updateAvailable(version: String) = "አዲስ እትም · $version"
+    override val updateDownload = "አውርድ"
+    override val updateDismiss = "ዝጋ"
+    override val settingsUpdateCheck = "አዲስ እትም ፈልግ"
+    override val settingsUpdateCheckDesc =
+        "በቀን አንዴ ጊትሀብን ይጠይቃል። የመተግበሪያው ብቸኛ የኢንተርኔት አገልግሎት ነው።"
+    override val updateNoneFound = "አዲስ እትም የለም"
+
+    // ── ቁርባን ዝግጅት ──────────────────────────────────────────────────────────
+
+    override val kurbanPrepTitle = "የቁርባን ዝግጅት"
+    override val kurbanPrepDesc = "ሥርዓተ መቅረቢያውና ጸሎቶቹ"
+    override val kurbanChecklistHeader = "ሥርዓተ መቅረቢያ"
+    override val kurbanStatusHeader = "ዝግጅት"
+    override val kurbanConfessionPending = "ያልተናዘዙት የንስሐ ረቂቅ አለ።"
+    override val kurbanPenanceUnsettled = "ያልተፈጸመ ቀኖና አለ።"
+    override val kurbanPrePrayersHeader = "ጸሎት ዘቅድመ ቁርባን"
+    override val kurbanPostPrayersHeader = "ጸሎት ዘድኅረ ቁርባን"
 }
 
 object EnglishStrings : Strings {
@@ -1629,7 +1823,7 @@ object EnglishStrings : Strings {
     override val exportSectionOfferings = "Tithe and vows"
     override val exportSectionJournal = "Journal"
     override val exportJournalWarning =
-        "Journal entries are written into the file as plain text — anyone who opens it can read them. Confession drafts are never included."
+        "Journal entries are written into the file as plain text — anyone who opens it can read them. Confession drafts and penances are never included."
     override val exportNothingChosen = "Choose at least one"
     override val continueAction = "Continue"
 
@@ -1702,6 +1896,95 @@ object EnglishStrings : Strings {
     override val noSpecialReminders = "No reminders yet."
     override val tomorrowLabel = "Tomorrow"
     override val readGitsawe = "Read the Gitsawe"
+
+    // ── Confession preparation ───────────────────────────────────────────────
+
+    override val confessionPrepTitle = "Preparing for confession"
+    override val confessionPrepDesc = "Examine the heart and prepare for confession"
+    override fun confessionPrepStepOf(step: Int, total: Int) = "$step / $total"
+    override val confessionPrepStart = "Begin the examination"
+    override val confessionPrepNoteHint = "Write anything you want to remember (optional)"
+    override val confessionPrepReviewHeader = "Sections written under"
+    override val confessionPrepNothingNoted = "Nothing was written; only the examination itself is kept."
+    override val confessionPrepSave = "Keep as a draft"
+    override val confessionPrepSavedTitle = "Kept"
+    override val confessionPrepOpenDraft = "Open the draft"
+    override val confessionPrepStamp = "An examination of conscience was made."
+    override val confessionPrepPenancePrompt = "Did your father confessor give you a penance? Record it so it is not forgotten."
+
+    // ── Penance ──────────────────────────────────────────────────────────────
+
+    override val settingsPenanceTitle = "Penance"
+    override val settingsPenanceDesc = "Keep the penance you were given; it stays on this device only"
+    override val penanceTitle = "Penance"
+    override val penanceIntro = "Keep here the penance your father confessor gave you. It reminds you until it is finished, and then falls silent."
+    override val penanceAdd = "Add a penance"
+    override val noPenances = "No penance is held"
+    override val penanceNameLabel = "Description (optional)"
+    override val penanceNameHint = "e.g. 40 prostrations"
+    override val penanceKindLabel = "Kind"
+    override val penanceKindProstrations = "Prostrations"
+    override val penanceKindFastingDays = "Fasting (days)"
+    override val penanceKindAlms = "Alms"
+    override val penanceKindPrayers = "Prayers"
+    override val penanceKindOther = "Other"
+    override val penanceQuotaLabel = "Measure"
+    override val penanceDone = "Done"
+    override val penanceRemaining = "Remaining"
+    override val penanceSettled = "Fulfilled"
+    override val penanceLogProgress = "Record"
+    override val penanceProgressHeader = "Recorded"
+    override val noPenanceProgress = "Nothing recorded yet"
+    override val deletePenanceConfirm = "This penance will be deleted. This cannot be undone."
+    override val penanceReminderTitle = "Penance"
+    override val penanceReminderBody = "You are keeping a penance."
+    override val penanceChannelName = "Penance reminder"
+    override val penancePrivacyNote = "Penances are never included in a backup; they stay on this device only."
+
+    // ── Reading plan ─────────────────────────────────────────────────────────
+
+    override val readingTitle = "Reading"
+    override val readingIntro =
+        "The Gitsawe reads you the Gospels and the Epistles; this reads the Old Testament and the books it does not reach."
+    override val readingChoose = "Choose a reading"
+    override val readingStart = "Begin"
+    override val readingStop = "Stop"
+    override val readingStopConfirm = "The reading stops. What you have read is kept."
+    override fun readingDayLabel(day: String) = "Day $day"
+    override val readingTodayHeader = "Today's reading"
+    override val readingGitsaweHeader = "Today's Gitsawe"
+    override val readingWithGitsawe = "With the day's Gitsawe"
+    override val readingMarkDone = "I have read it"
+    override val readingDone = "Read"
+    override val readingAllDays = "All days"
+    override fun readingDaysRead(count: Int) = "$count days read"
+    override val readingBehindTitle = "Some days are unread"
+    override val readingCatchToday = "Continue from today"
+    override val readingCatchOldest = "Continue from the oldest"
+    override val readingRedistribute = "Spread the rest out"
+    override fun readingPlanMeta(days: String, perDay: String) = "$days days · $perDay chapters a day"
+    override val readingNoPlan = "No reading started yet"
+
+    // ── Update notice ────────────────────────────────────────────────────────
+
+    override fun updateAvailable(version: String) = "New version · $version"
+    override val updateDownload = "Get it"
+    override val updateDismiss = "Dismiss"
+    override val settingsUpdateCheck = "Check for updates"
+    override val settingsUpdateCheckDesc =
+        "Asks GitHub once a day. The app's only use of the internet."
+    override val updateNoneFound = "No new version"
+
+    // ── Communion preparation ────────────────────────────────────────────────
+
+    override val kurbanPrepTitle = "Preparing for Communion"
+    override val kurbanPrepDesc = "The order of approach and its prayers"
+    override val kurbanChecklistHeader = "The order of approach"
+    override val kurbanStatusHeader = "Preparation"
+    override val kurbanConfessionPending = "A confession draft is still waiting."
+    override val kurbanPenanceUnsettled = "An unfinished penance remains."
+    override val kurbanPrePrayersHeader = "Prayer before Communion"
+    override val kurbanPostPrayersHeader = "Prayer after Communion"
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { AmharicStrings }

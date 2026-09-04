@@ -51,6 +51,8 @@ object JournalRepository {
 
     fun count(context: Context): Flow<Int> = dao(context).count()
 
+    fun draftCount(context: Context): Flow<Int> = dao(context).draftCount()
+
     suspend fun byId(context: Context, id: String): JournalEntry? = dao(context).byId(id)
 
     // ── Writing ──────────────────────────────────────────────────────────────

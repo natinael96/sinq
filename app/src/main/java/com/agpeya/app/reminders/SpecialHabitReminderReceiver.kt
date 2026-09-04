@@ -6,11 +6,14 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.agpeya.app.MainActivity
 import com.agpeya.app.R
 import com.agpeya.app.data.OfferingRepository
+import com.agpeya.app.data.PenanceRepository
 import com.agpeya.app.data.SettingsRepository
+import com.agpeya.app.model.Penance
 import com.agpeya.app.model.ScheduledReminder
 import com.agpeya.app.model.Vow
 import com.agpeya.app.stringsFor
@@ -43,11 +46,14 @@ class SpecialHabitReminderReceiver : BroadcastReceiver() {
                         SpecialHabit.REPENTANCE -> SettingsRepository.repentanceReminders(context).first()
                         SpecialHabit.TITHE -> SettingsRepository.titheReminders(context).first()
                         SpecialHabit.VOW -> OfferingRepository.vows(context).first()
+                        SpecialHabit.PENANCE -> PenanceRepository.penances(context).first()
                     }
                     val entry = list.firstOrNull { it.id == entryId } ?: return@runBlocking
                     // A one-time ስዕለት that has been kept stops here: no
                     // notification, and no re-arming to ask again next year.
+                    // A finished ቀኖና likewise.
                     if (entry is Vow && !entry.remindsStill) return@runBlocking
+                    if (entry is Penance && !entry.remindsStill) return@runBlocking
                     if (!entry.enabled) return@runBlocking
                     // Chain: always re-arm this entry for its next due day,
                     // then fall silent if the quiet window covers right now.
@@ -64,6 +70,8 @@ class SpecialHabitReminderReceiver : BroadcastReceiver() {
                             Triple(s.titheReminderTitle, s.titheReminderBody, s.titheChannelName)
                         SpecialHabit.VOW ->
                             Triple(s.vowReminderTitle, s.vowReminderBody, s.vowChannelName)
+                        SpecialHabit.PENANCE ->
+                            Triple(s.penanceReminderTitle, s.penanceReminderBody, s.penanceChannelName)
                     }
                     // A vow that named an amount says what is still owed on it;
                     // one that promised prayer or fasting has no figure to give.
@@ -73,7 +81,10 @@ class SpecialHabitReminderReceiver : BroadcastReceiver() {
                     } else {
                         defaultBody
                     }
-                    val title = entry.label.ifBlank { defaultTitle }
+                    // A ቀኖና is confessional: its label never rides in the tray,
+                    // where a lock screen would show it to anyone who glances.
+                    val title = if (habit == SpecialHabit.PENANCE) defaultTitle
+                    else entry.label.ifBlank { defaultTitle }
                     ensureChannel(context, habit, channelName)
                     // Tap request code and notification id both derive from the
                     // entry id, so entries never overwrite each other's tray
@@ -84,10 +95,12 @@ class SpecialHabitReminderReceiver : BroadcastReceiver() {
                         tapCode,
                         Intent(context, MainActivity::class.java).apply {
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                            // አስራት and ስዕለት land on their own page, where the
-                            // amount can actually be recorded; the other two
+                            // አስራት, ስዕለት and ቀኖና land on their own page, where
+                            // the record can actually be made; ምጽዋት and ንስሐ
                             // have nothing to record and just open the app.
-                            if (habit == SpecialHabit.TITHE || habit == SpecialHabit.VOW) {
+                            if (habit == SpecialHabit.TITHE || habit == SpecialHabit.VOW ||
+                                habit == SpecialHabit.PENANCE
+                            ) {
                                 putExtra(MainActivity.EXTRA_OPEN_OFFERING, habit.name)
                             }
                         },
@@ -117,7 +130,10 @@ class SpecialHabitReminderReceiver : BroadcastReceiver() {
 
     private fun ensureChannel(context: Context, habit: SpecialHabit, name: String) {
         val nm = context.getSystemService(NotificationManager::class.java)
-        if (nm.getNotificationChannel(habit.channelId) == null) {
+        // Channels only exist from Oreo; below it there is nothing to create.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+            nm.getNotificationChannel(habit.channelId) == null
+        ) {
             nm.createNotificationChannel(
                 NotificationChannel(habit.channelId, name, NotificationManager.IMPORTANCE_DEFAULT),
             )

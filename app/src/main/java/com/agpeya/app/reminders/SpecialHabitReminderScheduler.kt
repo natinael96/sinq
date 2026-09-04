@@ -5,7 +5,9 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import com.agpeya.app.data.OfferingRepository
+import com.agpeya.app.data.PenanceRepository
 import com.agpeya.app.data.SettingsRepository
+import com.agpeya.app.model.Penance
 import com.agpeya.app.model.ScheduledReminder
 import com.agpeya.app.model.Vow
 import java.time.LocalDateTime
@@ -13,7 +15,7 @@ import java.time.LocalTime
 import java.time.ZoneId
 
 /**
- * The scheduled intentions the app nudges: ምጽዋት, ንስሐ, አስራት and ስዕለት.
+ * The scheduled intentions the app nudges: ምጽዋት, ንስሐ, አስራት, ስዕለት and ቀኖና.
  *
  * The first two are deliberately NOT habits — the app reminds and then looks
  * away, recording nothing, because alms and repentance are between the person
@@ -22,8 +24,11 @@ import java.time.ZoneId
  * አስራት and ስዕለት are different in kind and are tracked (see
  * [OfferingRepository]): a tithe is a reckoning and a vow is a debt willingly
  * taken on, and neither can be kept by someone who cannot see where they
- * stand. The reminder machinery is identical for all four, so it is shared;
- * only the source of the entries and the notification wording differ.
+ * stand. A ቀኖና is a debt too — assigned rather than chosen — and is tracked
+ * the same way, but as confessional material (see [PenanceRepository]): its
+ * notifications never carry its label. The reminder machinery is identical
+ * for all five, so it is shared; only the source of the entries and the
+ * notification wording differ.
  *
  * Each intention holds a LIST of entries, each with its own label, cadence and
  * time. The enum carries what is shared per intention: the broadcast [action]
@@ -39,6 +44,7 @@ enum class SpecialHabit(
     REPENTANCE("com.agpeya.app.REPENTANCE_REMINDER", "repentance_reminders"),
     TITHE("com.agpeya.app.TITHE_REMINDER", "tithe_reminders"),
     VOW("com.agpeya.app.VOW_REMINDER", "vow_reminders"),
+    PENANCE("com.agpeya.app.PENANCE_REMINDER", "penance_reminders"),
 }
 
 /**
@@ -84,10 +90,14 @@ object SpecialHabitReminderScheduler {
     /**
      * Whether an entry should hold an alarm at all. For most intentions that is
      * simply its switch; a one-time ስዕለት also stops once it has been kept, so
-     * a discharged vow does not go on asking to be paid.
+     * a discharged vow does not go on asking to be paid — and a finished ቀኖና
+     * likewise.
      */
-    private fun ScheduledReminder.armable(): Boolean =
-        if (this is Vow) remindsStill else enabled
+    private fun ScheduledReminder.armable(): Boolean = when (this) {
+        is Vow -> remindsStill
+        is Penance -> remindsStill
+        else -> enabled
+    }
 
     /** Re-arm one entry for its next due day — used by the chain after a fire. */
     fun scheduleNext(context: Context, habit: SpecialHabit, entry: ScheduledReminder) {
@@ -113,6 +123,7 @@ object SpecialHabitReminderScheduler {
         SpecialHabit.REPENTANCE -> SettingsRepository.repentanceRemindersBlocking(context)
         SpecialHabit.TITHE -> SettingsRepository.titheRemindersBlocking(context)
         SpecialHabit.VOW -> OfferingRepository.vowsBlocking(context)
+        SpecialHabit.PENANCE -> PenanceRepository.penancesBlocking(context)
     }
 
     /** Arm every intention at once — app launch, boot, time change. */
@@ -125,6 +136,7 @@ object SpecialHabitReminderScheduler {
         SpecialHabit.REPENTANCE -> SettingsRepository.KEY_REPENTANCE_SCHEDULED_IDS_PUBLIC
         SpecialHabit.TITHE -> SettingsRepository.KEY_TITHE_SCHEDULED_IDS_PUBLIC
         SpecialHabit.VOW -> SettingsRepository.KEY_VOW_SCHEDULED_IDS_PUBLIC
+        SpecialHabit.PENANCE -> SettingsRepository.KEY_PENANCE_SCHEDULED_IDS_PUBLIC
     }
 
     private fun requestCode(habit: SpecialHabit, entryId: String): Int =

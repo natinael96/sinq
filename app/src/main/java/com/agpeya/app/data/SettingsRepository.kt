@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -133,8 +134,21 @@ object SettingsRepository {
     private val KEY_TITHE_REMINDERS = stringPreferencesKey("tithe_reminders")
     private val KEY_TITHE_SCHEDULED_IDS = stringPreferencesKey("tithe_scheduled_ids")
     // ስዕለት reminders ARE the vows, stored in OfferingRepository — only the
-    // armed-alarm bookkeeping belongs here.
+    // armed-alarm bookkeeping belongs here. Likewise ቀኖና, whose records live
+    // in PenanceRepository and never leave the device.
     private val KEY_VOW_SCHEDULED_IDS = stringPreferencesKey("vow_scheduled_ids")
+    private val KEY_PENANCE_SCHEDULED_IDS = stringPreferencesKey("penance_scheduled_ids")
+
+    // Opt-in, and off by default: turning it on is what gives the app leave to
+    // use the network at all. See UpdateRepository — one request a day, and the
+    // only one the app ever makes.
+    private val KEY_UPDATE_CHECK = booleanPreferencesKey("update_check")
+
+    // The ቁርባን checklist is a preparation for ONE day, so the marks carry
+    // their date and silently read as empty the morning after. Transient by
+    // design: not backed up, and rewarding nothing.
+    private val KEY_KURBAN_CHECKED = stringSetPreferencesKey("kurban_checked")
+    private val KEY_KURBAN_CHECKED_DATE = stringPreferencesKey("kurban_checked_date")
 
     /** 09:00 — morning of the chosen alms day, before the day fills up. */
     const val DEFAULT_ALMS_REMINDER_MIN = 9 * 60
@@ -616,6 +630,28 @@ object SettingsRepository {
     val KEY_REPENTANCE_SCHEDULED_IDS_PUBLIC get() = KEY_REPENTANCE_SCHEDULED_IDS
     val KEY_TITHE_SCHEDULED_IDS_PUBLIC get() = KEY_TITHE_SCHEDULED_IDS
     val KEY_VOW_SCHEDULED_IDS_PUBLIC get() = KEY_VOW_SCHEDULED_IDS
+    val KEY_PENANCE_SCHEDULED_IDS_PUBLIC get() = KEY_PENANCE_SCHEDULED_IDS
+
+    fun updateCheck(context: Context): Flow<Boolean> =
+        context.settingsDataStore.data.map { it[KEY_UPDATE_CHECK] ?: false }
+
+    suspend fun setUpdateCheck(context: Context, value: Boolean) {
+        context.settingsDataStore.edit { it[KEY_UPDATE_CHECK] = value }
+    }
+
+    /** Which ቁርባን rules were marked on [today]; another day's marks read empty. */
+    fun kurbanChecked(context: Context, today: String): Flow<Set<String>> =
+        context.settingsDataStore.data.map {
+            if (it[KEY_KURBAN_CHECKED_DATE] == today) it[KEY_KURBAN_CHECKED] ?: emptySet()
+            else emptySet()
+        }
+
+    suspend fun setKurbanChecked(context: Context, today: String, ids: Set<String>) {
+        context.settingsDataStore.edit {
+            it[KEY_KURBAN_CHECKED] = ids
+            it[KEY_KURBAN_CHECKED_DATE] = today
+        }
+    }
 
     // ---- Quiet hours --------------------------------------------------------
     //
