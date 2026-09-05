@@ -5,21 +5,25 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -52,8 +56,9 @@ fun UpdateLine(
         modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.background)
+            .height(28.dp)
             .clickable(onClick = onOpen)
-            .padding(start = Spacing.screen, end = Spacing.sm),
+            .padding(start = Spacing.screen),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
@@ -77,9 +82,19 @@ fun UpdateLine(
             color = MaterialTheme.colorScheme.secondary,
             maxLines = 1,
         )
-        // The × keeps a full touch target while the row itself stays short —
-        // height comes from the icon button's own minimum, not from padding.
-        IconButton(onClick = onDismiss, modifier = Modifier.size(36.dp)) {
+        // A 48dp-wide target on a line this short. The strip is deliberately
+        // 28dp tall — the whole point of it — so the guideline's 48dp cannot be
+        // met vertically without becoming the banner it was meant not to be.
+        // Width is free, so the × takes all of it and is easy to hit.
+        Box(
+            modifier = Modifier
+                .width(48.dp)
+                .fillMaxHeight()
+                .clip(MaterialTheme.shapes.small)
+                .clickable(onClick = onDismiss)
+                .semantics { role = Role.Button },
+            contentAlignment = Alignment.Center,
+        ) {
             Icon(
                 Icons.Outlined.Close,
                 contentDescription = s.updateDismiss,
