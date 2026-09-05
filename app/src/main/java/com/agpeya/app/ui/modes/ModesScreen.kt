@@ -47,6 +47,7 @@ import com.agpeya.app.model.ModesState
 import com.agpeya.app.model.PrayerMode
 import com.agpeya.app.reminders.ReminderScheduler
 import kotlinx.coroutines.launch
+import com.agpeya.app.ui.theme.Spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,7 +90,7 @@ fun ModesScreen(onBack: () -> Unit, onEditMode: (String) -> Unit, onOpenBatteryH
                             )
                         },
                     )
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(Spacing.md))
                 }
             }
             items(state.modes, key = { it.id }) { mode ->
@@ -108,7 +109,7 @@ fun ModesScreen(onBack: () -> Unit, onEditMode: (String) -> Unit, onOpenBatteryH
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
             item {
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(Spacing.xl))
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     TextButton(onClick = {
                         scope.launch {
@@ -128,7 +129,7 @@ fun ModesScreen(onBack: () -> Unit, onEditMode: (String) -> Unit, onOpenBatteryH
                         }
                     }) { Text(s.startEmpty) }
                 }
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(Spacing.screen))
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Text(
                     text = s.remindersNotFiringTitle,
@@ -179,13 +180,13 @@ private fun NotificationsOffBanner(onOpenSettings: () -> Unit) {
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onErrorContainer,
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(Spacing.xs))
             Text(
                 s.notifDisabledBody,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onErrorContainer,
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(Spacing.xs))
             TextButton(onClick = onOpenSettings) { Text(s.openSettings) }
         }
     }
@@ -208,7 +209,7 @@ private fun ModeRow(
     ) {
         val s = com.agpeya.app.ui.strings.LocalStrings.current
         RadioButton(selected = isActive, onClick = onActivate)
-        Spacer(Modifier.width(4.dp))
+        Spacer(Modifier.width(Spacing.xs))
         Column(Modifier.weight(1f)) {
             Text(
                 text = mode.name,

@@ -81,7 +81,7 @@ fun ScriptureListScreen(testament: String, onBack: () -> Unit, onOpenBook: (Stri
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
                 }
             }
-            item { Spacer(Modifier.height(24.dp)) }
+            item { Spacer(Modifier.height(Spacing.screen)) }
         }
     }
 }

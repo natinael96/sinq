@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.HabitsRepository
 import com.agpeya.app.ui.strings.LocalStrings
 import java.time.LocalDate
+import com.agpeya.app.ui.theme.Spacing
 
 /** GitHub-style contribution grid: 7 rows (Mon–Sun) × [weeksBack] weeks. */
 @Composable
@@ -85,7 +86,7 @@ fun HabitHeatmap(
             }
         }
         if (showLegend) {
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(Spacing.sm))
             val s = LocalStrings.current
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(s.less, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)

@@ -189,7 +189,7 @@ fun SearchScreen(
                         reference?.let { ref ->
                             item(key = "ref") {
                                 ReferenceRow(ref) { open(ref) }
-                                Spacer(Modifier.height(4.dp))
+                                Spacer(Modifier.height(Spacing.xs))
                             }
                         }
                         SOURCE_ORDER.forEach { source ->
@@ -229,7 +229,7 @@ private fun ResultRow(result: AmharicSearch.Result, onClick: () -> Unit) {
     ) {
         Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
             SourceTag(result.sourceLabel)
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(Spacing.sm))
             Text(
                 text = result.title,
                 style = MaterialTheme.typography.titleMedium,
@@ -237,7 +237,7 @@ private fun ResultRow(result: AmharicSearch.Result, onClick: () -> Unit) {
                 maxLines = 1,
             )
         }
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(Spacing.xs))
         Text(
             text = highlighted(result),
             style = MaterialTheme.typography.bodyMedium,

@@ -297,7 +297,7 @@ fun ScriptureReaderScreen(
                     selected = chapter,
                     onSelect = { chapter = it },
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Spacing.sm))
             }
             // The cited verses are emitted as ONE row so the citation reads as a
             // single tinted block instead of a stack of separate boxes.

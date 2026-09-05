@@ -29,6 +29,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.theme.Spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +51,7 @@ fun BatteryHelpScreen(onBack: () -> Unit) {
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp),
         ) {
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(Spacing.sm))
             Text(
                 text = s.batteryHelpIntro,
                 style = MaterialTheme.typography.bodyLarge,
@@ -58,7 +59,7 @@ fun BatteryHelpScreen(onBack: () -> Unit) {
             )
             Step(s.batteryStepUnrestrict, s.batteryStepUnrestrictBody)
             Step(s.batteryStepAutostart, s.batteryStepAutostartBody)
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(Spacing.screen))
             Button(
                 onClick = { openAppSettings(context) },
                 modifier = Modifier.padding(bottom = 32.dp),
@@ -69,9 +70,9 @@ fun BatteryHelpScreen(onBack: () -> Unit) {
 
 @Composable
 private fun Step(title: String, body: String) {
-    Spacer(Modifier.height(20.dp))
+    Spacer(Modifier.height(Spacing.xl))
     Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.secondary)
-    Spacer(Modifier.height(4.dp))
+    Spacer(Modifier.height(Spacing.xs))
     Text(body, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
 

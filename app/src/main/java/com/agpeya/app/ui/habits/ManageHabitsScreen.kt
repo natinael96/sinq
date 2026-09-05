@@ -46,6 +46,8 @@ import com.agpeya.app.model.HabitsState
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.strings.LocalStrings
 import kotlinx.coroutines.launch
+import com.agpeya.app.ui.theme.Spacing
+import com.agpeya.app.ui.theme.IconSize
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,7 +85,7 @@ fun ManageHabitsScreen(onBack: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 8.dp),
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Spacing.sm))
             }
             items(ids.size, key = { ids[it] }) { index ->
                 val id = ids[index]
@@ -107,30 +109,30 @@ fun ManageHabitsScreen(onBack: () -> Unit) {
                         modifier = Modifier.weight(1f).padding(vertical = 14.dp),
                     )
                     IconButton(onClick = { renamingId = id }) {
-                        Icon(Icons.Outlined.Edit, contentDescription = s.rename, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Outlined.Edit, contentDescription = s.rename, modifier = Modifier.size(IconSize.medium))
                     }
                     IconButton(onClick = { move(index, index - 1) }, enabled = index > 0) {
                         Icon(
-                            Icons.Filled.KeyboardArrowUp, contentDescription = s.moveUp, modifier = Modifier.size(20.dp),
+                            Icons.Filled.KeyboardArrowUp, contentDescription = s.moveUp, modifier = Modifier.size(IconSize.medium),
                             tint = if (index > 0) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceVariant,
                         )
                     }
                     IconButton(onClick = { move(index, index + 1) }, enabled = index < ids.size - 1) {
                         Icon(
-                            Icons.Filled.KeyboardArrowDown, contentDescription = s.moveDown, modifier = Modifier.size(20.dp),
+                            Icons.Filled.KeyboardArrowDown, contentDescription = s.moveDown, modifier = Modifier.size(IconSize.medium),
                             tint = if (index < ids.size - 1) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceVariant,
                         )
                     }
                     if (isCustom) {
                         IconButton(onClick = { scope.launch { HabitsRepository.deleteCustomHabit(context, id) } }) {
-                            Icon(Icons.Outlined.Close, contentDescription = s.remove, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.error)
+                            Icon(Icons.Outlined.Close, contentDescription = s.remove, modifier = Modifier.size(IconSize.medium), tint = MaterialTheme.colorScheme.error)
                         }
                     }
                 }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
             item {
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(Spacing.md))
                 TextButton(onClick = { creating = true }) { Text("＋ ${s.newHabit}") }
             }
         }

@@ -368,7 +368,7 @@ private fun PenanceCard(
                         ).joinToString(" · "),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(vertical = 2.dp),
+                        modifier = Modifier.padding(vertical = Spacing.xxs),
                     )
                 }
             }

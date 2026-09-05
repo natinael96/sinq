@@ -178,12 +178,12 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
             contentPadding = PaddingValues(horizontal = Spacing.screen),
         ) {
             item(key = "lang") {
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Spacing.sm))
                 LanguageToggle(geez = geez, amharicLabel = s.wudaseLangAmharic, geezLabel = s.wudaseLangGeez) { geez = it }
             }
             item(key = "days") {
                 SectionStrip(sections, selected) { picked = it }
-                Spacer(Modifier.height(6.dp))
+                Spacer(Modifier.height(Spacing.sm))
             }
             if (section != null) {
                 item(key = "title") {
@@ -223,7 +223,7 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
                     }
                 }
             }
-            item { Spacer(Modifier.height(48.dp)) }
+            item { Spacer(Modifier.height(Spacing.huge)) }
         }
         val stanzasNow = if (section == null) emptyList() else (if (geez) section.ge else section.am)
         val selBody = if (selRange.isEmpty()) null

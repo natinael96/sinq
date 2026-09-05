@@ -56,6 +56,8 @@ import com.agpeya.app.model.Hour
 import com.agpeya.app.model.HourLayout
 import com.agpeya.app.model.Section
 import kotlinx.coroutines.launch
+import com.agpeya.app.ui.theme.Spacing
+import com.agpeya.app.ui.theme.IconSize
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,7 +85,7 @@ fun CustomizeHoursScreen(onBack: () -> Unit, onOpenHour: (String) -> Unit) {
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Spacing.sm))
             }
             items(hours, key = { it.id }) { hour ->
                 Row(
@@ -179,7 +181,7 @@ fun CustomizeHourScreen(hourId: String, onBack: () -> Unit) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
             item {
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(Spacing.md))
                 TextButton(onClick = { showPicker = true }) { Text("＋ ${s.addPsalm}") }
             }
         }
@@ -212,7 +214,7 @@ private fun PsalmPicker(title: String, onPick: (Int) -> Unit) {
 
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
         Text(title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Spacing.sm))
         OutlinedTextField(
             value = query,
             onValueChange = { query = it },
@@ -221,7 +223,7 @@ private fun PsalmPicker(title: String, onPick: (Int) -> Unit) {
             placeholder = { Text("1 – 150") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Spacing.sm))
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
             items(filtered.size, key = { filtered[it].id }) { i ->
                 val p = filtered[i]
@@ -251,7 +253,7 @@ private fun PsalmPicker(title: String, onPick: (Int) -> Unit) {
                 }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
-            item { Spacer(Modifier.height(32.dp)) }
+            item { Spacer(Modifier.height(Spacing.xxl)) }
         }
     }
 }
@@ -301,7 +303,7 @@ private fun SectionEditRow(
             Icon(
                 Icons.Filled.KeyboardArrowUp,
                 contentDescription = s.moveUp,
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(IconSize.medium),
                 tint = if (canMoveUp) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceVariant,
             )
         }
@@ -309,7 +311,7 @@ private fun SectionEditRow(
             Icon(
                 Icons.Filled.KeyboardArrowDown,
                 contentDescription = s.moveDown,
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(IconSize.medium),
                 tint = if (canMoveDown) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceVariant,
             )
         }
@@ -318,7 +320,7 @@ private fun SectionEditRow(
                 Icon(
                     Icons.Outlined.Close,
                     contentDescription = s.remove,
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(IconSize.medium),
                     tint = MaterialTheme.colorScheme.error,
                 )
             }

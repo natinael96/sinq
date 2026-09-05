@@ -38,6 +38,7 @@ import com.agpeya.app.ui.common.NavRow
 import com.agpeya.app.ui.common.Tab
 import com.agpeya.app.ui.strings.LocalStrings
 import kotlinx.coroutines.launch
+import com.agpeya.app.ui.theme.Spacing
 
 /** The deliberately shallow Settings landing page: two direct choices and six doors. */
 @Composable
@@ -89,21 +90,21 @@ fun SettingsScreen(
         ) {
             item {
                 Text(s.settingsTitle, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(Spacing.md))
                 CompactSegmented(
                     label = s.appearance,
                     options = listOf(s.themeSystem, s.themeLight, s.themeDark),
                     selected = theme.ordinal,
                     onSelect = { scope.launch { SettingsRepository.setTheme(context, ThemeChoice.entries[it]) } },
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Spacing.sm))
                 CompactSegmented(
                     label = s.languageLabel,
                     options = listOf(s.langSystem, s.langAmharic, s.langEnglish),
                     selected = language.ordinal,
                     onSelect = { scope.launch { SettingsRepository.setLanguage(context, Language.entries[it]) } },
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Spacing.sm))
                 NavRow(s.settingsGroupReading, onOpenReading, subtitle = "${fontLabel(font)} · ${size}sp")
                 NavRow(s.prayerSettingsTitle, onOpenPrayer, subtitle = prayerLevelLabel(prayerLevel))
                 NavRow(s.remindersSettingsTitle, onOpenReminders, subtitle = if (enabledCount == 0) s.remindersOff else s.remindersOn(enabledCount))
@@ -112,7 +113,7 @@ fun SettingsScreen(
                 NavRow(s.whatsNew, onOpenChangelog, subtitle = "v${appVersion(context)}")
                 NavRow(s.about, onOpenAbout)
                 NavRow(s.licensesTitle, onOpenLicenses)
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(Spacing.lg))
                 // The installed version, quietly closing the page.
                 Text(
                     "ስንቅ · v${appVersion(context)}",
@@ -121,7 +122,7 @@ fun SettingsScreen(
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Spacing.sm))
             }
         }
     }
@@ -136,7 +137,7 @@ private fun appVersion(context: android.content.Context): String = runCatching {
 private fun CompactSegmented(label: String, options: List<String>, selected: Int, onSelect: (Int) -> Unit) {
     Column {
         Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(Spacing.xs))
         if (LocalDensity.current.fontScale > 1.5f) {
             options.forEachIndexed { index, text ->
                 androidx.compose.foundation.layout.Row(

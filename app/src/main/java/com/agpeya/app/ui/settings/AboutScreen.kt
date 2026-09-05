@@ -51,7 +51,7 @@ fun AboutScreen(onBack: () -> Unit) {
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp),
         ) {
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(Spacing.sm))
             Para("ስንቅ", MaterialTheme.typography.headlineMedium)
             val context = androidx.compose.ui.platform.LocalContext.current
             val version = remember {
@@ -65,7 +65,7 @@ fun AboutScreen(onBack: () -> Unit) {
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Spacing.sm))
             }
             Para(s.aboutTagline, MaterialTheme.typography.bodyMedium)
             Section(s.aboutSourceTitle)
@@ -127,16 +127,16 @@ fun AboutScreen(onBack: () -> Unit) {
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
             )
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(Spacing.screen))
         }
     }
 }
 
 @Composable
 private fun Section(title: String) {
-    Spacer(Modifier.height(14.dp))
+    Spacer(Modifier.height(Spacing.lg))
     Text(title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-    Spacer(Modifier.height(4.dp))
+    Spacer(Modifier.height(Spacing.xs))
 }
 
 @Composable
@@ -145,5 +145,5 @@ private fun Para(
     style: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.bodyLarge,
 ) {
     Text(text, style = style, color = MaterialTheme.colorScheme.onBackground)
-    Spacer(Modifier.height(6.dp))
+    Spacer(Modifier.height(Spacing.sm))
 }

@@ -48,6 +48,8 @@ import com.agpeya.app.model.HoursConfig
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.strings.LocalStrings
 import kotlinx.coroutines.launch
+import com.agpeya.app.ui.theme.Spacing
+import com.agpeya.app.ui.theme.IconSize
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,7 +83,7 @@ fun ManageHoursScreen(onBack: () -> Unit, onEditHour: (String) -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 8.dp),
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Spacing.sm))
             }
             items(hours.size, key = { hours[it].id }) { index ->
                 val hour = hours[index]
@@ -98,7 +100,7 @@ fun ManageHoursScreen(onBack: () -> Unit, onEditHour: (String) -> Unit) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
             item {
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(Spacing.md))
                 TextButton(onClick = { creating = true }) { Text("＋ ${s.newHour}") }
             }
         }
@@ -169,11 +171,11 @@ private fun HourManageRow(
                 .padding(vertical = 14.dp),
         )
         IconButton(onClick = onRename) {
-            Icon(Icons.Outlined.Edit, contentDescription = s.rename, modifier = Modifier.size(20.dp))
+            Icon(Icons.Outlined.Edit, contentDescription = s.rename, modifier = Modifier.size(IconSize.medium))
         }
         if (isCustom) {
             IconButton(onClick = onDelete) {
-                Icon(Icons.Outlined.Close, contentDescription = s.remove, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.error)
+                Icon(Icons.Outlined.Close, contentDescription = s.remove, modifier = Modifier.size(IconSize.medium), tint = MaterialTheme.colorScheme.error)
             }
         }
     }

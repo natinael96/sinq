@@ -43,6 +43,7 @@ import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.strings.Strings
 import com.agpeya.app.ui.theme.inReadingFont
 import kotlinx.coroutines.launch
+import com.agpeya.app.ui.theme.Spacing
 
 /** One tour page: an icon (or wordmark hero) above a title and a line of body. */
 private data class IntroPage(
@@ -171,16 +172,16 @@ private fun TutorialAsk(onShow: () -> Unit, onSkip: () -> Unit) {
                 color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center,
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(Spacing.md))
             Text(
                 text = s.tutorialAskBody,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
-            Spacer(Modifier.height(40.dp))
+            Spacer(Modifier.height(Spacing.huge))
             Button(onClick = onShow, modifier = Modifier.fillMaxWidth()) { Text(s.showTutorial) }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(Spacing.sm))
             TextButton(onClick = onSkip, modifier = Modifier.fillMaxWidth()) { Text(s.skip) }
         }
     }
@@ -267,7 +268,7 @@ private fun IntroPageContent(p: IntroPage) {
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(72.dp),
                 )
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(Spacing.screen))
             }
             p.hero != null -> {
                 Text(
@@ -275,7 +276,7 @@ private fun IntroPageContent(p: IntroPage) {
                     style = MaterialTheme.typography.headlineMedium.inReadingFont(),
                     color = MaterialTheme.colorScheme.primary,
                 )
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(Spacing.screen))
             }
         }
         Text(
@@ -284,7 +285,7 @@ private fun IntroPageContent(p: IntroPage) {
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(Spacing.md))
         Text(
             text = p.body,
             style = MaterialTheme.typography.bodyLarge,
@@ -313,14 +314,14 @@ private fun NameForm(
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Spacing.sm))
         Text(
             text = s.introNameBody,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(Spacing.screen))
         OutlinedTextField(
             value = name,
             onValueChange = onName,
@@ -328,7 +329,7 @@ private fun NameForm(
             label = { Text(s.yourNameLabel) },
             modifier = Modifier.fillMaxWidth(),
         )
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(Spacing.md))
         OutlinedTextField(
             value = christianName,
             onValueChange = onChristianName,

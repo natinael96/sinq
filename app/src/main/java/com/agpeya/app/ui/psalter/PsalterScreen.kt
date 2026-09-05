@@ -417,7 +417,7 @@ private fun PsalterContents(psalms: List<Section>, onSelect: (Int) -> Unit) {
     }
     Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
         Text(s.contents, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Spacing.sm))
         OutlinedTextField(
             value = query,
             onValueChange = { query = it },
@@ -426,7 +426,7 @@ private fun PsalterContents(psalms: List<Section>, onSelect: (Int) -> Unit) {
             placeholder = { Text(s.searchHint) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Spacing.sm))
         LazyColumn(Modifier.fillMaxWidth()) {
             items(filtered.size, key = { filtered[it].value.id }) { i ->
                 val (index, p) = filtered[i]
@@ -443,7 +443,7 @@ private fun PsalterContents(psalms: List<Section>, onSelect: (Int) -> Unit) {
                 }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
-            item { Spacer(Modifier.height(36.dp)) }
+            item { Spacer(Modifier.height(Spacing.huge)) }
         }
     }
 }

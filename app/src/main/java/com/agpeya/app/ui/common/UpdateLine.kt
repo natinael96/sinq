@@ -24,6 +24,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
 
 /**
@@ -83,7 +84,7 @@ fun UpdateLine(
                 Icons.Outlined.Close,
                 contentDescription = s.updateDismiss,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(IconSize.small),
             )
         }
     }

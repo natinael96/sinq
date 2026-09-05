@@ -180,13 +180,13 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
                 itemsIndexed(list.orEmpty()) { i, entry ->
                     Column(Modifier.fillMaxWidth()) {
                         if (i > 0) {
-                            Spacer(Modifier.height(20.dp))
+                            Spacer(Modifier.height(Spacing.xl))
                             HorizontalDivider(
                                 modifier = Modifier.padding(bottom = 16.dp),
                                 color = MaterialTheme.colorScheme.surfaceVariant,
                             )
                         } else {
-                            Spacer(Modifier.height(12.dp))
+                            Spacer(Modifier.height(Spacing.md))
                         }
 
                         val title = cleanSynaxariumText(entry.title)
@@ -244,7 +244,7 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
                     }
                 }
                 item { ClosingPrayer(bodyFontSp) }
-                item { Spacer(Modifier.height(48.dp)) }
+                item { Spacer(Modifier.height(Spacing.huge)) }
             }
         }
         // The selected run, ready to copy or leave as text or a PNG card.
@@ -293,7 +293,7 @@ private fun ClosingPrayer(fontSp: Int) {
     val style = readingBodyStyle(fontSp, CLOSING_LINE_HEIGHT).let {
         it.copy(fontSize = it.fontSize * CLOSING_FONT_SCALE, lineHeight = it.lineHeight * CLOSING_FONT_SCALE)
     }
-    Spacer(Modifier.height(20.dp))
+    Spacer(Modifier.height(Spacing.xl))
     HorizontalDivider(
         modifier = Modifier.fillMaxWidth(),
         thickness = 1.dp,

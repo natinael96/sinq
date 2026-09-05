@@ -449,7 +449,7 @@ private fun VerticalReader(
         }
         item {
             HourStepper(onPrevious = onPrevious, onNext = onNext)
-            Spacer(Modifier.height(56.dp))
+            Spacer(Modifier.height(Spacing.huge))
         }
     }
 }
@@ -647,7 +647,7 @@ private fun HourStepper(onPrevious: (() -> Unit)?, onNext: (() -> Unit)?) {
                 Text("‹  ${s.previousHour}", style = MaterialTheme.typography.labelLarge)
             }
         } else {
-            Spacer(Modifier.width(1.dp))
+            Spacer(Modifier.width(Spacing.xxs))
         }
         if (onNext != null) {
             TextButton(onClick = onNext, colors = colors) {

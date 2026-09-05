@@ -56,6 +56,7 @@ import com.agpeya.app.ui.theme.Abyssinica
 import com.agpeya.app.ui.theme.LocalMotion
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.agpeya.app.ui.theme.Spacing
 
 // The reminder writes itself, then rests a moment before the app opens. A tap
 // moves on early for anyone who doesn't want to wait.
@@ -174,7 +175,7 @@ fun MementoMoriScreen(onDone: () -> Unit) {
                 }
             }
 
-            Spacer(Modifier.height(22.dp))
+            Spacer(Modifier.height(Spacing.xl))
             // The gloss leads in the app language; its counterpart in the other
             // language settles quietly beneath.
             Text(
@@ -184,7 +185,7 @@ fun MementoMoriScreen(onDone: () -> Unit) {
                 textAlign = TextAlign.Center,
                 modifier = Modifier.alpha(subtitle.value),
             )
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(Spacing.sm))
             Text(
                 text = if (s.isAmharic) EnglishStrings.mementoMoriGloss else AmharicStrings.mementoMoriGloss,
                 style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = 1.sp),

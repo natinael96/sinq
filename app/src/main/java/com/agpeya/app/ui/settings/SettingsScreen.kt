@@ -369,16 +369,16 @@ private fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(Spacing.sm))
                     }
                     Text(s.backupContains(summary.days, summary.bookmarks, summary.highlights))
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(Spacing.sm))
                     Text(
                         if (summary.newDays == 0 && summary.newBookmarks == 0) s.restoreNothingNew
                         else s.restoreWillAdd(summary.newDays, summary.newBookmarks),
                         color = MaterialTheme.colorScheme.secondary,
                     )
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(Spacing.sm))
                     Text(
                         s.restoreMergeNote,
                         style = MaterialTheme.typography.bodySmall,

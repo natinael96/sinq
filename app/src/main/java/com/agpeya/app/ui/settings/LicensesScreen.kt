@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.theme.Spacing
 
 /**
  * In-app attribution and licence notices for everything the app bundles.
@@ -127,7 +128,7 @@ fun LicensesScreen(onBack: () -> Unit) {
             item {
                 LicSection("SIL Open Font License 1.1 — full text")
                 LicenseBlock(OFL_1_1_TEXT)
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(Spacing.screen))
             }
         }
     }
@@ -135,15 +136,15 @@ fun LicensesScreen(onBack: () -> Unit) {
 
 @Composable
 private fun LicSection(title: String) {
-    Spacer(Modifier.height(14.dp))
+    Spacer(Modifier.height(Spacing.lg))
     Text(title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-    Spacer(Modifier.height(4.dp))
+    Spacer(Modifier.height(Spacing.xs))
 }
 
 @Composable
 private fun LicPara(text: String) {
     Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground)
-    Spacer(Modifier.height(6.dp))
+    Spacer(Modifier.height(Spacing.sm))
 }
 
 /** Verbatim licence text: small, monospace, never translated or reflowed by style. */
@@ -158,7 +159,7 @@ private fun LicenseBlock(text: String) {
         ),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
-    Spacer(Modifier.height(6.dp))
+    Spacer(Modifier.height(Spacing.sm))
 }
 
 /** The standard MIT permission notice, as required to accompany copies. */

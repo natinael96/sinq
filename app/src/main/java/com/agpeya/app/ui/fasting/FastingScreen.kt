@@ -87,19 +87,19 @@ fun FastingScreen(onBack: () -> Unit) {
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.secondary,
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Spacing.sm))
             }
             items(fasts.size, key = { fasts[it].key }) { i ->
                 FastRow(fasts[i], today, s)
             }
             item {
-                Spacer(Modifier.height(18.dp))
+                Spacer(Modifier.height(Spacing.xl))
                 Text(
                     s.fastingWeeklyNote,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Spacer(Modifier.height(40.dp))
+                Spacer(Modifier.height(Spacing.huge))
             }
         }
     }
@@ -174,7 +174,7 @@ private fun FastRow(fast: FastingCalendar.Fast, today: LocalDate, s: Strings) {
                     },
                 ),
         )
-        Spacer(Modifier.width(14.dp))
+        Spacer(Modifier.width(Spacing.lg))
         Column(Modifier.weight(1f)) {
             Text(
                 fast.nameAm,

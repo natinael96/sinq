@@ -58,6 +58,7 @@ import com.agpeya.app.model.ReminderEntry
 import com.agpeya.app.reminders.ReminderScheduler
 import kotlinx.coroutines.launch
 import java.util.UUID
+import com.agpeya.app.ui.theme.Spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -136,7 +137,7 @@ fun ModeEditorScreen(modeId: String, onBack: () -> Unit) {
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                     )
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(Spacing.md))
                 }
             }
             items(
@@ -163,7 +164,7 @@ fun ModeEditorScreen(modeId: String, onBack: () -> Unit) {
             }
             if (!mode.isBuiltIn) {
                 item {
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(Spacing.lg))
                     TextButton(onClick = {
                         editing = ReminderEntry(
                             id = UUID.randomUUID().toString(),
@@ -174,7 +175,7 @@ fun ModeEditorScreen(modeId: String, onBack: () -> Unit) {
                     }) { Text(s.addReminder) }
                 }
             }
-            item { Spacer(Modifier.height(40.dp)) }
+            item { Spacer(Modifier.height(Spacing.huge)) }
         }
     }
 
@@ -248,7 +249,7 @@ private fun EntryRow(
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
-            Spacer(Modifier.height(2.dp))
+            Spacer(Modifier.height(Spacing.xxs))
             val s = com.agpeya.app.ui.strings.LocalStrings.current
             Text(
                 text = daysSummary(entry.days, s.dayLabels, s.daysSummaryDaily, s.noDaySelected),
@@ -296,7 +297,7 @@ private fun EntryEditor(
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(Spacing.sm))
             Column {
                 hours.chunked(2).forEach { rowHours ->
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -310,10 +311,10 @@ private fun EntryEditor(
                         }
                         if (rowHours.size == 1) Spacer(Modifier.weight(1f))
                     }
-                    Spacer(Modifier.height(6.dp))
+                    Spacer(Modifier.height(Spacing.sm))
                 }
             }
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(Spacing.md))
         }
 
         Text(
@@ -321,7 +322,7 @@ private fun EntryEditor(
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Spacing.sm))
         TimePicker(state = timeState)
 
         Text(
@@ -329,7 +330,7 @@ private fun EntryEditor(
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Spacing.sm))
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             s.dayLabels.forEachIndexed { index, label ->
                 val day = index + 1
@@ -342,10 +343,10 @@ private fun EntryEditor(
                 )
             }
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Spacing.sm))
         TextButton(onClick = { days = ReminderEntry.ALL_DAYS }) { Text(s.everyDay) }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(Spacing.lg))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -355,7 +356,7 @@ private fun EntryEditor(
                     Text(s.delete, color = MaterialTheme.colorScheme.error)
                 }
             } else {
-                Spacer(Modifier.height(1.dp))
+                Spacer(Modifier.height(Spacing.xxs))
             }
             TextButton(
                 enabled = days.isNotEmpty(),
@@ -372,6 +373,6 @@ private fun EntryEditor(
                 },
             ) { Text(s.save) }
         }
-        Spacer(Modifier.height(36.dp))
+        Spacer(Modifier.height(Spacing.huge))
     }
 }

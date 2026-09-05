@@ -180,7 +180,7 @@ fun EthiopianYearHeatmap(
                     }
                 }
             }
-            Spacer(Modifier.width(4.dp))
+            Spacer(Modifier.width(Spacing.xs))
             Column(Modifier.horizontalScroll(scroll)) {
                 // Month labels
                 Row(Modifier.height(16.dp)) {
@@ -230,7 +230,7 @@ fun EthiopianYearHeatmap(
         }
 
         // Legend
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(Spacing.sm))
         FlowRow(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -246,7 +246,7 @@ fun EthiopianYearHeatmap(
         }
 
         // Compact year switcher
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(Spacing.xs))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
