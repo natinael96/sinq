@@ -89,7 +89,8 @@
   <h2><span>If something goes wrong</span></h2>
   <dl class="terms">
     <dt><span>“App not installed”</span></dt>
-    <dd><span>Usually there is already a copy of Sinq on the phone signed with a different key: one built from source, or from a very early release. Uninstall that copy first, then install the new APK. Your data is in that copy, so export a backup from Settings → Data before uninstalling.</span></dd>
+    <dd><span>On Android 7 or older this used to be the whole story: Sinq needed Android 8.0 until version 1.7.0, and the phone had no way to say so. If that was your phone, <a href="https://github.com/natinael96/sinq/releases/latest">the current release</a> installs on Android 6.0 and up.</span></dd>
+    <dd><span>Otherwise, in the order worth trying. <b>Play Protect</b> blocks most apps installed from outside the Play Store, and on some phones says only “App not installed” rather than explaining itself — open Play Store → profile → Play Protect and turn off scanning while you install, or choose “Install anyway” if offered. <b>Storage</b>: the APK is 8&nbsp;MB but needs about 40&nbsp;MB free to unpack. <b>A partial download</b> produces a file that looks complete and is not; download it again on a steady connection. And if a copy of Sinq built from source is already on the phone, uninstall it first — export a backup from Settings → Data before you do, because your journal and records live in that copy.</span></dd>
     <dt><span>“There was a problem parsing the package”</span></dt>
     <dd><span>The download did not finish, or the file is not the APK. Only the file ending in <code>.apk</code> installs on a phone. Download it again, on a stable connection.</span></dd>
     <dt><span>Play Protect warns about an unknown app</span></dt>
