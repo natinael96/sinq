@@ -143,6 +143,10 @@ object SettingsRepository {
     // use the network at all. See UpdateRepository — one request a day, and the
     // only one the app ever makes.
     private val KEY_UPDATE_CHECK = booleanPreferencesKey("update_check")
+    // Whether the question has been put at all. Opt-in is only honest if it is
+    // actually offered: left to Settings alone, nobody finds it and the notice
+    // never appears for anyone.
+    private val KEY_UPDATE_ASKED = booleanPreferencesKey("update_check_asked")
 
     // The ቁርባን checklist is a preparation for ONE day, so the marks carry
     // their date and silently read as empty the morning after. Transient by
@@ -637,6 +641,17 @@ object SettingsRepository {
 
     suspend fun setUpdateCheck(context: Context, value: Boolean) {
         context.settingsDataStore.edit { it[KEY_UPDATE_CHECK] = value }
+    }
+
+    fun updateAsked(context: Context): Flow<Boolean> =
+        context.settingsDataStore.data.map { it[KEY_UPDATE_ASKED] ?: false }
+
+    /** Records the answer and that it was given, so it is asked exactly once. */
+    suspend fun answerUpdateCheck(context: Context, allow: Boolean) {
+        context.settingsDataStore.edit {
+            it[KEY_UPDATE_CHECK] = allow
+            it[KEY_UPDATE_ASKED] = true
+        }
     }
 
     /** Which ቁርባን rules were marked on [today]; another day's marks read empty. */

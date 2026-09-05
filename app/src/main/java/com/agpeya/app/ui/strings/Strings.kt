@@ -698,6 +698,10 @@ interface Strings {
 
     /** The Home line, e.g. "አዲስ እትም · 1.7.0". */
     fun updateAvailable(version: String): String
+    /** The one-time question, asked on ቤት in the same hairline. */
+    val updateAsk: String
+    val updateAskYes: String
+    val updateAskNo: String
     val updateDownload: String
     val updateDismiss: String
     val settingsUpdateCheck: String
@@ -1328,6 +1332,9 @@ object AmharicStrings : Strings {
     // ── የአዲስ እትም ማሳወቂያ ────────────────────────────────────────────────────
 
     override fun updateAvailable(version: String) = "አዲስ እትም · $version"
+    override val updateAsk = "አዲስ እትም ሲወጣ ላሳውቅዎት?"
+    override val updateAskYes = "አዎ"
+    override val updateAskNo = "አያስፈልግም"
     override val updateDownload = "አውርድ"
     override val updateDismiss = "ዝጋ"
     override val settingsUpdateCheck = "አዲስ እትም ፈልግ"
@@ -1975,6 +1982,9 @@ object EnglishStrings : Strings {
     // ── Update notice ────────────────────────────────────────────────────────
 
     override fun updateAvailable(version: String) = "New version · $version"
+    override val updateAsk = "Tell you when a new version is out?"
+    override val updateAskYes = "Yes"
+    override val updateAskNo = "No thanks"
     override val updateDownload = "Get it"
     override val updateDismiss = "Dismiss"
     override val settingsUpdateCheck = "Check for updates"

@@ -113,3 +113,70 @@ fun UpdateLine(
             .clearAndSetSemantics { },
     )
 }
+
+/**
+ * The one-time question, in the same hairline as the answer.
+ *
+ * Opt-in is only honest if it is actually offered. Left to a switch in
+ * Settings the check is never found, and a notice nobody has enabled is a
+ * notice nobody receives — which is what happened between 1.7.0 and 1.7.2.
+ *
+ * Asked once, on ቤት, in the quietest shape the app has. Either answer is
+ * final: there is no third launch where it asks again, and Settings still has
+ * the switch for anyone who changes their mind.
+ */
+@Composable
+fun UpdateConsentLine(
+    onAnswer: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val s = LocalStrings.current
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background)
+            .height(28.dp)
+            .padding(start = Spacing.screen),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        Box(
+            Modifier
+                .size(5.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.secondary),
+        )
+        Text(
+            s.updateAsk,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
+        ConsentAnswer(s.updateAskYes, MaterialTheme.colorScheme.secondary) { onAnswer(true) }
+        ConsentAnswer(s.updateAskNo, MaterialTheme.colorScheme.onSurfaceVariant) { onAnswer(false) }
+    }
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .background(MaterialTheme.colorScheme.outlineVariant)
+            .clearAndSetSemantics { },
+    )
+}
+
+@Composable
+private fun ConsentAnswer(label: String, tint: androidx.compose.ui.graphics.Color, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxHeight()
+            .clip(MaterialTheme.shapes.small)
+            .clickable(onClick = onClick)
+            .semantics { role = Role.Button }
+            .padding(horizontal = Spacing.sm),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(label, style = MaterialTheme.typography.labelMedium, color = tint, maxLines = 1)
+    }
+}

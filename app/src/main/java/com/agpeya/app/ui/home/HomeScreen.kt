@@ -119,9 +119,6 @@ fun HomeScreen(
     }
     val suggestedId = remember(now.hour) { ContentRepository.suggestedHourId(now.hour) }
     val suggested = hours.find { it.id == suggestedId } ?: hours.find { it.id == currentHourId }
-    val shortcuts = remember(hours, currentHourId, suggestedId) {
-        prayerShortcuts(hours, currentHourId ?: suggestedId)
-    }
 
     val habitState by HabitsRepository.state(context).collectAsState(initial = HabitsState())
     val doneToday = habitState.records[today.toString()] ?: emptySet()
@@ -167,6 +164,10 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val updateEnabled by com.agpeya.app.data.SettingsRepository.updateCheck(context)
         .collectAsState(initial = false)
+    // Asked once, on this screen. Until it is answered the app has no leave to
+    // use the network, so nothing is checked and nothing is shown.
+    val updateAsked by com.agpeya.app.data.SettingsRepository.updateAsked(context)
+        .collectAsState(initial = true)
     val update by com.agpeya.app.data.UpdateRepository.available(context)
         .collectAsState(initial = null)
     LaunchedEffect(updateEnabled) {
@@ -180,6 +181,16 @@ fun HomeScreen(
       Column(Modifier.fillMaxSize().padding(innerPadding)) {
         // Above the day, outside the screen margin: a notice about the app
         // itself has no business indenting the date beneath it.
+        if (!updateAsked) {
+            com.agpeya.app.ui.common.UpdateConsentLine(
+                onAnswer = { allow ->
+                    scope.launch {
+                        com.agpeya.app.data.SettingsRepository.answerUpdateCheck(context, allow)
+                        com.agpeya.app.data.UpdateRepository.checkIfDue(context, allow)
+                    }
+                },
+            )
+        }
         update?.let { found ->
             com.agpeya.app.ui.common.UpdateLine(
                 version = found.version,
@@ -220,8 +231,6 @@ fun HomeScreen(
                 seasonLabel = seasonLabel,
                 suggested = suggested,
                 hours = hours,
-                shortcuts = shortcuts,
-                currentHourId = currentHourId,
                 readingsState = readingsState,
                 habitIds = habitIds,
                 doneToday = doneWithAggregate,
@@ -259,11 +268,6 @@ private sealed interface HomeReadingsState {
     data class Ready(val readings: DayReadings) : HomeReadingsState
 }
 
-private fun prayerShortcuts(hours: List<Hour>, currentId: String?): List<Hour> {
-    if (hours.isEmpty()) return emptyList()
-    val index = hours.indexOfFirst { it.id == currentId }.let { if (it < 0) 0 else it }
-    return listOf(hours[index], hours[(index + 1) % hours.size]).distinctBy { it.id }
-}
 
 @Composable
 private fun HomeDashboard(
@@ -273,8 +277,6 @@ private fun HomeDashboard(
     seasonLabel: String?,
     suggested: Hour?,
     hours: List<Hour>,
-    shortcuts: List<Hour>,
-    currentHourId: String?,
     readingsState: HomeReadingsState,
     habitIds: List<String>,
     doneToday: Set<String>,
@@ -303,8 +305,6 @@ private fun HomeDashboard(
         Spacer(Modifier.height(Spacing.md))
         if (suggested != null) NowCard(suggested) { onOpenHour(suggested.id) }
         else EmptyHoursCard(onOpenAllHours)
-        Spacer(Modifier.height(Spacing.sm))
-        PrayerHoursStrip(hours, shortcuts, currentHourId, onOpenHour, onOpenAllHours)
         Spacer(Modifier.height(Spacing.sm))
         GitsaweCard(readingsState, onOpenGitsawe)
         Spacer(Modifier.height(Spacing.md))
@@ -435,58 +435,7 @@ private fun EmptyHoursCard(onClick: () -> Unit) {
     }
 }
 
-@Composable
-private fun PrayerHoursStrip(
-    hours: List<Hour>,
-    shortcuts: List<Hour>,
-    currentHourId: String?,
-    onOpenHour: (String) -> Unit,
-    onOpenAll: () -> Unit,
-) {
-    val s = LocalStrings.current
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text(s.hoursHeader, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.secondary)
-        Spacer(Modifier.weight(1f))
-        Text(hours.size.toString(), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    }
-    Spacer(Modifier.height(Spacing.xs))
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-        shortcuts.forEach { hour ->
-            HourShortcut(hour, hour.id == currentHourId, { onOpenHour(hour.id) }, Modifier.weight(1f))
-        }
-        SinqCard(
-            onClick = onOpenAll,
-            modifier = Modifier.width(72.dp).height(48.dp),
-            contentPadding = PaddingValues(horizontal = Spacing.sm, vertical = Spacing.xs),
-        ) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(s.wholePsalter, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-            }
-        }
-    }
-}
 
-@Composable
-private fun HourShortcut(hour: Hour, isCurrent: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val s = LocalStrings.current
-    SinqCard(
-        onClick = onClick,
-        accented = isCurrent,
-        modifier = modifier.height(48.dp),
-        contentPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.xs),
-    ) {
-        Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(hour.name, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onBackground, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                if (hour.timeHint.isNotBlank()) Text(hour.timeHint, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
-            }
-            if (isCurrent) {
-                Spacer(Modifier.width(Spacing.xs))
-                Text(s.currentHourBadge, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
-            }
-        }
-    }
-}
 
 /** Preserves the full feast and reading content from the existing Home card. */
 @Composable
