@@ -6,6 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [1.7.3] — 2026-09-04
+
+_versionCode 61 · it tells you what it just learned_
+
+### Added
+- **A walkthrough after an install or an update.** Six pages on what is new,
+  each saying what a thing is for and where it lives rather than that it
+  changed — and where one names a screen it offers to open it, so you end up in
+  the feature instead of holding a description of it. Shown once, skippable,
+  and replayable from Settings → የአዲሱ እትም ጉብኝት.
+- **The first-run tour went from three pages to nine**: ግጻዌ, the hours,
+  reminders, the Psalter, ንባብ, the journey, ማስታወሻ, አስራት and ስዕለት, and search.
+- The opening page now closes with the mark and the version beneath it.
+- Releases carry the Play bundle again, named `-play-upload.aab` so it is not
+  mistaken for the file a phone installs.
+
+### Changed
+- **Checking for a new version is on by default.** Sinq is installed by hand, so
+  an update nobody is told about is an update nobody gets — and left opt-in,
+  nobody found the switch and the notice never appeared for anyone. One request
+  a day, carrying nothing about you, and Settings can turn it off.
+- **ዘወትር reads as prose.** It was verse-shaped in the data: 74 entries of which
+  only 30 ended in a full stop, the rest being fragments split at the source's
+  line breaks. Now 30 paragraphs, and the Ge'ez 17. The weekday ውዳሴ portions
+  were already one sentence per line and are untouched.
+- The hour shortcut pills are gone from ቤት; the hours moved into the header menu.
+
 ## [1.7.2] — 2026-09-04
 
 _versionCode 60 · the home page stops squeezing_

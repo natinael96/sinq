@@ -173,11 +173,39 @@ def main():
     s = open(p, encoding="utf-8").read()
     s = re.sub(r"Sinq-v\d+\.\d+\.\d+\.apk", f"Sinq-v{ver}.apk", s)
     open(p, "w", encoding="utf-8").write(s)
+
+    # ── canonical URLs ───────────────────────────────────────────────────
+    for name in os.listdir(site):
+        if not name.endswith(".html"):
+            continue
+        p = os.path.join(site, name)
+        s = open(p, encoding="utf-8").read()
+        fixed = re.sub(
+            r'(<link rel="canonical" href=")[^"]*?/([^/"]+\.html")',
+            lambda m: m.group(1) + SITE_BASE + "/" + m.group(2),
+            s,
+        )
+        fixed = re.sub(
+            r'(<link rel="canonical" href=")[^"]*?"(\s*>)',
+            lambda m: m.group(1) + SITE_BASE + "/\"" + m.group(2),
+            fixed,
+        ) if "canonical" in fixed and "index" in name else fixed
+        if fixed != s:
+            open(p, "w", encoding="utf-8").write(fixed)
+    print(f"  canonicals -> {SITE_BASE}")
     print(f"  index.html / install.html: v{ver}, Android {MIN_ANDROID}+")
 
 
 # Kept beside the app's minSdk; update both together.
 MIN_ANDROID = "6.0"
+
+# What the pages call themselves. Canonical URLs must name a page that actually
+# resolves — pointing them at a host that 404s tells search engines the real
+# copy is missing and buries the one that works.
+#
+# sinq.natinael96.tech is the intended home, on Vercel. Flip this back the
+# moment that deployment is serving again; nothing else has to change.
+SITE_BASE = "https://natinael96.github.io/sinq"
 
 if __name__ == "__main__":
     main()

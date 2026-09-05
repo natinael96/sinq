@@ -31,6 +31,25 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.7.3",
+        title = "It tells you what it just learned",
+        titleAm = "የተማረውን ይነግርዎታል",
+        changes = listOf(
+            "After an update Sinq now walks you through what is new — and offers to open each thing rather than only describe it.",
+            "The first-run tour covers nine parts of the app instead of three.",
+            "Checking for a new version is on by default now. One request a day, nothing about you, and Settings can turn it off.",
+            "ዘወትር reads as flowing prose instead of broken lines.",
+            "The hours moved from the home page into the header menu.",
+        ),
+        changesAm = listOf(
+            "ከዘመነ በኋላ ስንቅ አዲሱን ነገር ያስጎበኝዎታል — ከመግለጽ አልፎ ራሱን ለመክፈት ያቀርባል።",
+            "የመጀመሪያው ጉብኝት ከሦስት ይልቅ ዘጠኝ የመተግበሪያውን ክፍሎች ይሸፍናል።",
+            "አዲስ እትም መፈለግ አሁን በራሱ ይሠራል። በቀን አንዴ ብቻ፣ ስለ እርስዎ ምንም ሳይልክ፤ ከቅንብር ማጥፋት ይችላሉ።",
+            "ዘወትር ተቆራርጦ ሳይሆን እንደ ቀጣይ ጽሑፍ ይነበባል።",
+            "ሰዓታቱ ከመነሻ ገጹ ወደ ራስጌው ዝርዝር ተዛውረዋል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.7.2",
         title = "The home page stops squeezing",
         titleAm = "የመነሻ ገጹ መጨናነቅ ቀረ",
