@@ -698,10 +698,20 @@ interface Strings {
 
     /** The Home line, e.g. "አዲስ እትም · 1.7.0". */
     fun updateAvailable(version: String): String
-    /** The one-time question, asked on ቤት in the same hairline. */
-    val updateAsk: String
-    val updateAskYes: String
-    val updateAskNo: String
+    /** Settings row that replays the newest what's-new tour. */
+    val introGitsaweTitle: String
+    val introGitsaweBody: String
+    val introHoursTitle: String
+    val introHoursBody: String
+    val introJournalTitle: String
+    val introJournalBody: String
+    val introOfferingsTitle: String
+    val introOfferingsBody: String
+    val introReadingTitle: String
+    val introReadingBody: String
+    val introSearchTitle: String
+    val introSearchBody: String
+    val whatsNewTour: String
     val updateDownload: String
     val updateDismiss: String
     val settingsUpdateCheck: String
@@ -1332,14 +1342,30 @@ object AmharicStrings : Strings {
     // ── የአዲስ እትም ማሳወቂያ ────────────────────────────────────────────────────
 
     override fun updateAvailable(version: String) = "አዲስ እትም · $version"
-    override val updateAsk = "አዲስ እትም ሲወጣ ላሳውቅዎት?"
-    override val updateAskYes = "አዎ"
-    override val updateAskNo = "አያስፈልግም"
+    override val introGitsaweTitle = "የዕለቱ ግጻዌ"
+    override val introGitsaweBody =
+        "ቤተ ክርስቲያን ለዛሬ የመደበችው ምስባክ፣ ወንጌልና የሐዋርያት ንባብ በየቀኑ በመነሻ ገጹ ላይ ይጠብቅዎታል፤ ከስንክሳሩ ጋር። ምንም መፈለግ አያስፈልግም — ዕለቱ ራሱ ያመጣዋል።"
+    override val introHoursTitle = "ሰባቱ ሰዓታት"
+    override val introHoursBody =
+        "ከነግህ እስከ መንፈቀ ሌሊት፣ ከመጋረጃው ጸሎት ጋር። አሁን የሚደርሰው ሰዓት በመነሻ ገጹ ላይ ይታያል፤ ሌሎቹን ከራስጌው ዝርዝር ውስጥ ያገኛሉ። ማንቂያም ማስያዝ ይችላሉ።"
+    override val introJournalTitle = "ማስታወሻ"
+    override val introJournalBody =
+        "የጻፉት በዚህ መሣሪያ ብቻ ይቀራል፤ በይለፍ ቃል መቆለፍ ይችላሉ። መተግበሪያው የጻፉትን አያነብም፣ አይቆጥርም፣ ለምን እንዳልጻፉም አይጠይቅም።"
+    override val introOfferingsTitle = "አስራትና ስዕለት"
+    override val introOfferingsBody =
+        "አስራት ሒሳብ ነው፤ ስዕለት ደግሞ በፈቃድ የተያዘ ዕዳ። ሁለቱም የሚያስፈልጋቸው ማየት ስለሆነ ይመዘገባሉ። ምጽዋትና ንስሐ ግን አይመዘገቡም — ያስታውሳል፣ ከዚያም ዓይኑን ይመልሳል።"
+    override val introReadingTitle = "ንባብ"
+    override val introReadingBody =
+        "ግጻዌው ወንጌልንና መልእክታትን ያነብልዎታል፤ ብሉይ ኪዳኑን ግን አያነብም። ንባቡ የቀረውን በዓመት ወይም በስድስት ወር ያስነብብዎታል፤ የዕለቱ ግጻዌም አብሮ ይታያል።"
+    override val introSearchTitle = "ፍለጋ"
+    override val introSearchBody =
+        "ጸሎቱን፣ መዝሙረ ዳዊትን፣ መጽሐፍ ቅዱሱን፣ ስንክሳሩንና ውዳሴ ማርያምን በአንድ ጊዜ ይፈልጋል። ሆሄያቱ ቢቀያየሩም ያገኘዋል።"
+    override val whatsNewTour = "የአዲሱ እትም ጉብኝት"
     override val updateDownload = "አውርድ"
     override val updateDismiss = "ዝጋ"
     override val settingsUpdateCheck = "አዲስ እትም ፈልግ"
     override val settingsUpdateCheckDesc =
-        "በቀን አንዴ ጊትሀብን ይጠይቃል። የመተግበሪያው ብቸኛ የኢንተርኔት አገልግሎት ነው።"
+        "በቀን አንዴ ጊትሀብን ይጠይቃል። የመተግበሪያው ብቸኛ የኢንተርኔት አገልግሎት ነው፤ ማጥፋት ይችላሉ።"
     override val updateNoneFound = "አዲስ እትም የለም"
 
     // ── ቁርባን ዝግጅት ──────────────────────────────────────────────────────────
@@ -1982,14 +2008,30 @@ object EnglishStrings : Strings {
     // ── Update notice ────────────────────────────────────────────────────────
 
     override fun updateAvailable(version: String) = "New version · $version"
-    override val updateAsk = "Tell you when a new version is out?"
-    override val updateAskYes = "Yes"
-    override val updateAskNo = "No thanks"
+    override val introGitsaweTitle = "The day's Gitsawe"
+    override val introGitsaweBody =
+        "The misbak, Gospel and apostolic readings the Church appoints for today are waiting on the home page every morning, with the day's synaxarium beside them. Nothing to look up — the day brings it."
+    override val introHoursTitle = "The seven hours"
+    override val introHoursBody =
+        "From ነግህ to መንፈቀ ሌሊት, with the Veil prayer beside them. The hour due now is on the home page; the rest are in the header menu. You can set an alarm for any of them."
+    override val introJournalTitle = "The journal"
+    override val introJournalBody =
+        "What you write stays on this device, and can be locked behind a passphrase. The app never reads it, never counts it, and never asks why a week is empty."
+    override val introOfferingsTitle = "Tithe and vows"
+    override val introOfferingsBody =
+        "A tithe is a reckoning and a vow is a debt willingly taken on, so both are recorded — neither can be kept by someone who cannot see where they stand. Alms and repentance are not: the app reminds, then looks away."
+    override val introReadingTitle = "Reading"
+    override val introReadingBody =
+        "The Gitsawe reads you the Gospels and the Epistles but no Old Testament. The reading plan covers the rest, over a year or six months, with the day's Gitsawe shown above it."
+    override val introSearchTitle = "Search"
+    override val introSearchBody =
+        "Searches the prayers, the Psalter, the Bible, the synaxarium and ውዳሴ ማርያም at once, and finds words even when the letters that spell them vary."
+    override val whatsNewTour = "What's new in this version"
     override val updateDownload = "Get it"
     override val updateDismiss = "Dismiss"
     override val settingsUpdateCheck = "Check for updates"
     override val settingsUpdateCheckDesc =
-        "Asks GitHub once a day. The app's only use of the internet."
+        "Asks GitHub once a day. The app's only use of the internet — you can turn it off."
     override val updateNoneFound = "No new version"
 
     // ── Communion preparation ────────────────────────────────────────────────

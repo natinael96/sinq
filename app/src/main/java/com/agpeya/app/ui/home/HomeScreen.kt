@@ -26,6 +26,7 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.VolunteerActivism
@@ -164,10 +165,6 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val updateEnabled by com.agpeya.app.data.SettingsRepository.updateCheck(context)
         .collectAsState(initial = false)
-    // Asked once, on this screen. Until it is answered the app has no leave to
-    // use the network, so nothing is checked and nothing is shown.
-    val updateAsked by com.agpeya.app.data.SettingsRepository.updateAsked(context)
-        .collectAsState(initial = true)
     val update by com.agpeya.app.data.UpdateRepository.available(context)
         .collectAsState(initial = null)
     LaunchedEffect(updateEnabled) {
@@ -181,16 +178,6 @@ fun HomeScreen(
       Column(Modifier.fillMaxSize().padding(innerPadding)) {
         // Above the day, outside the screen margin: a notice about the app
         // itself has no business indenting the date beneath it.
-        if (!updateAsked) {
-            com.agpeya.app.ui.common.UpdateConsentLine(
-                onAnswer = { allow ->
-                    scope.launch {
-                        com.agpeya.app.data.SettingsRepository.answerUpdateCheck(context, allow)
-                        com.agpeya.app.data.UpdateRepository.checkIfDue(context, allow)
-                    }
-                },
-            )
-        }
         update?.let { found ->
             com.agpeya.app.ui.common.UpdateLine(
                 version = found.version,
@@ -301,7 +288,7 @@ private fun HomeDashboard(
     // The page scrolls instead.
     val cardScale = LocalDensity.current.fontScale.coerceIn(1f, 2f)
     Column(modifier) {
-        DayHeader(today, seasonLabel, onOpenSearch, onOpenFasting, onOpenBookmarks, onOpenPrayerList)
+        DayHeader(today, seasonLabel, onOpenSearch, onOpenFasting, onOpenBookmarks, onOpenPrayerList, onOpenAllHours)
         Spacer(Modifier.height(Spacing.md))
         if (suggested != null) NowCard(suggested) { onOpenHour(suggested.id) }
         else EmptyHoursCard(onOpenAllHours)
@@ -349,6 +336,7 @@ private fun DayHeader(
     onOpenFasting: () -> Unit,
     onOpenBookmarks: () -> Unit,
     onOpenPrayerList: () -> Unit,
+    onOpenAllHours: () -> Unit,
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
@@ -395,6 +383,9 @@ private fun DayHeader(
                 Icon(Icons.Outlined.MoreVert, contentDescription = s.more, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                // The hours live here now that the shortcut pills are gone: the
+                // "now" card opens one hour, and this opens the rest.
+                HomeMenuItem(Icons.Outlined.Schedule, s.hoursHeader) { menuOpen = false; onOpenAllHours() }
                 HomeMenuItem(Icons.Outlined.CalendarMonth, s.fastingTitle) { menuOpen = false; onOpenFasting() }
                 HomeMenuItem(Icons.Outlined.Bookmarks, s.bookmarksTitle) { menuOpen = false; onOpenBookmarks() }
                 HomeMenuItem(Icons.Outlined.VolunteerActivism, s.prayerListTitle) { menuOpen = false; onOpenPrayerList() }

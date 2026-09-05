@@ -17,6 +17,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.CloudOff
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.outlined.EditNote
+import androidx.compose.material.icons.outlined.VolunteerActivism
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.material3.Button
@@ -59,11 +63,21 @@ private fun introPages(s: Strings): List<IntroPage> = listOf(
     IntroPage(icon = Icons.Outlined.CloudOff, title = s.introOfflineTitle, body = s.introOfflineBody),
 )
 
-/** The three headline features — offered after the name, replayable from Settings. */
+/**
+ * The tour of what the app holds — offered after the name, replayable from
+ * Settings. Ordered as a day is: what the Church appoints, then the hours, then
+ * the reading, then what you keep yourself.
+ */
 private fun tutorialPages(s: Strings): List<IntroPage> = listOf(
+    IntroPage(icon = Icons.AutoMirrored.Outlined.MenuBook, title = s.introGitsaweTitle, body = s.introGitsaweBody),
+    IntroPage(icon = Icons.Outlined.Schedule, title = s.introHoursTitle, body = s.introHoursBody),
     IntroPage(icon = Icons.Outlined.NotificationsActive, title = s.introRemindersTitle, body = s.introRemindersBody),
-    IntroPage(icon = Icons.Outlined.Route, title = s.introJourneyTitle, body = s.introJourneyBody),
     IntroPage(icon = Icons.AutoMirrored.Outlined.MenuBook, title = s.introPsalterTitle, body = s.introPsalterBody),
+    IntroPage(icon = Icons.AutoMirrored.Outlined.MenuBook, title = s.introReadingTitle, body = s.introReadingBody),
+    IntroPage(icon = Icons.Outlined.Route, title = s.introJourneyTitle, body = s.introJourneyBody),
+    IntroPage(icon = Icons.Outlined.EditNote, title = s.introJournalTitle, body = s.introJournalBody),
+    IntroPage(icon = Icons.Outlined.VolunteerActivism, title = s.introOfferingsTitle, body = s.introOfferingsBody),
+    IntroPage(icon = Icons.Outlined.Search, title = s.introSearchTitle, body = s.introSearchBody),
 )
 
 private enum class IntroStage { PAGES, ASK, TUTORIAL }
@@ -187,8 +201,9 @@ private fun TutorialAsk(onShow: () -> Unit, onSkip: () -> Unit) {
     }
 }
 
+/** Shared by the first-run tour and the what's-new tour; one pager, one shape. */
 @Composable
-private fun TourScaffold(
+internal fun TourScaffold(
     pagerState: androidx.compose.foundation.pager.PagerState,
     pageCount: Int,
     isLast: Boolean,

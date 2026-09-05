@@ -139,14 +139,17 @@ object SettingsRepository {
     private val KEY_VOW_SCHEDULED_IDS = stringPreferencesKey("vow_scheduled_ids")
     private val KEY_PENANCE_SCHEDULED_IDS = stringPreferencesKey("penance_scheduled_ids")
 
-    // Opt-in, and off by default: turning it on is what gives the app leave to
-    // use the network at all. See UpdateRepository — one request a day, and the
-    // only one the app ever makes.
+    // On by default. Sinq is installed by hand from GitHub, so an update no one
+    // is told about is an update no one gets — and left opt-in, nobody found the
+    // switch and the notice never appeared for anyone. See UpdateRepository: one
+    // request a day, carrying nothing about the person, and the only one the app
+    // ever makes. Settings can turn it off.
     private val KEY_UPDATE_CHECK = booleanPreferencesKey("update_check")
-    // Whether the question has been put at all. Opt-in is only honest if it is
-    // actually offered: left to Settings alone, nobody finds it and the notice
-    // never appears for anyone.
-    private val KEY_UPDATE_ASKED = booleanPreferencesKey("update_check_asked")
+
+    // The versionCode whose tour has been seen. Written when the tour is
+    // finished OR skipped — never when it opens, so a tour interrupted by a
+    // phone call is still there afterwards.
+    private val KEY_LAST_TOUR_VERSION = intPreferencesKey("last_tour_version_code")
 
     // The ቁርባን checklist is a preparation for ONE day, so the marks carry
     // their date and silently read as empty the morning after. Transient by
@@ -637,22 +640,20 @@ object SettingsRepository {
     val KEY_PENANCE_SCHEDULED_IDS_PUBLIC get() = KEY_PENANCE_SCHEDULED_IDS
 
     fun updateCheck(context: Context): Flow<Boolean> =
-        context.settingsDataStore.data.map { it[KEY_UPDATE_CHECK] ?: false }
+        context.settingsDataStore.data.map { it[KEY_UPDATE_CHECK] ?: true }
+
+    /** null when no tour has ever run here — a first install, or an old build. */
+    fun lastTourVersion(context: Context): Flow<Int?> =
+        context.settingsDataStore.data.map { it[KEY_LAST_TOUR_VERSION] }
+
+    suspend fun setLastTourVersion(context: Context, versionCode: Int) {
+        context.settingsDataStore.edit { it[KEY_LAST_TOUR_VERSION] = versionCode }
+    }
 
     suspend fun setUpdateCheck(context: Context, value: Boolean) {
         context.settingsDataStore.edit { it[KEY_UPDATE_CHECK] = value }
     }
 
-    fun updateAsked(context: Context): Flow<Boolean> =
-        context.settingsDataStore.data.map { it[KEY_UPDATE_ASKED] ?: false }
-
-    /** Records the answer and that it was given, so it is asked exactly once. */
-    suspend fun answerUpdateCheck(context: Context, allow: Boolean) {
-        context.settingsDataStore.edit {
-            it[KEY_UPDATE_CHECK] = allow
-            it[KEY_UPDATE_ASKED] = true
-        }
-    }
 
     /** Which ቁርባን rules were marked on [today]; another day's marks read empty. */
     fun kurbanChecked(context: Context, today: String): Flow<Set<String>> =

@@ -17,9 +17,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,9 +48,12 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.agpeya.app.R
 import com.agpeya.app.ui.strings.AmharicStrings
 import com.agpeya.app.ui.strings.EnglishStrings
 import com.agpeya.app.ui.strings.LocalStrings
@@ -56,6 +61,7 @@ import com.agpeya.app.ui.theme.Abyssinica
 import com.agpeya.app.ui.theme.LocalMotion
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
 
 // The reminder writes itself, then rests a moment before the app opens. A tap
@@ -194,6 +200,45 @@ fun MementoMoriScreen(onDone: () -> Unit) {
                 modifier = Modifier.alpha(subtitle.value),
             )
         }
+
+        // The mark and the version, resting at the foot of the page. It arrives
+        // with the gloss rather than with the writing, so the hand is finished
+        // before anything else asks to be read.
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = Spacing.huge)
+                .alpha(subtitle.value),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.widget_logo),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.size(IconSize.large),
+            )
+            Spacer(Modifier.height(Spacing.xs))
+            Text(
+                text = appVersion(),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontStyle = FontStyle.Italic,
+                    fontWeight = FontWeight.Light,
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+/** The running app's own versionName, for the foot of the opening page. */
+@Composable
+private fun appVersion(): String {
+    val context = LocalContext.current
+    return remember(context) {
+        runCatching {
+            @Suppress("DEPRECATION")
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty()
+        }.getOrDefault("")
     }
 }
 

@@ -49,6 +49,7 @@ fun SettingsScreen(
     onOpenReminders: () -> Unit,
     onOpenData: () -> Unit,
     onOpenTutorial: () -> Unit,
+    onOpenWhatsNew: () -> Unit,
     onOpenChangelog: () -> Unit,
     onOpenAbout: () -> Unit,
     onOpenLicenses: () -> Unit,
@@ -110,6 +111,7 @@ fun SettingsScreen(
                 NavRow(s.remindersSettingsTitle, onOpenReminders, subtitle = if (enabledCount == 0) s.remindersOff else s.remindersOn(enabledCount))
                 NavRow(s.settingsGroupData, onOpenData, subtitle = backupRelativeLabel(lastBackupAt, s))
                 NavRow(s.tutorial, onOpenTutorial)
+                NavRow(s.whatsNewTour, onOpenWhatsNew)
                 NavRow(s.whatsNew, onOpenChangelog, subtitle = "v${appVersion(context)}")
                 NavRow(s.about, onOpenAbout)
                 NavRow(s.licensesTitle, onOpenLicenses)

@@ -13,6 +13,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -95,6 +97,24 @@ class MainActivity : ComponentActivity() {
                     // fragile. Once per activity launch. The Box is what makes it
                     // an overlay — without it the two are merely siblings.
                     var opened by rememberSaveable { mutableStateOf(false) }
+                    // The tour sits in the same overlay, behind Memento Mori:
+                    // the opening page finishes, then what is new is explained,
+                    // then the app. Resolved here rather than as a destination
+                    // for the same reason the Box exists at all.
+                    val tourContent by produceState(
+                        com.agpeya.app.model.TourContent(),
+                    ) { value = com.agpeya.app.data.TourRepository.content(this@MainActivity) }
+                    val lastTour by SettingsRepository.lastTourVersion(this@MainActivity)
+                        .collectAsState(initial = -1)
+                    val installedCode = remember {
+                        com.agpeya.app.data.TourRepository.installedVersionCode(this@MainActivity)
+                    }
+                    // -1 is "not loaded yet"; only decide once the store answers.
+                    val tour = if (lastTour == -1) null else com.agpeya.app.data.TourRepository
+                        .pending(tourContent.tours, lastTour, installedCode)
+                    val tourScope = rememberCoroutineScope()
+                    var tourRoute by remember { mutableStateOf<String?>(null) }
+
                     Box(Modifier.fillMaxSize()) {
                         AgpeyaNavHost(
                             deepLinkHourId = pendingDeepLinkHourId.value,
@@ -103,6 +123,8 @@ class MainActivity : ComponentActivity() {
                             onJourneyHandled = { pendingOpenJourney.value = false },
                             openOffering = pendingOpenOffering.value,
                             onOfferingHandled = { pendingOpenOffering.value = null },
+                            openRoute = tourRoute,
+                            onRouteHandled = { tourRoute = null },
                             openGitsawe = pendingOpenGitsawe.value,
                             gitsaweEpochDay = pendingGitsaweEpochDay.value,
                             onGitsaweHandled = {
@@ -110,6 +132,19 @@ class MainActivity : ComponentActivity() {
                                 pendingGitsaweEpochDay.value = null
                             },
                         )
+                        if (opened && tour != null) {
+                            com.agpeya.app.ui.intro.WhatsNewTour(
+                                tour = tour,
+                                onOpenRoute = { tourRoute = it },
+                                onDone = {
+                                    tourScope.launch {
+                                        SettingsRepository.setLastTourVersion(
+                                            this@MainActivity, installedCode,
+                                        )
+                                    }
+                                },
+                            )
+                        }
                         if (!opened) {
                             com.agpeya.app.ui.intro.MementoMoriScreen(onDone = { opened = true })
                         }
@@ -185,6 +220,8 @@ private fun AgpeyaNavHost(
     onJourneyHandled: () -> Unit,
     openOffering: String?,
     onOfferingHandled: () -> Unit,
+    openRoute: String?,
+    onRouteHandled: () -> Unit,
     openGitsawe: Boolean,
     gitsaweEpochDay: Long?,
     onGitsaweHandled: () -> Unit,
@@ -255,6 +292,14 @@ private fun AgpeyaNavHost(
         if (ready && openJourney) {
             navController.switchTab(Tab.JOURNEY)
             onJourneyHandled()
+        }
+    }
+
+    // A tour page asking to open the thing it describes.
+    LaunchedEffect(ready, openRoute) {
+        if (ready && openRoute != null) {
+            runCatching { navController.navigate(openRoute) { launchSingleTop = true } }
+            onRouteHandled()
         }
     }
 
@@ -606,6 +651,7 @@ private fun AgpeyaNavHost(
                 onOpenReminders = { navController.navigate("settings/reminders") { launchSingleTop = true } },
                 onOpenData = { navController.navigate("settings/data") { launchSingleTop = true } },
                 onOpenTutorial = { navController.navigate("tutorial") { launchSingleTop = true } },
+                onOpenWhatsNew = { navController.navigate("whatsNew") { launchSingleTop = true } },
                 onOpenChangelog = { navController.navigate("changelog") { launchSingleTop = true } },
                 onOpenAbout = { navController.navigate("about") { launchSingleTop = true } },
                 onOpenLicenses = { navController.navigate("licenses") { launchSingleTop = true } },
@@ -747,6 +793,24 @@ private fun AgpeyaNavHost(
         composable("customize/{hourId}") { backStackEntry ->
             val hourId = backStackEntry.arguments?.getString("hourId") ?: return@composable
             CustomizeHourScreen(hourId = hourId, onBack = { navController.popBackStack() })
+        }
+        composable("whatsNew") {
+            // Replays the newest tour whatever the stored version says, so
+            // skipping it on launch is never a decision you cannot undo.
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val content by androidx.compose.runtime.produceState(com.agpeya.app.model.TourContent()) {
+                value = com.agpeya.app.data.TourRepository.content(context)
+            }
+            val newest = content.tours.filter { it.pages.isNotEmpty() }.maxByOrNull { it.versionCode }
+            if (newest == null) navController.popBackStack()
+            else com.agpeya.app.ui.intro.WhatsNewTour(
+                tour = newest,
+                onOpenRoute = { route ->
+                    navController.popBackStack()
+                    runCatching { navController.navigate(route) { launchSingleTop = true } }
+                },
+                onDone = { navController.popBackStack() },
+            )
         }
         composable("tutorial") {
             com.agpeya.app.ui.intro.TutorialScreen(onDone = { navController.popBackStack() })

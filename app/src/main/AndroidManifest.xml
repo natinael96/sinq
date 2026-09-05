@@ -12,10 +12,11 @@
     <uses-permission
         android:name="android.permission.SCHEDULE_EXACT_ALARM"
         android:maxSdkVersion="32" />
-    <!-- The app's ONLY network use: an opt-in, once-a-day check of the GitHub
-         releases page so a new version can be announced. Off by default; nothing
-         is fetched until the person turns it on in Settings. No content, no
-         analytics and no personal data ever crosses the wire. -->
+    <!-- The app's ONLY network use: a once-a-day check of the GitHub releases
+         page so a new version can be announced. Sinq is installed by hand, so an
+         update nobody is told about is an update nobody gets — it is on by
+         default and can be turned off in Settings. The request carries nothing
+         about the person: no content, no analytics, no identifiers. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
