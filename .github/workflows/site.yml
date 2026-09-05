@@ -17,6 +17,12 @@ on:
   push:
     tags:
       - "v*"
+    # A hand edit to the site deploys on its own. Pushes made by the publish
+    # job below do NOT retrigger this: GitHub deliberately does not fire
+    # workflows for commits pushed with GITHUB_TOKEN, which is also what stops
+    # this from looping. That job deploys inline instead.
+    branches:
+      - gh-pages
   workflow_dispatch:
 
 permissions:
@@ -28,6 +34,7 @@ concurrency:
 
 jobs:
   publish:
+    if: github.ref != 'refs/heads/gh-pages'
     runs-on: ubuntu-latest
     steps:
       - name: Check out the app (for CHANGELOG.md and the generator)
@@ -57,3 +64,35 @@ jobs:
           git add -A
           git commit -m "Update the site for ${GITHUB_REF_NAME:-a manual run}"
           git push
+
+      - name: Deploy to Vercel
+        # Skipped, not failed, when the token is absent: the site is also served
+        # from GitHub Pages, so a missing secret should leave that alone rather
+        # than turn every release red.
+        if: ${{ env.VERCEL_TOKEN != '' }}
+        working-directory: site
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          npm install --global vercel@latest
+          vercel deploy --prod --yes --token="$VERCEL_TOKEN"
+
+  # A push straight to gh-pages (an edit made by hand, not by the job above)
+  # deploys without regenerating anything.
+  deploy-only:
+    if: github.ref == 'refs/heads/gh-pages'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Vercel
+        if: ${{ env.VERCEL_TOKEN != '' }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          npm install --global vercel@latest
+          vercel deploy --prod --yes --token="$VERCEL_TOKEN"
