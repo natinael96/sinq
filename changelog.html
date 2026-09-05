@@ -6,7 +6,7 @@
 <title>What changed · ስንቅ Sinq</title>
 <meta name="description" content="Recent Sinq releases and what changed in each: the tithe ledger, vows, the journal, quieter reminders and the fixes since.">
 <meta name="color-scheme" content="light dark">
-<link rel="canonical" href="https://sinq.natinael96.tech/changelog.html">
+<link rel="canonical" href="https://natinael96.github.io/sinq/changelog.html">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="style.css">
 <script src="site.js" defer></script>
@@ -41,6 +41,28 @@
 </div>
 
 <!-- releases:start -->
+<article class="release">
+  <header>
+    <h2>1.7.3 <span class="date">4 September 2026</span></h2>
+    <p class="motto"><span>it tells you what it just learned</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>A walkthrough after an install or an update.</b> Six pages on what is new, each saying what a thing is for and where it lives rather than that it changed — and where one names a screen it offers to open it, so you end up in the feature instead of holding a description of it. Shown once, skippable, and replayable from Settings → የአዲሱ እትም ጉብኝት.</span></li>
+    <li><span><b>The first-run tour went from three pages to nine</b>: ግጻዌ, the hours, reminders, the Psalter, ንባብ, the journey, ማስታወሻ, አስራት and ስዕለት, and search.</span></li>
+    <li><span>The opening page now closes with the mark and the version beneath it.</span></li>
+    <li><span>Releases carry the Play bundle again, named <code>-play-upload.aab</code> so it is not mistaken for the file a phone installs.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Checking for a new version is on by default.</b> Sinq is installed by hand, so an update nobody is told about is an update nobody gets — and left opt-in, nobody found the switch and the notice never appeared for anyone. One request a day, carrying nothing about you, and Settings can turn it off.</span></li>
+    <li><span><b>ዘወትር reads as prose.</b> It was verse-shaped in the data: 74 entries of which only 30 ended in a full stop, the rest being fragments split at the source&#x27;s line breaks. Now 30 paragraphs, and the Ge&#x27;ez 17. The weekday ውዳሴ portions were already one sentence per line and are untouched.</span></li>
+    <li><span>The hour shortcut pills are gone from ቤት; the hours moved into the header menu.</span></li>
+  </ul>
+  </div>
+</article>
+
 <article class="release">
   <header>
     <h2>1.7.2 <span class="date">4 September 2026</span></h2>
@@ -146,23 +168,6 @@
     <li><span><b>&quot;Keep screen on&quot; never showed its explanation</b>, though one was written and translated.</span></li>
     <li><span><b>The last-backup date</b> was printed as a raw Gregorian date in an app that is otherwise ግእዝ-first everywhere.</span></li>
     <li><span><b>&quot;1 reminders on.&quot;</b> The English count had no singular form.</span></li>
-  </ul>
-  </div>
-</article>
-
-<article class="release">
-  <header>
-    <h2>1.5.2 <span class="date">31 August 2026</span></h2>
-    <p class="motto"><span>the alarm asks again</span></p>
-  </header>
-  <div class="body">
-  <h3><span>Fixed</span></h3>
-  <ul>
-    <li><span><b>&quot;ጨርሰዋል?&quot; comes back after an alarm.</b> The 1.5.0 notification rework hung that follow-up on the notification&#x27;s delete intent, which only fires when a user clears a notification — not on the app-side cancel behind Dismiss, the auto-cancel behind Open, or the 60-second timeout. Only swiping the alarm away reached it. Every ending now posts the prompt explicitly, with the timeout carried by its own alarm; Snooze stays the one ending that asks nothing.</span></li>
-  </ul>
-  <h3><span>Changed</span></h3>
-  <ul>
-    <li><span><b>The ጉዞ page is more compact.</b> About 80dp less chrome — a tighter heading, hero, and section rhythm — so more of the day&#x27;s habits sit on screen. The year heatmap and the habit rows&#x27; touch targets are untouched.</span></li>
   </ul>
   </div>
 </article>
