@@ -11,9 +11,12 @@ Source of truth is CHANGELOG.md. Run with the site checkout as the argument:
     python3 tools/build_site.py ../sinq-site
 """
 import html
+import json
 import os
 import re
 import sys
+import urllib.error
+import urllib.request
 from datetime import date
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -93,6 +96,36 @@ def article(r) -> str:
     return "\n".join(out)
 
 
+def download_total():
+    """Total APK downloads across every release, or None if GitHub is unreachable.
+
+    Counted here, at build time, and baked into the page as a number. The site
+    promises no tracking and means it: the reader's browser never contacts
+    GitHub, and nothing observes who is reading.
+    """
+    total, page = 0, 1
+    try:
+        while page <= 10:
+            req = urllib.request.Request(
+                f"https://api.github.com/repos/natinael96/sinq/releases?per_page=100&page={page}",
+                headers={"Accept": "application/vnd.github+json", "User-Agent": "sinq-site-build"},
+            )
+            batch = json.load(urllib.request.urlopen(req, timeout=30))
+            if not batch:
+                break
+            for release in batch:
+                for asset in release.get("assets", []):
+                    if asset.get("name", "").endswith(".apk"):
+                        total += asset.get("download_count", 0)
+            if len(batch) < 100:
+                break
+            page += 1
+    except (urllib.error.URLError, TimeoutError, ValueError) as e:
+        print(f"  downloads: unavailable ({e.__class__.__name__}) — leaving the page as it is")
+        return None
+    return total
+
+
 def replace_between(text, start_mark, end_mark, body):
     a = text.index(start_mark) + len(start_mark)
     b = text.index(end_mark)
@@ -122,6 +155,19 @@ def main():
     s = open(p, encoding="utf-8").read()
     s = re.sub(r"v\d+\.\d+\.\d+ · Android [\d.]+\+", f"v{ver} · Android {MIN_ANDROID}+", s)
     open(p, "w", encoding="utf-8").write(s)
+
+    # ── the download count ───────────────────────────────────────────────
+    total = download_total()
+    if total is not None:
+        p = os.path.join(site, "index.html")
+        s = open(p, encoding="utf-8").read()
+        if "<!-- downloads:start -->" in s:
+            s = replace_between(
+                s, "<!-- downloads:start -->", "<!-- downloads:end -->",
+                f'        <span>{total:,} downloads</span>',
+            )
+            open(p, "w", encoding="utf-8").write(s)
+            print(f"  index.html: {total:,} downloads")
 
     p = os.path.join(site, "install.html")
     s = open(p, encoding="utf-8").read()
