@@ -96,6 +96,19 @@ def article(r) -> str:
     return "\n".join(out)
 
 
+def star_count():
+    """Stars on the repository, or None if GitHub is unreachable."""
+    try:
+        req = urllib.request.Request(
+            "https://api.github.com/repos/natinael96/sinq",
+            headers={"Accept": "application/vnd.github+json", "User-Agent": "sinq-site-build"},
+        )
+        return json.load(urllib.request.urlopen(req, timeout=30)).get("stargazers_count")
+    except (urllib.error.URLError, TimeoutError, ValueError) as e:
+        print(f"  stars: unavailable ({e.__class__.__name__})")
+        return None
+
+
 def download_total():
     """Total APK downloads across every release, or None if GitHub is unreachable.
 
@@ -156,18 +169,32 @@ def main():
     s = re.sub(r"v\d+\.\d+\.\d+ · Android [\d.]+\+", f"v{ver} · Android {MIN_ANDROID}+", s)
     open(p, "w", encoding="utf-8").write(s)
 
-    # ── the download count ───────────────────────────────────────────────
-    total = download_total()
-    if total is not None:
+    # ── downloads and stars ──────────────────────────────────────────────
+    # Both read here and written in as text. The reader's browser never asks
+    # GitHub anything, so the site keeps its promise not to watch anyone — and
+    # the star link is a plain link, not GitHub's button, which is an iframe
+    # from a third party and would need a hole in the CSP to load.
+    total, stars = download_total(), star_count()
+    if total is not None or stars is not None:
         p = os.path.join(site, "index.html")
         s = open(p, encoding="utf-8").read()
-        if "<!-- downloads:start -->" in s:
+        if "<!-- counts:start -->" in s:
+            bits = []
+            if total is not None:
+                bits.append(f"<span>{total:,} downloads</span>")
+            if stars is not None:
+                plural = "" if stars == 1 else "s"
+                bits.append(
+                    '<a class="star" href="https://github.com/natinael96/sinq" '
+                    'rel="noopener">'
+                    f'<span>&#9733; {stars:,} star{plural} on GitHub</span></a>'
+                )
             s = replace_between(
-                s, "<!-- downloads:start -->", "<!-- downloads:end -->",
-                f'        <span>{total:,} downloads</span>',
+                s, "<!-- counts:start -->", "<!-- counts:end -->",
+                "        " + "\n        ".join(bits),
             )
             open(p, "w", encoding="utf-8").write(s)
-            print(f"  index.html: {total:,} downloads")
+            print(f"  index.html: {total:,} downloads, {stars} stars")
 
     p = os.path.join(site, "install.html")
     s = open(p, encoding="utf-8").read()
@@ -203,9 +230,8 @@ MIN_ANDROID = "6.0"
 # resolves — pointing them at a host that 404s tells search engines the real
 # copy is missing and buries the one that works.
 #
-# sinq.natinael96.tech is the intended home, on Vercel. Flip this back the
-# moment that deployment is serving again; nothing else has to change.
-SITE_BASE = "https://natinael96.github.io/sinq"
+# The Vercel deployment is serving again, so the pages name their own home.
+SITE_BASE = "https://sinq.natinael96.tech"
 
 if __name__ == "__main__":
     main()
