@@ -31,6 +31,21 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.7.2",
+        title = "The home page stops squeezing",
+        titleAm = "የመነሻ ገጹ መጨናነቅ ቀረ",
+        changes = listOf(
+            "On small phones the home cards were squeezed to fit one screen, and the ንባብ line was the first to suffer. Cards now size to their own text and the page scrolls.",
+            "The × on the new-version line was too small to hit comfortably. It is now a full-width target.",
+            "Spacing and icon sizes across 22 screens are back on the app's own scale.",
+        ),
+        changesAm = listOf(
+            "በትንንሽ ስልኮች ላይ የመነሻ ገጹ ካርዶች በአንድ ገጽ ለመግባት ይጨናነቁ ነበር፤ የንባቡ መስመርም መጀመሪያ ይጎዳ ነበር። አሁን ካርዶቹ እንደ ጽሑፋቸው ይሰፋሉ፣ ገጹም ይንሸራተታል።",
+            "የአዲስ እትም መስመር ላይ ያለው «×» ለመንካት ያስቸግር ነበር፤ አሁን ሰፍቷል።",
+            "በ፳፪ ገጾች ላይ የነበሩ ክፍተቶችና የአዶ መጠኖች ወደ መተግበሪያው መለኪያ ተመልሰዋል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.7.1",
         title = "ንስሐ and ቁርባን wait for their text",
         titleAm = "ንስሐና ቁርባን ጽሑፋቸውን ይጠብቃሉ",

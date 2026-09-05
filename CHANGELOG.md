@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [1.7.2] — 2026-09-04
+
+_versionCode 60 · the home page stops squeezing_
+
+### Fixed
+- **ቤት squeezed its cards on small phones.** Every card was pinned to a fixed
+  height so the dashboard fitted one screen without scrolling. That held while
+  the page ended at መዝሙር and ዘወትር; the ንባብ card added a fourth block below them
+  and the reading line was the first thing to lose room. Cards now wrap their
+  own text and the page scrolls. The side-by-side pair matches the taller of the
+  two rather than a height chosen in advance.
+- **The update line's × was too small to hit** — a 36dp target, the only one in
+  the app under the 48dp the design system asks for. The strip stays 28dp tall,
+  but the × now takes a full 48dp of width and announces itself as a button.
+
+### Changed
+- **97 spacings and nine icon sizes across 22 screens are back on the scale.**
+  An audit against `docs/DESIGN_SYSTEM.md`, which asks for no raw dp gaps and
+  icons at 18/22/26 only. Most were already on the scale and only change name;
+  the strays snap to their nearest step. Settings, About, Licenses and the
+  battery help page held most of them — screens written before the scale did.
+- በቅርቡ now uses the shared `StatePanel`, so "nothing here yet" reads in the same
+  voice as every other empty state.
+
 ## [1.7.1] — 2026-09-04
 
 _versionCode 59 · ንስሐ and ቁርባን wait for their text_
