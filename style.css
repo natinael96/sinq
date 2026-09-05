@@ -474,3 +474,11 @@ footer .fine { color: #8FA99C; font-size: 13.5px; }
   html { scroll-behavior: smooth; }
 }
 
+/* Downloads and stars under the hero. The star is a link to the repository,
+   not GitHub's own button: that is an iframe from a third party, and this site
+   loads nothing from anywhere else. */
+.hero-fine.counts { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.hero-fine.counts .star { color: var(--gold-lit); text-decoration: none;
+  border-bottom: 1px solid transparent; transition: border-color .15s ease; }
+.hero-fine.counts .star:hover,
+.hero-fine.counts .star:focus-visible { border-bottom-color: var(--gold-lit); }
