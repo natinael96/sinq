@@ -1,0 +1,59 @@
+name: Site
+
+# The marketing site carries the version number, the minimum Android version
+# and the recent release notes. All three used to be edited by hand and all
+# three drifted: the site still said 1.6.1 and "Android 8.0+" after the floor
+# had moved to 6.0 — which was, of all things, an install problem it was
+# advertising wrongly.
+#
+# CHANGELOG.md is the source of truth. This regenerates the site from it on
+# every release, and can be run by hand for a correction between releases.
+#
+# The page stays static. It is not fetching the version from GitHub in the
+# browser: the site says of itself "no network, no tracking", and a page that
+# phones home to render its own footer would not be telling the truth.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: site
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the app (for CHANGELOG.md and the generator)
+        uses: actions/checkout@v4
+        with:
+          path: app
+
+      - name: Check out the site
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: site
+          fetch-depth: 0
+
+      - name: Regenerate the site from CHANGELOG.md
+        run: python3 app/tools/build_site.py site
+
+      - name: Commit, if anything actually changed
+        working-directory: site
+        run: |
+          if git diff --quiet; then
+            echo "site already current — nothing to do"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Update the site for ${GITHUB_REF_NAME:-a manual run}"
+          git push
