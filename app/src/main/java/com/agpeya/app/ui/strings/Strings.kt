@@ -711,6 +711,9 @@ interface Strings {
     val introReadingBody: String
     val introSearchTitle: String
     val introSearchBody: String
+    /** The hours strip under the hero: "ቀጥሎ …" and the way to all seven. */
+    val hoursNext: String
+    val hoursAll: String
     val whatsNewTour: String
     val updateDownload: String
     val updateDismiss: String
@@ -1360,6 +1363,8 @@ object AmharicStrings : Strings {
     override val introSearchTitle = "ፍለጋ"
     override val introSearchBody =
         "ጸሎቱን፣ መዝሙረ ዳዊትን፣ መጽሐፍ ቅዱሱን፣ ስንክሳሩንና ውዳሴ ማርያምን በአንድ ጊዜ ይፈልጋል። ሆሄያቱ ቢቀያየሩም ያገኘዋል።"
+    override val hoursNext = "ቀጥሎ"
+    override val hoursAll = "ሁሉም"
     override val whatsNewTour = "የአዲሱ እትም ጉብኝት"
     override val updateDownload = "አውርድ"
     override val updateDismiss = "ዝጋ"
@@ -2026,6 +2031,8 @@ object EnglishStrings : Strings {
     override val introSearchTitle = "Search"
     override val introSearchBody =
         "Searches the prayers, the Psalter, the Bible, the synaxarium and ውዳሴ ማርያም at once, and finds words even when the letters that spell them vary."
+    override val hoursNext = "Next"
+    override val hoursAll = "All"
     override val whatsNewTour = "What's new in this version"
     override val updateDownload = "Get it"
     override val updateDismiss = "Dismiss"

@@ -26,7 +26,6 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.VolunteerActivism
@@ -52,6 +51,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
@@ -283,10 +286,18 @@ private fun HomeDashboard(
     // The page scrolls instead.
     val cardScale = LocalDensity.current.fontScale.coerceIn(1f, 2f)
     Column(modifier) {
-        DayHeader(today, seasonLabel, onOpenSearch, onOpenFasting, onOpenBookmarks, onOpenPrayerList, onOpenAllHours)
+        DayHeader(today, seasonLabel, onOpenSearch, onOpenFasting, onOpenBookmarks, onOpenPrayerList)
         Spacer(Modifier.height(Spacing.md))
         if (suggested != null) NowCard(suggested) { onOpenHour(suggested.id) }
         else EmptyHoursCard(onOpenAllHours)
+        if (suggested != null) {
+            HoursStrip(
+                current = suggested,
+                next = com.agpeya.app.data.PrayerSchedule.next(hours, suggested.id),
+                onOpenHour = onOpenHour,
+                onOpenAll = onOpenAllHours,
+            )
+        }
         Spacer(Modifier.height(Spacing.sm))
         GitsaweCard(readingsState, onOpenGitsawe)
         Spacer(Modifier.height(Spacing.md))
@@ -331,7 +342,6 @@ private fun DayHeader(
     onOpenFasting: () -> Unit,
     onOpenBookmarks: () -> Unit,
     onOpenPrayerList: () -> Unit,
-    onOpenAllHours: () -> Unit,
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
@@ -378,9 +388,6 @@ private fun DayHeader(
                 Icon(Icons.Outlined.MoreVert, contentDescription = s.more, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                // The hours live here now that the shortcut pills are gone: the
-                // "now" card opens one hour, and this opens the rest.
-                HomeMenuItem(Icons.Outlined.Schedule, s.hoursHeader) { menuOpen = false; onOpenAllHours() }
                 HomeMenuItem(Icons.Outlined.CalendarMonth, s.fastingTitle) { menuOpen = false; onOpenFasting() }
                 HomeMenuItem(Icons.Outlined.Bookmarks, s.bookmarksTitle) { menuOpen = false; onOpenBookmarks() }
                 HomeMenuItem(Icons.Outlined.VolunteerActivism, s.prayerListTitle) { menuOpen = false; onOpenPrayerList() }
@@ -410,6 +417,91 @@ private fun NowCard(hour: Hour, onClick: () -> Unit) {
         }
         Icon(Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = null, tint = sinq.onHeroMuted)
     }
+}
+
+/**
+ * The hours, as one line under the prayer card.
+ *
+ * Built like the update notice above it — a dot, a sentence, a hairline rule —
+ * so ቤት has one shape for "a quiet word about something", not two.
+ *
+ * The hero directly above already names the hour due now, so the line's real
+ * work is the one after it: "ቀጥሎ …" is the thing the page could not say before.
+ * The names are the app's own, ጸሎት and all, rather than shortened to fit.
+ */
+@Composable
+private fun HoursStrip(
+    current: Hour,
+    next: Hour?,
+    onOpenHour: (String) -> Unit,
+    onOpenAll: () -> Unit,
+) {
+    val s = LocalStrings.current
+    Spacer(Modifier.height(Spacing.sm))
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(28.dp)
+            .clip(MaterialTheme.shapes.small)
+            .clickable { onOpenHour(current.id) },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        Box(
+            Modifier
+                .size(5.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.secondary),
+        )
+        Text(
+            current.name,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1,
+        )
+        if (next != null) {
+            Text(
+                "·",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.outlineVariant,
+            )
+            Text(
+                "${s.hoursNext} ${next.name}",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+        } else {
+            Spacer(Modifier.weight(1f))
+        }
+        // Its own target, so tapping "all" never opens the current hour by
+        // accident. Width earns it a real target on a line this short.
+        Box(
+            modifier = Modifier
+                .width(56.dp)
+                .fillMaxHeight()
+                .clip(MaterialTheme.shapes.small)
+                .clickable(onClick = onOpenAll)
+                .semantics { role = Role.Button },
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                s.hoursAll,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.secondary,
+                maxLines = 1,
+            )
+        }
+    }
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .background(MaterialTheme.colorScheme.outlineVariant)
+            .clearAndSetSemantics { },
+    )
 }
 
 @Composable
