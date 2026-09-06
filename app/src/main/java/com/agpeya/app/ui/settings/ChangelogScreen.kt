@@ -31,6 +31,23 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.7.4",
+        title = "The hours come back to the front",
+        titleAm = "ሰዓታቱ ወደ ፊት ተመልሰዋል",
+        changes = listOf(
+            "The seven hours are on the home page again, as one line: what is being prayed now, what follows, and a way to all seven.",
+            "Sinq checks for a new version every time you open it, instead of once a day.",
+            "The tour's “Open it” button is gone — taking it meant never seeing the rest of the tour.",
+            "Settings → What's new in this version now works; it used to close itself before it had loaded.",
+        ),
+        changesAm = listOf(
+            "ሰባቱ ሰዓታት በአንድ መስመር ወደ መነሻ ገጹ ተመልሰዋል፦ አሁን የሚጸለየው፣ ቀጥሎ የሚመጣው፣ እና ወደ ሁሉም መንገድ።",
+            "ስንቅ በከፈቱት ቁጥር አዲስ እትም ይመለከታል፤ ከዚህ በፊት በቀን አንዴ ብቻ ነበር።",
+            "የጉብኝቱ «ክፈተው» አዝራር ተነስቷል — ቢነኩት የቀረውን ጉብኝት ማየት አይችሉም ነበር።",
+            "ቅንብር → የአዲሱ እትም ጉብኝት አሁን ይሠራል፤ ከዚህ በፊት ሳይጫን ራሱን ይዘጋ ነበር።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.7.3",
         title = "It tells you what it just learned",
         titleAm = "የተማረውን ይነግርዎታል",

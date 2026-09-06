@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [1.7.4] — 2026-09-05
+
+_versionCode 62 · the hours come back to the front_
+
+### Added
+- **The seven hours are on ቤት again, as one line.** Under the prayer card, built
+  like the update notice above it: what is being prayed now, what follows —
+  "ቀጥሎ ጸሎተ ሠለስት" — and ሁሉም for all seven. They had been behind the header menu
+  since the shortcut pills were removed, which is a poor place for something used
+  every day.
+
+### Changed
+- **The version check runs at every launch, not once a day.** The notice is only
+  ever read with the app open, so opening it is the one moment the question
+  matters; a release published this morning no longer waits until tomorrow. The
+  stored ETag keeps the repeat cheap.
+
+### Fixed
+- **The tour's "Open it" button is gone.** It had to close the tour to navigate,
+  so taking it meant never seeing the pages after it — the button competed with
+  the thing it was part of.
+- **Settings → የአዲሱ እትም ጉብኝት did nothing.** It read the empty value the content
+  loader starts with as "there is no tour" and closed itself on its first frame,
+  before the file had loaded.
+
 ## [1.7.3] — 2026-09-04
 
 _versionCode 61 · it tells you what it just learned_

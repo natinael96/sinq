@@ -2,6 +2,44 @@
   "contentVersion": 1,
   "tours": [
     {
+      "versionCode": 62,
+      "version": "1.7.4",
+      "title": {
+        "am": "በዚህ እትም",
+        "en": "In this version"
+      },
+      "pages": [
+        {
+          "kicker": {
+            "am": "ሰዓታት",
+            "en": "The hours"
+          },
+          "title": {
+            "am": "ሰዓታቱ ወደ መነሻ ገጹ ተመልሰዋል",
+            "en": "The hours are back on the home page"
+          },
+          "body": {
+            "am": "ከጸሎቱ ካርድ በታች አንድ ቀጭን መስመር አለ፦ አሁን የሚጸለየውን፣ ቀጥሎ የሚመጣውንም ይነግርዎታል። «ሁሉም» ሰባቱን በአንድ ላይ ይከፍታል። ከዚህ በፊት በራስጌው ዝርዝር ውስጥ ተደብቀው ነበር።",
+            "en": "A thin line under the prayer card now says what is being prayed and what follows it. “ሁሉም” opens all seven. They were behind the header menu until now."
+          }
+        },
+        {
+          "kicker": {
+            "am": "አዲስ እትም",
+            "en": "Updates"
+          },
+          "title": {
+            "am": "በየጊዜው ይመለከታል",
+            "en": "It checks every time you open it"
+          },
+          "body": {
+            "am": "ስንቅ አዲስ እትም መውጣቱን በቀን አንዴ ብቻ ይመለከት ነበር። አሁን በከፈቱት ቁጥር ይመለከታል፤ ስለዚህ ዛሬ የወጣ እትም እስከ ነገ አይጠብቅም። ስለ እርስዎ ምንም አይልክም፤ ከቅንብር ማጥፋት ይችላሉ።",
+            "en": "Sinq used to look for a new version once a day. It now looks each time you open it, so a release published this morning does not wait until tomorrow. It still sends nothing about you, and Settings can turn it off."
+          }
+        }
+      ]
+    },
+    {
       "versionCode": 61,
       "version": "1.7.3",
       "title": {
