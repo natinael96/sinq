@@ -43,6 +43,28 @@
 <!-- releases:start -->
 <article class="release">
   <header>
+    <h2>1.7.4 <span class="date">5 September 2026</span></h2>
+    <p class="motto"><span>the hours come back to the front</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>The seven hours are on ቤት again, as one line.</b> Under the prayer card, built like the update notice above it: what is being prayed now, what follows — &quot;ቀጥሎ ጸሎተ ሠለስት&quot; — and ሁሉም for all seven. They had been behind the header menu since the shortcut pills were removed, which is a poor place for something used every day.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>The version check runs at every launch, not once a day.</b> The notice is only ever read with the app open, so opening it is the one moment the question matters; a release published this morning no longer waits until tomorrow. The stored ETag keeps the repeat cheap.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>The tour&#x27;s &quot;Open it&quot; button is gone.</b> It had to close the tour to navigate, so taking it meant never seeing the pages after it — the button competed with the thing it was part of.</span></li>
+    <li><span><b>Settings → የአዲሱ እትም ጉብኝት did nothing.</b> It read the empty value the content loader starts with as &quot;there is no tour&quot; and closed itself on its first frame, before the file had loaded.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
     <h2>1.7.3 <span class="date">4 September 2026</span></h2>
     <p class="motto"><span>it tells you what it just learned</span></p>
   </header>
@@ -138,36 +160,6 @@
   <h3><span>Changed</span></h3>
   <ul>
     <li><span><b>The journal says when it has saved.</b> A tick appears in the entry header once the text is on disk. The editor still has no Save button, but &quot;is this saved?&quot; was a question the screen previously gave no way to answer.</span></li>
-  </ul>
-  </div>
-</article>
-
-<article class="release">
-  <header>
-    <h2>1.6.0 <span class="date">31 August 2026</span></h2>
-    <p class="motto"><span>what is owed, what was promised, what was thought</span></p>
-  </header>
-  <div class="body">
-  <h3><span>Added</span></h3>
-  <ul>
-    <li><span><b>አስራት.</b> A ledger for the tithe: record what you receive and the tenth is worked out for you; record what you give and it shows what is still owed, over an Ethiopian month or year. The share is adjustable for those who keep a different fraction, and amounts are counted in a currency you name. Giving beyond the tithe is shown as a surplus rather than a negative debt.</span></li>
-    <li><span><b>ስዕለት.</b> Vows and pledges, each tied to the feast it was promised on, with what was promised set against what has been kept. A one-time vow stops reminding once it is fulfilled; a standing one keeps its rhythm.</span></li>
-    <li><span><b>Feast-anchored reminders.</b> Cadences now include a yearly date and a named feast, alongside the weekly, every-other-day and monthly ones. The ወርኀዊ በዓላት come from the bundled ስንክሳር itself, so choosing &quot;ቀን ፲፱&quot; and choosing &quot;ቅዱስ ገብርኤል&quot; are the same act; movable feasts such as ፋሲካ are computed each year from the ባሕረ ሓሳብ.</span></li>
-    <li><span><b>ማስታወሻ — a journal.</b> Write the day down, browsed a ግእዝ month at a time. Every entry keeps the Church&#x27;s day it was written on — the feast, the fast, the day&#x27;s ግጻዌ — so an old entry reads as more than a date. A &quot;write about this&quot; action in the Psalter and the ግጻዌ reader starts an entry linked back to the passage. Entries can be locked behind a passphrase, and the journal never appears in screenshots or the app switcher.</span></li>
-    <li><span><b>Preparing for ንስሐ.</b> A kind of entry built to be destroyed: it never leaves the device, never enters a backup, and &quot;ንስሐ ገብቻለሁ&quot; deletes it rather than filing it away.</span></li>
-    <li><span><b>Choose what a backup contains.</b> Export is now a checklist rather than all-or-nothing. The journal is off by default and asks for your passphrase before it can be included — the file itself is plain text, so what happens to it afterwards is yours to look after.</span></li>
-  </ul>
-  <h3><span>Changed</span></h3>
-  <ul>
-    <li><span><b>Quiet hours now silence every reminder.</b> They previously applied only to the ringing prayer alarms and the ሕሊና prayer; the nightly, ግጻዌ, ምጽዋት and ንስሐ notifications ignored them entirely. A silenced reminder still keeps its schedule — only that one occurrence is dropped. Because the silence is now total, the setting warns when a reminder is timed inside the window and would never arrive.</span></li>
-    <li><span><b>The Reminders page is grouped</b> — daily, giving, and sound — rather than one flat run of rows, and the reminder descriptions now speak in one voice instead of three.</span></li>
-  </ul>
-  <h3><span>Fixed</span></h3>
-  <ul>
-    <li><span><b>The text-size control was labelled &quot;የንባብ ፊደል&quot;</b>, the same as the font picker directly above it, leaving the size stepper with no label of its own.</span></li>
-    <li><span><b>&quot;Keep screen on&quot; never showed its explanation</b>, though one was written and translated.</span></li>
-    <li><span><b>The last-backup date</b> was printed as a raw Gregorian date in an app that is otherwise ግእዝ-first everywhere.</span></li>
-    <li><span><b>&quot;1 reminders on.&quot;</b> The English count had no singular form.</span></li>
   </ul>
   </div>
 </article>
