@@ -36,10 +36,6 @@ object UpdateRepository {
     private const val LATEST = "https://api.github.com/repos/natinael96/sinq/releases/latest"
     private const val RELEASES_PAGE = "https://github.com/natinael96/sinq/releases/latest"
 
-    /** One check a day is plenty for a project that ships every few weeks. */
-    private const val CHECK_INTERVAL_MS = 24L * 60 * 60 * 1000
-
-    private val KEY_LAST_CHECK = longPreferencesKey("last_check_ms")
     private val KEY_LATEST_VERSION = stringPreferencesKey("latest_version")
     private val KEY_LATEST_URL = stringPreferencesKey("latest_url")
     private val KEY_DISMISSED = stringPreferencesKey("dismissed_version")
@@ -75,14 +71,20 @@ object UpdateRepository {
     }.getOrDefault("")
 
     /**
-     * Ask GitHub, but only if [enabled], and only if a day has passed since the
-     * last ask. Every failure — no network, no GitHub, a rate limit, a body
-     * that does not parse — is swallowed: the line simply does not appear.
+     * Ask GitHub, once per app launch, if [enabled].
+     *
+     * Not throttled to a day: the answer is only ever read while the app is
+     * open, so checking when it opens is the one moment it can matter, and a
+     * release published this morning should not wait until tomorrow to be
+     * announced. The stored ETag makes the repeat cheap — an unchanged release
+     * answers 304 with no body.
+     *
+     * Every failure — no network, no GitHub, a rate limit, a body that does not
+     * parse — is swallowed: the line simply does not appear.
      */
-    suspend fun checkIfDue(context: Context, enabled: Boolean, now: Long = System.currentTimeMillis()) {
+    suspend fun check(context: Context, enabled: Boolean, now: Long = System.currentTimeMillis()) {
         if (!enabled) return
         val prefs = context.updateDataStore.data.first()
-        if (now - (prefs[KEY_LAST_CHECK] ?: 0L) < CHECK_INTERVAL_MS) return
         val etag = prefs[KEY_ETAG].orEmpty()
         withContext(Dispatchers.IO) {
             runCatching {
@@ -98,7 +100,7 @@ object UpdateRepository {
                 }
                 try {
                     when (conn.responseCode) {
-                        HttpURLConnection.HTTP_NOT_MODIFIED -> stamp(context, now)
+                        HttpURLConnection.HTTP_NOT_MODIFIED -> Unit
                         HttpURLConnection.HTTP_OK -> {
                             val body = conn.inputStream.bufferedReader().use { it.readText() }
                             val json = JSONObject(body)
@@ -106,7 +108,6 @@ object UpdateRepository {
                             val page = json.optString("html_url").ifBlank { RELEASES_PAGE }
                             val newEtag = conn.getHeaderField("ETag").orEmpty()
                             context.updateDataStore.edit {
-                                it[KEY_LAST_CHECK] = now
                                 if (tag.isNotBlank()) {
                                     it[KEY_LATEST_VERSION] = normalise(tag)
                                     it[KEY_LATEST_URL] = page
@@ -114,8 +115,8 @@ object UpdateRepository {
                                 if (newEtag.isNotBlank()) it[KEY_ETAG] = newEtag
                             }
                         }
-                        // Anything else (rate limit, 5xx) — wait for tomorrow.
-                        else -> stamp(context, now)
+                        // Anything else (rate limit, 5xx) — try again next launch.
+                        else -> Unit
                     }
                 } finally {
                     conn.disconnect()
@@ -124,9 +125,6 @@ object UpdateRepository {
         }
     }
 
-    private suspend fun stamp(context: Context, now: Long) {
-        context.updateDataStore.edit { it[KEY_LAST_CHECK] = now }
-    }
 
     /** "v1.7.0" and "1.7.0" are the same release. */
     fun normalise(tag: String): String = tag.trim().removePrefix("v").removePrefix("V")

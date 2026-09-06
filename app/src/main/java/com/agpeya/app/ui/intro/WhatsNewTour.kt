@@ -10,7 +10,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,9 +24,11 @@ import com.agpeya.app.ui.theme.Spacing
  * The walkthrough shown once after an install or an update.
  *
  * Longer than the changelog on purpose: a release note says what changed, this
- * says what the thing is for and where it lives. Where a page names a route it
- * offers to open it, so the reader ends up *in* the feature rather than holding
- * a description of it — which is the difference between a tour and a list.
+ * says what the thing is for and where it lives.
+ *
+ * It offers no way into the features it describes, deliberately: a button that
+ * opened one would have to close the tour to do it, and the pages after it
+ * would never be read.
  *
  * Skipping and finishing are the same outcome: both mark the version seen, so
  * it is asked once and never nags.
@@ -35,7 +36,6 @@ import com.agpeya.app.ui.theme.Spacing
 @Composable
 fun WhatsNewTour(
     tour: Tour,
-    onOpenRoute: (String) -> Unit,
     onDone: () -> Unit,
 ) {
     val s = LocalStrings.current
@@ -55,25 +55,12 @@ fun WhatsNewTour(
         onSkip = onDone,
         onFinish = onDone,
     ) { i ->
-        TourPageContent(
-            page = pages[i],
-            amharic = s.isAmharic,
-            onOpenRoute = { route ->
-                // Opening the feature ends the tour: coming back to page 4 of 6
-                // after praying an hour is not something anyone wants.
-                onDone()
-                onOpenRoute(route)
-            },
-        )
+        TourPageContent(page = pages[i], amharic = s.isAmharic)
     }
 }
 
 @Composable
-private fun TourPageContent(
-    page: TourPage,
-    amharic: Boolean,
-    onOpenRoute: (String) -> Unit,
-) {
+private fun TourPageContent(page: TourPage, amharic: Boolean) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -104,12 +91,5 @@ private fun TourPageContent(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
-        if (page.route.isNotBlank()) {
-            Spacer(Modifier.height(Spacing.xxl))
-            OutlinedButton(
-                onClick = { onOpenRoute(page.route) },
-                modifier = Modifier.fillMaxWidth(),
-            ) { Text(page.action.pick(amharic).ifBlank { LocalStrings.current.gotIt }) }
-        }
     }
 }

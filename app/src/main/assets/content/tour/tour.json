@@ -4,55 +4,90 @@
     {
       "versionCode": 61,
       "version": "1.7.3",
-      "title": { "am": "በዚህ እትም", "en": "In this version" },
+      "title": {
+        "am": "በዚህ እትም",
+        "en": "In this version"
+      },
       "pages": [
         {
-          "kicker": { "am": "መጫን", "en": "Installing" },
-          "title": { "am": "በአሮጌ ስልኮችም ይጫናል", "en": "It installs on older phones" },
+          "kicker": {
+            "am": "መጫን",
+            "en": "Installing"
+          },
+          "title": {
+            "am": "በአሮጌ ስልኮችም ይጫናል",
+            "en": "It installs on older phones"
+          },
           "body": {
             "am": "እስከ ቅርብ ጊዜ ድረስ ስንቅ አንድሮይድ ፰ና ከዚያ በላይ ብቻ ነበር የሚጫነው። አሁን ከአንድሮይድ ፮ ጀምሮ ይጫናል። ከዚህ በፊት «አልተጫነም» ብሎ የመለሰለት ዘመድ ካለዎት፣ አሁን መጫን ይችላል።",
             "en": "Until recently Sinq needed Android 8 or newer. It now installs on Android 6 and up. If someone you know was turned away with “App not installed”, they can install it now."
           }
         },
         {
-          "kicker": { "am": "ንባብ", "en": "Reading" },
-          "title": { "am": "ግጻዌው የማያነብልዎት", "en": "What the Gitsawe does not read" },
+          "kicker": {
+            "am": "ንባብ",
+            "en": "Reading"
+          },
+          "title": {
+            "am": "ግጻዌው የማያነብልዎት",
+            "en": "What the Gitsawe does not read"
+          },
           "body": {
             "am": "ግጻዌው ወንጌልንና መልእክታትን በዓመት ውስጥ ሙሉ ለሙሉ ያህል ያነብልዎታል፤ ከመዝሙረ ዳዊት ውጪ ያለውን ብሉይ ኪዳን ግን አያነብም። ይህ ንባብ የቀረውን ያስነብብዎታል — ኦሪቱንና መጻሕፍቱን፣ ፲፻፷፯ ምዕራፎች፣ በቀን ሦስት ያህል። በዓመት ወይም በስድስት ወር መርጠው ይጀምራሉ።",
             "en": "The Gitsawe reads you nearly the whole New Testament across a year, but no Old Testament outside the Psalms. This reads the rest — the Law and the books, 1,067 chapters, about three a day. Choose a year or six months."
-          },
-          "route": "reading",
-          "action": { "am": "ክፈተው", "en": "Open it" }
+          }
         },
         {
-          "kicker": { "am": "ንባብ", "en": "Reading" },
-          "title": { "am": "የዕለቱ ግጻዌ ከንባቡ ጋር", "en": "The day's Gitsawe comes first" },
+          "kicker": {
+            "am": "ንባብ",
+            "en": "Reading"
+          },
+          "title": {
+            "am": "የዕለቱ ግጻዌ ከንባቡ ጋር",
+            "en": "The day's Gitsawe comes first"
+          },
           "body": {
             "am": "በንባቡ ገጽ ላይ የዕለቱ ግጻዌ ከላይ ይታያል፤ የዕለቱ ንባብ ከሱ በታች። የቤተ ክርስቲያን ንባብ ይቀድማል፣ «ተነቧል» ተብሎም አይመዘገብም — የተሰጠ እንጂ የሚፈጸም አይደለምና።",
             "en": "On the reading page the day's Gitsawe sits above the plan's own chapters. The Church's reading leads, and is never ticked off: it is given, not achieved."
           }
         },
         {
-          "kicker": { "am": "ቀኖና", "en": "Penance" },
-          "title": { "am": "የተቀበሉትን ቀኖና ይያዙ", "en": "Keep the penance you were given" },
+          "kicker": {
+            "am": "ቀኖና",
+            "en": "Penance"
+          },
+          "title": {
+            "am": "የተቀበሉትን ቀኖና ይያዙ",
+            "en": "Keep the penance you were given"
+          },
           "body": {
             "am": "ከንስሐ አባትዎ የተቀበሉትን ቀኖና — ፵ ስግደት፣ የጾም ቀናት፣ ምጽዋት — መጠኑን ከነፈጸሙት ጋር ይይዛል፤ እስኪፈጸም ያስታውሰዎታል፣ ከተፈጸመም ዝም ይላል። በዚህ መሣሪያ ብቻ ይቀራል፦ በመጠባበቂያ ቅጂ ውስጥ አይገባም፣ ስሙም በማሳወቂያ ላይ ፈጽሞ አይታይም።",
             "en": "The penance your father confessor gave you — 40 prostrations, days of fasting, alms — with its measure and what you have done against it. It reminds you until it is finished, then falls silent. It stays on this device: never in a backup, and its name never appears in a notification."
-          },
-          "route": "penance",
-          "action": { "am": "ክፈተው", "en": "Open it" }
+          }
         },
         {
-          "kicker": { "am": "ንስሐ · ቁርባን", "en": "Confession · Communion" },
-          "title": { "am": "«በቅርቡ» የሚሉት ለምንድን ነው", "en": "Why they say “coming soon”" },
+          "kicker": {
+            "am": "ንስሐ · ቁርባን",
+            "en": "Confession · Communion"
+          },
+          "title": {
+            "am": "«በቅርቡ» የሚሉት ለምንድን ነው",
+            "en": "Why they say “coming soon”"
+          },
           "body": {
             "am": "የንስሐ ዝግጅትና የቁርባን ዝግጅት ገጾች አሉ፤ ግን ባዶ ናቸው። የኅሊና ምርመራውና ሥርዓተ መቅረቢያው የሚሰጡት በቤተ ክርስቲያን እንጂ በመተግበሪያ አይደለም። ጽሑፉ ተዘጋጅቶ ሲገባ ገጾቹ በራሳቸው ይከፈታሉ።",
             "en": "The confession and communion preparation screens exist but are empty. An examination of conscience and the order of approach are the Church's to give, not an app's to draft. When the text is ready the screens open by themselves."
           }
         },
         {
-          "kicker": { "am": "አዲስ እትም", "en": "Updates" },
-          "title": { "am": "አዲስ እትም ሲወጣ ያሳውቅዎታል", "en": "It tells you when a version is out" },
+          "kicker": {
+            "am": "አዲስ እትም",
+            "en": "Updates"
+          },
+          "title": {
+            "am": "አዲስ እትም ሲወጣ ያሳውቅዎታል",
+            "en": "It tells you when a version is out"
+          },
           "body": {
             "am": "ስንቅ በእጅ ስለሚጫን፣ አዲስ እትም መውጣቱን የሚነግርዎት ነገር አልነበረም። አሁን በቀን አንዴ ጊትሀብን ይጠይቃል፤ አዲስ ካለ በመነሻ ገጹ ራስጌ ላይ ቀጭን መስመር ይታያል። ይህ የመተግበሪያው ብቸኛ የኢንተርኔት አገልግሎት ነው፤ ስለ እርስዎ ምንም አይልክም፤ ከቅንብር ማጥፋት ይችላሉ።",
             "en": "Sinq is installed by hand, so nothing told you a new version existed. It now asks GitHub once a day, and shows a thin line at the top of the home page when there is one. This is the app's only use of the internet, it sends nothing about you, and Settings can turn it off."

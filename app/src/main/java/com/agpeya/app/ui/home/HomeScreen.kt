@@ -163,13 +163,8 @@ fun HomeScreen(
     // The only network-facing thing on this screen, and it draws nothing unless
     // the check is on AND a newer release was found AND it wasn't waved away.
     val scope = rememberCoroutineScope()
-    val updateEnabled by com.agpeya.app.data.SettingsRepository.updateCheck(context)
-        .collectAsState(initial = false)
     val update by com.agpeya.app.data.UpdateRepository.available(context)
         .collectAsState(initial = null)
-    LaunchedEffect(updateEnabled) {
-        com.agpeya.app.data.UpdateRepository.checkIfDue(context, updateEnabled)
-    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,

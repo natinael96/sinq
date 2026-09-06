@@ -113,7 +113,13 @@ class MainActivity : ComponentActivity() {
                     val tour = if (lastTour == -1) null else com.agpeya.app.data.TourRepository
                         .pending(tourContent.tours, lastTour, installedCode)
                     val tourScope = rememberCoroutineScope()
-                    var tourRoute by remember { mutableStateOf<String?>(null) }
+                    // Asked once per launch, while the opening page is drawing:
+                    // the notice is only ever read with the app open, so this is
+                    // the moment it can matter.
+                    LaunchedEffect(Unit) {
+                        val on = SettingsRepository.updateCheck(this@MainActivity).first()
+                        com.agpeya.app.data.UpdateRepository.check(this@MainActivity, on)
+                    }
 
                     Box(Modifier.fillMaxSize()) {
                         AgpeyaNavHost(
@@ -123,8 +129,6 @@ class MainActivity : ComponentActivity() {
                             onJourneyHandled = { pendingOpenJourney.value = false },
                             openOffering = pendingOpenOffering.value,
                             onOfferingHandled = { pendingOpenOffering.value = null },
-                            openRoute = tourRoute,
-                            onRouteHandled = { tourRoute = null },
                             openGitsawe = pendingOpenGitsawe.value,
                             gitsaweEpochDay = pendingGitsaweEpochDay.value,
                             onGitsaweHandled = {
@@ -135,7 +139,6 @@ class MainActivity : ComponentActivity() {
                         if (opened && tour != null) {
                             com.agpeya.app.ui.intro.WhatsNewTour(
                                 tour = tour,
-                                onOpenRoute = { tourRoute = it },
                                 onDone = {
                                     tourScope.launch {
                                         SettingsRepository.setLastTourVersion(
@@ -220,8 +223,6 @@ private fun AgpeyaNavHost(
     onJourneyHandled: () -> Unit,
     openOffering: String?,
     onOfferingHandled: () -> Unit,
-    openRoute: String?,
-    onRouteHandled: () -> Unit,
     openGitsawe: Boolean,
     gitsaweEpochDay: Long?,
     onGitsaweHandled: () -> Unit,
@@ -295,13 +296,6 @@ private fun AgpeyaNavHost(
         }
     }
 
-    // A tour page asking to open the thing it describes.
-    LaunchedEffect(ready, openRoute) {
-        if (ready && openRoute != null) {
-            runCatching { navController.navigate(openRoute) { launchSingleTop = true } }
-            onRouteHandled()
-        }
-    }
 
     // Opened from an አስራት, ስዕለት or ቀኖና reminder → the page that records it.
     LaunchedEffect(ready, openOffering) {
@@ -798,19 +792,22 @@ private fun AgpeyaNavHost(
             // Replays the newest tour whatever the stored version says, so
             // skipping it on launch is never a decision you cannot undo.
             val context = androidx.compose.ui.platform.LocalContext.current
-            val content by androidx.compose.runtime.produceState(com.agpeya.app.model.TourContent()) {
+            // Nullable while the asset loads. Reading the empty default as "no
+            // tour" popped the screen on its first frame, which is why this row
+            // appeared to do nothing at all.
+            val content by androidx.compose.runtime.produceState<com.agpeya.app.model.TourContent?>(null) {
                 value = com.agpeya.app.data.TourRepository.content(context)
             }
-            val newest = content.tours.filter { it.pages.isNotEmpty() }.maxByOrNull { it.versionCode }
-            if (newest == null) navController.popBackStack()
-            else com.agpeya.app.ui.intro.WhatsNewTour(
-                tour = newest,
-                onOpenRoute = { route ->
-                    navController.popBackStack()
-                    runCatching { navController.navigate(route) { launchSingleTop = true } }
-                },
-                onDone = { navController.popBackStack() },
-            )
+            val loaded = content
+            val newest = loaded?.tours?.filter { it.pages.isNotEmpty() }?.maxByOrNull { it.versionCode }
+            when {
+                loaded == null -> com.agpeya.app.ui.common.LoadingPanel()
+                newest == null -> LaunchedEffect(Unit) { navController.popBackStack() }
+                else -> com.agpeya.app.ui.intro.WhatsNewTour(
+                    tour = newest,
+                    onDone = { navController.popBackStack() },
+                )
+            }
         }
         composable("tutorial") {
             com.agpeya.app.ui.intro.TutorialScreen(onDone = { navController.popBackStack() })
