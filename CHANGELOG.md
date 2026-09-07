@@ -30,12 +30,18 @@ features; `versionCode` increments on every release).
   ጥበብ, ሲራክ, ባሮክ, መቃብያን, ዕዝራ ሱቱኤል, ኩፋሌ, ሄኖክ and the rest had no door in the
   Library at all. ብሉይ now carries them, under their own heading — and every
   heading is in Amharic (ኦሪት, መጻሕፍተ ታሪክ, ዐበይት ነቢያት, መልእክታተ ጳውሎስ …) where the
-  page used to print the catalogue's English keys. The books of church order
-  have a heading of their own instead of trailing after ራእይ — **የሥርዓት
-  መጻሕፍት**, which is what the Church's own catechism calls them, and there are
-  eight of them: ዮሴፍ ወልደ ኮርዮን is not a book of order but the last of the
-  seventeen ብሉይ ኪዳን histories, "from ኢያሱ ወልደ ነዌ to ዮሴፍ ወልደ ኮርዮን", and it is
-  now listed there.
+  page used to print the catalogue's English keys.
+- **The book list follows ፍትሐ ነገሥት አንቀጽ ፪.** The bundled catalogue is not the
+  Church's: it filed everything past the Hebrew thirty-nine as one
+  "deuterocanonical" block, which the EOTC does not have. Every one of those
+  books is counted inside a section that already existed — ኩፋሌ with ኦሪት
+  ዘፍጥረት, ባሮክ and ተረፈ ኤርምያስ inside ትንቢተ ኤርምያስ, ሶስና and ሠለስቱ ደቂቅ inside
+  ትንቢተ ዳንኤል, ጦቢት and ዮዲት and መቃብያን among the histories, ሲራክ and ጥበብ among
+  the wisdom books. The headings are the Church's own names for them —
+  የሕግ መጻሕፍት, የታሪክ መጻሕፍት, የጥበብና የመዝሙር መጻሕፍት, የሥርዓት መጻሕፍት. ዮሴፍ ወልደ ኮርዮን
+  (ዜና አይሁድ) is the last of the seventeen histories, not a ninth book of order,
+  so that group is the eight ፍትሐ ነገሥት lists. ወደ ዕብራውያን leads the fourteen
+  Pauline epistles instead of sitting with the catholic seven.
 - **The ቅዳሴ readings are in the order the liturgy reads them** — ጳውሎስ, ሐዋርያ,
   ግብረ ሐዋርያት, ምስባክ, ወንጌል — and each is named by its text rather than by whose
   turn it is to read it. The page had the Gospel first and ጳውሎስ third.
@@ -77,6 +83,10 @@ features; `versionCode` increments on every release).
   full day, one is always visible.
 
 ### Fixed
+- **Eight books were headed "null".** `canon.json` writes JSON null for the
+  section of every book of church order, and reading it as a string yields the
+  four characters "null" rather than nothing — so ዲድስቅልያ, ቀሌምንጦስ and the rest
+  were grouped under a heading spelling that out.
 - **ንባብ recorded day numbers, and a day number means nothing.** Progress was a
   set of numbers per plan, so repacking the plan to finish on time, or a new
   bundled plan, silently re-pointed them: a reader who had read ኦሪት ዘሌዋውያን

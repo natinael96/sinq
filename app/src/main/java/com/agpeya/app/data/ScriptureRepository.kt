@@ -60,10 +60,10 @@ object ScriptureRepository {
                         number = b["order"]!!.jsonPrimitive.int,
                         key = slug(b["file"]!!.jsonPrimitive.content),
                         nameAm = b["name"]!!.jsonPrimitive.content,
-                        nameEn = canonical?.get("name_en")?.jsonPrimitive?.content ?: id,
+                        nameEn = canonical?.text("name_en") ?: id,
                         chapters = b["chapters"]!!.jsonPrimitive.int,
-                        testament = canonical?.get("testament")?.jsonPrimitive?.content ?: "old",
-                        section = canonical?.get("section")?.jsonPrimitive?.content ?: "",
+                        testament = canonical?.text("testament") ?: "old",
+                        section = canonical?.text("section").orEmpty(),
                     )
                 }
             }.onFailure { Log.e(TAG, "Failed to load unified Bible catalog", it) }
@@ -133,6 +133,15 @@ object ScriptureRepository {
             }.onFailure { Log.e(TAG, "Failed to load Psalms from $edition", it) }
                 .getOrDefault(emptyList()).also { if (it.isNotEmpty()) psalmCache[geez] = it }
         }
+
+    /**
+     * A string field, or null when the catalogue writes JSON null there — which
+     * it does for the section of every book of church order. `jsonPrimitive` on
+     * a `JsonNull` yields the four characters "null", so reading it straight
+     * gave those books a section named "null" and a heading to match.
+     */
+    private fun JsonObject.text(key: String): String? =
+        this[key]?.takeIf { it !is JsonNull }?.jsonPrimitive?.content
 
     private fun slug(file: String): String = file.substringAfter('/').substringAfter('-').removeSuffix(".json")
 

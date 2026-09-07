@@ -40,29 +40,60 @@ import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.theme.Spacing
 
 /**
- * ዮሴፍ ወልደ ኮርዮን. The bundle files Josippon after ራእየ ዮሐንስ, with the books of
- * church order; the Church counts it as the last of the seventeen ብሉይ ኪዳን
- * history books — "from ኢያሱ ወልደ ነዌ to ዮሴፍ ወልደ ኮርዮን" — which is also why the
- * order group is eight books and not nine. Corrected here rather than in
- * `canon.json`, which is copied wholesale from the upstream Bible data.
+ * Where each book sits in the Church's own catalogue.
+ *
+ * `canon.json` comes from the upstream Bible data, which files the books
+ * beyond the Hebrew thirty-nine as one undifferentiated "deuterocanonical"
+ * block and leaves the books of church order with no section at all. The EOTC
+ * has no such block: ፍትሐ ነገሥት አንቀጽ ፪ enumerates forty-six ብሉይ ኪዳን and
+ * thirty-five ሐዲስ ኪዳን, and every one of these books is counted inside a
+ * section that already exists here — several of them inside another book.
+ *
+ * - ኩፋሌ is counted as one with ኦሪት ዘፍጥረት, and ሄኖክ is read beside it.
+ * - The seventeen histories run "from ኢያሱ ወልደ ነዌ to ዜና አይሁድ", which is why
+ *   ዮሴፍ ወልደ ኮርዮን is here and not among the books of order, and why that
+ *   group is eight books rather than nine.
+ * - ባሮክ, ተረፈ ኤርምያስ and the letter are counted inside ትንቢተ ኤርምያስ; ሶስና,
+ *   ሠለስቱ ደቂቅ and ተረፈ ዳንኤል inside ትንቢተ ዳንኤል.
+ * - ወደ ዕብራውያን is the first of the fourteen Pauline epistles, not a catholic
+ *   one; the upstream catalogue follows the Protestant ordering there.
+ *
+ * Corrected here rather than in the asset, which `tools/extract_bible_editions.py`
+ * copies wholesale from the upstream repository on every rebuild.
  */
+private val EOTC_SECTION: Map<String, String> = buildMap {
+    listOf("kufale", "enoch").forEach { put(it, "Pentateuch") }
+    listOf(
+        "tobit", "yodit", "esther-greek",
+        "1-maccabees", "2-maccabees", "3-maccabees",
+        "1-maccabees-greek", "2-maccabees-greek",
+        "ezra-sutuel", "ezra-kalie", "1-esdras", "2-esdras",
+        JOSIPPON,
+    ).forEach { put(it, "Historical") }
+    listOf("wisdom-of-solomon", "sirach", "admonition", "prayer-of-manasseh")
+        .forEach { put(it, "PoetryWisdom") }
+    listOf("baruch", "teref-ermias", "jeremys-letter", "seleste-dekik", "susanna", "teref-daniel")
+        .forEach { put(it, "MajorProphet") }
+    put("hebrews", "PaulineEpistle")
+}
+
+/** ዮሴፍ ወልደ ኮርዮን — ዜና አይሁድ, the last of the ብሉይ ኪዳን histories. */
 internal const val JOSIPPON = "josippon"
 
-/** Which testament a book is listed under, Josippon apart. */
+/**
+ * Which testament a book is listed under. Only Josippon moves: the bundle
+ * files it after ራእየ ዮሐንስ with the books of order.
+ */
 internal fun canonTestament(book: ScriptureBookMeta): String =
     if (book.key == JOSIPPON) "old" else book.testament
 
 /**
- * Which heading a book sits under. `canon.json` leaves a section off the three
- * Ethiopian deuterocanonical books and the eight of church order; both have an
- * obvious home rather than a bare testament header.
+ * Which heading a book sits under: the Church's own placement where the
+ * upstream catalogue differs, the catalogue's otherwise, and the books of
+ * church order for what it leaves unplaced.
  */
-internal fun canonSectionKey(book: ScriptureBookMeta): String = when {
-    book.key == JOSIPPON -> "Historical"
-    book.section.isNotBlank() -> book.section
-    book.testament == "deuterocanonical" -> "Deuterocanonical"
-    else -> "ChurchOrder"
-}
+internal fun canonSectionKey(book: ScriptureBookMeta): String =
+    EOTC_SECTION[book.key] ?: book.section.ifBlank { "ChurchOrder" }
 
 /** One testament from the unified Amharic 1980 Bible, grouped by canon section. */
 @OptIn(ExperimentalMaterial3Api::class)
