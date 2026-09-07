@@ -138,10 +138,6 @@ features; `versionCode` increments on every release).
   with ጐ or ጎ, and with half a dozen typos. The ግጻዌ header printed each variant
   verbatim, so one ቅዳሴ appeared under four names in a week. It is named once now,
   with its incipit beside it.
-- **The app starts in English.** It followed the phone, so an Amharic device
-  opened it in Amharic before anyone had chosen anything. አማርኛ is the first
-  choice on the settings page for whoever wants it; the prayer text is Amharic
-  and Ge'ez either way.
 - **ፍለጋ ranks what it finds, and reads Ge'ez numerals.** Corpus order was the
   only order, so a search for a book's own name led with whatever the bundle
   listed first; a title match now leads, then a whole word, then a fragment

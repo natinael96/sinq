@@ -444,22 +444,21 @@ object SettingsRepository {
         context.settingsDataStore.edit { it[KEY_KEEP_SCREEN_ON] = value }
     }
 
-    /**
-     * English until someone says otherwise.
-     *
-     * It used to follow the device, which meant an Amharic phone opened the app
-     * in Amharic before anyone had chosen anything. The prayer text is Amharic
-     * and Ge'ez whichever way this is set — this is the language of the app's
-     * own words, and English is the one more readers can start from. ገጽታ on the
-     * settings landing is the first thing on the page for whoever wants አማርኛ.
-     */
     fun language(context: Context): Flow<Language> =
         context.settingsDataStore.data.map {
             runCatching { Language.valueOf(it[KEY_LANGUAGE] ?: "") }.getOrDefault(DEFAULT_LANGUAGE)
         }
 
-    /** The language a fresh install starts in. */
-    val DEFAULT_LANGUAGE = Language.ENGLISH
+    /**
+     * The language a fresh install starts in: the device's own.
+     *
+     * An Amharic phone opens the app in Amharic and everything else opens in
+     * English. Forcing English on everyone would be a promise the app does not
+     * keep — the Ge'ez numerals, the book names and ባሕረ ሓሳብ are Amharic
+     * whatever this is set to, so an English-first launch shows a half
+     * translated app rather than an English one.
+     */
+    val DEFAULT_LANGUAGE = Language.SYSTEM
 
     suspend fun setLanguage(context: Context, value: Language) {
         context.settingsDataStore.edit { it[KEY_LANGUAGE] = value.name }
