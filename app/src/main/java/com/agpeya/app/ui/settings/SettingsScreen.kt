@@ -690,6 +690,7 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
     val readingAlignment by SettingsRepository.readingAlignment(context)
         .collectAsState(initial = com.agpeya.app.data.ReadingAlignment.JUSTIFIED)
     val keepOn by SettingsRepository.keepScreenOn(context).collectAsState(initial = true)
+    val crossRefs by SettingsRepository.showCrossRefs(context).collectAsState(initial = false)
     val size = SettingsRepository.FONT_STEPS_SP[step.coerceIn(0, SettingsRepository.FONT_STEPS_SP.lastIndex)]
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -782,6 +783,12 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
                     keepOn,
                     { scope.launch { SettingsRepository.setKeepScreenOn(context, it) } },
                     subtitle = s.keepScreenOnDesc,
+                )
+                ToggleRow(
+                    s.crossRefsTitle,
+                    crossRefs,
+                    { scope.launch { SettingsRepository.setShowCrossRefs(context, it) } },
+                    subtitle = s.crossRefsSubtitle,
                 )
                 NavRow(
                     title = s.copyFormatTitle,

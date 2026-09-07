@@ -78,6 +78,9 @@ import com.agpeya.app.ui.theme.readingBodyStyle
 import com.agpeya.app.ui.theme.readingVerseGap
 import com.agpeya.app.ui.theme.sinqColors
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
+import com.agpeya.app.ui.theme.inReadingFont
 
 private val FONT_STEPS_SP = com.agpeya.app.data.SettingsRepository.FONT_STEPS_SP
 
@@ -149,8 +152,24 @@ fun ScriptureReaderScreen(
     // the title, chapter strip, and bookmark all agreeing — beats silently showing
     // chapter 1 under the cited number. The highlight only fires when the clamped
     // chapter still equals the cited one, so a bad citation never tints wrong verses.
+    val showRefs by SettingsRepository.showCrossRefs(context).collectAsState(initial = false)
+    val lastChapters by SettingsRepository.lastChapters(context).collectAsState(initial = emptyMap())
     var chapter by rememberSaveable(bookKey) {
         mutableIntStateOf(initialChapter.coerceIn(1, b.chapters.size))
+    }
+    // Opening a book with no chapter named carries on where it was left. A link
+    // that names one — a ግጻዌ citation, a bookmark — always wins over the memory.
+    var restoredChapter by rememberSaveable(bookKey) { mutableStateOf(false) }
+    androidx.compose.runtime.LaunchedEffect(bookKey, lastChapters) {
+        if (restoredChapter || initialChapter > 1) {
+            restoredChapter = true
+            return@LaunchedEffect
+        }
+        lastChapters[bookKey]?.takeIf { it in 1..b.chapters.size }?.let { chapter = it }
+        restoredChapter = true
+    }
+    androidx.compose.runtime.LaunchedEffect(bookKey, chapter, restoredChapter) {
+        if (restoredChapter) SettingsRepository.setLastChapter(context, bookKey, chapter)
     }
     // Live verse selection (tap anchors, next tap moves the end); -1 = none.
     var selA by rememberSaveable(bookKey, chapter) { mutableIntStateOf(-1) }
@@ -358,6 +377,34 @@ fun ScriptureReaderScreen(
                             .padding(horizontal = Spacing.sm),
                     )
                 }
+                // The edition's own heading, where it prints one — a psalm's
+                // superscription, the note opening ሲኖዶስ. The parser used to
+                // drop every one of them.
+                val verseBlock = @Composable { verse: com.agpeya.app.model.ScriptureVerse ->
+                    current.headings[verse.n]?.let { heading ->
+                        Text(
+                            heading,
+                            style = MaterialTheme.typography.titleSmall.inReadingFont(),
+                            color = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = Spacing.md, bottom = Spacing.xs, start = Spacing.sm, end = Spacing.sm),
+                        )
+                    }
+                    body(verse)
+                    if (showRefs) {
+                        verse.refs?.let { refs ->
+                            Text(
+                                refs,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = Spacing.sm, end = Spacing.sm, bottom = Spacing.xs),
+                            )
+                        }
+                    }
+                }
                 if (tinted) {
                     Column(
                         Modifier
@@ -367,12 +414,52 @@ fun ScriptureReaderScreen(
                             .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.22f))
                             .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.75f), RoundedCornerShape(10.dp))
                             .padding(vertical = Spacing.xs),
-                    ) { row.forEach { body(it) } }
+                    ) { row.forEach { verseBlock(it) } }
                 } else {
-                    Column(Modifier.fillMaxWidth()) { row.forEach { body(it) } }
+                    Column(Modifier.fillMaxWidth()) { row.forEach { verseBlock(it) } }
                 }
             }
-            item { Spacer(Modifier.height(Spacing.huge)) }
+            item {
+                ChapterStepper(
+                    onPrevious = { chapter -= 1 }.takeIf { chapter > 1 },
+                    onNext = { chapter += 1 }.takeIf { chapter < b.chapters.size },
+                )
+                Spacer(Modifier.height(Spacing.huge))
+            }
+        }
+    }
+}
+
+/**
+ * The two ends of a chapter.
+ *
+ * Reading to the foot of ኦሪት ዘፍጥረት ፩ and wanting ፪ meant scrolling back to the
+ * top and finding it in the strip. Every other reader in the app steps from
+ * where the reading ends; this one did not.
+ */
+@Composable
+private fun ChapterStepper(onPrevious: (() -> Unit)?, onNext: (() -> Unit)?) {
+    if (onPrevious == null && onNext == null) return
+    val s = com.agpeya.app.ui.strings.LocalStrings.current
+    val colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = Spacing.xxl),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (onPrevious != null) {
+            androidx.compose.material3.TextButton(onClick = onPrevious, colors = colors) {
+                Text("‹  ${s.previousChapter}", style = MaterialTheme.typography.labelLarge)
+            }
+        } else {
+            Spacer(Modifier.width(Spacing.xxs))
+        }
+        if (onNext != null) {
+            androidx.compose.material3.TextButton(onClick = onNext, colors = colors) {
+                Text("${s.nextChapter}  ›", style = MaterialTheme.typography.labelLarge)
+            }
         }
     }
 }

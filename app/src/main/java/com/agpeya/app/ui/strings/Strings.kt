@@ -128,6 +128,11 @@ interface Strings {
     val bookmarkAction: String
     /** The selection bar's own two words — short, because they sit under icons. */
     val markAction: String
+    /** The edition's own cross references, and the chapter stepper's two ends. */
+    val crossRefsTitle: String
+    val crossRefsSubtitle: String
+    val previousChapter: String
+    val nextChapter: String
     /** ምልክቶቼ — the one home for bookmarks, highlights and passage notes. */
     val marksTitle: String
     val marksTabBookmarks: String
@@ -892,6 +897,10 @@ object AmharicStrings : Strings {
     override val readingModeToggle = "የንባብ ሁነታ"
     override val bookmarkAction = "ምልክት አድርግ"
     override val markAction = "ምልክት"
+    override val crossRefsTitle = "የጥቅስ ማጣቀሻዎች"
+    override val crossRefsSubtitle = "በእትሙ የተቀመጡት ተያያዥ ጥቅሶች"
+    override val previousChapter = "ያለፈው ምዕራፍ"
+    override val nextChapter = "ቀጣይ ምዕራፍ"
     override val marksTitle = "ምልክቶቼ"
     override val marksTabBookmarks = "ዕልባቶች"
     override val marksTabHighlights = "ማድመቂያዎች"
@@ -1602,6 +1611,10 @@ object EnglishStrings : Strings {
     override val readingModeToggle = "Reading mode"
     override val bookmarkAction = "Bookmark"
     override val markAction = "Mark"
+    override val crossRefsTitle = "Cross references"
+    override val crossRefsSubtitle = "The edition's own related verses"
+    override val previousChapter = "Previous chapter"
+    override val nextChapter = "Next chapter"
     override val marksTitle = "My marks"
     override val marksTabBookmarks = "Bookmarks"
     override val marksTabHighlights = "Highlights"

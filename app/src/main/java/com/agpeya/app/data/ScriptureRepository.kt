@@ -135,6 +135,23 @@ object ScriptureRepository {
         }
 
     /**
+     * The headings worth printing, keyed by the verse they precede.
+     *
+     * The edition marks each chapter's opening with a "ምዕራፍ ፲" heading, which
+     * the reader's own title already says; what is left is the descriptive
+     * matter — a psalm's superscription, the note that opens ሲኖዶስ, the acrostic
+     * letters through መዝሙር ፻፲፰ — and that has never been on the page.
+     */
+    private fun headingsOf(chapter: JsonObject): Map<Int, String> =
+        chapter["headings"]?.jsonArray.orEmpty().mapNotNull { node ->
+            val h = node.jsonObject
+            if (h.text("kind") == "major") return@mapNotNull null
+            val before = h["before"]?.jsonPrimitive?.intOrNull ?: return@mapNotNull null
+            val text = h.text("text")?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+            before to text
+        }.toMap()
+
+    /**
      * A string field, or null when the catalogue writes JSON null there — which
      * it does for the section of every book of church order. `jsonPrimitive` on
      * a `JsonNull` yields the four characters "null", so reading it straight
@@ -157,8 +174,16 @@ object ScriptureRepository {
                 verses = c["verses"]!!.jsonArray.mapIndexedNotNull { index, verseNode ->
                     val v = verseNode.jsonObject
                     val text = v["t"]?.jsonPrimitive?.contentOrNull ?: return@mapIndexedNotNull null
-                    ScriptureVerse(v["n"]?.jsonPrimitive?.intOrNull ?: index + 1, text)
+                    ScriptureVerse(
+                        n = v["n"]?.jsonPrimitive?.intOrNull ?: index + 1,
+                        text = text,
+                        refs = v["refs"]?.jsonArray.orEmpty()
+                            .mapNotNull { it.jsonObject["target"]?.jsonPrimitive?.contentOrNull }
+                            .joinToString(" ")
+                            .takeIf { it.isNotBlank() },
+                    )
                 },
+                headings = headingsOf(c),
             )
         },
     )

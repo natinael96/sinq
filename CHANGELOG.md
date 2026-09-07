@@ -127,6 +127,12 @@ features; `versionCode` increments on every release).
   citation of what is selected. Readers whose unit is a paragraph simply have no
   colour row. The four highlight colours can be named (ተስፋ, ትእዛዝ, ጸሎት, ማስተዋል,
   or anything else) and the name shows under the swatch.
+- **The Bible reader reads like a book.** A chapter steps from the foot of the
+  page instead of only from the strip at the top, and a book reopens at the
+  chapter it was left on. The edition's own headings are on the page — a psalm's
+  superscription, the note that opens ሲኖዶስ — and its cross references can be
+  turned on under ቅንብሮች › ንባብ. The parser had been dropping both: 22,905 verses
+  carry references and none of them had ever been shown.
 - **ምልክቶቼ — one home for every mark.** ዕልባቶች, ማድመቂያዎች and ማስታወሻዎች in three
   tabs, reachable from ቤተ መጻሕፍት, from ቅንብሮች › ውሂብ, and from the ⋮ on ቤት where
   the bookmarks list used to be. A highlight had no list at all before: the only
