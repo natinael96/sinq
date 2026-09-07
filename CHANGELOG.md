@@ -127,6 +127,13 @@ features; `versionCode` increments on every release).
   citation of what is selected. Readers whose unit is a paragraph simply have no
   colour row. The four highlight colours can be named (ተስፋ, ትእዛዝ, ጸሎት, ማስተዋል,
   or anything else) and the name shows under the swatch.
+- **ፍለጋ ranks what it finds, and reads Ge'ez numerals.** Corpus order was the
+  only order, so a search for a book's own name led with whatever the bundle
+  listed first; a title match now leads, then a whole word, then a fragment
+  inside one. "መዝሙር ፶" opens psalm 50 — every number this app prints is a Ge'ez
+  numeral and the reference parser knew only Arabic digits. The ግዕዝ Psalter is
+  searched too, the field takes focus when the screen opens, and a query can be
+  cleared without holding backspace.
 - **ቅንብሮች has groups, and መዝገብ has a page.** Nine flat rows under no headings
   became four groups. A new **መዝገብ** gathers what the app keeps a record of —
   አስራት, ስዕለት, ቀኖና, ምልክቶቼ, የጸሎት ዝርዝር, አጽዋማት — three of which were children of

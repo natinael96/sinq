@@ -56,6 +56,8 @@ import com.agpeya.app.ui.theme.Spacing
 import androidx.compose.ui.draw.clip
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.material.icons.outlined.Close
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,6 +95,7 @@ fun SearchScreen(
                 query,
                 AmharicSearch.Labels(
                     psalter = s.psalterTitle,
+                    psalterGeez = "${s.psalterTitle} · ${s.wudaseLangGeez}",
                     scripture = s.scripturesTitle,
                     synaxarium = s.synaxariumTitle,
                     wudase = s.wudaseMariam,
@@ -103,6 +106,7 @@ fun SearchScreen(
                 query,
                 AmharicSearch.Labels(
                     psalter = s.psalterTitle,
+                    psalterGeez = "${s.psalterTitle} · ${s.wudaseLangGeez}",
                     scripture = s.scripturesTitle,
                     synaxarium = s.synaxariumTitle,
                     wudase = s.wudaseMariam,
@@ -128,12 +132,28 @@ fun SearchScreen(
                 .padding(horizontal = Spacing.screen),
         ) {
             Spacer(Modifier.height(Spacing.md))
+            // The screen exists to be typed into, so the keyboard is up when it
+            // opens; and a query can be cleared without holding backspace.
+            val focus = androidx.compose.ui.focus.FocusRequester()
+            androidx.compose.runtime.LaunchedEffect(Unit) {
+                runCatching { focus.requestFocus() }
+            }
             TextField(
                 value = query,
                 onValueChange = { query = it },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().focusRequester(focus),
                 placeholder = { Text(s.searchHint) },
                 leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
+                trailingIcon = {
+                    if (query.isNotEmpty()) {
+                        androidx.compose.material3.IconButton(onClick = { query = "" }) {
+                            Icon(
+                                Icons.Outlined.Close,
+                                contentDescription = s.cancel,
+                            )
+                        }
+                    }
+                },
                 singleLine = true,
                 keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                     imeAction = ImeAction.Search,

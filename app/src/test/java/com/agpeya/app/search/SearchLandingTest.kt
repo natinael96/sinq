@@ -15,6 +15,7 @@ class SearchLandingTest {
 
     private val labels = AmharicSearch.Labels(
         psalter = "መዝሙር",
+        psalterGeez = "መዝሙር · ግዕዝ",
         scripture = "መጽሐፍ ቅዱስ",
         synaxarium = "ስንክሳር",
         wudase = "ውዳሴ ማርያም",
@@ -95,6 +96,26 @@ class SearchLandingTest {
             chapter("genesis", n, listOf(1 to "እግዚአብሔር ሰማይንና ምድርን ፈጠረ"))
         }
         assertEquals(60, search(many, "እግዚአብሔር").size)
+    }
+
+    @Test
+    fun `a title match outranks a match buried in the words`() {
+        // Corpus order used to be the only order, so a search for a book's own
+        // name led with whatever the bundle happened to list first.
+        val named = chapter("ማርታ", 1, listOf(1 to "ስለ ማርታ የተጻፈ ነው"))
+        val buried = chapter("john", 4, listOf(1 to "እርሷም ማርታ ትባል ነበር"))
+        val hits = search(listOf(buried, named), "ማርታ")
+        assertEquals(2, hits.size)
+        assertTrue(hits.first().title.startsWith("ማርታ"))
+    }
+
+    @Test
+    fun `a word beats a fragment inside another word`() {
+        val whole = chapter("a", 1, listOf(1 to "ጸሎት ነው"))
+        val inside = chapter("b", 1, listOf(1 to "የጸሎት ነው"))
+        val hits = search(listOf(inside, whole), "ጸሎት")
+        assertEquals(2, hits.size)
+        assertEquals("a 1", hits.first().title)
     }
 
     @Test

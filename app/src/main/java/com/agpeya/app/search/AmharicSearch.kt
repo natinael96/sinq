@@ -59,7 +59,33 @@ object AmharicSearch {
         /** A ready navigation route. Sources added after the original two carry
          *  one instead of being decoded from [targetId]/[targetIndex]. */
         val route: String? = null,
+        /**
+         * How well the hit answers the query — see [scoreOf]. Corpus order was
+         * the only order before, so a search for ጸሎት led with whatever the
+         * bundle happened to list first.
+         */
+        val score: Int = 0,
     )
+
+    /**
+     * How good a hit is, high to low.
+     *
+     * A match in the title is what someone searching a book name wants; a match
+     * at the start of a word is a word, and a match inside one is a coincidence
+     * of spelling that is still worth showing, last. An earlier hit in a long
+     * document beats a later one, which only breaks ties.
+     */
+    internal fun scoreOf(title: String, haystack: String, needle: String, hit: Int): Int {
+        val inTitle = fold(title).contains(needle)
+        val boundary = hit == 0 || !haystack[hit - 1].isLetter()
+        val base = when {
+            inTitle && boundary -> 400
+            inTitle -> 300
+            boundary -> 200
+            else -> 100
+        }
+        return base + (50 - hit / 40).coerceIn(0, 50)
+    }
 
     /**
      * One searchable unit of a bundled corpus, with its haystack pre-folded.
@@ -231,27 +257,38 @@ object AmharicSearch {
                             snippet = snip.text,
                             snippetMatchStart = snip.matchStart,
                             snippetMatchLen = snip.matchLen,
+                            score = scoreOf(section.title, haystackOf(section), needle, snip.matchStart),
                         )
                     }
                 }
             }
-            ContentRepository.psalter(context).forEachIndexed { index, psalm ->
-                match(psalm, needle, query.length)?.let { snip ->
-                    results += Result(
-                        source = Source.PSALTER,
-                        targetId = "",
-                        sourceLabel = labels.psalter,
-                        targetIndex = index,
-                        title = psalm.title,
-                        snippet = snip.text,
-                        snippetMatchStart = snip.matchStart,
-                        snippetMatchLen = snip.matchLen,
-                    )
+            // Both editions of the Psalter. Only the Amharic was searched, so a
+            // ግዕዝ verse — the text the ምስባክ is chanted from — could not be found
+            // by its own words.
+            listOf(false to labels.psalter, true to labels.psalterGeez).forEach { (geez, label) ->
+                val psalms = runCatching {
+                    if (geez) ScriptureRepository.psalms(context, geez = true)
+                    else ContentRepository.psalter(context)
+                }.getOrDefault(emptyList())
+                psalms.forEachIndexed { index, psalm ->
+                    match(psalm, needle, query.length)?.let { snip ->
+                        results += Result(
+                            source = Source.PSALTER,
+                            targetId = if (geez) "geez" else "",
+                            sourceLabel = label,
+                            targetIndex = index,
+                            title = psalm.title,
+                            snippet = snip.text,
+                            snippetMatchStart = snip.matchStart,
+                            snippetMatchLen = snip.matchLen,
+                            score = scoreOf(psalm.title, haystackOf(psalm), needle, snip.matchStart),
+                        )
+                    }
                 }
             }
 
             results += searchBundled(context, needle, query.length, labels)
-            results
+            results.sortedByDescending { it.score }
         }
     }
 
@@ -297,11 +334,20 @@ object AmharicSearch {
         )
     }
 
-    /** Split "ሉቃስ 10" into its book part and trailing number; null if it isn't
-     *  shaped like a reference at all. Pure, so it is unit-testable. */
+    /**
+     * Split "ሉቃስ 10" into its book part and trailing number; null if it isn't
+     * shaped like a reference at all. Pure, so it is unit-testable.
+     *
+     * The number may be written either way. Every number this app prints is a
+     * Ge'ez numeral, so "መዝሙር ፶" is someone typing back what they just read,
+     * and it used to find nothing.
+     */
     internal fun parseReference(raw: String): Pair<String, Int>? {
-        val m = Regex("^(.*?)[\\s:፥]*(\\d{1,3})\\s*$").find(raw.trim()) ?: return null
-        val number = m.groupValues[2].toIntOrNull() ?: return null
+        val m = Regex("^(.*?)[\\s:፥]*([\\d፩-፼]{1,6})\\s*$").find(raw.trim()) ?: return null
+        val digits = m.groupValues[2]
+        val number = digits.toIntOrNull()
+            ?: com.agpeya.app.ui.reading.parseGeezNumeral(digits)
+            ?: return null
         return m.groupValues[1].trim() to number
     }
 
@@ -315,6 +361,7 @@ object AmharicSearch {
     /** Display labels for the corpora, passed in so search stays UI-agnostic. */
     data class Labels(
         val psalter: String,
+        val psalterGeez: String,
         val scripture: String,
         val synaxarium: String,
         val wudase: String,
@@ -351,6 +398,7 @@ object AmharicSearch {
             val hit = doc.folded.indexOf(needle)
             if (hit < 0) continue
             val snip = snippet(doc.haystack, hit, matchLen)
+            val score = scoreOf(doc.title, doc.haystack, needle, hit)
             val label = when (doc.source) {
                 Source.SCRIPTURE -> labels.scripture
                 Source.SYNAXARIUM -> labels.synaxarium
@@ -366,9 +414,10 @@ object AmharicSearch {
                 snippetMatchStart = snip.matchStart,
                 snippetMatchLen = snip.matchLen,
                 route = doc.routeTo(hit),
+                score = score,
             )
         }
-        return out
+        return out.sortedByDescending { it.score }
     }
 
     /** Text of a section, searchable as one blob (title + subtitle + verses). */

@@ -27,6 +27,11 @@ import com.agpeya.app.ui.common.SinqCard
 import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
 import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.EventNote
+import androidx.compose.material.icons.outlined.LibraryMusic
+import androidx.compose.material.icons.outlined.LocalDrink
+import androidx.compose.material.icons.outlined.WbTwilight
 
 /** ቤተ መጻሕፍት — Scripture is one entry; its categories live in its hub. */
 @Composable
@@ -75,14 +80,14 @@ fun LibraryScreen(
                 )
             }
             item {
-                LibraryCard(icon = Icons.AutoMirrored.Outlined.MenuBook, title = s.wudaseMariam, subtitle = s.wudaseScheduleSubtitle, onClick = onOpenWudase)
+                LibraryCard(icon = Icons.Outlined.LibraryMusic, title = s.wudaseMariam, subtitle = s.wudaseScheduleSubtitle, onClick = onOpenWudase)
             }
             item {
-                LibraryCard(icon = Icons.AutoMirrored.Outlined.MenuBook, title = s.zewotrTselot, subtitle = s.zewotrSubtitle, onClick = onOpenZewotr)
+                LibraryCard(icon = Icons.Outlined.WbTwilight, title = s.zewotrTselot, subtitle = s.zewotrSubtitle, onClick = onOpenZewotr)
             }
             item {
                 LibraryCard(
-                    icon = Icons.AutoMirrored.Outlined.MenuBook,
+                    icon = Icons.Outlined.CalendarMonth,
                     title = s.bahreHasabTitle,
                     subtitle = s.bahreHasabSubtitle,
                     onClick = onOpenBahreHasab,
@@ -90,7 +95,7 @@ fun LibraryScreen(
             }
             item {
                 LibraryCard(
-                    icon = Icons.AutoMirrored.Outlined.MenuBook,
+                    icon = Icons.Outlined.EventNote,
                     title = s.readingTitle,
                     subtitle = s.readingIntro,
                     onClick = onOpenReading,
@@ -107,7 +112,7 @@ fun LibraryScreen(
             }
             item {
                 LibraryCard(
-                    icon = Icons.AutoMirrored.Outlined.MenuBook,
+                    icon = Icons.Outlined.LocalDrink,
                     title = s.kurbanPrepTitle,
                     subtitle = "${s.kurbanPrepDesc} · ${s.comingSoon}",
                     onClick = onOpenKurban,

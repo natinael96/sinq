@@ -17,6 +17,7 @@ class SynaxariumSearchTest {
             .map(::File).first { it.isDirectory }
     private val labels = AmharicSearch.Labels(
         psalter = "መዝሙር",
+        psalterGeez = "መዝሙር · ግዕዝ",
         scripture = "መጽሐፍ ቅዱስ",
         synaxarium = "ስንክሳር",
         wudase = "ውዳሴ ማርያም",
