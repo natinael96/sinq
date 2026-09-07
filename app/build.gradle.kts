@@ -20,11 +20,17 @@ fun signingValue(property: String, envVar: String): String? =
     keystoreProperties.getProperty(property) ?: System.getenv(envVar)
 
 android {
+    // Where the Kotlin lives. Deliberately NOT renamed alongside applicationId:
+    // it is invisible outside the source tree, and moving every file to say
+    // com/sinq/app would be a diff the size of the app for no one's benefit.
     namespace = "com.agpeya.app"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.agpeya.app"
+        // The identity Play and Android know the app by, and the one thing here
+        // that can never be changed again once a listing exists. Sinq is the
+        // app's name, so this is the name it registers under.
+        applicationId = "com.sinq.app"
         // Android 6.0. Below this the alarm architecture loses the APIs it is
         // built on (setAndAllowWhileIdle, FLAG_IMMUTABLE, the battery-optimisation
         // settings screen), all of which arrived in 23. java.time and
@@ -37,6 +43,19 @@ android {
         versionCode = 62
         versionName = "1.7.4"
 
+        // ስንቅ ships two ways, and only one of them may mention GitHub.
+        //
+        // A hand-installed build has to announce its own updates: nothing else
+        // will. A Play install must not — Play forbids an app pointing people at
+        // application downloads outside the store, and Play updates it anyway.
+        //
+        // Off unless -PupdateNotice is passed, so the failure mode of a forgotten
+        // flag is a missing notice on GitHub, never a policy breach on Play.
+        buildConfigField(
+            "boolean",
+            "UPDATE_NOTICE",
+            project.hasProperty("updateNotice").toString(),
+        )
     }
 
     signingConfigs {
@@ -80,6 +99,8 @@ android {
     }
     buildFeatures {
         compose = true
+        // For UPDATE_NOTICE, above.
+        buildConfig = true
     }
 }
 

@@ -127,6 +127,21 @@ features; `versionCode` increments on every release).
   citation of what is selected. Readers whose unit is a paragraph simply have no
   colour row. The four highlight colours can be named (ተስፋ, ትእዛዝ, ጸሎት, ማስተዋል,
   or anything else) and the name shows under the swatch.
+- **"Change day" opens the Church's calendar.** ግጻዌ is dated ጳጉሜን ፪ and cited
+  in Ge'ez numerals, and its date button opened a Gregorian grid of Arabic
+  digits — so finding መስከረም ፩ meant knowing it falls on 11 September, which is
+  the arithmetic this app exists to do for you. Thirteen months, Ge'ez numerals,
+  and ጳጉሜን with its five days or six.
+- **One liturgy, one name.** The lectionary writes the anaphora as free text and
+  does it 120 ways across the year for thirteen anaphoras — with and without the
+  ዘ- prefix, as the council's number or its byname, with the incipit in brackets,
+  with ጐ or ጎ, and with half a dozen typos. The ግጻዌ header printed each variant
+  verbatim, so one ቅዳሴ appeared under four names in a week. It is named once now,
+  with its incipit beside it.
+- **The app starts in English.** It followed the phone, so an Amharic device
+  opened it in Amharic before anyone had chosen anything. አማርኛ is the first
+  choice on the settings page for whoever wants it; the prayer text is Amharic
+  and Ge'ez either way.
 - **ፍለጋ ranks what it finds, and reads Ge'ez numerals.** Corpus order was the
   only order, so a search for a book's own name led with whatever the bundle
   listed first; a title match now leads, then a whole word, then a fragment

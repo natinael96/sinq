@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
         consumeDeepLink(intent)
         setContent {
             val themeChoice by SettingsRepository.theme(this).collectAsState(initial = ThemeChoice.SYSTEM)
-            val language by SettingsRepository.language(this).collectAsState(initial = Language.SYSTEM)
+            val language by SettingsRepository.language(this).collectAsState(initial = SettingsRepository.DEFAULT_LANGUAGE)
             val readingFont by SettingsRepository.readingFont(this)
                 .collectAsState(initial = com.agpeya.app.data.ReadingFont.ABYSSINICA)
             val readingLineSpacing by SettingsRepository.readingLineSpacing(this)

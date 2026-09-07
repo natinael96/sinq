@@ -60,7 +60,7 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
     val s = LocalStrings.current
     val theme by SettingsRepository.theme(context).collectAsState(initial = ThemeChoice.SYSTEM)
-    val language by SettingsRepository.language(context).collectAsState(initial = Language.SYSTEM)
+    val language by SettingsRepository.language(context).collectAsState(initial = SettingsRepository.DEFAULT_LANGUAGE)
     val font by SettingsRepository.readingFont(context).collectAsState(initial = ReadingFont.ABYSSINICA)
     val fontStep by SettingsRepository.fontStep(context).collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
     val prayerLevel by SettingsRepository.prayerLevel(context).collectAsState(initial = PrayerLevel.FULL)

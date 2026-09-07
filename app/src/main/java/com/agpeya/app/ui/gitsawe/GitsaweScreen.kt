@@ -276,19 +276,18 @@ fun GitsaweScreen(
     }
 
     if (showPicker) {
-        val pickerState = rememberDatePickerState(initialSelectedDateMillis = epochDay * 86_400_000L)
-        DatePickerDialog(
-            onDismissRequest = { showPicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    pickerState.selectedDateMillis?.let { epochDay = it / 86_400_000L }
-                    showPicker = false
-                }) { Text(s.ok) }
+        // The Church's own calendar. Every date on this page is Ethiopian and
+        // every number Ge'ez; "change day" used to open a Gregorian grid of
+        // Arabic digits, so finding መስከረም ፩ meant knowing it is 11 September —
+        // the arithmetic this app exists to do for the reader.
+        com.agpeya.app.ui.common.EthiopianDatePickerDialog(
+            initial = java.time.LocalDate.ofEpochDay(epochDay),
+            onDismiss = { showPicker = false },
+            onSelect = {
+                epochDay = it.toEpochDay()
+                showPicker = false
             },
-            dismissButton = {
-                TextButton(onClick = { showPicker = false }) { Text(s.cancel) }
-            },
-        ) { DatePicker(state = pickerState) }
+        )
     }
 }
 
@@ -701,10 +700,19 @@ private fun gitsaweShareBody(services: GitsaweServices): String = buildString {
 }
 
 /** The day's appointed ቅዳሴ chants, across all available offices, deduplicated. */
+/**
+ * The day's ቅዳሴ, named once each.
+ *
+ * The lectionary writes the anaphora as free text — 120 spellings across the
+ * year for thirteen anaphoras — and the three services often repeat it. The
+ * header printed every variant verbatim, so one liturgy appeared under four
+ * names in a week. [com.agpeya.app.data.Anaphora] resolves them.
+ */
 private fun dayChants(services: GitsaweServices?): List<String> =
-    ((services?.negh?.kidassie ?: emptyList()) +
-        (services?.kidassie?.kidassie ?: emptyList()) +
-        (services?.serk?.kidassie ?: emptyList()))
-        .map { it.trim() }
-        .filter { it.isNotEmpty() }
-        .distinct()
+    com.agpeya.app.data.Anaphora.allOf(
+        ((services?.negh?.kidassie ?: emptyList()) +
+            (services?.kidassie?.kidassie ?: emptyList()) +
+            (services?.serk?.kidassie ?: emptyList()))
+            .map { it.trim() }
+            .filter { it.isNotEmpty() },
+    ).map { it.label }

@@ -1000,7 +1000,6 @@ fun RemindersSettingsScreen(
     val titheEntries by SettingsRepository.titheReminders(context).collectAsState(initial = emptyList())
     val vowEntries by com.agpeya.app.data.OfferingRepository.vows(context).collectAsState(initial = emptyList())
     val penanceEntries by com.agpeya.app.data.PenanceRepository.penances(context).collectAsState(initial = emptyList())
-    val updateCheck by SettingsRepository.updateCheck(context).collectAsState(initial = false)
     val alert by SettingsRepository.alarmAlert(context).collectAsState(initial = com.agpeya.app.data.AlarmAlert.SOUND_VIBRATE)
     val sound by SettingsRepository.alarmSound(context).collectAsState(initial = com.agpeya.app.data.AlarmSound.ALARM)
     var soundSheetOpen by remember { mutableStateOf(false) }

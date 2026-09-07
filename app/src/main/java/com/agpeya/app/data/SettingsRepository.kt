@@ -71,7 +71,7 @@ object SettingsRepository {
         val lineSpacing: String = ReadingLineSpacing.NORMAL.name,
         val readingAlignment: String = ReadingAlignment.JUSTIFIED.name,
         val keepScreenOn: Boolean = true,
-        val language: String = Language.SYSTEM.name,
+        val language: String = DEFAULT_LANGUAGE.name,
         val prayerLevel: String = PrayerLevel.FULL.name,
         val alarmAlert: String = AlarmAlert.SOUND_VIBRATE.name,
         val alarmSound: String = AlarmSound.ALARM.name,
@@ -148,11 +148,15 @@ object SettingsRepository {
     private val KEY_VOW_SCHEDULED_IDS = stringPreferencesKey("vow_scheduled_ids")
     private val KEY_PENANCE_SCHEDULED_IDS = stringPreferencesKey("penance_scheduled_ids")
 
-    // On by default. Sinq is installed by hand from GitHub, so an update no one
-    // is told about is an update no one gets — and left opt-in, nobody found the
-    // switch and the notice never appeared for anyone. See UpdateRepository: one
-    // request a day, carrying nothing about the person, and the only one the app
-    // ever makes. Settings can turn it off.
+    // On by default. A hand-installed ስንቅ is one no update can reach on its own,
+    // so an update no one is told about is an update no one gets — and left
+    // opt-in, nobody found the switch and the notice never appeared for anyone.
+    // See UpdateRepository: one request a day, carrying nothing about the
+    // person, and the only one the app ever makes.
+    //
+    // Read but inert in a Play build, where UpdateRepository is compiled dark:
+    // this says whether the person wants the notice, never whether the build is
+    // allowed to show it.
     private val KEY_UPDATE_CHECK = booleanPreferencesKey("update_check")
 
     // The versionCode whose tour has been seen. Written when the tour is
@@ -440,10 +444,22 @@ object SettingsRepository {
         context.settingsDataStore.edit { it[KEY_KEEP_SCREEN_ON] = value }
     }
 
+    /**
+     * English until someone says otherwise.
+     *
+     * It used to follow the device, which meant an Amharic phone opened the app
+     * in Amharic before anyone had chosen anything. The prayer text is Amharic
+     * and Ge'ez whichever way this is set — this is the language of the app's
+     * own words, and English is the one more readers can start from. ገጽታ on the
+     * settings landing is the first thing on the page for whoever wants አማርኛ.
+     */
     fun language(context: Context): Flow<Language> =
         context.settingsDataStore.data.map {
-            runCatching { Language.valueOf(it[KEY_LANGUAGE] ?: "") }.getOrDefault(Language.SYSTEM)
+            runCatching { Language.valueOf(it[KEY_LANGUAGE] ?: "") }.getOrDefault(DEFAULT_LANGUAGE)
         }
+
+    /** The language a fresh install starts in. */
+    val DEFAULT_LANGUAGE = Language.ENGLISH
 
     suspend fun setLanguage(context: Context, value: Language) {
         context.settingsDataStore.edit { it[KEY_LANGUAGE] = value.name }

@@ -49,13 +49,26 @@ jobs:
       - name: Decode signing keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > sinq-upload.jks
 
-      - name: Build signed release APK + AAB
+      # Two runs, because the two artifacts are for two stores and only one of
+      # them may carry the update notice. -PupdateNotice compiles the GitHub
+      # line into the APK; the .aab is built without it, since a Play build that
+      # points at a page of APKs is a policy breach. Do not merge these back
+      # into one invocation — the flag applies to everything a run produces.
+      - name: Build signed release APK (hand-installed, with update notice)
         env:
           SINQ_KEYSTORE_FILE: sinq-upload.jks
           SINQ_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           SINQ_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           SINQ_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew assembleRelease bundleRelease --no-daemon
+        run: ./gradlew assembleRelease -PupdateNotice --no-daemon
+
+      - name: Build signed release AAB (Play upload, no update notice)
+        env:
+          SINQ_KEYSTORE_FILE: sinq-upload.jks
+          SINQ_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          SINQ_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          SINQ_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew bundleRelease --no-daemon
 
       - name: Rename artifacts
         run: |

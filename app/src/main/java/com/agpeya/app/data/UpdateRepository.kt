@@ -7,9 +7,11 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.agpeya.app.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -29,6 +31,13 @@ private val Context.updateDataStore by preferencesDataStore(name = "updates")
  * there is no background worker and no scheduler. The check runs at launch, at
  * most once a day, and fails silently — an update notice is not worth an error
  * message, and a person praying offline should never learn that from ስንቅ.
+ *
+ * All of that is for the hand-installed build alone. A build from Play compiles
+ * with `BuildConfig.UPDATE_NOTICE` false and this object goes dark: no request,
+ * no stored release, no line — because pointing a Play install at a page of
+ * APKs is exactly what the store forbids, and Play already updates itself. The
+ * gate sits here rather than at the two call sites so there is one place to be
+ * right about, and every caller is right by construction.
  */
 object UpdateRepository {
 
@@ -50,7 +59,8 @@ object UpdateRepository {
      * of the time, and draws nothing.
      */
     fun available(context: Context): Flow<Available?> =
-        context.updateDataStore.data.map { prefs ->
+        if (!BuildConfig.UPDATE_NOTICE) flowOf(null)
+        else context.updateDataStore.data.map { prefs ->
             val latest = prefs[KEY_LATEST_VERSION].orEmpty()
             if (latest.isBlank()) return@map null
             if (prefs[KEY_DISMISSED] == latest) return@map null
@@ -83,6 +93,7 @@ object UpdateRepository {
      * parse — is swallowed: the line simply does not appear.
      */
     suspend fun check(context: Context, enabled: Boolean, now: Long = System.currentTimeMillis()) {
+        if (!BuildConfig.UPDATE_NOTICE) return
         if (!enabled) return
         val prefs = context.updateDataStore.data.first()
         val etag = prefs[KEY_ETAG].orEmpty()
