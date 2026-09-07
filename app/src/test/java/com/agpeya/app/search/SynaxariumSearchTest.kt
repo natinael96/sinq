@@ -41,13 +41,18 @@ class SynaxariumSearchTest {
     )
 
     @Test
-    fun `every Sinkisar entry has a unique result identity and valid day route`() {
+    fun `every Sinkisar entry has a unique result identity and lands on its own entry`() {
         assertTrue(docs.isNotEmpty())
         assertEquals(docs.size, docs.map { it.targetId }.toSet().size)
-        docs.forEach { doc ->
+        docs.forEachIndexed { index, doc ->
             assertEquals(AmharicSearch.Source.SYNAXARIUM, doc.source)
-            val epochDay = doc.route.removePrefix("synaxarium/").toLong()
-            LocalDate.ofEpochDay(epochDay) // must be navigable by MainActivity
+            // "synaxarium/<epochDay>?entry=<ordinal>" — the day to open and the
+            // commemoration inside it, both of which MainActivity must accept.
+            val (day, entry) = doc.route.removePrefix("synaxarium/").split("?entry=")
+            LocalDate.ofEpochDay(day.toLong())
+            assertTrue("entry ordinal missing at $index", entry.toInt() >= 0)
+            // The ordinal is the one the identity records.
+            assertEquals(doc.targetId.substringAfterLast('-'), entry)
         }
     }
 

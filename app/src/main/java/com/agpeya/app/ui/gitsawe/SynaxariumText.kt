@@ -82,6 +82,7 @@ private fun isProseReturn(line: String): Boolean {
 
 /** The 📖 that prefixes an entry whose body is a quoted scripture passage. */
 private const val SCRIPTURE_MARKER = "📖" // 📖
+private const val LIST_MARKER = "📌" // 📌
 
 enum class SynaxariumParaKind { NARRATIVE, ARKE_LABEL, ARKE_VERSE }
 
@@ -103,6 +104,51 @@ fun cleanSynaxariumText(raw: String): String =
 /** True when [rawTitle] marks a scripture-quote entry (📖 prefix in the source). */
 fun isScriptureEntry(rawTitle: String): Boolean =
     rawTitle.trimStart().startsWith(SCRIPTURE_MARKER)
+
+/**
+ * What kind of thing an entry of the day is.
+ *
+ * The source calls all 2,308 of them entries and the screen drew all of them
+ * the same way, but they are four different things and only one of them is a
+ * commemoration:
+ *
+ *  - [OPENING] — 361 of the 366 days begin with one, titled "ስንክሳር ዘወርኀ <month>"
+ *    over the day's opening doxology. The title names the month, which the
+ *    page's own header already says, so it is not a heading; the doxology under
+ *    it is.
+ *  - [COMMEMORATION] — 852 of them: a life. Its title is not a heading either,
+ *    it is the sentence the account opens with — "በዚችም ዕለት ቅዱስ ቲቶ ረድእ አረፈ ።"
+ *    reads on from the prose that follows it, and centring it in gold breaks a
+ *    sentence in half.
+ *  - [FEAST_LIST] — 715 of them, marked 📌: names, not prose.
+ *  - [SCRIPTURE] — 380 of them, marked 📖: a quotation.
+ */
+enum class SynaxariumEntryKind { OPENING, COMMEMORATION, FEAST_LIST, SCRIPTURE }
+
+private const val MONTH_HEADING_PREFIX = "ስንክሳር ዘወርኀ"
+
+fun synaxariumEntryKind(rawTitle: String): SynaxariumEntryKind {
+    val t = rawTitle.trimStart()
+    return when {
+        t.startsWith(SCRIPTURE_MARKER) -> SynaxariumEntryKind.SCRIPTURE
+        t.startsWith(LIST_MARKER) -> SynaxariumEntryKind.FEAST_LIST
+        cleanSynaxariumText(t).startsWith(MONTH_HEADING_PREFIX) -> SynaxariumEntryKind.OPENING
+        else -> SynaxariumEntryKind.COMMEMORATION
+    }
+}
+
+/**
+ * A 📌 list's items, one name per line, with the source's own numbering removed.
+ *
+ * The book writes them "፩.ርዕሰ ዓውደ ዓመት"; a list draws its own marks, so keeping
+ * the printed ones would number every item twice.
+ */
+fun synaxariumListItems(rawText: String): List<String> =
+    rawText.split('\n')
+        .map { cleanSynaxariumText(it).replace(LIST_NUMBER, "").trim() }
+        .filter { it.isNotEmpty() }
+
+private val LIST_NUMBER = Regex("""^[፩-፼]+\s*[.።]\s*""")
 
 /**
  * Split [rawText] into display paragraphs. Everything before an `አርኬ` line is

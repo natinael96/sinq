@@ -32,6 +32,7 @@ import androidx.compose.material.icons.outlined.EventNote
 import androidx.compose.material.icons.outlined.LibraryMusic
 import androidx.compose.material.icons.outlined.LocalDrink
 import androidx.compose.material.icons.outlined.WbTwilight
+import androidx.compose.material.icons.outlined.AutoStories
 
 /** ቤተ መጻሕፍት — Scripture is one entry; its categories live in its hub. */
 @Composable
@@ -41,6 +42,7 @@ fun LibraryScreen(
     onOpenZewotr: () -> Unit,
     onOpenBahreHasab: () -> Unit,
     onOpenMahlets: () -> Unit,
+    onOpenSynaxarium: () -> Unit,
     onOpenKurban: () -> Unit,
     onOpenReading: () -> Unit,
     onOpenMarks: () -> Unit,
@@ -85,6 +87,16 @@ fun LibraryScreen(
             }
             item {
                 LibraryCard(icon = Icons.Outlined.WbTwilight, title = s.zewotrTselot, subtitle = s.zewotrSubtitle, onClick = onOpenZewotr)
+            }
+            item {
+                // 1.6 MB and 366 days whose only doors were today's ግጻዌ and a
+                // search hit — the book was not browsable at all.
+                LibraryCard(
+                    icon = Icons.Outlined.AutoStories,
+                    title = s.synaxariumTitle,
+                    subtitle = s.synaxariumLibrarySubtitle,
+                    onClick = onOpenSynaxarium,
+                )
             }
             item {
                 LibraryCard(

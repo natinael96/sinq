@@ -220,7 +220,10 @@ object AmharicSearch {
                             targetId = "$month-${day.day}-$entryIndex",
                             targetIndex = day.day,
                             title = com.agpeya.app.ui.gitsawe.cleanSynaxariumText(entry.title),
-                            route = "synaxarium/$epochDay",
+                            // The entry the hit is in, not just the day: a
+                            // twelve-entry ስንክሳር landed at the top and left the
+                            // reader to find it.
+                            route = "synaxarium/$epochDay?entry=$entryIndex",
                             haystack = hay,
                             folded = fold(hay),
                         ),

@@ -127,12 +127,20 @@ features; `versionCode` increments on every release).
   citation of what is selected. Readers whose unit is a paragraph simply have no
   colour row. The four highlight colours can be named (ተስፋ, ትእዛዝ, ጸሎት, ማስተዋል,
   or anything else) and the name shows under the swatch.
-- **ስንክሳር reads as one page of the book.** Commemorations were told apart by a
-  rule between them and by red — the አርኬ label and its hymn were both drawn in
-  the liturgical red, which made colour carry the structure. The rest after each
-  አርኬ does that work now, and the hymn keeps only its italic and its centring.
-  The bookmark on a scripture commemoration sits in the corner of the passage
-  it marks, rather than floating in a row of its own above it.
+- **ስንክሳር reads as one page of the book.** An entry of the day was drawn one
+  way, but of the 2,308 in the book 852 are a commemoration, 715 are lists of
+  feast names, 380 are scripture quotations and 361 are the day's opening
+  doxology under a heading naming the month. Each is set as what it is now: a
+  life's title opens its first paragraph, because "በዚችም ዕለት ቅዱስ ቲቶ ረድእ አረፈ ።"
+  is the sentence the account begins with and centring it in gold broke a
+  sentence in half; the month heading is gone, since the page already says the
+  day; a list is a list. Colour and a rule no longer carry the structure — the
+  space after each entry does. 59 entries with no text are not drawn.
+- **ስንክሳር can be read through.** ‹ › and the Ethiopian date picker are in its
+  top bar, a contents sheet lists the day's commemorations, and it has a row in
+  ቤተ መጻሕፍት — 1.62 million characters whose only doors were today's ግጻዌ and a
+  search hit. Any commemoration takes a bookmark now, not only the 380
+  scripture quotes.
 - **ሥርዓተ ማኅሌት is on the page.** 37 orders of service and 732 sung parts have
   been shipping inside the app since the lectionary was imported, parsed on
   demand and thrown away because no screen ever asked for them. Now a feast day
@@ -235,6 +243,12 @@ features; `versionCode` increments on every release).
   Latin by the content pipeline and are turned into the Church's own — Amharic
   book, Ge'ez chapter and verse — when the content loads. The ንባብ day and card
   no longer say "2 Kings 24–25" either.
+- **A ስንክሳር search result opens the commemoration it matched.** The index had
+  recorded which entry the hit was in all along, and the route threw it away, so
+  a hit on a twelve-entry day landed at the top.
+- **The reader ⋮ menu copies in the format you set.** It built its own text
+  rather than going through ቅዳና አጋራ, so one passage left the app in two
+  different shapes depending on which control you reached for.
 - **A search result opens the verse it matched**, not the top of its chapter,
   and the first search says it is searching instead of "ምንም አልተገኘም" while the
   bundled books are still being read.

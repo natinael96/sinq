@@ -28,6 +28,7 @@ import android.os.Build
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.IconSize
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.collectAsState
 
 /**
  * The one share affordance every reader's app bar uses: a share icon opening
@@ -111,6 +112,19 @@ fun ReaderToolsMenu(
     val scope = rememberCoroutineScope()
     var open by remember { mutableStateOf(false) }
     var imageBusy by remember { mutableStateOf(false) }
+    // The same format the selection bar uses. The menu built its own text, so
+    // one passage left the app in two different shapes depending on which
+    // control the reader reached for.
+    val format by com.agpeya.app.data.SettingsRepository.copyFormat(context)
+        .collectAsState(initial = CopyFormat())
+    fun textOf(payload: SharePayload): String = PassageFormat.text(
+        Passage(
+            verses = listOf(null to payload.body),
+            citation = payload.title ?: payload.kicker,
+            edition = payload.dateLabel,
+        ),
+        format,
+    )
 
     Box {
         IconButton(onClick = { open = true }) {
@@ -172,7 +186,7 @@ fun ReaderToolsMenu(
                     enabled = shareEnabled,
                     onClick = {
                         open = false
-                        sharePayload()?.let { Sharing.copy(context, it.asText(), s) }
+                        sharePayload()?.let { Sharing.copy(context, textOf(it), s) }
                     },
                 )
                 DropdownMenuItem(
@@ -181,7 +195,7 @@ fun ReaderToolsMenu(
                     enabled = shareEnabled,
                     onClick = {
                         open = false
-                        sharePayload()?.let { Sharing.share(context, it.asText(), it.title ?: it.kicker, s) }
+                        sharePayload()?.let { Sharing.share(context, textOf(it), it.title ?: it.kicker, s) }
                     },
                 )
                 DropdownMenuItem(

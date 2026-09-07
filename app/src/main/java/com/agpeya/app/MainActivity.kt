@@ -508,6 +508,9 @@ private fun AgpeyaNavHost(
                 onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
                 onOpenBahreHasab = { navController.navigate("bahreHasabReference") { launchSingleTop = true } },
                 onOpenMahlets = { navController.navigate("mahlets") { launchSingleTop = true } },
+                onOpenSynaxarium = {
+                    navController.navigate("synaxarium/${java.time.LocalDate.now().toEpochDay()}") { launchSingleTop = true }
+                },
                 onOpenKurban = { navController.navigate("communionPrep") { launchSingleTop = true } },
                 onOpenReading = { navController.navigate("reading") { launchSingleTop = true } },
                 onOpenMarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
@@ -654,11 +657,15 @@ private fun AgpeyaNavHost(
             )
         }
         composable(
-            route = "synaxarium/{epochDay}",
-            arguments = listOf(navArgument("epochDay") { type = NavType.LongType }),
+            route = "synaxarium/{epochDay}?entry={entry}",
+            arguments = listOf(
+                navArgument("epochDay") { type = NavType.LongType },
+                navArgument("entry") { type = NavType.IntType; defaultValue = -1 },
+            ),
         ) { backStackEntry ->
             com.agpeya.app.ui.gitsawe.SynaxariumScreen(
                 epochDay = backStackEntry.arguments?.getLong("epochDay") ?: 0L,
+                initialEntry = backStackEntry.arguments?.getInt("entry") ?: -1,
                 onBack = { navController.popBackStack() },
             )
         }

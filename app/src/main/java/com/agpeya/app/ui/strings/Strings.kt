@@ -130,6 +130,8 @@ interface Strings {
     val markAction: String
     /** The edition's own cross references, and the chapter stepper's two ends. */
     val crossRefsTitle: String
+    /** ስንክሳር's own row in ቤተ መጻሕፍት. */
+    val synaxariumLibrarySubtitle: String
     /** ሥርዓተ ማኅሌት — the orders of service sung on a feast. */
     val mahletTitle: String
     val mahletSubtitle: String
@@ -920,6 +922,7 @@ object AmharicStrings : Strings {
     override val markAction = "ምልክት"
     override val crossRefsTitle = "የጥቅስ ማጣቀሻዎች"
     override val mahletTitle = "ሥርዓተ ማኅሌት"
+    override val synaxariumLibrarySubtitle = "የዓመቱ የቅዱሳን መታሰቢያ"
     override val mahletSubtitle = "የበዓላት ማኅሌትና ዋዜማ"
     override val mahletVigil = "ዋዜማ"
     override val mahletDawn = "ነግሥ"
@@ -1652,6 +1655,7 @@ object EnglishStrings : Strings {
     override val markAction = "Mark"
     override val crossRefsTitle = "Cross references"
     override val mahletTitle = "ሥርዓተ ማኅሌት"
+    override val synaxariumLibrarySubtitle = "The year's commemorations"
     override val mahletSubtitle = "Orders of service for the feasts"
     override val mahletVigil = "ዋዜማ"
     override val mahletDawn = "ነግሥ"
