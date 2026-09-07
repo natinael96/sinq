@@ -1,6 +1,8 @@
 package com.agpeya.app.ui.reading
 
 import com.agpeya.app.model.Section
+import com.agpeya.app.ui.common.CopyFormat
+import com.agpeya.app.ui.common.PassageFormat
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -48,19 +50,28 @@ class VerseSelectionTest {
     }
 
     @Test
-    fun `share text carries the title and every selected verse with its numeral`() {
-        val text = verseShareText(listOf(psalm), "ps_23:1", "ps_23:2")!!
-        assertEquals("መዝሙር ፳፫\n፩  የመጀመሪያ ጥቅስ\n፪  ሁለተኛ ጥቅስ", text)
-        // Single verse — unchanged from the pre-range behaviour.
-        assertEquals("መዝሙር ፳፫\n፫  ሦስተኛ ጥቅስ", verseShareText(listOf(psalm), "ps_23:3"))
+    fun `the passage carries every selected verse with the number it has`() {
+        val passage = versePassage(listOf(psalm), "ps_23:1", "ps_23:2")!!
+        assertEquals(listOf(1 to "የመጀመሪያ ጥቅስ", 2 to "ሁለተኛ ጥቅስ"), passage.verses)
+        assertEquals("መዝሙር ፳፫", passage.citation)
+        assertEquals(
+            "፩  የመጀመሪያ ጥቅስ\n፪  ሁለተኛ ጥቅስ\n— መዝሙር ፳፫",
+            PassageFormat.text(passage, CopyFormat()),
+        )
     }
 
     @Test
-    fun `the payload body is the run and the kicker survives`() {
-        val payload = versePayload(listOf(psalm), "ps_23:2", "መዝሙረ ዳዊት", "ps_23:3")!!
-        assertEquals("፪  ሁለተኛ ጥቅስ\n፫  ሦስተኛ ጥቅስ", payload.body)
-        assertEquals("መዝሙረ ዳዊት", payload.kicker)
-        assertEquals("መዝሙር ፳፫", payload.title)
+    fun `a reader that knows its book names the exact range`() {
+        val passage = versePassage(
+            sections = listOf(psalm),
+            verseKey = "ps_23:2",
+            endKey = "ps_23:3",
+            edition = "ግዕዝ ፲፱፻፹",
+        ) { section, range ->
+            com.agpeya.app.data.Citation.of("መዝሙር", section.number!!, range.first, range.last)
+        }!!
+        assertEquals("መዝሙር ፳፫፥፪–፫", passage.citation)
+        assertEquals("ግዕዝ ፲፱፻፹", passage.edition)
     }
 
     @Test
@@ -85,16 +96,14 @@ class VerseSelectionTest {
     }
 
     @Test
-    fun `shared scripture selection includes its reference`() {
-        val gospel = psalm.copy(title = "ወንጌል", reference = "Luke 2:25-32")
-        val text = verseShareText(listOf(gospel), "ps_23:1")!!
-        assertTrue(text.startsWith("ወንጌል — Luke 2:25-32\n"))
-        assertEquals("ወንጌል — Luke 2:25-32", versePayload(listOf(gospel), "ps_23:1", null)!!.title)
+    fun `an hour's passage is named by the reference the prayer book gave it`() {
+        val gospel = psalm.copy(title = "ወንጌል", reference = "የሉቃስ ወንጌል ፪፥፳፭–፴፪")
+        assertEquals("ወንጌል — የሉቃስ ወንጌል ፪፥፳፭–፴፪", versePassage(listOf(gospel), "ps_23:1")!!.citation)
     }
 
     @Test
     fun `an unknown section or malformed key resolves to nothing`() {
-        assertNull(verseShareText(listOf(psalm), "missing:1", "missing:2"))
-        assertNull(versePayload(listOf(psalm), "ps_23:notanumber", null))
+        assertNull(versePassage(listOf(psalm), "missing:1", "missing:2"))
+        assertNull(versePassage(listOf(psalm), "ps_23:notanumber"))
     }
 }

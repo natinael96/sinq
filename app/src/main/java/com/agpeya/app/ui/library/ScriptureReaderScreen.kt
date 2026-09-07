@@ -107,12 +107,7 @@ fun ScriptureReaderScreen(
     val fontStep by SettingsRepository.fontStep(context).collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
 
-    val haptics = LocalHapticFeedback.current
-    val bookmarks by UserDataRepository.bookmarks(context).collectAsState(initial = emptyList())
     val highlights by HighlightRepository.highlights(context).collectAsState(initial = emptyMap())
-    val bookmarkedIds = remember(bookmarks) {
-        bookmarks.filter { it.hourId == "scripture_library" }.mapTo(HashSet()) { it.sectionId }
-    }
 
     val b = bookResult?.getOrNull() ?: run {
         // Keep a back arrow visible: if the book never loads (stale bookmark,
@@ -200,10 +195,19 @@ fun ScriptureReaderScreen(
     val selRange = com.agpeya.app.ui.reading.flatSelectionRange(selA, selB)
     val sinq = sinqColors
     val chapterTitle = "${b.nameAm} ${s.chapterUnit} ${geezNumeral(chapter)}"
-    val selBody = if (selRange.isEmpty()) null
-    else current.verses.filter { it.n in selRange }
-        .joinToString("\n") { "${geezNumeral(it.n)}  ${it.text}" }
-        .ifBlank { null }
+    // The selection as the Church names it: the book's Amharic name, the
+    // chapter and the verses, in Ge'ez numerals — the same string the copy, the
+    // share, the image card and the bookmark all carry.
+    val selPassage = if (selRange.isEmpty()) null else {
+        val verses = current.verses.filter { it.n in selRange }
+        if (verses.isEmpty()) null else com.agpeya.app.ui.common.Passage(
+            verses = verses.map { it.n as Int? to it.text },
+            citation = com.agpeya.app.data.Citation.of(b.nameAm, chapter, selRange.first, selRange.last),
+            edition = s.amharicEdition,
+        )
+    }
+    val selRoute = "scripture/$bookKey/$chapter" +
+        if (selRange.isEmpty()) "" else "?start=${selRange.first}&end=${selRange.last}"
 
     // Land on the cited verse when opened from a reading link — once. Without the
     // guard, paging away and back to this chapter re-ran the jump mid-reading.
@@ -224,32 +228,12 @@ fun ScriptureReaderScreen(
                 title = b.nameAm,
                 subtitle = "${s.chapterUnit} ${geezNumeral(chapter)}",
                 onBack = onBack,
+                // The top bar has no bookmark of its own any more. It could
+                // only ever mark a whole chapter, which is not the grain anyone
+                // reads at; the selection bar marks what was actually chosen,
+                // and it is the same control in every reader. Chapter bookmarks
+                // already saved keep working and keep opening the chapter.
                 actions = {
-                    val sectionId = "scripture:$bookKey:$chapter"
-                    val marked = sectionId in bookmarkedIds
-                    IconButton(onClick = {
-                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        scope.launch {
-                            UserDataRepository.toggleBookmark(
-                                context,
-                                Bookmark(
-                                    hourId = "scripture_library",
-                                    hourName = s.bookmarkGroupScripture,
-                                    sectionId = sectionId,
-                                    title = "${b.nameAm} ${s.chapterUnit} ${geezNumeral(chapter)}",
-                                    route = "scripture/$bookKey/$chapter",
-                                ),
-                            )
-                        }
-                    }) {
-                        Icon(
-                            imageVector = if (marked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-                            contentDescription = if (marked) s.removeAction else s.bookmarkAction,
-                            tint = if (marked) MaterialTheme.colorScheme.secondary
-                            else MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(IconSize.medium),
-                        )
-                    }
                     com.agpeya.app.ui.common.ReaderToolsMenu(
                         fontStep = fontStep,
                         maxFontStep = FONT_STEPS_SP.lastIndex,
@@ -278,8 +262,9 @@ fun ScriptureReaderScreen(
             )
         },
         bottomBar = {
-            com.agpeya.app.ui.reading.HighlightBar(
+            com.agpeya.app.ui.reading.SelectionBar(
                 visible = selA >= 0,
+                passage = selPassage,
                 currentColor = selA.takeIf { it >= 0 }
                     ?.let { highlights[HighlightRepository.verseKey(highlightSectionId, it)] },
                 onPick = { colorKey ->
@@ -293,13 +278,34 @@ fun ScriptureReaderScreen(
                     }
                 },
                 onDismiss = { selA = -1; selB = -1 },
-                shareText = selBody?.let { "$chapterTitle\n$it" },
-                shareImage = selBody?.let {
-                    com.agpeya.app.ui.common.SharePayload(
-                        body = it,
-                        kicker = s.scripturesTitle,
-                        title = chapterTitle,
-                    )
+                imageKicker = s.scripturesTitle,
+                // The bar is the only bookmark control now, so a bookmark is
+                // made at the grain the reader chose rather than always at the
+                // chapter — the route has carried a verse range all along.
+                onBookmark = selPassage?.let { passage ->
+                    {
+                        scope.launch {
+                            UserDataRepository.toggleBookmark(
+                                context,
+                                com.agpeya.app.model.Bookmark(
+                                    hourId = "scripture_library",
+                                    hourName = s.scripturesTitle,
+                                    sectionId = "$bookKey:$chapter:${selRange.first}-${selRange.last}",
+                                    sectionIndex = chapter,
+                                    title = passage.citation ?: chapterTitle,
+                                    subtitle = passage.verses.firstOrNull()?.second,
+                                    route = selRoute,
+                                ),
+                            )
+                        }
+                        selA = -1; selB = -1
+                    }
+                },
+                onWriteNote = selPassage?.let { passage ->
+                    {
+                        onWriteNote(selRoute, passage.citation ?: chapterTitle)
+                        selA = -1; selB = -1
+                    }
                 },
             )
         },

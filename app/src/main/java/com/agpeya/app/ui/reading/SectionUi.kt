@@ -75,6 +75,9 @@ import com.agpeya.app.ui.theme.inReadingFont
 import com.agpeya.app.ui.theme.readingBodyStyle
 import com.agpeya.app.ui.theme.sinqColors
 import kotlinx.coroutines.launch
+import com.agpeya.app.ui.common.Passage
+import androidx.compose.material.icons.outlined.EditNote
+import androidx.compose.runtime.collectAsState
 
 /**
  * Section rendering shared by the hour reader, the Psalter and the scripture
@@ -297,21 +300,35 @@ fun FontSizeActions(fontStep: Int, maxStep: Int, onChange: (Int) -> Unit) {
 }
 
 /**
- * The bar that appears when a verse is tapped: pick a highlight, copy, share, or
- * clear. It slides up from the bottom edge — the shortest possible distance —
- * and every action closes it, so it is never something to dismiss twice.
+ * The bar that appears when a unit of text is selected.
+ *
+ * One bar for every reader — the lesson YouVersion teaches best. Tap a verse in
+ * the Bible, a psalm in ዳዊት, a verse inside ጸሎተ ነግህ, a paragraph of ስንክሳር, and
+ * the same actions appear in the same order, so nobody has to learn which
+ * reader they are standing in. Readers whose unit is a paragraph simply have no
+ * colour row; everything below it is identical.
+ *
+ * It slides up from the bottom edge — the shortest possible distance — and
+ * every action closes it, so it is never something to dismiss twice.
+ *
+ * The citation sits at the top, where it does two jobs: it says what is
+ * selected, and it shows where a run stops, since a selection cannot cross a
+ * section boundary.
  */
 @Composable
-internal fun HighlightBar(
+internal fun SelectionBar(
     visible: Boolean,
-    currentColor: String?,
-    onPick: (String?) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
-    /** The tapped verse, ready to copy or share; null hides those actions. */
-    shareText: String? = null,
-    /** The same verse as a card payload; null hides the share-as-image action. */
-    shareImage: com.agpeya.app.ui.common.SharePayload? = null,
+    /** The selection itself; null leaves the bar with nothing to act on. */
+    passage: com.agpeya.app.ui.common.Passage? = null,
+    /** Null hides the colour row — the paragraph readers. */
+    currentColor: String? = null,
+    onPick: ((String?) -> Unit)? = null,
+    /** Names the source on the image card: the hour, the Psalter, መጽሐፍ ቅዱስ. */
+    imageKicker: String? = null,
+    onBookmark: (() -> Unit)? = null,
+    onWriteNote: (() -> Unit)? = null,
 ) {
     val motion = LocalMotion.current
     AnimatedVisibility(
@@ -321,8 +338,12 @@ internal fun HighlightBar(
         exit = slideOutVertically(motion.spec(Motion.fast)) { it } + fadeOut(motion.spec(Motion.fast)),
     ) {
         val s = LocalStrings.current
-        val haptics = LocalHapticFeedback.current
-        val sinq = sinqColors
+        val ctx = androidx.compose.ui.platform.LocalContext.current
+        val scope = androidx.compose.runtime.rememberCoroutineScope()
+        val format by com.agpeya.app.data.SettingsRepository.copyFormat(ctx)
+            .collectAsState(initial = com.agpeya.app.ui.common.CopyFormat())
+        val names by com.agpeya.app.data.SettingsRepository.highlightNames(ctx)
+            .collectAsState(initial = emptyMap())
         Surface(
             modifier = Modifier.navigationBarsPadding(),
             shadowElevation = 8.dp,
@@ -334,45 +355,15 @@ internal fun HighlightBar(
                     .fillMaxWidth()
                     .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    HighlightRepository.COLOR_KEYS.forEach { key ->
-                        val selected = key == currentColor
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(CircleShape)
-                                .semantics { contentDescription = "${s.highlight}: ${s.highlightColor(key)}" }
-                                .clickable {
-                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                    onPick(key)
-                                },
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Box(
-                                Modifier
-                                    .size(32.dp)
-                                    .clip(CircleShape)
-                                    .background(highlightSwatch(key, sinq.highlight(key)))
-                                    .then(
-                                        if (selected) Modifier.border(2.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
-                                        else Modifier
-                                    ),
-                            )
-                        }
-                    }
-                    Spacer(Modifier.weight(1f))
-                    IconButton(onClick = { onPick(null) }) {
-                        Icon(
-                            Icons.Outlined.FormatColorReset,
-                            contentDescription = s.removeHighlight,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(IconSize.medium),
-                        )
-                    }
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = passage?.let { com.agpeya.app.ui.common.PassageFormat.heading(it) }.orEmpty(),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.secondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
+                    )
                     IconButton(onClick = onDismiss) {
                         Icon(
                             Icons.Outlined.Close,
@@ -382,40 +373,148 @@ internal fun HighlightBar(
                         )
                     }
                 }
-                if (shareText != null) {
-                    val ctx = androidx.compose.ui.platform.LocalContext.current
-                    val scope = androidx.compose.runtime.rememberCoroutineScope()
+                if (onPick != null) {
+                    HighlightRow(
+                        currentColor = currentColor,
+                        names = names,
+                        onPick = onPick,
+                    )
+                }
+                if (passage != null) {
+                    val text = com.agpeya.app.ui.common.PassageFormat.text(passage, format)
+                    val payload = com.agpeya.app.ui.common.SharePayload(
+                        body = com.agpeya.app.ui.common.PassageFormat.body(
+                            passage,
+                            // The card is a picture of the text, so it keeps its
+                            // verse numbers whatever the copy format says.
+                            format.copy(verseNumbers = true),
+                        ),
+                        kicker = imageKicker,
+                        title = com.agpeya.app.ui.common.PassageFormat.heading(passage),
+                    )
                     val imageBusy = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+                    fun image(run: suspend () -> Unit): () -> Unit = {
+                        onDismiss()
+                        if (!imageBusy.value) scope.launch {
+                            imageBusy.value = true
+                            try { run() } finally { imageBusy.value = false }
+                        }
+                    }
                     SelectionActions(
-                        onCopy = {
-                            com.agpeya.app.ui.common.Sharing.copy(ctx, shareText, s)
-                            onDismiss()
-                        },
-                        onShare = {
-                            com.agpeya.app.ui.common.Sharing.share(ctx, shareText, strings = s)
-                            onDismiss()
-                        },
-                        onShareImage = shareImage?.let { payload ->
-                            {
-                                onDismiss()
-                                if (!imageBusy.value) scope.launch {
-                                    imageBusy.value = true
-                                    try { com.agpeya.app.ui.common.PassageShare.share(ctx, payload, s) } finally { imageBusy.value = false }
-                                }
+                        buildList {
+                            onBookmark?.let {
+                                add(SelectionAct(s.markAction, Icons.Outlined.BookmarkBorder) { onDismiss(); it() })
                             }
-                        },
-                        onSaveImage = shareImage?.takeIf { android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q }?.let { payload ->
-                            {
-                                onDismiss()
-                                if (!imageBusy.value) scope.launch {
-                                    imageBusy.value = true
-                                    try { com.agpeya.app.ui.common.PassageShare.save(ctx, payload, s) } finally { imageBusy.value = false }
-                                }
+                            onWriteNote?.let {
+                                add(SelectionAct(s.noteAction, Icons.Outlined.EditNote) { onDismiss(); it() })
+                            }
+                            add(
+                                SelectionAct(s.copyAction, Icons.Outlined.ContentCopy) {
+                                    com.agpeya.app.ui.common.Sharing.copy(ctx, text, s)
+                                    onDismiss()
+                                },
+                            )
+                            add(
+                                SelectionAct(s.shareAction, Icons.Outlined.Share) {
+                                    com.agpeya.app.ui.common.Sharing.share(ctx, text, strings = s)
+                                    onDismiss()
+                                },
+                            )
+                            add(
+                                SelectionAct(
+                                    s.shareAsImage,
+                                    Icons.Outlined.Image,
+                                    image { com.agpeya.app.ui.common.PassageShare.share(ctx, payload, s) },
+                                ),
+                            )
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                                add(
+                                    SelectionAct(
+                                        s.saveImage,
+                                        Icons.Outlined.SaveAlt,
+                                        image { com.agpeya.app.ui.common.PassageShare.save(ctx, payload, s) },
+                                    ),
+                                )
                             }
                         },
                     )
                 }
             }
+        }
+    }
+}
+
+/**
+ * The four colours, each under the name the reader gave it.
+ *
+ * Olive Tree's lesson: a colour is only worth having if it means something, and
+ * what it means is the reader's to decide. Unnamed, a swatch keeps the colour's
+ * own name, which is at least honest.
+ */
+@Composable
+private fun HighlightRow(
+    currentColor: String?,
+    names: Map<String, String>,
+    onPick: (String?) -> Unit,
+) {
+    val s = LocalStrings.current
+    val haptics = LocalHapticFeedback.current
+    val sinq = sinqColors
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = Spacing.xxs),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+        verticalAlignment = Alignment.Top,
+    ) {
+        HighlightRepository.COLOR_KEYS.forEach { key ->
+            val selected = key == currentColor
+            val label = names[key]?.takeIf { it.isNotBlank() } ?: s.highlightColor(key)
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(MaterialTheme.shapes.small)
+                    .semantics { contentDescription = "${s.highlight}: $label" }
+                    .clickable {
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onPick(key)
+                    }
+                    .padding(vertical = Spacing.xs),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Box(
+                    Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(highlightSwatch(key, sinq.highlight(key)))
+                        .then(
+                            if (selected) Modifier.border(2.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
+                            else Modifier
+                        ),
+                )
+                Spacer(Modifier.height(Spacing.xxs))
+                Text(
+                    label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (selected) MaterialTheme.colorScheme.onSurface
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+        Column(
+            modifier = Modifier
+                .width(48.dp)
+                .clip(MaterialTheme.shapes.small)
+                .clickable { onPick(null) }
+                .padding(vertical = Spacing.xs),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Icon(
+                Icons.Outlined.FormatColorReset,
+                contentDescription = s.removeHighlight,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(32.dp),
+            )
         }
     }
 }
@@ -424,111 +523,30 @@ internal fun HighlightBar(
  * The swatch shown in the picker. Opaque, unlike the tint it applies: a 35%
  * yellow drawn on the sheet would read as "off" rather than as a colour choice.
  */
-private fun highlightSwatch(key: String?, tint: Color): Color =
-    if (tint == Color.Transparent) Color.Gray else tint.copy(alpha = 1f)
+private fun highlightSwatch(key: String?, tint: androidx.compose.ui.graphics.Color): androidx.compose.ui.graphics.Color =
+    if (tint == androidx.compose.ui.graphics.Color.Transparent) androidx.compose.ui.graphics.Color.Gray
+    else tint.copy(alpha = 1f)
 
-/**
- * The text behind a verse key ("<sectionId>:<n>"), formatted for sharing:
- * the section title, then the verse with its Ge'ez numeral.
- */
-/**
- * The share bar for readers whose text has no highlight layer (ስንክሳር, ውዳሴ,
- * the NT reader): the same slide-up surface as [HighlightBar], carrying only
- * dismiss / copy / share / share-as-image for the current selection.
- */
-@Composable
-internal fun SelectionShareBar(
-    visible: Boolean,
-    onDismiss: () -> Unit,
-    modifier: Modifier = Modifier,
-    shareText: String? = null,
-    shareImage: com.agpeya.app.ui.common.SharePayload? = null,
-) {
-    val motion = LocalMotion.current
-    AnimatedVisibility(
-        visible = visible,
-        modifier = modifier,
-        enter = slideInVertically(motion.spec(Motion.standard)) { it } + fadeIn(motion.spec(Motion.fast)),
-        exit = slideOutVertically(motion.spec(Motion.fast)) { it } + fadeOut(motion.spec(Motion.fast)),
-    ) {
-        val s = LocalStrings.current
-        Surface(
-            modifier = Modifier.navigationBarsPadding(),
-            shadowElevation = 8.dp,
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Spacing.xl, vertical = Spacing.sm),
-            ) {
-                val ctx = androidx.compose.ui.platform.LocalContext.current
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    IconButton(onClick = onDismiss) {
-                        Icon(
-                            Icons.Outlined.Close,
-                            contentDescription = s.cancel,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(IconSize.medium),
-                        )
-                    }
-                }
-                if (shareText != null) {
-                    val scope = androidx.compose.runtime.rememberCoroutineScope()
-                    val imageBusy = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
-                    SelectionActions(
-                        onCopy = {
-                            com.agpeya.app.ui.common.Sharing.copy(ctx, shareText, s)
-                            onDismiss()
-                        },
-                        onShare = {
-                            com.agpeya.app.ui.common.Sharing.share(ctx, shareText, strings = s)
-                            onDismiss()
-                        },
-                        onShareImage = shareImage?.let { payload ->
-                            {
-                                onDismiss()
-                                if (!imageBusy.value) scope.launch {
-                                    imageBusy.value = true
-                                    try { com.agpeya.app.ui.common.PassageShare.share(ctx, payload, s) } finally { imageBusy.value = false }
-                                }
-                            }
-                        },
-                        onSaveImage = shareImage?.takeIf { android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q }?.let { payload ->
-                            {
-                                onDismiss()
-                                if (!imageBusy.value) scope.launch {
-                                    imageBusy.value = true
-                                    try { com.agpeya.app.ui.common.PassageShare.save(ctx, payload, s) } finally { imageBusy.value = false }
-                                }
-                            }
-                        },
-                    )
-                }
-            }
-        }
-    }
-}
+/** One action in the bar. */
+private data class SelectionAct(
+    val label: String,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val onClick: () -> Unit,
+)
 
 @Composable
-private fun ColumnScope.SelectionActions(
-    onCopy: () -> Unit,
-    onShare: () -> Unit,
-    onShareImage: (() -> Unit)?,
-    onSaveImage: (() -> Unit)?,
-) {
-    val s = LocalStrings.current
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-        SelectionAction(s.copyAction, Icons.Outlined.ContentCopy, onCopy, Modifier.weight(1f))
-        SelectionAction(s.shareAction, Icons.Outlined.Share, onShare, Modifier.weight(1f))
-    }
-    if (onShareImage != null) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-            SelectionAction(s.shareAsImage, Icons.Outlined.Image, onShareImage, Modifier.weight(1f))
-            if (onSaveImage != null) {
-                SelectionAction(s.saveImage, Icons.Outlined.SaveAlt, onSaveImage, Modifier.weight(1f))
+private fun ColumnScope.SelectionActions(actions: List<SelectionAct>) {
+    if (actions.isEmpty()) return
+    // Five across is the most a phone holds at a 56 dp target; beyond that they
+    // split into two balanced rows rather than shrinking.
+    val perRow = if (actions.size <= 5) actions.size else (actions.size + 1) / 2
+    actions.chunked(perRow).forEach { row ->
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
+            row.forEach { act ->
+                SelectionAction(act.label, act.icon, act.onClick, Modifier.weight(1f))
             }
+            // A short last row keeps its buttons the width of the row above.
+            repeat(perRow - row.size) { Spacer(Modifier.weight(1f)) }
         }
     }
 }
@@ -574,13 +592,31 @@ internal fun flatSelectionRange(anchor: Int, end: Int): IntRange =
     if (anchor < 0) IntRange.EMPTY
     else minOf(anchor, if (end < 0) anchor else end)..maxOf(anchor, if (end < 0) anchor else end)
 
-internal fun verseShareText(
+/**
+ * The selection as a [Passage] — the verses with their own numbers, and the
+ * Church's name for them.
+ *
+ * [citationFor] lets a reader that knows its book and chapter name the exact
+ * range ("የሉቃስ ወንጌል ፲፥፴፰–፵፪"); the hours cannot, since a section there is a
+ * passage the prayer book chose, and its own reference is already the answer.
+ */
+internal fun versePassage(
     sections: List<Section>,
     verseKey: String?,
     endKey: String? = null,
-): String? {
+    edition: String? = null,
+    citationFor: (Section, IntRange) -> String? = { section, _ -> shareHeading(section) },
+): Passage? {
     val (section, range) = resolveSelection(sections, verseKey, endKey) ?: return null
-    return "${shareHeading(section)}\n${versesBody(section, range)}"
+    val verses = range.mapNotNull { n ->
+        section.verses.getOrNull(n - section.firstVerse)?.let { n to it }
+    }
+    if (verses.isEmpty()) return null
+    return Passage(
+        verses = verses.map { (n, text) -> n as Int? to text },
+        citation = citationFor(section, range),
+        edition = edition,
+    )
 }
 
 /** The verse-key pair after a tap: same section extends the run to the tapped
@@ -641,21 +677,4 @@ private fun shareHeading(section: Section): String =
         section.reference?.takeIf { it.isNotBlank() && it != section.title },
     ).joinToString(" — ")
 
-/**
- * The same verse as a [com.agpeya.app.ui.common.SharePayload] for the PNG card:
- * the section title carries the heading, [kicker] names the book it came from
- * (the hour, the Psalter), and the verse keeps its Ge'ez numeral.
- */
-internal fun versePayload(
-    sections: List<Section>,
-    verseKey: String?,
-    kicker: String?,
-    endKey: String? = null,
-): com.agpeya.app.ui.common.SharePayload? {
-    val (section, range) = resolveSelection(sections, verseKey, endKey) ?: return null
-    return com.agpeya.app.ui.common.SharePayload(
-        body = versesBody(section, range),
-        kicker = kicker,
-        title = shareHeading(section),
-    )
-}
+

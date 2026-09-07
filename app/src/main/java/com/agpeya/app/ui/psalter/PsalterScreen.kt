@@ -60,7 +60,7 @@ import com.agpeya.app.data.UserDataRepository
 import com.agpeya.app.model.Bookmark
 import com.agpeya.app.model.Section
 import com.agpeya.app.search.AmharicSearch
-import com.agpeya.app.ui.reading.HighlightBar
+import com.agpeya.app.ui.reading.SelectionBar
 import com.agpeya.app.ui.reading.SectionView
 import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
@@ -279,8 +279,23 @@ fun PsalterScreen(
             )
         },
         bottomBar = {
-            HighlightBar(
+            val selectedPsalm = shown.firstOrNull { it.id == selStart?.substringBeforeLast(':') }
+            com.agpeya.app.ui.reading.SelectionBar(
                 visible = selStart != null,
+                onDismiss = { selStart = null; selEnd = null },
+                // The Psalter is the one shelf with two editions, so its
+                // citation names the one being read — a ግዕዝ verse copied out
+                // should not arrive claiming to be the Amharic.
+                passage = com.agpeya.app.ui.reading.versePassage(
+                    sections = shown,
+                    verseKey = selStart,
+                    endKey = selEnd,
+                    edition = if (geez) s.geezEdition else s.amharicEdition,
+                ) { section, range ->
+                    section.number?.let {
+                        com.agpeya.app.data.Citation.of(s.psalmName, it, range.first, range.last)
+                    } ?: section.title
+                },
                 currentColor = com.agpeya.app.ui.reading.selectionKeys(shown, selStart, null) {
                     if (geez) HighlightRepository.GEEZ_PSALTER_NAMESPACE
                     else HighlightRepository.AMHARIC_PSALTER_NAMESPACE
@@ -295,9 +310,16 @@ fun PsalterScreen(
                         HighlightRepository.setHighlights(context, keys, colorKey)
                     }
                 },
-                onDismiss = { selStart = null; selEnd = null },
-                shareText = com.agpeya.app.ui.reading.verseShareText(shown, selStart, selEnd),
-                shareImage = com.agpeya.app.ui.reading.versePayload(shown, selStart, s.psalterTitle, selEnd),
+                imageKicker = s.psalterTitle,
+                onBookmark = selectedPsalm?.let { section -> { toggleBookmark(section) } },
+                onWriteNote = selectedPsalm?.let { section ->
+                    {
+                        onWriteNote(
+                            "psalter?section=${(section.number ?: 1) - 1}",
+                            section.title,
+                        )
+                    }
+                },
             )
         },
     ) { innerPadding ->

@@ -121,7 +121,22 @@ features; `versionCode` increments on every release).
   now records for itself when the hour is read to its foot. The page's first
   glance could not answer the day's first question before.
 
+- **One selection bar, in every reader.** Tap a verse in the Bible, a psalm in
+  ዳዊት, a verse inside ጸሎተ ነግህ, a paragraph of ስንክሳር or ውዳሴ ማርያም, and the same
+  actions appear in the same order — ምልክት, ማስታወሻ, ቅዳ, አጋራ, ምስል — under the
+  citation of what is selected. Readers whose unit is a paragraph simply have no
+  colour row. The four highlight colours can be named (ተስፋ, ትእዛዝ, ጸሎት, ማስተዋል,
+  or anything else) and the name shows under the swatch.
+- **ቅዳና አጋራ, in ቅንብሮች › ንባብ.** Whether verse numbers, the chapter and verse,
+  and the edition travel with a copied passage is now the reader's choice, shown
+  against a live sample. The Psalter names which edition a verse came from, so a
+  ግዕዝ verse no longer arrives claiming to be the Amharic.
+
 ### Fixed
+- **A bookmark can be a verse.** The Bible reader could only bookmark a whole
+  chapter, from a control in its top bar that no other reader had. The selection
+  bar marks the verses actually chosen, in every reader, and the route it stores
+  reopens them tinted. Chapter bookmarks already saved keep working.
 - **Eight books were headed "null".** `canon.json` writes JSON null for the
   section of every book of church order, and reading it as a string yields the
   four characters "null" rather than nothing — so ዲድስቅልያ, ቀሌምንጦስ and the rest

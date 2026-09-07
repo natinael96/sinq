@@ -126,6 +126,22 @@ interface Strings {
     val showFullPsalms: String
     val readingModeToggle: String
     val bookmarkAction: String
+    /** The selection bar's own two words — short, because they sit under icons. */
+    val markAction: String
+    /** How a single psalm is named in a citation, and the two Psalter editions. */
+    val psalmName: String
+    val geezEdition: String
+    val amharicEdition: String
+    val noteAction: String
+    /** ቅንብሮች › ንባብ › ቅዳና አጋራ. */
+    val copyFormatTitle: String
+    val copyFormatSubtitle: String
+    val copyVerseNumbers: String
+    val copyReference: String
+    val copyEdition: String
+    val copySignatureNote: String
+    val highlightNamesTitle: String
+    val highlightNameFor: String
     val highlight: String
     fun highlightColor(colorKey: String): String
     val removeHighlight: String
@@ -866,6 +882,19 @@ object AmharicStrings : Strings {
     override val showFullPsalms = "ሙሉ መዝሙራት"
     override val readingModeToggle = "የንባብ ሁነታ"
     override val bookmarkAction = "ምልክት አድርግ"
+    override val markAction = "ምልክት"
+    override val psalmName = "መዝሙር"
+    override val geezEdition = "ግዕዝ ፲፱፻፹"
+    override val amharicEdition = "አማርኛ ፲፱፻፹"
+    override val noteAction = "ማስታወሻ"
+    override val copyFormatTitle = "ቅዳና አጋራ"
+    override val copyFormatSubtitle = "ከጥቅሱ ጋር የሚሄደው"
+    override val copyVerseNumbers = "የቁጥር ምልክቶች"
+    override val copyReference = "ምዕራፍና ቁጥር"
+    override val copyEdition = "እትም"
+    override val copySignatureNote = "“— ስንቅ” ሲያጋሩ ብቻ ይታከላል፤ ሲቀዱ አይታከልም።"
+    override val highlightNamesTitle = "የማድመቂያ ስሞች"
+    override val highlightNameFor = "ስም"
     override val highlight = "አድምቅ"
     override fun highlightColor(colorKey: String) = when (colorKey) {
         "yellow" -> "ቢጫ"
@@ -1555,6 +1584,19 @@ object EnglishStrings : Strings {
     override val showFullPsalms = "Full Psalms"
     override val readingModeToggle = "Reading mode"
     override val bookmarkAction = "Bookmark"
+    override val markAction = "Mark"
+    override val psalmName = "መዝሙር"
+    override val geezEdition = "Ge'ez 1980"
+    override val amharicEdition = "Amharic 1980"
+    override val noteAction = "Note"
+    override val copyFormatTitle = "Copy and share"
+    override val copyFormatSubtitle = "What travels with the verse"
+    override val copyVerseNumbers = "Verse numbers"
+    override val copyReference = "Chapter and verse"
+    override val copyEdition = "Edition"
+    override val copySignatureNote = "“— ስንቅ” is added when sharing, never when copying."
+    override val highlightNamesTitle = "Highlight names"
+    override val highlightNameFor = "Name"
     override val highlight = "Highlight"
     override fun highlightColor(colorKey: String) = colorKey.replaceFirstChar { it.uppercase() }
     override val removeHighlight = "Remove highlight"

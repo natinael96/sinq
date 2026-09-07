@@ -378,8 +378,11 @@ fun ReadingScreen(
             )
         },
         bottomBar = {
-            HighlightBar(
+            val selectedSection = sections.firstOrNull { it.id == selStart?.substringBeforeLast(':') }
+            SelectionBar(
                 visible = selStart != null,
+                onDismiss = { selStart = null; selEnd = null },
+                passage = versePassage(sections, selStart, selEnd),
                 currentColor = selectionKeys(sections, selStart, null, highlightNamespaceFor)
                     .firstOrNull()?.let { highlights[it] },
                 onPick = { colorKey ->
@@ -389,9 +392,21 @@ fun ReadingScreen(
                         HighlightRepository.setHighlights(context, keys, colorKey)
                     }
                 },
-                onDismiss = { selStart = null; selEnd = null },
-                shareText = verseShareText(sections, selStart, selEnd),
-                shareImage = versePayload(sections, selStart, hour?.name, selEnd),
+                imageKicker = hour?.name,
+                onBookmark = selectedSection?.let { section ->
+                    { toggleBookmark(section, sections.indexOf(section)) }
+                },
+                onWriteNote = selectedSection?.let { section ->
+                    {
+                        val h = hour
+                        if (h != null) {
+                            onWriteNote(
+                                "reading/${h.id}?sectionId=${android.net.Uri.encode(section.id)}",
+                                "${h.name} · ${section.title}",
+                            )
+                        }
+                    }
+                },
             )
         },
         containerColor = MaterialTheme.colorScheme.background,

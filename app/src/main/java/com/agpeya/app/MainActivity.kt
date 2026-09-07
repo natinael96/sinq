@@ -672,10 +672,14 @@ private fun AgpeyaNavHost(
             com.agpeya.app.ui.settings.ReadingSettingsScreen(
                 onBack = { navController.popBackStack() },
                 onOpenFonts = { navController.navigate("settings/reading/fonts") { launchSingleTop = true } },
+                onOpenCopyFormat = { navController.navigate("settings/reading/copy") { launchSingleTop = true } },
             )
         }
         composable("settings/reading/fonts") {
             com.agpeya.app.ui.settings.ReadingFontScreen(onBack = { navController.popBackStack() })
+        }
+        composable("settings/reading/copy") {
+            com.agpeya.app.ui.settings.CopyFormatScreen(onBack = { navController.popBackStack() })
         }
         composable("settings/prayer") {
             com.agpeya.app.ui.settings.PrayerSettingsScreen(

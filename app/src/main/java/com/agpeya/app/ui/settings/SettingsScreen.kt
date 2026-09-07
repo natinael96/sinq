@@ -79,6 +79,8 @@ import kotlinx.coroutines.launch
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
 
 
 /**
@@ -677,7 +679,7 @@ private fun QuietHoursRow(s: com.agpeya.app.ui.strings.Strings) {
 
 /** Reading-specific preferences, separated from the Settings landing page. */
 @Composable
-fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit) {
+fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCopyFormat: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val s = com.agpeya.app.ui.strings.LocalStrings.current
@@ -781,8 +783,114 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit) {
                     { scope.launch { SettingsRepository.setKeepScreenOn(context, it) } },
                     subtitle = s.keepScreenOnDesc,
                 )
+                NavRow(
+                    title = s.copyFormatTitle,
+                    subtitle = s.copyFormatSubtitle,
+                    onClick = onOpenCopyFormat,
+                )
             }
         }
+    }
+}
+
+/**
+ * ቅዳና አጋራ — what travels with a verse when it leaves.
+ *
+ * Olive Tree and Logos both make this the reader's choice and remember it. A
+ * live sample sits at the top, so the switches are read against the thing they
+ * change rather than against their own labels.
+ */
+@Composable
+fun CopyFormatScreen(onBack: () -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val s = com.agpeya.app.ui.strings.LocalStrings.current
+    val format by SettingsRepository.copyFormat(context)
+        .collectAsState(initial = com.agpeya.app.ui.common.CopyFormat())
+    val names by SettingsRepository.highlightNames(context).collectAsState(initial = emptyMap())
+    var editing by remember { mutableStateOf<String?>(null) }
+
+    val sample = com.agpeya.app.ui.common.Passage(
+        verses = listOf(38 to "ወደ ቤትም ሲገቡ ማርታ የምትባል አንዲት ሴት በቤቷ ተቀበለችው።"),
+        citation = "የሉቃስ ወንጌል ፲፥፴፰",
+        edition = s.amharicEdition,
+    )
+
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = { com.agpeya.app.ui.common.SinqTopBar(s.copyFormatTitle, onBack) },
+    ) { inner ->
+        LazyColumn(
+            Modifier.fillMaxSize().padding(inner),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+        ) {
+            item {
+                com.agpeya.app.ui.common.SinqCard(contentPadding = PaddingValues(16.dp)) {
+                    Text(
+                        com.agpeya.app.ui.common.PassageFormat.text(sample, format),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+                Spacer(Modifier.height(12.dp))
+                ToggleRow(
+                    s.copyVerseNumbers,
+                    format.verseNumbers,
+                    { scope.launch { SettingsRepository.setCopyFormat(context, format.copy(verseNumbers = it)) } },
+                )
+                ToggleRow(
+                    s.copyReference,
+                    format.reference,
+                    { scope.launch { SettingsRepository.setCopyFormat(context, format.copy(reference = it)) } },
+                )
+                ToggleRow(
+                    s.copyEdition,
+                    format.edition,
+                    { scope.launch { SettingsRepository.setCopyFormat(context, format.copy(edition = it)) } },
+                    subtitle = s.amharicEdition,
+                )
+                Text(
+                    s.copySignatureNote,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                )
+                Spacer(Modifier.height(8.dp))
+                SectionHeader(s.highlightNamesTitle)
+            }
+            items(com.agpeya.app.data.HighlightRepository.COLOR_KEYS.size) { i ->
+                val key = com.agpeya.app.data.HighlightRepository.COLOR_KEYS[i]
+                NavRow(
+                    title = names[key]?.takeIf { it.isNotBlank() } ?: s.highlightColor(key),
+                    subtitle = s.highlightColor(key),
+                    onClick = { editing = key },
+                )
+            }
+        }
+    }
+
+    val editKey = editing
+    if (editKey != null) {
+        var text by remember(editKey) { mutableStateOf(names[editKey].orEmpty()) }
+        AlertDialog(
+            onDismissRequest = { editing = null },
+            title = { Text(s.highlightColor(editKey)) },
+            text = {
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    singleLine = true,
+                    label = { Text(s.highlightNameFor) },
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    scope.launch { SettingsRepository.setHighlightName(context, editKey, text) }
+                    editing = null
+                }) { Text(s.save) }
+            },
+            dismissButton = { TextButton(onClick = { editing = null }) { Text(s.cancel) } },
+        )
     }
 }
 

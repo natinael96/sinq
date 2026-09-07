@@ -268,17 +268,17 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
             }
             .joinToString("\n\n")
             .ifBlank { null }
-        com.agpeya.app.ui.reading.SelectionShareBar(
+        com.agpeya.app.ui.reading.SelectionBar(
             visible = selA >= 0,
             onDismiss = { selA = -1; selB = -1 },
-            shareText = selBody?.let { "${s.synaxariumTitle} — ${com.agpeya.app.ui.common.formatEthiopian(date, s)}\n\n$it" },
-            shareImage = selBody?.let {
-                com.agpeya.app.ui.common.SharePayload(
-                    body = it,
-                    kicker = s.synaxariumTitle,
-                    dateLabel = com.agpeya.app.ui.common.formatEthiopian(date, s),
+            // A paragraph reader: the day is the citation.
+            passage = selBody?.let {
+                com.agpeya.app.ui.common.Passage(
+                    verses = listOf(null to it),
+                    citation = "${s.synaxariumTitle}  ·  ${com.agpeya.app.ui.common.formatEthiopian(date, s)}",
                 )
             },
+            imageKicker = s.synaxariumTitle,
             modifier = Modifier.align(Alignment.BottomCenter),
         )
         }

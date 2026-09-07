@@ -104,6 +104,12 @@ object SettingsRepository {
     private val KEY_ALARM_ALERT = stringPreferencesKey("alarm_alert")
     private val KEY_ALARM_SOUND = stringPreferencesKey("alarm_sound")
     private val KEY_MISBAK_LANGUAGE = stringPreferencesKey("misbak_language")
+    // What travels with a copied verse, and what the four highlight colours
+    // are called. Both belong to the reader, not to the app.
+    private val KEY_COPY_VERSE_NUMBERS = booleanPreferencesKey("copy_verse_numbers")
+    private val KEY_COPY_REFERENCE = booleanPreferencesKey("copy_reference")
+    private val KEY_COPY_EDITION = booleanPreferencesKey("copy_edition")
+    private val KEY_HIGHLIGHT_NAMES = stringPreferencesKey("highlight_names")
     private val KEY_ONBOARDED = booleanPreferencesKey("onboarded")
     private val KEY_NAME = stringPreferencesKey("profile_name")
     private val KEY_CHRISTIAN_NAME = stringPreferencesKey("profile_christian_name")
@@ -343,6 +349,53 @@ object SettingsRepository {
 
     suspend fun setMisbakLanguage(context: Context, language: MisbakLanguage) {
         context.settingsDataStore.edit { it[KEY_MISBAK_LANGUAGE] = language.name }
+    }
+
+    /** Highlight names are a small string map; no schema to evolve. */
+    private val highlightNameJson = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+
+    /**
+     * How a copied or shared passage is written. Everything on by default: a
+     * verse that arrives somewhere else should be able to say what it is.
+     */
+    fun copyFormat(context: Context): Flow<com.agpeya.app.ui.common.CopyFormat> =
+        context.settingsDataStore.data.map {
+            com.agpeya.app.ui.common.CopyFormat(
+                verseNumbers = it[KEY_COPY_VERSE_NUMBERS] ?: true,
+                reference = it[KEY_COPY_REFERENCE] ?: true,
+                edition = it[KEY_COPY_EDITION] ?: true,
+            )
+        }
+
+    suspend fun setCopyFormat(context: Context, format: com.agpeya.app.ui.common.CopyFormat) {
+        context.settingsDataStore.edit {
+            it[KEY_COPY_VERSE_NUMBERS] = format.verseNumbers
+            it[KEY_COPY_REFERENCE] = format.reference
+            it[KEY_COPY_EDITION] = format.edition
+        }
+    }
+
+    /**
+     * What the reader calls each highlight colour — ተስፋ, ትእዛዝ, ጸሎት, ማስተዋል, or
+     * anything else. A colour is only useful if it means something, and what it
+     * means is not the app's to decide; an unnamed colour keeps its own name.
+     */
+    fun highlightNames(context: Context): Flow<Map<String, String>> =
+        context.settingsDataStore.data.map { prefs ->
+            val raw = prefs[KEY_HIGHLIGHT_NAMES] ?: return@map emptyMap()
+            runCatching {
+                highlightNameJson.decodeFromString<Map<String, String>>(raw)
+            }.getOrDefault(emptyMap())
+        }
+
+    suspend fun setHighlightName(context: Context, key: String, name: String) {
+        context.settingsDataStore.edit { prefs ->
+            val current = runCatching {
+                highlightNameJson.decodeFromString<Map<String, String>>(prefs[KEY_HIGHLIGHT_NAMES] ?: "{}")
+            }.getOrDefault(emptyMap())
+            val next = if (name.isBlank()) current - key else current + (key to name.trim())
+            prefs[KEY_HIGHLIGHT_NAMES] = highlightNameJson.encodeToString(next)
+        }
     }
 
     fun keepScreenOn(context: Context): Flow<Boolean> =

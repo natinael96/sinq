@@ -229,13 +229,17 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
         val selBody = if (selRange.isEmpty()) null
         else stanzasNow.filterIndexed { i, _ -> i in selRange }.joinToString("\n\n").ifBlank { null }
         val sectionTitle = section?.let { if (geez) it.titleGe else it.titleAm }
-        com.agpeya.app.ui.reading.SelectionShareBar(
+        com.agpeya.app.ui.reading.SelectionBar(
             visible = selA >= 0,
             onDismiss = { selA = -1; selB = -1 },
-            shareText = selBody?.let { listOfNotNull(sectionTitle, it).joinToString("\n\n") },
-            shareImage = selBody?.let {
-                com.agpeya.app.ui.common.SharePayload(body = it, kicker = s.wudaseMariam, title = sectionTitle)
+            // A paragraph reader: no verse numbers to print, and no colour row.
+            passage = selBody?.let {
+                com.agpeya.app.ui.common.Passage(
+                    verses = listOf(null to it),
+                    citation = listOfNotNull(s.wudaseMariam, sectionTitle).joinToString("  ·  "),
+                )
             },
+            imageKicker = s.wudaseMariam,
             modifier = Modifier.align(Alignment.BottomCenter),
         )
         }
