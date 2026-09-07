@@ -135,23 +135,6 @@ data class DateSpan(val monthNum: Int, val fromDay: Int, val toDay: Int) {
     fun contains(month: Int, day: Int): Boolean = month == monthNum && day in fromDay..toDay
 }
 
-/** A separately selected funeral or memorial reading from master Part 4. */
-@Serializable
-data class AthanasiusEntry(
-    val index: Int,
-    val title: String,
-    /** person, riteChapter, burialPrayer, or memorial. */
-    val category: String,
-    val memorialDay: Int? = null,
-    val observance: String? = null,
-    /** መስተበቍዕ, kept distinct from the scripture-reading slots. */
-    val supplication: String? = null,
-    val sourcePages: List<Int> = emptyList(),
-    override val negh: GitsaweService? = null,
-    override val kidassie: GitsaweService? = null,
-    override val serk: GitsaweService? = null,
-) : GitsaweServices
-
 /** The historical 2001–2015 EC reference table printed in master Part 5. */
 @Serializable
 data class BahreHasabReference(

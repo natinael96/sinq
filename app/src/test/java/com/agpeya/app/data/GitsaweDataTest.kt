@@ -1,7 +1,6 @@
 package com.agpeya.app.data
 
 import com.agpeya.app.model.Feast
-import com.agpeya.app.model.AthanasiusEntry
 import com.agpeya.app.model.BahreHasabReference
 import com.agpeya.app.model.GitsaweEntry
 import com.agpeya.app.model.GitsaweMonth
@@ -44,7 +43,6 @@ class GitsaweDataTest {
         assertEquals(43, load("seasonal-gitsawe.json", com.agpeya.app.model.SeasonalEntry.serializer()).size)
         assertEquals(49, load("movable-weekday-gitsawe.json", com.agpeya.app.model.SeasonalEntry.serializer()).size)
         assertEquals(91, load("sunday-cycle-gitsawe.json", SundayCycleEntry.serializer()).size)
-        assertEquals(25, load("athanasius.json", AthanasiusEntry.serializer()).size)
         assertEquals(9, load("monthly-gitsawe.json", com.agpeya.app.model.MonthlyEntry.serializer()).size)
         assertEquals(21, load("feasts.json", Feast.serializer()).size)
         assertEquals(40, load("sub-feasts.json", SubFeast.serializer()).size)
@@ -130,16 +128,6 @@ class GitsaweDataTest {
             "nolawi", "lidet", "kremt",
         )
         assertEquals(emptyList<String>(), entries.mapNotNull { it.season }.filter { it !in knownSeasons }.distinct())
-    }
-
-    @Test
-    fun `Part 4 keeps funeral categories and supplications distinct`() {
-        val entries = load("athanasius.json", AthanasiusEntry.serializer())
-        assertEquals("person", entries.first().category)
-        assertEquals("riteChapter", entries.first { it.index == 11 }.category)
-        assertEquals(3, entries.first { it.index == 20 }.memorialDay)
-        assertEquals("memorial", entries.last().category)
-        assertTrue(entries.count { it.supplication != null } == 14)
     }
 
     @Test

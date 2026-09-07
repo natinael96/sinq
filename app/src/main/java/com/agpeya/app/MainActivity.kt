@@ -507,6 +507,7 @@ private fun AgpeyaNavHost(
                 onOpenWudase = { navController.navigate("wudase") { launchSingleTop = true } },
                 onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
                 onOpenBahreHasab = { navController.navigate("bahreHasabReference") { launchSingleTop = true } },
+                onOpenMahlets = { navController.navigate("mahlets") { launchSingleTop = true } },
                 onOpenKurban = { navController.navigate("communionPrep") { launchSingleTop = true } },
                 onOpenReading = { navController.navigate("reading") { launchSingleTop = true } },
                 onOpenMarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
@@ -579,6 +580,9 @@ private fun AgpeyaNavHost(
                     ) { launchSingleTop = true }
                 },
                 onOpenSynaxarium = { epochDay -> navController.navigate("synaxarium/$epochDay") { launchSingleTop = true } },
+                onOpenMahlet = { key ->
+                    navController.navigate("mahlet/${android.net.Uri.encode(key)}") { launchSingleTop = true }
+                },
                 onOpenSundayCycle = { day -> navController.navigate("sundayGitsawe/$day") { launchSingleTop = true } },
             )
         }
@@ -700,6 +704,23 @@ private fun AgpeyaNavHost(
                 onOpenSpecialHabit = { habit ->
                     navController.navigate("intention/${habit.name.lowercase()}") { launchSingleTop = true }
                 },
+            )
+        }
+        composable("mahlets") {
+            com.agpeya.app.ui.mahlet.MahletListScreen(
+                onBack = { navController.popBackStack() },
+                onOpen = { key ->
+                    navController.navigate("mahlet/${android.net.Uri.encode(key)}") { launchSingleTop = true }
+                },
+            )
+        }
+        composable(
+            route = "mahlet/{subFeast}",
+            arguments = listOf(navArgument("subFeast") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            com.agpeya.app.ui.mahlet.MahletScreen(
+                subFeastKey = backStackEntry.arguments?.getString("subFeast").orEmpty(),
+                onBack = { navController.popBackStack() },
             )
         }
         composable("settings/records") {

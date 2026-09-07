@@ -130,6 +130,13 @@ interface Strings {
     val markAction: String
     /** The edition's own cross references, and the chapter stepper's two ends. */
     val crossRefsTitle: String
+    /** ሥርዓተ ማኅሌት — the orders of service sung on a feast. */
+    val mahletTitle: String
+    val mahletSubtitle: String
+    val mahletVigil: String
+    val mahletDawn: String
+    fun mahletParts(n: Int): String
+    val mahletNone: String
     /** The two reading modes, named for a settings page rather than a toggle. */
     val readingModeVertical: String
     val readingModeHorizontal: String
@@ -912,6 +919,12 @@ object AmharicStrings : Strings {
     override val bookmarkAction = "ምልክት አድርግ"
     override val markAction = "ምልክት"
     override val crossRefsTitle = "የጥቅስ ማጣቀሻዎች"
+    override val mahletTitle = "ሥርዓተ ማኅሌት"
+    override val mahletSubtitle = "የበዓላት ማኅሌትና ዋዜማ"
+    override val mahletVigil = "ዋዜማ"
+    override val mahletDawn = "ነግሥ"
+    override fun mahletParts(n: Int) = "${com.agpeya.app.ui.reading.geezNumeral(n)} ክፍል"
+    override val mahletNone = "ማኅሌቱ ገና አልገባም"
     override val readingModeVertical = "ማንሸራተት"
     override val readingModeHorizontal = "ገጽ በገጽ"
     override val imageShapeCard = "ካርድ"
@@ -1638,6 +1651,12 @@ object EnglishStrings : Strings {
     override val bookmarkAction = "Bookmark"
     override val markAction = "Mark"
     override val crossRefsTitle = "Cross references"
+    override val mahletTitle = "ሥርዓተ ማኅሌት"
+    override val mahletSubtitle = "Orders of service for the feasts"
+    override val mahletVigil = "ዋዜማ"
+    override val mahletDawn = "ነግሥ"
+    override fun mahletParts(n: Int) = if (n == 1) "1 part" else "$n parts"
+    override val mahletNone = "Coming soon"
     override val readingModeVertical = "Scroll"
     override val readingModeHorizontal = "Page by page"
     override val imageShapeCard = "Card"

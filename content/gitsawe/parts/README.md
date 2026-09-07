@@ -44,24 +44,6 @@ ordinals ፩ኛ–፲፭ኛ, not Sunday ordinals.
 One transcription is corrected on import: section 27 reads ፳፫ in the master,
 but scan 390 prints "ለታኅሣሥ ፳፰ ቀን መርዓዊ" (አማኑኤል's monthly day).
 
-## Part 4 — Athanasius funeral lectionary
-
-`04-athanasius-funeral-lectionary.json` contains 25 sections from scans 415–424.
-It is a funeral and memorial lectionary, not a date-driven calendar collection.
-Its sequence covers:
-
-- readings according to who died (bishops, priests, deacons, children,
-  monastics, adults, and women);
-- seven rite chapters;
-- prayers at church and burial;
-- readings for the 3rd, 7th, 12th, 30th, 40th, 80th/100th, half-year, annual,
-  and other memorial observances.
-
-Many sections include `መስተበቍዕ`, a supplication distinct from the scripture
-slots. The scripture portions still use the existing Gitsawe reading/service
-shape, but this collection needs explicit user selection rather than automatic
-calendar matching.
-
 ## Part 5 — Bahre Hasab table
 
 `05-bahre-hasab-tables.json` preserves scans 425–427. The three printed pages

@@ -17,7 +17,6 @@ OUT = ROOT / "content/gitsawe/parts"
 FILES = {
     2: "02-movable-feasts-and-fasts.json",
     3: "03-sunday-cycle-and-mezmur.json",
-    4: "04-athanasius-funeral-lectionary.json",
     5: "05-bahre-hasab-tables.json",
 }
 
@@ -43,17 +42,6 @@ ABOUT = {
             "The flat extracted_sections order is canonical and must be preserved.",
             "Some sections are continuations or instructions and intentionally lack a period or hymn field.",
             "Reading shapes vary; note-only and partial-service sections must not be invented into full services.",
-        ],
-    },
-    4: {
-        "collection": "athanasius_funeral_lectionary",
-        "selection_basis": "funeral rite, person who died, rite chapter, or memorial day",
-        "content_shape": "25 titled funeral and memorial reading sections with provenance",
-        "app_model_target": "existing GitsaweService reading structure in a separately selected collection",
-        "notes": [
-            "This is not calendar-driven daily or seasonal Gitsawe.",
-            "It covers clergy, monastics, adults, children, childbirth, rite chapters, burial prayers, and memorial days.",
-            "The መስተበቍዕ supplication is source content and must remain distinct from scripture readings.",
         ],
     },
     5: {

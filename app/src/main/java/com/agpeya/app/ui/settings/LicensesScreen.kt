@@ -65,7 +65,7 @@ fun LicensesScreen(onBack: () -> Unit) {
                 LicSection("Gitsawe (ግጻዌ)")
                 LicPara(
                     "The ግጻዌ lectionary — the fixed 366-day cycle together with the movable, " +
-                        "Sunday, Athanasius, and Bahre Hasab collections — was scanned and " +
+                        "Sunday, ማኅሌት, and Bahre Hasab collections — was scanned and " +
                         "transcribed from the printed ግጻዌ by the Sinq maintainer, and is released " +
                         "as open content under the Creative Commons " +
                         "Attribution-NonCommercial-NoDerivatives 4.0 International licence, the " +

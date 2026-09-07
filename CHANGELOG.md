@@ -127,6 +127,16 @@ features; `versionCode` increments on every release).
   citation of what is selected. Readers whose unit is a paragraph simply have no
   colour row. The four highlight colours can be named (ተስፋ, ትእዛዝ, ጸሎት, ማስተዋል,
   or anything else) and the name shows under the swatch.
+- **ሥርዓተ ማኅሌት is on the page.** 37 orders of service and 732 sung parts have
+  been shipping inside the app since the lectionary was imported, parsed on
+  demand and thrown away because no screen ever asked for them. Now a feast day
+  offers its ዋዜማ and its ነግሥ on ግጻዌ, and ቤተ መጻሕፍት opens the whole book grouped
+  by month. Each order reads as its movements in sung order — ነግሥ, ዚቅ, ወረብ,
+  አመላለስ — so the selection bar comes with it and a ዚቅ copies and shares like any
+  other passage. Nothing needed a new calendar: 31 of the 37 hang off a fixed
+  feast date, five off the ዘመነ ጽጌ week the Sunday calendar already computes, and
+  one off ፋሲካ. Three sub-feasts have no order transcribed yet; the list names
+  them and says so rather than hiding them.
 - **"Change day" opens the Church's calendar.** ግጻዌ is dated ጳጉሜን ፪ and cited
   in Ge'ez numerals, and its date button opened a Gregorian grid of Arabic
   digits — so finding መስከረም ፩ meant knowing it falls on 11 September, which is
@@ -178,6 +188,12 @@ features; `versionCode` increments on every release).
   and the edition travel with a copied passage is now the reader's choice, shown
   against a live sample. The Psalter names which edition a verse came from, so a
   ግዕዝ verse no longer arrives claiming to be the Amharic.
+
+### Removed
+- **The አትናቴዎስ funeral lectionary.** 25 sections of the burial rite were
+  bundled, parsed and never shown. It is out of the app, out of the source
+  parts, and out of the importer. The licences page credits the same scan by
+  the collections that stayed.
 
 ### Fixed
 - **A bookmark can be a verse.** The Bible reader could only bookmark a whole

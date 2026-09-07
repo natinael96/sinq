@@ -40,6 +40,7 @@ fun LibraryScreen(
     onOpenWudase: () -> Unit,
     onOpenZewotr: () -> Unit,
     onOpenBahreHasab: () -> Unit,
+    onOpenMahlets: () -> Unit,
     onOpenKurban: () -> Unit,
     onOpenReading: () -> Unit,
     onOpenMarks: () -> Unit,
@@ -84,6 +85,14 @@ fun LibraryScreen(
             }
             item {
                 LibraryCard(icon = Icons.Outlined.WbTwilight, title = s.zewotrTselot, subtitle = s.zewotrSubtitle, onClick = onOpenZewotr)
+            }
+            item {
+                LibraryCard(
+                    icon = Icons.Outlined.LibraryMusic,
+                    title = s.mahletTitle,
+                    subtitle = s.mahletSubtitle,
+                    onClick = onOpenMahlets,
+                )
             }
             item {
                 LibraryCard(

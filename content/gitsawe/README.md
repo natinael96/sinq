@@ -8,7 +8,7 @@ Sinq's Gitsawe data.
 - `months/` contains the 13 self-contained Part 1 base files regenerated from
   the master. These remain the stable input to the app's daily-data importer.
 - `parts/` contains self-contained, source-preserving splits for Parts 2–5:
-  movable readings, Sunday/mezmur cycles, the Athanasius funeral lectionary,
+  movable readings, Sunday/mezmur cycles,
   and the Bahre Hasab reference table.
 - `app/src/main/assets/content/gitsawe/daily-gitsawe.json` is the normalized,
   app-facing fixed-calendar dataset; it is generated data, not the source of
@@ -26,7 +26,6 @@ App-facing normalization currently runs as:
 
 - `tools/import_gitsawe_part2.py` → `movable-weekday-gitsawe.json`
 - `tools/import_gitsawe_part3.py` → `sunday-cycle-gitsawe.json`
-- `tools/import_gitsawe_part4.py` → `athanasius.json`
 - `tools/import_gitsawe_part5.py` → `bahre-hasab-reference.json`
 
 Part 2 is calendar-matched through `BahreHasab`. Part 3 is exposed by the
