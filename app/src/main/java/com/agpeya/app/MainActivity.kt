@@ -37,7 +37,7 @@ import com.agpeya.app.data.ThemeChoice
 import com.agpeya.app.reminders.ReminderScheduler
 import com.agpeya.app.reminders.StreakReminderScheduler
 import kotlinx.coroutines.flow.first
-import com.agpeya.app.ui.bookmarks.BookmarksScreen
+import com.agpeya.app.ui.marks.MarksScreen
 import com.agpeya.app.ui.common.Tab
 import com.agpeya.app.ui.customize.CustomizeHourScreen
 import com.agpeya.app.ui.home.HomeScreen
@@ -406,7 +406,7 @@ private fun AgpeyaNavHost(
             )
         }
         composable("bookmarks") {
-            BookmarksScreen(
+            MarksScreen(
                 onBack = { navController.popBackStack() },
                 onOpen = { hourId, index, sectionId ->
                     // Psalter bookmarks live under a pseudo hour id and open the
@@ -509,6 +509,7 @@ private fun AgpeyaNavHost(
                 onOpenBahreHasab = { navController.navigate("bahreHasabReference") { launchSingleTop = true } },
                 onOpenKurban = { navController.navigate("communionPrep") { launchSingleTop = true } },
                 onOpenReading = { navController.navigate("reading") { launchSingleTop = true } },
+                onOpenMarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
                 onSelectTab = navController::switchTab,
             )
         }
@@ -701,7 +702,10 @@ private fun AgpeyaNavHost(
             )
         }
         composable("settings/data") {
-            com.agpeya.app.ui.settings.DataSettingsScreen(onBack = { navController.popBackStack() })
+            com.agpeya.app.ui.settings.DataSettingsScreen(
+                onBack = { navController.popBackStack() },
+                onOpenMarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
+            )
         }
         composable(
             route = "intention/{habit}",

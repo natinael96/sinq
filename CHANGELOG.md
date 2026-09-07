@@ -127,6 +127,13 @@ features; `versionCode` increments on every release).
   citation of what is selected. Readers whose unit is a paragraph simply have no
   colour row. The four highlight colours can be named (ተስፋ, ትእዛዝ, ጸሎት, ማስተዋል,
   or anything else) and the name shows under the swatch.
+- **ምልክቶቼ — one home for every mark.** ዕልባቶች, ማድመቂያዎች and ማስታወሻዎች in three
+  tabs, reachable from ቤተ መጻሕፍት, from ቅንብሮች › ውሂብ, and from the ⋮ on ቤት where
+  the bookmarks list used to be. A highlight had no list at all before: the only
+  way to find one was to remember where it was. Each row is the citation, the
+  colour's name, and two lines of the text resolved from the bundle — nothing is
+  stored, so a mark cannot go stale. Verses painted in one run show as one mark.
+  ወደ ፋይል writes the lot as plain text through the system file picker.
 - **ቅዳና አጋራ, in ቅንብሮች › ንባብ.** Whether verse numbers, the chapter and verse,
   and the edition travel with a copied passage is now the reader's choice, shown
   against a live sample. The Psalter names which edition a verse came from, so a

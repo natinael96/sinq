@@ -51,6 +51,9 @@ object JournalRepository {
 
     fun count(context: Context): Flow<Int> = dao(context).count()
 
+    /** Entries anchored to a passage, newest first — ምልክቶቼ's ማስታወሻዎች tab. */
+    fun fromPassages(context: Context): Flow<List<JournalEntry>> = dao(context).fromPassages()
+
     fun draftCount(context: Context): Flow<Int> = dao(context).draftCount()
 
     suspend fun byId(context: Context, id: String): JournalEntry? = dao(context).byId(id)

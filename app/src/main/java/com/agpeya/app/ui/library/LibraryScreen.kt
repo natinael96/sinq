@@ -26,6 +26,7 @@ import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.common.SinqCard
 import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
+import androidx.compose.material.icons.outlined.BookmarkBorder
 
 /** ቤተ መጻሕፍት — Scripture is one entry; its categories live in its hub. */
 @Composable
@@ -36,6 +37,7 @@ fun LibraryScreen(
     onOpenBahreHasab: () -> Unit,
     onOpenKurban: () -> Unit,
     onOpenReading: () -> Unit,
+    onOpenMarks: () -> Unit,
     onSelectTab: (Tab) -> Unit,
 ) {
     val s = LocalStrings.current
@@ -92,6 +94,15 @@ fun LibraryScreen(
                     title = s.readingTitle,
                     subtitle = s.readingIntro,
                     onClick = onOpenReading,
+                )
+            }
+            item {
+                // What the reader has left in the books, beside the books.
+                LibraryCard(
+                    icon = Icons.Outlined.BookmarkBorder,
+                    title = s.marksTitle,
+                    subtitle = "${s.marksTabBookmarks} · ${s.marksTabHighlights} · ${s.marksTabNotes}",
+                    onClick = onOpenMarks,
                 )
             }
             item {

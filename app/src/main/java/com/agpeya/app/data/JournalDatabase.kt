@@ -107,6 +107,16 @@ interface JournalDao {
     @Query("SELECT * FROM journal_entries ORDER BY date DESC")
     suspend fun all(): List<JournalEntry>
 
+    /** Entries written from a passage — the third tab of ምልክቶቼ. */
+    @Query(
+        """
+        SELECT * FROM journal_entries
+        WHERE anchorRoute IS NOT NULL AND kind != 'CONFESSION_DRAFT'
+        ORDER BY date DESC, createdAt DESC
+        """,
+    )
+    fun fromPassages(): Flow<List<JournalEntry>>
+
     @Query("SELECT COUNT(*) FROM journal_entries")
     fun count(): Flow<Int>
 

@@ -128,6 +128,15 @@ interface Strings {
     val bookmarkAction: String
     /** The selection bar's own two words — short, because they sit under icons. */
     val markAction: String
+    /** ምልክቶቼ — the one home for bookmarks, highlights and passage notes. */
+    val marksTitle: String
+    val marksTabBookmarks: String
+    val marksTabHighlights: String
+    val marksTabNotes: String
+    val marksExport: String
+    val marksExported: String
+    val noMarksTitle: String
+    val noMarksBody: String
     /** How a single psalm is named in a citation, and the two Psalter editions. */
     val psalmName: String
     val geezEdition: String
@@ -883,6 +892,14 @@ object AmharicStrings : Strings {
     override val readingModeToggle = "የንባብ ሁነታ"
     override val bookmarkAction = "ምልክት አድርግ"
     override val markAction = "ምልክት"
+    override val marksTitle = "ምልክቶቼ"
+    override val marksTabBookmarks = "ዕልባቶች"
+    override val marksTabHighlights = "ማድመቂያዎች"
+    override val marksTabNotes = "ማስታወሻዎች"
+    override val marksExport = "ወደ ፋይል"
+    override val marksExported = "ተቀምጧል"
+    override val noMarksTitle = "ገና ምንም ምልክት የለም"
+    override val noMarksBody = "ጥቅስ ነክተው ምልክት፣ ማድመቂያ ወይም ማስታወሻ ሲያኖሩ እዚህ ይሰበሰባሉ።"
     override val psalmName = "መዝሙር"
     override val geezEdition = "ግዕዝ ፲፱፻፹"
     override val amharicEdition = "አማርኛ ፲፱፻፹"
@@ -1585,6 +1602,14 @@ object EnglishStrings : Strings {
     override val readingModeToggle = "Reading mode"
     override val bookmarkAction = "Bookmark"
     override val markAction = "Mark"
+    override val marksTitle = "My marks"
+    override val marksTabBookmarks = "Bookmarks"
+    override val marksTabHighlights = "Highlights"
+    override val marksTabNotes = "Notes"
+    override val marksExport = "To a file"
+    override val marksExported = "Saved"
+    override val noMarksTitle = "No marks yet"
+    override val noMarksBody = "Tap a verse and bookmark, highlight or write about it; they gather here."
     override val psalmName = "መዝሙር"
     override val geezEdition = "Ge'ez 1980"
     override val amharicEdition = "Amharic 1980"

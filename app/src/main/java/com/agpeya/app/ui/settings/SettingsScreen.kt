@@ -1152,7 +1152,7 @@ private fun SettingsRadioRow(
 
 /** Local identity and recoverable user-created data. */
 @Composable
-fun DataSettingsScreen(onBack: () -> Unit) {
+fun DataSettingsScreen(onBack: () -> Unit, onOpenMarks: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val s = com.agpeya.app.ui.strings.LocalStrings.current
@@ -1168,6 +1168,12 @@ fun DataSettingsScreen(onBack: () -> Unit) {
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
         ) {
             item {
+                // The reader's own record, beside the backup that carries it.
+                NavRow(
+                    title = s.marksTitle,
+                    subtitle = "${s.marksTabBookmarks} · ${s.marksTabHighlights} · ${s.marksTabNotes}",
+                    onClick = onOpenMarks,
+                )
                 EditableRow(s.yourNameLabel, name, s.addName) {
                     scope.launch { SettingsRepository.setProfileName(context, it) }
                 }
