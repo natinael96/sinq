@@ -82,6 +82,22 @@ features; `versionCode` increments on every release).
   adding a habit dimmed the whole past. The scale is absolute now — seven is a
   full day, one is always visible.
 
+- **ቤት fits on one screen.** The page cost 711 dp at the default font size, so
+  the ንባብ card and half of ዛሬ sat below the fold on a common phone; it is 460
+  dp now, with room to spare up to font scale 1.5. The wordmark went and the
+  Ethiopian date became the headline. The hours strip is gone as a separate
+  line — it repeated the hero's own hour before saying anything new, so "ቀጥሎ …"
+  moved into the hero's foot. The ግጻዌ hero drops the kicker that said "today's
+  ግጻዌ" above a title saying the same, and keeps the day's name. ዳዊት, ዘወትር and
+  ንባብ share one shape, one line each rather than three. And **ዛሬ moves to the
+  foot**, a row between hairlines instead of a card in the middle: it is a
+  summary of the page above it, not a task on it. The ten-week heatmap is
+  unchanged.
+- **The prayer hero says whether the hour has been prayed.** It carries an አሁን
+  chip while the hour is due and a lit candle once it is prayed — which the app
+  now records for itself when the hour is read to its foot. The page's first
+  glance could not answer the day's first question before.
+
 ### Fixed
 - **Eight books were headed "null".** `canon.json` writes JSON null for the
   section of every book of church order, and reading it as a string yields the

@@ -140,6 +140,7 @@ private val LightSinq = SinqColors(
     hero = GreenDeep,
     onHero = Color(0xFFF4F1E4),
     onHeroMuted = Color(0xFFB9CCC0),
+    onHeroGold = GoldDark,
     heroGlow = Color(0x57E4BC5A),
     success = Color(0xFF44654F),
     // The coral that reads on the dark ground fails contrast on ivory; the
@@ -156,6 +157,7 @@ private val DarkSinq = SinqColors(
     hero = Color(0xFF12463A),
     onHero = Color(0xFFF0EBDC),
     onHeroMuted = Color(0xFFA9C6B6),
+    onHeroGold = GoldDark,
     heroGlow = Color(0x4DE0BC65),
     success = Color(0xFF9EC7AB),
     arke = Color(0xFFF0776A),

@@ -54,7 +54,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
@@ -85,6 +84,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.LocalDateTime
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 
 private const val PRAYER_AGGREGATE_ID = "prayer"
 
@@ -291,32 +293,26 @@ private fun HomeDashboard(
     // card at the foot was the one that showed it first on a small phone.
     // The page scrolls instead.
     val cardScale = LocalDensity.current.fontScale.coerceIn(1f, 2f)
+    // The order is the day's: what is due now, what the Church appoints, the
+    // two standing prayers, the plan — and ዛሬ last, because a tally of what has
+    // been done is a summary and not a task. It used to sit in the middle,
+    // between the ግጻዌ and the readings it was summarising.
     Column(modifier) {
         DayHeader(today, seasonLabel, onOpenSearch, onOpenFasting, onOpenBookmarks, onOpenPrayerList)
-        Spacer(Modifier.height(Spacing.md))
-        if (suggested != null) NowCard(suggested) { onOpenHour(suggested.id) }
-        else EmptyHoursCard(onOpenAllHours)
+        Spacer(Modifier.height(Spacing.sm))
         if (suggested != null) {
-            HoursStrip(
-                current = suggested,
+            NowCard(
+                hour = suggested,
                 next = com.agpeya.app.data.PrayerSchedule.next(hours, suggested.id),
-                onOpenHour = onOpenHour,
+                prayed = HabitsRepository.hourHabitId(suggested.id) in doneToday,
+                onClick = { onOpenHour(suggested.id) },
                 onOpenAll = onOpenAllHours,
             )
+        } else {
+            EmptyHoursCard(onOpenAllHours)
         }
         Spacer(Modifier.height(Spacing.sm))
         GitsaweCard(readingsState, onOpenGitsawe)
-        Spacer(Modifier.height(Spacing.md))
-
-        TodayCard(
-            habitIds,
-            doneToday,
-            habitState.records,
-            today,
-            onOpenJourney,
-            cardScale,
-            Modifier.fillMaxWidth(),
-        )
         Spacer(Modifier.height(Spacing.sm))
         if (stackReadingCards) {
             DailyPsalmCard(today, onOpenPsalter, Modifier.fillMaxWidth())
@@ -333,8 +329,17 @@ private fun HomeDashboard(
                 ZewotrCard(onOpenZewotr, Modifier.weight(1f).fillMaxHeight())
             }
         }
-        Spacer(Modifier.height(Spacing.sm))
+        Spacer(Modifier.height(Spacing.md))
         ReadingCard(planLine, onOpenReading, Modifier.fillMaxWidth())
+        Spacer(Modifier.height(Spacing.md))
+        TodayRow(
+            habitIds = habitIds,
+            doneToday = doneToday,
+            records = habitState.records,
+            today = today,
+            onClick = onOpenJourney,
+            scale = cardScale,
+        )
         Spacer(Modifier.height(Spacing.md))
     }
 }
@@ -355,35 +360,40 @@ private fun DayHeader(
     val callName = christianName.ifBlank { profileName }
     var menuOpen by remember { mutableStateOf(false) }
 
+    // Two lines where there were four. The wordmark went: an app that is open
+    // does not need to say its own name, and it was pushing the day — the one
+    // thing this header exists to say — into third place.
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
         Column(Modifier.weight(1f)) {
-            Text("ስንቅ", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
             Text(
                 com.agpeya.app.ui.common.formatEthiopian(today, s),
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            // The greeting leads in gold and survives the ellipsis; the season
+            // and the Gregorian date follow it, quietly, on the same line.
+            val greeting = callName.takeIf { it.isNotBlank() }?.let { s.greeting(it) }
+            val tail = listOfNotNull(
+                com.agpeya.app.ui.common.formatGregorianShort(today, s).takeIf { it.isNotBlank() },
+                seasonLabel,
+            ).joinToString("  ·  ")
+            Text(
+                buildAnnotatedString {
+                    if (greeting != null) {
+                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.secondary)) {
+                            append(greeting)
+                        }
+                        if (tail.isNotEmpty()) append("  ·  ")
+                    }
+                    append(tail)
+                },
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            Text(
-                com.agpeya.app.ui.common.formatGregorianShort(today, s),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                maxLines = 1,
-            )
-            val accent = listOfNotNull(
-                seasonLabel,
-                callName.takeIf { it.isNotBlank() }?.let { s.greeting(it) },
-            )
-            if (accent.isNotEmpty()) {
-                Text(
-                    accent.joinToString("  ·  "),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
         }
         IconButton(onClick = onOpenSearch) {
             Icon(Icons.Outlined.Search, contentDescription = s.tabSearch, tint = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -410,103 +420,101 @@ private fun HomeMenuItem(icon: androidx.compose.ui.graphics.vector.ImageVector, 
     )
 }
 
+/**
+ * The hour due now, and under it the one after — the hours line that used to
+ * be a separate strip below the hero, folded into its foot.
+ *
+ * The strip repeated the hero's own hour before saying anything new, so the
+ * page named ጸሎተ ሠለስት twice within 40 dp. What it actually carried was "ቀጥሎ",
+ * which is now the hero's second line.
+ *
+ * The chip on the right is the only prayer state on the page above the fold:
+ * አሁን while the hour is due, a lit candle once it has been prayed — which the
+ * reader no longer has to tell the app, since reaching the foot of the hour
+ * records it.
+ */
 @Composable
-private fun NowCard(hour: Hour, onClick: () -> Unit) {
+private fun NowCard(
+    hour: Hour,
+    next: Hour?,
+    prayed: Boolean,
+    onClick: () -> Unit,
+    onOpenAll: () -> Unit,
+) {
     val s = LocalStrings.current
     val sinq = sinqColors
     HeroCard(onClick = onClick, contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.md)) {
         Column(Modifier.weight(1f)) {
-            Text(s.nowPrayer, style = MaterialTheme.typography.labelMedium, color = sinq.onHeroMuted)
-            Text(hour.name, style = MaterialTheme.typography.titleLarge, color = sinq.onHero, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            if (hour.timeHint.isNotBlank()) Text(hour.timeHint, style = MaterialTheme.typography.bodySmall, color = sinq.onHeroMuted, maxLines = 1)
-        }
-        Icon(Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = null, tint = sinq.onHeroMuted)
-    }
-}
-
-/**
- * The hours, as one line under the prayer card.
- *
- * Built like the update notice above it — a dot, a sentence, a hairline rule —
- * so ቤት has one shape for "a quiet word about something", not two.
- *
- * The hero directly above already names the hour due now, so the line's real
- * work is the one after it: "ቀጥሎ …" is the thing the page could not say before.
- * The names are the app's own, ጸሎት and all, rather than shortened to fit.
- */
-@Composable
-private fun HoursStrip(
-    current: Hour,
-    next: Hour?,
-    onOpenHour: (String) -> Unit,
-    onOpenAll: () -> Unit,
-) {
-    val s = LocalStrings.current
-    Spacer(Modifier.height(Spacing.sm))
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(28.dp)
-            .clip(MaterialTheme.shapes.small)
-            .clickable { onOpenHour(current.id) },
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-    ) {
-        Box(
-            Modifier
-                .size(5.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.secondary),
-        )
-        Text(
-            current.name,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-            maxLines = 1,
-        )
-        if (next != null) {
-            Text(
-                "·",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.outlineVariant,
-            )
-            Text(
-                "${s.hoursNext} ${next.name}",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
-        } else {
-            Spacer(Modifier.weight(1f))
-        }
-        // Its own target, so tapping "all" never opens the current hour by
-        // accident. Width earns it a real target on a line this short.
-        Box(
-            modifier = Modifier
-                .width(56.dp)
-                .fillMaxHeight()
-                .clip(MaterialTheme.shapes.small)
-                .clickable(onClick = onOpenAll)
-                .semantics { role = Role.Button },
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                s.hoursAll,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.secondary,
-                maxLines = 1,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(s.nowPrayer, style = MaterialTheme.typography.labelMedium, color = sinq.onHeroMuted)
+                    Text(
+                        buildAnnotatedString {
+                            append(hour.name)
+                            if (hour.timeHint.isNotBlank()) {
+                                withStyle(SpanStyle(color = sinq.onHeroMuted)) { append("  ·  ${hour.timeHint}") }
+                            }
+                        },
+                        style = MaterialTheme.typography.titleLarge,
+                        color = sinq.onHero,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                Spacer(Modifier.width(Spacing.sm))
+                if (prayed) {
+                    Candle(
+                        lit = true,
+                        contentDescription = s.journeyTodayLit,
+                        bodyColor = sinq.onHeroMuted,
+                        flameColor = sinq.onHeroGold,
+                        modifier = Modifier.size(width = 13.dp, height = 22.dp),
+                    )
+                } else {
+                    Text(
+                        s.nowChip,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = sinq.onHero,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(sinq.onHero.copy(alpha = 0.16f))
+                            .padding(horizontal = Spacing.sm, vertical = Spacing.xxs),
+                    )
+                }
+            }
+            Spacer(Modifier.height(Spacing.xxs))
+            Row(
+                modifier = Modifier.fillMaxWidth().height(20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            ) {
+                Box(Modifier.size(5.dp).clip(CircleShape).background(sinq.onHeroMuted))
+                Text(
+                    text = next?.let {
+                        listOf("${s.hoursNext} ${it.name}", it.timeHint)
+                            .filter { part -> part.isNotBlank() }.joinToString("  ·  ")
+                    }.orEmpty(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = sinq.onHeroMuted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                // Its own target, so tapping "all" never opens the current hour.
+                Text(
+                    s.hoursAll,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = sinq.onHeroGold,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .clip(MaterialTheme.shapes.small)
+                        .clickable(onClick = onOpenAll)
+                        .semantics { role = Role.Button }
+                        .padding(horizontal = Spacing.xs, vertical = Spacing.xxs),
+                )
+            }
         }
     }
-    Box(
-        Modifier
-            .fillMaxWidth()
-            .height(1.dp)
-            .background(MaterialTheme.colorScheme.outlineVariant)
-            .clearAndSetSemantics { },
-    )
 }
 
 @Composable
@@ -537,14 +545,18 @@ private fun GitsaweCard(state: HomeReadingsState, onClick: () -> Unit) {
         Icon(Icons.AutoMirrored.Outlined.MenuBook, contentDescription = null, tint = sinq.onHeroMuted, modifier = Modifier.size(IconSize.large))
         Spacer(Modifier.width(Spacing.md))
         Column(Modifier.weight(1f)) {
-            Text(s.gitsaweKicker, style = MaterialTheme.typography.labelMedium, color = sinq.onHeroMuted)
+            // The kicker said "today's ግጻዌ" directly above a title saying the
+            // same, and the citations below it — መዝ ፻፲፡፲–፲፩ · ሉቃስ ፲፡፩–፲፪ —
+            // are for the page this card opens, not for a glance at ቤት. What
+            // is left is the day's own name.
             Text(s.gitsaweTitle, style = MaterialTheme.typography.titleMedium, color = sinq.onHero)
             when (state) {
                 HomeReadingsState.Loading -> Text(s.loadingLabel, style = MaterialTheme.typography.bodySmall, color = sinq.onHeroMuted)
                 HomeReadingsState.Unavailable -> Text(s.contentMissingTitle, style = MaterialTheme.typography.bodySmall, color = sinq.onHeroMuted)
                 is HomeReadingsState.Ready -> {
-                    feast?.let { Text(it, style = MaterialTheme.typography.labelMedium, color = sinq.onHeroMuted, maxLines = 1, overflow = TextOverflow.Ellipsis) }
-                    reading?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = sinq.onHeroMuted, maxLines = 2, overflow = TextOverflow.Ellipsis) }
+                    (feast ?: reading)?.let {
+                        Text(it, style = MaterialTheme.typography.bodySmall, color = sinq.onHeroMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
                     mezmur?.let { Text("${s.sundayMezmurTitle} · $it", style = MaterialTheme.typography.bodySmall, color = sinq.onHero, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                 }
             }
@@ -553,35 +565,56 @@ private fun GitsaweCard(state: HomeReadingsState, onClick: () -> Unit) {
     }
 }
 
+/**
+ * ዛሬ, at the foot of the page: a row between two hairlines rather than a card.
+ *
+ * It is a summary, not a task, so it comes last and does not compete with the
+ * things above it for the eye. The card cost 99 dp to say what a 64 dp row
+ * says — the count, the candle, the month's line, and the full ten weeks of
+ * the heatmap, which is the part worth keeping at full size.
+ */
 @Composable
-private fun TodayCard(
+private fun TodayRow(
     habitIds: List<String>,
     doneToday: Set<String>,
     records: Map<String, Set<String>>,
     today: LocalDate,
     onClick: () -> Unit,
-    /** Matches the card's own font-driven growth — see [HomeDashboard]. */
+    /** Matches the page's own font-driven growth — see [HomeDashboard]. */
     scale: Float,
-    modifier: Modifier = Modifier,
 ) {
     val s = LocalStrings.current
     val doneCount = habitIds.count { it in doneToday }
     val summary = remember(records, today) { PrayerJourney.summarize(records, today) }
     // The heatmap is drawn in dp, so it ignores the font scale that stretches
-    // this card — left alone it would sit adrift in a half-empty box. It grows
-    // with the card, but capped: past 1.5x it would take the width the reading
-    // beside it needs.
+    // the text beside it. It grows with the row, but capped: past 1.5x it
+    // would take the width that text needs.
     val glyphScale = scale.coerceAtMost(1.5f)
-    SinqCard(onClick = onClick, modifier = modifier, contentPadding = PaddingValues(Spacing.md)) {
-        Text(s.todayLabel, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.secondary, maxLines = 1)
-        Spacer(Modifier.height(Spacing.xs))
+    Column(Modifier.fillMaxWidth()) {
+        SinqDivider()
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 64.dp)
+                .clickable(onClick = onClick)
+                .semantics { role = Role.Button }
+                .padding(vertical = Spacing.sm),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("$doneCount/${habitIds.size}", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
+                    Text(
+                        s.todayLabel,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.secondary,
+                        maxLines = 1,
+                    )
+                    Spacer(Modifier.width(Spacing.sm))
+                    Text(
+                        "$doneCount/${habitIds.size}",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
                     Spacer(Modifier.width(Spacing.sm))
                     Candle(
                         lit = summary.prayedToday,
@@ -609,6 +642,45 @@ private fun TodayCard(
                 gap = 1.dp * glyphScale,
             )
         }
+        SinqDivider()
+    }
+}
+
+@Composable
+private fun ShortcutCard(
+    title: String,
+    caption: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    SinqCard(
+        onClick = onClick,
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.sm),
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                title,
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                caption,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.secondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Spacer(Modifier.width(Spacing.sm))
+        Icon(
+            Icons.AutoMirrored.Outlined.ArrowForward,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(IconSize.small),
+        )
     }
 }
 
@@ -616,22 +688,12 @@ private fun TodayCard(
 private fun DailyPsalmCard(today: LocalDate, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val s = LocalStrings.current
     val range = remember(today) { com.agpeya.app.ui.psalter.dailyRange(today.dayOfWeek) }
-    SinqCard(onClick = onClick, modifier = modifier, contentPadding = PaddingValues(Spacing.md)) {
-        Text(s.dailyPsalms, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.secondary, maxLines = 1)
-        Spacer(Modifier.height(Spacing.xs))
-        Text(
-            range?.let { s.psalmRange(it.first, it.last) } ?: s.wholePsalter,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Spacer(Modifier.height(Spacing.sm))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(s.psalterTitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Icon(Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(IconSize.small))
-        }
-    }
+    ShortcutCard(
+        title = range?.let { s.psalmRange(it.first, it.last) } ?: s.wholePsalter,
+        caption = "${s.psalterTitle}  ·  ${s.dailyPsalms}",
+        onClick = onClick,
+        modifier = modifier,
+    )
 }
 
 /**
@@ -643,75 +705,66 @@ private fun DailyPsalmCard(today: LocalDate, onClick: () -> Unit, modifier: Modi
 @Composable
 private fun ReadingCard(planLine: Pair<Int, String>?, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val s = LocalStrings.current
-    SinqCard(onClick = onClick, modifier = modifier, contentPadding = PaddingValues(Spacing.md)) {
-        Text(
-            s.readingTitle,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.secondary,
+    if (planLine == null) {
+        ShortcutCard(
+            title = s.readingNoPlan,
+            caption = s.readingTitle,
+            onClick = onClick,
+            modifier = modifier,
         )
-        Spacer(Modifier.height(Spacing.xs))
-        if (planLine == null) {
-            Text(s.readingNoPlan, style = MaterialTheme.typography.titleSmall, maxLines = 1,
-                overflow = TextOverflow.Ellipsis)
-        } else {
-            val (day, passages) = planLine
+        return
+    }
+    val (day, passages) = planLine
+    // ንባብ leads the line in gold and the day follows it, so the card names
+    // itself without spending a line on a label. The first passage rides the
+    // same line; anything after it drops to the caption with the ግጻዌ note.
+    val parts = passages.split(" · ").filter { it.isNotBlank() }
+    SinqCard(
+        onClick = onClick,
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.sm),
+    ) {
+        Column(Modifier.weight(1f)) {
             Text(
-                listOf(
-                    s.readingDayLabel(com.agpeya.app.ui.reading.geezNumeral(day)),
-                    passages,
-                ).filter { it.isNotBlank() }.joinToString(" · "),
+                buildAnnotatedString {
+                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.secondary)) {
+                        append(s.readingTitle)
+                    }
+                    append("  ${s.readingDayLabel(com.agpeya.app.ui.reading.geezNumeral(day))}")
+                    parts.firstOrNull()?.let { append("  ·  $it") }
+                },
                 style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            Spacer(Modifier.height(Spacing.xxs))
             Text(
-                s.readingWithGitsawe,
+                (parts.drop(1) + s.readingWithGitsawe).joinToString("  ·  "),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
+        Spacer(Modifier.width(Spacing.sm))
+        Icon(
+            Icons.AutoMirrored.Outlined.ArrowForward,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(IconSize.small),
+        )
     }
 }
 
 @Composable
 private fun ZewotrCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
     val s = LocalStrings.current
-    SinqCard(onClick = onClick, modifier = modifier, contentPadding = PaddingValues(Spacing.md)) {
-        Text(
-            s.zewotrTselot,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.secondary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Spacer(Modifier.height(Spacing.xs))
-        Text(
-            s.wudaseMariam,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Spacer(Modifier.height(Spacing.sm))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                "ጸሎት ዘዘወትር",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(1f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Icon(
-                Icons.AutoMirrored.Outlined.ArrowForward,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(IconSize.small),
-            )
-        }
-    }
+    ShortcutCard(
+        title = s.wudaseMariam,
+        caption = s.zewotrTselot,
+        onClick = onClick,
+        modifier = modifier,
+    )
 }
 
 @Composable

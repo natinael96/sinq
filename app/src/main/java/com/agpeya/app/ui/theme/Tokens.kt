@@ -144,6 +144,11 @@ data class SinqColors(
     val onHero: Color,
     /** Muted ink on [hero], for a kicker or a time hint. */
     val onHeroMuted: Color,
+    /** The gold accent *on* [hero] — a link or a flame. The scheme's own
+     *  secondary is tuned for the ivory ground and goes muddy on the green,
+     *  so the hero keeps the dark theme's gold in both themes, as the hero
+     *  itself is the same green in both. */
+    val onHeroGold: Color,
     /** The soft gold bloom in the corner of a hero card. */
     val heroGlow: Color,
     /** Completed / fulfilled — a prayed hour, a kept habit. */

@@ -114,6 +114,8 @@ interface Strings {
     val fastLegendLabel: String
 
     val nowPrayer: String
+    /** The chip on ቤት's prayer hero: this hour, right now. */
+    val nowChip: String
     val continueReading: String
     val hoursHeader: String
 
@@ -854,6 +856,7 @@ object AmharicStrings : Strings {
     override val fastLegendLabel = "ጾም"
 
     override val nowPrayer = "የአሁኑ ሰዓት ጸሎት"
+    override val nowChip = "አሁን"
     override val continueReading = "ቀጥል"
     override val hoursHeader = "ሰዓታት"
 
@@ -1544,6 +1547,7 @@ object EnglishStrings : Strings {
     override val fastLegendLabel = "Fast"
 
     override val nowPrayer = "Prayer for now"
+    override val nowChip = "Now"
     override val continueReading = "Continue"
     override val hoursHeader = "Hours"
 
