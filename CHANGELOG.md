@@ -127,6 +127,12 @@ features; `versionCode` increments on every release).
   citation of what is selected. Readers whose unit is a paragraph simply have no
   colour row. The four highlight colours can be named (ተስፋ, ትእዛዝ, ጸሎት, ማስተዋል,
   or anything else) and the name shows under the swatch.
+- **ስንክሳር reads as one page of the book.** Commemorations were told apart by a
+  rule between them and by red — the አርኬ label and its hymn were both drawn in
+  the liturgical red, which made colour carry the structure. The rest after each
+  አርኬ does that work now, and the hymn keeps only its italic and its centring.
+  The bookmark on a scripture commemoration sits in the corner of the passage
+  it marks, rather than floating in a row of its own above it.
 - **ሥርዓተ ማኅሌት is on the page.** 37 orders of service and 732 sung parts have
   been shipping inside the app since the lectionary was imported, parsed on
   demand and thrown away because no screen ever asked for them. Now a feast day

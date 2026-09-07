@@ -79,6 +79,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import androidx.compose.runtime.LaunchedEffect
 import com.agpeya.app.data.HabitsRepository
+import androidx.compose.foundation.layout.size
 
 private val FONT_STEPS_SP = SettingsRepository.FONT_STEPS_SP
 
@@ -190,15 +191,10 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
             ) {
                 itemsIndexed(list.orEmpty()) { i, entry ->
                     Column(Modifier.fillMaxWidth()) {
-                        if (i > 0) {
-                            Spacer(Modifier.height(Spacing.xl))
-                            HorizontalDivider(
-                                modifier = Modifier.padding(bottom = 16.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                            )
-                        } else {
-                            Spacer(Modifier.height(Spacing.md))
-                        }
+                        // No rule between commemorations and no colour telling
+                        // them apart: the day reads as one page of the book, and
+                        // the rest after each አርኬ is the join.
+                        Spacer(Modifier.height(Spacing.md))
 
                         val title = cleanSynaxariumText(entry.title)
                         if (title.isNotBlank()) {
@@ -251,6 +247,9 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
                                     SynaxariumParaKind.ARKE_VERSE -> ArkeVerse(para.text, bodyFontSp, selected = flatKey in selRange, onTap = tap)
                                 }
                             }
+                            // The አርኬ closes a commemoration, so the rest after
+                            // it is what says the next one has begun.
+                            Spacer(Modifier.height(Spacing.xxl))
                         }
                     }
                 }
@@ -426,10 +425,10 @@ private fun ArkeLabel(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelLarge.inReadingFont(),
-        color = sinqColors.arke,
+        color = MaterialTheme.colorScheme.secondary,
         textAlign = TextAlign.Center,
         letterSpacing = 6.sp,
-        modifier = Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 10.dp),
+        modifier = Modifier.fillMaxWidth().padding(top = Spacing.xl, bottom = 10.dp),
     )
 }
 
@@ -445,7 +444,7 @@ private fun ArkeVerse(
         Text(
             text = text,
             style = readingBodyStyle(fontSp, ArkeLineHeight).copy(fontStyle = FontStyle.Italic),
-            color = sinqColors.arke,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
@@ -464,33 +463,39 @@ private fun ScriptureBody(
     onToggleBookmark: () -> Unit,
 ) {
     val s = LocalStrings.current
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Spacer(Modifier.weight(1f))
-        IconButton(onClick = onToggleBookmark) {
+    // A few scripture entries carry an embedded አርኬ hymn after the quotation —
+    // the quote goes in the card, the hymn sits centered below it.
+    val paras = parseSynaxarium(rawText)
+    val quote = paras.filter { it.kind == SynaxariumParaKind.NARRATIVE }
+        .joinToString("\n\n") { it.text }
+    // The bookmark sits in the card's own corner. It used to float in a
+    // full-width row of its own above it, right-aligned against nothing, so it
+    // read as belonging to the page rather than to the passage under it.
+    Box(Modifier.fillMaxWidth()) {
+        androidx.compose.foundation.text.selection.SelectionContainer {
+            Text(
+                text = quote,
+                style = readingBodyStyle(fontSp),
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(start = 14.dp, top = 14.dp, bottom = 14.dp, end = 46.dp),
+            )
+        }
+        IconButton(
+            onClick = onToggleBookmark,
+            modifier = Modifier.align(Alignment.TopEnd).padding(top = 2.dp, end = 2.dp),
+        ) {
             Icon(
                 imageVector = if (bookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
                 contentDescription = if (bookmarked) s.removeAction else s.bookmarkAction,
                 tint = if (bookmarked) MaterialTheme.colorScheme.secondary
                 else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(com.agpeya.app.ui.theme.IconSize.small),
             )
         }
-    }
-    // A few scripture entries carry an embedded አርኬ hymn after the quotation —
-    // the quote goes in the card, the hymn keeps its red centered styling below.
-    val paras = parseSynaxarium(rawText)
-    val quote = paras.filter { it.kind == SynaxariumParaKind.NARRATIVE }
-        .joinToString("\n\n") { it.text }
-    androidx.compose.foundation.text.selection.SelectionContainer {
-        Text(
-            text = quote,
-            style = readingBodyStyle(fontSp),
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(14.dp),
-        )
     }
     paras.forEach { para ->
         when (para.kind) {
