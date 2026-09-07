@@ -96,7 +96,13 @@ import java.time.LocalDate
 import kotlinx.coroutines.launch
 
 /** One reading office the user can switch to on a given day. */
-private data class Source(val label: String, val subtitle: String?, val services: GitsaweServices)
+private data class Source(
+    val label: String,
+    val subtitle: String?,
+    /** Scan pages the entry was transcribed from — the printed book's own. */
+    val pages: List<Int>,
+    val services: GitsaweServices,
+)
 
 /**
  * የዕለቱ ግጻዌ — today's lectionary. Offers whatever offices fall on the date
@@ -133,9 +139,9 @@ fun GitsaweScreen(
     // Keyed on the strings too, so the source labels re-localize on a language switch.
     val sources = remember(data, s) {
         if (data == null) emptyList() else buildList {
-            data.daily?.let { add(Source(s.srcDaily, it.title, it)) }
-            data.seasonal.forEach { add(Source(s.srcSeasonal, it.title, it)) }
-            data.monthly.forEach { add(Source(s.srcMonthly, it.title ?: it.raw, it)) }
+            data.daily?.let { add(Source(s.srcDaily, it.title, it.sourcePages, it)) }
+            data.seasonal.forEach { add(Source(s.srcSeasonal, it.title, it.sourcePages, it)) }
+            data.monthly.forEach { add(Source(s.srcMonthly, it.title ?: it.raw, emptyList(), it)) }
         }
     }
     var selected by rememberSaveable(epochDay, sources.size) { mutableIntStateOf(0) }
@@ -205,6 +211,9 @@ fun GitsaweScreen(
                     SynaxariumCard(
                         date = date,
                         today = currentDay,
+                        // The day's own name, which the page used to print
+                        // again in full a few dp below the hero.
+                        dayTitle = active?.subtitle,
                         onClick = { onOpenSynaxarium(epochDay) },
                     )
                 }
@@ -222,31 +231,34 @@ fun GitsaweScreen(
                     if (sources.size > 1) {
                         item(key = "switcher") { SourceSwitcher(sources, selected) { selected = it } }
                     }
-                    active.subtitle?.let { sub ->
-                        item(key = "sub") {
-                            // The day's own heading is content, not chrome: set in
-                            // the reading face, and selectable like a reading.
-                            androidx.compose.foundation.text.selection.SelectionContainer {
-                                Text(
-                                    sub,
-                                    style = MaterialTheme.typography.titleMedium
-                                        .inReadingFont(),
-                                    color = MaterialTheme.colorScheme.onBackground,
-                                    modifier = Modifier.padding(top = Spacing.xs, bottom = Spacing.xxs),
-                                )
-                            }
-                        }
+                    // Where the day comes from, in one quiet line: which of the
+                    // book's cycles it was taken from, and the page it is
+                    // printed on. The day's own title is in the hero above.
+                    item(key = "sub") {
+                        Text(
+                            listOfNotNull(
+                                active.label,
+                                active.pages.takeIf { it.isNotEmpty() }?.let(s::gitsaweSourcePage),
+                            ).joinToString("  ·  "),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(top = Spacing.xxs, bottom = Spacing.xxs),
+                        )
                     }
                     val setMisbakLanguage: (MisbakLanguage) -> Unit = { language ->
                         scope.launch { SettingsRepository.setMisbakLanguage(context, language) }
                     }
-                    active.services.negh?.let { svc -> serviceSection("ነግህ", svc, s, misbakLanguage, setMisbakLanguage, onOpenReading) }
-                    active.services.kidassie?.let { svc -> serviceSection("ቅዳሴ", svc, s, misbakLanguage, setMisbakLanguage, onOpenReading) }
-                    active.services.serk?.let { svc -> serviceSection("ሠርክ", svc, s, misbakLanguage, setMisbakLanguage, onOpenReading) }
-                    val chants = dayChants(active.services)
-                    if (chants.isNotEmpty()) {
-                        item(key = "kidase") { KidaseSection(chants) }
+                    // The anaphora names the ቅዳሴ, so it sits on the ቅዳሴ
+                    // header. It used to be a section of its own at the foot
+                    // of the page, four readings away from what it names.
+                    val chants = dayChants(active.services).joinToString("  ·  ")
+                    active.services.negh?.let { svc -> serviceSection("ነግህ", null, svc, s, misbakLanguage, setMisbakLanguage, onOpenReading) }
+                    active.services.kidassie?.let { svc ->
+                        serviceSection("ቅዳሴ", chants.takeIf { it.isNotEmpty() }, svc, s, misbakLanguage, setMisbakLanguage, onOpenReading)
                     }
+                    active.services.serk?.let { svc -> serviceSection("ሠርክ", null, svc, s, misbakLanguage, setMisbakLanguage, onOpenReading) }
                 }
                 if (data?.sundayCycle?.isNotEmpty() == true) {
                     item(key = "sunday_cycle") {
@@ -300,6 +312,8 @@ private val ROLE_LABELS = listOf(
 
 private fun androidx.compose.foundation.lazy.LazyListScope.serviceSection(
     label: String,
+    /** The anaphora sung at this service, when it names one. */
+    note: String?,
     service: GitsaweService,
     s: Strings,
     misbakLanguage: MisbakLanguage,
@@ -307,7 +321,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.serviceSection(
     onOpenReading: (ReadingTarget, String) -> Unit,
 ) {
     item(key = "svc_$label") {
-        ServiceHeader(label)
+        ServiceHeader(label, note)
     }
     for ((role, pick) in ROLE_LABELS) {
         pick(service).forEachIndexed { i, reading ->
@@ -322,14 +336,15 @@ private fun androidx.compose.foundation.lazy.LazyListScope.serviceSection(
 }
 
 /**
- * Names one movement of the day — ነግህ, ቅዳሴ, and the Kidase coda — at the same
- * rank as every other section header in the app: gold, bold, with the rule
- * carrying the line to the margin.
+ * Names one movement of the day — ነግህ, ቅዳሴ, ሠርክ — at the same rank as every
+ * other section header in the app: gold, bold, with the rule carrying the line
+ * to the margin. [note] rides the far end of the rule, which is where the
+ * day's anaphora belongs: it names the ቅዳሴ it sits on.
  */
 @Composable
-private fun ServiceHeader(label: String) {
+private fun ServiceHeader(label: String, note: String? = null) {
     Row(
-        Modifier.fillMaxWidth().padding(top = Spacing.xl, bottom = Spacing.xs),
+        Modifier.fillMaxWidth().padding(top = Spacing.lg, bottom = Spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -345,41 +360,16 @@ private fun ServiceHeader(label: String) {
             thickness = 1.dp,
             color = MaterialTheme.colorScheme.outlineVariant,
         )
-    }
-}
-
-/**
- * የዕለቱ ቅዳሴ — which anaphora is sung today, closing the page as a natural
- * continuation of the readings above it. Chant names are content: set in the
- * reading face, selectable, marked with the ፨ section sign rather than an icon
- * the tradition never used.
- */
-@Composable
-private fun KidaseSection(chants: List<String>) {
-    val s = LocalStrings.current
-    Column(Modifier.fillMaxWidth()) {
-        ServiceHeader(s.kidaseHeader)
-        chants.forEach { name ->
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = Spacing.xs, horizontal = Spacing.xs),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    "፨",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.secondary,
-                )
-                Spacer(Modifier.width(Spacing.sm))
-                androidx.compose.foundation.text.selection.SelectionContainer {
-                    Text(
-                        name,
-                        style = MaterialTheme.typography.titleSmall.inReadingFont(),
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
-                }
-            }
+        if (!note.isNullOrBlank()) {
+            Spacer(Modifier.width(Spacing.md))
+            Text(
+                note,
+                style = MaterialTheme.typography.labelMedium.inReadingFont(),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false),
+            )
         }
     }
 }
@@ -428,7 +418,10 @@ private fun ReadingRow(
         else Color.Transparent,
         border = if (isMisbak) BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.32f)) else null,
     ) {
-        Column(Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm)) {
+        // Reference and incipit, and nothing else: 60 dp a row rather than
+        // 92. Nine readings is a long page already — the reader came for the
+        // passage, and the row's work is to say which one and open it.
+        Column(Modifier.padding(horizontal = Spacing.md, vertical = Spacing.xs)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(role, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
                 Spacer(Modifier.width(Spacing.sm))
@@ -455,12 +448,14 @@ private fun ReadingRow(
                 }
             }
             preview?.takeIf { it.isNotBlank() }?.let {
-                Spacer(Modifier.height(Spacing.xs))
+                Spacer(Modifier.height(Spacing.xxs))
                 Text(
                     it,
                     style = MaterialTheme.typography.bodyMedium.inReadingFont(),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
+                    // The ምስባክ is the exception: it is the chant itself, three
+                    // lines as the book prints them, not an incipit.
+                    maxLines = if (isMisbak) 4 else 1,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
@@ -528,7 +523,12 @@ private fun verseRef(v: VerseRef): String = buildString {
  * day actually in view: "የዕለቱ ስንክሳር" only while the page is on today.
  */
 @Composable
-private fun SynaxariumCard(date: LocalDate, today: LocalDate, onClick: () -> Unit) {
+private fun SynaxariumCard(
+    date: LocalDate,
+    today: LocalDate,
+    dayTitle: String?,
+    onClick: () -> Unit,
+) {
     val s = LocalStrings.current
     val sinq = sinqColors
     HeroCard(
@@ -545,18 +545,25 @@ private fun SynaxariumCard(date: LocalDate, today: LocalDate, onClick: () -> Uni
         Spacer(Modifier.width(Spacing.md))
         Column(Modifier.weight(1f)) {
             Text(
-                s.synaxariumTitle,
-                style = MaterialTheme.typography.labelMedium,
-                color = sinq.onHeroMuted,
-            )
-            Text(
                 if (date == today) s.synaxariumKicker
                 else s.synaxariumFor(formatEthiopianShort(date, s)),
                 style = MaterialTheme.typography.titleMedium,
                 color = sinq.onHero,
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+            // The day's own name, on the first thing the page shows. The hero
+            // used to say "ስንክሳር" and then "የዕለቱ ስንክሳር" — the same words
+            // twice — while the commemoration itself sat below it.
+            dayTitle?.takeIf { it.isNotBlank() }?.let {
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodySmall.inReadingFont(),
+                    color = sinq.onHeroMuted,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
         Icon(
             Icons.AutoMirrored.Outlined.KeyboardArrowRight,

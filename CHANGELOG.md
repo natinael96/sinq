@@ -93,6 +93,16 @@ features; `versionCode` increments on every release).
   foot**, a row between hairlines instead of a card in the middle: it is a
   summary of the page above it, not a task on it. The ten-week heatmap is
   unchanged.
+- **ግጻዌ lands the whole ቅዳሴ on the first screen.** 1,296 dp became 940. The
+  ስንክሳር hero stays first and full-width, but now carries the day's own name
+  instead of saying "ስንክሳር" and "የዕለቱ ስንክሳር" one above the other — and the
+  day's title, which used to be printed again a few dp below it, is that name.
+  What is left under the hero is one quiet line saying which of the book's
+  cycles the day came from and the page it is printed on. A reading row is 60
+  dp rather than 92: reference and incipit, one line each, with ምስባክ the
+  exception since it is the chant itself and not an incipit. The anaphora moved
+  onto the ቅዳሴ header it names, from a section of its own at the foot of the
+  page four readings away.
 - **The prayer hero says whether the hour has been prayed.** It carries an አሁን
   chip while the hour is due and a lit candle once it is prayed — which the app
   now records for itself when the hour is read to its foot. The page's first

@@ -55,6 +55,8 @@ interface Strings {
 
     val gitsaweTitle: String
     val gitsaweKicker: String
+    /** "መጽሐፈ ግጻዌ ገጽ ፫፻፶፪" — the printed page a day was transcribed from. */
+    fun gitsaweSourcePage(pages: List<Int>): String
     val srcDaily: String
     val srcSeasonal: String
     val srcMonthly: String
@@ -433,7 +435,6 @@ interface Strings {
     val shareFailed: String
 
     /** የዕለቱ ቅዳሴ — the day's appointed anaphora, at the foot of the ግጻዌ. */
-    val kidaseHeader: String
 
     // Prayer list — people to remember in prayer.
     val prayerListTitle: String
@@ -805,6 +806,8 @@ object AmharicStrings : Strings {
 
     override val gitsaweTitle = "የዕለቱ ግጻዌ"
     override val gitsaweKicker = "ግጻዌ ዘዕለት"
+    override fun gitsaweSourcePage(pages: List<Int>) =
+        "መጽሐፈ ግጻዌ ገጽ " + pages.joinToString("–") { com.agpeya.app.ui.reading.geezNumeral(it) }
     override val srcDaily = "ዕለታዊ"
     override val srcSeasonal = "ወቅታዊ"
     override val srcMonthly = "ወርኃዊ"
@@ -1165,7 +1168,6 @@ object AmharicStrings : Strings {
     override val imagePreparing = "ምስል በመዘጋጀት ላይ…"
     override val imageSaveFailed = "ምስሉን ማስቀመጥ አልተቻለም። እንደገና ይሞክሩ።"
     override val shareFailed = "ማጋራት አልተቻለም። እንደገና ይሞክሩ።"
-    override val kidaseHeader = "የዕለቱ ቅዳሴ"
 
     override val prayerListTitle = "የጸሎት ዝርዝር"
     override val addPerson = "ሰው ጨምር"
@@ -1492,6 +1494,8 @@ object EnglishStrings : Strings {
 
     override val gitsaweTitle = "Today's Gitsawe"
     override val gitsaweKicker = "Gitsawe of the day"
+    override fun gitsaweSourcePage(pages: List<Int>) =
+        "Gitsawe p. " + pages.joinToString("–")
     override val srcDaily = "Daily"
     override val srcSeasonal = "Seasonal"
     override val srcMonthly = "Monthly"
@@ -1869,7 +1873,6 @@ object EnglishStrings : Strings {
     override val imagePreparing = "Preparing image…"
     override val imageSaveFailed = "Couldn't save the image. Please try again."
     override val shareFailed = "Couldn't share this passage. Please try again."
-    override val kidaseHeader = "Kidase of the day"
 
     override val prayerListTitle = "Prayer list"
     override val addPerson = "Add person"
