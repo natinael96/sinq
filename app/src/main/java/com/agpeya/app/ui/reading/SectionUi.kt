@@ -633,8 +633,13 @@ private fun versesBody(section: Section, range: IntRange): String =
         section.verses.getOrNull(n - section.firstVerse)?.let { "${geezNumeral(n)}  $it" }
     }.joinToString("\n")
 
+/** Title and reference, unless the reference only repeats the title — a psalm
+ *  is named "መዝሙር ፩" in both, and "መዝሙር ፩ — መዝሙር ፩" is not a heading. */
 private fun shareHeading(section: Section): String =
-    listOfNotNull(section.title, section.reference?.takeIf { it.isNotBlank() }).joinToString(" — ")
+    listOfNotNull(
+        section.title,
+        section.reference?.takeIf { it.isNotBlank() && it != section.title },
+    ).joinToString(" — ")
 
 /**
  * The same verse as a [com.agpeya.app.ui.common.SharePayload] for the PNG card:

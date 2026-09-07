@@ -149,12 +149,25 @@ object GitsaweRepository {
         return monthly(context).filter { monthlyMatches(it, e.month, e.day, isSunday) }
     }
 
+    /**
+     * Every season window a date sits in: the computus one from [BahreHasab]
+     * first, then the fixed-anchored Sunday seasons from [SundayCycleCalendar].
+     */
+    fun seasonWindowsOn(date: LocalDate): List<BahreHasab.SeasonWindow> =
+        listOfNotNull(BahreHasab.movableSeasonOn(date)) + SundayCycleCalendar.windowsOn(date)
+
+    private fun BahreHasab.SeasonWindow.admits(season: String?, week: Int?): Boolean =
+        season == this.season && (this.week == null || week == null || week == this.week)
+
     /** Seasonal (movable) entries for a date, located via the [BahreHasab] computus. */
     suspend fun seasonalFor(context: Context, date: LocalDate): List<SeasonalEntry> {
         val sunday = BahreHasab.movableSeasonOn(date)
+        // The fixed-anchored seasons carry Sunday hymns only, so they join on Sundays.
+        val fixed = if (date.dayOfWeek == DayOfWeek.SUNDAY) SundayCycleCalendar.windowsOn(date) else emptyList()
+        val windows = listOfNotNull(sunday) + fixed
         val weekday = BahreHasab.movableWeekdayOn(date)
-        val sundayEntries = if (sunday == null) emptyList() else seasonal(context).filter {
-            it.season == sunday.season && (sunday.week == null || it.week == null || it.week == sunday.week)
+        val sundayEntries = if (windows.isEmpty()) emptyList() else seasonal(context).filter { entry ->
+            windows.any { it.admits(entry.season, entry.week) }
         }
         val weekdayEntries = if (weekday == null) emptyList() else movableWeekdays(context).filter {
             it.season == weekday.season && it.week == weekday.week && it.part == weekday.part
@@ -162,20 +175,28 @@ object GitsaweRepository {
         return sundayEntries + weekdayEntries
     }
 
-    /** Part 3 rows whose printed rule unambiguously selects this Sunday. */
-    suspend fun sundayCycleFor(context: Context, date: LocalDate): List<SundayCycleEntry> {
-        if (date.dayOfWeek != DayOfWeek.SUNDAY) return emptyList()
+    /**
+     * Part 3 rows the book prints for this Sunday (or for ቅዳሜ ሥዑር, the one
+     * Saturday it covers). A feast that falls on the day overrides the season:
+     * a single-date rubric beats a printed date range, which beats a season row.
+     */
+    suspend fun sundayCycleFor(context: Context, date: LocalDate): List<SundayCycleEntry> =
+        selectSundayCycle(sundayCycle(context), date)
+
+    /** The pure selection behind [sundayCycleFor], so it can be checked without assets. */
+    fun selectSundayCycle(entries: List<SundayCycleEntry>, date: LocalDate): List<SundayCycleEntry> {
+        val movable = BahreHasab.movableSeasonOn(date)
+        if (date.dayOfWeek != DayOfWeek.SUNDAY && movable?.season != "holy_saturday") return emptyList()
         val eth = EthiopianDate.from(date)
-        val window = BahreHasab.movableSeasonOn(date)
-        val candidates = sundayCycle(context).filter { entry ->
-            val fixed = entry.monthNum == eth.month &&
-                entry.fromDay != null && entry.toDay != null && eth.day in entry.fromDay..entry.toDay
-            val movable = window != null && entry.season == window.season && entry.week == window.week
-            fixed || movable
-        }
-        // An exact-date rubric overrides a broader range covering the same day.
-        val exact = candidates.filter { it.monthNum != null && it.fromDay == eth.day && it.toDay == eth.day }
-        return exact.ifEmpty { candidates }
+        val windows = listOfNotNull(movable) + SundayCycleCalendar.windowsOn(date)
+        val seasonal = entries.filter { e -> windows.any { w -> e.season == w.season && e.week == w.week } }
+        // Great Lent suppresses the feasts that fall inside it (ስምዖን on ዘወረደ).
+        if (movable?.season == "abiyTsom" && seasonal.isNotEmpty()) return seasonal
+        val exact = entries.filter { e -> e.dateSpans.any { it.isSingleDay && it.contains(eth.month, eth.day) } }
+        if (exact.isNotEmpty()) return exact
+        val ranged = entries.filter { e -> e.dateSpans.any { it.contains(eth.month, eth.day) } }
+        if (ranged.isNotEmpty()) return ranged
+        return seasonal
     }
 
     /**

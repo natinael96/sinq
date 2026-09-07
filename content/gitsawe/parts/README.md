@@ -32,8 +32,17 @@ canonical flat sections. Period, hymn, `gize`, heading, and reading fields are
 optional because some rows are continuations, rubrics, or partial services.
 They must not be filled with guessed content.
 
-Fixed Sunday ranges can later normalize to `MonthlyEntry`; movable Sunday rows
-fit `SeasonalEntry`. Both already share `GitsaweService` in the app model.
+Every row now carries the selector its heading prints, attached by
+`tools/import_gitsawe_part3.py`: a fixed Ethiopian date span (plus `spans` for
+a rubric naming two dates, such as ዕንባቆም), or a season key with a week. The
+computus seasons (`abiyTsom`, `tnsae`, `holy_saturday`) come from
+`BahreHasab`; the fixed-anchored ones (`tsige`, `astemhro`, `sibket`, `birhan`,
+`nolawi`, `lidet`, `kremt`) from `SundayCycleCalendar`, whose header documents
+how each week number is counted. `kremt` weeks are the book's printed hymn
+ordinals ፩ኛ–፲፭ኛ, not Sunday ordinals.
+
+One transcription is corrected on import: section 27 reads ፳፫ in the master,
+but scan 390 prints "ለታኅሣሥ ፳፰ ቀን መርዓዊ" (አማኑኤል's monthly day).
 
 ## Part 4 — Athanasius funeral lectionary
 

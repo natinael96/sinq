@@ -31,8 +31,29 @@ object ContentRepository {
 
     suspend fun hours(context: Context): List<Hour> =
         cache ?: withContext(Dispatchers.IO) {
-            load(context.applicationContext).also { cache = it }
+            val app = context.applicationContext
+            // Latin book names are a fact of the extraction, not of the prayer
+            // book; they are turned into the Church's own here, once, so that
+            // everything downstream — sharing above all — reads in Amharic.
+            val namesByEnglish = runCatching {
+                ScriptureRepository.books(app)
+                    .associate { Citation.englishKey(it.nameEn) to it.nameAm }
+            }.getOrDefault(emptyMap())
+            load(app).map { hour -> hour.copy(sections = hour.sections.map { it.inAmharic(namesByEnglish) }) }
+                .also { cache = it }
         }
+
+    /** A section whose reference reads as the app writes every other reference. */
+    private fun com.agpeya.app.model.Section.inAmharic(
+        namesByEnglish: Map<String, String>,
+    ): com.agpeya.app.model.Section {
+        val raw = reference?.takeIf { it.isNotBlank() } ?: return this
+        val named = Citation.fromLatin(raw, PSALM_NAME, namesByEnglish) ?: return this
+        return copy(reference = named)
+    }
+
+    /** How a single psalm is named — the Psalter is not in the book catalogue. */
+    private const val PSALM_NAME = "መዝሙር"
 
     suspend fun hour(context: Context, hourId: String): Hour? =
         hours(context).find { it.id == hourId }

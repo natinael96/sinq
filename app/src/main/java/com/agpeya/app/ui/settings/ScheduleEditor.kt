@@ -115,8 +115,12 @@ fun scheduleSummary(
         ?: s.chooseFeast
 }
 
+/**
+ * The cadence picker on its own, for callers that already have somewhere to
+ * show the summary — the habits editor puts it under the habit's name.
+ */
 @Composable
-private fun ScheduleEditorDialog(
+fun ScheduleEditorDialog(
     s: Strings,
     initial: HabitSchedule,
     onDismiss: () -> Unit,

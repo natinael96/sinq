@@ -39,6 +39,31 @@ import com.agpeya.app.ui.common.SectionHeader
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.theme.Spacing
 
+/**
+ * ዮሴፍ ወልደ ኮርዮን. The bundle files Josippon after ራእየ ዮሐንስ, with the books of
+ * church order; the Church counts it as the last of the seventeen ብሉይ ኪዳን
+ * history books — "from ኢያሱ ወልደ ነዌ to ዮሴፍ ወልደ ኮርዮን" — which is also why the
+ * order group is eight books and not nine. Corrected here rather than in
+ * `canon.json`, which is copied wholesale from the upstream Bible data.
+ */
+internal const val JOSIPPON = "josippon"
+
+/** Which testament a book is listed under, Josippon apart. */
+internal fun canonTestament(book: ScriptureBookMeta): String =
+    if (book.key == JOSIPPON) "old" else book.testament
+
+/**
+ * Which heading a book sits under. `canon.json` leaves a section off the three
+ * Ethiopian deuterocanonical books and the eight of church order; both have an
+ * obvious home rather than a bare testament header.
+ */
+internal fun canonSectionKey(book: ScriptureBookMeta): String = when {
+    book.key == JOSIPPON -> "Historical"
+    book.section.isNotBlank() -> book.section
+    book.testament == "deuterocanonical" -> "Deuterocanonical"
+    else -> "ChurchOrder"
+}
+
 /** One testament from the unified Amharic 1980 Bible, grouped by canon section. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,8 +73,15 @@ fun ScriptureListScreen(testament: String, onBack: () -> Unit, onOpenBook: (Stri
     val books by produceState<List<ScriptureBookMeta>>(initialValue = emptyList()) {
         value = ScriptureRepository.books(context)
     }
-    val groups = books.filter { it.testament == testament }
-        .groupBy { it.section.ifBlank { if (testament == "old") s.oldTestamentLabel else s.newTestamentLabel } }
+    // ብሉይ carries the deuterocanon with it — the books are part of this canon,
+    // and tagged as their own testament they matched neither list and so had no
+    // door at all. Books are already in canonical order, so the groups are too.
+    val groups = books
+        .filter {
+            val t = canonTestament(it)
+            t == testament || (testament == "old" && t == "deuterocanonical")
+        }
+        .groupBy(::canonSectionKey)
         .toList()
 
     Scaffold(
@@ -72,7 +104,7 @@ fun ScriptureListScreen(testament: String, onBack: () -> Unit, onOpenBook: (Stri
                 if (groupBooks.isEmpty()) return@forEach
                 item(key = "h_$label") {
                     SectionHeader(
-                        text = label,
+                        text = s.canonSection(label),
                         modifier = Modifier.padding(top = Spacing.xl, bottom = Spacing.xs),
                     )
                 }

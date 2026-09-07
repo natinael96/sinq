@@ -74,9 +74,14 @@ fun formatGregorianShort(date: LocalDate, s: Strings): String =
  * plain arithmetic off the season's start and is not affected by that question.
  */
 fun liturgicalSeasonLabel(date: LocalDate, s: Strings): String? {
-    val window = runCatching { com.agpeya.app.data.BahreHasab.movableSeasonOn(date) }.getOrNull()
+    val windows = runCatching { com.agpeya.app.data.GitsaweRepository.seasonWindowsOn(date) }.getOrNull()
         ?: return null
-    val name = s.seasonName(window.season) ?: return null
-    val week = window.week ?: return name
+    val window = windows.firstOrNull { s.seasonName(it.season) != null } ?: return null
+    val name = s.seasonName(window.season)!!
+    // Only seasons counted in plain weeks show one; ክረምት and ልደት carry the
+    // book's hymn ordinals, which skip numbers.
+    val week = window.week?.takeIf { window.season in WEEK_COUNTED_SEASONS } ?: return name
     return s.seasonWithWeek(name, week)
 }
+
+private val WEEK_COUNTED_SEASONS = setOf("abiyTsom", "tnsae", "tsige", "astemhro", "seneAstemhro", "filseta")

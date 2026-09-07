@@ -127,8 +127,10 @@ fun HomeScreen(
     val habitState by HabitsRepository.state(context).collectAsState(initial = HabitsState())
     val doneToday = habitState.records[today.toString()] ?: emptySet()
     val prayedAnyHour = doneToday.any { it.startsWith("hour_") }
-    val habitIds = remember(habitState) {
-        listOf(PRAYER_AGGREGATE_ID) + HabitsRepository.orderedHabitIds(habitState, includeHidden = false)
+    // Prayer, then only the habits today asks for: the count under ዛሬ is kept
+    // of *due*, so a weekly habit does not read as missed six days a week.
+    val habitIds = remember(habitState, today) {
+        listOf(PRAYER_AGGREGATE_ID) + HabitsRepository.dueHabitIds(habitState, today)
     }
     val doneWithAggregate = if (prayedAnyHour) doneToday + PRAYER_AGGREGATE_ID else doneToday
     val strings = LocalStrings.current
@@ -147,15 +149,19 @@ fun HomeScreen(
     }
     val planState by com.agpeya.app.data.ReadingPlanRepository.state(context)
         .collectAsState(initial = com.agpeya.app.model.ReadingPlanState())
-    val planLine = remember(planContent, planState, today) {
+    val planBookNames by produceState(emptyMap<String, String>()) {
+        value = runCatching { com.agpeya.app.data.ScriptureRepository.bookNames(context) }.getOrDefault(emptyMap())
+    }
+    val planLine = remember(planContent, planState, planBookNames, today) {
         planContent.plans.firstOrNull { it.id == planState.activePlanId }?.let { plan ->
             val day = com.agpeya.app.data.ReadingPlanRepository
                 .dayOn(planState.startedOn, today, plan.days)
-            val passages = plan.day(day)?.r.orEmpty().joinToString(" · ") { r ->
-                val name = r.b.split('-').joinToString(" ") { part ->
-                    part.replaceFirstChar { c -> if (c.isLowerCase()) c.titlecase() else c.toString() }
-                }
-                if (r.to > r.c) "$name ${r.c}–${r.to}" else "$name ${r.c}"
+            val readings = com.agpeya.app.data.ReadingPlanRepository
+                .effectiveDays(plan, planState).firstOrNull { it.d == day }?.r.orEmpty()
+            val passages = readings.joinToString(" · ") { r ->
+                val name = com.agpeya.app.ui.reading.bookName(r.b, planBookNames)
+                val from = com.agpeya.app.ui.reading.geezNumeral(r.c)
+                if (r.to > r.c) "$name $from–${com.agpeya.app.ui.reading.geezNumeral(r.to)}" else "$name $from"
             }
             day to passages
         }
@@ -307,7 +313,6 @@ private fun HomeDashboard(
             doneToday,
             habitState.records,
             today,
-            hours.size + (habitIds.size - 1),
             onOpenJourney,
             cardScale,
             Modifier.fillMaxWidth(),
@@ -526,6 +531,7 @@ private fun GitsaweCard(state: HomeReadingsState, onClick: () -> Unit) {
         ?: readings?.seasonal?.firstOrNull()?.title
         ?: readings?.monthly?.firstOrNull()?.let { it.title ?: it.raw }
         ?: readings?.sundayCycle?.firstOrNull()?.title
+    val mezmur = readings?.sundayCycle?.firstNotNullOfOrNull { it.mezmur }
 
     HeroCard(onClick = onClick, contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.md)) {
         Icon(Icons.AutoMirrored.Outlined.MenuBook, contentDescription = null, tint = sinq.onHeroMuted, modifier = Modifier.size(IconSize.large))
@@ -539,6 +545,7 @@ private fun GitsaweCard(state: HomeReadingsState, onClick: () -> Unit) {
                 is HomeReadingsState.Ready -> {
                     feast?.let { Text(it, style = MaterialTheme.typography.labelMedium, color = sinq.onHeroMuted, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                     reading?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = sinq.onHeroMuted, maxLines = 2, overflow = TextOverflow.Ellipsis) }
+                    mezmur?.let { Text("${s.sundayMezmurTitle} · $it", style = MaterialTheme.typography.bodySmall, color = sinq.onHero, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                 }
             }
         }
@@ -552,7 +559,6 @@ private fun TodayCard(
     doneToday: Set<String>,
     records: Map<String, Set<String>>,
     today: LocalDate,
-    maxPossible: Int,
     onClick: () -> Unit,
     /** Matches the card's own font-driven growth — see [HomeDashboard]. */
     scale: Float,
@@ -597,7 +603,6 @@ private fun TodayCard(
             HabitHeatmap(
                 records = records,
                 today = today,
-                maxPossible = maxPossible.coerceAtLeast(1),
                 weeksBack = 10,
                 showLegend = false,
                 cell = 6.dp * glyphScale,

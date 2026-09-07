@@ -73,7 +73,6 @@ fun EthiopianYearHeatmap(
     today: LocalDate,
     ecYear: Int,
     selectedDay: LocalDate?,
-    maxPossible: Int,
     modifier: Modifier = Modifier,
     onYearChange: (Int) -> Unit,
     onDaySelect: (LocalDate) -> Unit,
@@ -125,7 +124,7 @@ fun EthiopianYearHeatmap(
             // fainter green, so the year ahead keeps its shape.
             return if (inFast(date)) fastWash.copy(alpha = 0.08f) else empty.copy(alpha = 0.35f)
         }
-        return when (HabitsRepository.level(HabitsRepository.dayCount(records, date), maxPossible)) {
+        return when (HabitsRepository.level(HabitsRepository.dayCount(records, date))) {
             0 -> if (inFast(date)) fastWash else empty
             1 -> gold.copy(alpha = 0.30f)
             2 -> gold.copy(alpha = 0.50f)

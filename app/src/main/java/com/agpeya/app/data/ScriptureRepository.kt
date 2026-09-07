@@ -71,6 +71,14 @@ object ScriptureRepository {
         }
 
     /**
+     * Slug → the bundle's own Amharic name. The reading plan stores slugs, and
+     * a slug titlecased into Latin ("2 Kings") has no business on an Amharic
+     * page when `meta.json` names every book already.
+     */
+    suspend fun bookNames(context: Context): Map<String, String> =
+        books(context).associate { it.key to it.nameAm }
+
+    /**
      * Load one book by its key (e.g. "luke"), cached after first read.
      * [cache] false reads without populating the cache — the search indexer
      * walks every book once and must not evict what the reader is using.

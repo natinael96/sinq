@@ -71,7 +71,7 @@ fun GitsawePassageScreen(
     end: Int,
     role: String?,
     onBack: () -> Unit,
-    onWriteNote: (route: String, label: String) -> Unit = { _, _ -> },
+    onWriteNote: (route: String, label: String) -> Unit,
     onOpenBook: () -> Unit,
     onOpenChapter: (Boolean) -> Unit,
 ) {

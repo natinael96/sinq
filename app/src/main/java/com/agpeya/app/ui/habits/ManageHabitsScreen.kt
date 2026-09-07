@@ -48,6 +48,13 @@ import com.agpeya.app.ui.strings.LocalStrings
 import kotlinx.coroutines.launch
 import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.IconSize
+import androidx.compose.foundation.clickable
+import com.agpeya.app.model.HabitSchedule
+import com.agpeya.app.ui.settings.ScheduleEditorDialog
+import com.agpeya.app.ui.settings.scheduleSummary
+
+/** No schedule means every day; the picker opens showing exactly that. */
+private val DAILY_SCHEDULE = HabitSchedule(kind = HabitSchedule.Kind.WEEKLY, days = (1..7).toSet())
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +66,7 @@ fun ManageHabitsScreen(onBack: () -> Unit) {
     val ids = HabitsRepository.orderedHabitIds(state, includeHidden = true)
 
     var renamingId by remember { mutableStateOf<String?>(null) }
+    var schedulingId by remember { mutableStateOf<String?>(null) }
     var creating by remember { mutableStateOf(false) }
 
     fun move(from: Int, to: Int) {
@@ -102,12 +110,29 @@ fun ManageHabitsScreen(onBack: () -> Unit) {
                             tint = if (hidden) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
                         )
                     }
-                    Text(
-                        text = habitName(id, state, s),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = if (hidden) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.weight(1f).padding(vertical = 14.dp),
-                    )
+                    // Name, and under it the cadence — tapping either opens the
+                    // picker, so "how often" is set where the habit lives
+                    // rather than on a page of its own.
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable(onClickLabel = s.scheduleLabel) { schedulingId = id }
+                            .padding(vertical = 10.dp),
+                    ) {
+                        Text(
+                            text = habitName(id, state, s),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = if (hidden) MaterialTheme.colorScheme.onSurfaceVariant
+                            else MaterialTheme.colorScheme.onBackground,
+                        )
+                        Text(
+                            text = state.schedules[id]
+                                ?.let { scheduleSummary(it, s, context) }
+                                ?: s.daysSummaryDaily,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                     IconButton(onClick = { renamingId = id }) {
                         Icon(Icons.Outlined.Edit, contentDescription = s.rename, modifier = Modifier.size(IconSize.medium))
                     }
@@ -148,6 +173,23 @@ fun ManageHabitsScreen(onBack: () -> Unit) {
                 renamingId = null
             },
             onDismiss = { renamingId = null },
+        )
+    }
+    val cadenceId = schedulingId
+    if (cadenceId != null) {
+        ScheduleEditorDialog(
+            s = s,
+            initial = state.schedules[cadenceId] ?: DAILY_SCHEDULE,
+            onDismiss = { schedulingId = null },
+            onSave = { schedule ->
+                schedulingId = null
+                // Every weekday chosen is the same as no schedule at all, and
+                // storing nothing keeps an untouched habit untouched.
+                val next = schedule.takeUnless {
+                    it.kind == HabitSchedule.Kind.WEEKLY && it.days.size == 7
+                }
+                scope.launch { HabitsRepository.setSchedule(context, cadenceId, next) }
+            },
         )
     }
     if (creating) {

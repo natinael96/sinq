@@ -105,17 +105,35 @@ data class SundayCycleEntry(
     val rubric: String? = null,
     val reviewNotes: String? = null,
     val sourcePages: List<Int> = emptyList(),
-    /** Unambiguous fixed Ethiopian-date selector, when printed by the source. */
+    /** Fixed Ethiopian-date selector, when printed by the source. */
     val monthNum: Int? = null,
     val fromDay: Int? = null,
     val toDay: Int? = null,
-    /** Unambiguous computus-relative selector, when printed by the source. */
+    /** Further fixed dates the same rule names (e.g. ዕንባቆም: ጥቅምት ፫ or ኅዳር ፫). */
+    val spans: List<DateSpan> = emptyList(),
+    /**
+     * Season selector: a computus key from [com.agpeya.app.data.BahreHasab]
+     * or a fixed-anchored one from [com.agpeya.app.data.SundayCycleCalendar].
+     */
     val season: String? = null,
     val week: Int? = null,
     override val negh: GitsaweService? = null,
     override val kidassie: GitsaweService? = null,
     override val serk: GitsaweService? = null,
-) : GitsaweServices
+) : GitsaweServices {
+    /** Every fixed Ethiopian-date span this rule applies to. */
+    val dateSpans: List<DateSpan>
+        get() = listOfNotNull(
+            if (monthNum != null && fromDay != null && toDay != null) DateSpan(monthNum, fromDay, toDay) else null,
+        ) + spans
+}
+
+/** An inclusive Ethiopian month/day span. */
+@Serializable
+data class DateSpan(val monthNum: Int, val fromDay: Int, val toDay: Int) {
+    val isSingleDay: Boolean get() = fromDay == toDay
+    fun contains(month: Int, day: Int): Boolean = month == monthNum && day in fromDay..toDay
+}
 
 /** A separately selected funeral or memorial reading from master Part 4. */
 @Serializable

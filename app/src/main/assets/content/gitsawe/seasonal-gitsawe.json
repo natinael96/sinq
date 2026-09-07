@@ -1070,9 +1070,9 @@
   }
  },
  {
-  "season": "genaTsom",
+  "season": "astemhro",
   "week": 1,
-  "part": 1,
+  "part": null,
   "raw": "01-genaTsom-01",
   "movable": true,
   "title": "፩ኛ",
@@ -1152,9 +1152,9 @@
   }
  },
  {
-  "season": "genaTsom",
-  "week": 1,
-  "part": 2,
+  "season": "astemhro",
+  "week": 2,
+  "part": null,
   "raw": "01-genaTsom-02",
   "movable": true,
   "title": "፪ኛ",
@@ -1232,9 +1232,9 @@
   }
  },
  {
-  "season": "genaTsom",
-  "week": 1,
-  "part": 3,
+  "season": "astemhro",
+  "week": 3,
+  "part": null,
   "raw": "01-genaTsom-03",
   "movable": true,
   "title": "፫ኛ",
@@ -1310,9 +1310,9 @@
   }
  },
  {
-  "season": "genaTsom",
-  "week": 1,
-  "part": 4,
+  "season": "astemhro",
+  "week": 4,
+  "part": null,
   "raw": "01-genaTsom-04",
   "movable": true,
   "title": "፬ኛ",
@@ -1388,9 +1388,9 @@
   }
  },
  {
-  "season": "genaTsom",
-  "week": 1,
-  "part": 5,
+  "season": "astemhro",
+  "week": 5,
+  "part": null,
   "raw": "01-genaTsom-05",
   "movable": true,
   "title": "፭ኛ",
@@ -1468,8 +1468,8 @@
   }
  },
  {
-  "season": "genaTsom",
-  "week": 2,
+  "season": "sibket",
+  "week": null,
   "part": null,
   "raw": "02-genaTsom",
   "movable": true,
@@ -1546,8 +1546,8 @@
   }
  },
  {
-  "season": "genaTsom",
-  "week": 3,
+  "season": "birhan",
+  "week": null,
   "part": null,
   "raw": "03-genaTsom",
   "movable": true,
@@ -1625,8 +1625,8 @@
   }
  },
  {
-  "season": "genaTsom",
-  "week": 4,
+  "season": "nolawi",
+  "week": null,
   "part": null,
   "raw": "04-genaTsom",
   "movable": true,
@@ -2942,7 +2942,7 @@
   }
  },
  {
-  "season": "astemhro",
+  "season": "seneAstemhro",
   "week": null,
   "part": null,
   "raw": "ዘአስተምህሮ",
@@ -3022,7 +3022,7 @@
   }
  },
  {
-  "season": "zere_demena",
+  "season": "zere",
   "week": null,
   "part": null,
   "raw": "ዘርዕ ደመና",

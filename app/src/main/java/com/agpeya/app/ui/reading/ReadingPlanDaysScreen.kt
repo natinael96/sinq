@@ -46,6 +46,9 @@ fun ReadingPlanDaysScreen(onBack: () -> Unit, onOpenRoute: (String) -> Unit) {
     val today = remember { LocalDate.now() }
 
     val content by produceState(ReadingPlanContent()) { value = ReadingPlanRepository.content(context) }
+    val bookNames by produceState(emptyMap<String, String>()) {
+        value = runCatching { com.agpeya.app.data.ScriptureRepository.bookNames(context) }.getOrDefault(emptyMap())
+    }
     val state by ReadingPlanRepository.state(context).collectAsState(initial = ReadingPlanState())
     val plan = content.plans.firstOrNull { it.id == state.activePlanId }
     val listState = rememberLazyListState()
@@ -68,20 +71,22 @@ fun ReadingPlanDaysScreen(onBack: () -> Unit, onOpenRoute: (String) -> Unit) {
             )
             return@Scaffold
         }
-        val read = state.readDays(plan.id)
+        // The days as they now stand: repacked from the day the reader chose to
+        // finish on time, and the bundled days before it.
+        val days = ReadingPlanRepository.effectiveDays(plan, state)
+        val read = ReadingPlanRepository.readDayNumbers(state, days)
         LazyColumn(
             Modifier.fillMaxSize().padding(inner),
             state = listState,
             contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.md),
             verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
         ) {
-            items(plan.readings.size) { i ->
-                val day = plan.readings[i]
+            items(days.size) { i ->
+                val day = days[i]
                 val passages = day.r.joinToString(" · ") { r ->
-                    val name = r.b.split('-').joinToString(" ") { p ->
-                        p.replaceFirstChar { c -> if (c.isLowerCase()) c.titlecase() else c.toString() }
-                    }
-                    if (r.to > r.c) "$name ${r.c}–${r.to}" else "$name ${r.c}"
+                    val name = bookName(r.b, bookNames)
+                    if (r.to > r.c) "$name ${geezNumeral(r.c)}–${geezNumeral(r.to)}"
+                    else "$name ${geezNumeral(r.c)}"
                 }
                 ListRow(
                     title = s.readingDayLabel(day.d.toString()),

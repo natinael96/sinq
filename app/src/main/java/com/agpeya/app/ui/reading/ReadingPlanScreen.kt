@@ -67,6 +67,10 @@ fun ReadingPlanScreen(
     val today = remember { LocalDate.now() }
 
     val content by produceState(ReadingPlanContent()) { value = ReadingPlanRepository.content(context) }
+    // The plan stores slugs; every screen that shows one uses the bundle's own name.
+    val bookNames by produceState(emptyMap<String, String>()) {
+        value = runCatching { com.agpeya.app.data.ScriptureRepository.bookNames(context) }.getOrDefault(emptyMap())
+    }
     val state by ReadingPlanRepository.state(context).collectAsState(initial = ReadingPlanState())
     val plan = content.plans.firstOrNull { it.id == state.activePlanId }
 
@@ -94,8 +98,9 @@ fun ReadingPlanScreen(
                 }
             } else {
                 val day = ReadingPlanRepository.dayOn(state.startedOn, today, plan.days)
-                val read = state.readDays(plan.id)
-                val oldest = ReadingPlanRepository.oldestUnread(state, plan.id, day)
+                val days = ReadingPlanRepository.effectiveDays(plan, state)
+                val readCount = ReadingPlanRepository.daysRead(state, days)
+                val oldest = ReadingPlanRepository.oldestUnread(state, plan.id, days, day)
 
                 item {
                     Text(
@@ -103,7 +108,7 @@ fun ReadingPlanScreen(
                         style = MaterialTheme.typography.headlineSmall,
                     )
                     Text(
-                        s.readingDaysRead(read.size),
+                        s.readingDaysRead(readCount),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.secondary,
                     )
@@ -121,27 +126,27 @@ fun ReadingPlanScreen(
 
                 // ── then the plan's own ─────────────────────────────────────
                 item { SectionHeader(s.readingTodayHeader) }
-                val todayDay: PlanDay? = plan.day(day)
+                val todayDay: PlanDay? = days.firstOrNull { it.d == day }
                 if (todayDay == null) {
                     item { Text(s.readingNoPlan, style = MaterialTheme.typography.bodyMedium) }
                 } else {
                     items(todayDay.r.size) { i ->
                         val r = todayDay.r[i]
                         ListRow(
-                            title = bookName(r.b, s),
+                            title = bookName(r.b, bookNames),
                             subtitle = chapterLabel(r.c, r.to),
                             onClick = { onOpenRoute("scripture/${r.b}/${r.c}") },
                         )
                     }
                     item {
                         Spacer(Modifier.height(Spacing.sm))
-                        if (day in read) {
+                        if (ReadingPlanRepository.isRead(state, todayDay)) {
                             OutlinedButton(onClick = {
-                                scope.launch { ReadingPlanRepository.unmarkDay(context, plan.id, day) }
+                                scope.launch { ReadingPlanRepository.unmarkDay(context, plan, todayDay) }
                             }) { Text(s.readingDone) }
                         } else {
                             Button(onClick = {
-                                scope.launch { ReadingPlanRepository.markDay(context, plan.id, day, today) }
+                                scope.launch { ReadingPlanRepository.markDay(context, todayDay, today) }
                             }) { Text(s.readingMarkDone) }
                         }
                     }
@@ -187,28 +192,44 @@ fun ReadingPlanScreen(
 
     if (catching && plan != null) {
         val day = ReadingPlanRepository.dayOn(state.startedOn, today, plan.days)
-        val oldest = ReadingPlanRepository.oldestUnread(state, plan.id, day) ?: day
+        val oldest = ReadingPlanRepository.oldestUnread(
+            state,
+            plan.id,
+            ReadingPlanRepository.effectiveDays(plan, state),
+            day,
+        ) ?: day
         AlertDialog(
             onDismissRequest = { catching = false },
             title = { Text(s.readingBehindTitle) },
             text = {
+                // Two answers, and they are the only two: hold the daily reading
+                // and let the finish date move, or hold the finish date and let
+                // the days grow. Each says which it is costing.
                 Column {
-                    // Redistribute is offered first: it is the only one of the
-                    // three that never leaves a day behind or shows a deficit.
-                    TextButton(onClick = {
-                        catching = false
-                        scope.launch { ReadingPlanRepository.rebaseTo(context, oldest, today) }
-                    }) { Text(s.readingRedistribute) }
-                    TextButton(onClick = {
-                        catching = false
-                        scope.launch { ReadingPlanRepository.rebaseTo(context, oldest, today) }
-                    }) { Text(s.readingCatchOldest) }
-                    TextButton(onClick = {
-                        catching = false
-                        scope.launch {
-                            ReadingPlanRepository.markDay(context, plan.id, day, today)
-                        }
-                    }) { Text(s.readingCatchToday) }
+                    Text(
+                        s.readingBehindBody,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(Spacing.sm))
+                    ListRow(
+                        title = s.readingCatchOldest,
+                        subtitle = s.readingCatchOldestDesc,
+                        onClick = {
+                            catching = false
+                            scope.launch { ReadingPlanRepository.rebaseTo(context, oldest, today) }
+                        },
+                    )
+                    ListRow(
+                        title = s.readingRedistribute,
+                        subtitle = s.readingRedistributeDesc,
+                        onClick = {
+                            catching = false
+                            scope.launch {
+                                ReadingPlanRepository.redistributeFrom(context, plan.id, oldest, day)
+                            }
+                        },
+                    )
                 }
             },
             confirmButton = {},
@@ -275,10 +296,14 @@ private fun GitsaweSummary(readings: DayReadings?, onOpen: () -> Unit) {
 }
 
 private fun chapterLabel(from: Int, to: Int): String =
-    if (to > from) "$from–$to" else "$from"
+    if (to > from) "${geezNumeral(from)}–${geezNumeral(to)}" else geezNumeral(from)
 
-/** The plan stores slugs; the reader shows whatever the bundle calls the book. */
-private fun bookName(slug: String, s: com.agpeya.app.ui.strings.Strings): String =
-    slug.split('-').joinToString(" ") { part ->
+/**
+ * The plan stores slugs. The bundle names every book in Amharic, so a slug is
+ * only ever a fallback for a book that failed to load — never "2 Kings" on an
+ * Amharic page.
+ */
+internal fun bookName(slug: String, names: Map<String, String>): String =
+    names[slug] ?: slug.split('-').joinToString(" ") { part ->
         part.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
     }

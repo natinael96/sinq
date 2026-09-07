@@ -25,12 +25,15 @@ object Sharing {
     fun sign(body: String): String = body.trimEnd() + "\n\n" + SIGNATURE
 
     /**
-     * Put [body] on the clipboard, signed. Android 13+ shows its own copy
-     * confirmation, so the toast is only for older versions that show nothing.
+     * Put [body] on the clipboard — unsigned. A share leaves for someone else
+     * and says where it came from; a copy is the person quoting Scripture into
+     * their own notes, and the app's name in it is only something to delete.
+     * Android 13+ shows its own copy confirmation, so the toast is only for
+     * older versions that show nothing.
      */
     fun copy(context: Context, body: String, s: Strings) {
         val clip = context.getSystemService(ClipboardManager::class.java) ?: return
-        clip.setPrimaryClip(ClipData.newPlainText(SIGNATURE, sign(body)))
+        clip.setPrimaryClip(ClipData.newPlainText(SIGNATURE, body.trimEnd()))
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             Toast.makeText(context, s.copiedToast, Toast.LENGTH_SHORT).show()
         }

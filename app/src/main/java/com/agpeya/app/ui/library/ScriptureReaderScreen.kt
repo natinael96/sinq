@@ -94,6 +94,8 @@ fun ScriptureReaderScreen(
     initialStart: Int = -1,
     initialEnd: Int = -1,
     onBack: () -> Unit,
+    /** Opens a journal entry anchored to the chapter, or to the selected run of verses. */
+    onWriteNote: (route: String, label: String) -> Unit,
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
@@ -252,6 +254,18 @@ fun ScriptureReaderScreen(
                         fontStep = fontStep,
                         maxFontStep = FONT_STEPS_SP.lastIndex,
                         onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
+                        onWriteNote = {
+                            // A selected run names the verses; otherwise the chapter.
+                            if (selRange.isEmpty()) {
+                                onWriteNote("scripture/$bookKey/$chapter", chapterTitle)
+                            } else {
+                                onWriteNote(
+                                    "scripture/$bookKey/$chapter?start=${selRange.first}&end=${selRange.last}",
+                                    "$chapterTitle፥${geezNumeral(selRange.first)}" +
+                                        (if (selRange.last != selRange.first) "–${geezNumeral(selRange.last)}" else ""),
+                                )
+                            }
+                        },
                         sharePayload = {
                             com.agpeya.app.ui.common.SharePayload(
                                 body = current.verses.joinToString("\n") { "${geezNumeral(it.n)}  ${it.text}" },

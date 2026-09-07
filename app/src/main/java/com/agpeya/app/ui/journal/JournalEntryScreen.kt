@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.AlertDialog
@@ -67,6 +68,8 @@ fun JournalEntryScreen(
     anchorRoute: String?,
     anchorLabel: String?,
     onBack: () -> Unit,
+    /** Opens the passage the entry was written about. */
+    onOpenAnchor: (route: String) -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -190,13 +193,24 @@ fun JournalEntryScreen(
                     color = MaterialTheme.colorScheme.secondary,
                 )
             }
-            loaded?.anchorLabel?.let {
+            // The passage this was written about, as a way back to it. The
+            // route has always been stored on the entry; until now nothing
+            // opened it, so a note about a verse could not return to the verse.
+            loaded?.anchorLabel?.let { label ->
                 Spacer(Modifier.height(Spacing.sm))
-                Text(
-                    it,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                )
+                val route = loaded?.anchorRoute
+                com.agpeya.app.ui.common.ListRow(
+                    title = label,
+                    onClick = route?.let { { onOpenAnchor(it) } },
+                ) {
+                    if (route != null) {
+                        Icon(
+                            Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
             }
             Spacer(Modifier.height(Spacing.md))
             OutlinedTextField(

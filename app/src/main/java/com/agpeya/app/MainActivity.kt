@@ -247,6 +247,12 @@ private fun AgpeyaNavHost(
             runCatching {
                 com.agpeya.app.data.HighlightRepository.migrateLegacyPsalterKeys(context)
             }
+            // Fold the plan's old day-number ledger into chapters, and drop a
+            // repacking a new bundle has renumbered. Before any screen reads it.
+            runCatching {
+                val plans = com.agpeya.app.data.ReadingPlanRepository.content(context)
+                com.agpeya.app.data.ReadingPlanRepository.reconcile(context, plans)
+            }
             runCatching {
                 val names = com.agpeya.app.data.HoursRepository
                     .visibleHours(context).associate { it.id to it.name }
@@ -440,12 +446,17 @@ private fun AgpeyaNavHost(
                 initialEndVerse = backStackEntry.arguments?.getInt("end") ?: -1,
                 initialGeez = backStackEntry.arguments?.getString("lang") == "gez",
                 onBack = { navController.popBackStack() },
+                // Without this the Psalter's "ስለዚህ ጻፍ" item showed and did nothing:
+                // the screen's default is a no-op, and only the ግጻዌ passage page
+                // was ever wired to the journal.
+                onWriteNote = { route, label ->
+                    navController.navigate(writeNoteRoute(route, label)) { launchSingleTop = true }
+                },
             )
         }
         composable(Tab.JOURNEY.route) {
             com.agpeya.app.ui.habits.JourneyScreen(
                 onSelectTab = navController::switchTab,
-                onManageHabits = { navController.navigate("habits") { launchSingleTop = true } },
                 onOpenJournal = { navController.navigate("journal") { launchSingleTop = true } },
             )
         }
@@ -482,6 +493,9 @@ private fun AgpeyaNavHost(
                 anchorRoute = args?.getString("route"),
                 anchorLabel = args?.getString("label"),
                 onBack = { navController.popBackStack() },
+                onOpenAnchor = { route ->
+                    runCatching { navController.navigate(route) { launchSingleTop = true } }
+                },
             )
         }
         composable("habits") {
@@ -534,6 +548,9 @@ private fun AgpeyaNavHost(
             com.agpeya.app.ui.library.ScriptureReaderScreen(
                 bookKey = backStackEntry.arguments?.getString("book") ?: "matthew",
                 initialChapter = backStackEntry.arguments?.getInt("chapter") ?: 1,
+                onWriteNote = { route, label ->
+                    navController.navigate(writeNoteRoute(route, label)) { launchSingleTop = true }
+                },
                 initialStart = backStackEntry.arguments?.getInt("start") ?: -1,
                 initialEnd = backStackEntry.arguments?.getInt("end") ?: -1,
                 onBack = { navController.popBackStack() },
@@ -664,6 +681,7 @@ private fun AgpeyaNavHost(
             com.agpeya.app.ui.settings.PrayerSettingsScreen(
                 onBack = { navController.popBackStack() },
                 onOpenManageHours = { navController.navigate("customize") { launchSingleTop = true } },
+                onOpenManageHabits = { navController.navigate("habits") { launchSingleTop = true } },
             )
         }
         composable("settings/reminders") {
@@ -761,6 +779,9 @@ private fun AgpeyaNavHost(
                     navController.navigate("reading/$id") {
                         popUpTo("reading/{hourId}?section={section}&sectionId={sectionId}") { inclusive = true }
                     }
+                },
+                onWriteNote = { route, label ->
+                    navController.navigate(writeNoteRoute(route, label)) { launchSingleTop = true }
                 },
             )
         }

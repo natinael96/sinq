@@ -107,7 +107,7 @@ class GitsaweDataTest {
     }
 
     @Test
-    fun `Part 3 activates only explicitly classified Sunday rules`() {
+    fun `every Part 3 row carries the selector its heading prints`() {
         val entries = load("sunday-cycle-gitsawe.json", SundayCycleEntry.serializer())
         val fixed = entries.first { it.index == 2 }
         assertEquals(1, fixed.monthNum)
@@ -116,9 +116,20 @@ class GitsaweDataTest {
         val lent = entries.first { it.index == 44 }
         assertEquals("abiyTsom", lent.season)
         assertEquals(5, lent.week)
-        val ambiguous = entries.first { it.index == 8 }
-        assertEquals(null, ambiguous.monthNum)
-        assertEquals(null, ambiguous.season)
+        val tsige = entries.first { it.index == 8 }
+        assertEquals("tsige", tsige.season)
+        assertEquals(1, tsige.week)
+        val habakkuk = entries.first { it.index == 17 }
+        assertEquals(2, habakkuk.dateSpans.size)                   // ጥቅምት ፫ or ኅዳር ፫
+        val pagumen = entries.first { it.index == 91 }
+        assertEquals(13, pagumen.monthNum)
+        val unselectable = entries.filter { it.dateSpans.isEmpty() && it.season == null }
+        assertEquals(emptyList<Int>(), unselectable.map { it.index })
+        val knownSeasons = setOf(
+            "abiyTsom", "holy_saturday", "tnsae", "tsige", "astemhro", "sibket", "birhan",
+            "nolawi", "lidet", "kremt",
+        )
+        assertEquals(emptyList<String>(), entries.mapNotNull { it.season }.filter { it !in knownSeasons }.distinct())
     }
 
     @Test

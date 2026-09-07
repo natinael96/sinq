@@ -1,6 +1,7 @@
 package com.agpeya.app.ui.journal
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -15,7 +16,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.LockOpen
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -94,6 +98,8 @@ fun JournalScreen(
     var confessing by remember { mutableStateOf(false) }
     var penancePrompt by remember { mutableStateOf(false) }
     var settingPassphrase by remember { mutableStateOf(false) }
+    var lockMenu by remember { mutableStateOf(false) }
+    var removingPassphrase by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -102,8 +108,28 @@ fun JournalScreen(
                 title = s.journalTitle,
                 onBack = onBack,
                 actions = {
-                    IconButton(onClick = { settingPassphrase = true }) {
-                        Icon(Icons.Outlined.Lock, contentDescription = s.journalSetPassphrase)
+                    // The icon says whether a lock is on, and a lock that is on
+                    // can be changed or taken off — reachable only from inside,
+                    // which is to say only by someone who has already opened it.
+                    Box {
+                        IconButton(onClick = { if (locked) lockMenu = true else settingPassphrase = true }) {
+                            Icon(
+                                imageVector = if (locked) Icons.Outlined.Lock else Icons.Outlined.LockOpen,
+                                contentDescription = if (locked) s.journalChangePassphrase else s.journalSetPassphrase,
+                                tint = if (locked) MaterialTheme.colorScheme.secondary
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        DropdownMenu(expanded = lockMenu, onDismissRequest = { lockMenu = false }) {
+                            DropdownMenuItem(
+                                text = { Text(s.journalChangePassphrase) },
+                                onClick = { lockMenu = false; settingPassphrase = true },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(s.journalRemovePassphrase) },
+                                onClick = { lockMenu = false; removingPassphrase = true },
+                            )
+                        }
                     }
                 },
             )
@@ -209,6 +235,23 @@ fun JournalScreen(
                 }) { Text(s.penanceTitle) }
             },
             dismissButton = { TextButton(onClick = { penancePrompt = false }) { Text(s.cancel) } },
+        )
+    }
+
+    if (removingPassphrase) {
+        AlertDialog(
+            onDismissRequest = { removingPassphrase = false },
+            title = { Text(s.journalRemovePassphrase) },
+            text = { Text(s.journalRemovePassphraseConfirm) },
+            confirmButton = {
+                TextButton(onClick = {
+                    removingPassphrase = false
+                    scope.launch { JournalLock.clearPassphrase(context) }
+                }) { Text(s.journalRemovePassphrase) }
+            },
+            dismissButton = {
+                TextButton(onClick = { removingPassphrase = false }) { Text(s.cancel) }
+            },
         )
     }
 

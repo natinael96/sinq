@@ -6,6 +6,115 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [Unreleased]
+
+### Added
+- **Every Sunday now has its መዝሙር.** The Sunday Gitsawe (ግጻዌ ዘሰናብት ወመዝሙር)
+  was reachable for only 47 of its 91 rows: ዘመነ ጽጌ, አስተምህሮ, ስብከት–ብርሃን–ኖላዊ,
+  the ልደት Sundays and the whole of ክረምት through ጳጉሜን had no calendar rule, so
+  from late መስከረም to ጥር and from ሰኔ ፳፬ to the new year the link never
+  appeared. A new calendar counts those seasons from their fixed anchors the way
+  the book does, every row carries its selector, and a feast that lands on a
+  Sunday (ሐዋርያት, ቂርቆስ, ደብረ ታቦር, ዕንባቆም, ስምዖን, a ጳጉሜን Sunday …) takes its own
+  hymn — except inside Great Lent, which outranks them.
+- **The hymn is on the page, not behind a link.** The ግጻዌ day screen shows the
+  incipit of the Sunday's መዝሙር in a card that opens the full Sunday readings,
+  and ቤት names it under the day's reading.
+- **The season line knows the whole year.** Above the readings the accent line
+  now names ዘመነ ጽጌ, አስተምህሮ, ስብከት, ብርሃን, ኖላዊ, ዘመነ ልደት, the four parts of
+  ክረምት, ጾመ ፍልሰታ and ጳጉሜን, not only Lent and the Resurrection.
+
+### Changed
+- **ቅዱሳት መጻሕፍት opens the whole canon.** The book list matched a book's
+  testament against "old" or "new", and eighteen books are neither: ጦቢት, ዮዲት,
+  ጥበብ, ሲራክ, ባሮክ, መቃብያን, ዕዝራ ሱቱኤል, ኩፋሌ, ሄኖክ and the rest had no door in the
+  Library at all. ብሉይ now carries them, under their own heading — and every
+  heading is in Amharic (ኦሪት, መጻሕፍተ ታሪክ, ዐበይት ነቢያት, መልእክታተ ጳውሎስ …) where the
+  page used to print the catalogue's English keys. The books of church order
+  have a heading of their own instead of trailing after ራእይ — **የሥርዓት
+  መጻሕፍት**, which is what the Church's own catechism calls them, and there are
+  eight of them: ዮሴፍ ወልደ ኮርዮን is not a book of order but the last of the
+  seventeen ብሉይ ኪዳን histories, "from ኢያሱ ወልደ ነዌ to ዮሴፍ ወልደ ኮርዮን", and it is
+  now listed there.
+- **The ቅዳሴ readings are in the order the liturgy reads them** — ጳውሎስ, ሐዋርያ,
+  ግብረ ሐዋርያት, ምስባክ, ወንጌል — and each is named by its text rather than by whose
+  turn it is to read it. The page had the Gospel first and ጳውሎስ third.
+- **Falling behind on ንባብ offers two answers, and they differ.** Three buttons
+  did two things: two of them shifted the plan by the same call, and the third
+  marked today read without it having been read. Now: *ካልተነበበው ቀጥል* keeps the
+  daily reading and lets the finish date move, *ቀሪውን አከፋፍል* keeps the finish
+  date and shares what is left across the days that remain — each saying which
+  it costs. The repacking was written and tested long ago and had never been
+  connected to anything.
+- **Copying no longer signs the clipboard.** A share leaves for someone else and
+  says where it came from; a copy is Scripture quoted into one's own notes, and
+  "— ስንቅ" in it was only ever something to delete.
+- **ፍለጋ searches all of a book, not the first forty chapters of it.** The cap
+  cut the *search* off in bundled order, so ኢየሱስ stopped inside ማርቆስ and ሉቃስ,
+  ዮሐንስ, ግብረ ሐዋርያት and the epistles could not be reached; እግዚአብሔር never left
+  ኦሪት ዘፍጥረት. Every match is found now, each group says how many it has, and a
+  long one is drawn a page at a time.
+- **ብሉይ ኪዳን** is called that on every screen; the book list said ቀዳማዊ ኪዳን.
+- **ጉዞ records what the app can see.** Reaching the foot of an hour marks that
+  hour prayed; reading today's ስንክሳር marks ስንክሳር; finishing the day's portion
+  of the Psalter marks a new **ዳዊት** habit; and marking a day of ንባብ marks the
+  daily reading. The page used to know only what was typed into it, so a
+  morning spent in ጸሎተ ነግህ left the day blank unless it was also ticked.
+- **"Prayed" means one thing.** ቤት's candle counted prayer hours and ጉዞ counted
+  any mark at all, so a day with only ስንክሳር read was prayed on one screen and
+  not on the other. Both count the hours now; everything else is counted as
+  keeping, which is what it is.
+- **Habits can be kept on a cadence.** ስግደት on Wednesday and Friday, ቤተ
+  ክርስቲያን on Sunday, anything on the ግእዝ month day it belongs to — the same
+  five rhythms ምጽዋት and ስዕለት already used, set under the habit's name in
+  ልማዶች አስተካክል. A habit not asked for today is not on today's list, is not
+  named as outstanding by the night reminder, and is not counted against the
+  day. Habits without a cadence are daily, exactly as before.
+- **The heatmap counts what was kept, not a share of what could be.** Level 4
+  wanted nine things in one day once the seven hours and five habits were
+  showing, so a week of morning prayer never darkened past the palest step and
+  adding a habit dimmed the whole past. The scale is absolute now — seven is a
+  full day, one is always visible.
+
+### Fixed
+- **ንባብ recorded day numbers, and a day number means nothing.** Progress was a
+  set of numbers per plan, so repacking the plan to finish on time, or a new
+  bundled plan, silently re-pointed them: a reader who had read ኦሪት ዘሌዋውያን
+  would be asked for it again, and days already read could come back unread.
+  What is stored is chapters, and a day counts as read when every chapter it
+  asks for has been. Existing progress is converted once at launch.
+- **"ስለዚህ ጻፍ" wrote nothing.** The Psalter's menu item was wired to an empty
+  callback and only the ግጻዌ passage page ever reached the journal, so writing
+  from a verse was impossible in the two places verses are read. The Psalter,
+  the Bible reader and the prayer hours all open a note now — anchored to the
+  verses selected, or to the chapter or section in view — and an entry written
+  about a passage can open that passage again, which the stored route always
+  allowed and nothing ever used.
+- **A ምስባክ preview could show the prayers for the dead.** The row sliced the
+  verses out of the Ge'ez Psalter, which prints each psalm's closing Gloria
+  inside its last verse — and at the six section ends a long intercession for
+  departed bishops, kings and deacons. 99 of the year's 1,123 daily ምስባክ
+  citations reach such a verse. The ግጻዌ prints the chant itself, and that is
+  what the row shows. A citation with no closing verse now runs to the end of
+  the psalm in the row as it already did on the passage page.
+- **Shared prayers carried English references.** A verse from ጸሎተ ነግህ arrived
+  as "John 1:1-17" under Amharic text; the hours' references are written in
+  Latin by the content pipeline and are turned into the Church's own — Amharic
+  book, Ge'ez chapter and verse — when the content loads. The ንባብ day and card
+  no longer say "2 Kings 24–25" either.
+- **A search result opens the verse it matched**, not the top of its chapter,
+  and the first search says it is searching instead of "ምንም አልተገኘም" while the
+  bundled books are still being read.
+- **The journal's lock can be changed and taken off.** It could only ever be
+  set; the icon now says whether one is on, and offers both.
+- **ልማዶች አስተካክል** sits in ቅንብሮች beside ሰዓታት አስተካክል rather than at the foot
+  of ጉዞ.
+- **ታኅሣሥ ፳፰ (መርዓዊ) was keyed to the 23rd.** The scan prints ፳፰ — አማኑኤል's
+  monthly day, the eve of ልደት.
+- **The seasonal rows from the lectionary package used keys the app never
+  resolved** (`genaTsom`, a ሰኔ `astemhro`, `zere_demena`). They now share the
+  Sunday calendar's keys, so the same date selects both files.
+
 ## [1.7.4] — 2026-09-05
 
 _versionCode 62 · the hours come back to the front_

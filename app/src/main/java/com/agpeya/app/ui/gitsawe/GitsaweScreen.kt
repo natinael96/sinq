@@ -81,7 +81,7 @@ import com.agpeya.app.ui.common.liturgicalSeasonLabel
 import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.common.LoadingPanel
 import com.agpeya.app.ui.common.SelectPill
-import com.agpeya.app.ui.common.NavRow
+import com.agpeya.app.ui.common.SinqCard
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.common.HeroCard
 import com.agpeya.app.ui.common.rememberCurrentDate
@@ -250,9 +250,8 @@ fun GitsaweScreen(
                 }
                 if (data?.sundayCycle?.isNotEmpty() == true) {
                     item(key = "sunday_cycle") {
-                        NavRow(
-                            title = s.sundayCycleTitle,
-                            subtitle = s.sundayCycleSubtitle,
+                        SundayMezmurCard(
+                            entries = data.sundayCycle,
                             onClick = { onOpenSundayCycle(epochDay) },
                             modifier = Modifier.padding(top = Spacing.lg),
                         )
@@ -280,12 +279,23 @@ fun GitsaweScreen(
     }
 }
 
+/**
+ * The day's readings in the order the liturgy reads them, named by the text
+ * rather than by whose turn it is to read it.
+ *
+ * The data is unambiguous about which is which — across the bundled year
+ * `firstDeacon` is Pauline 354 times out of 354, `secondDeacon` a catholic
+ * epistle 366 of 366, and `secondKahn` Acts 364 of 364 — so the ቅዳሴ reads
+ * ጳውሎስ, ሐዋርያ, ግብረ ሐዋርያት, then the ምስባክ is sung and the ወንጌል proclaimed.
+ * ነግህ and ሠርክ carry only the psalm and the Gospel, so the same list serves
+ * all three offices: the roles they do not have contribute nothing.
+ */
 private val ROLE_LABELS = listOf(
+    "ጳውሎስ" to { s: GitsaweService -> s.firstDeacon },
+    "ሐዋርያ" to { s: GitsaweService -> s.secondDeacon },
+    "ግብረ ሐዋርያት" to { s: GitsaweService -> s.secondKahn },
     "ምስባክ" to { s: GitsaweService -> s.msbak },
     "ወንጌል" to { s: GitsaweService -> s.wengel },
-    "፩ ዲያቆን" to { s: GitsaweService -> s.firstDeacon },
-    "፪ ዲያቆን" to { s: GitsaweService -> s.secondDeacon },
-    "ካህን" to { s: GitsaweService -> s.secondKahn },
 )
 
 private fun androidx.compose.foundation.lazy.LazyListScope.serviceSection(
@@ -388,23 +398,25 @@ private fun ReadingRow(
     val target = verse?.let { GitsaweLinks.target(it) }
     val clickable = target != null
     val isMisbak = role == "ምስባክ" && target is ReadingTarget.Psalm
-    val preview by produceState<String?>(null, target, misbakLanguage) {
-        value = when (val t = target) {
-            is ReadingTarget.Psalm -> {
-                val section = ScriptureRepository.psalms(
-                    context,
-                    geez = isMisbak && misbakLanguage == MisbakLanguage.GEEZ,
-                ).find { it.number == t.number }
-                section?.verses?.let { verses ->
-                    val lo = (t.startVerse ?: 1).coerceIn(1, verses.size.coerceAtLeast(1))
-                    val hi = (t.endVerse ?: (lo + 1)).coerceIn(lo, verses.size)
-                    verses.subList(lo - 1, hi).joinToString(" ")
-                }
+    val preview by produceState<String?>(null, target, misbakLanguage, reading) {
+        val printed = reading.text
+        value = when {
+            // The ምስባክ is a chant, and the ግጻዌ prints it — three lines, often
+            // beginning part-way through a verse. Slicing the Psalter for it
+            // instead pulled in whatever that edition appends to a psalm's last
+            // verse: the Gloria on 147 of the 150, and at the six section ends
+            // the prayers for the departed. 99 of the year's 1,123 daily ምስባክ
+            // citations reach such a verse.
+            isMisbak && misbakLanguage == MisbakLanguage.GEEZ -> printed?.geez
+            isMisbak -> printed?.amharic
+                ?: psalmPreview(context, target as ReadingTarget.Psalm, geez = false)
+            else -> when (val t = target) {
+                is ReadingTarget.Psalm -> psalmPreview(context, t, geez = false)
+                is ReadingTarget.NtPassage -> ScriptureRepository.passage(
+                    context, t.bookKey, t.chapter, t.start, t.end,
+                )?.take(2)?.joinToString(" ") { it.text }
+                null -> printed?.geez ?: printed?.amharic
             }
-            is ReadingTarget.NtPassage -> ScriptureRepository.passage(
-                context, t.bookKey, t.chapter, t.start, t.end,
-            )?.take(2)?.joinToString(" ") { it.text }
-            null -> reading.text?.geez ?: reading.text?.amharic
         }
     }
     Surface(
@@ -458,6 +470,25 @@ private fun ReadingRow(
             }
         }
     }
+}
+
+/**
+ * The cited verses of a psalm, under the app's one range rule: a citation with
+ * no end runs to the psalm's last verse, exactly as [ScriptureRepository.passage]
+ * reads it. The row used to stop at two verses while the passage page ran to the
+ * end — one citation, two answers.
+ */
+private suspend fun psalmPreview(
+    context: android.content.Context,
+    target: ReadingTarget.Psalm,
+    geez: Boolean,
+): String? {
+    val verses = ScriptureRepository.psalms(context, geez = geez)
+        .find { it.number == target.number }?.verses ?: return null
+    if (verses.isEmpty()) return null
+    val lo = (target.startVerse ?: 1).coerceIn(1, verses.size)
+    val hi = (target.endVerse ?: verses.size).coerceIn(lo, verses.size)
+    return verses.subList(lo - 1, hi).joinToString(" ")
 }
 
 @Composable
@@ -532,6 +563,56 @@ private fun SynaxariumCard(date: LocalDate, today: LocalDate, onClick: () -> Uni
             contentDescription = null,
             tint = sinq.onHeroMuted,
         )
+    }
+}
+
+/**
+ * The Sunday's hymn, in front of the reader rather than behind a link: the
+ * incipit of every row the book prints for the day, in the reading face. The
+ * card opens the full Sunday Gitsawe with its readings.
+ */
+@Composable
+private fun SundayMezmurCard(
+    entries: List<com.agpeya.app.model.SundayCycleEntry>,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val s = LocalStrings.current
+    SinqCard(onClick = onClick, accented = true, modifier = modifier) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(s.sundayMezmurTitle, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                entries.forEach { entry ->
+                    Text(
+                        entry.mezmur ?: entry.title,
+                        style = MaterialTheme.typography.titleMedium.inReadingFont(),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(top = Spacing.xxs),
+                    )
+                    if (entry.mezmur != null && entry.title != entry.mezmur) {
+                        Text(
+                            entry.title,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+                Text(
+                    s.sundayCycleTitle,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = Spacing.xs),
+                )
+            }
+            Icon(
+                Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(IconSize.medium),
+            )
+        }
     }
 }
 

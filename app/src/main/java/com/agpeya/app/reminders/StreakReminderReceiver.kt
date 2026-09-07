@@ -13,6 +13,7 @@ import com.agpeya.app.R
 import com.agpeya.app.data.FastingCalendar
 import com.agpeya.app.data.GitsaweRepository
 import com.agpeya.app.data.HabitsRepository
+import com.agpeya.app.model.HabitsState
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.stringsFor
 import com.agpeya.app.ui.strings.Strings
@@ -99,10 +100,10 @@ class StreakReminderReceiver : BroadcastReceiver() {
 
     private suspend fun reminderBody(context: Context, s: Strings): String {
         val base = liturgicalBody(context, s)
-        val done = runCatching {
-            HabitsRepository.current(context).records[LocalDate.now().toString()].orEmpty()
-        }.getOrDefault(emptySet())
-        val pending = pendingNightlyHabitIds(done).map { id ->
+        val today = LocalDate.now()
+        val state = runCatching { HabitsRepository.current(context) }.getOrDefault(HabitsState())
+        val done = state.records[today.toString()].orEmpty()
+        val pending = pendingNightlyHabitIds(done, state, today).map { id ->
             when (id) {
                 "sinksar" -> s.habitSynaxarium
                 "church" -> s.habitChurch
@@ -131,6 +132,18 @@ class StreakReminderReceiver : BroadcastReceiver() {
     }
 }
 
-/** These remain worth reviewing even after one or every prayer hour is marked. */
-internal fun pendingNightlyHabitIds(done: Set<String>): List<String> =
-    listOf("sinksar", "church", "prostrate").filterNot(done::contains)
+/**
+ * These remain worth reviewing even after one or every prayer hour is marked —
+ * but only the ones today actually asked for. A ስግደት rule kept on Wednesday
+ * and Friday should not be listed as outstanding on a Tuesday night, and
+ * ቤተ ክርስቲያን on a Sunday cadence has nothing to answer for on a Thursday.
+ */
+internal fun pendingNightlyHabitIds(
+    done: Set<String>,
+    state: HabitsState = HabitsState(),
+    date: LocalDate = LocalDate.now(),
+): List<String> = NIGHTLY_IDS
+    .filter { HabitsRepository.isDue(state, it, date) }
+    .filterNot(done::contains)
+
+private val NIGHTLY_IDS = listOf("sinksar", "church", "prostrate")

@@ -74,6 +74,9 @@ import com.agpeya.app.ui.theme.inReadingFont
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
+import androidx.compose.runtime.snapshotFlow
+import com.agpeya.app.data.HabitsRepository
+import kotlinx.coroutines.flow.first
 
 /** Pseudo hour id psalter bookmarks are stored under — never a real hour id. */
 const val PSALTER_BOOKMARK_ID = "psalter"
@@ -100,7 +103,7 @@ fun PsalterScreen(
     initialEndVerse: Int = -1,
     initialGeez: Boolean = false,
     onBack: () -> Unit,
-    onWriteNote: (route: String, label: String) -> Unit = { _, _ -> },
+    onWriteNote: (route: String, label: String) -> Unit,
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
@@ -163,6 +166,27 @@ fun PsalterScreen(
             ReadingMode.VERTICAL -> listState.scrollToItem(target + headerCount())
             ReadingMode.HORIZONTAL -> pagerState.scrollToPage(target)
         }
+    }
+
+    // The day's portion of the Psalter, read to its end, is ዳዊት kept. Only the
+    // daily portion counts — browsing the whole book from a bookmark is
+    // reading, not the day's ዳዊት — and the flow completes on first arrival, so
+    // this writes once per visit.
+    LaunchedEffect(daily, range, readingMode, shown.size) {
+        if (!daily || range == null || shown.isEmpty()) return@LaunchedEffect
+        val foot = if (readingMode == ReadingMode.VERTICAL) {
+            headerCount() + shown.size          // the trailing spacer item
+        } else {
+            shown.size - 1
+        }
+        snapshotFlow {
+            if (readingMode == ReadingMode.VERTICAL) {
+                listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+            } else {
+                pagerState.currentPage
+            }
+        }.first { it >= foot }
+        HabitsRepository.markDone(context, today.toString(), HabitsRepository.DAWIT)
     }
 
     fun toggleBookmark(section: Section) {

@@ -788,7 +788,7 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit) {
 
 /** Prayer content and structure, without notification behavior. */
 @Composable
-fun PrayerSettingsScreen(onBack: () -> Unit, onOpenManageHours: () -> Unit) {
+fun PrayerSettingsScreen(onBack: () -> Unit, onOpenManageHours: () -> Unit, onOpenManageHabits: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val s = com.agpeya.app.ui.strings.LocalStrings.current
@@ -805,6 +805,8 @@ fun PrayerSettingsScreen(onBack: () -> Unit, onOpenManageHours: () -> Unit) {
             item {
                 NavRow(s.prayerLevelTitle, { levelSheetOpen = true }, subtitle = com.agpeya.app.ui.settings.prayerLevelLabel(level))
                 NavRow(s.manageHours, onOpenManageHours)
+                // Its twin: the habits kept on ጉዞ are edited here, beside the hours.
+                NavRow(s.manageHabits, onOpenManageHabits)
             }
         }
     }

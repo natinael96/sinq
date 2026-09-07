@@ -90,7 +90,9 @@ object BahreHasab {
      * Which movable season a date falls in, matching the `season` keys used by
      * the seasonal ግጻዌ data — or null if the date isn't within a movable window.
      * Covers the Nineveh fast, the eight Sundays of Great Lent (ዘወረደ … ሆሳዕና),
-     * Holy Thursday, and the Sundays of the Resurrection season through Pentecost.
+     * Holy Thursday, Holy Saturday, and the Sundays of the Resurrection season
+     * through Pentecost. The fixed-anchored Sunday seasons of the rest of the
+     * year live in [SundayCycleCalendar].
      */
     fun movableSeasonOn(date: LocalDate): SeasonWindow? {
         val year = EthiopianDate.from(date).year
@@ -104,6 +106,7 @@ object BahreHasab {
             // always evaluated true, so all-days IS the long-standing behavior.
             off in 13..62 -> SeasonWindow("abiyTsom", (off - 13) / 7 + 1)
             off == 66 -> SeasonWindow("holy_thursday", null)             // ዘጸሎተ ሐሙስ
+            off == 68 -> SeasonWindow("holy_saturday", null)             // ዘቅዳሜ ሥዑር
             off == 108 -> SeasonWindow("erget", null)                    // ዕርገት (Ascension)
             off in 69..146 && (off - 69) % 7 == 0 ->                     // Resurrection and post-Pentecost Sundays
                 SeasonWindow("tnsae", (off - 69) / 7 + 1)

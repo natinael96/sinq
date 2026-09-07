@@ -88,6 +88,13 @@ data class HabitsState(
     val hidden: Set<String> = emptySet(),
     val names: Map<String, String> = emptyMap(),
     val records: Map<String, Set<String>> = emptyMap(),
+    /**
+     * habitId → the cadence it is kept on. Absent means every day, which is
+     * what a habit was until now: ቤተ ክርስቲያን showed as missed six mornings a
+     * week for something nobody intends daily, and a ስግደት rule of Wednesday
+     * and Friday had nowhere to live.
+     */
+    val schedules: Map<String, HabitSchedule> = emptyMap(),
 )
 
 /** Someone the user remembers in prayer, with an optional intention note. */

@@ -69,6 +69,7 @@ private fun builtInName(id: String, s: Strings): String = when (id) {
     "church" -> s.habitChurch
     "prostrate" -> s.habitProstrate
     "bible" -> s.habitBible
+    "dawit" -> s.habitDawit
     else -> id
 }
 
@@ -100,7 +101,6 @@ fun journeyLine(summary: PrayerJourney.Summary, s: Strings): String {
 @Composable
 fun JourneyScreen(
     onSelectTab: (Tab) -> Unit,
-    onManageHabits: () -> Unit,
     onOpenJournal: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -115,8 +115,10 @@ fun JourneyScreen(
     // Prayer hours group under a collapsible ጸሎት header; other habits are flat.
     // Hours hidden in Manage Hours are already filtered out by visibleHours.
     val hourItems = remember(hours) { hours.map { HabitsRepository.hourHabitId(it.id) to it.name } }
-    val habitItems = remember(state, s) {
-        HabitsRepository.orderedHabitIds(state, includeHidden = false).map { it to habitName(it, state, s) }
+    // Only what today asks for. A habit kept on Wednesday and Friday is not a
+    // thing missed on a Tuesday, so it is not on Tuesday's list at all.
+    val habitItems = remember(state, s, today) {
+        HabitsRepository.dueHabitIds(state, today).map { it to habitName(it, state, s) }
     }
     var prayersExpanded by rememberSaveable { mutableStateOf(false) }
     val summary = remember(state, today) { PrayerJourney.summarize(state.records, today) }
@@ -214,7 +216,7 @@ fun JourneyScreen(
                     )
                     Text(
                         text = "$doneHours/${hourItems.size} · " + s.daysThisMonth(
-                            HabitsRepository.prayerDaysBetween(state.records, monthStart, today),
+                            PrayerJourney.daysPrayedBetween(state.records, monthStart, today),
                         ),
                         style = MaterialTheme.typography.labelSmall,
                         color = if (doneHours > 0) MaterialTheme.colorScheme.secondary
@@ -266,7 +268,6 @@ fun JourneyScreen(
                     today = today,
                     ecYear = displayedEcYear,
                     selectedDay = selectedDay,
-                    maxPossible = hourItems.size + habitItems.size,
                     modifier = Modifier.fillMaxWidth(),
                     onYearChange = { year ->
                         displayedEcYear = year
@@ -281,7 +282,6 @@ fun JourneyScreen(
                 // The journal sits with ጉዞ because both are the day looked back
                 // on — but it is never counted or scored alongside the habits.
                 NavRow(s.journalTitle, onClick = onOpenJournal, subtitle = s.journalSubtitle)
-                NavRow(s.manageHabits, onClick = onManageHabits)
                 Spacer(Modifier.height(Spacing.md))
             }
         }

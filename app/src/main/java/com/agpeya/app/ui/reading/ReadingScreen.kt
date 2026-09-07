@@ -89,6 +89,10 @@ import androidx.compose.ui.semantics.semantics
 import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.inReadingFont
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.snapshotFlow
+import com.agpeya.app.data.HabitsRepository
+import kotlinx.coroutines.flow.first
+import java.time.LocalDate
 
 private val FONT_STEPS_SP = com.agpeya.app.data.SettingsRepository.FONT_STEPS_SP
 
@@ -111,6 +115,8 @@ fun ReadingScreen(
     initialSectionId: String? = null,
     onBack: () -> Unit,
     onSwitchHour: (String) -> Unit = {},
+    /** Opens a journal entry anchored to the section in view. */
+    onWriteNote: (route: String, label: String) -> Unit,
 ) {
     val context = LocalContext.current
     val hour by produceState<Hour?>(initialValue = null, hourId) {
@@ -222,6 +228,29 @@ fun ReadingScreen(
         onDispose { window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
     }
 
+    // Reaching the foot of the hour is the app seeing the prayer prayed. ጉዞ
+    // used to know only what the reader typed into it, so a morning spent in
+    // ጸሎተ ነግህ left the day blank unless it was also ticked afterwards. The
+    // flow completes on the first arrival, so this writes once per visit.
+    LaunchedEffect(hourId, readingMode, sections.size) {
+        if (sections.isEmpty()) return@LaunchedEffect
+        // The vertical reader carries one trailing item after the sections —
+        // the stepper — so its end is one past the last section.
+        val foot = if (readingMode == ReadingMode.VERTICAL) sections.size else sections.size - 1
+        snapshotFlow {
+            if (readingMode == ReadingMode.VERTICAL) {
+                listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+            } else {
+                pagerState.currentPage
+            }
+        }.first { it >= foot }
+        HabitsRepository.markDone(
+            context,
+            LocalDate.now().toString(),
+            HabitsRepository.hourHabitId(hourId),
+        )
+    }
+
     // Persist scroll position on leave.
     DisposableEffect(hourId, readingMode) {
         onDispose {
@@ -312,6 +341,16 @@ fun ReadingScreen(
                         onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
                         secondaryActionLabel = s.showFullPsalms.takeIf { effectivePrayerLevel != PrayerLevel.FULL },
                         onSecondaryAction = if (effectivePrayerLevel != PrayerLevel.FULL) ({ showFullHour = true }) else null,
+                        onWriteNote = {
+                            val section = sections.getOrNull(contentsIndex)
+                            val h = hour
+                            if (section != null && h != null) {
+                                onWriteNote(
+                                    "reading/${h.id}?sectionId=${android.net.Uri.encode(section.id)}",
+                                    "${h.name} · ${section.title}",
+                                )
+                            }
+                        },
                         onToggleReadingMode = {
                             // Preserve the visible passage when changing layout.
                             anchor = if (readingMode == ReadingMode.VERTICAL) {

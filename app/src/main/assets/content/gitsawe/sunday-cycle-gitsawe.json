@@ -704,7 +704,9 @@
    "kidassie": [
     "ዘእግዝእትነ ። (ጕሥዓ)"
    ]
-  }
+  },
+  "season": "tsige",
+  "week": 1
  },
  {
   "index": 9,
@@ -791,7 +793,9 @@
    "kidassie": [
     "ዘእግዝእትነ ። (ጕሥዓ)"
    ]
-  }
+  },
+  "season": "tsige",
+  "week": 2
  },
  {
   "index": 10,
@@ -880,7 +884,9 @@
    "kidassie": [
     "ዘእግዝእትነ (ጕሥዓ) ።"
    ]
-  }
+  },
+  "season": "tsige",
+  "week": 3
  },
  {
   "index": 11,
@@ -969,7 +975,9 @@
    "kidassie": [
     "ዘእግዝእትነ (ጕሥዓ) ።"
    ]
-  }
+  },
+  "season": "tsige",
+  "week": 4
  },
  {
   "index": 12,
@@ -1058,7 +1066,9 @@
    "kidassie": [
     "ዘእግዝእትነ (ጕሥዓ) ።"
    ]
-  }
+  },
+  "season": "tsige",
+  "week": 5
  },
  {
   "index": 13,
@@ -1145,7 +1155,9 @@
    "kidassie": [
     "ዘእግዝእትነ (ጕሥዓ) ።"
    ]
-  }
+  },
+  "season": "tsige",
+  "week": 6
  },
  {
   "index": 14,
@@ -1509,7 +1521,17 @@
    "kidassie": [
     "ዘእግዝእትነ ማርያም (ጕሥዓ)"
    ]
-  }
+  },
+  "monthNum": 2,
+  "fromDay": 3,
+  "toDay": 3,
+  "spans": [
+   {
+    "monthNum": 3,
+    "fromDay": 3,
+    "toDay": 3
+   }
+  ]
  },
  {
   "index": 18,
@@ -1579,7 +1601,9 @@
      }
     }
    ]
-  }
+  },
+  "season": "astemhro",
+  "week": 1
  },
  {
   "index": 19,
@@ -1606,7 +1630,9 @@
    "kidassie": [
     "ዘእግዚእነ (ናአኵተከ)።"
    ]
-  }
+  },
+  "season": "astemhro",
+  "week": 1
  },
  {
   "index": 20,
@@ -1689,7 +1715,9 @@
    "kidassie": [
     "ዘአትናቴዎስ ።"
    ]
-  }
+  },
+  "season": "astemhro",
+  "week": 2
  },
  {
   "index": 21,
@@ -1777,7 +1805,9 @@
    "kidassie": [
     "ዘእግዚእነ (ናአኵተከ) ።"
    ]
-  }
+  },
+  "season": "astemhro",
+  "week": 3
  },
  {
   "index": 22,
@@ -1852,7 +1882,9 @@
    "kidassie": [
     "ዘእግዚእነ (ናአኵተከ) ።"
    ]
-  }
+  },
+  "season": "astemhro",
+  "week": 4
  },
  {
   "index": 23,
@@ -1941,7 +1973,9 @@
    "kidassie": [
     "ዘአትናቴዎስ ።"
    ]
-  }
+  },
+  "season": "astemhro",
+  "week": 5
  },
  {
   "index": 24,
@@ -2029,7 +2063,8 @@
    "kidassie": [
     "ዘእግዚእነ (ናአኵተከ) ።"
    ]
-  }
+  },
+  "season": "sibket"
  },
  {
   "index": 25,
@@ -2118,7 +2153,8 @@
    "kidassie": [
     "ዘአትናቴዎስ ።"
    ]
-  }
+  },
+  "season": "birhan"
  },
  {
   "index": 26,
@@ -2193,7 +2229,8 @@
    "kidassie": [
     "ዘእግዚእነ ።"
    ]
-  }
+  },
+  "season": "nolawi"
  },
  {
   "index": 27,
@@ -2207,8 +2244,8 @@
    390
   ],
   "monthNum": 4,
-  "fromDay": 23,
-  "toDay": 23
+  "fromDay": 28,
+  "toDay": 28
  },
  {
   "index": 28,
@@ -2219,7 +2256,9 @@
   "rubric": "ዘቅዳሴ ምንባብ የዘወትሩን በል ።",
   "sourcePages": [
    390
-  ]
+  ],
+  "season": "lidet",
+  "week": 0
  },
  {
   "index": 29,
@@ -2309,7 +2348,9 @@
    "kidassie": [
     "ዘዲዮስቆሮስ ።"
    ]
-  }
+  },
+  "season": "lidet",
+  "week": 1
  },
  {
   "index": 30,
@@ -2398,7 +2439,9 @@
    "kidassie": [
     "ዘዲዮስቆሮስ ።"
    ]
-  }
+  },
+  "season": "lidet",
+  "week": 2
  },
  {
   "index": 31,
@@ -2409,7 +2452,10 @@
   "rubric": "ለእመ ኮነ ጥምቀት በእሑድ ምንባብ የዘወትሩን በል ።",
   "sourcePages": [
    392
-  ]
+  ],
+  "monthNum": 5,
+  "fromDay": 11,
+  "toDay": 11
  },
  {
   "index": 32,
@@ -2500,7 +2546,9 @@
    "kidassie": [
     "ዘዲዮስቆሮስ ።"
    ]
-  }
+  },
+  "season": "lidet",
+  "week": 3
  },
  {
   "index": 33,
@@ -2588,7 +2636,9 @@
    "kidassie": [
     "ዘዲዮስቆሮስ ።"
    ]
-  }
+  },
+  "season": "lidet",
+  "week": 4
  },
  {
   "index": 34,
@@ -2678,7 +2728,9 @@
    "kidassie": [
     "ዘዲዮስቆሮስ ።"
    ]
-  }
+  },
+  "season": "lidet",
+  "week": 5
  },
  {
   "index": 35,
@@ -2690,7 +2742,10 @@
   "rubric": "ምንባብ የዘወትር በል ።",
   "sourcePages": [
    393
-  ]
+  ],
+  "monthNum": 6,
+  "fromDay": 8,
+  "toDay": 8
  },
  {
   "index": 36,
@@ -2779,7 +2834,9 @@
    "kidassie": [
     "ዘዲዮስቆሮስ ።"
    ]
-  }
+  },
+  "season": "lidet",
+  "week": 7
  },
  {
   "index": 37,
@@ -2869,7 +2926,9 @@
    "kidassie": [
     "ዘዲዮስቆሮስ ።"
    ]
-  }
+  },
+  "season": "lidet",
+  "week": 8
  },
  {
   "index": 38,
@@ -2959,7 +3018,9 @@
    "kidassie": [
     "ዘእግዚእነ ። (ናአኵተከ)"
    ]
-  }
+  },
+  "season": "lidet",
+  "week": 9
  },
  {
   "index": 39,
@@ -4199,7 +4260,8 @@
    "kidassie": [
     "ዘዮሐንስ አፈ ወርቅ ።"
    ]
-  }
+  },
+  "season": "holy_saturday"
  },
  {
   "index": 57,
@@ -5743,7 +5805,9 @@
    "kidassie": [
     "ዘኤጲፋንዮስ ።"
    ]
-  }
+  },
+  "season": "kremt",
+  "week": 1
  },
  {
   "index": 76,
@@ -5832,7 +5896,9 @@
    "kidassie": [
     "ዘእግዚእነ ።"
    ]
-  }
+  },
+  "season": "kremt",
+  "week": 2
  },
  {
   "index": 77,
@@ -5917,7 +5983,10 @@
    "kidassie": [
     "ዘሐዋርያት ።"
    ]
-  }
+  },
+  "monthNum": 11,
+  "fromDay": 5,
+  "toDay": 5
  },
  {
   "index": 78,
@@ -6005,7 +6074,9 @@
    "kidassie": [
     "ዘኤጲፋንዮስ ። (ዐቢይ)"
    ]
-  }
+  },
+  "season": "kremt",
+  "week": 4
  },
  {
   "index": 79,
@@ -6091,7 +6162,9 @@
    "kidassie": [
     "ዘኤጲፋንዮስ (ዐቢይ) ።"
    ]
-  }
+  },
+  "season": "kremt",
+  "week": 5
  },
  {
   "index": 80,
@@ -6180,7 +6253,10 @@
    "kidassie": [
     "ዘወልደ ነጐድጓድ ። (ኀቤከ)"
    ]
-  }
+  },
+  "monthNum": 11,
+  "fromDay": 19,
+  "toDay": 19
  },
  {
   "index": 81,
@@ -6253,7 +6329,9 @@
    "kidassie": [
     "ዘኤጲፋንዮስ ።"
    ]
-  }
+  },
+  "season": "kremt",
+  "week": 7
  },
  {
   "index": 82,
@@ -6339,7 +6417,9 @@
    "kidassie": [
     "ዘእግዚእነ ።"
    ]
-  }
+  },
+  "season": "kremt",
+  "week": 8
  },
  {
   "index": 83,
@@ -6427,7 +6507,9 @@
    "kidassie": [
     "ዘእግዝእትነ ።"
    ]
-  }
+  },
+  "season": "kremt",
+  "week": 9
  },
  {
   "index": 84,
@@ -6605,7 +6687,9 @@
    "kidassie": [
     "ዘእግዝእትነ ማርያም ። (ገሠሣ)"
    ]
-  }
+  },
+  "season": "kremt",
+  "week": 11
  },
  {
   "index": 86,
@@ -6615,7 +6699,10 @@
   "rubric": "የዘወትሩን በል ።",
   "sourcePages": [
    412
-  ]
+  ],
+  "monthNum": 12,
+  "fromDay": 13,
+  "toDay": 13
  },
  {
   "index": 87,
@@ -6702,7 +6789,9 @@
    "kidassie": [
     "ዘኤጲፋንዮስ ።"
    ]
-  }
+  },
+  "season": "kremt",
+  "week": 12
  },
  {
   "index": 88,
@@ -6789,7 +6878,9 @@
    "kidassie": [
     "ዘአትናቴዎስ ።"
    ]
-  }
+  },
+  "season": "kremt",
+  "week": 13
  },
  {
   "index": 89,
@@ -6814,7 +6905,9 @@
      }
     }
    ]
-  }
+  },
+  "season": "kremt",
+  "week": 14
  },
  {
   "index": 90,
@@ -6887,7 +6980,9 @@
    "kidassie": [
     "ዘእግዚእነ (ነአኵተከ) ።"
    ]
-  }
+  },
+  "season": "kremt",
+  "week": 14
  },
  {
   "index": 91,
@@ -6974,6 +7069,9 @@
    "kidassie": [
     "ያዕቆብ ዘሥሩግ (ተንሥኡ) ።"
    ]
-  }
+  },
+  "monthNum": 13,
+  "fromDay": 1,
+  "toDay": 6
  }
 ]

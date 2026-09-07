@@ -50,6 +50,7 @@ import com.agpeya.app.data.UserDataRepository
 import com.agpeya.app.search.AmharicSearch
 import com.agpeya.app.ui.common.ListRow
 import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.common.LoadingPanel
 import com.agpeya.app.ui.common.StatePanel
 import com.agpeya.app.ui.theme.Spacing
 import androidx.compose.ui.draw.clip
@@ -71,12 +72,21 @@ fun SearchScreen(
     // A typed reference ("መዝሙር 23", "ሉቃስ 10") jumps straight to the page.
     var reference by remember { mutableStateOf<AmharicSearch.Result?>(null) }
     var filter by rememberSaveable { mutableStateOf<AmharicSearch.Source?>(null) }
+    // A first search used to build the whole index inside itself while the page,
+    // holding nothing yet, said "nothing found". Read the corpora on arrival,
+    // and say plainly when a query is still being answered.
+    var searching by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { runCatching { AmharicSearch.warm(context) } }
+    // Groups the reader has asked to see in full; a new query starts them closed.
+    var expanded by remember(query) { mutableStateOf(emptySet<AmharicSearch.Source>()) }
 
     LaunchedEffect(query) {
         if (query.trim().length < 2) {
             results = emptyList()
             reference = null
+            searching = false
         } else {
+            searching = true
             delay(180) // debounce
             reference = AmharicSearch.referenceMatch(
                 context,
@@ -98,6 +108,7 @@ fun SearchScreen(
                     wudase = s.wudaseMariam,
                 ),
             )
+            searching = false
         }
     }
 
@@ -167,6 +178,11 @@ fun SearchScreen(
                         }
                     }
                 }
+                // Only while there is nothing to show: typing on into a query
+                // that already has results keeps them rather than flashing.
+                query.trim().length >= 2 && searching && results.isEmpty() && reference == null -> {
+                    LoadingPanel()
+                }
                 query.trim().length >= 2 && results.isEmpty() && reference == null -> {
                     StatePanel(icon = Icons.Outlined.Search, title = s.noResults)
                 }
@@ -195,20 +211,32 @@ fun SearchScreen(
                         SOURCE_ORDER.forEach { source ->
                             val rows = grouped[source].orEmpty()
                             if (rows.isEmpty()) return@forEach
+                            // Every match is found; a long group is drawn a page
+                            // at a time so one corpus cannot bury the others —
+                            // and the rest stay one tap away rather than lost.
+                            val whole = source in expanded || rows.size <= FIRST_PER_SOURCE
+                            val visible = if (whole) rows else rows.take(FIRST_PER_SOURCE)
                             item(key = "h_$source") {
                                 Text(
-                                    text = sourceTitle(source, s),
+                                    text = "${sourceTitle(source, s)}  ${rows.size}",
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.secondary,
                                     modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
                                 )
                             }
                             items(
-                                rows,
+                                visible,
                                 key = { "${it.source}:${it.targetId}:${it.targetIndex}" },
                             ) { r ->
                                 ResultRow(r) { open(r) }
                                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                            }
+                            if (!whole) {
+                                item(key = "more_$source") {
+                                    TextButton(onClick = { expanded = expanded + source }) {
+                                        Text(s.searchShowMore(rows.size - visible.size))
+                                    }
+                                }
                             }
                         }
                     }
@@ -280,6 +308,9 @@ private fun highlighted(result: AmharicSearch.Result) = buildAnnotatedString {
         append(text)
     }
 }
+
+/** How much of a group is drawn before the reader asks for the rest. */
+private const val FIRST_PER_SOURCE = 20
 
 /** Fixed display order, so results don't reshuffle between queries. */
 private val SOURCE_ORDER = listOf(

@@ -35,9 +35,15 @@ interface Strings {
     val annualTable: String
     val sundayCycleTitle: String
     val sundayCycleSubtitle: String
+    val sundayMezmurTitle: String
     val supplicationLabel: String
     fun memorialDay(day: Int): String
     val newTestamentLabel: String
+    /**
+     * A `canon.json` section key as the Church names it. Unknown keys return the
+     * key itself, which is visible enough to be reported rather than shipped.
+     */
+    fun canonSection(key: String): String
     val oldTestamentLabel: String
     val bibleTitle: String
     val chapterUnit: String
@@ -81,6 +87,7 @@ interface Strings {
     val habitChurch: String
     val habitProstrate: String
     val habitBible: String
+    val habitDawit: String
     val manageHabits: String
     val manageHabitsIntro: String
     val newHabit: String
@@ -120,6 +127,8 @@ interface Strings {
 
     val searchHint: String
     val noResults: String
+    /** "ሌሎቹን ፲፬ አሳይ" — the rest of a long group of matches. */
+    fun searchShowMore(remaining: Int): String
     val recentSearches: String
     val clearAction: String
     // The nightly nudge. Its wording never depends on history — no streak to
@@ -500,6 +509,7 @@ interface Strings {
     val journalSetPassphrase: String
     val journalChangePassphrase: String
     val journalRemovePassphrase: String
+    val journalRemovePassphraseConfirm: String
     val passphraseLabel: String
     val passphraseConfirmLabel: String
     val passphraseMismatch: String
@@ -684,9 +694,13 @@ interface Strings {
     /** Footer line: days read in the current period. Never a streak. */
     fun readingDaysRead(count: Int): String
     val readingBehindTitle: String
-    val readingCatchToday: String
+    val readingBehindBody: String
     val readingCatchOldest: String
+    /** What "continue from the unread" costs: the finish date, not the day. */
+    val readingCatchOldestDesc: String
     val readingRedistribute: String
+    /** What "spread the rest out" costs: the day, not the finish date. */
+    val readingRedistributeDesc: String
     /** e.g. "፫፻፷ ቀን · በቀን ፫ ምዕራፍ". */
     fun readingPlanMeta(days: String, perDay: String): String
     val readingNoPlan: String
@@ -760,10 +774,26 @@ object AmharicStrings : Strings {
     override val annualTable = "ዓመታዊ ሠንጠረዥ"
     override val sundayCycleTitle = "ግጻዌ ዘሰናብት ወመዝሙር"
     override val sundayCycleSubtitle = "የዕለቱ የሰንበት ሥርዓት"
+    override val sundayMezmurTitle = "የሰንበት መዝሙር"
     override val supplicationLabel = "መስተበቍዕ"
     override fun memorialDay(day: Int) = "$day ቀን"
     override val newTestamentLabel = "አዲስ ኪዳን"
-    override val oldTestamentLabel = "ቀዳማዊ ኪዳን"
+    override val oldTestamentLabel = "ብሉይ ኪዳን"
+    override fun canonSection(key: String) = when (key) {
+        "Pentateuch" -> "ኦሪት"
+        "Historical" -> "መጻሕፍተ ታሪክ"
+        "PoetryWisdom" -> "መጻሕፍተ ጥበብ"
+        "MajorProphet" -> "ዐበይት ነቢያት"
+        "MinorProphet" -> "ደቂቀ ነቢያት"
+        "Deuterocanonical" -> "ተጨማሪ መጻሕፍት"
+        "Gospel" -> "ወንጌላት"
+        "Acts" -> "ግብረ ሐዋርያት"
+        "PaulineEpistle" -> "መልእክታተ ጳውሎስ"
+        "GeneralEpistle" -> "መልእክታተ ሐዋርያት"
+        "Revelation" -> "ራእየ ዮሐንስ"
+        "ChurchOrder" -> "የሥርዓት መጻሕፍት"
+        else -> key
+    }
     override val bibleTitle = "መጽሐፍ ቅዱስ"
     override val chapterUnit = "ምዕራፍ"
     override val bookGroupGospels = "ወንጌላት"
@@ -803,6 +833,7 @@ object AmharicStrings : Strings {
     override val habitChurch = "ቤተ ክርስቲያን"
     override val habitProstrate = "ስግደት"
     override val habitBible = "የዕለት ንባብ"
+    override val habitDawit = "ዳዊት"
     override val manageHabits = "ልማዶች አስተካክል"
     override val manageHabitsIntro = "ልማዶችን ይጨምሩ፣ ስም ይቀይሩ፣ ደርድሩ ወይም ይደብቁ።"
     override val newHabit = "አዲስ ልማድ"
@@ -843,6 +874,7 @@ object AmharicStrings : Strings {
 
     override val searchHint = "በጸሎቶችና በመዝሙራት ውስጥ ይፈልጉ"
     override val noResults = "ምንም አልተገኘም"
+    override fun searchShowMore(remaining: Int) = "ሌሎቹን $remaining አሳይ"
     override val recentSearches = "የቅርብ ጊዜ ፍለጋዎች"
     override val clearAction = "አጽዳ"
     override val nightReminderTitle = "ሰርክ ደርሷል"
@@ -1079,7 +1111,21 @@ object AmharicStrings : Strings {
         "abiyTsom" -> "ዐቢይ ጾም"
         "holy_thursday" -> "ጸሎተ ሐሙስ"
         "erget" -> "ዕርገት"
+        "holy_saturday" -> "ቅዳሜ ሥዑር"
         "tnsae" -> "ትንሣኤ"
+        "tsige" -> "ዘመነ ጽጌ"
+        "astemhro" -> "ዘመነ አስተምህሮ"
+        "sibket" -> "ስብከት"
+        "birhan" -> "ብርሃን"
+        "nolawi" -> "ኖላዊ"
+        "lidet" -> "ዘመነ ልደት"
+        "seneAstemhro" -> "አስተምህሮ"
+        "zere" -> "ዘመነ ክረምት · ዘርዕ ደመና"
+        "mebreq" -> "ዘመነ ክረምት · መብረቅ ነጐድጓድ"
+        "egule" -> "ዘመነ ክረምት · ዕጐለ ቋዓት"
+        "nuha" -> "ዘመነ ክረምት · ኑኀ ነግህ"
+        "filseta" -> "ጾመ ፍልሰታ"
+        "pagumen" -> "ጳጉሜን"
         else -> null
     }
     override fun seasonWithWeek(name: String, week: Int) = "$name · $week ኛ ሳምንት"
@@ -1179,6 +1225,8 @@ object AmharicStrings : Strings {
     override val journalSetPassphrase = "የይለፍ ቃል አዘጋጅ"
     override val journalChangePassphrase = "የይለፍ ቃል ቀይር"
     override val journalRemovePassphrase = "ቁልፉን አንሳ"
+    override val journalRemovePassphraseConfirm =
+        "ማስታወሻው ከዚህ በኋላ ያለ የይለፍ ቃል ይከፈታል።"
     override val passphraseLabel = "የይለፍ ቃል"
     override val passphraseConfirmLabel = "እንደገና ያስገቡ"
     override val passphraseMismatch = "ሁለቱ አይመሳሰሉም"
@@ -1336,9 +1384,11 @@ object AmharicStrings : Strings {
     override val readingAllDays = "ሁሉንም ቀናት"
     override fun readingDaysRead(count: Int) = "$count ቀናት ተነብቧል"
     override val readingBehindTitle = "ያልተነበቡ ቀናት አሉ"
-    override val readingCatchToday = "ዛሬ ላይ ቀጥል"
+    override val readingBehindBody = "ንባቡን እንዴት ይቀጥሉ?"
     override val readingCatchOldest = "ካልተነበበው ቀጥል"
+    override val readingCatchOldestDesc = "የቀኑ ንባብ እንደነበረው ይቀጥላል፤ ንባቡ ዘግይቶ ይጠናቀቃል።"
     override val readingRedistribute = "ቀሪውን አከፋፍል"
+    override val readingRedistributeDesc = "ቀሪው በቀሩት ቀናት ይከፋፈላል፤ በጊዜው ይጠናቀቃል።"
     override fun readingPlanMeta(days: String, perDay: String) = "$days ቀን · በቀን $perDay ምዕራፍ"
     override val readingNoPlan = "ገና ንባብ አልጀመሩም"
 
@@ -1411,10 +1461,26 @@ object EnglishStrings : Strings {
     override val annualTable = "Annual table"
     override val sundayCycleTitle = "Sunday Gitsawe and hymns"
     override val sundayCycleSubtitle = "Sunday readings for the day"
+    override val sundayMezmurTitle = "Sunday hymn"
     override val supplicationLabel = "Supplication"
     override fun memorialDay(day: Int) = "Day $day"
     override val newTestamentLabel = "New Testament"
     override val oldTestamentLabel = "Old Testament"
+    override fun canonSection(key: String) = when (key) {
+        "Pentateuch" -> "The Law"
+        "Historical" -> "History"
+        "PoetryWisdom" -> "Poetry and wisdom"
+        "MajorProphet" -> "Major prophets"
+        "MinorProphet" -> "Minor prophets"
+        "Deuterocanonical" -> "Deuterocanonical"
+        "Gospel" -> "Gospels"
+        "Acts" -> "Acts"
+        "PaulineEpistle" -> "Pauline epistles"
+        "GeneralEpistle" -> "General epistles"
+        "Revelation" -> "Revelation"
+        "ChurchOrder" -> "Books of church order"
+        else -> key
+    }
     override val bibleTitle = "Bible"
     override val chapterUnit = "ch."
     override val bookGroupGospels = "Gospels"
@@ -1454,6 +1520,7 @@ object EnglishStrings : Strings {
     override val habitChurch = "Church"
     override val habitProstrate = "Prostration"
     override val habitBible = "Daily Bible"
+    override val habitDawit = "Daily Psalms"
     override val manageHabits = "Manage habits"
     override val manageHabitsIntro = "Add, rename, reorder or hide habits."
     override val newHabit = "New habit"
@@ -1492,6 +1559,7 @@ object EnglishStrings : Strings {
 
     override val searchHint = "Search prayers & psalms"
     override val noResults = "Nothing found"
+    override fun searchShowMore(remaining: Int) = "Show $remaining more"
     override val recentSearches = "Recent searches"
     override val clearAction = "Clear"
     override val nightReminderTitle = "The day is ending"
@@ -1748,7 +1816,21 @@ object EnglishStrings : Strings {
         "abiyTsom" -> "Great Lent"
         "holy_thursday" -> "Holy Thursday"
         "erget" -> "Ascension"
+        "holy_saturday" -> "Holy Saturday"
         "tnsae" -> "Resurrection season"
+        "tsige" -> "Season of Flowers"
+        "astemhro" -> "Season of Teaching"
+        "sibket" -> "Sibket"
+        "birhan" -> "Birhan"
+        "nolawi" -> "Nolawi"
+        "lidet" -> "Nativity season"
+        "seneAstemhro" -> "Teaching"
+        "zere" -> "Rainy season · seed and cloud"
+        "mebreq" -> "Rainy season · lightning and thunder"
+        "egule" -> "Rainy season · the ravens' young"
+        "nuha" -> "Rainy season · the long dawn"
+        "filseta" -> "Fast of the Assumption"
+        "pagumen" -> "Pagumen"
         else -> null
     }
     override fun seasonWithWeek(name: String, week: Int) = "$name · week $week"
@@ -1847,6 +1929,8 @@ object EnglishStrings : Strings {
     override val journalSetPassphrase = "Set a passphrase"
     override val journalChangePassphrase = "Change passphrase"
     override val journalRemovePassphrase = "Remove the lock"
+    override val journalRemovePassphraseConfirm =
+        "The journal will open without a passphrase from now on."
     override val passphraseLabel = "Passphrase"
     override val passphraseConfirmLabel = "Enter it again"
     override val passphraseMismatch = "These do not match"
@@ -2004,9 +2088,11 @@ object EnglishStrings : Strings {
     override val readingAllDays = "All days"
     override fun readingDaysRead(count: Int) = "$count days read"
     override val readingBehindTitle = "Some days are unread"
-    override val readingCatchToday = "Continue from today"
+    override val readingBehindBody = "How would you like to carry on?"
     override val readingCatchOldest = "Continue from the oldest"
+    override val readingCatchOldestDesc = "The daily reading stays as it is; the plan finishes later."
     override val readingRedistribute = "Spread the rest out"
+    override val readingRedistributeDesc = "What is left is shared across the days that remain; the plan finishes on time."
     override fun readingPlanMeta(days: String, perDay: String) = "$days days · $perDay chapters a day"
     override val readingNoPlan = "No reading started yet"
 

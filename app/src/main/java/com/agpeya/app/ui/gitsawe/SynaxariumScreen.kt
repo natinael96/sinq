@@ -77,6 +77,8 @@ import com.agpeya.app.ui.theme.inReadingFont
 import com.agpeya.app.ui.theme.readingBodyStyle
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import androidx.compose.runtime.LaunchedEffect
+import com.agpeya.app.data.HabitsRepository
 
 private val FONT_STEPS_SP = SettingsRepository.FONT_STEPS_SP
 
@@ -116,6 +118,15 @@ fun SynaxariumScreen(epochDay: Long, onBack: () -> Unit) {
     val bookmarks by UserDataRepository.bookmarks(context).collectAsState(initial = emptyList())
     val bookmarkedIds = remember(bookmarks) {
         bookmarks.filter { it.hourId == "sinksar_verse" }.mapTo(HashSet()) { it.sectionId }
+    }
+
+    // Reading today's ስንክሳር marks it kept. Only today's: browsing back through
+    // the year is reading about a day, not keeping it, and a day already past
+    // cannot be kept now.
+    LaunchedEffect(date, entriesResult) {
+        if (date != LocalDate.now()) return@LaunchedEffect
+        if (entriesResult?.getOrNull().isNullOrEmpty()) return@LaunchedEffect
+        HabitsRepository.markDone(context, date.toString(), "sinksar")
     }
 
     Scaffold(

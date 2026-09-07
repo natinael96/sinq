@@ -61,9 +61,6 @@ object AmharicSearch {
         val route: String? = null,
     )
 
-    /** Per-source result cap, so one huge corpus can't crowd out the others. */
-    private const val PER_SOURCE_LIMIT = 40
-
     /**
      * One searchable unit of a bundled corpus, with its haystack pre-folded.
      *
@@ -84,7 +81,28 @@ object AmharicSearch {
         val route: String,
         val haystack: String,
         val folded: String,
+        /**
+         * Where each verse begins in [haystack], and which verse that is. A
+         * match is an offset; these turn it into the verse to land on. Empty
+         * for a document with no verse structure.
+         */
+        val verseStarts: IntArray = IntArray(0),
+        val verseNumbers: IntArray = IntArray(0),
     )
+
+    /** The verse a hit at [offset] falls inside, or null without verse structure. */
+    private fun Doc.verseAt(offset: Int): Int? {
+        if (verseStarts.isEmpty()) return null
+        var found = 0
+        for (i in verseStarts.indices) {
+            if (verseStarts[i] <= offset) found = i else break
+        }
+        return verseNumbers.getOrNull(found)
+    }
+
+    /** Where a tap should land: the verse the match is in, not just its chapter. */
+    private fun Doc.routeTo(offset: Int): String =
+        verseAt(offset)?.let { "$route?start=$it" } ?: route
 
     @Volatile private var docIndex: List<Doc>? = null
 
@@ -109,7 +127,16 @@ object AmharicSearch {
         for (meta in ScriptureRepository.books(context)) {
             val book = ScriptureRepository.book(context, meta.key, cache = false) ?: continue
             for (chapter in book.chapters) {
-                val hay = chapter.verses.joinToString(" ") { it.text }
+                val text = StringBuilder()
+                val starts = IntArray(chapter.verses.size)
+                val numbers = IntArray(chapter.verses.size)
+                chapter.verses.forEachIndexed { i, verse ->
+                    if (i > 0) text.append(' ')
+                    starts[i] = text.length
+                    numbers[i] = verse.n
+                    text.append(verse.text)
+                }
+                val hay = text.toString()
                 docs += Doc(
                     source = Source.SCRIPTURE,
                     targetId = meta.key,
@@ -118,6 +145,8 @@ object AmharicSearch {
                     route = "scripture/${meta.key}/${chapter.chapter}",
                     haystack = hay,
                     folded = fold(hay),
+                    verseStarts = starts,
+                    verseNumbers = numbers,
                 )
             }
         }
@@ -173,6 +202,15 @@ object AmharicSearch {
                 }
             }
         }
+
+    /**
+     * Read the bundled corpora ahead of the first keystroke. Without it the
+     * first search builds the index inside itself while the screen, holding no
+     * results yet, says "nothing found" — an answer, not a wait.
+     */
+    suspend fun warm(context: Context) {
+        withContext(Dispatchers.Default) { index(context) }
+    }
 
     suspend fun search(context: Context, rawQuery: String, labels: Labels): List<Result> {
         val query = rawQuery.trim()
@@ -292,8 +330,15 @@ object AmharicSearch {
         return searchDocs(index(context), needle, matchLen, labels)
     }
 
-    /** Pure search pass, separated so the complete bundled Synaxarium can be
-     * regression-tested without an Android Context. */
+    /**
+     * Pure search pass, separated so the complete bundled Synaxarium can be
+     * regression-tested without an Android Context.
+     *
+     * Every match is returned. Deciding how many of them to draw is the screen's
+     * job: capping here meant a corpus was searched in bundled order and cut off
+     * at a fixed count, so a search for ኢየሱስ stopped inside Mark and the rest of
+     * the New Testament could not be reached at all.
+     */
     internal fun searchDocs(
         docs: List<Doc>,
         needle: String,
@@ -301,10 +346,8 @@ object AmharicSearch {
         labels: Labels,
     ): List<Result> {
         if (needle.isEmpty()) return emptyList()
-        val counts = mutableMapOf<Source, Int>()
         val out = mutableListOf<Result>()
         for (doc in docs) {
-            if ((counts[doc.source] ?: 0) >= PER_SOURCE_LIMIT) continue
             val hit = doc.folded.indexOf(needle)
             if (hit < 0) continue
             val snip = snippet(doc.haystack, hit, matchLen)
@@ -322,9 +365,8 @@ object AmharicSearch {
                 snippet = snip.text,
                 snippetMatchStart = snip.matchStart,
                 snippetMatchLen = snip.matchLen,
-                route = doc.route,
+                route = doc.routeTo(hit),
             )
-            counts[doc.source] = (counts[doc.source] ?: 0) + 1
         }
         return out
     }
