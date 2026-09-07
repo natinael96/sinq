@@ -117,7 +117,7 @@ fun AboutScreen(onBack: () -> Unit) {
             Spacer(Modifier.height(Spacing.xxl))
             // A small truth, thinly set.
             Text(
-                text = "powered by 2 ቡና",
+                text = "powered by 2ቡና",
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.Light,
                     fontStyle = FontStyle.Italic,
