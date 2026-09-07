@@ -28,7 +28,7 @@ import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.EventNote
+import androidx.compose.material.icons.automirrored.outlined.EventNote
 import androidx.compose.material.icons.outlined.LibraryMusic
 import androidx.compose.material.icons.outlined.LocalDrink
 import androidx.compose.material.icons.outlined.WbTwilight
@@ -116,7 +116,7 @@ fun LibraryScreen(
             }
             item {
                 LibraryCard(
-                    icon = Icons.Outlined.EventNote,
+                    icon = Icons.AutoMirrored.Outlined.EventNote,
                     title = s.readingTitle,
                     subtitle = s.readingIntro,
                     onClick = onOpenReading,

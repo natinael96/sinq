@@ -31,6 +31,31 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.8.1",
+        title = "The chant was in the book all along",
+        titleAm = "ማኅሌቱ በመጽሐፉ ውስጥ ነበር",
+        changes = listOf(
+            "ሥርዓተ ማኅሌት is in the app: 37 orders of service for the feasts, on the day they are sung and in ቤተ መጻሕፍት the rest of the year.",
+            "Every Sunday now has its መዝሙር, and the season line names the whole year.",
+            "One selection bar in every reader — mark, note, copy, share, image — and ምልክቶቼ gathers every mark in one place.",
+            "ቤት, ግጻዌ and ጉዞ each fit on a screen again.",
+            "ጉዞ records what the app can see: an hour read to its end, today's ስንክሳር, the day's ዳዊት, a marked reading.",
+            "ስንክሳር reads as a page of the book, and you can step through the year without leaving it.",
+            "The book list follows ፍትሐ ነገሥት, with every heading in the Church's own words.",
+            "ፍለጋ searches all of a book instead of the first forty chapters, ranks what it finds, and reads Ge'ez numerals.",
+        ),
+        changesAm = listOf(
+            "ሥርዓተ ማኅሌት ገብቷል፦ ፴፯ የበዓላት ማኅሌትና ዋዜማ፣ በሚዘመሩበት ቀን በግጻዌ ላይ፣ በቀረው ዓመትም በቤተ መጻሕፍት።",
+            "እያንዳንዱ ሰንበት መዝሙሩን አግኝቷል፤ የወቅቱ መስመርም ዓመቱን ሙሉ ይሰይማል።",
+            "በሁሉም አንባቢ አንድ የምርጫ አሞሌ — ምልክት፣ ማስታወሻ፣ ቅዳ፣ አጋራ፣ ምስል — እና ምልክቶቼ ሁሉንም በአንድ ስፍራ ይሰበስባል።",
+            "ቤት፣ ግጻዌና ጉዞ እንደገና በአንድ ገጽ ይገባሉ።",
+            "ጉዞ መተግበሪያው የሚያየውን ይመዘግባል፦ እስከ መጨረሻው የተነበበ ሰዓት፣ የዛሬው ስንክሳር፣ የዕለቱ ዳዊት፣ የተመለከተ ንባብ።",
+            "ስንክሳር እንደ መጽሐፍ ገጽ ይነበባል፤ ሳይወጡም ዓመቱን ማገላበጥ ይችላሉ።",
+            "የመጻሕፍቱ ዝርዝር ፍትሐ ነገሥትን ይከተላል፤ ርእሶቹም ሁሉ በቤተ ክርስቲያን ቃል ናቸው።",
+            "ፍለጋ የመጽሐፉን ሁሉ ይፈልጋል፤ ያገኘውንም ያስቀድማል፤ የግእዝ ቁጥሮችንም ያነባል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.7.4",
         title = "The hours come back to the front",
         titleAm = "ሰዓታቱ ወደ ፊት ተመልሰዋል",

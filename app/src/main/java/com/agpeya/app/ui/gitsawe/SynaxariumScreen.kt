@@ -479,15 +479,21 @@ private fun highlightHolyNames(text: String, color: Color): AnnotatedString =
         }
     }
 
-/** Centered gold commemoration title. */
+/**
+ * The label over a list or a quotation.
+ *
+ * Not gold and not centered. A centred gold line reads as a title, and none of
+ * these are titles: "ወርኀዊ በዓላት" labels the list under it and "ሉቃ ፬፥፲፯" is a
+ * citation. Setting them like headings made the day look like a stack of
+ * separate documents instead of a page of one book.
+ */
 @Composable
 private fun EntryTitle(title: String) {
     Text(
         text = title,
-        style = MaterialTheme.typography.titleMedium.inReadingFont(),
-        color = MaterialTheme.colorScheme.secondary,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+        style = MaterialTheme.typography.labelLarge.inReadingFont(),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.fillMaxWidth().padding(bottom = Spacing.xs),
     )
 }
 

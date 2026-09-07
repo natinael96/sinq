@@ -6,7 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
-## [Unreleased]
+## [1.8.1] — 2026-09-08
+
+_versionCode 63 · the chant was in the book all along_
 
 ### Added
 - **Every Sunday now has its መዝሙር.** The Sunday Gitsawe (ግጻዌ ዘሰናብት ወመዝሙር)
@@ -134,8 +136,10 @@ features; `versionCode` increments on every release).
   life's title opens its first paragraph, because "በዚችም ዕለት ቅዱስ ቲቶ ረድእ አረፈ ።"
   is the sentence the account begins with and centring it in gold broke a
   sentence in half; the month heading is gone, since the page already says the
-  day; a list is a list. Colour and a rule no longer carry the structure — the
-  space after each entry does. 59 entries with no text are not drawn.
+  day; a list is a list. No entry is headed in centred gold any more, not the
+  lists and not the quotations: a centred gold line reads as a title and none of
+  them are titles. Colour and a rule no longer carry the structure — the space
+  after each entry does. 59 entries with no text are not drawn.
 - **ስንክሳር can be read through.** ‹ › and the Ethiopian date picker are in its
   top bar, a contents sheet lists the day's commemorations, and it has a row in
   ቤተ መጻሕፍት — 1.62 million characters whose only doors were today's ግጻዌ and a
