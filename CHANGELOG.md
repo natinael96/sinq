@@ -127,6 +127,14 @@ features; `versionCode` increments on every release).
   citation of what is selected. Readers whose unit is a paragraph simply have no
   colour row. The four highlight colours can be named (ተስፋ, ትእዛዝ, ጸሎት, ማስተዋል,
   or anything else) and the name shows under the swatch.
+- **ቅንብሮች has groups, and መዝገብ has a page.** Nine flat rows under no headings
+  became four groups. A new **መዝገብ** gathers what the app keeps a record of —
+  አስራት, ስዕለት, ቀኖና, ምልክቶቼ, የጸሎት ዝርዝር, አጽዋማት — three of which were children of
+  the reminders page (a money ledger under an alarm) and three of which lived
+  only behind ቤት's ⋮ and were reachable nowhere else. The reminders page keeps
+  only what rings, and is called **ማንቂያዎች**: ማስታወሻ is the journal, and one word
+  cannot name a diary and an alarm. Reading mode and the ምስባክ language, which
+  existed only inside a reader's ⋮ menu, are on the ንባብ page too.
 - **The verse image has three shapes and two grounds.** Card as before, square
   for the previews Telegram and Instagram crop to, story for what people post;
   green or ivory. The typography and the colophon do not change — it is still

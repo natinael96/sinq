@@ -130,6 +130,9 @@ interface Strings {
     val markAction: String
     /** The edition's own cross references, and the chapter stepper's two ends. */
     val crossRefsTitle: String
+    /** The two reading modes, named for a settings page rather than a toggle. */
+    val readingModeVertical: String
+    val readingModeHorizontal: String
     /** The image sheet: three shapes, two grounds. */
     val imageShapeCard: String
     val imageShapeSquare: String
@@ -451,6 +454,9 @@ interface Strings {
     val prayerLevelSteadfastDescription: String
     val prayerLevelFullDescription: String
     val settingsGroupData: String
+    /** መዝገብ — the records the app keeps, as opposed to the alarms it rings. */
+    val settingsGroupRecords: String
+    val settingsGroupRecordsDesc: String
     val settingsGroupMore: String
 
     /**
@@ -906,6 +912,8 @@ object AmharicStrings : Strings {
     override val bookmarkAction = "ምልክት አድርግ"
     override val markAction = "ምልክት"
     override val crossRefsTitle = "የጥቅስ ማጣቀሻዎች"
+    override val readingModeVertical = "ማንሸራተት"
+    override val readingModeHorizontal = "ገጽ በገጽ"
     override val imageShapeCard = "ካርድ"
     override val imageShapeSquare = "ካሬ"
     override val imageShapeStory = "ስቶሪ"
@@ -975,7 +983,9 @@ object AmharicStrings : Strings {
 
     override val settingsTitle = "ቅንብሮች"
     override val prayerSettingsTitle = "ጸሎት"
-    override val remindersSettingsTitle = "ማስታወሻዎች"
+    // ማንቂያ, not ማስታወሻ: the journal is ማስታወሻ, and the page's own rows already
+    // said ማንቂያ throughout. One word cannot name a diary and an alarm.
+    override val remindersSettingsTitle = "ማንቂያዎች"
     override val remindersGroupDaily = "ዕለታዊ"
     override val remindersGroupGiving = "ምጽዋትና ስዕለት"
     override val remindersGroupSound = "ድምፅና ጸጥታ"
@@ -1218,6 +1228,8 @@ object AmharicStrings : Strings {
     override val prayerLevelSteadfastDescription = "በእያንዳንዱ ሰዓት 10 መዝሙራት፤ በሌሊት 24"
     override val prayerLevelFullDescription = "ለእያንዳንዱ ሰዓት የተመደቡት መዝሙራት በሙሉ"
     override val settingsGroupData = "መረጃ"
+    override val settingsGroupRecords = "መዝገብ"
+    override val settingsGroupRecordsDesc = "አስራት · ስዕለት · ቀኖና · ምልክቶቼ"
     override val settingsGroupMore = "ተጨማሪ"
 
     override val backupFailedBody =
@@ -1626,6 +1638,8 @@ object EnglishStrings : Strings {
     override val bookmarkAction = "Bookmark"
     override val markAction = "Mark"
     override val crossRefsTitle = "Cross references"
+    override val readingModeVertical = "Scroll"
+    override val readingModeHorizontal = "Page by page"
     override val imageShapeCard = "Card"
     override val imageShapeSquare = "Square"
     override val imageShapeStory = "Story"
@@ -1951,6 +1965,8 @@ object EnglishStrings : Strings {
     override val prayerLevelSteadfastDescription = "10 Psalms per hour · 24 at Midnight"
     override val prayerLevelFullDescription = "Every Psalm assigned to each hour"
     override val settingsGroupData = "Your data"
+    override val settingsGroupRecords = "Records"
+    override val settingsGroupRecordsDesc = "Tithe · vows · penance · my marks"
     override val settingsGroupMore = "More"
 
     override val backupFailedBody =

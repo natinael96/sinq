@@ -664,6 +664,7 @@ private fun AgpeyaNavHost(
                 onOpenReading = { navController.navigate("settings/reading") { launchSingleTop = true } },
                 onOpenPrayer = { navController.navigate("settings/prayer") { launchSingleTop = true } },
                 onOpenReminders = { navController.navigate("settings/reminders") { launchSingleTop = true } },
+                onOpenRecords = { navController.navigate("settings/records") { launchSingleTop = true } },
                 onOpenData = { navController.navigate("settings/data") { launchSingleTop = true } },
                 onOpenTutorial = { navController.navigate("tutorial") { launchSingleTop = true } },
                 onOpenWhatsNew = { navController.navigate("whatsNew") { launchSingleTop = true } },
@@ -699,9 +700,17 @@ private fun AgpeyaNavHost(
                 onOpenSpecialHabit = { habit ->
                     navController.navigate("intention/${habit.name.lowercase()}") { launchSingleTop = true }
                 },
+            )
+        }
+        composable("settings/records") {
+            com.agpeya.app.ui.settings.RecordsScreen(
+                onBack = { navController.popBackStack() },
                 onOpenTithe = { navController.navigate("tithe") { launchSingleTop = true } },
                 onOpenVows = { navController.navigate("vows") { launchSingleTop = true } },
                 onOpenPenance = { navController.navigate("penance") { launchSingleTop = true } },
+                onOpenMarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
+                onOpenPrayerList = { navController.navigate("prayerList") { launchSingleTop = true } },
+                onOpenFasting = { navController.navigate("fasting") { launchSingleTop = true } },
             )
         }
         composable("settings/data") {

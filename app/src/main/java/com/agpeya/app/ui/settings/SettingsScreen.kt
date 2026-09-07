@@ -691,6 +691,10 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
         .collectAsState(initial = com.agpeya.app.data.ReadingAlignment.JUSTIFIED)
     val keepOn by SettingsRepository.keepScreenOn(context).collectAsState(initial = true)
     val crossRefs by SettingsRepository.showCrossRefs(context).collectAsState(initial = false)
+    val readingMode by SettingsRepository.readingMode(context)
+        .collectAsState(initial = com.agpeya.app.data.ReadingMode.VERTICAL)
+    val misbak by SettingsRepository.misbakLanguage(context)
+        .collectAsState(initial = com.agpeya.app.data.MisbakLanguage.GEEZ)
     val size = SettingsRepository.FONT_STEPS_SP[step.coerceIn(0, SettingsRepository.FONT_STEPS_SP.lastIndex)]
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -784,6 +788,38 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
                     { scope.launch { SettingsRepository.setKeepScreenOn(context, it) } },
                     subtitle = s.keepScreenOnDesc,
                 )
+                // Both of these lived only inside a reader's ⋮ menu, so someone
+                // looking for them in ቅንብሮች could not find them at all.
+                SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                    val modes = listOf(
+                        com.agpeya.app.data.ReadingMode.VERTICAL to s.readingModeVertical,
+                        com.agpeya.app.data.ReadingMode.HORIZONTAL to s.readingModeHorizontal,
+                    )
+                    modes.forEachIndexed { index, (mode, label) ->
+                        SegmentedButton(
+                            selected = readingMode == mode,
+                            onClick = { scope.launch { SettingsRepository.setReadingMode(context, mode) } },
+                            shape = SegmentedButtonDefaults.itemShape(index, modes.size),
+                            icon = {},
+                        ) { Text(label, maxLines = 1) }
+                    }
+                }
+                Spacer(Modifier.height(Spacing.sm))
+                SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                    val langs = listOf(
+                        com.agpeya.app.data.MisbakLanguage.GEEZ to s.wudaseLangGeez,
+                        com.agpeya.app.data.MisbakLanguage.AMHARIC to s.wudaseLangAmharic,
+                    )
+                    langs.forEachIndexed { index, (lang, label) ->
+                        SegmentedButton(
+                            selected = misbak == lang,
+                            onClick = { scope.launch { SettingsRepository.setMisbakLanguage(context, lang) } },
+                            shape = SegmentedButtonDefaults.itemShape(index, langs.size),
+                            icon = {},
+                        ) { Text(label, maxLines = 1) }
+                    }
+                }
+                Spacer(Modifier.height(Spacing.sm))
                 ToggleRow(
                     s.crossRefsTitle,
                     crossRefs,
@@ -952,9 +988,6 @@ fun RemindersSettingsScreen(
     onBack: () -> Unit,
     onOpenModes: () -> Unit,
     onOpenSpecialHabit: (com.agpeya.app.reminders.SpecialHabit) -> Unit,
-    onOpenTithe: () -> Unit,
-    onOpenVows: () -> Unit,
-    onOpenPenance: () -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -1041,19 +1074,13 @@ fun RemindersSettingsScreen(
                         com.agpeya.app.reminders.BreathPrayerScheduler.sync(context, on)
                     }
                 }, subtitle = s.settingsBreathReminderDesc)
+                // ምጽዋት and ንስሐ are here because they ring; their ledgers — the
+                // money, the vows, the penance — are records, and records live
+                // under መዝገብ. This page had become the door to all three.
                 Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(s.remindersGroupGiving)
                 NavRow(s.settingsAlmsReminder, { onOpenSpecialHabit(com.agpeya.app.reminders.SpecialHabit.ALMS) }, subtitle = s.settingsAlmsReminderDesc)
                 NavRow(s.settingsRepentReminder, { onOpenSpecialHabit(com.agpeya.app.reminders.SpecialHabit.REPENTANCE) }, subtitle = s.settingsRepentReminderDesc)
-                NavRow(s.settingsTitheTitle, onOpenTithe, subtitle = s.settingsTitheDesc)
-                NavRow(s.settingsVowTitle, onOpenVows, subtitle = s.settingsVowDesc)
-                NavRow(s.settingsPenanceTitle, onOpenPenance, subtitle = s.settingsPenanceDesc)
-                Spacer(Modifier.height(Spacing.lg))
-                Spacer(Modifier.height(Spacing.lg))
-                SectionHeader(s.settingsUpdateCheck)
-                ToggleRow(s.settingsUpdateCheck, updateCheck, { on ->
-                    scope.launch { SettingsRepository.setUpdateCheck(context, on) }
-                }, subtitle = s.settingsUpdateCheckDesc)
                 Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(s.remindersGroupSound)
                 NavRow(s.reminderModes, onOpenModes)

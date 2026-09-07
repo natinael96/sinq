@@ -39,6 +39,7 @@ import com.agpeya.app.ui.common.Tab
 import com.agpeya.app.ui.strings.LocalStrings
 import kotlinx.coroutines.launch
 import com.agpeya.app.ui.theme.Spacing
+import com.agpeya.app.ui.common.SectionHeader
 
 /** The deliberately shallow Settings landing page: two direct choices and six doors. */
 @Composable
@@ -47,6 +48,7 @@ fun SettingsScreen(
     onOpenReading: () -> Unit,
     onOpenPrayer: () -> Unit,
     onOpenReminders: () -> Unit,
+    onOpenRecords: () -> Unit,
     onOpenData: () -> Unit,
     onOpenTutorial: () -> Unit,
     onOpenWhatsNew: () -> Unit,
@@ -105,11 +107,20 @@ fun SettingsScreen(
                     selected = language.ordinal,
                     onSelect = { scope.launch { SettingsRepository.setLanguage(context, Language.entries[it]) } },
                 )
-                Spacer(Modifier.height(Spacing.sm))
+                // Nine flat rows under no headings, in no order anyone could
+                // name. Four groups instead: what the app does, what it keeps,
+                // who is using it, and everything about the app itself.
+                Spacer(Modifier.height(Spacing.md))
+                SectionHeader(s.settingsGroupPrayer)
                 NavRow(s.settingsGroupReading, onOpenReading, subtitle = "${fontLabel(font)} · ${size}sp")
                 NavRow(s.prayerSettingsTitle, onOpenPrayer, subtitle = prayerLevelLabel(prayerLevel))
                 NavRow(s.remindersSettingsTitle, onOpenReminders, subtitle = if (enabledCount == 0) s.remindersOff else s.remindersOn(enabledCount))
+                Spacer(Modifier.height(Spacing.lg))
+                SectionHeader(s.settingsGroupRecords)
+                NavRow(s.settingsGroupRecords, onOpenRecords, subtitle = s.settingsGroupRecordsDesc)
                 NavRow(s.settingsGroupData, onOpenData, subtitle = backupRelativeLabel(lastBackupAt, s))
+                Spacer(Modifier.height(Spacing.lg))
+                SectionHeader(s.settingsGroupMore)
                 NavRow(s.tutorial, onOpenTutorial)
                 NavRow(s.whatsNewTour, onOpenWhatsNew)
                 NavRow(s.whatsNew, onOpenChangelog, subtitle = "v${appVersion(context)}")
