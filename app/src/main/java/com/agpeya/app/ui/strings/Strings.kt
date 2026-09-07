@@ -81,7 +81,6 @@ interface Strings {
     val closingPrayerAmharic: String
     val closingPrayerSwitchHint: String
 
-    val journeyTitle: String
     val todayLabel: String
     val habitsHeader: String
     val habitPrayer: String
@@ -109,6 +108,8 @@ interface Strings {
     /** Shown after one or more missed days — a welcome, never a loss notice. */
     val welcomeBack: String
     /** Per-habit summary row: "12 days this month". */
+    /** "፲፰/፴" — days kept of days asked for, in the numerals the app writes. */
+    fun keptOf(kept: Int, of: Int): String
     fun daysThisMonth(n: Int): String
     /** Header over the year heatmap — the main historical view. */
     val yearJourneyHeader: String
@@ -399,8 +400,6 @@ interface Strings {
     // the chevron's direction alone.
     val expand: String
     val collapse: String
-    val expandedState: String
-    val collapsedState: String
 
     // Settings groups. The screen is long enough that it has to be scannable by
     // heading rather than by reading every row.
@@ -486,7 +485,6 @@ interface Strings {
     // ── ማስታወሻ (journal) ──────────────────────────────────────────────────────
 
     val journalTitle: String
-    val journalSubtitle: String
     val journalEmpty: String
     val journalTodayHeader: String
     val newEntry: String
@@ -829,7 +827,6 @@ object AmharicStrings : Strings {
     override val closingPrayerAmharic = "አማርኛ"
     override val closingPrayerSwitchHint = "ቋንቋ ለመቀየር ይንኩ"
 
-    override val journeyTitle = "ጉዞ"
     override val todayLabel = "ዛሬ"
     override val habitsHeader = "ልማዶች"
     override val habitPrayer = "ጸሎት"
@@ -854,6 +851,8 @@ object AmharicStrings : Strings {
     override val journeyTodayLit = "ዛሬ ጸልየዋል"
     override val journeyTodayUnlit = "የዛሬው ሻማ ይጠብቃል"
     override val welcomeBack = "ተመልሰዋል — ዛሬ ይጀምሩ"
+    override fun keptOf(kept: Int, of: Int) =
+        "${com.agpeya.app.ui.reading.geezNumeral(kept)}/${com.agpeya.app.ui.reading.geezNumeral(of)}"
     override fun daysThisMonth(n: Int) = "በዚህ ወር $n ቀን"
     override val yearJourneyHeader = "የዓመቱ ጉዞ"
     override val fastLegendLabel = "ጾም"
@@ -1139,8 +1138,6 @@ object AmharicStrings : Strings {
 
     override val expand = "ክፈት"
     override val collapse = "ዝጋ"
-    override val expandedState = "ተከፍቷል"
-    override val collapsedState = "ተዘግቷል"
 
     override val settingsGroupReading = "ንባብ"
     override val settingsGroupPrayer = "ጸሎትና ማስታወሻ"
@@ -1206,7 +1203,6 @@ object AmharicStrings : Strings {
     override val untitledReminder = "ስም የሌለው"
 
     override val journalTitle = "ማስታወሻ"
-    override val journalSubtitle = "የዕለቱን ሐሳብ ይጻፉ"
     override val journalEmpty = "ገና ምንም አልተጻፈም።"
     override val journalTodayHeader = "የዛሬ"
     override val newEntry = "አዲስ ማስታወሻ"
@@ -1517,7 +1513,6 @@ object EnglishStrings : Strings {
     override val closingPrayerAmharic = "Amharic"
     override val closingPrayerSwitchHint = "Tap to switch language"
 
-    override val journeyTitle = "Journey"
     override val todayLabel = "Today"
     override val habitsHeader = "Habits"
     override val habitPrayer = "Prayer"
@@ -1546,6 +1541,7 @@ object EnglishStrings : Strings {
     override val journeyTodayLit = "Prayed today"
     override val journeyTodayUnlit = "Today's candle is waiting"
     override val welcomeBack = "You're back — begin today"
+    override fun keptOf(kept: Int, of: Int) = "$kept/$of"
     override fun daysThisMonth(n: Int) = if (n == 1) "1 day this month" else "$n days this month"
     override val yearJourneyHeader = "The year's journey"
     override val fastLegendLabel = "Fast"
@@ -1844,8 +1840,6 @@ object EnglishStrings : Strings {
 
     override val expand = "Expand"
     override val collapse = "Collapse"
-    override val expandedState = "Expanded"
-    override val collapsedState = "Collapsed"
 
     override val settingsGroupReading = "Reading"
     override val settingsGroupPrayer = "Prayer and reminders"
@@ -1911,7 +1905,6 @@ object EnglishStrings : Strings {
     override val untitledReminder = "Untitled"
 
     override val journalTitle = "Journal"
-    override val journalSubtitle = "Write down the day"
     override val journalEmpty = "Nothing written yet."
     override val journalTodayHeader = "Today"
     override val newEntry = "New entry"

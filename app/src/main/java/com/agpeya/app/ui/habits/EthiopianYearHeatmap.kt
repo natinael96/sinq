@@ -63,6 +63,47 @@ internal fun journeyYearSelectableRange(ecYear: Int, today: LocalDate): ClosedRa
 }
 
 /**
+ * The year switcher, for the trailing edge of the grid's own section header —
+ * a row of its own under the legend was 52 dp spent on two arrows and a number.
+ */
+@Composable
+fun EthiopianYearSwitcher(ecYear: Int, today: LocalDate, onYearChange: (Int) -> Unit) {
+    val s = LocalStrings.current
+    val currentEc = remember(today) { EthiopianDate.from(today).year }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        IconButton(
+            onClick = { onYearChange(ecYear - 1) },
+            enabled = ecYear > APP_EPOCH_EC.year,
+            modifier = Modifier.size(32.dp),
+        ) {
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                contentDescription = s.previousYear,
+                tint = if (ecYear > APP_EPOCH_EC.year) MaterialTheme.colorScheme.onSurface
+                else MaterialTheme.colorScheme.surfaceVariant,
+            )
+        }
+        Text(
+            text = "$ecYear ${s.eraSuffix}",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        IconButton(
+            onClick = { onYearChange(ecYear + 1) },
+            enabled = ecYear < currentEc,
+            modifier = Modifier.size(32.dp),
+        ) {
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = s.nextYear,
+                tint = if (ecYear < currentEc) MaterialTheme.colorScheme.onSurface
+                else MaterialTheme.colorScheme.surfaceVariant,
+            )
+        }
+    }
+}
+
+/**
  * Calendar heatmap of one Ethiopian year: month labels above, weekday labels
  * on the left, and an EC-year switcher below. The grid clips to
  * [APP_EPOCH_EC .. today].
@@ -242,42 +283,6 @@ fun EthiopianYearHeatmap(
             Spacer(Modifier.width(Spacing.sm))
             Spacer(Modifier.padding(GAP).size(CELL).clip(RoundedCornerShape(2.dp)).background(fastWash))
             Text(s.fastLegendLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-
-        // Compact year switcher
-        Spacer(Modifier.height(Spacing.xs))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            IconButton(
-                onClick = { onYearChange(ecYear - 1) },
-                enabled = ecYear > APP_EPOCH_EC.year,
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                    contentDescription = s.previousYear,
-                    tint = if (ecYear > APP_EPOCH_EC.year) MaterialTheme.colorScheme.onSurface
-                    else MaterialTheme.colorScheme.surfaceVariant,
-                )
-            }
-            Text(
-                text = "$ecYear ${s.eraSuffix}",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-            IconButton(
-                onClick = { onYearChange(ecYear + 1) },
-                enabled = ecYear < currentEc,
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = s.nextYear,
-                    tint = if (ecYear < currentEc) MaterialTheme.colorScheme.onSurface
-                    else MaterialTheme.colorScheme.surfaceVariant,
-                )
-            }
         }
 
         val selectionStart = selectableRange?.start

@@ -48,4 +48,17 @@ class EthiopianDateTest {
         assertEquals(EthiopianDate(2011, 13, 6), EthiopianDate.from(LocalDate.of(2019, 9, 11)))
         assertEquals(EthiopianDate(2012, 1, 1), EthiopianDate.from(LocalDate.of(2019, 9, 12)))
     }
+
+    @Test
+    fun `ጳጉሜን is six days in the year before a Gregorian leap year`() {
+        // The journal's month strip draws one cell per day, so it has to know
+        // where the month ends. Checked against the conversion itself: the day
+        // after the last of ጳጉሜን is መስከረም 1 of the next year.
+        for (year in 2010..2030) {
+            val length = EthiopianDate.pagumeLength(year)
+            val last = EthiopianDate(year, 13, length).toGregorian()
+            assertEquals(EthiopianDate(year + 1, 1, 1), EthiopianDate.from(last.plusDays(1)))
+            assertEquals(EthiopianDate(year, 13, length), EthiopianDate.from(last))
+        }
+    }
 }

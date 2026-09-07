@@ -20,6 +20,12 @@ data class EthiopianDate(val year: Int, val month: Int, val day: Int) {
     companion object {
         private const val ETHIOPIC_EPOCH = 1723856L
 
+        /**
+         * Days in ጳጉሜን: six in the year before a Gregorian leap year, five
+         * otherwise — the 1461-day cycle's extra day.
+         */
+        fun pagumeLength(year: Int): Int = if ((year + 1) % 4 == 0) 6 else 5
+
         fun from(date: LocalDate): EthiopianDate {
             val jdn = date.toEpochDay() + 2440588L // epoch day -> Julian Day Number
             val r = ((jdn - ETHIOPIC_EPOCH) % 1461).toInt()

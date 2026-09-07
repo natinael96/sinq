@@ -62,6 +62,15 @@ import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.strings.Strings
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import androidx.compose.ui.text.style.TextOverflow
+import com.agpeya.app.ui.common.SinqDivider
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.material.icons.filled.Check
+import com.agpeya.app.ui.settings.scheduleSummary
 
 private fun builtInName(id: String, s: Strings): String = when (id) {
     "prayer" -> s.habitPrayer
@@ -120,7 +129,6 @@ fun JourneyScreen(
     val habitItems = remember(state, s, today) {
         HabitsRepository.dueHabitIds(state, today).map { it to habitName(it, state, s) }
     }
-    var prayersExpanded by rememberSaveable { mutableStateOf(false) }
     val summary = remember(state, today) { PrayerJourney.summarize(state.records, today) }
     // Per-habit summaries always count the Ethiopian month, even during a fast:
     // the hero speaks the period's language, the private records stay steady.
@@ -143,8 +151,9 @@ fun JourneyScreen(
             contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.xs),
         ) {
             item {
-                Text(s.journeyTitle, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
-                Spacer(Modifier.height(Spacing.sm))
+                // No page title: the tab beneath it is already labelled ጉዞ,
+                // and 37 dp of the first screen went on saying so twice.
+                //
                 // The one hero on this screen: today's candle and the period's
                 // count of days prayed. Restrained on purpose — the point is a
                 // life of prayer, not a score, and the wording stays true
@@ -154,14 +163,24 @@ fun JourneyScreen(
                     contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.sm),
                 ) {
                     Column(Modifier.weight(1f)) {
+                        // Which hours, not just that some hour was prayed —
+                        // the app knows their names and the reader knows what
+                        // is still owed the day.
+                        val prayedNames = hourItems
+                            .filter { it.first in (state.records[todayKey] ?: emptySet()) }
+                            .joinToString("፣ ") { it.second }
                         Text(
                             when {
                                 summary.returning -> s.welcomeBack
+                                summary.prayedToday && prayedNames.isNotEmpty() ->
+                                    "${s.journeyTodayLit}  ·  $prayedNames"
                                 summary.prayedToday -> s.journeyTodayLit
                                 else -> s.journeyTodayUnlit
                             },
                             style = MaterialTheme.typography.labelMedium,
                             color = sinqColors.onHeroMuted,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                         Spacer(Modifier.height(Spacing.xxs))
                         Text(
@@ -180,88 +199,52 @@ fun JourneyScreen(
                     )
                 }
                 Spacer(Modifier.height(Spacing.sm))
-                SectionHeader(s.todayLabel)
+                val doneHours = hourItems.count { it.first in (state.records[todayKey] ?: emptySet()) }
+                val (keptHabits, dueHabits) = HabitsRepository.keptOfDue(state, today)
+                SectionHeader(s.todayLabel) {
+                    Text(
+                        "$doneHours/${hourItems.size}  ·  $keptHabits/$dueHabits",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 Spacer(Modifier.height(Spacing.xxs))
             }
 
-            item {
-                // ጸሎት group header: expand/collapse the per-hour rows.
-                val doneHours = hourItems.count { it.first in (state.records[todayKey] ?: emptySet()) }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .semantics {
-                            stateDescription = if (prayersExpanded) s.expandedState else s.collapsedState
-                        }
-                        .clickable(
-                            onClickLabel = if (prayersExpanded) s.collapse else s.expand,
-                            role = Role.Button,
-                        ) { prayersExpanded = !prayersExpanded }
-                        .heightIn(min = 48.dp)
-                        .padding(vertical = Spacing.xxs),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        imageVector = if (prayersExpanded) Icons.Filled.KeyboardArrowDown
-                        else Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(Modifier.width(Spacing.md))
-                    Text(
-                        text = s.habitPrayer,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Text(
-                        text = "$doneHours/${hourItems.size} · " + s.daysThisMonth(
-                            PrayerJourney.daysPrayedBetween(state.records, monthStart, today),
-                        ),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (doneHours > 0) MaterialTheme.colorScheme.secondary
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-
-            if (prayersExpanded) {
-                items(hourItems.size, key = { hourItems[it].first }) { i ->
-                    val (id, name) = hourItems[i]
-                    CheckRow(
-                        name = name,
-                        done = id in (state.records[todayKey] ?: emptySet()),
-                        detail = s.daysThisMonth(
-                            HabitsRepository.habitDaysBetween(state.records, id, monthStart, today),
-                        ),
-                        indented = true,
-                        onToggle = {
-                            scope.launch {
-                                HabitsRepository.toggle(context, todayKey, id)
-                            }
-                        },
-                    )
-                }
+            // The seven hours as two hairline strips — four names to a line,
+            // colour the only state. They were behind a ጸሎት row that opened a
+            // list of seven 48 dp check rows, which is 336 dp to say what two
+            // 28 dp lines say, and the page could not show a day's prayer and
+            // a day's habits at the same time.
+            item(key = "hours") {
+                HourStrips(
+                    items = hourItems,
+                    done = state.records[todayKey] ?: emptySet(),
+                    onToggle = { id -> scope.launch { HabitsRepository.toggle(context, todayKey, id) } },
+                )
             }
 
             items(habitItems.size, key = { habitItems[it].first }) { i ->
                 val (id, name) = habitItems[i]
-                CheckRow(
+                HabitRow(
                     name = name,
                     done = id in (state.records[todayKey] ?: emptySet()),
-                    detail = s.daysThisMonth(
-                        HabitsRepository.habitDaysBetween(state.records, id, monthStart, today),
-                    ),
-                    indented = false,
+                    detail = habitDetail(state, id, monthStart, today, s),
                     onToggle = { scope.launch { HabitsRepository.toggle(context, todayKey, id) } },
                 )
             }
+            item(key = "habits_end") { SinqDivider() }
 
             // The year heatmap is the historical view — the story is density
             // and return across the Church's year, not any one unbroken run.
             item {
                 Spacer(Modifier.height(Spacing.sm))
-                SectionHeader(s.yearJourneyHeader)
+                SectionHeader(s.yearJourneyHeader) {
+                    EthiopianYearSwitcher(displayedEcYear, today) { year ->
+                        displayedEcYear = year
+                        selectedEpochDay = null
+                    }
+                }
                 Spacer(Modifier.height(Spacing.xxs))
                 EthiopianYearHeatmap(
                     records = state.records,
@@ -281,66 +264,143 @@ fun JourneyScreen(
                 Spacer(Modifier.height(Spacing.xs))
                 // The journal sits with ጉዞ because both are the day looked back
                 // on — but it is never counted or scored alongside the habits.
-                NavRow(s.journalTitle, onClick = onOpenJournal, subtitle = s.journalSubtitle)
+                NavRow(s.journalTitle, onClick = onOpenJournal)
                 Spacer(Modifier.height(Spacing.md))
             }
         }
     }
 }
 
+/**
+ * The seven hours, four to a line, on hairlines.
+ *
+ * Colour is the whole of the state: a prayed hour is gold, an unprayed one
+ * muted. There is no box to tick because there is no room for one at this
+ * size, and none is needed — the names are the only thing on the line.
+ *
+ * A 28 dp line is under the 48 dp tap floor, so each name carries an invisible
+ * target taller than the text it sits on.
+ */
 @Composable
-private fun CheckRow(
+private fun HourStrips(
+    items: List<Pair<String, String>>,
+    done: Set<String>,
+    onToggle: (String) -> Unit,
+) {
+    val motion = LocalMotion.current
+    val haptics = LocalHapticFeedback.current
+    Column(Modifier.fillMaxWidth()) {
+        SinqDivider()
+        items.chunked(4).forEach { line ->
+            Row(
+                modifier = Modifier.fillMaxWidth().heightIn(min = 28.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                line.forEach { (id, name) ->
+                    val kept = id in done
+                    val tint by animateColorAsState(
+                        targetValue = if (kept) MaterialTheme.colorScheme.secondary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        animationSpec = motion.spec(Motion.standard),
+                        label = "hourTint",
+                    )
+                    Text(
+                        text = name,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = tint,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(MaterialTheme.shapes.small)
+                            .toggleable(
+                                value = kept,
+                                role = Role.Checkbox,
+                                onValueChange = {
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    onToggle(id)
+                                },
+                            )
+                            .padding(vertical = Spacing.sm, horizontal = Spacing.xxs),
+                    )
+                }
+                // A short last line keeps its columns rather than spreading.
+                repeat(4 - line.size) { Spacer(Modifier.weight(1f)) }
+            }
+            SinqDivider()
+        }
+    }
+}
+
+/**
+ * One habit: a small hollow ring that fills with a check when it is kept, the
+ * name, and how many days of the last thirty it has been kept.
+ *
+ * The ring is 20 dp and the row 44 dp, because the list has to take a habit
+ * more without pushing the year off the page — a tile grid or a row of large
+ * rings does not scale past the four that ship with the app. The whole row is
+ * the target, so the small ring is a mark and not a hit area.
+ */
+@Composable
+private fun HabitRow(
     name: String,
     done: Boolean,
     detail: String,
-    indented: Boolean,
     onToggle: () -> Unit,
 ) {
     val motion = LocalMotion.current
     val haptics = LocalHapticFeedback.current
+    val gold = MaterialTheme.colorScheme.secondary
     val tint by animateColorAsState(
-        targetValue = if (done) MaterialTheme.colorScheme.secondary
-        else MaterialTheme.colorScheme.onSurfaceVariant,
+        targetValue = if (done) gold else MaterialTheme.colorScheme.onSurfaceVariant,
         animationSpec = motion.spec(Motion.standard),
-        label = "checkTint",
+        label = "habitTint",
     )
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 48.dp)
+            .heightIn(min = 44.dp)
             .clip(MaterialTheme.shapes.small)
             .toggleable(
                 value = done,
                 role = Role.Checkbox,
                 onValueChange = {
-                    // A kept habit is worth a tick you can feel; it replaces the
-                    // toast that would otherwise interrupt the page.
                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     onToggle()
                 },
             )
-            // xxs, not xs: inside the 48dp floor this changes nothing, but at
-            // large font scales — where content outgrows the floor and the
-            // padding starts to count — it keeps the list from ballooning.
-            .padding(vertical = Spacing.xxs)
-            .padding(start = if (indented) 32.dp else 0.dp),
+            .padding(vertical = Spacing.xxs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(
-            imageVector = if (done) Icons.Filled.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
-            contentDescription = null,
-            tint = tint,
-            modifier = Modifier.size(IconSize.medium),
-        )
+        Box(
+            modifier = Modifier
+                .size(20.dp)
+                .clip(CircleShape)
+                .then(
+                    if (done) Modifier.background(gold)
+                    else Modifier.border(2.dp, gold, CircleShape),
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (done) {
+                Icon(
+                    Icons.Filled.Check,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSecondary,
+                    modifier = Modifier.size(14.dp),
+                )
+            }
+        }
         Spacer(Modifier.width(Spacing.md))
         Text(
             text = name,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.titleSmall,
+            color = tint,
             modifier = Modifier.weight(1f),
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
-        Spacer(Modifier.width(Spacing.sm))
         Text(
             text = detail,
             style = MaterialTheme.typography.labelSmall,
@@ -349,3 +409,30 @@ private fun CheckRow(
         )
     }
 }
+
+/**
+ * What a habit's row says on its right: days kept of the last thirty, in Ge'ez
+ * numerals — and for a habit kept on a cadence, days kept of the days it was
+ * actually asked for, with the cadence named. Four Sundays out of four is a
+ * kept rule; four days out of thirty is not the same fact.
+ */
+@Composable
+private fun habitDetail(
+    state: HabitsState,
+    habitId: String,
+    monthStart: LocalDate,
+    today: LocalDate,
+    s: Strings,
+): String {
+    val kept = HabitsRepository.habitDaysBetween(state.records, habitId, monthStart, today)
+    val schedule = state.schedules[habitId]
+        ?: return s.keptOf(kept, daysBetweenInclusive(monthStart, today))
+    val due = generateSequence(monthStart) { it.plusDays(1) }
+        .takeWhile { !it.isAfter(today) }
+        .count { schedule.isDueOn(it) }
+    return "${s.keptOf(kept, due)}  ·  ${scheduleSummary(schedule, s, LocalContext.current)}"
+}
+
+private fun daysBetweenInclusive(start: LocalDate, end: LocalDate): Int =
+    (end.toEpochDay() - start.toEpochDay()).toInt() + 1
+

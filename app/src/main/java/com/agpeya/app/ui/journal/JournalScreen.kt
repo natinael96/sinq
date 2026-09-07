@@ -52,6 +52,17 @@ import com.agpeya.app.ui.strings.Strings
 import com.agpeya.app.ui.theme.Spacing
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.size
+import com.agpeya.app.data.FastingCalendar
+import com.agpeya.app.ui.theme.sinqColors
+import androidx.compose.ui.unit.dp
 
 /**
  * ማስታወሻ — the journal, browsed one Ethiopian month at a time.
@@ -94,7 +105,10 @@ fun JournalScreen(
 
     val entries by JournalRepository.inEthiopianMonth(context, year, month)
         .collectAsState(initial = emptyList())
+    val writtenDays by JournalRepository.writtenDaysIn(context, year, month)
+        .collectAsState(initial = emptyList())
 
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
     var confessing by remember { mutableStateOf(false) }
     var penancePrompt by remember { mutableStateOf(false) }
     var settingPassphrase by remember { mutableStateOf(false) }
@@ -150,6 +164,7 @@ fun JournalScreen(
         }
 
         LazyColumn(
+            state = listState,
             modifier = Modifier.fillMaxSize().padding(inner),
             contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.md),
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
@@ -168,6 +183,18 @@ fun JournalScreen(
                     )
                     TextButton(onClick = { offset -= 1 }, enabled = offset > 0) { Text("→") }
                 }
+                MonthStrip(
+                    year = year,
+                    month = month,
+                    written = writtenDays.toSet(),
+                    today = today,
+                    onDay = { day ->
+                        // The header is item 0, so the first entry of a day
+                        // sits one past its index in the list.
+                        val index = entries.indexOfFirst { it.context.ethDay == day }
+                        if (index >= 0) scope.launch { listState.animateScrollToItem(index + 1) }
+                    },
+                )
                 if (entries.isEmpty()) {
                     Spacer(Modifier.height(Spacing.lg))
                     Text(
@@ -264,6 +291,69 @@ fun JournalScreen(
                 scope.launch { JournalLock.setPassphrase(context, phrase) }
             },
         )
+    }
+}
+
+/**
+ * The month as a strip of days above its entries.
+ *
+ * The page's premise is the month — "what was ጾመ ፍልሰታ like" — but the month
+ * was only ever a stack of cards, which says nothing about the days between
+ * them. A written day is gold, a fast day carries the same green wash the ጉዞ
+ * heatmap uses, today has a ring, and a tap scrolls to that day's first entry.
+ *
+ * Thirty cells, because an Ethiopian month is thirty days. ጳጉሜን gets five or
+ * six, and the row simply ends there.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun MonthStrip(
+    year: Int,
+    month: Int,
+    written: Set<Int>,
+    today: LocalDate,
+    onDay: (Int) -> Unit,
+) {
+    val s = LocalStrings.current
+    val days = remember(year, month) {
+        if (month == 13) EthiopianDate.pagumeLength(year) else 30
+    }
+    val fastWash = sinqColors.hero.copy(alpha = 0.14f)
+    val gold = MaterialTheme.colorScheme.secondary
+    val empty = MaterialTheme.colorScheme.surfaceVariant
+    val todayEth = remember(today) { EthiopianDate.from(today) }
+    // One pass over the month, so the calendar work is not redone per cell.
+    val fasting = remember(year, month, days) {
+        (1..days).map { day ->
+            runCatching {
+                val date = EthiopianDate(year, month, day).toGregorian()
+                FastingCalendar.fastOn(date) != null || FastingCalendar.isWeeklyFastDay(date)
+            }.getOrDefault(false)
+        }
+    }
+    FlowRow(
+        modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xs),
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+        verticalArrangement = Arrangement.spacedBy(3.dp),
+    ) {
+        (1..days).forEach { day ->
+            val isWritten = day in written
+            val isToday = todayEth.year == year && todayEth.month == month && todayEth.day == day
+            Box(
+                modifier = Modifier
+                    .size(13.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(
+                        when {
+                            isWritten -> gold
+                            fasting[day - 1] -> fastWash
+                            else -> empty
+                        },
+                    )
+                    .then(if (isToday) Modifier.border(1.dp, gold, RoundedCornerShape(2.dp)) else Modifier)
+                    .clickable(enabled = isWritten, onClickLabel = s.journalTitle) { onDay(day) },
+            )
+        }
     }
 }
 

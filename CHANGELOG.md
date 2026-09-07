@@ -103,6 +103,19 @@ features; `versionCode` increments on every release).
   exception since it is the chant itself and not an incipit. The anaphora moved
   onto the ቅዳሴ header it names, from a section of its own at the foot of the
   page four readings away.
+- **ጉዞ shows the day and the year at once.** 767 dp became 571. The page title
+  went — the tab below it already says ጉዞ. The seven hours are two hairline
+  strips, four names to a line with colour the only state, instead of a ጸሎት row
+  that opened seven 48 dp check rows: the page could not show a day's prayer
+  and a day's habits at the same time. Habits are a compact list — a small
+  hollow ring that fills with a check, the name, and the days kept of the days
+  asked for, so a Sunday habit reads ፬/፬ and not ፬/፴. It takes a new habit
+  without pushing the year grid off the page. The year switcher folded into the
+  section header it belongs to. The hero names which hours were prayed.
+- **ማስታወሻ shows the month, not just its entries.** A strip of the month's days
+  sits above the list: written days in gold, fast days in the same green wash
+  the year grid uses, a ring on today, and a tap scrolls to that day. The page
+  is built on the month as the unit of looking back and could not show one.
 - **The prayer hero says whether the hour has been prayed.** It carries an አሁን
   chip while the hour is due and a lit candle once it is prayed — which the app
   now records for itself when the hour is read to its foot. The page's first
