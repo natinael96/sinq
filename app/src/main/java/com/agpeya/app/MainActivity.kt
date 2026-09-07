@@ -555,6 +555,9 @@ private fun AgpeyaNavHost(
                 initialStart = backStackEntry.arguments?.getInt("start") ?: -1,
                 initialEnd = backStackEntry.arguments?.getInt("end") ?: -1,
                 onBack = { navController.popBackStack() },
+                onOpenRoute = { route ->
+                    runCatching { navController.navigate(route) { launchSingleTop = true } }
+                },
             )
         }
         composable(

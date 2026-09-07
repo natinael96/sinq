@@ -37,11 +37,23 @@ import java.util.ArrayList
  * lines that make it legible outside the app — where it's from ([kicker]), what
  * it is ([title]), and the day it belongs to ([dateLabel]).
  */
+/**
+ * The shape of the card. One renderer, three sizes: the tall card the app has
+ * always made, the square Telegram and Instagram previews crop to, and the
+ * story people actually post.
+ */
+enum class ImageShape { CARD, SQUARE, STORY }
+
+/** The two grounds: the app's own green, and its ivory. */
+enum class ImageGround { GREEN, IVORY }
+
 data class SharePayload(
     val body: String,
     val kicker: String? = null,
     val title: String? = null,
     val dateLabel: String? = null,
+    val shape: ImageShape = ImageShape.CARD,
+    val ground: ImageGround = ImageGround.GREEN,
 ) {
     /** The payload as plain text, for the clipboard and the text share sheet. */
     fun asText(): String = buildString {
@@ -77,12 +89,41 @@ object PassageShare {
     private const val EDGE = 56f
     private const val PAD = 72f
 
-    private val GROUND = Color.parseColor("#0B3129")
-    private val CARD = Color.parseColor("#10382F")
-    private val CARD_LINE = Color.parseColor("#1B4A3E")
-    private val GOLD = Color.parseColor("#E4BC5A")
-    private val IVORY = Color.parseColor("#F2EDDE")
-    private val MUTED = Color.parseColor("#9DBBAD")
+    /** One palette per ground; the typography and the colophon do not change. */
+    private data class Palette(
+        val ground: Int,
+        val card: Int,
+        val line: Int,
+        val gold: Int,
+        val ink: Int,
+        val muted: Int,
+        val glow: Int,
+    )
+
+    private val GREEN = Palette(
+        ground = Color.parseColor("#0B3129"),
+        card = Color.parseColor("#10382F"),
+        line = Color.parseColor("#1B4A3E"),
+        gold = Color.parseColor("#E4BC5A"),
+        ink = Color.parseColor("#F2EDDE"),
+        muted = Color.parseColor("#9DBBAD"),
+        glow = Color.argb(70, 228, 188, 90),
+    )
+
+    // The app's own light palette, so a card can sit on a white page the way
+    // the reader does.
+    private val IVORY_PALETTE = Palette(
+        ground = Color.parseColor("#E7E4D6"),
+        card = Color.parseColor("#EFEDE2"),
+        line = Color.parseColor("#D5D1BF"),
+        gold = Color.parseColor("#7E5F1E"),
+        ink = Color.parseColor("#1D2B24"),
+        muted = Color.parseColor("#5C6A5F"),
+        glow = Color.argb(46, 126, 95, 30),
+    )
+
+    private fun palette(ground: ImageGround): Palette =
+        if (ground == ImageGround.IVORY) IVORY_PALETTE else GREEN
 
     suspend fun share(context: Context, payload: SharePayload, strings: Strings? = null): Boolean = try {
         val files = withContext(Dispatchers.Default) { renderToCache(context, payload) }
@@ -183,9 +224,9 @@ object PassageShare {
 
     private fun paginateBodies(context: Context, payload: SharePayload): List<String> {
         val ethiopic = ResourcesCompat.getFont(context, R.font.abyssinica_sil) ?: Typeface.SERIF
-        val bodyPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 44f; color = IVORY; typeface = ethiopic }
+        val bodyPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 44f; typeface = ethiopic }
         val titlePaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
-            textSize = 58f; color = IVORY; typeface = Typeface.create(ethiopic, Typeface.BOLD)
+            textSize = 58f; typeface = Typeface.create(ethiopic, Typeface.BOLD)
         }
         val textWidth = (W - 2 * EDGE - 2 * PAD).toInt()
         val titleHeight = payload.title?.takeIf { it.isNotBlank() }?.let {
@@ -224,9 +265,10 @@ object PassageShare {
                 .setEllipsize(if (maxLines == Int.MAX_VALUE) null else TextUtils.TruncateAt.END)
                 .build()
 
-        val kickerPaint = paint(34f, GOLD)
-        val titlePaint = paint(58f, IVORY, bold = true)
-        val bodyPaint = paint(44f, IVORY)
+        val pal = palette(payload.ground)
+        val kickerPaint = paint(34f, pal.gold)
+        val titlePaint = paint(58f, pal.ink, bold = true)
+        val bodyPaint = paint(44f, pal.ink)
 
         val titleLayout = payload.title
             ?.takeIf { it.isNotBlank() }
@@ -241,48 +283,61 @@ object PassageShare {
         val footerBlock = 150f                 // signature + bottom padding
         val fixed = EDGE + brandBlock + kickerBlock + titleBlock + ruleBlock + footerBlock + EDGE
 
+        // A square or a story is a fixed frame the text has to live inside; the
+        // card grows to whatever the passage needs, as it always has.
+        val frame = when (payload.shape) {
+            ImageShape.SQUARE -> W
+            ImageShape.STORY -> MAX_H
+            ImageShape.CARD -> MAX_H
+        }
         val bodyLineHeight = bodyPaint.fontSpacing * 1.5f
-        val maxBodyLines = ((MAX_H - fixed) / bodyLineHeight).toInt().coerceAtLeast(4)
+        val maxBodyLines = ((frame - fixed) / bodyLineHeight).toInt().coerceAtLeast(4)
         val bodyLayout = layout(body, bodyPaint, 1.5f, maxLines = maxBodyLines)
 
-        val h = (fixed + bodyLayout.height).toInt().coerceIn(640, MAX_H)
+        val h = when (payload.shape) {
+            ImageShape.CARD -> (fixed + bodyLayout.height).toInt().coerceIn(640, MAX_H)
+            else -> frame
+        }
+        // In a fixed frame the block sits in the middle of the space it has
+        // rather than clinging to the top of a mostly empty card.
+        val slack = ((h - fixed - bodyLayout.height) / 2f).coerceAtLeast(0f)
         val bmp = Bitmap.createBitmap(W, h, Bitmap.Config.ARGB_8888)
         val c = Canvas(bmp)
 
         // Ground + soft gold glow in the top corner, then the card.
-        c.drawColor(GROUND)
+        c.drawColor(pal.ground)
         c.drawRect(
             0f, 0f, W.toFloat(), h.toFloat(),
             Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 shader = RadialGradient(
                     W * 0.86f, h * 0.08f, W * 0.55f,
-                    Color.argb(70, 228, 188, 90), Color.TRANSPARENT, Shader.TileMode.CLAMP,
+                    pal.glow, Color.TRANSPARENT, Shader.TileMode.CLAMP,
                 )
             },
         )
         val card = RectF(EDGE, EDGE, W - EDGE, h - EDGE)
-        c.drawRoundRect(card, 48f, 48f, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = CARD })
+        c.drawRoundRect(card, 48f, 48f, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = pal.card })
         c.drawRoundRect(
             card, 48f, 48f,
             Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = CARD_LINE; style = Paint.Style.STROKE; strokeWidth = 3f
+                color = pal.line; style = Paint.Style.STROKE; strokeWidth = 3f
             },
         )
 
         val left = card.left + PAD
         val right = card.right - PAD
-        var y = card.top + 140f
+        var y = card.top + 140f + slack
 
         // Brand row: ስንቅ left, the date right, then a hairline rule.
-        c.drawText("ስንቅ", left, y, paint(58f, GOLD, bold = true))
+        c.drawText("ስንቅ", left, y, paint(58f, pal.gold, bold = true))
         payload.dateLabel?.let {
-            val p = paint(32f, MUTED)
-            val available = (right - left - paint(58f, GOLD, bold = true).measureText("ስንቅ") - 40f).coerceAtLeast(120f)
+            val p = paint(32f, pal.muted)
+            val available = (right - left - paint(58f, pal.gold, bold = true).measureText("ስንቅ") - 40f).coerceAtLeast(120f)
             val line = TextUtils.ellipsize(it, p, available, TextUtils.TruncateAt.END).toString()
             c.drawText(line, right - p.measureText(line), y, p)
         }
         y += 44f
-        c.drawRect(left, y, right, y + 2f, Paint().apply { color = CARD_LINE })
+        c.drawRect(left, y, right, y + 2f, Paint().apply { color = pal.line })
 
         payload.kicker?.let {
             y += 90f
@@ -298,14 +353,14 @@ object PassageShare {
 
         // A short gold rule between the heading block and the passage.
         y += 28f
-        c.drawRect(left, y, left + 56f, y + 3f, Paint().apply { color = GOLD })
+        c.drawRect(left, y, left + 56f, y + 3f, Paint().apply { color = pal.gold })
         y += 16f
 
         c.withTranslation(left, y) { bodyLayout.draw(this) }
 
         // Footnote: the app's name in Ge'ez script, centred at the foot of the
         // card like a colophon, so every shared passage says where it came from.
-        val sigPaint = paint(34f, GOLD)
+        val sigPaint = paint(34f, pal.gold)
         val sig = if (pageCount > 1) "— ስንቅ —  $page/$pageCount" else "— ስንቅ —"
         c.drawText(sig, (W - sigPaint.measureText(sig)) / 2f, card.bottom - 56f, sigPaint)
 

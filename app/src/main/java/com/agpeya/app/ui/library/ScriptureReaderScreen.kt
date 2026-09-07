@@ -81,6 +81,9 @@ import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.width
 import com.agpeya.app.ui.theme.inReadingFont
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import com.agpeya.app.ui.common.ListRow
 
 private val FONT_STEPS_SP = com.agpeya.app.data.SettingsRepository.FONT_STEPS_SP
 
@@ -99,6 +102,8 @@ fun ScriptureReaderScreen(
     onBack: () -> Unit,
     /** Opens a journal entry anchored to the chapter, or to the selected run of verses. */
     onWriteNote: (route: String, label: String) -> Unit,
+    /** Follows today's ንባብ into the next book when the day crosses one. */
+    onOpenRoute: (route: String) -> Unit = {},
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
@@ -153,6 +158,22 @@ fun ScriptureReaderScreen(
     // chapter 1 under the cited number. The highlight only fires when the clamped
     // chapter still equals the cited one, so a bad citation never tints wrong verses.
     val showRefs by SettingsRepository.showCrossRefs(context).collectAsState(initial = false)
+    // Today's ንባብ, so a chapter that belongs to it can say so and be marked
+    // from where it is read. Opening a passage from the plan and then having to
+    // go back to the plan to tick it was the plan's own ledger asking twice.
+    val planContent by androidx.compose.runtime.produceState(com.agpeya.app.model.ReadingPlanContent()) {
+        value = com.agpeya.app.data.ReadingPlanRepository.content(context)
+    }
+    val planState by com.agpeya.app.data.ReadingPlanRepository.state(context)
+        .collectAsState(initial = com.agpeya.app.model.ReadingPlanState())
+    val today = com.agpeya.app.ui.common.rememberCurrentDate().value
+    val planDay = remember(planContent, planState, today) {
+        planContent.plans.firstOrNull { it.id == planState.activePlanId }?.let { plan ->
+            val n = com.agpeya.app.data.ReadingPlanRepository.dayOn(planState.startedOn, today, plan.days)
+            plan to com.agpeya.app.data.ReadingPlanRepository.effectiveDays(plan, planState)
+                .firstOrNull { it.d == n }
+        }
+    }
     val lastChapters by SettingsRepository.lastChapters(context).collectAsState(initial = emptyMap())
     var chapter by rememberSaveable(bookKey) {
         mutableIntStateOf(initialChapter.coerceIn(1, b.chapters.size))
@@ -420,6 +441,42 @@ fun ScriptureReaderScreen(
                 }
             }
             item {
+                // The day's own chapters, when this is one of them: which of
+                // them this is, the next of them, and the tick.
+                val day = planDay?.second
+                val dayChapters = day?.r.orEmpty().flatMap { r -> r.chapters.map { r.b to it } }
+                val here = dayChapters.indexOf(bookKey to chapter)
+                if (day != null && here >= 0) {
+                    val read = com.agpeya.app.data.ReadingPlanRepository.isRead(planState, day)
+                    ListRow(
+                        title = s.readingChapterOfDay(here + 1, dayChapters.size),
+                        subtitle = if (read) s.readingDone else s.readingMarkDone,
+                        leadingIcon = if (read) Icons.Outlined.Check else Icons.AutoMirrored.Outlined.MenuBook,
+                        leadingTint = if (read) MaterialTheme.colorScheme.secondary else null,
+                        onClick = {
+                            scope.launch {
+                                if (read) {
+                                    planDay.first.let { plan ->
+                                        com.agpeya.app.data.ReadingPlanRepository.unmarkDay(context, plan, day)
+                                    }
+                                } else {
+                                    com.agpeya.app.data.ReadingPlanRepository.markDay(context, day, today)
+                                }
+                            }
+                        },
+                    )
+                    dayChapters.getOrNull(here + 1)?.let { (nextBook, nextChapter) ->
+                        if (nextBook == bookKey) {
+                            ChapterStepper(onPrevious = null, onNext = { chapter = nextChapter })
+                        } else {
+                            ListRow(
+                                title = s.nextChapter,
+                                subtitle = nextBook,
+                                onClick = { onOpenRoute("scripture/$nextBook/$nextChapter") },
+                            )
+                        }
+                    }
+                }
                 ChapterStepper(
                     onPrevious = { chapter -= 1 }.takeIf { chapter > 1 },
                     onNext = { chapter += 1 }.takeIf { chapter < b.chapters.size },

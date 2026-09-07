@@ -78,6 +78,7 @@ import kotlinx.coroutines.launch
 import com.agpeya.app.ui.common.Passage
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.setValue
 
 /**
  * Section rendering shared by the hour reader, the Psalter and the scripture
@@ -393,12 +394,33 @@ internal fun SelectionBar(
                         title = com.agpeya.app.ui.common.PassageFormat.heading(passage),
                     )
                     val imageBusy = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
-                    fun image(run: suspend () -> Unit): () -> Unit = {
-                        onDismiss()
-                        if (!imageBusy.value) scope.launch {
-                            imageBusy.value = true
-                            try { run() } finally { imageBusy.value = false }
-                        }
+                    // The shape and ground are chosen when the image is asked
+                    // for, not before: it is a decision about where it is going.
+                    var imageSheet by androidx.compose.runtime.saveable.rememberSaveable {
+                        androidx.compose.runtime.mutableStateOf(false)
+                    }
+                    var saving by androidx.compose.runtime.saveable.rememberSaveable {
+                        androidx.compose.runtime.mutableStateOf(false)
+                    }
+                    if (imageSheet) {
+                        ImageOptionsDialog(
+                            onDismiss = { imageSheet = false },
+                            onChoose = { shape, ground ->
+                                imageSheet = false
+                                val shaped = payload.copy(shape = shape, ground = ground)
+                                val save = saving
+                                onDismiss()
+                                if (!imageBusy.value) scope.launch {
+                                    imageBusy.value = true
+                                    try {
+                                        if (save) com.agpeya.app.ui.common.PassageShare.save(ctx, shaped, s)
+                                        else com.agpeya.app.ui.common.PassageShare.share(ctx, shaped, s)
+                                    } finally {
+                                        imageBusy.value = false
+                                    }
+                                }
+                            },
+                        )
                     }
                     SelectionActions(
                         buildList {
@@ -421,19 +443,17 @@ internal fun SelectionBar(
                                 },
                             )
                             add(
-                                SelectionAct(
-                                    s.shareAsImage,
-                                    Icons.Outlined.Image,
-                                    image { com.agpeya.app.ui.common.PassageShare.share(ctx, payload, s) },
-                                ),
+                                SelectionAct(s.shareAsImage, Icons.Outlined.Image) {
+                                    saving = false
+                                    imageSheet = true
+                                },
                             )
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
                                 add(
-                                    SelectionAct(
-                                        s.saveImage,
-                                        Icons.Outlined.SaveAlt,
-                                        image { com.agpeya.app.ui.common.PassageShare.save(ctx, payload, s) },
-                                    ),
+                                    SelectionAct(s.saveImage, Icons.Outlined.SaveAlt) {
+                                        saving = true
+                                        imageSheet = true
+                                    },
                                 )
                             }
                         },
@@ -517,6 +537,59 @@ private fun HighlightRow(
             )
         }
     }
+}
+
+/**
+ * Three shapes and two grounds, asked for at the moment the image is.
+ *
+ * Square is what Telegram and Instagram previews crop to; story is what people
+ * post. The typography and the colophon do not change with either — the card is
+ * still ስንቅ in all three.
+ */
+@Composable
+private fun ImageOptionsDialog(
+    onDismiss: () -> Unit,
+    onChoose: (com.agpeya.app.ui.common.ImageShape, com.agpeya.app.ui.common.ImageGround) -> Unit,
+) {
+    val s = LocalStrings.current
+    var ground by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf(com.agpeya.app.ui.common.ImageGround.GREEN)
+    }
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(s.shareAsImage) },
+        text = {
+            Column {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                ) {
+                    listOf(
+                        com.agpeya.app.ui.common.ImageGround.GREEN to s.imageGroundGreen,
+                        com.agpeya.app.ui.common.ImageGround.IVORY to s.imageGroundIvory,
+                    ).forEach { (value, label) ->
+                        androidx.compose.material3.FilterChip(
+                            selected = ground == value,
+                            onClick = { ground = value },
+                            label = { Text(label, maxLines = 1) },
+                        )
+                    }
+                }
+                Spacer(Modifier.height(Spacing.sm))
+                listOf(
+                    com.agpeya.app.ui.common.ImageShape.CARD to s.imageShapeCard,
+                    com.agpeya.app.ui.common.ImageShape.SQUARE to s.imageShapeSquare,
+                    com.agpeya.app.ui.common.ImageShape.STORY to s.imageShapeStory,
+                ).forEach { (shape, label) ->
+                    com.agpeya.app.ui.common.ListRow(title = label, onClick = { onChoose(shape, ground) })
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            androidx.compose.material3.TextButton(onClick = onDismiss) { Text(s.cancel) }
+        },
+    )
 }
 
 /**

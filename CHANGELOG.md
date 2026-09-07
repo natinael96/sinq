@@ -127,6 +127,14 @@ features; `versionCode` increments on every release).
   citation of what is selected. Readers whose unit is a paragraph simply have no
   colour row. The four highlight colours can be named (ተስፋ, ትእዛዝ, ጸሎት, ማስተዋል,
   or anything else) and the name shows under the swatch.
+- **The verse image has three shapes and two grounds.** Card as before, square
+  for the previews Telegram and Instagram crop to, story for what people post;
+  green or ivory. The typography and the colophon do not change — it is still
+  ስንቅ in all three. And the day's ምስባክ has its own button on ግጻዌ, so the chant
+  goes out as a card in one tap instead of four.
+- **A chapter of ንባብ can be marked from where it is read.** A Bible chapter that
+  belongs to today's plan day says so at the foot of the page, offers the next
+  one, and takes the tick — the plan's ledger was asking twice.
 - **The Bible reader reads like a book.** A chapter steps from the foot of the
   page instead of only from the strip at the top, and a book reopens at the
   chapter it was left on. The edition's own headings are on the page — a psalm's

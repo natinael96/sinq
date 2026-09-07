@@ -130,6 +130,14 @@ interface Strings {
     val markAction: String
     /** The edition's own cross references, and the chapter stepper's two ends. */
     val crossRefsTitle: String
+    /** The image sheet: three shapes, two grounds. */
+    val imageShapeCard: String
+    val imageShapeSquare: String
+    val imageShapeStory: String
+    val imageGroundGreen: String
+    val imageGroundIvory: String
+    /** The ንባብ footer inside the Bible reader: this chapter is part of today. */
+    fun readingChapterOfDay(done: Int, total: Int): String
     val crossRefsSubtitle: String
     val previousChapter: String
     val nextChapter: String
@@ -898,6 +906,12 @@ object AmharicStrings : Strings {
     override val bookmarkAction = "ምልክት አድርግ"
     override val markAction = "ምልክት"
     override val crossRefsTitle = "የጥቅስ ማጣቀሻዎች"
+    override val imageShapeCard = "ካርድ"
+    override val imageShapeSquare = "ካሬ"
+    override val imageShapeStory = "ስቶሪ"
+    override val imageGroundGreen = "አረንጓዴ"
+    override val imageGroundIvory = "ነጣ ያለ"
+    override fun readingChapterOfDay(done: Int, total: Int) = "የዛሬው ንባብ · $done ከ$total"
     override val crossRefsSubtitle = "በእትሙ የተቀመጡት ተያያዥ ጥቅሶች"
     override val previousChapter = "ያለፈው ምዕራፍ"
     override val nextChapter = "ቀጣይ ምዕራፍ"
@@ -1612,6 +1626,12 @@ object EnglishStrings : Strings {
     override val bookmarkAction = "Bookmark"
     override val markAction = "Mark"
     override val crossRefsTitle = "Cross references"
+    override val imageShapeCard = "Card"
+    override val imageShapeSquare = "Square"
+    override val imageShapeStory = "Story"
+    override val imageGroundGreen = "Green"
+    override val imageGroundIvory = "Ivory"
+    override fun readingChapterOfDay(done: Int, total: Int) = "Today's reading · $done of $total"
     override val crossRefsSubtitle = "The edition's own related verses"
     override val previousChapter = "Previous chapter"
     override val nextChapter = "Next chapter"

@@ -94,6 +94,7 @@ import com.agpeya.app.ui.theme.inReadingFont
 import com.agpeya.app.ui.strings.Strings
 import java.time.LocalDate
 import kotlinx.coroutines.launch
+import androidx.compose.material.icons.outlined.Image
 
 /** One reading office the user can switch to on a given day. */
 private data class Source(
@@ -434,6 +435,43 @@ private fun ReadingRow(
                     overflow = TextOverflow.Ellipsis,
                 )
                 if (isMisbak) {
+                    // The day's chant, in the day's card, ready to send before
+                    // the liturgy. It is the one thing on this page that people
+                    // send every morning, and it took four taps to get out.
+                    val scope = androidx.compose.runtime.rememberCoroutineScope()
+                    val busy = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+                    IconButton(
+                        onClick = {
+                            val text = preview?.takeIf { it.isNotBlank() } ?: return@IconButton
+                            if (busy.value) return@IconButton
+                            scope.launch {
+                                busy.value = true
+                                try {
+                                    com.agpeya.app.ui.common.PassageShare.share(
+                                        context,
+                                        com.agpeya.app.ui.common.SharePayload(
+                                            body = text,
+                                            kicker = role,
+                                            title = verse?.let { verseRef(it) },
+                                            dateLabel = null,
+                                            shape = com.agpeya.app.ui.common.ImageShape.SQUARE,
+                                        ),
+                                        s,
+                                    )
+                                } finally {
+                                    busy.value = false
+                                }
+                            }
+                        },
+                        enabled = !preview.isNullOrBlank(),
+                    ) {
+                        Icon(
+                            Icons.Outlined.Image,
+                            contentDescription = s.shareAsImage,
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(IconSize.small),
+                        )
+                    }
                     SelectPill(
                         label = if (misbakLanguage == MisbakLanguage.GEEZ) s.wudaseLangGeez else s.wudaseLangAmharic,
                         selected = true,
