@@ -49,6 +49,16 @@ features; `versionCode` increments on every release).
   pattern was also matching the ፤ that separates citations.
 - **በዓለ ትንሳኤ sat under a heading naming ዘመነ ጽጌ.** The undated group took its
   title from its first row.
+- **Three faults in the Psalter.** መዝ ፻፲፰፥፯ ended with the ቤት acrostic letter
+  and debris from the scan, sitting inside the verse — all 22 letters are
+  already carried as headings. Six verses put a space in front of the Ethiopic
+  comma. And the Ge'ez Psalter had swallowed three verses whole: መዝ ፭፥፯ was
+  inside ፭፥፮, and መዝ ፻፵፥፭ and ፥፮ inside ፻፵፥፬, each with the verse marker still
+  in the text saying where the boundary had been. The ምስባክ is chanted from that
+  edition and cites it by verse.
+- **The Bible catalogue can no longer disagree with the Bible.** It claimed
+  2,459 Ge'ez verses for a Psalter that holds 2,462; nothing counted them. The
+  content gate does now.
 - **Opening notification settings crashed on Android 6 and 7**, which have no
   per-app notification page. Three screens called it unguarded; they fall back
   to the app's own settings page now.

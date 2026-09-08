@@ -11,6 +11,7 @@ and non-integer verse identifiers. Only insignificant JSON whitespace changes.
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -61,6 +62,72 @@ def validate_book(book: dict, edition: str, expected: dict) -> tuple[int, int]:
     return len(chapters), verses
 
 
+# Corrections applied to the upstream text on the way through.
+#
+# The 80-weahadu extraction is very clean — a word-boundary check against the
+# other 65 books found nothing wrong in the Amharic Psalter — but a few verses
+# carry marks from the scan, and the Ge'ez Psalter lost some verse boundaries.
+# Each entry is asserted to apply, so a rebuild against a source that has since
+# been corrected fails loudly instead of silently dropping the fix.
+#
+# Keyed by (edition, book id, chapter, verse).
+TEXT_FIXES = {
+    # The acrostic letter for the ቤት section, plus debris from the scan, left
+    # inside the verse. All 22 letters are already carried as headings, and this
+    # one duplicates the heading that stands above verse 9.
+    ("am-1980", "PSA", 118, 7): (
+        "አቤቱ፥ የጽድቅህን ፍርድ ስማር በቅን ልብ አመሰግንሃለሁ። ቤት ll*",
+        "አቤቱ፥ የጽድቅህን ፍርድ ስማር በቅን ልብ አመሰግንሃለሁ።",
+    ),
+}
+
+# The Ethiopic comma and full stop follow the word they close; the scan put a
+# space in front of them in six verses of the Amharic Psalter.
+SPACE_BEFORE_PUNCTUATION = re.compile(r"\s+([።፤፥፣])")
+
+# Ge'ez verses that swallowed the verse after them, with the verse marker left
+# in the text saying exactly where the boundary was. Splitting on the marker is
+# mechanical; the twelve other merged verses in this edition are not, because
+# the boundary has to be inferred, and those are left alone.
+SPLIT_ON_MARKER = {
+    ("gez-1980", "PSA", 5, 6),
+    ("gez-1980", "PSA", 140, 4),
+}
+VERSE_MARKER = re.compile(r"\s*(\d{1,3})፧\s*")
+
+
+def mend(edition: str, book_id: str, book: dict) -> None:
+    """Apply the corrections above to one book, in place."""
+    for chapter in book.get("chapters", []):
+        n = chapter.get("n")
+        rebuilt = []
+        for verse in chapter.get("verses", []):
+            key = (edition, book_id, n, verse.get("n"))
+            text = verse.get("t", "")
+
+            fix = TEXT_FIXES.get(key)
+            if fix:
+                if text != fix[0]:
+                    raise SystemExit(f"{key}: text has changed upstream; correction stale")
+                text = fix[1]
+
+            if edition == "am-1980":
+                text = SPACE_BEFORE_PUNCTUATION.sub(r"\1", text)
+
+            if key in SPLIT_ON_MARKER and VERSE_MARKER.search(text):
+                pieces = VERSE_MARKER.split(text)
+                verse["t"] = pieces[0].strip()
+                rebuilt.append(verse)
+                # split() alternates text, number, text, number, …
+                for i in range(1, len(pieces) - 1, 2):
+                    rebuilt.append({"n": int(pieces[i]), "t": pieces[i + 1].strip()})
+                continue
+
+            verse["t"] = text
+            rebuilt.append(verse)
+        chapter["verses"] = rebuilt
+
+
 def main() -> None:
     if not SOURCE_DATA.is_dir():
         raise FileNotFoundError(f"80-weahadu data not found at {SOURCE_DATA}")
@@ -94,6 +161,7 @@ def main() -> None:
         for expected in selected_books:
             source_file = source_dir / expected["file"]
             book = load(source_file)
+            mend(edition, expected["id"], book)
             book_chapters, book_verses = validate_book(book, edition, expected)
             chapters += book_chapters
             verses += book_verses

@@ -151,7 +151,9 @@ def check_scripture() -> None:
     catalog = load("bible", "catalog.json")
     if not catalog:
         return
-    expected = {"am-1980": (93, 44290), "gez-1980": (1, 2459)}
+    # gez-1980 gained three verses when two merged ones were split back apart
+    # on the ፯፧ / ፭፧ / ፮፧ markers the scan left inside them.
+    expected = {"am-1980": (93, 44290), "gez-1980": (1, 2462)}
     for edition in catalog.get("editions", []):
         eid = edition.get("id")
         if eid not in expected:
@@ -163,6 +165,23 @@ def check_scripture() -> None:
             meta = load("bible", eid, "meta.json")
             if meta and len(meta.get("books", [])) != expected[eid][0]:
                 fail(f"bible/{eid}: metadata book count mismatch")
+
+    # The catalogue is a claim about the files beside it; count them and check.
+    # It said 2,459 for a Psalter that held 2,462 until this was added.
+    for edition in catalog.get("editions", []):
+        eid = edition.get("id")
+        counted = 0
+        books_dir = os.path.join(CONTENT, "bible", eid, "books")
+        if not os.path.isdir(books_dir):
+            continue
+        for name in sorted(os.listdir(books_dir)):
+            if not name.endswith(".json"):
+                continue
+            with open(os.path.join(books_dir, name), encoding="utf-8") as handle:
+                book = json.load(handle)
+            counted += sum(len(c.get("verses", [])) for c in book.get("chapters", []))
+        if counted and counted != edition.get("stats", {}).get("verses"):
+            fail(f"bible/{eid}: catalogue says {edition['stats']['verses']} verses, files hold {counted}")
 
 
 def check_wudase() -> None:
