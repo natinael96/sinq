@@ -39,6 +39,77 @@ SECTIONS = [
     ("anqetse_birhan", 0, "አንቀጸ ብርሃን", "numeral"),
 ]
 
+# Corrections applied on top of the upstream text, keyed by section id.
+#
+# The community dataset is a transcription and carries a few readings that
+# differ from the printed ውዳሴ ማርያም. Each entry here is an exact string swap,
+# asserted to match once, so a rebuild that no longer needs a fix fails loudly
+# instead of silently dropping it. Nothing is rewritten wholesale: the prayer is
+# the source's, and these are the specific words the user corrected against the
+# book.
+CORRECTIONS = {
+    "yiwedsewa_melaekt": [
+        # ድንኳን is addressed to her, so the participle agrees with "you".
+        ("የተሸለመች ድንኳን", "የተሸለምሽ ድንኳን"),
+        ("የሁሉ እመቤት ማርያም", "እመቤታችን ማርያም"),
+        ("የሁሉ ፍቅረኛ ማርያም", "የሁሉ ሰላም ማርያም"),
+    ],
+}
+
+# Sections whose clause-per-line praise formulas are separated by ፤ in the
+# printed book and run together in the source. Splitting on the formula is
+# safe because it is the refrain the whole paragraph is built from.
+CLAUSE_SEPARATED = {"yiwedsewa_melaekt": "ምስጋና ይገባሻል"}
+
+# Fixes that only make sense once the clauses are separated, because they are
+# about where the ፤ lands rather than about a word.
+AFTER_SEPARATION = {
+    "yiwedsewa_melaekt": [
+        # "አላት" closes the angel's greeting; splitting on the refrain alone puts
+        # it at the head of the next clause, where it reads as him saying the
+        # second praise rather than the first.
+        ("ይገባሻል፤ አላት ", "ይገባሻል አላት፤ "),
+        # Two titles, not one: sister of the angels, mother of all the people.
+        ("የመላእክት እኅት የሕዝቡ", "የመላእክት እኅት፤ የሕዝቡ"),
+    ],
+}
+
+
+def correct(key, paragraphs):
+    """Apply the printed book's readings to one section's paragraphs."""
+    fixes = CORRECTIONS.get(key, [])
+    out = []
+    for para in paragraphs:
+        for old, new in fixes:
+            if old in para:
+                para = para.replace(old, new)
+        out.append(para)
+    for old, _ in fixes:
+        if any(old in p for p in out):
+            raise SystemExit(f"{key}: correction for {old!r} did not apply")
+    return out
+
+
+def separate_clauses(key, paragraphs):
+    """Put ፤ between the repeated praise clauses, as the book prints them."""
+    refrain = CLAUSE_SEPARATED.get(key)
+    if not refrain:
+        return paragraphs
+    after = AFTER_SEPARATION.get(key, [])
+    out = []
+    for para in paragraphs:
+        if para.count(refrain) < 3:          # not one of the litany paragraphs
+            out.append(para)
+            continue
+        parts = [p.strip() for p in para.split(refrain) if p.strip()]
+        joined = f" {refrain}፤ ".join(parts)
+        para = re.sub(r"\s+", " ", joined).strip() + f" {refrain}።"
+        for old, new in after:
+            para = para.replace(old, new)
+        out.append(para)
+    return out
+
+
 _NUM = r"[፩-፼]"
 # Split right before a stanza marker: a Ge'ez numeral group followed by "." / "።".
 _STANZA = re.compile(r"(?=(?<!\S)" + _NUM + r"+[.።] )")
@@ -72,7 +143,7 @@ def main():
             "label": label,
             "titleAm": node["title"].get("am", "").strip(),
             "titleGe": node["title"].get("ge", "").strip(),
-            "am": stanzas(node["content"].get("am", ""), split),
+            "am": separate_clauses(key, correct(key, stanzas(node["content"].get("am", ""), split))),
             "ge": stanzas(node["content"].get("ge", ""), split),
         })
 
