@@ -738,6 +738,18 @@ private fun AgpeyaNavHost(
         composable("books") {
             com.agpeya.app.ui.books.BookShelfScreen(
                 onBack = { navController.popBackStack() },
+                onOpenShelf = { key -> navController.navigate("books/$key") { launchSingleTop = true } },
+            )
+        }
+        // The shelf keys are ASCII slugs from the content index ("zema",
+        // "melkie", …), so they need no encoding to ride in the route.
+        composable(
+            route = "books/{shelf}",
+            arguments = listOf(navArgument("shelf") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            com.agpeya.app.ui.books.BookShelfPageScreen(
+                shelfKey = backStackEntry.arguments?.getString("shelf").orEmpty(),
+                onBack = { navController.popBackStack() },
                 onOpen = { id -> navController.navigate("book/$id") { launchSingleTop = true } },
             )
         }

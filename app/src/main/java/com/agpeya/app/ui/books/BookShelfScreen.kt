@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.BookRepository
 import com.agpeya.app.model.BookIndex
 import com.agpeya.app.model.BookMeta
-import com.agpeya.app.ui.common.SectionHeader
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.reading.ReadingColumn
 import com.agpeya.app.ui.strings.LocalStrings
@@ -37,20 +36,17 @@ import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.inReadingFont
 
 /**
- * ሌሎች መጻሕፍት — the church books outside the 81.
+ * ሌሎች መጻሕፍት — the church books outside the 81, as six shelves.
  *
- * Ninety-one of them, so the shelf is grouped the way the Church groups them
- * rather than listed flat: the chant books ማኅሌት and ሰዓታት are sung from, the
- * መልክእ hymns, the ድርሳናት, the ገድላት, the ቅዳሴ and the prayers. Seventy of the
- * ninety-one are መልክእ, which is why that group needs a heading of its own —
- * without one the shelf reads as a single run of near-identical names.
- *
- * Each row says how long the book is, because these run from a thousand
- * characters to three hundred thousand.
+ * Ninety-six of them, and seventy are መልክእ: listed on one page, the shelf was a
+ * single run of near-identical names that no heading could break up, and the
+ * five smaller groups sat below it where nobody scrolled. So the shelf is now
+ * the six groups themselves — the way the Church divides them — and each opens
+ * its own page. The count on each row is the reason to tap it or not.
  */
 @Composable
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
-fun BookShelfScreen(onBack: () -> Unit, onOpen: (String) -> Unit) {
+fun BookShelfScreen(onBack: () -> Unit, onOpenShelf: (String) -> Unit) {
     val context = LocalContext.current
     val s = LocalStrings.current
     val index by produceState(BookIndex()) { value = BookRepository.index(context) }
@@ -67,23 +63,96 @@ fun BookShelfScreen(onBack: () -> Unit, onOpen: (String) -> Unit) {
         },
     ) { inner ->
         ReadingColumn(innerPadding = inner) {
-            index.shelves.forEach { shelf ->
-                item(key = "h_${shelf.key}") {
-                    Spacer(Modifier.height(Spacing.md))
-                    SectionHeader(shelf.name)
-                    Text(
-                        shelf.subtitle,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(bottom = Spacing.xs),
-                    )
-                }
-                items(shelf.books.size, key = { shelf.books[it].id }) { i ->
-                    BookRow(shelf.books[i], onOpen)
-                }
+            items(index.shelves.size, key = { index.shelves[it].key }) { i ->
+                val shelf = index.shelves[i]
+                ShelfRow(
+                    name = shelf.name,
+                    subtitle = shelf.subtitle,
+                    count = shelf.books.size,
+                    onOpen = { onOpenShelf(shelf.key) },
+                )
             }
             item { Spacer(Modifier.height(Spacing.huge)) }
         }
+    }
+}
+
+/**
+ * One shelf's books, on its own page.
+ *
+ * An unknown [shelfKey] draws an empty page under the group name rather than
+ * failing: a stale back-stack entry after a content update is not worth a crash.
+ */
+@Composable
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+fun BookShelfPageScreen(shelfKey: String, onBack: () -> Unit, onOpen: (String) -> Unit) {
+    val context = LocalContext.current
+    val s = LocalStrings.current
+    val index by produceState(BookIndex()) { value = BookRepository.index(context) }
+    val shelf = index.shelves.firstOrNull { it.key == shelfKey }
+    val books = shelf?.books.orEmpty()
+
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            SinqTopBar(
+                title = shelf?.name ?: s.booksTitle,
+                subtitle = shelf?.let {
+                    if (books.isEmpty()) it.subtitle
+                    else "${it.subtitle}  ·  ${s.booksCount(books.size)}"
+                },
+                onBack = onBack,
+            )
+        },
+    ) { inner ->
+        ReadingColumn(innerPadding = inner) {
+            items(books.size, key = { books[it].id }) { i -> BookRow(books[i], onOpen) }
+            item { Spacer(Modifier.height(Spacing.huge)) }
+        }
+    }
+}
+
+/** One group: its name and what is in it, then how many books that is. */
+@Composable
+private fun ShelfRow(name: String, subtitle: String, count: Int, onOpen: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 52.dp)
+            .clickable(onClick = onOpen)
+            .padding(vertical = Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                name,
+                style = MaterialTheme.typography.titleSmall.inReadingFont(),
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(Modifier.height(Spacing.xxs))
+            Text(
+                subtitle,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Spacer(Modifier.width(Spacing.sm))
+        Text(
+            count.toString(),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.secondary,
+        )
+        Spacer(Modifier.width(Spacing.sm))
+        Icon(
+            Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(IconSize.medium),
+        )
     }
 }
 

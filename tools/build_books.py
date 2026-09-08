@@ -82,12 +82,17 @@ TIER_MARK = re.compile(r"\s*(?:፪ማ|(?<=\s)ማ)[፡:]\s*")
 AMHARIC = re.compile(r"(?:^|\s)(?:የ|እን[ደዲ]|ስለ|ሲ|ብት)|ናቸው|ነው|ነበር|ዘንድ|ችሁ|ኛል|ናል|ሆይ|ጋር|ውስጥ")
 GEEZ = re.compile(r"(?:^|\s)(?:ወ|ዘ|እም|ኀበ|ከመ|እስመ|እንዘ|ላዕለ|ኵሉ)|ውእቱ|ሆሙ|ኪያ")
 
-# The two scans carrying an editorial ማሳሰቢያ are not shipped. In የተክሌ አቋቋም ዝማሜ
-# the notice is a bare heading whose text the scan lost entirely, and in
-# መዝሙር ዘሰናብት one of the two is likewise empty — the scans are unreliable where
-# it matters most, in the order the chants are sung. Both remain in
-# sources/books/ and come back by deleting this set.
-DROPPED = {"የተክሌ አቋቋም ዝማሜ", "መዝሙር ዘሰናብት"}
+# የተክሌ አቋቋም ዝማሜ is not shipped: its ማሳሰቢያ is a bare heading whose text the scan
+# lost entirely, and a chant book cannot be trusted where it fails on the order
+# the chants are sung. It remains in sources/books/ and comes back by emptying
+# this set.
+DROPPED = {"የተክሌ አቋቋም ዝማሜ"}
+
+# A ማሳሰቢያ with nothing after the marker is a heading the scan lost the text of.
+# The notice itself is kept wherever it still says something — "ማሳሰቢያ፦ ቅደም ተከሉ
+# እንደ ግብረ ሕማማቱ ነው" tells the singer which order to follow, which is exactly the
+# kind of thing a chant book is read for.
+EMPTY_NOTICE = re.compile(r"^ማሳሰቢያ[፦:：]?\s*$")
 
 # ሀ ሐ ኀ ኸ · ሰ ሠ · አ ዐ · ጸ ፀ sound alike and the scans spell them both ways.
 # This mirrors AmharicSearch.foldChar series for series — each family folds to
@@ -177,7 +182,7 @@ def build():
                 text = clean_text(text)
                 # An empty table_row is a cell the scan could not read; an empty
                 # paragraph is nothing at all. Neither belongs in a reader.
-                if not text:
+                if not text or EMPTY_NOTICE.match(text):
                     continue
                 block = {"type": b.get("type", "paragraph"), "text": text}
                 if b.get("level"):
