@@ -82,9 +82,12 @@ TIER_MARK = re.compile(r"\s*(?:፪ማ|(?<=\s)ማ)[፡:]\s*")
 AMHARIC = re.compile(r"(?:^|\s)(?:የ|እን[ደዲ]|ስለ|ሲ|ብት)|ናቸው|ነው|ነበር|ዘንድ|ችሁ|ኛል|ናል|ሆይ|ጋር|ውስጥ")
 GEEZ = re.compile(r"(?:^|\s)(?:ወ|ዘ|እም|ኀበ|ከመ|እስመ|እንዘ|ላዕለ|ኵሉ)|ውእቱ|ሆሙ|ኪያ")
 
-# A ማሳሰቢያ is an editorial notice to the singer, not part of the book — and in
-# የተክሌ አቋቋም ዝማሜ it is a bare heading whose text the scan lost entirely. Dropped.
-NOTICE = re.compile(r"^ማሳሰቢያ")
+# The two scans carrying an editorial ማሳሰቢያ are not shipped. In የተክሌ አቋቋም ዝማሜ
+# the notice is a bare heading whose text the scan lost entirely, and in
+# መዝሙር ዘሰናብት one of the two is likewise empty — the scans are unreliable where
+# it matters most, in the order the chants are sung. Both remain in
+# sources/books/ and come back by deleting this set.
+DROPPED = {"የተክሌ አቋቋም ዝማሜ", "መዝሙር ዘሰናብት"}
 
 # ሀ ሐ ኀ ኸ · ሰ ሠ · አ ዐ · ጸ ፀ sound alike and the scans spell them both ways.
 # This mirrors AmharicSearch.foldChar series for series — each family folds to
@@ -142,6 +145,7 @@ def book_id(title):
 
 def build():
     applied = {before: 0 for before, _ in CORRECTIONS}
+    dropped = set()
     books, seen_ids = [], {}
 
     for path in sorted(p for d in SOURCES for p in d.glob("*.json")):
@@ -153,6 +157,9 @@ def build():
             continue
 
         title = TITLE_FIXES.get(raw_title, raw_title)
+        if title in DROPPED:
+            dropped.add(title)
+            continue
         bid = book_id(title)
         if bid in seen_ids:
             sys.exit(f"id collision: {title} and {seen_ids[bid]}")
@@ -170,7 +177,7 @@ def build():
                 text = clean_text(text)
                 # An empty table_row is a cell the scan could not read; an empty
                 # paragraph is nothing at all. Neither belongs in a reader.
-                if not text or NOTICE.match(text):
+                if not text:
                     continue
                 block = {"type": b.get("type", "paragraph"), "text": text}
                 if b.get("level"):
@@ -233,6 +240,10 @@ def build():
         other = by_title[base]
         b["meta"]["variantOf"] = {"id": other["id"], "title": other["title"]}
         other["meta"].setdefault("variants", []).append({"id": b["id"], "title": b["title"]})
+
+    if dropped != DROPPED:
+        sys.exit(f"expected to drop {sorted(DROPPED)}, but found {sorted(dropped)} — "
+                 f"a dropped scan was renamed or removed upstream")
 
     missing = [b for b, n in applied.items() if n == 0]
     if missing:

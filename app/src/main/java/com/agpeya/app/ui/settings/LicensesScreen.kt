@@ -123,7 +123,7 @@ fun LicensesScreen(onBack: () -> Unit) {
             item {
                 LicSection("Church books (ሌሎች መጻሕፍት)")
                 LicPara(
-                    "The ninety-six books on the ሌሎች መጻሕፍት shelf — the መልክእ hymns, the " +
+                    "The ninety-four books on the ሌሎች መጻሕፍት shelf — the መልክእ hymns, the " +
                         "ድርሳናት, the ገድላት, መጽሐፈ ሰዓታት, ሥርዓተ ቅዳሴ and the chant books of " +
                         "ቅዱስ ያሬድ — were scanned from available PDF scans of the printed " +
                         "books by the Sinq maintainer, and are released as open content under " +

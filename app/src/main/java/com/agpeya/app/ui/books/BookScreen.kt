@@ -9,10 +9,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -27,7 +30,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import com.agpeya.app.data.BookRepository
 import com.agpeya.app.data.SettingsRepository
@@ -173,6 +175,7 @@ fun BookScreen(
                 items(blocks.size, key = { "$chapter:$it" }) { index ->
                     BookBlockRow(
                         block = blocks[index],
+                        bilingual = meta?.lang == "mixed",
                         bodyFontSp = bodyFontSp,
                         selected = index in selRange,
                         onTap = {
@@ -192,13 +195,24 @@ fun BookScreen(
  * One block: a heading, a Ge'ez stanza, or the Amharic beside it.
  *
  * The Amharic is set apart rather than beside — a phone has no second column —
- * by an indent and the muted colour, so the eye can run down the Ge'ez alone
- * and drop into the translation only where it wants one. Headings take the
- * rubric red the printed books and the manuscripts before them use.
+ * by a gold rule down its left edge, the marginal gloss the printed books use.
+ * The eye can run down the Ge'ez alone and drop into the translation only where
+ * it wants one, but the translation is still the app's ordinary reading ink: it
+ * is the passage in a language the reader has, not a footnote to be squinted at.
+ *
+ * [bilingual] is the whole of what makes an Amharic block a translation. A book
+ * that is simply written in Amharic — ድርሳነ ሚካኤል has five hundred such blocks —
+ * gets no rule and no indent, because there is nothing there to be a gloss of,
+ * and marking its body as commentary was both wrong and the reason it read
+ * greyed-out from end to end.
+ *
+ * Headings take the rubric red the printed books and the manuscripts before
+ * them use.
  */
 @Composable
 private fun BookBlockRow(
     block: BookBlock,
+    bilingual: Boolean,
     bodyFontSp: Int,
     selected: Boolean,
     onTap: () -> Unit,
@@ -214,6 +228,7 @@ private fun BookBlockRow(
         )
         return
     }
+    val isGloss = block.isAmharic && bilingual
     Column(
         Modifier
             .fillMaxWidth()
@@ -223,19 +238,35 @@ private fun BookBlockRow(
                 else Color.Transparent,
             )
             .padding(
-                start = if (block.isAmharic) Spacing.lg else Spacing.sm,
+                start = Spacing.sm,
                 end = Spacing.sm,
-                top = if (block.isAmharic) Spacing.xxs else Spacing.sm,
+                top = if (isGloss) Spacing.xxs else Spacing.sm,
                 bottom = Spacing.xs,
             ),
     ) {
-        Text(
-            block.text,
-            style = readingBodyStyle(bodyFontSp).let {
-                if (block.isAmharic) it.copy(fontStyle = FontStyle.Italic) else it
-            },
-            color = if (block.isAmharic) MaterialTheme.colorScheme.onSurfaceVariant
-            else MaterialTheme.colorScheme.onBackground,
-        )
+        if (isGloss) {
+            // IntrinsicSize.Min so the rule is exactly as tall as the gloss it
+            // marks, however many lines that turns out to be.
+            Row(Modifier.height(IntrinsicSize.Min)) {
+                Box(
+                    Modifier
+                        .width(2.dp)
+                        .fillMaxHeight()
+                        .background(MaterialTheme.colorScheme.secondary),
+                )
+                Text(
+                    block.text,
+                    style = readingBodyStyle(bodyFontSp),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(start = Spacing.sm),
+                )
+            }
+        } else {
+            Text(
+                block.text,
+                style = readingBodyStyle(bodyFontSp),
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+        }
     }
 }
