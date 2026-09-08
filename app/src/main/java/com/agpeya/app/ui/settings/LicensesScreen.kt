@@ -62,6 +62,18 @@ fun LicensesScreen(onBack: () -> Unit) {
                 )
             }
             item {
+                LicSection("Mahlet (ሥርዓተ ማኅሌት)")
+                LicPara(
+                    "The orders of service are merged from three books. The spine is " +
+                        "ሥርዓተ ማኅሌት ዘዓበይት በዓላት together with the ዘመነ ጽጌ አቋቋም volumes, " +
+                        "scanned from available PDF scans of the printed books by the Sinq " +
+                        "maintainer and released as open content under the Creative Commons " +
+                        "Attribution-NonCommercial-NoDerivatives 4.0 International licence. " +
+                        "The six orders those books do not carry come from the ግጻዌ credited " +
+                        "below, and each is labelled with it where it appears.",
+                )
+            }
+            item {
                 LicSection("Gitsawe (ግጻዌ)")
                 LicPara(
                     "The ግጻዌ lectionary — the fixed 366-day cycle together with the movable, " +
@@ -111,7 +123,7 @@ fun LicensesScreen(onBack: () -> Unit) {
             item {
                 LicSection("Church books (ሌሎች መጻሕፍት)")
                 LicPara(
-                    "The ninety-one books on the ሌሎች መጻሕፍት shelf — the መልክእ hymns, the " +
+                    "The ninety-six books on the ሌሎች መጻሕፍት shelf — the መልክእ hymns, the " +
                         "ድርሳናት, the ገድላት, መጽሐፈ ሰዓታት, ሥርዓተ ቅዳሴ and the chant books of " +
                         "ቅዱስ ያሬድ — were scanned from available PDF scans of the printed " +
                         "books by the Sinq maintainer, and are released as open content under " +

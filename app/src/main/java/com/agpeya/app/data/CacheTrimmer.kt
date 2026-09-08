@@ -34,6 +34,7 @@ object CacheTrimmer : ComponentCallbacks2 {
         ) {
             ScriptureRepository.trimCaches()
             SynaxariumRepository.trimCaches()
+            MahletRepository.trimCaches()
             com.agpeya.app.search.AmharicSearch.trimCaches()
         }
     }

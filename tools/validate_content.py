@@ -392,6 +392,73 @@ def check_books() -> None:
     print(f"books: {len(listed)} books, {chapters} chapters, {blocks} blocks, {chars} chars")
 
 
+def check_mahlet() -> None:
+    """The merged ሥርዓተ ማኅሌት: the index and the month files must agree exactly.
+
+    An order id is what a route carries, so an id in the index with no order
+    behind it is a dead tap. And a ጽጌ order without a date is unreachable: the
+    season is chosen by which of its dates falls on a Sunday, so a dateless one
+    can never be appointed.
+    """
+    index = load("mahlet", "index.json")
+    if index is None:
+        return
+    check_version("mahlet/index.json", index)
+
+    listed, dated, tsige, from_gitsawe = {}, 0, 0, 0
+    for month in index.get("months", []):
+        num = month.get("month")
+        if not isinstance(num, int) or not 0 <= num <= 13:
+            fail(f"mahlet/index.json: month {num!r} is out of range")
+            continue
+        for meta in month.get("orders", []):
+            oid = meta.get("id", "")
+            if oid in listed:
+                fail(f"mahlet/index.json: duplicate order id {oid}")
+            listed[oid] = num
+            if not meta.get("feast"):
+                fail(f"mahlet/index.json: order {oid} has no feast")
+            if meta.get("kind") not in ("vigil", "mahlet"):
+                fail(f"mahlet/index.json: order {oid} has kind {meta.get('kind')!r}")
+            if meta.get("season") == "tsige":
+                tsige += 1
+                if meta.get("whenSunday") and meta.get("day") is None:
+                    fail(f"mahlet/index.json: ጽጌ order {oid} is appointed by a date "
+                         f"it does not carry")
+            if meta.get("day") is not None:
+                dated += 1
+            if meta.get("source") == "ግጻዌ":
+                from_gitsawe += 1
+
+    parts = 0
+    for month in index.get("months", []):
+        num = month["month"]
+        data = load("mahlet", f"m{num}.json")
+        if data is None:
+            continue
+        orders = {o.get("id"): o for o in data.get("orders", [])}
+        for meta in month.get("orders", []):
+            order = orders.get(meta.get("id"))
+            if order is None:
+                fail(f"mahlet/index.json lists {meta.get('id')} in month {num}, "
+                     f"but m{num}.json has no such order")
+                continue
+            if len(order.get("parts", [])) != meta.get("parts"):
+                fail(f"mahlet/m{num}.json {meta['id']}: {len(order.get('parts', []))} "
+                     f"parts, index says {meta.get('parts')}")
+            for p in order.get("parts", []):
+                parts += 1
+                if not p.get("verse", "").strip():
+                    fail(f"mahlet/m{num}.json {meta['id']}: a part has no verse")
+                check_text(f"mahlet/m{num}.json {meta['id']}", p.get("verse", ""))
+        for oid in orders:
+            if oid not in listed:
+                fail(f"mahlet/m{num}.json holds {oid}, which the index does not list")
+
+    print(f"mahlet: {len(listed)} orders ({dated} dated, {tsige} ዘመነ ጽጌ, "
+          f"{from_gitsawe} from the ግጻዌ), {parts} parts")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument(
@@ -406,6 +473,7 @@ def main() -> int:
     check_scripture()
     check_wudase()
     check_books()
+    check_mahlet()
     check_id_stability(ids, args.update_snapshot)
 
     total_sections = sum(len(v) for v in ids.values())

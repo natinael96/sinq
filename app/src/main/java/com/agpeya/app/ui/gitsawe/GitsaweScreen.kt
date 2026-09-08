@@ -265,39 +265,46 @@ fun GitsaweScreen(
                 // The night's ዋዜማ and the morning's ነግሥ, on the days the book
                 // appoints one. Beside the Sunday መዝሙር card, in its shape.
                 if (data?.mahlets?.isNotEmpty() == true) {
-                    items(data.mahlets.size, key = { "mahlet_${data.mahlets[it].subFeast.key}" }) { i ->
-                        val entry = data.mahlets[i]
+                    items(data.mahlets.size, key = { "mahlet_${data.mahlets[it].id}" }) { i ->
+                        val order = data.mahlets[i]
                         com.agpeya.app.ui.common.SinqCard(
-                            onClick = { onOpenMahlet(entry.subFeast.key) },
+                            onClick = { onOpenMahlet(order.id) },
                             accented = true,
                             modifier = Modifier.padding(top = Spacing.md),
                         ) {
-                            Column(Modifier.weight(1f)) {
-                                Text(
-                                    if (entry.isEve) s.mahletVigil else s.mahletDawn,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.secondary,
-                                )
-                                Text(
-                                    entry.mahlet.title,
-                                    style = MaterialTheme.typography.titleMedium.inReadingFont(),
-                                    color = MaterialTheme.colorScheme.onBackground,
-                                    modifier = Modifier.padding(top = Spacing.xxs),
-                                )
-                                Text(
-                                    s.mahletParts(entry.mahlet.detail.size),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                            ) {
+                                Column(Modifier.weight(1f)) {
+                                    Text(
+                                        if (order.kind == com.agpeya.app.model.MahletKind.VIGIL)
+                                            s.mahletVigil else s.mahletDawn,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                    )
+                                    Text(
+                                        order.feast,
+                                        style = MaterialTheme.typography.titleMedium.inReadingFont(),
+                                        color = MaterialTheme.colorScheme.onBackground,
+                                        modifier = Modifier.padding(top = Spacing.xxs),
+                                    )
+                                    Text(
+                                        s.mahletParts(order.parts.size),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                                Icon(
+                                    Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
-                            Icon(
-                                Icons.AutoMirrored.Outlined.KeyboardArrowRight,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
                         }
                     }
                 }
+
                 if (data?.sundayCycle?.isNotEmpty() == true) {
                     item(key = "sunday_cycle") {
                         SundayMezmurCard(

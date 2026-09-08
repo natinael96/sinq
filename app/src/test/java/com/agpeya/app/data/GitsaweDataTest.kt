@@ -45,8 +45,8 @@ class GitsaweDataTest {
         assertEquals(91, load("sunday-cycle-gitsawe.json", SundayCycleEntry.serializer()).size)
         assertEquals(9, load("monthly-gitsawe.json", com.agpeya.app.model.MonthlyEntry.serializer()).size)
         assertEquals(21, load("feasts.json", Feast.serializer()).size)
-        assertEquals(40, load("sub-feasts.json", SubFeast.serializer()).size)
-        assertEquals(37, load("mahlets.json", Mahlet.serializer()).size)
+        // mahlets.json and sub-feasts.json are no longer bundled: they became
+        // sources for the merged ማኅሌት corpus, which MahletTest guards instead.
         assertEquals(8, load("months.json", GitsaweMonth.serializer()).size)
         assertEquals(1, load("packages.json", GitsawePackage.serializer()).size)
         val reference = json.decodeFromString(

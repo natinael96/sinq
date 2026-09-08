@@ -1,89 +1,89 @@
 package com.agpeya.app.data
 
-import kotlinx.serialization.builtins.ListSerializer
+import com.agpeya.app.model.MahletIndex
+import com.agpeya.app.model.MahletKind
+import com.agpeya.app.model.MahletOrder
+import com.agpeya.app.model.MahletSeason
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import com.agpeya.app.model.Feast
-import com.agpeya.app.model.Mahlet
-import com.agpeya.app.model.SubFeast
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
 
 /**
- * ሥርዓተ ማኅሌት, and the joins that date it.
+ * Guards the merged ሥርዓተ ማኅሌት.
  *
- * The book files an order of service under a sub-feast and a sub-feast under a
- * feast, so putting one on a day is a join rather than a new calendar: nineteen
- * feasts carry a fixed dateKey, the ጽጌ weeks are the Sunday ordinal
- * SundayCycleCalendar already computes, and ትንሣኤ is ባሕረ ሓሳብ.
+ * The old test asserted the ግጻዌ's own thirty-seven orders; that book is now a
+ * source rather than an asset, folded into this corpus, so what is worth
+ * asserting is that the merge held: the year is covered, the ጽጌ orders can
+ * still be reached by date, and no order lost its parts on the way in.
  */
 class MahletTest {
 
+    @Serializable
+    private data class MonthFile(val month: Int = 0, val orders: List<MahletOrder> = emptyList())
+
     private val dir: File =
-        listOf("src/main/assets/content/gitsawe", "app/src/main/assets/content/gitsawe")
+        listOf("src/main/assets/content/mahlet", "app/src/main/assets/content/mahlet")
             .map(::File).first { it.isDirectory }
     private val json = Json { ignoreUnknownKeys = true }
 
-    private inline fun <reified T> load(file: String, serializer: kotlinx.serialization.KSerializer<T>): List<T> =
-        json.decodeFromString(ListSerializer(serializer), File(dir, file).readText())
-
-    private val feasts by lazy { load("feasts.json", Feast.serializer()) }
-    private val subs by lazy { load("sub-feasts.json", SubFeast.serializer()) }
-    private val mahlets by lazy { load("mahlets.json", Mahlet.serializer()) }
-
-    @Test
-    fun `every order of service reaches a feast through its sub-feast`() {
-        val subKeys = subs.associateBy { it.key }
-        val feastKeys = feasts.mapTo(mutableSetOf()) { it.key }
-        val orphans = mahlets.filter { m ->
-            val sub = subKeys[m.subFeast]
-            sub == null || sub.feast !in feastKeys
+    private val index: MahletIndex by lazy {
+        json.decodeFromString(File(dir, "index.json").readText())
+    }
+    private val orders: List<MahletOrder> by lazy {
+        index.months.flatMap {
+            json.decodeFromString<MonthFile>(File(dir, "m${it.month}.json").readText()).orders
         }
-        assertTrue("orphaned: ${orphans.map { it.title }}", orphans.isEmpty())
     }
 
     @Test
-    fun `the book is thirty-seven orders and seven hundred and thirty-two parts`() {
-        assertEquals(37, mahlets.size)
-        assertEquals(732, mahlets.sumOf { it.detail.size })
-        assertTrue(mahlets.all { it.detail.isNotEmpty() })
+    fun `the merged book is a hundred and forty-two orders, none of them empty`() {
+        assertEquals(142, orders.size)
+        assertEquals(2247, orders.sumOf { it.parts.size })
+        assertTrue("an order has no parts", orders.all { it.parts.isNotEmpty() })
+        assertTrue("a part has no verse", orders.all { o -> o.parts.all { it.verse.isNotBlank() } })
     }
 
+    /**
+     * The ግጻዌ's ማኅሌት stopped after ሚያዝያ. Reaching ጳጉሜን is the whole point of the
+     * merge, so it is asserted rather than assumed.
+     */
     @Test
-    fun `three sub-feasts have no order yet, and they are named`() {
-        val have = mahlets.mapNotNull { it.subFeast }.toSet()
-        assertEquals(
-            setOf("1_1st_week", "st_estifanos_tir_negs", "st_gebriel_tahsas_eve"),
-            subs.mapTo(mutableSetOf()) { it.key } - have,
+    fun `the year is covered past ሚያዝያ`() {
+        val months = orders.mapNotNull { it.month }.toSet()
+        assertTrue("ግንቦት has no orders", 9 in months)
+        assertTrue("ሰኔ has no orders", 10 in months)
+        assertTrue("ሐምሌ has no orders", 11 in months)
+        assertTrue("ነሐሴ has no orders", 12 in months)
+        assertTrue("ጳጉሜን has no orders", 13 in months)
+    }
+
+    /**
+     * A ጽጌ order is appointed by its date falling on a Sunday, so one without a
+     * date can never be reached — the season would silently lose a week.
+     */
+    @Test
+    fun `every dated ጽጌ order carries the date that appoints it`() {
+        val tsige = orders.filter { it.season == MahletSeason.TSIGE }
+        assertEquals(41, tsige.size)
+        assertTrue(
+            "a ጽጌ order is appointed by a date it does not carry",
+            tsige.none { it.whenSunday && (it.month == null || it.day == null) },
         )
     }
 
     @Test
-    fun `all but the movable feasts can be dated by their own key`() {
-        val subKeys = subs.associateBy { it.key }
-        val byKey = feasts.associateBy { it.key }
-        val movable = mahlets.count { m ->
-            byKey[subKeys[m.subFeast]?.feast]?.movable == true
-        }
-        assertEquals(31, mahlets.size - movable)
-        assertEquals(6, movable)
+    fun `the six orders the scan does not carry keep their source`() {
+        val fromGitsawe = orders.filter { it.source == "ግጻዌ" }
+        assertEquals(6, fromGitsawe.size)
+        assertTrue(fromGitsawe.all { it.parts.isNotEmpty() })
     }
 
     @Test
-    fun `a season's week is read out of the sub-feast key`() {
-        assertEquals(3, GitsaweRepository.seasonWeekOf("1_3rd_week"))
-        assertEquals(6, GitsaweRepository.seasonWeekOf("1_6th_week"))
-        assertEquals(null, GitsaweRepository.seasonWeekOf("st_aregawi_tikmt_negs"))
-    }
-
-    @Test
-    fun `ኅዳር ፮ carries two feasts and both are kept`() {
-        val onSix = feasts.filter { it.dateKey == "06-03" }
-        assertEquals(2, onSix.size)
-        assertEquals(
-            listOf("ቁስቋም ማርያም (ህዳር ፮)", "ቅዱስ ጊዮርጊስ (ህዳር ፮)"),
-            onSix.map { it.amharicName }.sorted(),
-        )
+    fun `ids are unique, so a route reaches exactly one order`() {
+        assertEquals(orders.size, orders.mapTo(mutableSetOf()) { it.id }.size)
+        assertTrue(orders.all { it.kind == MahletKind.VIGIL || it.kind == MahletKind.MAHLET })
     }
 }

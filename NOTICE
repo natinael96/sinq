@@ -63,7 +63,15 @@ the full SIL OFL 1.1 and MIT licence texts.
    (https://huggingface.co/datasets/Nexuss0781/synaxarium). Neither is
    bundled any longer.
 
-4. ግጻዌ (GITSAWE)
+4. ሥርዓተ ማኅሌት (MAHLET)
+   The orders of service are merged from three books. The spine is
+   ሥርዓተ ማኅሌት ዘዓበይት በዓላት and the ዘመነ ጽጌ አቋቋም volumes, scanned from available
+   PDF scans of the printed books by the Sinq maintainer; the six orders those
+   do not carry come from the ግጻዌ credited below and are labelled with it.
+   Released as open content under CC BY-NC-ND 4.0. Built by
+   tools/build_mahlet.py.
+
+5. ግጻዌ (GITSAWE)
    The lectionary (the fixed 366-day cycle plus the movable, Sunday,
    Athanasius, and Bahre Hasab collections) was scanned and transcribed from
    the printed ግጻዌ by the Sinq maintainer, who releases it as open content
@@ -75,7 +83,7 @@ the full SIL OFL 1.1 and MIT licence texts.
 CHURCH BOOKS (ሌሎች መጻሕፍት)
 --------------------------------------------------------------------------------
 
-The ninety-one books on the ሌሎች መጻሕፍት shelf — the መልክእ hymns, the ድርሳናት, the
+The ninety-six books on the ሌሎች መጻሕፍት shelf — the መልክእ hymns, the ድርሳናት, the
 ገድላት, መጽሐፈ ሰዓታት, ሥርዓተ ቅዳሴ and the chant books of ቅዱስ ያሬድ — were scanned from
 available PDF scans of the printed books by the Sinq maintainer, and are
 released as open content under the Creative Commons
@@ -92,7 +100,12 @@ The text is reproduced as the scans carry it, with two disclosed exceptions:
     spine; the Ge'ez-only copy restores the lines its scan dropped; the offices
     carried only by the ደብረ ዓባይ recension are labelled with that name.
 
-  Built by tools/build_books.py and tools/merge_seatat.py.
+  ማኅሌተ ጽጌ is shipped with its Amharic set against the Ge'ez verse by verse.
+  ሰቆቃወ ድንግል's Amharic is one verse short of its Ge'ez and nothing in the text
+  says which is missing, so it is appended whole under its own heading rather
+  than interleaved — a positional pairing would be wrong after the gap.
+
+  Built by tools/build_books.py, tools/merge_seatat.py and tools/merge_tsige.py.
 
 --------------------------------------------------------------------------------
 FONTS

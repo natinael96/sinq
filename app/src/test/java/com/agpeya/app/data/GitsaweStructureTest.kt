@@ -18,7 +18,7 @@ import java.io.File
 /**
  * Guards the restructured feast / seasonal / monthly metadata: the parsed,
  * date-matchable fields must stay correct, and the cross-references between
- * mahlets → sub-feasts → feasts must resolve.
+ * feasts must resolve.
  */
 class GitsaweStructureTest {
 
@@ -78,18 +78,4 @@ class GitsaweStructureTest {
         assertTrue(monthly.any { it.crossMonth && it.fromDay == 26 && it.toDay == 5 })
     }
 
-    @Test
-    fun `mahlets and sub-feasts reference existing parents`() {
-        val feastKeys = load("feasts.json", Feast.serializer()).map { it.key }.toSet()
-        val subs = load("sub-feasts.json", SubFeast.serializer())
-        val subKeys = subs.map { it.key }.toSet()
-
-        assertTrue("every sub-feast points at a real feast", subs.all { it.feast in feastKeys })
-
-        // Mahlets carry a subFeast link (read loosely to avoid coupling to the model).
-        val mahletSubs = json.parseToJsonElement(File(dir, "mahlets.json").readText())
-            .let { it as kotlinx.serialization.json.JsonArray }
-            .mapNotNull { it.jsonObject["subFeast"]?.jsonPrimitive?.content }
-        assertTrue("every mahlet subFeast exists", mahletSubs.all { it in subKeys })
     }
-}

@@ -583,9 +583,7 @@ private fun AgpeyaNavHost(
                     ) { launchSingleTop = true }
                 },
                 onOpenSynaxarium = { epochDay -> navController.navigate("synaxarium/$epochDay") { launchSingleTop = true } },
-                onOpenMahlet = { key ->
-                    navController.navigate("mahlet/${android.net.Uri.encode(key)}") { launchSingleTop = true }
-                },
+                onOpenMahlet = { id -> navController.navigate("mahlet/$id") { launchSingleTop = true } },
                 onOpenSundayCycle = { day -> navController.navigate("sundayGitsawe/$day") { launchSingleTop = true } },
             )
         }
@@ -738,17 +736,22 @@ private fun AgpeyaNavHost(
         composable("mahlets") {
             com.agpeya.app.ui.mahlet.MahletListScreen(
                 onBack = { navController.popBackStack() },
-                onOpen = { key ->
-                    navController.navigate("mahlet/${android.net.Uri.encode(key)}") { launchSingleTop = true }
-                },
+                onOpen = { id -> navController.navigate("mahlet/$id") { launchSingleTop = true } },
+                onOpenSeason = { navController.navigate("mahlet/season") { launchSingleTop = true } },
+            )
+        }
+        composable("mahlet/season") {
+            com.agpeya.app.ui.mahlet.MahletSeasonScreen(
+                onBack = { navController.popBackStack() },
+                onOpen = { id -> navController.navigate("mahlet/$id") { launchSingleTop = true } },
             )
         }
         composable(
-            route = "mahlet/{subFeast}",
-            arguments = listOf(navArgument("subFeast") { type = NavType.StringType }),
+            route = "mahlet/{orderId}",
+            arguments = listOf(navArgument("orderId") { type = NavType.StringType }),
         ) { backStackEntry ->
             com.agpeya.app.ui.mahlet.MahletScreen(
-                subFeastKey = backStackEntry.arguments?.getString("subFeast").orEmpty(),
+                orderId = backStackEntry.arguments?.getString("orderId").orEmpty(),
                 onBack = { navController.popBackStack() },
                 onOpenBook = { id -> navController.navigate("book/$id") { launchSingleTop = true } },
             )

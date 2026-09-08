@@ -36,6 +36,11 @@ SHELVES = [
 # Books whose shelf the title alone does not give away.
 SHELF_BY_TITLE = {
     "ማኅሌተ ጽጌ": "zema",
+    "ዘመነ ጽጌ": "zema",
+    "የአባ ጽጌ ድንግል ታሪክ": "zema",
+    "መዋሥዕት እምዮሐንስ እስከ ዮሐንስ": "zema",
+    "መዝሙር ዘሰናብት": "zema",
+    "መዝሙር እምዮሐንስ እስከ ዮሐንስ": "zema",
     "መዋሥዕት ዘቅዱስ ያሬድ": "zema",
     "መዝሙረ ክርስቶስ": "zema",
     "መጽሐፈ ሰዓታት": "zema",
@@ -52,7 +57,6 @@ SHELF_BY_TITLE = {
 # worse than broken words in a page: the title is the only thing on the shelf.
 TITLE_FIXES = {
     "መልክአ ቍርባን ።": "መልክአ ቍርባን",
-    "ሰቆቃወ ድንግል።": "ሰቆቃወ ድንግል",
     "ሥርዓት ቅዳሴ በአማርኛ": "ሥርዓተ ቅዳሴ በአማርኛ",
     "መልክአ ፍልሰታ (2)": "መልክአ ፍልሰታ ካልዕ",
     "መልክእ ዓቢብ": "መልክአ ዓቢብ",

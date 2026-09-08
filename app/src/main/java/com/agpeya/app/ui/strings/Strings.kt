@@ -148,6 +148,15 @@ interface Strings {
     val mahletDawn: String
     fun mahletParts(n: Int): String
     val mahletNone: String
+    fun mahletOrders(n: Int): String
+    val mahletToday: String
+    val mahletUndated: String
+    val mahletTsige: String
+    fun mahletTsigeSubtitle(n: Int): String
+    fun mahletTsigeThisYear(year: Int): String
+    val mahletTsigeThisYearBody: String
+    val mahletTsigeOtherYears: String
+    val mahletTsigeOtherYearsBody: String
 
     val booksTitle: String
     val booksSubtitle: String
@@ -950,6 +959,15 @@ object AmharicStrings : Strings {
     override val mahletDawn = "ነግሥ"
     override fun mahletParts(n: Int) = "${com.agpeya.app.ui.reading.geezNumeral(n)} ክፍል"
     override val mahletNone = "ማኅሌቱ ገና አልገባም"
+    override fun mahletOrders(n: Int) = "${com.agpeya.app.ui.reading.geezNumeral(n)} ሥርዓቶች"
+    override val mahletToday = "የዛሬው ሥርዓት"
+    override val mahletUndated = "ቀን ያልተወሰነላቸው"
+    override val mahletTsige = "ዘመነ ጽጌ"
+    override fun mahletTsigeSubtitle(n: Int) = "${com.agpeya.app.ui.reading.geezNumeral(n)} አቋቋም"
+    override fun mahletTsigeThisYear(year: Int) = "የ${com.agpeya.app.ui.reading.geezNumeral(year)} ዓ.ም. እሑዶች"
+    override val mahletTsigeThisYearBody = "በዚህ ዓመት እሑድ የሚውሉት ቀናት"
+    override val mahletTsigeOtherYears = "ሌሎች ቀናት"
+    override val mahletTsigeOtherYearsBody = "በሌሎች ዓመታት እሑድ ሲውሉ የሚደረሱ"
     override val booksTitle = "ሌሎች መጻሕፍት"
     override val booksSubtitle = "የቤተ ክርስቲያን መጻሕፍት"
     override fun booksCount(n: Int) = "${com.agpeya.app.ui.reading.geezNumeral(n)} መጻሕፍት"
@@ -1693,6 +1711,15 @@ object EnglishStrings : Strings {
     override val mahletDawn = "ነግሥ"
     override fun mahletParts(n: Int) = if (n == 1) "1 part" else "$n parts"
     override val mahletNone = "Coming soon"
+    override fun mahletOrders(n: Int) = "$n orders"
+    override val mahletToday = "Today's order"
+    override val mahletUndated = "Undated"
+    override val mahletTsige = "ዘመነ ጽጌ"
+    override fun mahletTsigeSubtitle(n: Int) = if (n == 1) "1 order" else "$n orders"
+    override fun mahletTsigeThisYear(year: Int) = "Sundays of $year E.C."
+    override val mahletTsigeThisYearBody = "The dates that fall on a Sunday this year"
+    override val mahletTsigeOtherYears = "Other dates"
+    override val mahletTsigeOtherYearsBody = "Sung in the years these fall on a Sunday"
     override val booksTitle = "ሌሎች መጻሕፍት"
     override val booksSubtitle = "Books of the Church"
     override fun booksCount(n: Int) = "$n books"
