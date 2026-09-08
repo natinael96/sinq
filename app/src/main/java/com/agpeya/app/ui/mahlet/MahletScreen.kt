@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.agpeya.app.data.BookRepository
 import com.agpeya.app.data.GitsaweRepository
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.model.Mahlet
@@ -63,6 +64,7 @@ import com.agpeya.app.ui.theme.sinqColors
 fun MahletScreen(
     subFeastKey: String,
     onBack: () -> Unit,
+    onOpenBook: (String) -> Unit = {},
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
@@ -79,6 +81,18 @@ fun MahletScreen(
         value = GitsaweRepository.mahletsOfFeastFor(context, subFeastKey)
     }
     val orders = pair.firstOrNull()?.orders.orEmpty()
+
+    // 137 of the book's 732 parts are named after a book on the ሌሎች መጻሕፍት
+    // shelf — መልክአ ሥላሴ, ማኅሌተ ጽጌ, ሰቆቃወ ድንግል. The ማኅሌት gives the stanza the
+    // feast appoints; the shelf has the whole hymn. So the part name becomes a
+    // door, resolved once per feast rather than per part.
+    val bookByPart by produceState(emptyMap<String, String>(), pair) {
+        val names = pair.firstOrNull()?.orders.orEmpty()
+            .flatMap { it.mahlet.detail }.map { it.key }.distinct()
+        value = names.mapNotNull { name ->
+            BookRepository.byPartName(context, name)?.let { name to it.id }
+        }.toMap()
+    }
     var tab by rememberSaveable(subFeastKey) { mutableIntStateOf(0) }
     val shown = orders.getOrNull(tab.coerceIn(0, (orders.size - 1).coerceAtLeast(0)))
 
@@ -160,6 +174,8 @@ fun MahletScreen(
                         total = parts.size,
                         bodyFontSp = bodyFontSp,
                         selected = index in selRange,
+                        bookId = bookByPart[parts[index].key],
+                        onOpenBook = onOpenBook,
                         onTap = {
                             val (a, b) = advanceFlatSelection(selA, index)
                             selA = a
@@ -199,6 +215,8 @@ private fun MahletPart(
     total: Int,
     bodyFontSp: Int,
     selected: Boolean,
+    bookId: String?,
+    onOpenBook: (String) -> Unit,
     onTap: () -> Unit,
 ) {
     val s = LocalStrings.current
@@ -233,6 +251,16 @@ private fun MahletPart(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
             )
+            if (bookId != null) {
+                Spacer(Modifier.width(Spacing.sm))
+                Text(
+                    s.booksFullHymn,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.secondary,
+                    maxLines = 1,
+                    modifier = Modifier.clickable { onOpenBook(bookId) },
+                )
+            }
         }
         Spacer(Modifier.height(Spacing.xxs))
         Text(

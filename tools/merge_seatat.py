@@ -14,9 +14,11 @@ import json, re, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-GEZ  = ROOT / "መጽሐፈ ሰዓታት በግዕዝ.json"
-BI   = ROOT / "መጽሐፈ ሰዓታት በግዕዝና አማርኛ.json"
-ABAY = ROOT / "መጽሐፈ ሰዓታት ዘደብረ ዓባይ.json"
+SRC  = ROOT / "sources/books"
+OUT  = ROOT / "sources/merged"
+GEZ  = SRC / "መጽሐፈ ሰዓታት በግዕዝ.json"
+BI   = SRC / "መጽሐፈ ሰዓታት በግዕዝና አማርኛ.json"
+ABAY = SRC / "መጽሐፈ ሰዓታት ዘደብረ ዓባይ.json"
 
 ABAY_SOURCE = "ዘደብረ ዓባይ"
 
@@ -186,7 +188,8 @@ def merge():
 
 def main():
     book = merge()
-    out = ROOT / "መጽሐፈ ሰዓታት (merged).json"
+    OUT.mkdir(parents=True, exist_ok=True)
+    out = OUT / "መጽሐፈ ሰዓታት.json"
     out.write_text(json.dumps(book, ensure_ascii=False, indent=1), encoding="utf-8")
 
     gez = amh = 0

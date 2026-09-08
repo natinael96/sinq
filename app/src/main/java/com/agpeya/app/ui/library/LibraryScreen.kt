@@ -42,6 +42,7 @@ fun LibraryScreen(
     onOpenZewotr: () -> Unit,
     onOpenBahreHasab: () -> Unit,
     onOpenMahlets: () -> Unit,
+    onOpenBooks: () -> Unit,
     onOpenSynaxarium: () -> Unit,
     onOpenKurban: () -> Unit,
     onOpenReading: () -> Unit,
@@ -104,6 +105,16 @@ fun LibraryScreen(
                     title = s.mahletTitle,
                     subtitle = s.mahletSubtitle,
                     onClick = onOpenMahlets,
+                )
+            }
+            item {
+                // Ninety-one scanned church books — the መልክእ hymns, the ድርሳናት,
+                // the ገድላት and the chant books ማኅሌት is sung from.
+                LibraryCard(
+                    icon = Icons.Outlined.AutoStories,
+                    title = s.booksTitle,
+                    subtitle = s.booksSubtitle,
+                    onClick = onOpenBooks,
                 )
             }
             item {

@@ -41,7 +41,7 @@ object AmharicSearch {
     }
 
     /** Where a result came from — lets the UI label it and route the tap. */
-    enum class Source { HOUR, PSALTER, SCRIPTURE, SYNAXARIUM, WUDASE }
+    enum class Source { HOUR, PSALTER, SCRIPTURE, SYNAXARIUM, WUDASE, BOOK }
 
     data class Result(
         val source: Source,
@@ -182,6 +182,27 @@ object AmharicSearch {
         val ethYear = EthiopianDate.from(LocalDate.now()).year
         for (month in 1..13) {
             docs += synaxariumDocs(month, ethYear, SynaxariumRepository.month(context, month))
+        }
+
+        // The ሌሎች መጻሕፍት shelf, a document per chapter rather than per book:
+        // ሥርዓተ ቅዳሴ is 230k characters, and a hit that lands on "the book" makes
+        // the reader hunt through twenty-three chapters for the word.
+        for (meta in com.agpeya.app.data.BookRepository.all(context)) {
+            val book = com.agpeya.app.data.BookRepository.book(context, meta.id) ?: continue
+            for (chapter in book.chapters) {
+                val hay = chapter.blocks.joinToString(" ") { it.text }
+                if (hay.isBlank()) continue
+                docs += Doc(
+                    source = Source.BOOK,
+                    targetId = meta.id,
+                    targetIndex = chapter.number,
+                    title = if (book.chapters.size > 1 && chapter.title.isNotBlank())
+                        "${book.title} · ${chapter.title}" else book.title,
+                    route = "book/${meta.id}?ch=${chapter.number}",
+                    haystack = hay,
+                    folded = fold(hay),
+                )
+            }
         }
 
         for (section in WudaseRepository.load(context).sections) {

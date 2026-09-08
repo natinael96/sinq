@@ -339,6 +339,7 @@ private val SOURCE_ORDER = listOf(
     AmharicSearch.Source.SCRIPTURE,
     AmharicSearch.Source.SYNAXARIUM,
     AmharicSearch.Source.WUDASE,
+    AmharicSearch.Source.BOOK,
 )
 
 private fun sourceTitle(source: AmharicSearch.Source, s: com.agpeya.app.ui.strings.Strings): String =
@@ -348,6 +349,7 @@ private fun sourceTitle(source: AmharicSearch.Source, s: com.agpeya.app.ui.strin
         AmharicSearch.Source.SCRIPTURE -> s.scripturesTitle
         AmharicSearch.Source.SYNAXARIUM -> s.synaxariumTitle
         AmharicSearch.Source.WUDASE -> s.wudaseMariam
+        AmharicSearch.Source.BOOK -> s.booksTitle
     }
 
 /** Filter row: "All" plus one chip per corpus that actually matched. */

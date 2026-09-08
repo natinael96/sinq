@@ -100,6 +100,28 @@ fun LicensesScreen(onBack: () -> Unit) {
                 )
             }
             item {
+                LicSection("Church books (ሌሎች መጻሕፍት)")
+                LicPara(
+                    "The ninety-one books on the ሌሎች መጻሕፍት shelf — the መልክእ hymns, the " +
+                        "ድርሳናት, the ገድላት, መጽሐፈ ሰዓታት, ሥርዓተ ቅዳሴ and the chant books of " +
+                        "ቅዱስ ያሬድ — were scanned from available PDF scans of the printed " +
+                        "books by the Sinq maintainer, and are released as open content under " +
+                        "the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 " +
+                        "International licence, the same terms as the bundled scripture. The " +
+                        "underlying texts are traditional Ethiopian Orthodox Tewahedo " +
+                        "liturgical material.",
+                )
+                LicPara(
+                    "The text is reproduced as the scans carry it, with two disclosed " +
+                        "exceptions. The printer's tier marks ፪ማ፡ and ማ፡, which mark where a " +
+                        "line of a stanza breaks, are shown as those line breaks rather than " +
+                        "as characters. And መጽሐፈ ሰዓታት is merged from three scanned copies: " +
+                        "the bilingual copy is the spine, the Ge'ez-only copy restores the " +
+                        "lines its scan dropped, and the offices carried only by the ደብረ ዓባይ " +
+                        "recension are labelled with that name where they appear.",
+                )
+            }
+            item {
                 LicSection("Fonts")
                 LicPara(
                     "All bundled fonts are used under the SIL Open Font License, Version 1.1 " +

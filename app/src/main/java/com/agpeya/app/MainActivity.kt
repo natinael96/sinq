@@ -507,6 +507,7 @@ private fun AgpeyaNavHost(
                 onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
                 onOpenBahreHasab = { navController.navigate("bahreHasabReference") { launchSingleTop = true } },
                 onOpenMahlets = { navController.navigate("mahlets") { launchSingleTop = true } },
+                onOpenBooks = { navController.navigate("books") { launchSingleTop = true } },
                 onOpenSynaxarium = {
                     navController.navigate("synaxarium/${java.time.LocalDate.now().toEpochDay()}") { launchSingleTop = true }
                 },
@@ -712,6 +713,28 @@ private fun AgpeyaNavHost(
                 },
             )
         }
+        composable("books") {
+            com.agpeya.app.ui.books.BookShelfScreen(
+                onBack = { navController.popBackStack() },
+                onOpen = { id -> navController.navigate("book/$id") { launchSingleTop = true } },
+            )
+        }
+        composable(
+            // ?ch is how a search hit lands on the chapter that matched rather
+            // than on the head of a book that can run to twenty-three of them.
+            route = "book/{bookId}?ch={ch}",
+            arguments = listOf(
+                navArgument("bookId") { type = NavType.StringType },
+                navArgument("ch") { type = NavType.IntType; defaultValue = 0 },
+            ),
+        ) { backStackEntry ->
+            com.agpeya.app.ui.books.BookScreen(
+                bookId = backStackEntry.arguments?.getString("bookId").orEmpty(),
+                openAtChapter = backStackEntry.arguments?.getInt("ch") ?: 0,
+                onBack = { navController.popBackStack() },
+                onOpenBook = { id -> navController.navigate("book/$id") { launchSingleTop = true } },
+            )
+        }
         composable("mahlets") {
             com.agpeya.app.ui.mahlet.MahletListScreen(
                 onBack = { navController.popBackStack() },
@@ -727,6 +750,7 @@ private fun AgpeyaNavHost(
             com.agpeya.app.ui.mahlet.MahletScreen(
                 subFeastKey = backStackEntry.arguments?.getString("subFeast").orEmpty(),
                 onBack = { navController.popBackStack() },
+                onOpenBook = { id -> navController.navigate("book/$id") { launchSingleTop = true } },
             )
         }
         composable("settings/records") {

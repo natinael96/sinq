@@ -243,6 +243,86 @@ def check_id_stability(current: dict[str, list[str]], update: bool) -> None:
             warn(f"{fname}: {len(added)} new section id(s), e.g. {sorted(added)[:5]}")
 
 
+def check_books() -> None:
+    """The ሌሎች መጻሕፍት shelf: the index and the book files must agree exactly.
+
+    The ids are content addresses (a hash of the title), and a bookmark or a
+    ማኅሌት join points at one, so a book file that the index does not list — or an
+    index row with no file behind it — is a dead link rather than a cosmetic
+    mismatch.
+    """
+    index = load("books", "index.json")
+    if index is None:
+        return
+    if not isinstance(index.get("contentVersion"), int) or index["contentVersion"] < 1:
+        fail("books/index.json: contentVersion must be a positive integer")
+
+    listed: dict[str, dict] = {}
+    for shelf in index.get("shelves", []):
+        if not shelf.get("name"):
+            fail(f"books/index.json: shelf {shelf.get('key')!r} has no name")
+        for meta in shelf.get("books", []):
+            bid = meta.get("id", "")
+            if bid in listed:
+                fail(f"books/index.json: duplicate book id {bid}")
+            listed[bid] = meta
+            if not meta.get("title"):
+                fail(f"books/index.json: book {bid} has no title")
+            if not meta.get("key"):
+                fail(f"books/index.json: book {bid} has no fold key for the ማኅሌት join")
+
+    on_disk = {
+        os.path.splitext(f)[0]
+        for f in os.listdir(os.path.join(CONTENT, "books"))
+        if f.endswith(".json") and f != "index.json"
+    }
+    for orphan in sorted(on_disk - set(listed)):
+        fail(f"books/{orphan}.json is not listed in the index")
+    for missing in sorted(set(listed) - on_disk):
+        fail(f"books/index.json lists {missing}, but there is no such file")
+
+    # Every recension pointer has to resolve, or the reader offers a dead tap.
+    for bid, meta in listed.items():
+        for ref in list(meta.get("variants", [])) + [meta.get("variantOf")]:
+            if ref and ref.get("id") not in listed:
+                fail(f"books/{bid}: points at unknown recension {ref.get('id')}")
+
+    chapters = blocks = chars = 0
+    for bid, meta in listed.items():
+        book = load("books", f"{bid}.json")
+        if book is None:
+            continue
+        if book.get("title") != meta.get("title"):
+            fail(f"books/{bid}: title {book.get('title')!r} != index {meta.get('title')!r}")
+        n_blocks = sum(len(c.get("blocks", [])) for c in book.get("chapters", []))
+        n_chars = sum(len(b.get("text", "")) for c in book.get("chapters", [])
+                      for b in c.get("blocks", []))
+        if len(book.get("chapters", [])) != meta.get("chapterCount"):
+            fail(f"books/{bid}: {len(book.get('chapters', []))} chapters, index says "
+                 f"{meta.get('chapterCount')}")
+        if n_blocks != meta.get("blockCount") or n_chars != meta.get("charCount"):
+            fail(f"books/{bid}: {n_blocks} blocks/{n_chars} chars, index says "
+                 f"{meta.get('blockCount')}/{meta.get('charCount')}")
+        for c in book.get("chapters", []):
+            for b in c.get("blocks", []):
+                if not b.get("text", "").strip():
+                    fail(f"books/{bid} ch{c.get('number')}: empty block")
+                    break
+        chapters += len(book.get("chapters", []))
+        blocks += n_blocks
+        chars += n_chars
+
+    # The printer's tier marks are turned into line breaks by the generator;
+    # one left behind means a book was added without being run through it.
+    for bid in sorted(listed):
+        raw = os.path.join(CONTENT, "books", f"{bid}.json")
+        with open(raw, encoding="utf-8") as f:
+            if "፪ማ፡" in f.read():
+                fail(f"books/{bid}.json still carries a ፪ማ፡ tier mark")
+
+    print(f"books: {len(listed)} books, {chapters} chapters, {blocks} blocks, {chars} chars")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument(
@@ -256,6 +336,7 @@ def main() -> int:
     check_synaxarium()
     check_scripture()
     check_wudase()
+    check_books()
     check_id_stability(ids, args.update_snapshot)
 
     total_sections = sum(len(v) for v in ids.values())

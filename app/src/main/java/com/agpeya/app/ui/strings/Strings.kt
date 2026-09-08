@@ -143,6 +143,16 @@ interface Strings {
     val mahletDawn: String
     fun mahletParts(n: Int): String
     val mahletNone: String
+
+    val booksTitle: String
+    val booksSubtitle: String
+    fun booksCount(n: Int): String
+    fun booksChapters(n: Int): String
+    fun booksStanzas(n: Int): String
+    val booksInAmharic: String
+    val booksBilingual: String
+    fun booksOtherRecension(title: String): String
+    val booksFullHymn: String
     /** The two reading modes, named for a settings page rather than a toggle. */
     val readingModeVertical: String
     val readingModeHorizontal: String
@@ -930,6 +940,15 @@ object AmharicStrings : Strings {
     override val mahletDawn = "ነግሥ"
     override fun mahletParts(n: Int) = "${com.agpeya.app.ui.reading.geezNumeral(n)} ክፍል"
     override val mahletNone = "ማኅሌቱ ገና አልገባም"
+    override val booksTitle = "ሌሎች መጻሕፍት"
+    override val booksSubtitle = "የቤተ ክርስቲያን መጻሕፍት"
+    override fun booksCount(n: Int) = "${com.agpeya.app.ui.reading.geezNumeral(n)} መጻሕፍት"
+    override fun booksChapters(n: Int) = "${com.agpeya.app.ui.reading.geezNumeral(n)} ምዕራፍ"
+    override fun booksStanzas(n: Int) = "${com.agpeya.app.ui.reading.geezNumeral(n)} አንቀጽ"
+    override val booksInAmharic = "በአማርኛ"
+    override val booksBilingual = "ከነትርጓሜው"
+    override fun booksOtherRecension(title: String) = "ካልዕ፦ $title"
+    override val booksFullHymn = "ሙሉውን ክፍል ክፈት"
     override val readingModeVertical = "ማንሸራተት"
     override val readingModeHorizontal = "ገጽ በገጽ"
     override val imageShapeCard = "ካርድ"
@@ -1659,6 +1678,15 @@ object EnglishStrings : Strings {
     override val mahletDawn = "ነግሥ"
     override fun mahletParts(n: Int) = if (n == 1) "1 part" else "$n parts"
     override val mahletNone = "Coming soon"
+    override val booksTitle = "ሌሎች መጻሕፍት"
+    override val booksSubtitle = "Books of the Church"
+    override fun booksCount(n: Int) = "$n books"
+    override fun booksChapters(n: Int) = if (n == 1) "1 chapter" else "$n chapters"
+    override fun booksStanzas(n: Int) = if (n == 1) "1 stanza" else "$n stanzas"
+    override val booksInAmharic = "Amharic"
+    override val booksBilingual = "with translation"
+    override fun booksOtherRecension(title: String) = "Other recension: $title"
+    override val booksFullHymn = "Open the whole hymn"
     override val readingModeVertical = "Scroll"
     override val readingModeHorizontal = "Page by page"
     override val imageShapeCard = "Card"

@@ -1,0 +1,241 @@
+package com.agpeya.app.ui.books
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextOverflow
+import com.agpeya.app.data.BookRepository
+import com.agpeya.app.data.SettingsRepository
+import com.agpeya.app.model.Book
+import com.agpeya.app.model.BookBlock
+import com.agpeya.app.model.BookMeta
+import com.agpeya.app.ui.common.Passage
+import com.agpeya.app.ui.common.SelectPill
+import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.reading.ReadingColumn
+import com.agpeya.app.ui.reading.SelectionBar
+import com.agpeya.app.ui.reading.advanceFlatSelection
+import com.agpeya.app.ui.reading.flatSelectionRange
+import com.agpeya.app.ui.reading.geezNumeral
+import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.theme.Spacing
+import com.agpeya.app.ui.theme.inReadingFont
+import com.agpeya.app.ui.theme.readingBodyStyle
+import com.agpeya.app.ui.theme.sinqColors
+
+/**
+ * One book off the ሌሎች መጻሕፍት shelf.
+ *
+ * The books have nothing in common but their script: a መልክእ is one chapter of
+ * twenty stanzas, ሥርዓተ ቅዳሴ is twenty-three chapters and two thousand
+ * paragraphs. So the chapter strip appears only when there is more than one
+ * chapter to pick, and a one-chapter hymn opens straight into its text.
+ *
+ * Selection is the same two-tap model every other reader uses, so a stanza
+ * copies, shares and becomes a card exactly as a psalm or a ዚቅ does.
+ */
+@Composable
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+fun BookScreen(
+    bookId: String,
+    /** 1-based chapter to open at; 0 opens at the first. Set by a search hit. */
+    openAtChapter: Int = 0,
+    onBack: () -> Unit,
+    onOpenBook: (String) -> Unit,
+) {
+    val context = LocalContext.current
+    val s = LocalStrings.current
+    val fontStep by SettingsRepository.fontStep(context)
+        .collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
+    val bodyFontSp = SettingsRepository.FONT_STEPS_SP[
+        fontStep.coerceIn(0, SettingsRepository.FONT_STEPS_SP.lastIndex),
+    ]
+
+    val book by produceState<Book?>(null, bookId) { value = BookRepository.book(context, bookId) }
+    val meta by produceState<BookMeta?>(null, bookId) { value = BookRepository.meta(context, bookId) }
+    val chapters = book?.chapters.orEmpty()
+
+    var chapter by rememberSaveable(bookId) {
+        mutableIntStateOf((openAtChapter - 1).coerceAtLeast(0))
+    }
+    val shown = chapters.getOrNull(chapter.coerceIn(0, (chapters.size - 1).coerceAtLeast(0)))
+    val blocks = shown?.blocks.orEmpty()
+
+    var selA by rememberSaveable(bookId, chapter) { mutableIntStateOf(-1) }
+    var selB by rememberSaveable(bookId, chapter) { mutableIntStateOf(-1) }
+    val selRange = flatSelectionRange(selA, selB)
+    val selBody = if (selRange.isEmpty()) null
+    else blocks.filterIndexed { i, _ -> i in selRange }
+        .joinToString("\n\n") { it.text }
+        .ifBlank { null }
+
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            SinqTopBar(
+                title = book?.title ?: meta?.title.orEmpty(),
+                subtitle = shown?.title?.takeIf { it.isNotBlank() && chapters.size > 1 },
+                // Which scanned copy this chapter came from, when the book was
+                // merged from several — the reader should never have to guess.
+                accentLine = shown?.source,
+                onBack = onBack,
+            )
+        },
+        bottomBar = {
+            SelectionBar(
+                visible = selA >= 0,
+                onDismiss = { selA = -1; selB = -1 },
+                passage = selBody?.let {
+                    Passage(
+                        verses = listOf(null to it),
+                        citation = listOfNotNull(
+                            book?.title,
+                            shown?.title?.takeIf { t -> t.isNotBlank() },
+                        ).joinToString("  ·  "),
+                    )
+                },
+                imageKicker = book?.title ?: s.booksTitle,
+            )
+        },
+    ) { inner ->
+        Box(Modifier.fillMaxSize()) {
+            ReadingColumn(innerPadding = inner) {
+                if (chapters.size > 1) {
+                    item(key = "chapters") {
+                        // Twenty-five chapters will not fit across a phone, so the
+                        // strip scrolls rather than wrapping into a wall of pills.
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState())
+                                .padding(vertical = Spacing.sm),
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                        ) {
+                            chapters.forEachIndexed { index, ch ->
+                                SelectPill(
+                                    label = ch.title.ifBlank { geezNumeral(index + 1) },
+                                    selected = index == chapter,
+                                    onClick = { chapter = index; selA = -1; selB = -1 },
+                                )
+                            }
+                        }
+                    }
+                }
+                // A second recension is the one thing a reader of these hymns
+                // most wants to know exists, and the shelf does not say it.
+                meta?.let { m ->
+                    val others = m.variants + listOfNotNull(m.variantOf)
+                    if (others.isNotEmpty()) {
+                        item(key = "variants") {
+                            Row(
+                                Modifier.fillMaxWidth().padding(bottom = Spacing.sm),
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                            ) {
+                                others.forEach { other ->
+                                    Text(
+                                        s.booksOtherRecension(other.title),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.clickable { onOpenBook(other.id) },
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                items(blocks.size, key = { "$chapter:$it" }) { index ->
+                    BookBlockRow(
+                        block = blocks[index],
+                        bodyFontSp = bodyFontSp,
+                        selected = index in selRange,
+                        onTap = {
+                            val (a, b) = advanceFlatSelection(selA, index)
+                            selA = a
+                            selB = b
+                        },
+                    )
+                }
+                item { Spacer(Modifier.height(Spacing.huge)) }
+            }
+        }
+    }
+}
+
+/**
+ * One block: a heading, a Ge'ez stanza, or the Amharic beside it.
+ *
+ * The Amharic is set apart rather than beside — a phone has no second column —
+ * by an indent and the muted colour, so the eye can run down the Ge'ez alone
+ * and drop into the translation only where it wants one. Headings take the
+ * rubric red the printed books and the manuscripts before them use.
+ */
+@Composable
+private fun BookBlockRow(
+    block: BookBlock,
+    bodyFontSp: Int,
+    selected: Boolean,
+    onTap: () -> Unit,
+) {
+    if (block.isHeading) {
+        Text(
+            block.text,
+            style = MaterialTheme.typography.titleSmall.inReadingFont(),
+            color = sinqColors.arke,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = Spacing.lg, bottom = Spacing.xs),
+        )
+        return
+    }
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onTap)
+            .background(
+                if (selected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.20f)
+                else Color.Transparent,
+            )
+            .padding(
+                start = if (block.isAmharic) Spacing.lg else Spacing.sm,
+                end = Spacing.sm,
+                top = if (block.isAmharic) Spacing.xxs else Spacing.sm,
+                bottom = Spacing.xs,
+            ),
+    ) {
+        Text(
+            block.text,
+            style = readingBodyStyle(bodyFontSp).let {
+                if (block.isAmharic) it.copy(fontStyle = FontStyle.Italic) else it
+            },
+            color = if (block.isAmharic) MaterialTheme.colorScheme.onSurfaceVariant
+            else MaterialTheme.colorScheme.onBackground,
+        )
+    }
+}
