@@ -6,6 +6,51 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [Unreleased]
+
+### Added
+- **ንባብ has a ዳዊት track.** One psalm a day, all 150, about a minute of
+  reading. The other two tracks leave the Psalter out because it is "prayed in
+  the hours" — but only 77 of the 150 psalms appear whole in an hour, and the
+  ግጻዌ cites the rest in ምስባክ fragments of a verse or two. 698 psalm verses were
+  in no hour and in no citation; this is the track that reaches them. A psalm
+  is never split and never doubled up, so መዝሙር ፻፲፰ is a day and መዝሙር ፻፲፮ is a
+  day. The two existing tracks are unchanged, to the byte.
+
+### Fixed
+- **The አርኬ has its colour back**, on the label and the verse. It came off with
+  the entry colouring, but the red was never entry colouring — Ethiopic
+  manuscripts mark a section title in cinnabar and every printed liturgy sets
+  the sung text in black and the rubric in red.
+- **ስንክሳር reads in one voice.** A day passed through three treatments of the
+  same text — a shrunk, muted opening, a full-size commemoration, and prose
+  again after the አርኬ — while the አርኬ, the one thing that should differ, did
+  not. And the "no ስንክሳር today" panel goes: all 366 days carry entries.
+- **The three compact cards on ቤት drew nothing at all.** `SinqCard` lays its
+  content out in a column, and the cards put a weighted column inside it, which
+  in a column sized by its content measures to zero.
+- **ቤት and ጉዞ have the ስንቅ mark back**, as a mark rather than the old
+  headline: taking it out bought vertical space and cost both pages their top
+  edge.
+- **22 broken words in ውዳሴ ማርያም**, checked against an independent
+  transcription. Fourteen had a space dropped into the middle of a word — the
+  worst split እግዚ አብሔር — five ran two words together, and three had lost a
+  letter as well. The ይዌድስዋ መላእክት litany is corrected against the printed book.
+- **A ዳዊት day opens the Psalter**, not the Bible reader, which does not carry
+  the Psalter at all.
+
+### Changed
+- **Cross-references are behind a tap and they open.** Selecting a verse gives
+  the bar a ማጣቀሻ action with the count, and the list opens as chips that go
+  where they point. All 73 abbreviations the edition uses resolve, covering
+  55,128 references.
+- **ማኅሌት is set as an order of service.** Half the book is three refrains, so
+  they are set as refrains; every part carries its ordinal, since one name
+  repeats up to thirteen times in a single order; and the index lists 22 feasts
+  where it listed 37 services.
+- **The ዳዊት habit goes.** የዕለት ንባብ already covers reading, and a fifth daily
+  tick for something the app marks on your behalf is a chore nobody chose.
+
 ## [1.8.1] — 2026-09-08
 
 _versionCode 63 · the chant was in the book all along_

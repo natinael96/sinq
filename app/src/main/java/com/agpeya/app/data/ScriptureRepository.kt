@@ -76,7 +76,14 @@ object ScriptureRepository {
      * page when `meta.json` names every book already.
      */
     suspend fun bookNames(context: Context): Map<String, String> =
-        books(context).associate { it.key to it.nameAm }
+        books(context).associate { it.key to it.nameAm } +
+            // Psalms is deliberately absent from [books] — it has its own
+            // reader and its own two editions — but the reading plan names it,
+            // so without this a ዳዊት day would read "Psalms" in Latin.
+            ("psalms" to PSALTER_NAME)
+
+    /** መዝሙረ ዳዊት, as the bundle's own catalogue names it. */
+    private const val PSALTER_NAME = "መዝሙረ ዳዊት"
 
     /**
      * Load one book by its key (e.g. "luke"), cached after first read.

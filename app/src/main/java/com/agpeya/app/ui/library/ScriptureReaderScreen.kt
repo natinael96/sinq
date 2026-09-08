@@ -469,7 +469,11 @@ fun ScriptureReaderScreen(
                             ListRow(
                                 title = s.nextChapter,
                                 subtitle = nextBook,
-                                onClick = { onOpenRoute("scripture/$nextBook/$nextChapter") },
+                                onClick = {
+                                    onOpenRoute(
+                                        com.agpeya.app.ui.reading.planReadingRoute(nextBook, nextChapter),
+                                    )
+                                },
                             )
                         }
                     }

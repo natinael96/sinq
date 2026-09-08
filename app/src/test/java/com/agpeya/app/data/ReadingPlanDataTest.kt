@@ -45,10 +45,11 @@ class ReadingPlanDataTest {
     }
 
     @Test
-    fun `both tracks are present`() {
+    fun `all three tracks are present`() {
         val ids = content.plans.map { it.id }.toSet()
         assertTrue("annual missing", "annual" in ids)
         assertTrue("half missing", "half" in ids)
+        assertTrue("psalter missing", "psalter" in ids)
     }
 
     @Test
@@ -72,25 +73,44 @@ class ReadingPlanDataTest {
     }
 
     @Test
-    fun `each track covers the corpus exactly once`() {
+    fun `each track covers its own corpus exactly once`() {
         for (plan in content.plans) {
             val seen = mutableListOf<Pair<String, Int>>()
             for (day in plan.readings) for (r in day.r) for (c in r.chapters) seen += r.b to c
             val dupes = seen.groupingBy { it }.eachCount().filterValues { it > 1 }
             assertTrue("${plan.id} repeats ${dupes.keys.take(3)}", dupes.isEmpty())
-            assertEquals("${plan.id} chapter total", 1067, seen.size)
+            // The ዳዊት track reads the Psalter; the others read what the ግጻዌ does not.
+            val expected = if (plan.id == "psalter") 150 else 1067
+            assertEquals("${plan.id} chapter total", expected, seen.size)
         }
     }
 
     @Test
-    fun `psalms and the new testament are not in the plan`() {
-        // The ግጻዌ already carries 88.5% of the NT and every psalm it needs;
-        // duplicating them here would double a devout reader's day for nothing.
-        for (plan in content.plans) {
+    fun `the reading tracks leave the psalms to the psalter track`() {
+        // The ግጻዌ already carries 90.8% of the NT, so duplicating it here would
+        // double a devout reader's day for nothing. The Psalter is a different
+        // case: it was left out as "prayed in the hours", but only 77 of the
+        // 150 psalms appear whole in an hour, so it has a track of its own.
+        for (plan in content.plans.filter { it.id != "psalter" }) {
             for (day in plan.readings) for (r in day.r) {
                 assertTrue("${plan.id}: psalms should not be in the plan", r.b != "psalms")
                 assertTrue("${plan.id}: matthew should not be in the plan", r.b != "matthew")
             }
+        }
+    }
+
+    @Test
+    fun `the psalter track is one psalm a day, all 150`() {
+        val psalter = content.plans.first { it.id == "psalter" }
+        assertEquals(150, psalter.days)
+        assertEquals(150, psalter.readings.size)
+        psalter.readings.forEachIndexed { i, day ->
+            assertEquals("day ${day.d} is not a single reading", 1, day.r.size)
+            val r = day.r.single()
+            assertEquals("day ${day.d} is not from the Psalter", "psalms", r.b)
+            // A psalm is a unit of prayer, never split and never doubled up.
+            assertEquals("day ${day.d} spans more than one psalm", r.c, r.to)
+            assertEquals("psalms are out of order", i + 1, r.c)
         }
     }
 

@@ -135,7 +135,7 @@ fun ReadingPlanScreen(
                         ListRow(
                             title = bookName(r.b, bookNames),
                             subtitle = chapterLabel(r.c, r.to),
-                            onClick = { onOpenRoute("scripture/${r.b}/${r.c}") },
+                            onClick = { onOpenRoute(planReadingRoute(r.b, r.c)) },
                         )
                     }
                     item {
@@ -303,7 +303,22 @@ private fun chapterLabel(from: Int, to: Int): String =
  * only ever a fallback for a book that failed to load — never "2 Kings" on an
  * Amharic page.
  */
+/** The Psalter's slug in the plans; it is not in the Bible reader's catalogue. */
+internal const val PSALMS_SLUG = "psalms"
+
 internal fun bookName(slug: String, names: Map<String, String>): String =
     names[slug] ?: slug.split('-').joinToString(" ") { part ->
         part.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
     }
+
+/**
+ * Where a day's reading opens.
+ *
+ * The Psalter has its own reader and its own two editions, and
+ * [com.agpeya.app.data.ScriptureRepository.books] leaves it out of the Bible
+ * catalogue for exactly that reason — so a ዳዊት day routed at the Bible reader
+ * would land on a book it cannot find.
+ */
+internal fun planReadingRoute(slug: String, chapter: Int): String =
+    if (slug == PSALMS_SLUG) "psalter?section=${chapter - 1}"
+    else "scripture/$slug/$chapter"

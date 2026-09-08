@@ -91,7 +91,7 @@ fun ReadingPlanDaysScreen(onBack: () -> Unit, onOpenRoute: (String) -> Unit) {
                 ListRow(
                     title = s.readingDayLabel(day.d.toString()),
                     subtitle = passages,
-                    onClick = { day.r.firstOrNull()?.let { onOpenRoute("scripture/${it.b}/${it.c}") } },
+                    onClick = { day.r.firstOrNull()?.let { onOpenRoute(planReadingRoute(it.b, it.c)) } },
                     trailing = {
                         if (day.d in read) {
                             Icon(

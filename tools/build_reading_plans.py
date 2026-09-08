@@ -119,6 +119,36 @@ def to_readings(day):
     return r
 
 
+def psalter_units(books):
+    """The 150 psalms, one entry each, in order."""
+    psa = next((b for b in books if b["id"] == "PSA"), None)
+    if not psa:
+        raise SystemExit("psalms are not in the bundle")
+    counts = chapter_verses(psa["slug"], psa["order"])
+    return [(psa["slug"], i, v) for i, v in enumerate(counts, start=1)]
+
+
+def build_psalter(u):
+    """One psalm a day, which is how the Psalter is prayed through.
+
+    Not packed to a verse budget like the other tracks. A psalm is a unit of
+    prayer, not a quantity of text: መዝሙር ፻፲፰ runs to 176 verses and መዝሙር ፻፲፮
+    to two, and both are a day's ዳዊት. The average day is 16 verses, about a
+    minute.
+
+    It exists because the other tracks leave the Psalter out — it is "prayed in
+    the hours" — but only 77 of the 150 psalms appear whole in an hour, and the
+    ግጻዌ cites the rest in ምስባክ fragments of a verse or two. 698 psalm verses
+    are in no hour and in no citation, and this is the track that reaches them.
+    """
+    readings = [{"d": i + 1, "r": [{"b": slug, "c": ch, "to": ch}]}
+                for i, (slug, ch, _) in enumerate(u)]
+    return {
+        "id": "psalter", "title": "የዳዊት ንባብ", "subtitle": "በየቀኑ አንድ መዝሙር",
+        "days": len(readings), "withGitsawe": True, "readings": readings,
+    }
+
+
 def build(u, days, plan_id, title, subtitle):
     packed = pack(u, days)
     readings = [{"d": i + 1, "r": to_readings(day)} for i, day in enumerate(packed) if day]
@@ -138,13 +168,19 @@ def main():
     plans = [
         build(u, 360, "annual", "ዓመታዊ ንባብ", "ግጻዌው የማያነብልዎት"),
         build(u, 180, "half", "የስድስት ወር ንባብ", "በስድስት ወር"),
+        build_psalter(psalter_units(books)),
     ]
+    # The psalter track reads its own corpus, so each plan is checked against
+    # the one it was built from rather than against the shared total.
+    psalter_ch = len(psalter_units(books))
+    psalter_v = sum(v for _, _, v in psalter_units(books))
     for p in plans:
+        want_ch, want_v = (psalter_ch, psalter_v) if p["id"] == "psalter" else (total_ch, total_v)
         ch = sum(len(range(r["c"], r["to"] + 1)) for d in p["readings"] for r in d["r"])
-        assert ch == total_ch, f"{p['id']}: {ch} chapters packed, expected {total_ch}"
+        assert ch == want_ch, f"{p['id']}: {ch} chapters packed, expected {want_ch}"
         longest = max(len([1 for r in d["r"] for _ in range(r["c"], r["to"] + 1)]) for d in p["readings"])
-        print(f"  {p['id']:7s} {p['days']:3d} days  {ch} ch  ~{ch / p['days']:.2f} ch/day  "
-              f"~{total_v / p['days']:.0f} v/day  longest day {longest} ch")
+        print(f"  {p['id']:8s} {p['days']:3d} days  {ch} ch  ~{ch / p['days']:.2f} ch/day  "
+              f"~{want_v / p['days']:.0f} v/day  longest day {longest} ch")
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     json.dump({"contentVersion": 1, "plans": plans},
