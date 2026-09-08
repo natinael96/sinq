@@ -77,18 +77,27 @@ fun LicensesScreen(onBack: () -> Unit) {
             item {
                 LicSection("Synaxarium (ስንክሳር)")
                 LicPara(
-                    "The Amharic ስንክሳር is drawn from two sources: the gitsaweandsinksarbot " +
-                        "project by hailemariam-eyayu " +
-                        "(github.com/hailemariam-eyayu/gitsaweandsinksarbot), and the " +
-                        "Nexuss0781/synaxarium dataset on the Hugging Face Hub " +
-                        "(huggingface.co/datasets/Nexuss0781/synaxarium), which is published " +
-                        "under the MIT License. The underlying commemorations are traditional " +
-                        "Ethiopian Orthodox liturgical content.",
+                    "Both editions — መጽሐፈ ስንክሳር በአማርኛ and መጽሐፈ ስንክሳር በግእዝ, 366 days " +
+                        "each — were scanned from available PDF scans of the printed books " +
+                        "by the Sinq maintainer, and are released as open content under the " +
+                        "Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 " +
+                        "International licence, the same terms as the bundled scripture. The " +
+                        "underlying commemorations are traditional Ethiopian Orthodox " +
+                        "liturgical content.",
                 )
                 LicPara(
-                    "The MIT License requires that its permission notice accompany copies:",
+                    "The text is reproduced as the scans carry it, with three disclosed " +
+                        "exceptions. Each paragraph's number is written twice in the source, " +
+                        "once in Arabic and once in Ge'ez, and only the Ge'ez is kept. " +
+                        "Editorial dingbats and stray markup are removed. And two Ge'ez days " +
+                        "that carry no heading block are given one naming their date.",
                 )
-                LicenseBlock(MIT_LICENSE_TEXT)
+                LicPara(
+                    "Earlier releases bundled the Amharic synaxarium from the " +
+                        "gitsaweandsinksarbot project by hailemariam-eyayu and the " +
+                        "Nexuss0781/synaxarium dataset on the Hugging Face Hub. Neither is " +
+                        "bundled any longer.",
+                )
             }
             item {
                 LicSection("Wudase Maryam (ውዳሴ ማርያም)")
@@ -184,16 +193,6 @@ private fun LicenseBlock(text: String) {
     Spacer(Modifier.height(Spacing.sm))
 }
 
-/** The standard MIT permission notice, as required to accompany copies. */
-private val MIT_LICENSE_TEXT = """
-MIT License
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-""".trimIndent()
 
 /**
  * The generic portion of the SIL Open Font License 1.1, verbatim from

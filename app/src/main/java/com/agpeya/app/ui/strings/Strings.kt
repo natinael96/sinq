@@ -132,6 +132,11 @@ interface Strings {
     fun crossRefsAction(n: Int): String
     /** ስንክሳር's own row in ቤተ መጻሕፍት. */
     val synaxariumLibrarySubtitle: String
+    val sinksarAmharic: String
+    val sinksarGeez: String
+    val sinksarAnnualFeasts: String
+    val sinksarMonthlyFeasts: String
+    val sinksarReading: String
     /** ሥርዓተ ማኅሌት — the orders of service sung on a feast. */
     val mahletTitle: String
     val mahletSubtitle: String
@@ -932,6 +937,11 @@ object AmharicStrings : Strings {
     override fun crossRefsAction(n: Int) = "ማጣቀሻ ${com.agpeya.app.ui.reading.geezNumeral(n)}"
     override val mahletTitle = "ሥርዓተ ማኅሌት"
     override val synaxariumLibrarySubtitle = "የዓመቱ የቅዱሳን መታሰቢያ"
+    override val sinksarAmharic = "አማርኛ"
+    override val sinksarGeez = "ግእዝ"
+    override val sinksarAnnualFeasts = "ዓመታዊ በዓላት"
+    override val sinksarMonthlyFeasts = "ወርኀዊ በዓላት"
+    override val sinksarReading = "የዕለቱ ንባብ"
     override val mahletSubtitle = "የበዓላት ማኅሌትና ዋዜማ"
     override val mahletVigil = "ዋዜማ"
     override val mahletMovable = "የወር ቀን የሌላቸው"
@@ -1671,6 +1681,11 @@ object EnglishStrings : Strings {
     override fun crossRefsAction(n: Int) = "Refs $n"
     override val mahletTitle = "ሥርዓተ ማኅሌት"
     override val synaxariumLibrarySubtitle = "The year's commemorations"
+    override val sinksarAmharic = "አማርኛ"
+    override val sinksarGeez = "ግእዝ"
+    override val sinksarAnnualFeasts = "Annual feasts"
+    override val sinksarMonthlyFeasts = "Monthly feasts"
+    override val sinksarReading = "The day's reading"
     override val mahletSubtitle = "Orders of service for the feasts"
     override val mahletVigil = "ዋዜማ"
     override val mahletMovable = "Movable feasts"

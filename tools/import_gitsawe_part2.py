@@ -9,7 +9,7 @@ from import_gitsawe_months import convert_service
 
 
 ROOT = Path(__file__).resolve().parent.parent
-SOURCE = ROOT / "content/gitsawe/parts/02-movable-feasts-and-fasts.json"
+SOURCE = ROOT / "sources/gitsawe/parts/02-movable-feasts-and-fasts.json"
 OUT = ROOT / "app/src/main/assets/content/gitsawe/movable-weekday-gitsawe.json"
 
 DAY_PART = {

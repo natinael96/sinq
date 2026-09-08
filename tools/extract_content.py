@@ -1,6 +1,6 @@
 """Generate the app's bundled prayer content from the 80-weahadu Amharic Bible.
 
-Reads  : content/hour_mapping.json  +  ../80-weahadu/data/am/*.json
+Reads  : sources/hours/hour_mapping.json  +  ../80-weahadu/data/am/*.json
 Writes : app/src/main/assets/content/<hourId>.json  +  manifest.json
 
 Run from the repo root:  python tools/extract_content.py
@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 BIBLE = ROOT.parent / "80-weahadu" / "data" / "am"
-MAPPING = ROOT / "content" / "hour_mapping.json"
+MAPPING = ROOT / "sources" / "hours" / "hour_mapping.json"
 OUT = ROOT / "app" / "src" / "main" / "assets" / "content"
 
 CONTENT_VERSION = 1

@@ -16,7 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "app/src/main/assets/content/gitsawe/daily-gitsawe.json"
-DEFAULT_MONTHS = ROOT / "content/gitsawe/months"
+DEFAULT_MONTHS = ROOT / "sources/gitsawe/months"
 
 DIGITS = {"፩": 1, "፪": 2, "፫": 3, "፬": 4, "፭": 5, "፮": 6, "፯": 7,
           "፰": 8, "፱": 9, "፲": 10, "፳": 20, "፴": 30, "፵": 40,

@@ -181,6 +181,8 @@ object AmharicSearch {
         // Gregorian date that day falls on in the current Ethiopian year.
         val ethYear = EthiopianDate.from(LocalDate.now()).year
         for (month in 1..13) {
+            // The Amharic edition only. Indexing both would double the ስንክሳር's
+            // weight in memory to find the same commemorations twice.
             docs += synaxariumDocs(month, ethYear, SynaxariumRepository.month(context, month))
         }
 
@@ -234,13 +236,16 @@ object AmharicSearch {
                     EthiopianDate(ethYear, month, day.day).toGregorian().toEpochDay()
                 }.getOrNull() ?: continue
                 day.entries.forEachIndexed { entryIndex, entry ->
-                    val hay = entry.title + " " + entry.text
+                    // The hymn is searched with the life it closes: a reader
+                    // looking for a line of an አርኬ should find the saint it
+                    // belongs to, not a result with no name on it.
+                    val hay = entry.text + " " + entry.arke.orEmpty()
                     add(
                         Doc(
                             source = Source.SYNAXARIUM,
                             targetId = "$month-${day.day}-$entryIndex",
                             targetIndex = day.day,
-                            title = com.agpeya.app.ui.gitsawe.cleanSynaxariumText(entry.title),
+                            title = entry.heading,
                             // The entry the hit is in, not just the day: a
                             // twelve-entry ስንክሳር landed at the top and left the
                             // reader to find it.

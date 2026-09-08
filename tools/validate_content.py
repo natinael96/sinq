@@ -126,25 +126,94 @@ def collect_section_ids() -> dict[str, list[str]]:
 
 
 def check_synaxarium() -> None:
+    """Both editions of the ስንክሳር, and the structure the reader draws by.
+
+    The scans carry the shape now, so these check the shape rather than the
+    prose: every day has its heading and its commemorations, every hymn is a
+    block of its own, the reading is one piece with its reference, and no two
+    entries in a day share the id a bookmark points at.
+    """
     manifest = load("sinksar", "manifest.json")
     if manifest:
         check_version("sinksar/manifest.json", manifest)
-    for m in range(1, 14):
-        data = load("sinksar", f"{m}.json")
-        if data is None:
-            continue
-        if data.get("month") != m:
-            fail(f"sinksar/{m}.json: declares month {data.get('month')}")
-        days = data.get("days", [])
-        nums = [d.get("day") for d in days]
-        if len(nums) != len(set(nums)):
-            dupes = {n for n in nums if nums.count(n) > 1}
-            fail(f"sinksar/{m}.json: duplicate days {sorted(dupes)}")
-        for d in days:
-            if not d.get("entries"):
-                fail(f"sinksar/{m}.json day {d.get('day')}: no entries")
-            for i, e in enumerate(d.get("entries", [])):
-                check_text(f"sinksar/{m}.json d{d.get('day')} e{i}", e.get("text", ""))
+        codes = [e.get("code") for e in manifest.get("editions", [])]
+        if codes != ["am", "ge"]:
+            fail(f"sinksar/manifest.json: editions are {codes}, expected ['am', 'ge']")
+
+    totals = {}
+    for edition in ("am", "ge"):
+        days_seen = entries = arke = readings = 0
+        for m in range(1, 14):
+            name = f"{edition}-{m}.json"
+            data = load("sinksar", name)
+            if data is None:
+                continue
+            if data.get("month") != m:
+                fail(f"sinksar/{name}: declares month {data.get('month')}")
+            if data.get("edition") != edition:
+                fail(f"sinksar/{name}: declares edition {data.get('edition')}")
+
+            days = data.get("days", [])
+            nums = [d.get("day") for d in days]
+            if len(nums) != len(set(nums)):
+                dupes = {n for n in nums if nums.count(n) > 1}
+                fail(f"sinksar/{name}: duplicate days {sorted(dupes)}")
+            if sorted(nums) != list(range(1, len(nums) + 1)):
+                fail(f"sinksar/{name}: days are not 1..{len(nums)}")
+
+            for d in days:
+                where = f"sinksar/{name} day {d.get('day')}"
+                days_seen += 1
+                if not d.get("header"):
+                    fail(f"{where}: no heading")
+                if not d.get("entries"):
+                    fail(f"{where}: no entries")
+
+                ids = [e.get("id") for e in d.get("entries", [])]
+                if len(ids) != len(set(ids)):
+                    # A bookmark points at one of these; a repeat would make a
+                    # bookmark on either entry light up on both.
+                    fail(f"{where}: repeated entry id {sorted(set(x for x in ids if ids.count(x) > 1))}")
+                if not all(ids):
+                    fail(f"{where}: an entry has no id")
+
+                for e in d.get("entries", []):
+                    entries += 1
+                    paras = e.get("paragraphs", [])
+                    if not paras:
+                        fail(f"{where} entry {e.get('id')}: no paragraphs")
+                    for para in paras:
+                        check_text(f"{where} entry {e.get('id')}", para.get("text", ""))
+                    hymn = e.get("arke")
+                    if hymn is not None:
+                        arke += 1
+                        if not hymn.strip():
+                            fail(f"{where} entry {e.get('id')}: empty አርኬ")
+                        elif not hymn.lstrip().startswith("ሰላ"):
+                            # The hymn is the salutation. Anything else here
+                            # means the block typing slipped.
+                            fail(f"{where} entry {e.get('id')}: አርኬ does not open with ሰላም")
+
+                reading = d.get("reading")
+                if reading is not None:
+                    readings += 1
+                    if not reading.get("text", "").strip():
+                        fail(f"{where}: reading with no text")
+                    check_text(f"{where} reading", reading.get("text", ""))
+
+        totals[edition] = (days_seen, entries, arke, readings)
+        if days_seen != 366:
+            fail(f"sinksar/{edition}: {days_seen} days, expected 366")
+
+    for edition, (days_seen, entries, arke, readings) in totals.items():
+        print(f"sinksar {edition}: {days_seen} days, {entries} entries, "
+              f"{arke} አርኬ, {readings} readings")
+
+    # Only the Amharic edition carries the feast lists and the daily reading;
+    # the Ge'ez scans have neither, and claiming otherwise would mean the
+    # generator had started inventing them.
+    if totals.get("ge", (0, 0, 0, 0))[3] != 0:
+        fail("sinksar/ge: the Ge'ez edition should carry no readings")
 
 
 def check_scripture() -> None:

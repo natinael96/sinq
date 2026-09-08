@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -60,8 +59,13 @@ import androidx.compose.ui.unit.sp
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.data.SynaxariumRepository
 import com.agpeya.app.data.UserDataRepository
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Menu
 import com.agpeya.app.model.Bookmark
+import com.agpeya.app.model.SynaxariumDay
+import com.agpeya.app.model.SynaxariumEdition
 import com.agpeya.app.model.SynaxariumEntry
+import com.agpeya.app.model.SynaxariumReading
 import com.agpeya.app.ui.common.EthiopianDate
 import com.agpeya.app.ui.common.formatEthiopianWithGregorian
 import com.agpeya.app.ui.reading.geezNumeral
@@ -82,13 +86,18 @@ import com.agpeya.app.data.HabitsRepository
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.Menu
 
 private val FONT_STEPS_SP = SettingsRepository.FONT_STEPS_SP
 
 // The warm liturgical አርኬ red lives in SinqColors.arke, tuned per theme so it
 // keeps its contrast on the ivory ground as well as the dark green one.
+
+/**
+ * The word the book itself uses for the hymn. The scans carry the hymn as a
+ * block but not the label above it, so the label is the app's, kept because it
+ * names what the centered red verse is for a reader who has not met one.
+ */
+private const val ARKE_LABEL = "አርኬ"
 
 /** The hymn is verse, not prose: a little more air than the running text. */
 private const val ArkeLineHeight = 1.78f
@@ -96,6 +105,24 @@ private const val ArkeLineHeight = 1.78f
 /** The fixed closing ጸሎት is a coda — noticeably smaller and tightly set. */
 private const val CLOSING_FONT_SCALE = 0.78f
 private const val CLOSING_LINE_HEIGHT = 1.28f
+
+/**
+ * One selectable piece of the day, in reading order.
+ *
+ * Selection used to be keyed `entryIndex * 1000 + paragraphIndex`, which meant
+ * every screen that wanted the selected text had to re-parse the day and
+ * reconstruct the same arithmetic. The day is flattened once instead, and the
+ * key is simply the position in this list.
+ */
+private data class DayPiece(val text: String, val entryIndex: Int)
+
+private fun SynaxariumDay.pieces(): List<DayPiece> = buildList {
+    entries.forEachIndexed { i, entry ->
+        entry.paragraphs.forEach { add(DayPiece(it.text, i)) }
+        entry.arke?.let { add(DayPiece(it, i)) }
+    }
+    reading?.let { add(DayPiece(it.text, entries.size)) }
+}
 
 /** ስንክሳር — the day's synaxarium commemorations for [epochDay]. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -114,32 +141,39 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, onBack: () -> Unit)
     val date = remember(epochDay) { LocalDate.ofEpochDay(epochDay) }
     val eth = remember(date) { EthiopianDate.from(date) }
     var loadAttempt by rememberSaveable(epochDay) { mutableIntStateOf(0) }
-    val entriesResult by produceState<Result<List<SynaxariumEntry>>?>(initialValue = null, epochDay, loadAttempt) {
-        value = runCatching { SynaxariumRepository.forDate(context, date) }
+
+    val edition by SettingsRepository.synaxariumEdition(context)
+        .collectAsState(initial = SynaxariumEdition.AMHARIC)
+    val dayResult by produceState<Result<SynaxariumDay?>?>(null, epochDay, loadAttempt, edition) {
+        value = runCatching { SynaxariumRepository.forDate(context, date, edition) }
     }
+    val day = dayResult?.getOrNull()
+    val entries = day?.entries.orEmpty()
+    val pieces = remember(day) { day?.pieces().orEmpty() }
+
     val fontStep by SettingsRepository.fontStep(context).collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
 
-    // Live paragraph selection across the day's entries: a tap anchors, the
-    // next tap moves the end. Keys are entryIndex*1000 + paragraphIndex, so a
-    // run can span entries while staying in reading order. -1 = none.
-    var selA by rememberSaveable(epochDay) { androidx.compose.runtime.mutableIntStateOf(-1) }
-    var selB by rememberSaveable(epochDay) { androidx.compose.runtime.mutableIntStateOf(-1) }
+    // Live paragraph selection across the day: a tap anchors, the next moves
+    // the end. Keys are positions in [pieces], so a run spans commemorations
+    // while staying in reading order. -1 = none.
+    var selA by rememberSaveable(epochDay, edition) { androidx.compose.runtime.mutableIntStateOf(-1) }
+    var selB by rememberSaveable(epochDay, edition) { androidx.compose.runtime.mutableIntStateOf(-1) }
     val selRange = com.agpeya.app.ui.reading.flatSelectionRange(selA, selB)
 
     // A search result knows which entry it matched — the index has stored the
     // ordinal all along and the route threw it away, so a hit on a twelve-entry
     // day landed at the top.
     var landed by rememberSaveable(epochDay) { mutableStateOf(false) }
-    LaunchedEffect(entriesResult, initialEntry) {
+    LaunchedEffect(dayResult, initialEntry) {
         if (landed || initialEntry < 0) return@LaunchedEffect
-        val count = entriesResult?.getOrNull()?.size ?: return@LaunchedEffect
-        if (initialEntry < count) listState.scrollToItem(initialEntry)
+        if (entries.isEmpty()) return@LaunchedEffect
+        if (initialEntry < entries.size) listState.scrollToItem(initialEntry + 1)
         landed = true
     }
 
-    fun tapAt(flatKey: Int) {
-        val (a, b) = com.agpeya.app.ui.reading.advanceFlatSelection(selA, flatKey)
+    fun tapAt(key: Int) {
+        val (a, b) = com.agpeya.app.ui.reading.advanceFlatSelection(selA, key)
         selA = a
         selB = b
     }
@@ -152,9 +186,9 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, onBack: () -> Unit)
     // Reading today's ስንክሳር marks it kept. Only today's: browsing back through
     // the year is reading about a day, not keeping it, and a day already past
     // cannot be kept now.
-    LaunchedEffect(date, entriesResult) {
+    LaunchedEffect(date, dayResult) {
         if (date != LocalDate.now()) return@LaunchedEffect
-        if (entriesResult?.getOrNull().isNullOrEmpty()) return@LaunchedEffect
+        if (entries.isEmpty()) return@LaunchedEffect
         HabitsRepository.markDone(context, date.toString(), "sinksar")
     }
 
@@ -182,7 +216,6 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, onBack: () -> Unit)
                 subtitle = formatEthiopianWithGregorian(date, s),
                 onBack = onBack,
                 actions = {
-                    val list = entriesResult?.getOrNull().orEmpty()
                     IconButton(onClick = { epochDay -= 1 }) {
                         Icon(
                             Icons.AutoMirrored.Filled.KeyboardArrowLeft,
@@ -204,7 +237,7 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, onBack: () -> Unit)
                             modifier = Modifier.size(com.agpeya.app.ui.theme.IconSize.medium),
                         )
                     }
-                    if (list.size > 2) {
+                    if (entries.size > 2) {
                         IconButton(onClick = { showContents = true }) {
                             Icon(
                                 Icons.Outlined.Menu,
@@ -217,29 +250,27 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, onBack: () -> Unit)
                         fontStep = fontStep,
                         maxFontStep = FONT_STEPS_SP.lastIndex,
                         onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
-                        shareEnabled = list.isNotEmpty(),
+                        shareEnabled = day != null,
                         sharePayload = {
-                            if (list.isEmpty()) null
-                            else com.agpeya.app.ui.common.SharePayload(
-                                body = synaxariumShareBody(list),
-                                kicker = s.synaxariumTitle,
-                                title = list.firstNotNullOfOrNull {
-                                    cleanSynaxariumText(it.title).takeIf { t -> t.isNotBlank() }
-                                },
-                                dateLabel = com.agpeya.app.ui.common.formatEthiopian(date, s),
-                            )
+                            day?.let {
+                                com.agpeya.app.ui.common.SharePayload(
+                                    body = synaxariumShareBody(it),
+                                    kicker = s.synaxariumTitle,
+                                    title = it.entries.firstOrNull()?.heading?.takeIf { t -> t.isNotBlank() },
+                                    dateLabel = com.agpeya.app.ui.common.formatEthiopian(date, s),
+                                )
+                            }
                         },
                     )
                 },
             )
         },
     ) { innerPadding ->
-        val list = entriesResult?.getOrNull()
         androidx.compose.foundation.layout.Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         when {
-            entriesResult == null -> LoadingPanel(Modifier.padding(innerPadding))
+            dayResult == null -> LoadingPanel(Modifier.padding(innerPadding))
 
-            entriesResult?.isFailure == true -> StatePanel(
+            dayResult?.isFailure == true || day == null -> StatePanel(
                 title = s.contentUnavailable,
                 body = s.contentMissingBody,
                 actionLabel = s.retryAction,
@@ -256,104 +287,108 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, onBack: () -> Unit)
                 modifier = Modifier.fillMaxSize().padding(innerPadding).widthIn(max = ReadingMaxWidth),
                 contentPadding = PaddingValues(horizontal = Spacing.screen),
             ) {
-                itemsIndexed(list.orEmpty()) { i, entry ->
-                    val title = cleanSynaxariumText(entry.title)
-                    val paras = remember(entry) { parseSynaxarium(entry.text) }
-                    // An entry with no text is a heading over nothing. 59 of the
-                    // 2,308 are; they are not drawn.
-                    if (paras.isEmpty() && title.isBlank()) return@itemsIndexed
+                item(key = "edition") {
+                    Spacer(Modifier.height(Spacing.sm))
+                    // Two editions, never side by side: only 30 of the 366 days
+                    // have the same paragraph count in both, so a parallel
+                    // layout would pair the wrong paragraphs all year.
+                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                        SynaxariumEdition.all.forEach { code ->
+                            com.agpeya.app.ui.common.SelectPill(
+                                label = if (code == SynaxariumEdition.AMHARIC) s.sinksarAmharic else s.sinksarGeez,
+                                selected = code == edition,
+                                onClick = {
+                                    scope.launch { SettingsRepository.setSynaxariumEdition(context, code) }
+                                },
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(Spacing.md))
+                }
+
+                itemsIndexed(entries, key = { _, e -> e.id }) { i, entry ->
+                    // Keyed by the Ethiopian date and the entry's own content
+                    // hash, not its position: the same commemoration recurs
+                    // every year and should stay bookmarked across years, and
+                    // across a re-scan that splits the day differently.
+                    val sectionId = "sinksar:${eth.month}-${eth.day}:${entry.id}"
+                    val base = pieces.indexOfFirst { it.entryIndex == i }
                     Column(Modifier.fillMaxWidth()) {
-                        Spacer(Modifier.height(Spacing.md))
-                        when (synaxariumEntryKind(entry.title)) {
-                            // The day's opening doxology. Its title names the
-                            // month, which the header above already says, so
-                            // only the words are kept — set quieter, because
-                            // they open the day rather than being it.
-                            SynaxariumEntryKind.OPENING -> paras.forEachIndexed { p, para ->
+                        entry.paragraphs.forEachIndexed { p, para ->
+                            val key = base + p
+                            if (para.n == 0) {
+                                // The day's opening doxology, and the few
+                                // paragraphs the scan left unnumbered. Same
+                                // voice as the rest, only without a number.
                                 OpeningPara(
                                     text = para.text,
                                     fontSp = bodyFontSp,
-                                    selected = (i * 1000 + p) in selRange,
-                                    onTap = { tapAt(i * 1000 + p) },
+                                    selected = key in selRange,
+                                    onTap = { tapAt(key) },
                                 )
-                            }
-
-                            // A list of names. It draws its own marks, so the
-                            // source's printed numbers come off.
-                            SynaxariumEntryKind.FEAST_LIST -> {
-                                if (title.isNotBlank()) EntryTitle(title)
-                                FeastList(
-                                    items = remember(entry) { synaxariumListItems(entry.text) },
+                            } else {
+                                NarrativePara(
+                                    number = para.n,
+                                    text = para.text,
                                     fontSp = bodyFontSp,
-                                )
-                            }
-
-                            SynaxariumEntryKind.SCRIPTURE -> {
-                                if (title.isNotBlank()) EntryTitle(title)
-                                // Keyed by the Ethiopian date, not the Gregorian
-                                // one: the same commemoration recurs every year
-                                // and should stay bookmarked across years.
-                                val sectionId = "sinksar:${eth.month}-${eth.day}:$i"
-                                ScriptureBody(
-                                    rawText = entry.text,
-                                    fontSp = bodyFontSp,
-                                    bookmarked = sectionId in bookmarkedIds,
+                                    selected = key in selRange,
+                                    onTap = { tapAt(key) },
+                                    // The bookmark sits on the paragraph that
+                                    // opens the commemoration, not on every one.
+                                    bookmarked = if (p == 0) sectionId in bookmarkedIds else null,
                                     onToggleBookmark = {
-                                        mark(sectionId, title.ifBlank { s.synaxariumTitle }, entry.text)
+                                        mark(sectionId, entry.heading.ifBlank { s.synaxariumTitle }, entry.text)
                                     },
                                 )
                             }
+                        }
+                        entry.arke?.let { hymn ->
+                            val key = base + entry.paragraphs.size
+                            ArkeLabel()
+                            // Every stanza of it, centered — the hymn is now a
+                            // block of its own in the source, so there is no
+                            // longer any case where it falls through as prose.
+                            ArkeVerse(hymn, bodyFontSp, selected = key in selRange) { tapAt(key) }
+                        }
+                        Spacer(Modifier.height(Spacing.xl))
+                    }
+                }
 
-                            // A life. Its title is the sentence the account
-                            // opens with, so it opens the account: the first
-                            // paragraph carries it, and the bookmark sits beside
-                            // it rather than only on the scripture entries.
-                            SynaxariumEntryKind.COMMEMORATION -> {
-                                val sectionId = "sinksar:${eth.month}-${eth.day}:$i"
-                                var n = 0
-                                paras.forEachIndexed { p, para ->
-                                    val flatKey = i * 1000 + p
-                                    when (para.kind) {
-                                        SynaxariumParaKind.NARRATIVE -> {
-                                            n = para.sourceNumber ?: (n + 1)
-                                            NarrativePara(
-                                                number = n,
-                                                text = if (p == 0 && title.isNotBlank()) "$title  ${para.text}" else para.text,
-                                                fontSp = bodyFontSp,
-                                                selected = flatKey in selRange,
-                                                onTap = { tapAt(flatKey) },
-                                                bookmarked = if (p == 0) sectionId in bookmarkedIds else null,
-                                                onToggleBookmark = {
-                                                    mark(sectionId, title.ifBlank { s.synaxariumTitle }, entry.text)
-                                                },
-                                            )
-                                        }
-                                        SynaxariumParaKind.ARKE_LABEL -> ArkeLabel(para.text)
-                                        SynaxariumParaKind.ARKE_VERSE ->
-                                            ArkeVerse(para.text, bodyFontSp, selected = flatKey in selRange) { tapAt(flatKey) }
-                                    }
-                                }
-                                // A commemoration ends where the next begins,
-                                // whether or not it closed with an አርኬ — only
-                                // 817 of the 2,308 entries carry one.
-                                Spacer(Modifier.height(Spacing.xl))
-                            }
+                if (day.feasts.isNotEmpty() || day.monthly.isNotEmpty()) {
+                    item(key = "feasts") {
+                        if (day.feasts.isNotEmpty()) {
+                            EntryTitle(s.sinksarAnnualFeasts)
+                            FeastList(day.feasts, bodyFontSp)
+                        }
+                        if (day.monthly.isNotEmpty()) {
+                            EntryTitle(s.sinksarMonthlyFeasts)
+                            FeastList(day.monthly, bodyFontSp)
                         }
                     }
                 }
+
+                day.reading?.let { reading ->
+                    item(key = "reading") {
+                        val sectionId = "sinksar:${eth.month}-${eth.day}:reading"
+                        ReadingBlock(
+                            reading = reading,
+                            fontSp = bodyFontSp,
+                            bookmarked = sectionId in bookmarkedIds,
+                            onToggleBookmark = {
+                                mark(sectionId, s.sinksarReading, reading.text)
+                            },
+                        )
+                    }
+                }
+
                 item { ClosingPrayer(bodyFontSp) }
                 item { Spacer(Modifier.height(Spacing.huge)) }
             }
         }
         // The selected run, ready to copy or leave as text or a PNG card.
-        val selBody = if (selRange.isEmpty()) null else list.orEmpty()
-            .flatMapIndexed { i, entry ->
-                if (isScriptureEntry(entry.title)) emptyList()
-                else parseSynaxarium(entry.text).mapIndexedNotNull { p, para ->
-                    para.text.takeIf { (i * 1000 + p) in selRange }
-                }
-            }
-            .joinToString("\n\n")
+        val selBody = if (selRange.isEmpty()) null
+        else pieces.filterIndexed { i, _ -> i in selRange }
+            .joinToString("\n\n") { it.text }
             .ifBlank { null }
         if (showPicker) {
             com.agpeya.app.ui.common.EthiopianDatePickerDialog(
@@ -366,13 +401,12 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, onBack: () -> Unit)
             )
         }
         if (showContents) {
-            val list = entriesResult?.getOrNull().orEmpty()
             androidx.compose.material3.ModalBottomSheet(onDismissRequest = { showContents = false }) {
                 SynaxariumContents(
-                    entries = list,
+                    entries = entries,
                     onSelect = { index ->
                         showContents = false
-                        scope.launch { listState.scrollToItem(index) }
+                        scope.launch { listState.scrollToItem(index + 1) }
                     },
                 )
             }
@@ -395,8 +429,11 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, onBack: () -> Unit)
 }
 
 /**
- * The fixed closing ጸሎት, appended once after the day's commemorations and set
- * apart by a divider. Holy names are drawn in red.
+ * The fixed closing ጸሎት, appended once after the day's commemorations.
+ * Holy names are drawn in red.
+ *
+ * Set apart by air and by its own surface, not by a rule: a line across the
+ * page reads as a break in the book, and this is the same book still.
  *
  * Tapping it switches between the Ge'ez verses and their Amharic rendering. The
  * choice is remembered while the screen lives but deliberately not persisted —
@@ -413,12 +450,7 @@ private fun ClosingPrayer(fontSp: Int) {
     val style = readingBodyStyle(fontSp, CLOSING_LINE_HEIGHT).let {
         it.copy(fontSize = it.fontSize * CLOSING_FONT_SCALE, lineHeight = it.lineHeight * CLOSING_FONT_SCALE)
     }
-    Spacer(Modifier.height(Spacing.xl))
-    HorizontalDivider(
-        modifier = Modifier.fillMaxWidth(),
-        thickness = 1.dp,
-        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
-    )
+    Spacer(Modifier.height(Spacing.xxl))
     val language = if (showAmharic) s.closingPrayerAmharic else s.closingPrayerGeez
     Column(
         Modifier
@@ -605,9 +637,9 @@ private fun Modifier.paragraphSelection(selected: Boolean, onTap: (() -> Unit)?)
 
 /** The centered "አርኬ" heading above the hymn. */
 @Composable
-private fun ArkeLabel(text: String) {
+private fun ArkeLabel() {
     Text(
-        text = text,
+        text = ARKE_LABEL,
         style = MaterialTheme.typography.labelLarge.inReadingFont(),
         // The rubric colour, not the accent. Ethiopic manuscripts mark a
         // section title and an opening line in cinnabar, and every printed
@@ -620,7 +652,13 @@ private fun ArkeLabel(text: String) {
     )
 }
 
-/** An arke verse — italic, centered, red, and selectable like the prose. */
+/**
+ * The hymn — italic, centered, red, and selectable like the prose.
+ *
+ * Always centered, because the source now marks every one of them and there is
+ * no longer a case where a hymn falls through the parser and is set as running
+ * prose. A hymn of several stanzas is one selectable piece: it is sung as one.
+ */
 @Composable
 private fun ArkeVerse(
     text: String,
@@ -642,35 +680,48 @@ private fun ArkeVerse(
     }
 }
 
-/** A scripture-quote entry: the passage in a card, with a bookmark toggle. */
+/**
+ * The day's reading: the passage and the reference it came from, as one thing.
+ *
+ * The scan writes them as two blocks and they were drawn as two, which let the
+ * citation be tapped, selected, copied and shared on its own as though it were
+ * a paragraph of the book. One card, one bookmark, the reference set quiet
+ * beneath the passage it belongs to.
+ */
 @Composable
-private fun ScriptureBody(
-    rawText: String,
+private fun ReadingBlock(
+    reading: SynaxariumReading,
     fontSp: Int,
     bookmarked: Boolean,
     onToggleBookmark: () -> Unit,
 ) {
     val s = LocalStrings.current
-    // A few scripture entries carry an embedded አርኬ hymn after the quotation —
-    // the quote goes in the card, the hymn sits centered below it.
-    val paras = parseSynaxarium(rawText)
-    val quote = paras.filter { it.kind == SynaxariumParaKind.NARRATIVE }
-        .joinToString("\n\n") { it.text }
-    // The bookmark sits in the card's own corner. It used to float in a
-    // full-width row of its own above it, right-aligned against nothing, so it
-    // read as belonging to the page rather than to the passage under it.
-    Box(Modifier.fillMaxWidth()) {
+    Box(Modifier.fillMaxWidth().padding(bottom = Spacing.md)) {
         androidx.compose.foundation.text.selection.SelectionContainer {
-            Text(
-                text = quote,
-                style = readingBodyStyle(fontSp),
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier
+            Column(
+                Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(14.dp))
                     .background(MaterialTheme.colorScheme.surface)
                     .padding(start = 14.dp, top = 14.dp, bottom = 14.dp, end = 46.dp),
-            )
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = reading.text,
+                    style = readingBodyStyle(fontSp),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                reading.cite?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.labelMedium.inReadingFont(),
+                        color = MaterialTheme.colorScheme.secondary,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
         }
         IconButton(
             onClick = onToggleBookmark,
@@ -685,31 +736,24 @@ private fun ScriptureBody(
             )
         }
     }
-    paras.forEach { para ->
-        when (para.kind) {
-            SynaxariumParaKind.ARKE_LABEL -> ArkeLabel(para.text)
-            SynaxariumParaKind.ARKE_VERSE -> ArkeVerse(para.text, fontSp)
-            SynaxariumParaKind.NARRATIVE -> Unit
-        }
-    }
 }
 
-/** The whole day's commemorations as plain text, for the share actions. */
-private fun synaxariumShareBody(entries: List<SynaxariumEntry>): String =
-    entries.joinToString("\n\n") { e ->
-        buildString {
-            val t = cleanSynaxariumText(e.title)
-            if (t.isNotBlank()) {
-                append(t)
-                append("\n")
-            }
-            append(parseSynaxarium(e.text).joinToString("\n") { it.text })
-        }
+/** The whole day as plain text, for the share actions. */
+private fun synaxariumShareBody(day: SynaxariumDay): String = buildString {
+    day.entries.forEach { e ->
+        append(e.paragraphs.joinToString("\n") { it.text })
+        e.arke?.let { append("\n\n"); append(it) }
+        append("\n\n")
     }
+    day.reading?.let {
+        append(it.text)
+        it.cite?.let { c -> append("\n"); append(c) }
+    }
+}.trim()
 
 /** A short one-line preview of an entry's body for the bookmarks list. */
 private fun snippet(rawText: String): String {
-    val clean = cleanSynaxariumText(rawText.replace('\n', ' '))
+    val clean = rawText.replace('\n', ' ').trim()
     return if (clean.length > 90) clean.take(89).trimEnd() + "…" else clean
 }
 
@@ -718,8 +762,7 @@ private fun snippet(rawText: String): String {
  *
  * The longest day of the year is twelve entries and sixteen thousand
  * characters — about twenty screenfuls — and there was nothing to move through
- * it with. The opening doxology and the feast lists are left out: what a reader
- * is looking for is a life.
+ * it with. Each row is a life, titled by the sentence its account opens with.
  */
 @Composable
 private fun SynaxariumContents(entries: List<SynaxariumEntry>, onSelect: (Int) -> Unit) {
@@ -737,17 +780,11 @@ private fun SynaxariumContents(entries: List<SynaxariumEntry>, onSelect: (Int) -
             Spacer(Modifier.height(Spacing.sm))
         }
         itemsIndexed(entries) { index, entry ->
-            val kind = synaxariumEntryKind(entry.title)
-            if (kind == SynaxariumEntryKind.OPENING) return@itemsIndexed
-            val title = cleanSynaxariumText(entry.title)
+            val title = entry.heading
             if (title.isBlank()) return@itemsIndexed
             com.agpeya.app.ui.common.ListRow(
                 title = title,
-                subtitle = when (kind) {
-                    SynaxariumEntryKind.SCRIPTURE -> s.bookmarkGroupScripture
-                    SynaxariumEntryKind.FEAST_LIST -> s.fastingTitle
-                    else -> null
-                },
+                subtitle = if (entry.arke != null) ARKE_LABEL else null,
                 onClick = { onSelect(index) },
             )
         }

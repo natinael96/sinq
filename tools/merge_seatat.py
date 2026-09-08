@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC  = ROOT / "sources/books"
-OUT  = ROOT / "sources/merged"
+OUT  = ROOT / "sources/generated"
 GEZ  = SRC / "መጽሐፈ ሰዓታት በግዕዝ.json"
 BI   = SRC / "መጽሐፈ ሰዓታት በግዕዝና አማርኛ.json"
 ABAY = SRC / "መጽሐፈ ሰዓታት ዘደብረ ዓባይ.json"

@@ -96,7 +96,7 @@ These are *missing content*, not wrong rules. Do not fabricate replacements.
 - **Yekatit 3 (ስንክሳር)** — the source carried a mislabeled duplicate day whose
   entries were Hamle 29's; both were removed in v0.5.2 rather than shipped
   wrong. The day now renders the empty state. A trusted text for Yekatit 3 is
-  needed, ideally through `tools/extract_sinksar.py` rather than by hand.
+  needed, ideally through `tools/build_sinksar.py` rather than by hand.
 - **Ge'ez ስንክሳር** — the bundled data has Amharic only; there is no Ge'ez field.
   Adding it needs a source and a schema change (`textGeez` per entry), then a
   regeneration.

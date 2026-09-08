@@ -8,7 +8,7 @@ import json, os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-D = ROOT / 'content/gitsawe'
+D = ROOT / 'sources/gitsawe'
 OUT = D / 'months'
 os.makedirs(OUT, exist_ok=True)
 

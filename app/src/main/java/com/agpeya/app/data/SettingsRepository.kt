@@ -104,6 +104,9 @@ object SettingsRepository {
     private val KEY_ALARM_ALERT = stringPreferencesKey("alarm_alert")
     private val KEY_ALARM_SOUND = stringPreferencesKey("alarm_sound")
     private val KEY_MISBAK_LANGUAGE = stringPreferencesKey("misbak_language")
+    // Which ስንክሳር edition is read. The two are parallel editions rather than a
+    // parallel text, so this is a choice of book, not a display toggle.
+    private val KEY_SINKSAR_EDITION = stringPreferencesKey("sinksar_edition")
     // What travels with a copied verse, and what the four highlight colours
     // are called. Both belong to the reader, not to the app.
     private val KEY_COPY_VERSE_NUMBERS = booleanPreferencesKey("copy_verse_numbers")
@@ -344,6 +347,18 @@ object SettingsRepository {
 
     suspend fun setReadingAlignment(context: Context, value: ReadingAlignment) {
         context.settingsDataStore.edit { it[KEY_READING_ALIGNMENT] = value.name }
+    }
+
+    fun synaxariumEdition(context: Context): Flow<String> =
+        context.settingsDataStore.data.map {
+            it[KEY_SINKSAR_EDITION]
+                ?.takeIf { code -> code in com.agpeya.app.model.SynaxariumEdition.all }
+                ?: com.agpeya.app.model.SynaxariumEdition.AMHARIC
+        }
+
+    suspend fun setSynaxariumEdition(context: Context, edition: String) {
+        if (edition !in com.agpeya.app.model.SynaxariumEdition.all) return
+        context.settingsDataStore.edit { it[KEY_SINKSAR_EDITION] = edition }
     }
 
     fun misbakLanguage(context: Context): Flow<MisbakLanguage> =

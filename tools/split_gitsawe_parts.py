@@ -11,8 +11,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
-SOURCE = ROOT / "content/gitsawe/gitsawe-master.json"
-OUT = ROOT / "content/gitsawe/parts"
+SOURCE = ROOT / "sources/gitsawe/gitsawe-master.json"
+OUT = ROOT / "sources/gitsawe/parts"
 
 FILES = {
     2: "02-movable-feasts-and-fasts.json",

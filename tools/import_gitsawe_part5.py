@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
-SOURCE = ROOT / "content/gitsawe/parts/05-bahre-hasab-tables.json"
+SOURCE = ROOT / "sources/gitsawe/parts/05-bahre-hasab-tables.json"
 OUT = ROOT / "app/src/main/assets/content/gitsawe/bahre-hasab-reference.json"
 
 

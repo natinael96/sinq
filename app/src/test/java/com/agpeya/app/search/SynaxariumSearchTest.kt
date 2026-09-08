@@ -27,7 +27,7 @@ class SynaxariumSearchTest {
     private val docs by lazy {
         (1..13).flatMap { month ->
             val data = json.decodeFromString<SynaxariumMonth>(
-                File(contentDir, "sinksar/$month.json").readText(),
+                File(contentDir, "sinksar/am-$month.json").readText(),
             )
             AmharicSearch.synaxariumDocs(month, 2015, data.days)
         }

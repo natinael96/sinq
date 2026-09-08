@@ -13,7 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 # The scans, and the one book built from several of them by merge_seatat.py.
-SOURCES = [ROOT / "sources/books", ROOT / "sources/merged"]
+SOURCES = [ROOT / "sources/books", ROOT / "sources/generated"]
 OUT = ROOT / "app/src/main/assets/content/books"
 
 # The three unmerged መጽሐፈ ሰዓታት copies; tools/merge_seatat.py folds them into one.

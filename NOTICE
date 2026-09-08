@@ -42,17 +42,26 @@ the full SIL OFL 1.1 and MIT licence texts.
    that transcription and want it removed or re-credited, please open an issue.
 
 3. ስንክሳር (SYNAXARIUM)
-   Amharic synaxarium text, drawn from two sources:
-     * The gitsaweandsinksarbot project by hailemariam-eyayu
-       (https://github.com/hailemariam-eyayu/gitsaweandsinksarbot),
-       normalized by tools/extract_sinksar.py.
-     * The Nexuss0781/synaxarium dataset on the Hugging Face Hub
-       (https://huggingface.co/datasets/Nexuss0781/synaxarium), tagged
-       MIT License, normalized by tools/extract_sinksar_hf.py (the current
-       source of the bundled text). The MIT permission notice is reproduced
-       in the app's Licenses & sources screen.
+   Both editions — መጽሐፈ ስንክሳር በአማርኛ and መጽሐፈ ስንክሳር በግእዝ, 366 days each —
+   were scanned from available PDF scans of the printed books by the Sinq
+   maintainer, who releases them as open content under CC BY-NC-ND 4.0, the
+   same terms as the bundled Bible text. Built by tools/build_sinksar.py.
    The underlying commemorations are traditional Ethiopian Orthodox
    liturgical content.
+
+   The text is reproduced as the scans carry it, with three disclosed
+   exceptions: each paragraph's number is written twice in the source, once
+   in Arabic and once in Ge'ez, and only the Ge'ez is kept (all 18,764 of
+   them agree, which the generator re-proves on every run); editorial
+   dingbats and stray markup are removed; and two Ge'ez days that carry no
+   heading block are given one naming their date.
+
+   Earlier releases of Sinq bundled the Amharic synaxarium from the
+   gitsaweandsinksarbot project by hailemariam-eyayu
+   (https://github.com/hailemariam-eyayu/gitsaweandsinksarbot) and the
+   Nexuss0781/synaxarium dataset on the Hugging Face Hub
+   (https://huggingface.co/datasets/Nexuss0781/synaxarium). Neither is
+   bundled any longer.
 
 4. ግጻዌ (GITSAWE)
    The lectionary (the fixed 366-day cycle plus the movable, Sunday,
