@@ -30,10 +30,11 @@ object HabitsRepository {
      * Prayer is NOT a single habit — each prayer hour is tracked individually
      * with a "hour_<hourId>" record id (see [hourHabitId]).
      */
-    /** The day's portion of the Psalter, recorded when the reader finishes it. */
-    const val DAWIT = "dawit"
-
-    val BUILT_IN_IDS = listOf("sinksar", "church", "prostrate", "bible", DAWIT)
+    // ዳዊት was here briefly, recorded when the day's psalms were finished. It
+    // went because የዕለት ንባብ already covers reading, and a fifth daily tick for
+    // something the app marks on your behalf is a chore nobody chose. Records
+    // already written under "dawit" are left alone; it is simply not offered.
+    val BUILT_IN_IDS = listOf("sinksar", "church", "prostrate", "bible")
 
     fun hourHabitId(hourId: String): String = "hour_$hourId"
 

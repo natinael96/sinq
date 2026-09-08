@@ -365,6 +365,7 @@ private fun DayHeader(
     // thing this header exists to say — into third place.
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
         Column(Modifier.weight(1f)) {
+            com.agpeya.app.ui.common.SinqWordmark()
             Text(
                 com.agpeya.app.ui.common.formatEthiopian(today, s),
                 style = MaterialTheme.typography.titleMedium,
@@ -653,11 +654,15 @@ private fun ShortcutCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // SinqCard lays its content out in a Column, so the row has to be one:
+    // Modifier.weight in a column whose height is its content measures to
+    // zero, which is why these cards shipped in 1.8.1 drawing nothing at all.
     SinqCard(
         onClick = onClick,
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.sm),
     ) {
+      Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             Text(
                 title,
@@ -681,6 +686,7 @@ private fun ShortcutCard(
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(IconSize.small),
         )
+      }
     }
 }
 
@@ -724,6 +730,7 @@ private fun ReadingCard(planLine: Pair<Int, String>?, onClick: () -> Unit, modif
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.sm),
     ) {
+      Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             Text(
                 buildAnnotatedString {
@@ -753,6 +760,7 @@ private fun ReadingCard(planLine: Pair<Int, String>?, onClick: () -> Unit, modif
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(IconSize.small),
         )
+      }
     }
 }
 

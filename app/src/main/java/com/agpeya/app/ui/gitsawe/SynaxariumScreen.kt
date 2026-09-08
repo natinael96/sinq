@@ -551,16 +551,21 @@ private fun NarrativePara(
 }
 
 /**
- * The day's opening doxology: the same words every day of a month, so they are
- * set below the body rather than as part of it.
+ * The day's opening doxology.
+ *
+ * The same body text as everything else. It was set smaller and muted to keep
+ * it from competing with the first commemoration, which was the wrong tool: it
+ * is the same book in the same voice. Carrying no number is enough to mark it
+ * as the day's preface, and it leaves the አርኬ as the only thing on the page
+ * that is set apart.
  */
 @Composable
 private fun OpeningPara(text: String, fontSp: Int, selected: Boolean, onTap: () -> Unit) {
     androidx.compose.foundation.text.selection.SelectionContainer {
         Text(
             text = text,
-            style = readingBodyStyle(fontSp).let { it.copy(fontSize = it.fontSize * 0.92f) },
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = readingBodyStyle(fontSp),
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
                 .fillMaxWidth()
                 .paragraphSelection(selected, onTap)
@@ -612,7 +617,11 @@ private fun ArkeLabel(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelLarge.inReadingFont(),
-        color = MaterialTheme.colorScheme.secondary,
+        // The rubric colour, not the accent. Ethiopic manuscripts mark a
+        // section title and an opening line in cinnabar, and every printed
+        // liturgy sets the sung text in black and the rubric in red. Taking it
+        // off was over-reach when the entry colouring came off.
+        color = sinqColors.arke,
         textAlign = TextAlign.Center,
         letterSpacing = 6.sp,
         modifier = Modifier.fillMaxWidth().padding(top = Spacing.xl, bottom = 10.dp),
@@ -631,7 +640,7 @@ private fun ArkeVerse(
         Text(
             text = text,
             style = readingBodyStyle(fontSp, ArkeLineHeight).copy(fontStyle = FontStyle.Italic),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = sinqColors.arke,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()

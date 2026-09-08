@@ -181,6 +181,25 @@ fun CollapsibleHeader(
  * step and the outline already carry the separation, and neither costs a
  * shadow-rendering pass on a low-end device.
  */
+/**
+ * The app's name, small, at the top of a root page.
+ *
+ * Not a headline — a mark. The full-size wordmark went in the compaction and
+ * took the pages' top edge with it: with nothing above the first line, ቤት and
+ * ጉዞ read as content pushed against the status bar. This gives the eye
+ * somewhere to start for about 22 dp instead of the 40 the headline cost.
+ */
+@Composable
+fun SinqWordmark(modifier: Modifier = Modifier) {
+    Text(
+        text = "ስንቅ",
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.secondary,
+        maxLines = 1,
+        modifier = modifier,
+    )
+}
+
 @Composable
 fun SinqCard(
     modifier: Modifier = Modifier,

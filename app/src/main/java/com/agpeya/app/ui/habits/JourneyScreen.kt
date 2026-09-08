@@ -78,7 +78,6 @@ private fun builtInName(id: String, s: Strings): String = when (id) {
     "church" -> s.habitChurch
     "prostrate" -> s.habitProstrate
     "bible" -> s.habitBible
-    "dawit" -> s.habitDawit
     else -> id
 }
 
@@ -151,8 +150,11 @@ fun JourneyScreen(
             contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.xs),
         ) {
             item {
-                // No page title: the tab beneath it is already labelled ጉዞ,
-                // and 37 dp of the first screen went on saying so twice.
+                // The mark, not a page title: the tab beneath is already
+                // labelled ጉዞ, so the name of the app is what belongs here —
+                // and without it the page read as content jammed to the top.
+                com.agpeya.app.ui.common.SinqWordmark()
+                Spacer(Modifier.height(Spacing.xs))
                 //
                 // The one hero on this screen: today's candle and the period's
                 // count of days prayed. Restrained on purpose — the point is a

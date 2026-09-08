@@ -88,7 +88,6 @@ interface Strings {
     val habitChurch: String
     val habitProstrate: String
     val habitBible: String
-    val habitDawit: String
     val manageHabits: String
     val manageHabitsIntro: String
     val newHabit: String
@@ -887,7 +886,6 @@ object AmharicStrings : Strings {
     override val habitChurch = "ቤተ ክርስቲያን"
     override val habitProstrate = "ስግደት"
     override val habitBible = "የዕለት ንባብ"
-    override val habitDawit = "ዳዊት"
     override val manageHabits = "ልማዶች አስተካክል"
     override val manageHabitsIntro = "ልማዶችን ይጨምሩ፣ ስም ይቀይሩ፣ ደርድሩ ወይም ይደብቁ።"
     override val newHabit = "አዲስ ልማድ"
@@ -1617,7 +1615,6 @@ object EnglishStrings : Strings {
     override val habitChurch = "Church"
     override val habitProstrate = "Prostration"
     override val habitBible = "Daily Bible"
-    override val habitDawit = "Daily Psalms"
     override val manageHabits = "Manage habits"
     override val manageHabitsIntro = "Add, rename, reorder or hide habits."
     override val newHabit = "New habit"

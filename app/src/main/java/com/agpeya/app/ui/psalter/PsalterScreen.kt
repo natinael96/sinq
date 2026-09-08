@@ -168,27 +168,6 @@ fun PsalterScreen(
         }
     }
 
-    // The day's portion of the Psalter, read to its end, is ዳዊት kept. Only the
-    // daily portion counts — browsing the whole book from a bookmark is
-    // reading, not the day's ዳዊት — and the flow completes on first arrival, so
-    // this writes once per visit.
-    LaunchedEffect(daily, range, readingMode, shown.size) {
-        if (!daily || range == null || shown.isEmpty()) return@LaunchedEffect
-        val foot = if (readingMode == ReadingMode.VERTICAL) {
-            headerCount() + shown.size          // the trailing spacer item
-        } else {
-            shown.size - 1
-        }
-        snapshotFlow {
-            if (readingMode == ReadingMode.VERTICAL) {
-                listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
-            } else {
-                pagerState.currentPage
-            }
-        }.first { it >= foot }
-        HabitsRepository.markDone(context, today.toString(), HabitsRepository.DAWIT)
-    }
-
     fun toggleBookmark(section: Section) {
         scope.launch {
             UserDataRepository.toggleBookmark(
