@@ -187,10 +187,7 @@ fun ModeEditorScreen(modeId: String, onBack: () -> Unit) {
             confirmButton = {
                 TextButton(onClick = {
                     showNotifDenied = false
-                    context.startActivity(
-                        android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                            .putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName),
-                    )
+                    com.agpeya.app.ui.common.openNotificationSettings(context)
                 }) { Text(s.openSettings) }
             },
             dismissButton = {

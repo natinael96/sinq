@@ -1029,7 +1029,7 @@ fun RemindersSettingsScreen(
             item {
                 if (!NotificationManagerCompat.from(context).areNotificationsEnabled() && remindersOn) {
                     NotificationsOffBanner {
-                        context.startActivity(android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName))
+                        com.agpeya.app.ui.common.openNotificationSettings(context)
                     }
                     Spacer(Modifier.height(Spacing.md))
                 }

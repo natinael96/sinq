@@ -253,14 +253,22 @@ object GitsaweRepository {
      */
     suspend fun mahletsByFeast(context: Context): List<FeastMahlets> {
         val all = allMahlets(context)
-        return all.groupBy { it.subFeast.feast }
+        // A fixed feast has one row carrying its ዋዜማ and its ማኅሌት. ዘመነ ጽጌ is
+        // not that shape: its "feast" holds six numbered weeks, each with its
+        // own order of service, so grouping them together would put five of
+        // them behind one row and leave four unreachable.
+        return all.groupBy { it.subFeast.feast + (seasonWeekOf(it.subFeast.key)?.let { w -> "#$w" } ?: "") }
             .map { (_, orders) ->
                 val kept = orders.filter { it.mahlet.detail.isNotEmpty() }
+                val week = seasonWeekOf(orders.first().subFeast.key)
                 FeastMahlets(
                     // The source writes the date into the name as well, so it
-                    // would appear twice beside a date column.
-                    feastName = (orders.first().feast?.amharicName ?: orders.first().subFeast.amharicName)
-                        .substringBefore(" (").trim(),
+                    // would appear twice beside a date column. A week of a
+                    // season is named by the week, not by the season.
+                    feastName = (
+                        if (week != null) orders.first().subFeast.amharicName
+                        else orders.first().feast?.amharicName ?: orders.first().subFeast.amharicName
+                        ).substringBefore(" (").trim(),
                     orders = kept.ifEmpty { orders },
                     feast = orders.first().feast,
                     complete = kept.isNotEmpty(),

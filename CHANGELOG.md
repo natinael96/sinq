@@ -38,6 +38,20 @@ features; `versionCode` increments on every release).
   letter as well. The ይዌድስዋ መላእክት litany is corrected against the printed book.
 - **A ዳዊት day opens the Psalter**, not the Bible reader, which does not carry
   the Psalter at all.
+- **Four ማኅሌት of ዘመነ ጽጌ had become unreachable.** The index groups a feast with
+  its services, but ጽጌ is not that shape — it holds six numbered weeks, each
+  with its own order — so five collapsed into one row and four could be opened
+  nowhere. 94 parts of transcribed ማኅሌት were behind that row.
+- **A verse with two reference lists lost the second.** The reader hands them to
+  the parser joined, and the parser only read from the start of the string, so
+  everything after the first citation went — and the bare "chapter፥verse" that
+  followed inherited the wrong book, putting መዝሙር ፴፰፥፲፪ under ሚክያስ. The book
+  pattern was also matching the ፤ that separates citations.
+- **በዓለ ትንሳኤ sat under a heading naming ዘመነ ጽጌ.** The undated group took its
+  title from its first row.
+- **Opening notification settings crashed on Android 6 and 7**, which have no
+  per-app notification page. Three screens called it unguarded; they fall back
+  to the app's own settings page now.
 
 ### Changed
 - **Cross-references are behind a tap and they open.** Selecting a verse gives

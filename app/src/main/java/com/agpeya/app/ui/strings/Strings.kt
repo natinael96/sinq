@@ -136,6 +136,8 @@ interface Strings {
     val mahletTitle: String
     val mahletSubtitle: String
     val mahletVigil: String
+    /** The heading over the feasts that fall on no fixed date. */
+    val mahletMovable: String
     /** "፫ ከ፴፭" — which part of how many, since a name repeats up to 13 times. */
     fun mahletNth(n: Int, of: Int): String
     val mahletDawn: String
@@ -925,6 +927,7 @@ object AmharicStrings : Strings {
     override val synaxariumLibrarySubtitle = "የዓመቱ የቅዱሳን መታሰቢያ"
     override val mahletSubtitle = "የበዓላት ማኅሌትና ዋዜማ"
     override val mahletVigil = "ዋዜማ"
+    override val mahletMovable = "የወር ቀን የሌላቸው"
     override fun mahletNth(n: Int, of: Int) =
         "${com.agpeya.app.ui.reading.geezNumeral(n)} ከ${com.agpeya.app.ui.reading.geezNumeral(of)}"
     override val mahletDawn = "ነግሥ"
@@ -1658,6 +1661,7 @@ object EnglishStrings : Strings {
     override val synaxariumLibrarySubtitle = "The year's commemorations"
     override val mahletSubtitle = "Orders of service for the feasts"
     override val mahletVigil = "ዋዜማ"
+    override val mahletMovable = "Movable feasts"
     override fun mahletNth(n: Int, of: Int) = "$n of $of"
     override val mahletDawn = "ነግሥ"
     override fun mahletParts(n: Int) = if (n == 1) "1 part" else "$n parts"

@@ -41,6 +41,29 @@ class CrossReferenceTest {
     }
 
     @Test
+    fun `a verse carrying two reference lists keeps both`() {
+        // መኃልየ መኃልይ ፩፥፩ has two refs entries, and the reader joins them. A rule
+        // anchored at the start read the first citation of each and dropped the
+        // rest; the bare verse that followed then inherited the wrong book.
+        val joined = "መኃል 4፥10። ሉቃስ 7፥46፤ ዮሐን 12፥3፤ መክብ 7፥1።"
+        val refs = CrossReference.parse(joined)
+        assertEquals(4, refs.size)
+        assertEquals(
+            listOf("song-of-solomon", "luke", "john", "ecclesiastes"),
+            refs.map { it.bookKey },
+        )
+    }
+
+    @Test
+    fun `an unknown book is dropped and does not adopt the one before it`() {
+        val refs = CrossReference.parse("ማቴዎ 9፥37፤ ዘየለም 2፥2፤ 3፥3", names)
+        // The unknown citation goes; the bare one after it continues ማቴዎስ,
+        // which is the book it actually follows in the printed list.
+        assertEquals(listOf("matthew", "matthew"), refs.map { it.bookKey })
+        assertEquals(listOf(37, 3), refs.map { it.verse })
+    }
+
+    @Test
     fun `what cannot be read is dropped rather than guessed at`() {
         assertTrue(CrossReference.parse("", names).isEmpty())
         assertTrue(CrossReference.parse("ወንጌል", names).isEmpty())
@@ -62,10 +85,19 @@ class CrossReferenceTest {
         booksDir.listFiles().orEmpty().sortedBy { it.name }.forEach { file ->
             json.parseToJsonElement(file.readText()).jsonObject["chapters"]!!.jsonArray.forEach { ch ->
                 ch.jsonObject["verses"]!!.jsonArray.forEach { v ->
+                    val joined = mutableListOf<String>()
                     v.jsonObject["refs"]?.jsonArray.orEmpty().forEach { r ->
                         val target = r.jsonObject["target"]?.jsonPrimitive?.content.orEmpty()
                         atoms += target.split('፤').count { it.isNotBlank() }
                         parsed += CrossReference.parse(target).size
+                        joined.add(target)
+                    }
+                    // The reader hands the parser every list of a verse joined
+                    // into one string, so that is what has to parse.
+                    if (joined.size > 1) {
+                        val apart = joined.sumOf { CrossReference.parse(it).size }
+                        val together = CrossReference.parse(joined.joinToString(" ")).size
+                        assertEquals("a joined verse loses references", apart, together)
                     }
                 }
             }

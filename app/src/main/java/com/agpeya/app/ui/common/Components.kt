@@ -189,6 +189,27 @@ fun CollapsibleHeader(
  * ጉዞ read as content pushed against the status bar. This gives the eye
  * somewhere to start for about 22 dp instead of the 40 the headline cost.
  */
+/**
+ * Open this app's notification settings, falling back to the app's own page.
+ *
+ * `ACTION_APP_NOTIFICATION_SETTINGS` only exists from Oreo, and minSdk here is
+ * 23, so on API 23–25 the unguarded call throws ActivityNotFoundException and
+ * takes the screen down. Those versions have no per-app notification page at
+ * all; the app detail page is where the setting lives.
+ */
+fun openNotificationSettings(context: android.content.Context) {
+    val intent = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+        android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+            .putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName)
+    } else {
+        android.content.Intent(
+            android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            android.net.Uri.fromParts("package", context.packageName, null),
+        )
+    }
+    runCatching { context.startActivity(intent) }
+}
+
 @Composable
 fun SinqWordmark(modifier: Modifier = Modifier) {
     Text(

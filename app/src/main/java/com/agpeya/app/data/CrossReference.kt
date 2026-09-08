@@ -23,7 +23,18 @@ object CrossReference {
         val route: String get() = "scripture/$bookKey/$chapter?start=$verse&end=$verse"
     }
 
-    private val ATOM = Regex("""^\s*(?:(\d?[ሀ-፿]+)\s+)?(\d{1,3})[፥:](\d{1,3})""")
+    /**
+     * Every citation in a string, in order. Not anchored: a verse can carry
+     * more than one reference list and they arrive joined, so a rule that only
+     * matched from the start read the first citation of each and dropped the
+     * rest — and the bare "chapter፥verse" that followed then inherited whatever
+     * book came before it, which put መዝሙር ፴፰፥፲፪ under ሚክያስ.
+     *
+     * The book class is Ethiopic syllables only (U+1200–U+135A). Written as
+     * ሀ-፿ it also swallowed the ፤ that separates the citations, and every
+     * reference after the first was then dropped as an unknown book.
+     */
+    private val ATOM = Regex("""(?:(\d?[\u1200-\u135A]+)\s*)?(\d{1,3})[፥:](\d{1,3})""")
 
     /**
      * Parse a printed reference string. [names] maps a book slug to the Amharic
@@ -35,18 +46,23 @@ object CrossReference {
     fun parse(raw: String, names: Map<String, String> = emptyMap()): List<Ref> {
         val out = mutableListOf<Ref>()
         var lastBook: String? = null
-        for (piece in raw.split('፤', ';')) {
-            val atom = piece.trim().trimEnd('።', '.', ' ')
-            if (atom.isEmpty()) continue
-            val m = ATOM.find(atom) ?: continue
+        var lastAbbreviation: String? = null
+        for (m in ATOM.findAll(raw)) {
             val abbreviation = m.groupValues[1].takeIf { it.isNotBlank() }
-            val key = abbreviation?.let { BOOKS[it] } ?: lastBook ?: continue
+            val key = when {
+                // A citation with no book of its own continues the last one.
+                abbreviation == null -> lastBook ?: continue
+                // One the table does not know is dropped, and does not become
+                // the book the citations after it inherit.
+                else -> BOOKS[abbreviation] ?: continue
+            }
             lastBook = key
+            if (abbreviation != null) lastAbbreviation = abbreviation
             val chapter = m.groupValues[2].toIntOrNull() ?: continue
             val verse = m.groupValues[3].toIntOrNull() ?: continue
             out += Ref(
                 bookKey = key,
-                bookName = names[key] ?: abbreviation.orEmpty(),
+                bookName = names[key] ?: abbreviation ?: lastAbbreviation.orEmpty(),
                 chapter = chapter,
                 verse = verse,
             )

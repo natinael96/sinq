@@ -78,9 +78,11 @@ fun MahletListScreen(onBack: () -> Unit, onOpen: (subFeastKey: String) -> Unit) 
             groups.forEach { (monthNum, items) ->
                 item(key = "h_${monthNum ?: 0}") {
                     Spacer(Modifier.height(Spacing.md))
+                    // The undated group holds both ዘመነ ጽጌ's weeks and ትንሣኤ, so
+                    // it cannot be headed by the first row's name: that put
+                    // በዓለ ትንሳኤ under a heading naming ጽጌ.
                     SectionHeader(
-                        monthNum?.let { s.ethMonths.getOrNull(it - 1) }
-                            ?: items.firstOrNull()?.feastName.orEmpty(),
+                        monthNum?.let { s.ethMonths.getOrNull(it - 1) } ?: s.mahletMovable,
                     )
                 }
                 items(items.size, key = { items[it].orders.first().subFeast.key }) { i ->
@@ -133,7 +135,11 @@ private fun FeastRow(
             )
             Spacer(Modifier.height(Spacing.xxs))
             if (feast.complete) {
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                // FlowRow, because a feast can appoint more than the two a
+                // fixed day does and a plain Row runs off the right edge.
+                androidx.compose.foundation.layout.FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                ) {
                     feast.orders.forEach { order ->
                         Text(
                             "${if (order.isEve) s.mahletVigil else s.mahletDawn} ${geezNumeral(order.mahlet.detail.size)}",
