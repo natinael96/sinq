@@ -156,7 +156,6 @@ object SettingsRepository {
     // Read but inert in a Play build, where UpdateRepository is compiled dark:
     // this says whether the person wants the notice, never whether the build is
     // allowed to show it.
-    private val KEY_UPDATE_CHECK = booleanPreferencesKey("update_check")
 
     // The versionCode whose tour has been seen. Written when the tour is
     // finished OR skipped — never when it opens, so a tour interrupted by a
@@ -730,19 +729,12 @@ object SettingsRepository {
     val KEY_VOW_SCHEDULED_IDS_PUBLIC get() = KEY_VOW_SCHEDULED_IDS
     val KEY_PENANCE_SCHEDULED_IDS_PUBLIC get() = KEY_PENANCE_SCHEDULED_IDS
 
-    fun updateCheck(context: Context): Flow<Boolean> =
-        context.settingsDataStore.data.map { it[KEY_UPDATE_CHECK] ?: true }
-
     /** null when no tour has ever run here — a first install, or an old build. */
     fun lastTourVersion(context: Context): Flow<Int?> =
         context.settingsDataStore.data.map { it[KEY_LAST_TOUR_VERSION] }
 
     suspend fun setLastTourVersion(context: Context, versionCode: Int) {
         context.settingsDataStore.edit { it[KEY_LAST_TOUR_VERSION] = versionCode }
-    }
-
-    suspend fun setUpdateCheck(context: Context, value: Boolean) {
-        context.settingsDataStore.edit { it[KEY_UPDATE_CHECK] = value }
     }
 
 

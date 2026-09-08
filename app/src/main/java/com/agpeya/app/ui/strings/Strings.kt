@@ -788,10 +788,7 @@ interface Strings {
     val whatsNewTour: String
     val updateDownload: String
     val updateDismiss: String
-    val settingsUpdateCheck: String
-    val settingsUpdateCheckDesc: String
     /** About row when the check is off, or nothing has been found yet. */
-    val updateNoneFound: String
 
     // ── ቁርባን ዝግጅት (communion preparation) ──────────────────────────────────
 
@@ -1519,10 +1516,6 @@ object AmharicStrings : Strings {
     override val whatsNewTour = "የአዲሱ እትም ጉብኝት"
     override val updateDownload = "አውርድ"
     override val updateDismiss = "ዝጋ"
-    override val settingsUpdateCheck = "አዲስ እትም ፈልግ"
-    override val settingsUpdateCheckDesc =
-        "በቀን አንዴ ጊትሀብን ይጠይቃል። የመተግበሪያው ብቸኛ የኢንተርኔት አገልግሎት ነው፤ ማጥፋት ይችላሉ።"
-    override val updateNoneFound = "አዲስ እትም የለም"
 
     // ── ቁርባን ዝግጅት ──────────────────────────────────────────────────────────
 
@@ -2263,10 +2256,6 @@ object EnglishStrings : Strings {
     override val whatsNewTour = "What's new in this version"
     override val updateDownload = "Get it"
     override val updateDismiss = "Dismiss"
-    override val settingsUpdateCheck = "Check for updates"
-    override val settingsUpdateCheckDesc =
-        "Asks GitHub once a day. The app's only use of the internet — you can turn it off."
-    override val updateNoneFound = "No new version"
 
     // ── Communion preparation ────────────────────────────────────────────────
 

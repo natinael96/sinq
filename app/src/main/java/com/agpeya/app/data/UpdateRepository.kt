@@ -92,9 +92,12 @@ object UpdateRepository {
      * Every failure — no network, no GitHub, a rate limit, a body that does not
      * parse — is swallowed: the line simply does not appear.
      */
-    suspend fun check(context: Context, enabled: Boolean, now: Long = System.currentTimeMillis()) {
+    suspend fun check(context: Context, now: Long = System.currentTimeMillis()) {
+        // The only switch that matters is the build's own: the .aab for Play is
+        // built without UPDATE_NOTICE, because a Play build pointing at a page
+        // of APKs is a policy breach. The hand-installed APK is the one that
+        // checks, and someone who installed it that way wants to know.
         if (!BuildConfig.UPDATE_NOTICE) return
-        if (!enabled) return
         val prefs = context.updateDataStore.data.first()
         val etag = prefs[KEY_ETAG].orEmpty()
         withContext(Dispatchers.IO) {

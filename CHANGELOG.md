@@ -56,6 +56,9 @@ features; `versionCode` increments on every release).
   inside ፭፥፮, and መዝ ፻፵፥፭ and ፥፮ inside ፻፵፥፬, each with the verse marker still
   in the text saying where the boundary had been. The ምስባክ is chanted from that
   edition and cites it by verse.
+- **The ግጻዌ page's ⋮ shared in a shape of its own.** Copy and share there
+  ignored ቅዳና አጋራ while the very same passage from the selection bar obeyed it.
+  Every menu in the app now formats a passage the one way.
 - **The Bible catalogue can no longer disagree with the Bible.** It claimed
   2,459 Ge'ez verses for a Psalter that holds 2,462; nothing counted them. The
   content gate does now.
@@ -64,6 +67,11 @@ features; `versionCode` increments on every release).
   to the app's own settings page now.
 
 ### Changed
+- **The "check for updates" switch goes.** It was orphaned when the settings
+  were regrouped — readable but no longer settable — and it was never the real
+  switch anyway: the Play bundle is built without the update notice entirely,
+  because a Play build pointing at a page of APKs is a policy breach, and
+  someone who installed the APK by hand wants to know when there is a new one.
 - **Cross-references are behind a tap and they open.** Selecting a verse gives
   the bar a ማጣቀሻ action with the count, and the list opens as chips that go
   where they point. All 73 abbreviations the edition uses resolve, covering

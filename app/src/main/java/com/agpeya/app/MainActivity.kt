@@ -117,8 +117,7 @@ class MainActivity : ComponentActivity() {
                     // the notice is only ever read with the app open, so this is
                     // the moment it can matter.
                     LaunchedEffect(Unit) {
-                        val on = SettingsRepository.updateCheck(this@MainActivity).first()
-                        com.agpeya.app.data.UpdateRepository.check(this@MainActivity, on)
+                        com.agpeya.app.data.UpdateRepository.check(this@MainActivity)
                     }
 
                     Box(Modifier.fillMaxSize()) {

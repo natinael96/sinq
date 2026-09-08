@@ -49,6 +49,19 @@ fun ShareMenuAction(
     val scope = rememberCoroutineScope()
     var open by remember { mutableStateOf(false) }
     var imageBusy by remember { mutableStateOf(false) }
+    // The same format the selection bar and the reader menu use. This one was
+    // still building its own text, so a passage shared from here ignored
+    // ቅዳና አጋራ while the very same passage shared from the bar obeyed it.
+    val format by com.agpeya.app.data.SettingsRepository.copyFormat(context)
+        .collectAsState(initial = CopyFormat())
+    fun textOf(p: SharePayload): String = PassageFormat.text(
+        Passage(
+            verses = listOf(null to p.body),
+            citation = p.title ?: p.kicker,
+            edition = p.dateLabel,
+        ),
+        format,
+    )
 
     Box {
         IconButton(onClick = { open = true }, enabled = enabled) {
@@ -61,11 +74,11 @@ fun ShareMenuAction(
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             MenuItem(s.copyAction, Icons.Outlined.ContentCopy) {
                 open = false
-                payload()?.let { Sharing.copy(context, it.asText(), s) }
+                payload()?.let { Sharing.copy(context, textOf(it), s) }
             }
             MenuItem(s.shareAction, Icons.Outlined.Share) {
                 open = false
-                payload()?.let { Sharing.share(context, it.asText(), it.title ?: it.kicker, s) }
+                payload()?.let { Sharing.share(context, textOf(it), it.title ?: it.kicker, s) }
             }
             MenuItem(s.shareAsImage, Icons.Outlined.Image, enabled = !imageBusy) {
                 open = false
