@@ -31,6 +31,31 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.9.0",
+        title = "The books behind the books",
+        titleAm = "ከመጻሕፍቱ ጀርባ ያሉ መጻሕፍት",
+        changes = listOf(
+            "ሌሎች መጻሕፍት: 96 books of the Church — the መልክእ hymns, the ድርሳናት, the ገድላት, ሥርዓተ ቅዳሴ, and the chant books of ቅዱስ ያሬድ.",
+            "መጽሐፈ ሰዓታት, merged from three copies, with the Ge'ez and its Amharic together.",
+            "ስንክሳር now reads in Ge'ez as well as Amharic, and names the day's saints and its reading.",
+            "ማኅሌት covers the whole year — 142 orders where there were 37 — and ዘመነ ጽጌ follows this year's own Sundays.",
+            "A ማኅሌት part named after a hymn opens the whole hymn on the shelf.",
+            "ንባብ has a ዳዊት track: one psalm a day, all 150.",
+            "Cross-references in the Bible open where they point.",
+            "22 broken words mended in ውዳሴ ማርያም, and three faults in the Psalter.",
+        ),
+        changesAm = listOf(
+            "ሌሎች መጻሕፍት፦ ፺፮ የቤተ ክርስቲያን መጻሕፍት — መልክአ ቅዱሳን፣ ድርሳናት፣ ገድላት፣ ሥርዓተ ቅዳሴ፣ የቅዱስ ያሬድ የዜማ መጻሕፍት።",
+            "መጽሐፈ ሰዓታት ከሦስት ቅጂዎች ተዋሕዶ፣ ግእዙና ትርጓሜው አብረው።",
+            "ስንክሳር በግእዝም ይነበባል፤ የዕለቱን ቅዱሳንና ንባብ ይሰይማል።",
+            "ማኅሌት ዓመቱን ሙሉ ደርሷል — ከ፴፯ ወደ ፻፵፪ ሥርዓት — ዘመነ ጽጌም የዘንድሮን እሑዶች ይከተላል።",
+            "በሕሙ ስም የተሰየመ የማኅሌት ክፍል ሙሉውን ሕሙ ይከፍታል።",
+            "ንባብ የዳዊት መስመር አግኝቷል፦ በየቀኑ አንድ መዝሙር፣ ሁሉንም ፻፶።",
+            "በመጽሐፍ ቅዱስ ውስጥ ያሉ ማጣቀሻዎች ወደ ሚያመለክቱት ይከፍታሉ።",
+            "በውዳሴ ማርያም ፳፪ የተሰበሩ ቃላት፣ በመዝሙረ ዳዊትም ሦስት ስሕተቶች ተስተካክለዋል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.8.1",
         title = "The chant was in the book all along",
         titleAm = "ማኅሌቱ በመጽሐፉ ውስጥ ነበር",

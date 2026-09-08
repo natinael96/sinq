@@ -6,9 +6,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
-## [Unreleased]
+## [1.9.0] — 2026-09-08
+
+_versionCode 64 · The books behind the books_
 
 ### Added
+- **ሌሎች መጻሕፍት — 96 scanned church books.** The መልክእ hymns, the ድርሳናት, the
+  ገድላት, ሥርዓተ ቅዳሴ, the chant books of ቅዱስ ያሬድ, and መጽሐፈ ሰዓታት. Grouped the way
+  the Church groups them, because seventy of the ninety-six are መልክእ and a flat
+  list reads as one run of near-identical names. Three million characters,
+  2.2 MB in the release. A book loads only when it is opened.
+- **መጽሐፈ ሰዓታት, merged from its three scanned copies.** The bilingual copy is
+  the spine — 94% of the Ge'ez-only copy is inside it word for word — and the
+  Ge'ez copy restores the 54 lines its scan dropped. The twelve offices only
+  ዘደብረ ዓባይ carries are labelled with that name. It is not the Agpeya, and it
+  is shelved well away from it.
+- **ስንክሳር in Ge'ez.** መጽሐፈ ስንክሳር በግእዝ, all 366 days, switched by a pill. The
+  two are parallel editions rather than a parallel text — only 30 of the 366
+  days have the same paragraph count — so they are read one at a time and never
+  set side by side.
+- **The day's saints and the day's reading, in ስንክሳር.** 3,558 named
+  commemorations across the year, annual and ወርኀዊ, and the scripture each day
+  closes on with its citation — neither of which the old text carried.
+- **ማኅሌት reaches the whole year.** 142 orders where there were 37: the ግጻዌ's
+  own stopped after ሚያዝያ and had nothing for ግንቦት through ጳጉሜን. Today's order
+  opens the list when the year appoints one.
+- **ዘመነ ጽጌ knows its dates.** The season floats, so the ግጻዌ could only give it
+  as an ordinal week. The አቋቋም books give an order for every date its Sundays
+  can land on — 41 of them — and the app works out which applies this year.
+- **A ማኅሌት part named after a book opens it.** 514 of the book's 2,247 parts
+  are named for a hymn on the shelf; the ማኅሌት gives the stanza the feast
+  appoints, and the shelf has the whole hymn.
+- **ማኅሌተ ጽጌ and ሰቆቃወ ድንግል with their Amharic.** ማኅሌተ ጽጌ set verse against
+  verse; ሰቆቃወ ድንግል's Amharic is one verse short of its Ge'ez and nothing says
+  which, so it is given whole under its own heading rather than mispaired.
 - **ንባብ has a ዳዊት track.** One psalm a day, all 150, about a minute of
   reading. The other two tracks leave the Psalter out because it is "prayed in
   the hours" — but only 77 of the 150 psalms appear whole in an hour, and the
@@ -67,6 +98,13 @@ features; `versionCode` increments on every release).
   to the app's own settings page now.
 
 ### Changed
+- **ስንክሳር is rebuilt from the printed book's own structure.** The አርኬ is a
+  block in the source now, so the three hundred lines that inferred it from
+  prose are gone — and the hymn is always centred, because there is no longer a
+  case where one falls through and is set as running prose. The day's reading
+  is one piece with its citation, which could previously be selected and shared
+  on its own as though it were a paragraph of the book. No rules across the
+  page either.
 - **The "check for updates" switch goes.** It was orphaned when the settings
   were regrouped — readable but no longer settable — and it was never the real
   switch anyway: the Play bundle is built without the update notice entirely,
@@ -82,6 +120,9 @@ features; `versionCode` increments on every release).
   where it listed 37 services.
 - **The ዳዊት habit goes.** የዕለት ንባብ already covers reading, and a fifth daily
   tick for something the app marks on your behalf is a chore nobody chose.
+- **ስንክሳር bookmarks point at the commemoration, not at its position.** The id
+  was the entry's index within the day, so any change to how a day is cut
+  renamed every entry after the first.
 
 ## [1.8.1] — 2026-09-08
 
