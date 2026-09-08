@@ -136,6 +136,8 @@ interface Strings {
     val mahletTitle: String
     val mahletSubtitle: String
     val mahletVigil: String
+    /** "፫ ከ፴፭" — which part of how many, since a name repeats up to 13 times. */
+    fun mahletNth(n: Int, of: Int): String
     val mahletDawn: String
     fun mahletParts(n: Int): String
     val mahletNone: String
@@ -923,6 +925,8 @@ object AmharicStrings : Strings {
     override val synaxariumLibrarySubtitle = "የዓመቱ የቅዱሳን መታሰቢያ"
     override val mahletSubtitle = "የበዓላት ማኅሌትና ዋዜማ"
     override val mahletVigil = "ዋዜማ"
+    override fun mahletNth(n: Int, of: Int) =
+        "${com.agpeya.app.ui.reading.geezNumeral(n)} ከ${com.agpeya.app.ui.reading.geezNumeral(of)}"
     override val mahletDawn = "ነግሥ"
     override fun mahletParts(n: Int) = "${com.agpeya.app.ui.reading.geezNumeral(n)} ክፍል"
     override val mahletNone = "ማኅሌቱ ገና አልገባም"
@@ -1654,6 +1658,7 @@ object EnglishStrings : Strings {
     override val synaxariumLibrarySubtitle = "The year's commemorations"
     override val mahletSubtitle = "Orders of service for the feasts"
     override val mahletVigil = "ዋዜማ"
+    override fun mahletNth(n: Int, of: Int) = "$n of $of"
     override val mahletDawn = "ነግሥ"
     override fun mahletParts(n: Int) = if (n == 1) "1 part" else "$n parts"
     override val mahletNone = "Coming soon"

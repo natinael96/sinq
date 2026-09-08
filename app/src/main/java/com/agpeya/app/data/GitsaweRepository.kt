@@ -190,7 +190,13 @@ object GitsaweRepository {
     }
 
     /** A feast and the orders of service the book gives it, ዋዜማ before ነግሥ. */
-    data class FeastMahlets(val feastName: String?, val orders: List<DayMahlet>)
+    data class FeastMahlets(
+        val feastName: String?,
+        val orders: List<DayMahlet>,
+        val feast: Feast? = null,
+        /** False when the transcription has not reached this feast yet. */
+        val complete: Boolean = true,
+    )
 
     /**
      * Every order of service belonging to the same feast as [subFeastKey].
@@ -209,7 +215,7 @@ object GitsaweRepository {
             if (seasonWeekOf(sub.key) != null && sub.key != subFeastKey) return@mapNotNull null
             DayMahlet(mahlet = mahlet, subFeast = sub, feast = feast)
         }.sortedBy { if (it.isEve) 0 else 1 }
-        return listOf(FeastMahlets(feastName = feast?.amharicName, orders = orders))
+        return listOf(FeastMahlets(feastName = feast?.amharicName, orders = orders, feast = feast))
     }
 
     /**
@@ -236,6 +242,31 @@ object GitsaweRepository {
                     feast = feasts[sub.feast],
                 )
             }
+    }
+
+/**
+     * The book grouped as the book is: one feast, with the services it appoints.
+     *
+     * A feast gets a ዋዜማ the evening before and the ማኅሌት at dawn, and listing
+     * those as two sibling rows breaks a feast in half and makes the index
+     * twice as long as the book. 20 feasts carry a ማኅሌት; 14 have both services.
+     */
+    suspend fun mahletsByFeast(context: Context): List<FeastMahlets> {
+        val all = allMahlets(context)
+        return all.groupBy { it.subFeast.feast }
+            .map { (_, orders) ->
+                val kept = orders.filter { it.mahlet.detail.isNotEmpty() }
+                FeastMahlets(
+                    // The source writes the date into the name as well, so it
+                    // would appear twice beside a date column.
+                    feastName = (orders.first().feast?.amharicName ?: orders.first().subFeast.amharicName)
+                        .substringBefore(" (").trim(),
+                    orders = kept.ifEmpty { orders },
+                    feast = orders.first().feast,
+                    complete = kept.isNotEmpty(),
+                )
+            }
+            .sortedWith(compareBy({ it.feast?.monthNum ?: 99 }, { it.feast?.day ?: 99 }))
     }
 
     /** "1_3rd_week" → 3. The book numbers the ጽጌ weeks in the sub-feast key. */

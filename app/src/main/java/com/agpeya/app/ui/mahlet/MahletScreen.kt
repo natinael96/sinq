@@ -23,6 +23,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
@@ -42,6 +43,8 @@ import com.agpeya.app.ui.theme.readingBodyStyle
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.inReadingFont
+import androidx.compose.foundation.layout.width
+import com.agpeya.app.ui.theme.sinqColors
 
 /**
  * ሥርዓተ ማኅሌት — one feast's order of service, sung in order.
@@ -125,7 +128,10 @@ fun MahletScreen(
                         ) {
                             orders.forEachIndexed { index, order ->
                                 SelectPill(
-                                    label = if (order.isEve) s.mahletVigil else s.mahletDawn,
+                                    // Not ነግሥ: that is also the name of a part,
+                                    // 35 times over, so the tab and the header
+                                    // would read as the same word.
+                                    label = if (order.isEve) s.mahletVigil else s.mahletTitle,
                                     selected = index == tab,
                                     onClick = { tab = index; selA = -1; selB = -1 },
                                 )
@@ -150,6 +156,8 @@ fun MahletScreen(
                 items(parts.size, key = { "$tab:$it" }) { index ->
                     MahletPart(
                         part = parts[index],
+                        ordinal = index + 1,
+                        total = parts.size,
                         bodyFontSp = bodyFontSp,
                         selected = index in selRange,
                         onTap = {
@@ -166,18 +174,35 @@ fun MahletScreen(
 }
 
 /**
- * One movement: its name in gold, its verse beneath.
+ * The three that recur between movements rather than carrying one.
  *
- * The name is the whole navigation — ዚቅ appears 187 times across the book and a
- * singer finds their place by it, so it leads rather than sitting as a caption.
+ * Half the book is these: ዚቅ 187 times, ወረብ 136, አመላለስ 42, out of 732 parts.
+ * They are also the shortest thing in it — a median of 66 characters against
+ * 101 to 129 for everything else — because they answer rather than carry. Set
+ * as peers of the movements they follow, they made the page a flat list of a
+ * word repeated; set as what they are, the movements carry the structure.
+ */
+private val REFRAINS = Regex("ዚቅ|ወረብ|አመላለስ|እመላለስ")
+
+/**
+ * One part: its name, then its verse.
+ *
+ * The name is the whole navigation, and it cannot do that job alone — inside a
+ * single order one name repeats up to thirteen times, so the ordinal goes
+ * beside it. The name is in the rubric colour, which is what the printed book
+ * and the Ethiopic manuscripts before it use to mark a section.
  */
 @Composable
 private fun MahletPart(
     part: MahletVerse,
+    ordinal: Int,
+    total: Int,
     bodyFontSp: Int,
     selected: Boolean,
     onTap: () -> Unit,
 ) {
+    val s = LocalStrings.current
+    val refrain = REFRAINS.containsMatchIn(part.key)
     Column(
         Modifier
             .fillMaxWidth()
@@ -186,20 +211,37 @@ private fun MahletPart(
                 if (selected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.20f)
                 else androidx.compose.ui.graphics.Color.Transparent,
             )
-            .padding(horizontal = Spacing.sm, vertical = Spacing.sm),
+            .padding(
+                start = if (refrain) Spacing.lg else Spacing.sm,
+                end = Spacing.sm,
+                top = if (refrain) Spacing.xs else Spacing.md,
+                bottom = Spacing.xs,
+            ),
     ) {
-        Text(
-            part.key,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.secondary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        Row(verticalAlignment = Alignment.Bottom) {
+            Text(
+                part.key,
+                style = MaterialTheme.typography.labelMedium,
+                color = sinqColors.arke,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(Modifier.width(Spacing.sm))
+            Text(
+                s.mahletNth(ordinal, total),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+            )
+        }
         Spacer(Modifier.height(Spacing.xxs))
         Text(
             part.verse,
-            style = readingBodyStyle(bodyFontSp),
-            color = MaterialTheme.colorScheme.onBackground,
+            style = readingBodyStyle(bodyFontSp).let {
+                if (refrain) it.copy(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic) else it
+            },
+            color = if (refrain) MaterialTheme.colorScheme.onSurfaceVariant
+            else MaterialTheme.colorScheme.onBackground,
         )
     }
 }
