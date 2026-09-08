@@ -532,7 +532,6 @@ private fun AgpeyaNavHost(
                 onOpenSynaxarium = {
                     navController.navigate("synaxarium/${java.time.LocalDate.now().toEpochDay()}") { launchSingleTop = true }
                 },
-                onOpenKurban = { navController.navigate("communionPrep") { launchSingleTop = true } },
                 onOpenReading = { navController.navigate("reading") { launchSingleTop = true } },
                 onOpenMarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
                 onSelectTab = navController::switchTab,
@@ -756,15 +755,17 @@ private fun AgpeyaNavHost(
         composable(
             // ?ch is how a search hit lands on the chapter that matched rather
             // than on the head of a book that can run to twenty-three of them.
-            route = "book/{bookId}?ch={ch}",
+            route = "book/{bookId}?ch={ch}&blk={blk}",
             arguments = listOf(
                 navArgument("bookId") { type = NavType.StringType },
                 navArgument("ch") { type = NavType.IntType; defaultValue = 0 },
+                navArgument("blk") { type = NavType.IntType; defaultValue = -1 },
             ),
         ) { backStackEntry ->
             com.agpeya.app.ui.books.BookScreen(
                 bookId = backStackEntry.arguments?.getString("bookId").orEmpty(),
                 openAtChapter = backStackEntry.arguments?.getInt("ch") ?: 0,
+                openAtBlock = backStackEntry.arguments?.getInt("blk") ?: -1,
                 onBack = { navController.popBackStack() },
                 onOpenBook = { id -> navController.navigate("book/$id") { launchSingleTop = true } },
             )
@@ -789,7 +790,11 @@ private fun AgpeyaNavHost(
             com.agpeya.app.ui.mahlet.MahletScreen(
                 orderId = backStackEntry.arguments?.getString("orderId").orEmpty(),
                 onBack = { navController.popBackStack() },
-                onOpenBook = { id -> navController.navigate("book/$id") { launchSingleTop = true } },
+                // Straight to the stanza being sung, not the head of a hymn
+                // forty stanzas long.
+                onOpenBook = { id, ch, blk ->
+                    navController.navigate("book/$id?ch=$ch&blk=$blk") { launchSingleTop = true }
+                },
             )
         }
         composable("settings/records") {
@@ -864,6 +869,10 @@ private fun AgpeyaNavHost(
                 onOpenRoute = { route -> navController.navigate(route) { launchSingleTop = true } },
             )
         }
+        // Unreachable on purpose: ቁርባን preparation is finished enough to open
+        // but not to ship, so ቤተ መጻሕፍት no longer offers it. The screen, its
+        // strings and KurbanRepository all stay — putting the card back in
+        // LibraryScreen is the whole of restoring it.
         composable("communionPrep") {
             com.agpeya.app.ui.nisiha.CommunionPrepScreen(
                 onBack = { navController.popBackStack() },

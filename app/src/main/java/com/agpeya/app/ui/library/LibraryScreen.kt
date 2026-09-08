@@ -31,7 +31,6 @@ import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.automirrored.outlined.EventNote
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Nightlight
-import androidx.compose.material.icons.outlined.LocalDrink
 import androidx.compose.material.icons.outlined.WbTwilight
 import androidx.compose.material.icons.outlined.AutoStories
 
@@ -45,7 +44,6 @@ fun LibraryScreen(
     onOpenMahlets: () -> Unit,
     onOpenBooks: () -> Unit,
     onOpenSynaxarium: () -> Unit,
-    onOpenKurban: () -> Unit,
     onOpenReading: () -> Unit,
     onOpenMarks: () -> Unit,
     onSelectTab: (Tab) -> Unit,
@@ -141,14 +139,6 @@ fun LibraryScreen(
                     title = s.marksTitle,
                     subtitle = "${s.marksTabBookmarks} · ${s.marksTabHighlights} · ${s.marksTabNotes}",
                     onClick = onOpenMarks,
-                )
-            }
-            item {
-                LibraryCard(
-                    icon = Icons.Outlined.LocalDrink,
-                    title = s.kurbanPrepTitle,
-                    subtitle = "${s.kurbanPrepDesc} · ${s.comingSoon}",
-                    onClick = onOpenKurban,
                 )
             }
         }

@@ -9,13 +9,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -23,13 +21,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import com.agpeya.app.data.BookRepository
 import com.agpeya.app.data.SettingsRepository
@@ -67,6 +71,12 @@ fun BookScreen(
     bookId: String,
     /** 1-based chapter to open at; 0 opens at the first. Set by a search hit. */
     openAtChapter: Int = 0,
+    /**
+     * Stanza within that chapter to land on; -1 lands at the top. Set when a
+     * ማኅሌት movement opens the hymn it is an excerpt of — a መልክእ is one chapter
+     * of forty stanzas, so the chapter alone would land nowhere useful.
+     */
+    openAtBlock: Int = -1,
     onBack: () -> Unit,
     onOpenBook: (String) -> Unit,
 ) {
@@ -88,6 +98,21 @@ fun BookScreen(
     val shown = chapters.getOrNull(chapter.coerceIn(0, (chapters.size - 1).coerceAtLeast(0)))
     val blocks = shown?.blocks.orEmpty()
 
+    val listState = rememberLazyListState()
+    // Once per book: landing again after the reader has scrolled away, or picked
+    // another chapter, would be the screen taking the wheel back off them.
+    var landed by rememberSaveable(bookId) { mutableStateOf(false) }
+    val blocksNow = shown?.blocks.orEmpty()
+    // The stanza's row is preceded by the chapter strip and the recension line,
+    // each of which is one item and each of which may not be there.
+    val leadingItems = (if (chapters.size > 1) 1 else 0) +
+        (if (meta?.let { it.variants.isNotEmpty() || it.variantOf != null } == true) 1 else 0)
+    LaunchedEffect(bookId, blocksNow.size, openAtBlock) {
+        if (!landed && openAtBlock >= 0 && openAtBlock < blocksNow.size) {
+            landed = true
+            listState.scrollToItem(leadingItems + openAtBlock)
+        }
+    }
     var selA by rememberSaveable(bookId, chapter) { mutableIntStateOf(-1) }
     var selB by rememberSaveable(bookId, chapter) { mutableIntStateOf(-1) }
     val selRange = flatSelectionRange(selA, selB)
@@ -126,7 +151,7 @@ fun BookScreen(
         },
     ) { inner ->
         Box(Modifier.fillMaxSize()) {
-            ReadingColumn(innerPadding = inner) {
+            ReadingColumn(innerPadding = inner, state = listState) {
                 if (chapters.size > 1) {
                     item(key = "chapters") {
                         // Twenty-five chapters will not fit across a phone, so the
@@ -176,6 +201,7 @@ fun BookScreen(
                     BookBlockRow(
                         block = blocks[index],
                         bilingual = meta?.lang == "mixed",
+                        rubricate = meta?.shelf == "melkie",
                         bodyFontSp = bodyFontSp,
                         selected = index in selRange,
                         onTap = {
@@ -195,10 +221,12 @@ fun BookScreen(
  * One block: a heading, a Ge'ez stanza, or the Amharic beside it.
  *
  * The Amharic is set apart rather than beside — a phone has no second column —
- * by a gold rule down its left edge, the marginal gloss the printed books use.
- * The eye can run down the Ge'ez alone and drop into the translation only where
- * it wants one, but the translation is still the app's ordinary reading ink: it
- * is the passage in a language the reader has, not a footnote to be squinted at.
+ * by an indent and the gold the app accents with, so the eye can run down the
+ * Ge'ez alone and drop into the translation only where it wants one. Gold and
+ * not the muted grey it used to take: a passage in the language the reader
+ * actually has should not be the faintest thing on the page. The italic is gone
+ * with it — Ethiopic has no italic, so that was a synthesised slant, and it
+ * read as a rendering fault rather than a voice.
  *
  * [bilingual] is the whole of what makes an Amharic block a translation. A book
  * that is simply written in Amharic — ድርሳነ ሚካኤል has five hundred such blocks —
@@ -207,12 +235,14 @@ fun BookScreen(
  * greyed-out from end to end.
  *
  * Headings take the rubric red the printed books and the manuscripts before
- * them use.
+ * them use, and on a መልክእ ([rubricate]) so do the salutation opening each
+ * stanza and the Name of God within it — see [Rubrication].
  */
 @Composable
 private fun BookBlockRow(
     block: BookBlock,
     bilingual: Boolean,
+    rubricate: Boolean,
     bodyFontSp: Int,
     selected: Boolean,
     onTap: () -> Unit,
@@ -238,35 +268,30 @@ private fun BookBlockRow(
                 else Color.Transparent,
             )
             .padding(
-                start = Spacing.sm,
+                start = if (isGloss) Spacing.lg else Spacing.sm,
                 end = Spacing.sm,
                 top = if (isGloss) Spacing.xxs else Spacing.sm,
                 bottom = Spacing.xs,
             ),
     ) {
-        if (isGloss) {
-            // IntrinsicSize.Min so the rule is exactly as tall as the gloss it
-            // marks, however many lines that turns out to be.
-            Row(Modifier.height(IntrinsicSize.Min)) {
-                Box(
-                    Modifier
-                        .width(2.dp)
-                        .fillMaxHeight()
-                        .background(MaterialTheme.colorScheme.secondary),
-                )
-                Text(
-                    block.text,
-                    style = readingBodyStyle(bodyFontSp),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(start = Spacing.sm),
-                )
+        val red = sinqColors.arke
+        val body = if (rubricate && !isGloss) {
+            remember(block.text, red) {
+                buildAnnotatedString {
+                    append(block.text)
+                    Rubrication.redRanges(block.text).forEach {
+                        addStyle(SpanStyle(color = red), it.first, it.last + 1)
+                    }
+                }
             }
         } else {
-            Text(
-                block.text,
-                style = readingBodyStyle(bodyFontSp),
-                color = MaterialTheme.colorScheme.onBackground,
-            )
+            remember(block.text) { AnnotatedString(block.text) }
         }
+        Text(
+            body,
+            style = readingBodyStyle(bodyFontSp),
+            color = if (isGloss) MaterialTheme.colorScheme.secondary
+            else MaterialTheme.colorScheme.onBackground,
+        )
     }
 }

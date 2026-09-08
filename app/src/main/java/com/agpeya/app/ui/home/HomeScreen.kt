@@ -303,9 +303,12 @@ private fun HomeDashboard(
         if (suggested != null) {
             NowCard(
                 hour = suggested,
-                next = com.agpeya.app.data.PrayerSchedule.next(hours, suggested.id),
                 prayed = HabitsRepository.hourHabitId(suggested.id) in doneToday,
                 onClick = { onOpenHour(suggested.id) },
+            )
+            Spacer(Modifier.height(Spacing.sm))
+            HoursLine(
+                next = com.agpeya.app.data.PrayerSchedule.next(hours, suggested.id),
                 onOpenAll = onOpenAllHours,
             )
         } else {
@@ -422,12 +425,10 @@ private fun HomeMenuItem(icon: androidx.compose.ui.graphics.vector.ImageVector, 
 }
 
 /**
- * The hour due now, and under it the one after — the hours line that used to
- * be a separate strip below the hero, folded into its foot.
+ * The hour due now — its name, its time, and whether it has been prayed.
  *
- * The strip repeated the hero's own hour before saying anything new, so the
- * page named ጸሎተ ሠለስት twice within 40 dp. What it actually carried was "ቀጥሎ",
- * which is now the hero's second line.
+ * What follows it, and the way to all of them, is [HoursLine] beneath: the hero
+ * says one thing, and the strip under the hairline carries the sequence.
  *
  * The chip on the right is the only prayer state on the page above the fold:
  * አሁን while the hour is due, a lit candle once it has been prayed — which the
@@ -437,10 +438,8 @@ private fun HomeMenuItem(icon: androidx.compose.ui.graphics.vector.ImageVector, 
 @Composable
 private fun NowCard(
     hour: Hour,
-    next: Hour?,
     prayed: Boolean,
     onClick: () -> Unit,
-    onOpenAll: () -> Unit,
 ) {
     val s = LocalStrings.current
     val sinq = sinqColors
@@ -483,39 +482,58 @@ private fun NowCard(
                     )
                 }
             }
-            Spacer(Modifier.height(Spacing.xxs))
-            Row(
-                modifier = Modifier.fillMaxWidth().height(20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-            ) {
-                Box(Modifier.size(5.dp).clip(CircleShape).background(sinq.onHeroMuted))
-                Text(
-                    text = next?.let {
-                        listOf("${s.hoursNext} ${it.name}", it.timeHint)
-                            .filter { part -> part.isNotBlank() }.joinToString("  ·  ")
-                    }.orEmpty(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = sinq.onHeroMuted,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
-                )
-                // Its own target, so tapping "all" never opens the current hour.
-                Text(
-                    s.hoursAll,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = sinq.onHeroGold,
-                    maxLines = 1,
-                    modifier = Modifier
-                        .clip(MaterialTheme.shapes.small)
-                        .clickable(onClick = onOpenAll)
-                        .semantics { role = Role.Button }
-                        .padding(horizontal = Spacing.xs, vertical = Spacing.xxs),
-                )
-            }
         }
     }
+}
+
+/**
+ * The hours line: what is being prayed now, what follows it, and the way to all
+ * of them — on the page itself, between the hero and the ግጻዌ, fenced by a
+ * hairline top and bottom.
+ *
+ * It lived here before and was folded into the hero's foot; it is back out on
+ * the page, but without repeating the hour the hero has just named in full.
+ * The hero says what is due now, the strip says what comes after it, and
+ * ሁሉም opens the rest — each thing said once.
+ */
+@Composable
+private fun HoursLine(next: Hour?, onOpenAll: () -> Unit) {
+    val s = LocalStrings.current
+    SinqDivider()
+    Row(
+        modifier = Modifier.fillMaxWidth().heightIn(min = 36.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        Box(
+            Modifier.size(5.dp).clip(CircleShape)
+                .background(MaterialTheme.colorScheme.secondary),
+        )
+        Text(
+            text = next?.let {
+                listOf("${s.hoursNext} ${it.name}", it.timeHint)
+                    .filter { part -> part.isNotBlank() }.joinToString("  ·  ")
+            }.orEmpty(),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
+        // Its own target, so tapping "all" never opens the current hour.
+        Text(
+            s.hoursAll,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.secondary,
+            maxLines = 1,
+            modifier = Modifier
+                .clip(MaterialTheme.shapes.small)
+                .clickable(onClick = onOpenAll)
+                .semantics { role = Role.Button }
+                .padding(horizontal = Spacing.xs, vertical = Spacing.xxs),
+        )
+    }
+    SinqDivider()
 }
 
 @Composable

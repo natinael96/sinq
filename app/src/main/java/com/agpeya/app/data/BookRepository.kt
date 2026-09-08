@@ -99,8 +99,43 @@ object BookRepository {
         return null
     }
 
-    /** A book on the shelf and the chapter within it that answers a lookup. */
-    data class BookLocation(val book: BookMeta, val chapter: Int)
+    /**
+     * A book on the shelf and where in it a lookup landed.
+     *
+     * [block] is the index of the stanza within that chapter, or -1 when only
+     * the chapter is known. A መልክእ is a single chapter of forty-odd stanzas,
+     * so for those the chapter alone is the top of the book and says nothing.
+     */
+    data class BookLocation(val book: BookMeta, val chapter: Int, val block: Int = -1)
+
+    /**
+     * The stanza a ማኅሌት part is an excerpt of.
+     *
+     * [byPartName] finds the book the part is named after; this goes one step
+     * further and finds the stanza itself, so tapping a movement of the ማኅሌት
+     * opens the hymn at the verse being sung rather than at its first page —
+     * which, in a hymn of forty stanzas, is forty scrolls from the answer.
+     *
+     * Matched on the folded opening of the part's own text. Null only when the
+     * book is not on the shelf at all; when the book is there but the stanza
+     * cannot be found in it — the ማኅሌት and the scan do not always spell a line
+     * the same way — this still answers with the book and a [BookLocation.block]
+     * of -1, which opens it at the top. Losing the link because the excerpt
+     * could not be located would be worse than landing a scroll away from it.
+     */
+    suspend fun byPartVerse(context: Context, partName: String, verse: String): BookLocation? {
+        val meta = byPartName(context, partName) ?: return null
+        val top = BookLocation(meta, 0, -1)
+        val needle = fold(verse).trim(' ', '\u1362', '\u1361')
+        if (needle.length < 8) return top
+        val probe = needle.take(14)
+        val book = book(context, meta.id) ?: return top
+        for (chapter in book.chapters) {
+            val i = chapter.blocks.indexOfFirst { probe in fold(it.text) }
+            if (i >= 0) return BookLocation(meta, chapter.number, i)
+        }
+        return top
+    }
 
     /** "፯ተኛ መዝሙር " — an ordinal and the name of the genre, not of the hymn. */
     private val INCIPIT_PREFIX = Regex("^\\s*(?:[\u1369-\u137C0-9]+\\s*(?:\u1270\u129B|\u129B)?\\s*)?(?:\u1218\u12DD\u1219\u122D\\s*)?")

@@ -153,8 +153,10 @@ data class SinqColors(
     val heroGlow: Color,
     /** Completed / fulfilled — a prayed hour, a kept habit. */
     val success: Color,
-    /** Warm liturgical red for the አርኬ hymn — distinct from the gold accent,
-     *  darkened on the ivory ground so small verse text keeps its contrast. */
+    /** The blood red the printed books and the manuscripts rubricate with —
+     *  a saturated red, not a crimson or a rose. Deepened on the ivory ground
+     *  and lifted on the green so small verse text keeps its contrast, but the
+     *  hue is the same red in both, because it is the ink being named. */
     val arke: Color,
     /** Verse highlight tints, tuned per theme so they read on either ground. */
     val highlightYellow: Color,

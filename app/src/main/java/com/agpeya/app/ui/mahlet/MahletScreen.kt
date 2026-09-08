@@ -66,7 +66,7 @@ import com.agpeya.app.ui.theme.sinqColors
 fun MahletScreen(
     orderId: String,
     onBack: () -> Unit,
-    onOpenBook: (String) -> Unit = {},
+    onOpenBook: (String, Int, Int) -> Unit = { _, _, _ -> },
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
@@ -91,11 +91,16 @@ fun MahletScreen(
     val parts = shown?.parts.orEmpty()
 
     // Resolved once per feast rather than per part: 137 of the book's movements
-    // are named after a book on the shelf.
-    val bookByPart by produceState(emptyMap<String, String>(), orders) {
-        val names = orders.flatMap { it.parts }.map { it.key }.filter { it.isNotBlank() }.distinct()
-        value = names.mapNotNull { name ->
-            BookRepository.byPartName(context, name)?.let { name to it.id }
+    // are named after a book on the shelf. Keyed by name AND opening words, not
+    // by name alone — one feast can sing several stanzas of the same መልክእ, and
+    // each of them opens the hymn at a different place.
+    val bookByPart by produceState(emptyMap<String, BookRepository.BookLocation>(), orders) {
+        val wanted = orders.flatMap { it.parts }
+            .filter { it.key.isNotBlank() && it.verse.isNotBlank() }
+            .distinctBy { partAnchor(it.key, it.verse) }
+        value = wanted.mapNotNull { part ->
+            BookRepository.byPartVerse(context, part.key, part.verse)
+                ?.let { partAnchor(part.key, part.verse) to it }
         }.toMap()
     }
 
@@ -178,7 +183,7 @@ fun MahletScreen(
                         total = parts.size,
                         bodyFontSp = bodyFontSp,
                         selected = index in selRange,
-                        bookId = bookByPart[parts[index].key],
+                        location = bookByPart[partAnchor(parts[index].key, parts[index].verse)],
                         onOpenBook = onOpenBook,
                         onTap = {
                             val (a, b) = advanceFlatSelection(selA, index)
@@ -219,8 +224,8 @@ private fun MahletPartRow(
     total: Int,
     bodyFontSp: Int,
     selected: Boolean,
-    bookId: String?,
-    onOpenBook: (String) -> Unit,
+    location: BookRepository.BookLocation?,
+    onOpenBook: (String, Int, Int) -> Unit,
     onTap: () -> Unit,
 ) {
     val s = LocalStrings.current
@@ -256,14 +261,16 @@ private fun MahletPartRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                 )
-                if (bookId != null) {
+                if (location != null) {
                     Spacer(Modifier.width(Spacing.sm))
                     Text(
                         s.booksFullHymn,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.secondary,
                         maxLines = 1,
-                        modifier = Modifier.clickable { onOpenBook(bookId) },
+                        modifier = Modifier.clickable {
+                            onOpenBook(location.book.id, location.chapter, location.block)
+                        },
                     )
                 }
             }
@@ -279,3 +286,11 @@ private fun MahletPartRow(
         )
     }
 }
+
+/**
+ * What identifies a part for the shelf lookup: its name and how it opens.
+ *
+ * The name alone is not enough — a feast can sing several stanzas of one መልክእ,
+ * and they are the same book at different verses.
+ */
+private fun partAnchor(key: String, verse: String): String = key + "\u0000" + verse.take(24)
