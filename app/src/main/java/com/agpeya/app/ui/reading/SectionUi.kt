@@ -79,6 +79,7 @@ import com.agpeya.app.ui.common.Passage
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 
 /**
  * Section rendering shared by the hour reader, the Psalter and the scripture
@@ -330,6 +331,9 @@ internal fun SelectionBar(
     imageKicker: String? = null,
     onBookmark: (() -> Unit)? = null,
     onWriteNote: (() -> Unit)? = null,
+    /** The edition's cross references for the selection; empty hides the action. */
+    crossRefs: List<com.agpeya.app.data.CrossReference.Ref> = emptyList(),
+    onOpenRef: (String) -> Unit = {},
 ) {
     val motion = LocalMotion.current
     AnimatedVisibility(
@@ -393,6 +397,21 @@ internal fun SelectionBar(
                         kicker = imageKicker,
                         title = com.agpeya.app.ui.common.PassageFormat.heading(passage),
                     )
+                    // The references live behind their own action rather than
+                    // under every verse. 22,905 verses carry them, so a marker
+                    // on each would be a second text running beside the first —
+                    // which is why no phone Bible has done it that way since
+                    // YouVersion moved them behind a tap.
+                    var refsOpen by androidx.compose.runtime.saveable.rememberSaveable {
+                        androidx.compose.runtime.mutableStateOf(false)
+                    }
+                    if (refsOpen && crossRefs.isNotEmpty()) {
+                        CrossRefSheet(
+                            refs = crossRefs,
+                            onDismiss = { refsOpen = false },
+                            onOpen = { route -> refsOpen = false; onDismiss(); onOpenRef(route) },
+                        )
+                    }
                     val imageBusy = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
                     // The shape and ground are chosen when the image is asked
                     // for, not before: it is a decision about where it is going.
@@ -429,6 +448,14 @@ internal fun SelectionBar(
                             }
                             onWriteNote?.let {
                                 add(SelectionAct(s.noteAction, Icons.Outlined.EditNote) { onDismiss(); it() })
+                            }
+                            if (crossRefs.isNotEmpty()) {
+                                add(
+                                    SelectionAct(
+                                        s.crossRefsAction(crossRefs.size),
+                                        Icons.AutoMirrored.Outlined.MenuBook,
+                                    ) { refsOpen = true },
+                                )
                             }
                             add(
                                 SelectionAct(s.copyAction, Icons.Outlined.ContentCopy) {
@@ -599,6 +626,48 @@ private fun ImageOptionsDialog(
 private fun highlightSwatch(key: String?, tint: androidx.compose.ui.graphics.Color): androidx.compose.ui.graphics.Color =
     if (tint == androidx.compose.ui.graphics.Color.Transparent) androidx.compose.ui.graphics.Color.Gray
     else tint.copy(alpha = 1f)
+
+/**
+ * The verse's cross references, as chips that open where they point.
+ *
+ * Citations only, in the Church's own numerals — the target's text is a second
+ * tap, not a preview, so the sheet stays short enough to leave the verse it
+ * came from on screen.
+ */
+@Composable
+private fun CrossRefSheet(
+    refs: List<com.agpeya.app.data.CrossReference.Ref>,
+    onDismiss: () -> Unit,
+    onOpen: (String) -> Unit,
+) {
+    val s = LocalStrings.current
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(s.crossRefsTitle) },
+        text = {
+            androidx.compose.foundation.layout.FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+            ) {
+                refs.forEach { ref ->
+                    androidx.compose.material3.SuggestionChip(
+                        onClick = { onOpen(ref.route) },
+                        label = {
+                            Text(
+                                com.agpeya.app.data.Citation.of(ref.bookName, ref.chapter, ref.verse, ref.verse),
+                                maxLines = 1,
+                            )
+                        },
+                    )
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            androidx.compose.material3.TextButton(onClick = onDismiss) { Text(s.dismiss) }
+        },
+    )
+}
 
 /** One action in the bar. */
 private data class SelectionAct(

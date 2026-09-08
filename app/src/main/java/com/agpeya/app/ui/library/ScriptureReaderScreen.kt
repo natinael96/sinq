@@ -157,7 +157,6 @@ fun ScriptureReaderScreen(
     // the title, chapter strip, and bookmark all agreeing — beats silently showing
     // chapter 1 under the cited number. The highlight only fires when the clamped
     // chapter still equals the cited one, so a bad citation never tints wrong verses.
-    val showRefs by SettingsRepository.showCrossRefs(context).collectAsState(initial = false)
     // Today's ንባብ, so a chapter that belongs to it can say so and be marked
     // from where it is read. Opening a passage from the plan and then having to
     // go back to the plan to tick it was the plan's own ledger asking twice.
@@ -229,6 +228,9 @@ fun ScriptureReaderScreen(
                 }
             }
         }
+    }
+    val bookNames by androidx.compose.runtime.produceState(emptyMap<String, String>()) {
+        value = runCatching { ScriptureRepository.bookNames(context) }.getOrDefault(emptyMap())
     }
     val listState = rememberLazyListState()
     val verseGap = readingVerseGap(bodyFontSp)
@@ -319,6 +321,13 @@ fun ScriptureReaderScreen(
                 },
                 onDismiss = { selA = -1; selB = -1 },
                 imageKicker = s.scripturesTitle,
+                crossRefs = remember(current, selRange, bookNames) {
+                    if (selRange.isEmpty()) emptyList()
+                    else current.verses.filter { it.n in selRange }
+                        .flatMap { com.agpeya.app.data.CrossReference.parse(it.refs.orEmpty(), bookNames) }
+                        .distinctBy { it.route }
+                },
+                onOpenRef = { route -> selA = -1; selB = -1; onOpenRoute(route) },
                 // The bar is the only bookmark control now, so a bookmark is
                 // made at the grain the reader chose rather than always at the
                 // chapter — the route has carried a verse range all along.
@@ -413,18 +422,6 @@ fun ScriptureReaderScreen(
                         )
                     }
                     body(verse)
-                    if (showRefs) {
-                        verse.refs?.let { refs ->
-                            Text(
-                                refs,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(start = Spacing.sm, end = Spacing.sm, bottom = Spacing.xs),
-                            )
-                        }
-                    }
                 }
                 if (tinted) {
                     Column(

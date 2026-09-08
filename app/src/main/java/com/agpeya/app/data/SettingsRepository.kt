@@ -110,7 +110,6 @@ object SettingsRepository {
     private val KEY_COPY_REFERENCE = booleanPreferencesKey("copy_reference")
     private val KEY_COPY_EDITION = booleanPreferencesKey("copy_edition")
     private val KEY_HIGHLIGHT_NAMES = stringPreferencesKey("highlight_names")
-    private val KEY_CROSS_REFS = booleanPreferencesKey("show_cross_refs")
     // Where the reader was in each book, so a book reopens where it was left.
     private val KEY_LAST_CHAPTERS = stringPreferencesKey("last_chapters")
     private val KEY_ONBOARDED = booleanPreferencesKey("onboarded")
@@ -403,17 +402,6 @@ object SettingsRepository {
             val next = if (name.isBlank()) current - key else current + (key to name.trim())
             prefs[KEY_HIGHLIGHT_NAMES] = highlightNameJson.encodeToString(next)
         }
-    }
-
-    /**
-     * Whether the edition's own cross references print under each verse. Off by
-     * default: 22,905 of them would be a second text running beside the first.
-     */
-    fun showCrossRefs(context: Context): Flow<Boolean> =
-        context.settingsDataStore.data.map { it[KEY_CROSS_REFS] ?: false }
-
-    suspend fun setShowCrossRefs(context: Context, value: Boolean) {
-        context.settingsDataStore.edit { it[KEY_CROSS_REFS] = value }
     }
 
     /**

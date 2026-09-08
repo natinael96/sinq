@@ -72,7 +72,6 @@ interface Strings {
     val ok: String
     val synaxariumTitle: String
     val synaxariumKicker: String
-    val noSynaxariumToday: String
     /** The ስንክሳር of a day other than today, e.g. "የሐምሌ 8 ስንክሳር". */
     fun synaxariumFor(dateLabel: String): String
 
@@ -129,6 +128,8 @@ interface Strings {
     val markAction: String
     /** The edition's own cross references, and the chapter stepper's two ends. */
     val crossRefsTitle: String
+    /** The selection bar's reference action, with how many the verse carries. */
+    fun crossRefsAction(n: Int): String
     /** ስንክሳር's own row in ቤተ መጻሕፍት. */
     val synaxariumLibrarySubtitle: String
     /** ሥርዓተ ማኅሌት — the orders of service sung on a feast. */
@@ -149,7 +150,6 @@ interface Strings {
     val imageGroundIvory: String
     /** The ንባብ footer inside the Bible reader: this chapter is part of today. */
     fun readingChapterOfDay(done: Int, total: Int): String
-    val crossRefsSubtitle: String
     val previousChapter: String
     val nextChapter: String
     /** ምልክቶቼ — the one home for bookmarks, highlights and passage notes. */
@@ -872,7 +872,6 @@ object AmharicStrings : Strings {
     override val ok = "እሺ"
     override val synaxariumTitle = "ስንክሳር"
     override val synaxariumKicker = "የዕለቱ ስንክሳር"
-    override val noSynaxariumToday = "ለዛሬ የተመዘገበ ስንክሳር የለም"
     override fun synaxariumFor(dateLabel: String) = "የ$dateLabel ስንክሳር"
 
     override val closingPrayerGeez = "ግዕዝ"
@@ -919,6 +918,7 @@ object AmharicStrings : Strings {
     override val bookmarkAction = "ምልክት አድርግ"
     override val markAction = "ምልክት"
     override val crossRefsTitle = "የጥቅስ ማጣቀሻዎች"
+    override fun crossRefsAction(n: Int) = "ማጣቀሻ ${com.agpeya.app.ui.reading.geezNumeral(n)}"
     override val mahletTitle = "ሥርዓተ ማኅሌት"
     override val synaxariumLibrarySubtitle = "የዓመቱ የቅዱሳን መታሰቢያ"
     override val mahletSubtitle = "የበዓላት ማኅሌትና ዋዜማ"
@@ -934,7 +934,6 @@ object AmharicStrings : Strings {
     override val imageGroundGreen = "አረንጓዴ"
     override val imageGroundIvory = "ነጣ ያለ"
     override fun readingChapterOfDay(done: Int, total: Int) = "የዛሬው ንባብ · $done ከ$total"
-    override val crossRefsSubtitle = "በእትሙ የተቀመጡት ተያያዥ ጥቅሶች"
     override val previousChapter = "ያለፈው ምዕራፍ"
     override val nextChapter = "ቀጣይ ምዕራፍ"
     override val marksTitle = "ምልክቶቼ"
@@ -1601,7 +1600,6 @@ object EnglishStrings : Strings {
     override val ok = "OK"
     override val synaxariumTitle = "Synaxarium"
     override val synaxariumKicker = "Today's Synaxarium"
-    override val noSynaxariumToday = "No synaxarium recorded for today"
     override fun synaxariumFor(dateLabel: String) = "Synaxarium for $dateLabel"
 
     override val closingPrayerGeez = "Ge'ez"
@@ -1651,6 +1649,7 @@ object EnglishStrings : Strings {
     override val bookmarkAction = "Bookmark"
     override val markAction = "Mark"
     override val crossRefsTitle = "Cross references"
+    override fun crossRefsAction(n: Int) = "Refs $n"
     override val mahletTitle = "ሥርዓተ ማኅሌት"
     override val synaxariumLibrarySubtitle = "The year's commemorations"
     override val mahletSubtitle = "Orders of service for the feasts"
@@ -1666,7 +1665,6 @@ object EnglishStrings : Strings {
     override val imageGroundGreen = "Green"
     override val imageGroundIvory = "Ivory"
     override fun readingChapterOfDay(done: Int, total: Int) = "Today's reading · $done of $total"
-    override val crossRefsSubtitle = "The edition's own related verses"
     override val previousChapter = "Previous chapter"
     override val nextChapter = "Next chapter"
     override val marksTitle = "My marks"

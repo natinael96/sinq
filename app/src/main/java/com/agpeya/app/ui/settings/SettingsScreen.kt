@@ -690,7 +690,6 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
     val readingAlignment by SettingsRepository.readingAlignment(context)
         .collectAsState(initial = com.agpeya.app.data.ReadingAlignment.JUSTIFIED)
     val keepOn by SettingsRepository.keepScreenOn(context).collectAsState(initial = true)
-    val crossRefs by SettingsRepository.showCrossRefs(context).collectAsState(initial = false)
     val readingMode by SettingsRepository.readingMode(context)
         .collectAsState(initial = com.agpeya.app.data.ReadingMode.VERTICAL)
     val misbak by SettingsRepository.misbakLanguage(context)
@@ -820,12 +819,6 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
                     }
                 }
                 Spacer(Modifier.height(Spacing.sm))
-                ToggleRow(
-                    s.crossRefsTitle,
-                    crossRefs,
-                    { scope.launch { SettingsRepository.setShowCrossRefs(context, it) } },
-                    subtitle = s.crossRefsSubtitle,
-                )
                 NavRow(
                     title = s.copyFormatTitle,
                     subtitle = s.copyFormatSubtitle,

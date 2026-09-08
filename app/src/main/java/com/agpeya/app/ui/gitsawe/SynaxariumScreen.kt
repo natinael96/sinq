@@ -247,18 +247,10 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, onBack: () -> Unit)
                 modifier = Modifier.padding(innerPadding),
             )
 
-            list?.isEmpty() == true -> Box(
-                Modifier.fillMaxSize().padding(innerPadding).padding(32.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    s.noSynaxariumToday,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                )
-            }
-
+            // No empty state. Every one of the 366 days carries entries, so
+            // "ለዛሬ የተመዘገበ ስንክሳር የለም" could only ever appear on a date the book
+            // does not reach — and telling a reader the day is empty is worse
+            // than the page simply being short.
             else -> LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize().padding(innerPadding).widthIn(max = ReadingMaxWidth),
