@@ -31,6 +31,27 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.9.9",
+        title = "What the day already knew",
+        titleAm = "ዕለቱ የሚያውቀው",
+        changes = listOf(
+            "A daily nudge for your reading plan, at a time you choose. It waits until you have started a plan, names the day's passage, and stops asking if it is not helping.",
+            "The ግጻዌ's መዝሙር opens the whole hymn, now that the chant books are on the shelf.",
+            "The ግጻዌ widget uses the whole card: one to five readings depending on the size you give it, and the date no longer cut short.",
+            "Starting a reading plan asks first, and says what it is signing you up for.",
+            "ቅዳሴ shows all of the day's anaphora instead of clipping it to one line.",
+            "The third share-image shape is its own shape at last, and the ivory and green grounds are told apart.",
+        ),
+        changesAm = listOf(
+            "ለንባብ መርሐ ግብርዎ ዕለታዊ ማስታወሻ፣ በመረጡት ሰዓት። ንባብ እስኪጀምሩ ይጠብቃል፣ የዕለቱን ንባብ ይሰይማል፣ የማይጠቅም ከሆነም መጠየቁን ያቆማል።",
+            "የግጻዌው መዝሙር ሙሉውን ያስከፍታል፤ የዜማ መጻሕፍቱ አሁን በመደርደሪያው ላይ ናቸውና።",
+            "የግጻዌ ውጅት ካርዱን በሙሉ ይጠቀማል፦ በሰጡት መጠን ልክ ከአንድ እስከ አምስት ንባብ፣ ቀኑም ከእንግዲህ አይቆረጥም።",
+            "ንባብ መጀመር አስቀድሞ ይጠይቃል፤ ወደ ምን እንደሚያስገባዎትም ይነግርዎታል።",
+            "ቅዳሴ የዕለቱን ቅዳሴዎች በሙሉ ያሳያል እንጂ በአንድ መስመር አይቆርጥም።",
+            "ሦስተኛው የምስል ቅርጽ የራሱ ሆኗል፤ የዝሆን ጥርስና አረንጓዴውም ተለይተው ይታያሉ።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.9.0",
         title = "The books behind the books",
         titleAm = "ከመጻሕፍቱ ጀርባ ያሉ መጻሕፍት",

@@ -6,6 +6,52 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [1.9.9] — 2026-09-09
+
+_versionCode 65 · What the day already knew_
+
+### Added
+- **The reading plan has a daily nudge**, at 06:30 unless changed. It stays
+  silent until a plan is actually begun, never asks about a day already read,
+  and names the passage when it does speak — "ዕለት ፵፫ · ኦሪት ዘፍጥረት ፩–፫" — because
+  a reminder worth opening says what it is for. After a week of being ignored
+  it says so once and turns itself off, leaving the switch where you can turn
+  it back on. It carries no streak and nothing at stake: the wording has to be
+  equally true on a first morning and on the morning someone comes back after a
+  month away.
+- **The ግጻዌ's መዝሙር opens the whole hymn.** The lectionary only ever gives it by
+  its opening words, because a printed ግጻዌ names the chant and the chant lives
+  in another book — and that book is on the shelf now. 50 of the 80 Sunday
+  incipits resolve.
+
+### Fixed
+- **Two of the ግጻዌ widget's tiers had never once been drawn.** The footer and
+  the ቅዳሴ line each asked for 128dp of granted height that the default size
+  never gave. The card is rebuilt around what the launcher actually grants: one
+  to five readings chosen by height, every step up adding a reading rather than
+  an ornament. The date owns its line instead of being ellipsized beside the
+  wordmark at the size most people leave it at.
+- **A reading plan is started deliberately.** Tapping a plan card committed you
+  to a six-month track dated from that moment; it asks first now, and says what
+  it is signing you up for.
+- **ቅዳሴ shows its anaphora whole.** The names rode the end of the header rule
+  clipped to one line — exactly where a day naming several ቅዳሴዎች ran off the
+  edge with no way to read it.
+- **The third share-image shape was the first.** STORY and CARD both capped at
+  1920, so any passage long enough to fill the frame produced the same image
+  twice. A card stops at 1440 now and a story is the full 9:16.
+- **The image ground chips carry a swatch of the ground they stand for.**
+  Selected and unselected chips differ too little to tell apart, so ivory and
+  green read as one choice offered twice.
+- **ዓመታዊ በዓላት and ወርኀዊ በዓላት keep the Church's own words in both languages.**
+  They name a kind of feast, not a frequency.
+- **ውዳሴ ማርያም and ሥርዓተ ማኅሌት no longer share the music icon** with each other and
+  with the rest of the shelf.
+- The ስንቅ wordmark is set in the reading face, and larger.
+- A ማሳሰቢያ block is dropped from the shelf: it is an editorial notice to the
+  singer rather than part of the book, and in የተክሌ አቋቋም ዝማሜ it is a bare heading
+  whose text the scan lost entirely.
+
 ## [1.9.0] — 2026-09-08
 
 _versionCode 64 · The books behind the books_
