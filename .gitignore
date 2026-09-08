@@ -18,3 +18,7 @@ docs/extracted/
 # Kotlin build cache and local agent/tooling config.
 .kotlin/
 .claude/
+
+# Python bytecode from the content tools
+__pycache__/
+*.pyc

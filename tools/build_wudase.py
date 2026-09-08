@@ -48,6 +48,57 @@ SECTIONS = [
 # the source's, and these are the specific words the user corrected against the
 # book.
 CORRECTIONS = {
+    # The seven weekday portions, checked word by word against the independent
+    # transcription at EOTCOpenSource/store (prayers/wudasie-maryam). The prayer
+    # is the same in both; these are the places our source is wrong about where
+    # a word ends. 22 defects in 2,936 words.
+    #
+    # A space dropped into the middle of a word — the worst of them splits the
+    # name of God.
+    "monday": [
+        ("የፈረደበት ንም", "የፈረደበትንም"),
+        ("ያለወንድ", "ያለ ወንድ"),
+        ("ቤተልሔም", "ቤተ ልሔም"),
+    ],
+    "tuesday": [
+        ("እግዚ አብሔር", "እግዚአብሔር"),
+        ("የእር ሱን", "የእርሱን"),
+        ("የቆ ሙትንም", "የቆሙትንም"),
+    ],
+    "wednesday": [
+        ("ፍጽም ትና", "ፍጽምትና"),
+        ("ባለሟ ልነትን", "ባለሟልነትን"),
+        ("ስለተገለጠልን", "ስለ ተገለጠልን"),
+    ],
+    "thursday": [
+        ("ድን ግልናዋ", "ድንግልናዋ"),
+        ("አልተ ለወጠም", "አልተለወጠም"),
+        ("ከወለደ ችው", "ከወለደችው"),
+        ("የሚሆ ነው", "የሚሆነው"),
+        ("ዘለዓ ለም", "ዘለዓለም"),
+        ("እንደ ሰጡ", "እንደሰጡ"),
+        # Two words run together with no space at all.
+        ("ያዳነንየክርስቶስ", "ያዳነን የክርስቶስ"),
+        ("በስሙያስተማሩለትን", "በስሙ ያስተማሩለትን"),
+        ("ዳዊትግን", "ዳዊት ግን"),
+        ("ስለመውደድ", "ስለ መውደድ"),
+        ("ስለእግዚአብሔር", "ስለ እግዚአብሔር"),
+        # A letter lost along with the space: ሕማም, not ህማም; መንግሥተ, not መንግስተ.
+        ("ያለህማም", "ያለ ሕማም"),
+        ("ስለመንግስተ", "ስለ መንግሥተ"),
+        ("ቤተልሔም", "ቤተ ልሔም"),
+    ],
+    "friday": [
+        ("ፈጥሮና ልና", "ፈጥሮናልና"),
+        ("ዳግ መኛ", "ዳግመኛ"),
+        ("ማርያምሆይ", "ማርያም ሆይ"),
+    ],
+    "sunday": [
+        ("መጀመሪያስሙን", "መጀመሪያ ስሙን"),
+        ("ያለመለወጥም", "ያለ መለወጥም"),
+        ("ሁልጊዜ", "ሁል ጊዜ"),
+        ("የህግጽላት", "የሕግ ጽላት"),
+    ],
     "yiwedsewa_melaekt": [
         # ድንኳን is addressed to her, so the participle agrees with "you".
         ("የተሸለመች ድንኳን", "የተሸለምሽ ድንኳን"),
