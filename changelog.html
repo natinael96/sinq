@@ -43,6 +43,52 @@
 <!-- releases:start -->
 <article class="release">
   <header>
+    <h2>1.9.0 <span class="date">8 September 2026</span></h2>
+    <p class="motto"><span>The books behind the books</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>ሌሎች መጻሕፍት — 96 scanned church books.</b> The መልክእ hymns, the ድርሳናት, the ገድላት, ሥርዓተ ቅዳሴ, the chant books of ቅዱስ ያሬድ, and መጽሐፈ ሰዓታት. Grouped the way the Church groups them, because seventy of the ninety-six are መልክእ and a flat list reads as one run of near-identical names. Three million characters, 2.2 MB in the release. A book loads only when it is opened.</span></li>
+    <li><span><b>መጽሐፈ ሰዓታት, merged from its three scanned copies.</b> The bilingual copy is the spine — 94% of the Ge&#x27;ez-only copy is inside it word for word — and the Ge&#x27;ez copy restores the 54 lines its scan dropped. The twelve offices only ዘደብረ ዓባይ carries are labelled with that name. It is not the Agpeya, and it is shelved well away from it.</span></li>
+    <li><span><b>ስንክሳር in Ge&#x27;ez.</b> መጽሐፈ ስንክሳር በግእዝ, all 366 days, switched by a pill. The two are parallel editions rather than a parallel text — only 30 of the 366 days have the same paragraph count — so they are read one at a time and never set side by side.</span></li>
+    <li><span><b>The day&#x27;s saints and the day&#x27;s reading, in ስንክሳር.</b> 3,558 named commemorations across the year, annual and ወርኀዊ, and the scripture each day closes on with its citation — neither of which the old text carried.</span></li>
+    <li><span><b>ማኅሌት reaches the whole year.</b> 142 orders where there were 37: the ግጻዌ&#x27;s own stopped after ሚያዝያ and had nothing for ግንቦት through ጳጉሜን. Today&#x27;s order opens the list when the year appoints one.</span></li>
+    <li><span><b>ዘመነ ጽጌ knows its dates.</b> The season floats, so the ግጻዌ could only give it as an ordinal week. The አቋቋም books give an order for every date its Sundays can land on — 41 of them — and the app works out which applies this year.</span></li>
+    <li><span><b>A ማኅሌት part named after a book opens it.</b> 514 of the book&#x27;s 2,247 parts are named for a hymn on the shelf; the ማኅሌት gives the stanza the feast appoints, and the shelf has the whole hymn.</span></li>
+    <li><span><b>ማኅሌተ ጽጌ and ሰቆቃወ ድንግል with their Amharic.</b> ማኅሌተ ጽጌ set verse against verse; ሰቆቃወ ድንግል&#x27;s Amharic is one verse short of its Ge&#x27;ez and nothing says which, so it is given whole under its own heading rather than mispaired.</span></li>
+    <li><span><b>ንባብ has a ዳዊት track.</b> One psalm a day, all 150, about a minute of reading. The other two tracks leave the Psalter out because it is &quot;prayed in the hours&quot; — but only 77 of the 150 psalms appear whole in an hour, and the ግጻዌ cites the rest in ምስባክ fragments of a verse or two. 698 psalm verses were in no hour and in no citation; this is the track that reaches them. A psalm is never split and never doubled up, so መዝሙር ፻፲፰ is a day and መዝሙር ፻፲፮ is a day. The two existing tracks are unchanged, to the byte.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>The አርኬ has its colour back</b>, on the label and the verse. It came off with the entry colouring, but the red was never entry colouring — Ethiopic manuscripts mark a section title in cinnabar and every printed liturgy sets the sung text in black and the rubric in red.</span></li>
+    <li><span><b>ስንክሳር reads in one voice.</b> A day passed through three treatments of the same text — a shrunk, muted opening, a full-size commemoration, and prose again after the አርኬ — while the አርኬ, the one thing that should differ, did not. And the &quot;no ስንክሳር today&quot; panel goes: all 366 days carry entries.</span></li>
+    <li><span><b>The three compact cards on ቤት drew nothing at all.</b> <code>SinqCard</code> lays its content out in a column, and the cards put a weighted column inside it, which in a column sized by its content measures to zero.</span></li>
+    <li><span><b>ቤት and ጉዞ have the ስንቅ mark back</b>, as a mark rather than the old headline: taking it out bought vertical space and cost both pages their top edge.</span></li>
+    <li><span><b>22 broken words in ውዳሴ ማርያም</b>, checked against an independent transcription. Fourteen had a space dropped into the middle of a word — the worst split እግዚ አብሔር — five ran two words together, and three had lost a letter as well. The ይዌድስዋ መላእክት litany is corrected against the printed book.</span></li>
+    <li><span><b>A ዳዊት day opens the Psalter</b>, not the Bible reader, which does not carry the Psalter at all.</span></li>
+    <li><span><b>Four ማኅሌት of ዘመነ ጽጌ had become unreachable.</b> The index groups a feast with its services, but ጽጌ is not that shape — it holds six numbered weeks, each with its own order — so five collapsed into one row and four could be opened nowhere. 94 parts of transcribed ማኅሌት were behind that row.</span></li>
+    <li><span><b>A verse with two reference lists lost the second.</b> The reader hands them to the parser joined, and the parser only read from the start of the string, so everything after the first citation went — and the bare &quot;chapter፥verse&quot; that followed inherited the wrong book, putting መዝሙር ፴፰፥፲፪ under ሚክያስ. The book pattern was also matching the ፤ that separates citations.</span></li>
+    <li><span><b>በዓለ ትንሳኤ sat under a heading naming ዘመነ ጽጌ.</b> The undated group took its title from its first row.</span></li>
+    <li><span><b>Three faults in the Psalter.</b> መዝ ፻፲፰፥፯ ended with the ቤት acrostic letter and debris from the scan, sitting inside the verse — all 22 letters are already carried as headings. Six verses put a space in front of the Ethiopic comma. And the Ge&#x27;ez Psalter had swallowed three verses whole: መዝ ፭፥፯ was inside ፭፥፮, and መዝ ፻፵፥፭ and ፥፮ inside ፻፵፥፬, each with the verse marker still in the text saying where the boundary had been. The ምስባክ is chanted from that edition and cites it by verse.</span></li>
+    <li><span><b>The ግጻዌ page&#x27;s ⋮ shared in a shape of its own.</b> Copy and share there ignored ቅዳና አጋራ while the very same passage from the selection bar obeyed it. Every menu in the app now formats a passage the one way.</span></li>
+    <li><span><b>The Bible catalogue can no longer disagree with the Bible.</b> It claimed 2,459 Ge&#x27;ez verses for a Psalter that holds 2,462; nothing counted them. The content gate does now.</span></li>
+    <li><span><b>Opening notification settings crashed on Android 6 and 7</b>, which have no per-app notification page. Three screens called it unguarded; they fall back to the app&#x27;s own settings page now.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>ስንክሳር is rebuilt from the printed book&#x27;s own structure.</b> The አርኬ is a block in the source now, so the three hundred lines that inferred it from prose are gone — and the hymn is always centred, because there is no longer a case where one falls through and is set as running prose. The day&#x27;s reading is one piece with its citation, which could previously be selected and shared on its own as though it were a paragraph of the book. No rules across the page either.</span></li>
+    <li><span><b>The &quot;check for updates&quot; switch goes.</b> It was orphaned when the settings were regrouped — readable but no longer settable — and it was never the real switch anyway: the Play bundle is built without the update notice entirely, because a Play build pointing at a page of APKs is a policy breach, and someone who installed the APK by hand wants to know when there is a new one.</span></li>
+    <li><span><b>Cross-references are behind a tap and they open.</b> Selecting a verse gives the bar a ማጣቀሻ action with the count, and the list opens as chips that go where they point. All 73 abbreviations the edition uses resolve, covering 55,128 references.</span></li>
+    <li><span><b>ማኅሌት is set as an order of service.</b> Half the book is three refrains, so they are set as refrains; every part carries its ordinal, since one name repeats up to thirteen times in a single order; and the index lists 22 feasts where it listed 37 services.</span></li>
+    <li><span><b>The ዳዊት habit goes.</b> የዕለት ንባብ already covers reading, and a fifth daily tick for something the app marks on your behalf is a chore nobody chose.</span></li>
+    <li><span><b>ስንክሳር bookmarks point at the commemoration, not at its position.</b> The id was the entry&#x27;s index within the day, so any change to how a day is cut renamed every entry after the first.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
     <h2>1.8.1 <span class="date">8 September 2026</span></h2>
     <p class="motto"><span>the chant was in the book all along</span></p>
   </header>
@@ -182,33 +228,6 @@
     <li><span><b>ንስሐ ዝግጅት and ቁርባን ዝግጅት now say በቅርቡ.</b> Both shipped in 1.7.0 with text written for the app rather than received from the Church — an examination of conscience, the ሥርዓተ መቅረቢያ, and prayers before and after receiving. These are the two screens in Sinq that teach rather than record, and that is the wrong provenance for them, so the text is removed and the screens wait.</span></li>
     <li><span>The entry points stay visible and say so. The state follows the bundled content being empty, so adding the text turns the screens on with no code change.</span></li>
     <li><span>ቀኖና is unaffected and still works: it holds only what its owner enters.</span></li>
-  </ul>
-  </div>
-</article>
-
-<article class="release">
-  <header>
-    <h2>1.7.0 <span class="date">4 September 2026</span></h2>
-    <p class="motto"><span>what the Church does not read to you</span></p>
-  </header>
-  <div class="body">
-  <h3><span>Fixed</span></h3>
-  <ul>
-    <li><span><b>The app would not install on anything below Android 8.0.</b> <code>minSdk</code> was 26, held there only by <code>java.time</code> (used in some 50 files) and <code>java.util.Base64</code> in the journal lock. Core library desugaring carries both down, so the floor is now 23 — Android 6.0. Notification channels, which do not exist before Oreo, are behind version checks; <code>PBKDF2WithHmacSHA256</code>, which also needs 26, now records which algorithm hashed a passphrase so one set on Android 6 keeps verifying after its owner upgrades.</span></li>
-    <li><span><b>Release APKs now carry the v1 JAR signature.</b> v2 alone covers API 24 and up, which would have excluded the Android 6 devices the change is for.</span></li>
-    <li><span>Two long-standing lint errors that were keeping the CI workflow red.</span></li>
-  </ul>
-  <h3><span>Added</span></h3>
-  <ul>
-    <li><span><b>ንስሐ ዝግጅት</b> — a guided examination of conscience, walked one section at a time. The questions are read, never ticked, and the walk produces a single confession draft that &quot;ንስሐ ገብቻለሁ&quot; deletes.</span></li>
-    <li><span><b>ቀኖና</b> — the penance received from a ንስሐ አባት, with its measure and what has been done against it. It reminds until it is finished and then falls silent. Kept on the device only: never in a backup, and its label never appears in a notification.</span></li>
-    <li><span><b>ቁርባን ዝግጅት</b> — the order of approach as the tradition states it, with the prayers before and after receiving.</span></li>
-    <li><span><b>ንባብ</b> — a reading plan for the 1,067 chapters of the Old Testament and deuterocanon that the ግጻዌ never reaches, over a year or six months. The day&#x27;s ግጻዌ is shown inside the plan, above the plan&#x27;s own reading and never marked done. It is also the first screen to reach ሲራክ, ኩፋሌ, ሄኖክ and መቃብያን, which have been bundled all along with no way in.</span></li>
-    <li><span><b>A line on ቤት when a new version is out.</b> Opt-in and off by default; one request a day, the app&#x27;s only use of the network. It opens the release page in the browser and never downloads anything itself.</span></li>
-  </ul>
-  <h3><span>Changed</span></h3>
-  <ul>
-    <li><span>The Journey page&#x27;s vertical rhythm is a little tighter again.</span></li>
   </ul>
   </div>
 </article>
