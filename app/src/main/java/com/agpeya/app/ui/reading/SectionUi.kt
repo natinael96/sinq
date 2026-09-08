@@ -591,14 +591,39 @@ private fun ImageOptionsDialog(
                     Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 ) {
+                    // Each chip carries the ground it stands for. Selected and
+                    // unselected FilterChips differ too little to tell apart at
+                    // a glance, so the two read as one choice made twice — and
+                    // the picker looked broken rather than merely quiet.
                     listOf(
-                        com.agpeya.app.ui.common.ImageGround.GREEN to s.imageGroundGreen,
-                        com.agpeya.app.ui.common.ImageGround.IVORY to s.imageGroundIvory,
-                    ).forEach { (value, label) ->
+                        Triple(
+                            com.agpeya.app.ui.common.ImageGround.GREEN,
+                            s.imageGroundGreen,
+                            androidx.compose.ui.graphics.Color(0xFF0B3129),
+                        ),
+                        Triple(
+                            com.agpeya.app.ui.common.ImageGround.IVORY,
+                            s.imageGroundIvory,
+                            androidx.compose.ui.graphics.Color(0xFFE7E4D6),
+                        ),
+                    ).forEach { (value, label, swatch) ->
                         androidx.compose.material3.FilterChip(
                             selected = ground == value,
                             onClick = { ground = value },
                             label = { Text(label, maxLines = 1) },
+                            leadingIcon = {
+                                androidx.compose.foundation.layout.Box(
+                                    Modifier
+                                        .size(16.dp)
+                                        .clip(androidx.compose.foundation.shape.CircleShape)
+                                        .background(swatch)
+                                        .border(
+                                            1.dp,
+                                            MaterialTheme.colorScheme.outline,
+                                            androidx.compose.foundation.shape.CircleShape,
+                                        ),
+                                )
+                            },
                         )
                     }
                 }

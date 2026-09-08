@@ -73,6 +73,41 @@ object BookRepository {
         return all(context).find { it.key == key }
     }
 
+    /**
+     * The book and chapter holding the hymn a ግጻዌ incipit names.
+     *
+     * The lectionary only ever gives a መዝሙር by its opening words — a printed
+     * ግጻዌ names the chant, and the chant itself lives in another book. That
+     * other book is on the shelf now, so the incipit can be a door instead of
+     * a dead end.
+     *
+     * The incipit is written with an ordinal and the word መዝሙር in front of it
+     * ("፯ተኛ መዝሙር ትብሎ መርዓት ።"), neither of which is part of the hymn.
+     */
+    suspend fun byIncipit(context: Context, incipit: String): BookLocation? {
+        val needle = fold(INCIPIT_PREFIX.replace(incipit, "")).trim(' ', '\u1362', '\u1361')
+        if (needle.length < 8) return null
+        val probe = needle.take(14)
+        for (meta in all(context).filter { it.shelf == CHANT_SHELF }) {
+            val book = book(context, meta.id) ?: continue
+            for (chapter in book.chapters) {
+                if (probe in fold(chapter.blocks.joinToString(" ") { it.text })) {
+                    return BookLocation(meta, chapter.number)
+                }
+            }
+        }
+        return null
+    }
+
+    /** A book on the shelf and the chapter within it that answers a lookup. */
+    data class BookLocation(val book: BookMeta, val chapter: Int)
+
+    /** "፯ተኛ መዝሙር " — an ordinal and the name of the genre, not of the hymn. */
+    private val INCIPIT_PREFIX = Regex("^\\s*(?:[\u1369-\u137C0-9]+\\s*(?:\u1270\u129B|\u129B)?\\s*)?(?:\u1218\u12DD\u1219\u122D\\s*)?")
+
+    /** የዜማ መጻሕፍት — the only shelf a chant is on. */
+    private const val CHANT_SHELF = "zema"
+
     /** The app's own homophone folding — tools/build_books.py mirrors it exactly. */
     internal fun fold(raw: String): String =
         AmharicSearch.fold(raw).replace(Regex("\\s+"), " ").trim()

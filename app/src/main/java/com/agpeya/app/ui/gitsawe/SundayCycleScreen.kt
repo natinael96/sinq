@@ -48,6 +48,7 @@ fun SundayCycleScreen(
     epochDay: Long,
     onBack: () -> Unit,
     onOpenReading: (ReadingTarget, String) -> Unit,
+    onOpenBook: (String, Int) -> Unit = { _, _ -> },
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
@@ -71,7 +72,7 @@ fun SundayCycleScreen(
         val data = entries
         if (data == null) LoadingPanel(Modifier.padding(padding))
         else if (selected == null) SundayOptions(data, Modifier.padding(padding)) { selectedIndex = it.index }
-        else SundayReading(selected, Modifier.padding(padding), onOpenReading)
+        else SundayReading(selected, Modifier.padding(padding), onOpenReading, onOpenBook)
     }
 }
 
@@ -102,13 +103,41 @@ private fun SundayReading(
     entry: SundayCycleEntry,
     modifier: Modifier,
     onOpenReading: (ReadingTarget, String) -> Unit,
+    onOpenBook: (String, Int) -> Unit,
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
-        entry.mezmur?.let { item { Text(it, style = MaterialTheme.typography.titleMedium.inReadingFont(), color = MaterialTheme.colorScheme.secondary) } }
+        entry.mezmur?.let { incipit ->
+            item {
+                // The ግጻዌ gives the መዝሙር by its opening words only. When the
+                // shelf has the hymn those words belong to, the line becomes a
+                // door into it rather than a name with nothing behind it.
+                val found by androidx.compose.runtime.produceState<com.agpeya.app.data.BookRepository.BookLocation?>(
+                    null, incipit,
+                ) { value = com.agpeya.app.data.BookRepository.byIncipit(context, incipit) }
+                Column(Modifier.fillMaxWidth()) {
+                    Text(
+                        incipit,
+                        style = MaterialTheme.typography.titleMedium.inReadingFont(),
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
+                    found?.let { loc ->
+                        Text(
+                            LocalStrings.current.mezmurFullHymn(loc.book.title),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier
+                                .padding(top = Spacing.xxs)
+                                .clickable { onOpenBook(loc.book.id, loc.chapter) },
+                        )
+                    }
+                }
+            }
+        }
         entry.rubric?.let { item { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) } }
         items(entry.labeledReadings()) { (role, reading) ->
             val target = reading.verse?.let(GitsaweLinks::target)

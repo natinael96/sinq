@@ -597,6 +597,9 @@ private fun AgpeyaNavHost(
                         launchSingleTop = true
                     }
                 },
+                onOpenBook = { id, chapter ->
+                    navController.navigate("book/$id?ch=$chapter") { launchSingleTop = true }
+                },
             )
         }
         composable(

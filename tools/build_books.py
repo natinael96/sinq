@@ -82,6 +82,10 @@ TIER_MARK = re.compile(r"\s*(?:፪ማ|(?<=\s)ማ)[፡:]\s*")
 AMHARIC = re.compile(r"(?:^|\s)(?:የ|እን[ደዲ]|ስለ|ሲ|ብት)|ናቸው|ነው|ነበር|ዘንድ|ችሁ|ኛል|ናል|ሆይ|ጋር|ውስጥ")
 GEEZ = re.compile(r"(?:^|\s)(?:ወ|ዘ|እም|ኀበ|ከመ|እስመ|እንዘ|ላዕለ|ኵሉ)|ውእቱ|ሆሙ|ኪያ")
 
+# A ማሳሰቢያ is an editorial notice to the singer, not part of the book — and in
+# የተክሌ አቋቋም ዝማሜ it is a bare heading whose text the scan lost entirely. Dropped.
+NOTICE = re.compile(r"^ማሳሰቢያ")
+
 # ሀ ሐ ኀ ኸ · ሰ ሠ · አ ዐ · ጸ ፀ sound alike and the scans spell them both ways.
 # This mirrors AmharicSearch.foldChar series for series — each family folds to
 # one consonant keeping its vowel order — so a key built here matches a name
@@ -166,7 +170,7 @@ def build():
                 text = clean_text(text)
                 # An empty table_row is a cell the scan could not read; an empty
                 # paragraph is nothing at all. Neither belongs in a reader.
-                if not text:
+                if not text or NOTICE.match(text):
                     continue
                 block = {"type": b.get("type", "paragraph"), "text": text}
                 if b.get("level"):

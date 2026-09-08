@@ -64,6 +64,7 @@ import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.LocalMotion
 import com.agpeya.app.ui.theme.Motion
 import com.agpeya.app.ui.theme.Spacing
+import com.agpeya.app.ui.theme.inReadingFont
 import com.agpeya.app.ui.theme.sinqColors
 import kotlinx.coroutines.delay
 
@@ -214,7 +215,7 @@ fun openNotificationSettings(context: android.content.Context) {
 fun SinqWordmark(modifier: Modifier = Modifier) {
     Text(
         text = "ስንቅ",
-        style = MaterialTheme.typography.titleSmall,
+        style = MaterialTheme.typography.titleLarge.inReadingFont(),
         color = MaterialTheme.colorScheme.secondary,
         maxLines = 1,
         modifier = modifier,

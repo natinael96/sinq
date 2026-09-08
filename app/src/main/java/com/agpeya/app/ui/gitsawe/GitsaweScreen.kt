@@ -404,17 +404,22 @@ private fun ServiceHeader(label: String, note: String? = null) {
             thickness = 1.dp,
             color = MaterialTheme.colorScheme.outlineVariant,
         )
-        if (!note.isNullOrBlank()) {
-            Spacer(Modifier.width(Spacing.md))
-            Text(
-                note,
-                style = MaterialTheme.typography.labelMedium.inReadingFont(),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f, fill = false),
-            )
-        }
+    }
+    // The day's anaphora, on its own line under the rule.
+    //
+    // It used to ride the end of the rule, clipped to one line — which on ቅዳሴ
+    // is where the day names several ቅዳሴዎች and the list ran off the edge with
+    // no way to read it. A name of a ቅዳሴ is not a hint; it has to be readable
+    // whole, so it wraps here instead of competing with the rule for width.
+    if (!note.isNullOrBlank()) {
+        Text(
+            note,
+            style = MaterialTheme.typography.labelMedium.inReadingFont(),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = Spacing.xs),
+        )
     }
 }
 

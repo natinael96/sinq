@@ -29,7 +29,8 @@ import com.agpeya.app.ui.theme.Spacing
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.automirrored.outlined.EventNote
-import androidx.compose.material.icons.outlined.LibraryMusic
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.Nightlight
 import androidx.compose.material.icons.outlined.LocalDrink
 import androidx.compose.material.icons.outlined.WbTwilight
 import androidx.compose.material.icons.outlined.AutoStories
@@ -84,7 +85,7 @@ fun LibraryScreen(
                 )
             }
             item {
-                LibraryCard(icon = Icons.Outlined.LibraryMusic, title = s.wudaseMariam, subtitle = s.wudaseScheduleSubtitle, onClick = onOpenWudase)
+                LibraryCard(icon = Icons.Outlined.Favorite, title = s.wudaseMariam, subtitle = s.wudaseScheduleSubtitle, onClick = onOpenWudase)
             }
             item {
                 LibraryCard(icon = Icons.Outlined.WbTwilight, title = s.zewotrTselot, subtitle = s.zewotrSubtitle, onClick = onOpenZewotr)
@@ -101,7 +102,7 @@ fun LibraryScreen(
             }
             item {
                 LibraryCard(
-                    icon = Icons.Outlined.LibraryMusic,
+                    icon = Icons.Outlined.Nightlight,
                     title = s.mahletTitle,
                     subtitle = s.mahletSubtitle,
                     onClick = onOpenMahlets,

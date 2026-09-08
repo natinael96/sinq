@@ -85,6 +85,9 @@ object PassageShare {
     private const val W = 1080
     private const val MAX_H = 1920
 
+    /** A card stops here so a story is visibly the taller frame of the two. */
+    private const val CARD_MAX_H = 1440
+
     /** Card inset from the bitmap edge, and text inset from the card edge. */
     private const val EDGE = 56f
     private const val PAD = 72f
@@ -285,17 +288,21 @@ object PassageShare {
 
         // A square or a story is a fixed frame the text has to live inside; the
         // card grows to whatever the passage needs, as it always has.
+        // Three frames that are actually three. A story is the full 9:16; a card
+        // grows to its text but stops well short of it, so the two are told
+        // apart at a glance. They used to share MAX_H, which made the third
+        // option identical to the first for any passage long enough to fill it.
         val frame = when (payload.shape) {
             ImageShape.SQUARE -> W
             ImageShape.STORY -> MAX_H
-            ImageShape.CARD -> MAX_H
+            ImageShape.CARD -> CARD_MAX_H
         }
         val bodyLineHeight = bodyPaint.fontSpacing * 1.5f
         val maxBodyLines = ((frame - fixed) / bodyLineHeight).toInt().coerceAtLeast(4)
         val bodyLayout = layout(body, bodyPaint, 1.5f, maxLines = maxBodyLines)
 
         val h = when (payload.shape) {
-            ImageShape.CARD -> (fixed + bodyLayout.height).toInt().coerceIn(640, MAX_H)
+            ImageShape.CARD -> (fixed + bodyLayout.height).toInt().coerceIn(640, CARD_MAX_H)
             else -> frame
         }
         // In a fixed frame the block sits in the middle of the space it has

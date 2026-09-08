@@ -79,7 +79,44 @@ fun ReadingPlanScreen(
     }
 
     var stopping by remember { mutableStateOf(false) }
+    var pending by remember { mutableStateOf<ReadingPlan?>(null) }
     var catching by remember { mutableStateOf(false) }
+
+    pending?.let { choice ->
+        val perDay = if (choice.days > 0) (choice.totalChapters + choice.days - 1) / choice.days else 0
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { pending = null },
+            title = { Text(choice.title) },
+            text = {
+                Column {
+                    if (choice.subtitle.isNotBlank()) {
+                        Text(choice.subtitle, style = MaterialTheme.typography.bodyMedium)
+                        Spacer(Modifier.height(Spacing.sm))
+                    }
+                    Text(
+                        s.readingPlanMeta(choice.days.toString(), perDay.toString()),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
+                    Spacer(Modifier.height(Spacing.sm))
+                    Text(
+                        s.readingStartBody,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    pending = null
+                    scope.launch { ReadingPlanRepository.start(context, choice.id, today) }
+                }) { Text(s.readingStartAction) }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { pending = null }) { Text(s.cancel) }
+            },
+        )
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -94,7 +131,10 @@ fun ReadingPlanScreen(
                 item { ChooserIntro(s.readingIntro) }
                 items(content.plans.size) { i ->
                     val p = content.plans[i]
-                    PlanChoice(p) { scope.launch { ReadingPlanRepository.start(context, p.id, today) } }
+                    // Tapping a card used to start the plan there and then. A
+                    // six-month track is a commitment dated from the day it
+                    // begins, so it is asked for rather than fallen into.
+                    PlanChoice(p) { pending = p }
                 }
             } else {
                 val day = ReadingPlanRepository.dayOn(state.startedOn, today, plan.days)

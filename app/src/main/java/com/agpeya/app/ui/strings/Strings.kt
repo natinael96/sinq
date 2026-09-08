@@ -137,6 +137,9 @@ interface Strings {
     val sinksarAnnualFeasts: String
     val sinksarMonthlyFeasts: String
     val sinksarReading: String
+    fun mezmurFullHymn(book: String): String
+    val readingStartAction: String
+    val readingStartBody: String
     /** ሥርዓተ ማኅሌት — the orders of service sung on a feast. */
     val mahletTitle: String
     val mahletSubtitle: String
@@ -951,6 +954,9 @@ object AmharicStrings : Strings {
     override val sinksarAnnualFeasts = "ዓመታዊ በዓላት"
     override val sinksarMonthlyFeasts = "ወርኀዊ በዓላት"
     override val sinksarReading = "የዕለቱ ንባብ"
+    override fun mezmurFullHymn(book: String) = "ሙሉውን መዝሙር ክፈት · $book"
+    override val readingStartAction = "ጀምር"
+    override val readingStartBody = "ንባቡ ከዛሬ ጀምሮ ይቆጠራል። በማንኛውም ጊዜ ማቆም ይችላሉ።"
     override val mahletSubtitle = "የበዓላት ማኅሌትና ዋዜማ"
     override val mahletVigil = "ዋዜማ"
     override val mahletMovable = "የወር ቀን የሌላቸው"
@@ -1701,9 +1707,14 @@ object EnglishStrings : Strings {
     override val synaxariumLibrarySubtitle = "The year's commemorations"
     override val sinksarAmharic = "አማርኛ"
     override val sinksarGeez = "ግእዝ"
-    override val sinksarAnnualFeasts = "Annual feasts"
-    override val sinksarMonthlyFeasts = "Monthly feasts"
+    // The Church's own words for these, in both languages: they name a kind of
+    // feast, not a frequency, and "monthly feasts" is not what they are called.
+    override val sinksarAnnualFeasts = "ዓመታዊ በዓላት"
+    override val sinksarMonthlyFeasts = "ወርኀዊ በዓላት"
     override val sinksarReading = "The day's reading"
+    override fun mezmurFullHymn(book: String) = "Open the whole hymn · $book"
+    override val readingStartAction = "Start"
+    override val readingStartBody = "The plan is counted from today. You can stop at any time."
     override val mahletSubtitle = "Orders of service for the feasts"
     override val mahletVigil = "ዋዜማ"
     override val mahletMovable = "Movable feasts"
