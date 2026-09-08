@@ -13,6 +13,7 @@ import android.view.View
 import android.widget.RemoteViews
 import com.agpeya.app.MainActivity
 import com.agpeya.app.R
+import com.agpeya.app.data.FastingCalendar
 import com.agpeya.app.data.GitsaweRepository
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.model.GitsaweReading
@@ -21,6 +22,7 @@ import com.agpeya.app.model.VerseRef
 import com.agpeya.app.reminders.GitsaweReminderScheduler
 import com.agpeya.app.stringsFor
 import com.agpeya.app.ui.common.formatEthiopian
+import com.agpeya.app.ui.strings.Strings
 import com.agpeya.app.ui.reading.geezNumeral
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -33,9 +35,9 @@ import java.time.ZoneId
  * Tapping it opens the ግጻዌ screen.
  *
  * The provider renders the single card itself (no collection service): content
- * is read on a background thread via [BroadcastReceiver.goAsync], and the
- * layout's rule/rows/kidase/cta tiers are shown or hidden to fit the height
- * the launcher grants, so the card stays legible at every widget size. It
+ * is read on a background thread via [BroadcastReceiver.goAsync], and the number
+ * of readings — one to five — is chosen from the height the launcher grants, so
+ * a tall card is worth making tall and a short one still says something. It
  * refreshes on date/time/locale changes and re-arms a just-past-midnight
  * alarm so the card never shows yesterday's readings.
  */
@@ -90,11 +92,12 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
     private data class Card(
         val header: String,
         val title: String,
+        /** Every reading the day has, in liturgical order. Trimmed at render. */
         val rows: List<Pair<String, String>>,
-        val kidase: String?,
+        /** What kind of day it is: the anaphora, the fast, or both. */
+        val status: String?,
         val emptyText: String,
         val hasContent: Boolean,
-        val ctaText: String,
         val epochDay: Long,
     )
 
@@ -107,15 +110,16 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
         val service = entry?.kidassie ?: entry?.negh
         val realTitle = entry?.title?.takeIf { it.isNotBlank() }
             ?: readings.feasts.firstOrNull()?.amharicName
-        val rows = service?.let { pickRows(it) }.orEmpty()
+        val rows = service?.let { allRows(it) }.orEmpty()
         Card(
-            header = "${s.todayLabel}  ·  ${formatEthiopian(date, s)}",
+            // The date now owns its line, so it can be the whole date: it used
+            // to share a row with the wordmark and get ellipsized on a 4×2.
+            header = formatEthiopian(date, s),
             title = realTitle ?: s.gitsaweTitle,
             rows = rows,
-            kidase = service?.kidassie?.firstOrNull { it.isNotBlank() }?.trim(),
+            status = statusLine(s, date, service),
             emptyText = s.noGitsaweToday,
             hasContent = rows.isNotEmpty() || realTitle != null,
-            ctaText = "${s.readGitsawe} →",
             epochDay = date.toEpochDay(),
         )
     }
@@ -124,53 +128,65 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
         val views = RemoteViews(context.packageName, R.layout.widget_gitsawe)
         // How much fits: the launcher reports granted size in dp via the options.
         val options = manager.getAppWidgetOptions(id)
-        val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 180)
+        val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 110)
         val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 250)
-        val showRows = minHeight >= 84
-        val showFoot = minHeight >= 128
-        val showChips = minWidth >= 180
+        // Readings the height pays for. The 4×2 default is ~110dp, and the two
+        // it buys there are the two the widget has always promised; every step
+        // up adds a reading rather than an ornament. The old thresholds asked
+        // for 128dp before showing a footer the default size could never grant,
+        // so two of the card's tiers were unreachable as shipped.
+        val maxRows = when {
+            minHeight >= 190 -> 5
+            minHeight >= 162 -> 4
+            minHeight >= 134 -> 3
+            minHeight >= 100 -> 2
+            minHeight >= 76 -> 1
+            else -> 0
+        }
+        val showStatus = minHeight >= 162
+        // A narrow card gives the reference the whole width instead.
+        val showRoles = minWidth >= 180
 
         if (card == null) {
             // Load failure: name the app, invite the tap — never a blank card.
             views.setTextViewText(R.id.widget_date, "")
             views.setTextViewText(R.id.widget_title, context.getString(R.string.widget_gitsawe_label))
             views.setViewVisibility(R.id.widget_rule, View.GONE)
-            views.setViewVisibility(R.id.widget_row_1, View.GONE)
-            views.setViewVisibility(R.id.widget_row_2, View.GONE)
-            views.setViewVisibility(R.id.widget_kidase, View.GONE)
+            ROW_IDS.forEach { (rowId, _) -> views.setViewVisibility(rowId, View.GONE) }
             views.setViewVisibility(R.id.widget_empty, View.GONE)
-            views.setViewVisibility(R.id.widget_cta, View.GONE)
+            views.setViewVisibility(R.id.widget_status_rule, View.GONE)
+            views.setViewVisibility(R.id.widget_status, View.GONE)
             views.setOnClickPendingIntent(R.id.widget_root, openGitsawe(context, LocalDate.now().toEpochDay()))
             return views
         }
 
         views.setTextViewText(R.id.widget_date, card.header)
         views.setTextViewText(R.id.widget_title, card.title)
-        if (card.rows.isEmpty()) {
-            views.setViewVisibility(R.id.widget_row_1, View.GONE)
-            views.setViewVisibility(R.id.widget_row_2, View.GONE)
-            views.setViewVisibility(R.id.widget_rule, if (showRows) View.VISIBLE else View.GONE)
-            views.setViewVisibility(R.id.widget_empty, if (showRows) View.VISIBLE else View.GONE)
+
+        val shown = trimToFit(card.rows, maxRows)
+        val hasRoom = maxRows > 0
+        if (shown.isEmpty()) {
+            ROW_IDS.forEach { (rowId, _) -> views.setViewVisibility(rowId, View.GONE) }
+            views.setViewVisibility(R.id.widget_rule, if (hasRoom) View.VISIBLE else View.GONE)
+            views.setViewVisibility(R.id.widget_empty, if (hasRoom) View.VISIBLE else View.GONE)
             views.setTextViewText(R.id.widget_empty, card.emptyText)
         } else {
             views.setViewVisibility(R.id.widget_empty, View.GONE)
-            views.setViewVisibility(R.id.widget_rule, if (showRows) View.VISIBLE else View.GONE)
-            bindRow(views, card.rows.getOrNull(0)?.takeIf { showRows }, showChips, R.id.widget_row_1, R.id.widget_role_1, R.id.widget_ref_1)
-            bindRow(views, card.rows.getOrNull(1)?.takeIf { showRows }, showChips, R.id.widget_row_2, R.id.widget_role_2, R.id.widget_ref_2)
-            // The day's ቅዳሴ, one quiet line — a continuation, not a third row.
-            if (card.kidase == null || !showFoot) {
-                views.setViewVisibility(R.id.widget_kidase, View.GONE)
-            } else {
-                views.setViewVisibility(R.id.widget_kidase, View.VISIBLE)
-                views.setTextViewText(R.id.widget_kidase, "ቅዳሴ · ${card.kidase}")
+            views.setViewVisibility(R.id.widget_rule, View.VISIBLE)
+            ROW_IDS.forEachIndexed { i, (rowId, ids) ->
+                bindRow(views, shown.getOrNull(i), showRoles, rowId, ids.first, ids.second)
             }
         }
-        // The primary action line — the whole card opens the app, this names it.
-        if (card.hasContent && showFoot) {
-            views.setViewVisibility(R.id.widget_cta, View.VISIBLE)
-            views.setTextViewText(R.id.widget_cta, card.ctaText)
+
+        // The day itself — anaphora and fast — under its own hairline.
+        val status = card.status?.takeIf { showStatus && shown.isNotEmpty() }
+        if (status == null) {
+            views.setViewVisibility(R.id.widget_status_rule, View.GONE)
+            views.setViewVisibility(R.id.widget_status, View.GONE)
         } else {
-            views.setViewVisibility(R.id.widget_cta, View.GONE)
+            views.setViewVisibility(R.id.widget_status_rule, View.VISIBLE)
+            views.setViewVisibility(R.id.widget_status, View.VISIBLE)
+            views.setTextViewText(R.id.widget_status, status)
         }
         views.setOnClickPendingIntent(R.id.widget_root, openGitsawe(context, card.epochDay))
         return views
@@ -179,7 +195,7 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
     private fun bindRow(
         views: RemoteViews,
         row: Pair<String, String>?,
-        showChip: Boolean,
+        showRole: Boolean,
         rowId: Int,
         roleId: Int,
         refId: Int,
@@ -189,17 +205,47 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
             return
         }
         views.setViewVisibility(rowId, View.VISIBLE)
-        views.setViewVisibility(roleId, if (showChip) View.VISIBLE else View.GONE)
+        views.setViewVisibility(roleId, if (showRole) View.VISIBLE else View.GONE)
         views.setTextViewText(roleId, row.first)
         views.setTextViewText(refId, row.second)
     }
 
-    /** The two most useful lines for a glance: ምስባክ and ወንጌል, when present. */
-    private fun pickRows(service: GitsaweService): List<Pair<String, String>> =
-        listOfNotNull(
-            service.msbak.firstOrNull()?.let { "ምስባክ" to summarize(it) },
-            service.wengel.firstOrNull()?.let { "ወንጌል" to summarize(it) },
-        )
+    /** Every reading the service carries, in the order the liturgy reads them. */
+    private fun allRows(service: GitsaweService): List<Pair<String, String>> =
+        ROLES.mapNotNull { (label, pick) ->
+            pick(service).firstOrNull()?.let { label to summarize(it) }
+                ?.takeIf { it.second.isNotBlank() }
+        }
+
+    /**
+     * The [max] most useful readings, still in liturgical order.
+     *
+     * Which ones go when there is no room is a different question from which
+     * order they are read in: the ወንጌል is the one reading worth a single line,
+     * and the ምስባክ the second — those two are what a glance is for, and what
+     * the widget's own picker description promises. The epistles fill a taller
+     * card. Dropping is by [ROLE_PRIORITY]; what survives is re-sorted back.
+     */
+    private fun trimToFit(rows: List<Pair<String, String>>, max: Int): List<Pair<String, String>> {
+        if (max <= 0) return emptyList()
+        if (rows.size <= max) return rows
+        val keep = rows.sortedBy { ROLE_PRIORITY.indexOf(it.first) }.take(max).toSet()
+        return rows.filter { it in keep }
+    }
+
+    /**
+     * What kind of day it is, in one line: the anaphora sung at the ቅዳሴ, and
+     * the fast in effect. Both are things a person wants before deciding
+     * anything about the day, and neither reached the widget before.
+     */
+    private fun statusLine(s: Strings, date: LocalDate, service: GitsaweService?): String? {
+        val anaphora = service?.kidassie?.firstOrNull { it.isNotBlank() }?.trim()
+        val fast = FastingCalendar.fastOn(date)?.let { if (s.isAmharic) it.nameAm else it.nameEn }
+            ?: s.fastingWeekly.takeIf { FastingCalendar.isWeeklyFastDay(date) }
+        return listOfNotNull(anaphora?.let { "ቅዳሴ $it" }, fast)
+            .joinToString("  ·  ")
+            .ifBlank { null }
+    }
 
     private fun summarize(reading: GitsaweReading): String =
         reading.verse?.let { verseRef(it) }?.takeIf { it.isNotBlank() }
@@ -285,3 +331,30 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
         }
     }
 }
+
+/**
+ * The five readings of a ቅዳሴ, in the order the liturgy reads them and under the
+ * names the text goes by rather than whose turn it is to read it — the same
+ * list, and the same reasoning, as `ROLE_LABELS` on the ግጻዌ screen. ነግህ and
+ * ሠርክ carry only the psalm and the Gospel; the roles they lack contribute
+ * nothing. The names stay Amharic in every language, as they do on the screen.
+ */
+private val ROLES: List<Pair<String, (GitsaweService) -> List<GitsaweReading>>> = listOf(
+    "ጳውሎስ" to { s: GitsaweService -> s.firstDeacon },
+    "ሐዋርያ" to { s: GitsaweService -> s.secondDeacon },
+    "ግብረ ሐዋርያት" to { s: GitsaweService -> s.secondKahn },
+    "ምስባክ" to { s: GitsaweService -> s.msbak },
+    "ወንጌል" to { s: GitsaweService -> s.wengel },
+)
+
+/** Which readings survive a short card, most worth keeping first. */
+private val ROLE_PRIORITY = listOf("ወንጌል", "ምስባክ", "ጳውሎስ", "ሐዋርያ", "ግብረ ሐዋርያት")
+
+/** row → (role, reference), in the layout's own order. */
+private val ROW_IDS = listOf(
+    R.id.widget_row_1 to (R.id.widget_role_1 to R.id.widget_ref_1),
+    R.id.widget_row_2 to (R.id.widget_role_2 to R.id.widget_ref_2),
+    R.id.widget_row_3 to (R.id.widget_role_3 to R.id.widget_ref_3),
+    R.id.widget_row_4 to (R.id.widget_role_4 to R.id.widget_ref_4),
+    R.id.widget_row_5 to (R.id.widget_role_5 to R.id.widget_ref_5),
+)

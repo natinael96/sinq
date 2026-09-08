@@ -5,8 +5,10 @@
   the provider's own just-past-midnight alarm plus the date/time/locale filters
   in the manifest, so the card always shows today.
 
-  The provider adapts its content tiers to the granted size, so the widget can
-  be resized well below the default 4×3 card and stay legible.
+  The provider chooses how many readings to show from the granted height: two at
+  this 4×2 default, up to five when resized taller, one on a slim strip. The
+  declared minimum below is the size the tiers are tuned against — raise it and
+  the smallest tier stops being reachable.
 -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:minWidth="250dp"
