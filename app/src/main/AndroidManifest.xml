@@ -61,6 +61,10 @@
             android:exported="false" />
 
         <receiver
+            android:name=".reminders.ReadingReminderReceiver"
+            android:exported="false" />
+
+        <receiver
             android:name=".reminders.SpecialHabitReminderReceiver"
             android:exported="false" />
 

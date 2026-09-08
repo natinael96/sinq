@@ -43,6 +43,12 @@ class SystemEventsReceiver : BroadcastReceiver() {
                                     SettingsRepository.gitsaweReminder(context).first(),
                                 )
                             }
+                            runCatching {
+                                ReadingReminderScheduler.sync(
+                                    context,
+                                    SettingsRepository.readingReminder(context).first(),
+                                )
+                            }
                             runCatching { SpecialHabitReminderScheduler.syncAll(context) }
                             runCatching {
                                 BreathPrayerScheduler.sync(

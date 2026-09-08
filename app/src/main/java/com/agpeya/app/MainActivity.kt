@@ -63,6 +63,7 @@ class MainActivity : ComponentActivity() {
     // Set when opened from the morning ግጻዌ-reminder notification.
     private val pendingOpenOffering = mutableStateOf<String?>(null)
     private val pendingOpenGitsawe = mutableStateOf(false)
+    private val pendingOpenReading = mutableStateOf(false)
     private val pendingGitsaweEpochDay = mutableStateOf<Long?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -128,6 +129,8 @@ class MainActivity : ComponentActivity() {
                             onJourneyHandled = { pendingOpenJourney.value = false },
                             openOffering = pendingOpenOffering.value,
                             onOfferingHandled = { pendingOpenOffering.value = null },
+                            openReading = pendingOpenReading.value,
+                            onReadingHandled = { pendingOpenReading.value = false },
                             openGitsawe = pendingOpenGitsawe.value,
                             gitsaweEpochDay = pendingGitsaweEpochDay.value,
                             onGitsaweHandled = {
@@ -180,6 +183,13 @@ class MainActivity : ComponentActivity() {
             pendingDeepLinkHourId.value = it
             intent.removeExtra(ReminderScheduler.EXTRA_HOUR_ID)
         }
+        if (intent.getBooleanExtra(
+                com.agpeya.app.reminders.ReadingReminderScheduler.EXTRA_OPEN_READING, false,
+            )
+        ) {
+            pendingOpenReading.value = true
+            intent.removeExtra(com.agpeya.app.reminders.ReadingReminderScheduler.EXTRA_OPEN_READING)
+        }
         if (intent.getBooleanExtra(StreakReminderScheduler.EXTRA_OPEN_STREAK, false)) {
             pendingOpenJourney.value = true
             intent.removeExtra(StreakReminderScheduler.EXTRA_OPEN_STREAK)
@@ -222,6 +232,8 @@ private fun AgpeyaNavHost(
     onJourneyHandled: () -> Unit,
     openOffering: String?,
     onOfferingHandled: () -> Unit,
+    openReading: Boolean,
+    onReadingHandled: () -> Unit,
     openGitsawe: Boolean,
     gitsaweEpochDay: Long?,
     onGitsaweHandled: () -> Unit,
@@ -312,6 +324,15 @@ private fun AgpeyaNavHost(
             }
             runCatching { navController.navigate(route) { launchSingleTop = true } }
             onOfferingHandled()
+        }
+    }
+
+    // Opened from the reading-plan nudge → open the plan, where the day it
+    // named is the first thing on the screen.
+    LaunchedEffect(ready, openReading) {
+        if (ready && openReading) {
+            navController.navigate("reading") { launchSingleTop = true }
+            onReadingHandled()
         }
     }
 

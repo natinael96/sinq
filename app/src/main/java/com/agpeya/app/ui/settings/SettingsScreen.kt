@@ -574,6 +574,49 @@ private fun StreakReminderTimeRow(s: com.agpeya.app.ui.strings.Strings) {
     }
 }
 
+@Composable
+private fun ReadingReminderTimeRow(s: com.agpeya.app.ui.strings.Strings) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val minute by SettingsRepository.readingReminderTime(context)
+        .collectAsState(initial = SettingsRepository.DEFAULT_READING_REMINDER_MIN)
+    var picking by remember { mutableStateOf(false) }
+
+    com.agpeya.app.ui.common.ListRow(
+        title = s.timeLabel,
+        subtitle = "%02d:%02d".format(minute / 60, minute % 60),
+        onClick = { picking = true },
+    )
+
+    if (picking) {
+        val timeState = androidx.compose.material3.rememberTimePickerState(
+            initialHour = minute / 60,
+            initialMinute = minute % 60,
+            is24Hour = true,
+        )
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { picking = false },
+            title = { Text(s.timeLabel) },
+            text = { androidx.compose.material3.TimePicker(state = timeState) },
+            confirmButton = {
+                TextButton(onClick = {
+                    picking = false
+                    scope.launch {
+                        SettingsRepository.setReadingReminderTime(
+                            context,
+                            timeState.hour * 60 + timeState.minute,
+                        )
+                        com.agpeya.app.reminders.ReadingReminderScheduler.sync(context, true)
+                    }
+                }) { Text(s.save) }
+            },
+            dismissButton = {
+                TextButton(onClick = { picking = false }) { Text(s.cancel) }
+            },
+        )
+    }
+}
+
 /**
  * A nightly window in which every reminder stays silent.
  *
@@ -988,6 +1031,7 @@ fun RemindersSettingsScreen(
     val streak by SettingsRepository.streakReminder(context).collectAsState(initial = true)
     val gitsawe by SettingsRepository.gitsaweReminder(context).collectAsState(initial = true)
     val breath by SettingsRepository.breathReminder(context).collectAsState(initial = true)
+    val reading by SettingsRepository.readingReminder(context).collectAsState(initial = true)
     val almsEntries by SettingsRepository.almsReminders(context).collectAsState(initial = emptyList())
     val repentanceEntries by SettingsRepository.repentanceReminders(context).collectAsState(initial = emptyList())
     val titheEntries by SettingsRepository.titheReminders(context).collectAsState(initial = emptyList())
@@ -1005,7 +1049,7 @@ fun RemindersSettingsScreen(
         lifecycleOwner?.lifecycle?.addObserver(observer)
         onDispose { lifecycleOwner?.lifecycle?.removeObserver(observer) }
     }
-    val remindersOn = streak || gitsawe || breath ||
+    val remindersOn = streak || gitsawe || breath || reading ||
         almsEntries.any { it.enabled } || repentanceEntries.any { it.enabled } ||
         titheEntries.any { it.enabled } || vowEntries.any { it.remindsStill } ||
         penanceEntries.any { it.remindsStill }
@@ -1066,6 +1110,14 @@ fun RemindersSettingsScreen(
                         com.agpeya.app.reminders.BreathPrayerScheduler.sync(context, on)
                     }
                 }, subtitle = s.settingsBreathReminderDesc)
+                ToggleRow(s.settingsReadingReminder, reading, { on ->
+                    if (on) requestNotifications()
+                    scope.launch {
+                        SettingsRepository.setReadingReminder(context, on)
+                        com.agpeya.app.reminders.ReadingReminderScheduler.sync(context, on)
+                    }
+                }, subtitle = s.settingsReadingReminderDesc)
+                if (reading) ReadingReminderTimeRow(s)
                 // ምጽዋት and ንስሐ are here because they ring; their ledgers — the
                 // money, the vows, the penance — are records, and records live
                 // under መዝገብ. This page had become the door to all three.

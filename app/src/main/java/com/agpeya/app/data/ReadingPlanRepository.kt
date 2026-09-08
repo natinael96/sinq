@@ -101,6 +101,10 @@ object ReadingPlanRepository {
             )
         }
         HabitsRepository.markDone(context, today.toString(), BIBLE_HABIT)
+        // The nudge asked a question and this is the answer, so the count of
+        // unanswered ones goes back to nothing and the back-off never fires on
+        // someone who is actually reading.
+        SettingsRepository.clearReadingReminderUnanswered(context)
     }
 
     /**

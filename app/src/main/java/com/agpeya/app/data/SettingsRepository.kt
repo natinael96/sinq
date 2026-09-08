@@ -107,6 +107,11 @@ object SettingsRepository {
     // Which ስንክሳር edition is read. The two are parallel editions rather than a
     // parallel text, so this is a choice of book, not a display toggle.
     private val KEY_SINKSAR_EDITION = stringPreferencesKey("sinksar_edition")
+    // The reading plan's own nudge, and the count of times it has gone
+    // unanswered — the app stops asking rather than becoming wallpaper.
+    private val KEY_READING_REMINDER = booleanPreferencesKey("reading_reminder")
+    private val KEY_READING_REMINDER_TIME = intPreferencesKey("reading_reminder_time")
+    private val KEY_READING_REMINDER_UNANSWERED = intPreferencesKey("reading_reminder_unanswered")
     // What travels with a copied verse, and what the four highlight colours
     // are called. Both belong to the reader, not to the app.
     private val KEY_COPY_VERSE_NUMBERS = booleanPreferencesKey("copy_verse_numbers")
@@ -123,6 +128,20 @@ object SettingsRepository {
 
     /** 21:30 — the historical fixed time, kept as the default. */
     const val DEFAULT_STREAK_REMINDER_MIN = 21 * 60 + 30
+
+    /** A plan's reading is a morning thing; 06:30 unless changed. */
+    const val DEFAULT_READING_REMINDER_MIN = 6 * 60 + 30
+
+    /**
+     * How many unanswered nudges before the app stops sending them.
+     *
+     * Duolingo's own most-quoted notification is the one that says the
+     * reminders do not seem to be working and it will stop — and it exists
+     * because a notification nobody acts on stops being read at all, and then
+     * the app is uninstalled. Seven is a week of being ignored, which is
+     * enough of an answer.
+     */
+    const val READING_REMINDER_BACKOFF = 7
     private val KEY_GITSAWE_REMINDER = booleanPreferencesKey("gitsawe_reminder")
     // Legacy single-reminder keys — read only, to migrate the one old alms /
     // repentance reminder into the first entry of the new lists below.
@@ -347,6 +366,52 @@ object SettingsRepository {
 
     suspend fun setReadingAlignment(context: Context, value: ReadingAlignment) {
         context.settingsDataStore.edit { it[KEY_READING_ALIGNMENT] = value.name }
+    }
+
+    /** The reading plan's nudge. On, but silent until a plan is actually started. */
+    fun readingReminder(context: Context): Flow<Boolean> =
+        context.settingsDataStore.data.map { it[KEY_READING_REMINDER] ?: true }
+
+    suspend fun setReadingReminder(context: Context, enabled: Boolean) {
+        context.settingsDataStore.edit {
+            it[KEY_READING_REMINDER] = enabled
+            // Turning it back on is a fresh answer to the question, so the
+            // count of unanswered nudges starts again.
+            if (enabled) it[KEY_READING_REMINDER_UNANSWERED] = 0
+        }
+    }
+
+    fun readingReminderTime(context: Context): Flow<Int> =
+        context.settingsDataStore.data.map {
+            it[KEY_READING_REMINDER_TIME] ?: DEFAULT_READING_REMINDER_MIN
+        }
+
+    suspend fun setReadingReminderTime(context: Context, minuteOfDay: Int) {
+        context.settingsDataStore.edit {
+            it[KEY_READING_REMINDER_TIME] = minuteOfDay.coerceIn(0, 1439)
+        }
+    }
+
+    /** Read outside a coroutine when the receiver arms the next alarm. */
+    fun readingReminderTimeBlocking(context: Context): Int =
+        runCatching {
+            kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) {
+                readingReminderTime(context).first()
+            }
+        }.getOrDefault(DEFAULT_READING_REMINDER_MIN)
+
+    fun readingReminderUnanswered(context: Context): Flow<Int> =
+        context.settingsDataStore.data.map { it[KEY_READING_REMINDER_UNANSWERED] ?: 0 }
+
+    suspend fun noteReadingReminderSent(context: Context) {
+        context.settingsDataStore.edit {
+            it[KEY_READING_REMINDER_UNANSWERED] = (it[KEY_READING_REMINDER_UNANSWERED] ?: 0) + 1
+        }
+    }
+
+    /** A day of the plan read is an answer; the count goes back to nothing. */
+    suspend fun clearReadingReminderUnanswered(context: Context) {
+        context.settingsDataStore.edit { it[KEY_READING_REMINDER_UNANSWERED] = 0 }
     }
 
     fun synaxariumEdition(context: Context): Flow<String> =

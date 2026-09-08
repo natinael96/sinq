@@ -16,6 +16,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import kotlinx.coroutines.flow.first
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -28,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.agpeya.app.data.GitsaweRepository
 import com.agpeya.app.data.ReadingPlanRepository
+import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.data.DayReadings
 import com.agpeya.app.model.PlanDay
 import com.agpeya.app.model.ReadingPlan
@@ -109,7 +111,14 @@ fun ReadingPlanScreen(
             confirmButton = {
                 androidx.compose.material3.TextButton(onClick = {
                     pending = null
-                    scope.launch { ReadingPlanRepository.start(context, choice.id, today) }
+                    scope.launch {
+                        ReadingPlanRepository.start(context, choice.id, today)
+                        // The nudge has had nothing to say until now.
+                        com.agpeya.app.reminders.ReadingReminderScheduler.sync(
+                            context,
+                            SettingsRepository.readingReminder(context).first(),
+                        )
+                    }
                 }) { Text(s.readingStartAction) }
             },
             dismissButton = {

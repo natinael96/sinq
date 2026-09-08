@@ -140,6 +140,14 @@ interface Strings {
     fun mezmurFullHymn(book: String): String
     val readingStartAction: String
     val readingStartBody: String
+    val readingReminderChannel: String
+    val readingReminderTitle: String
+    fun readingReminderBody(day: Int, passages: String): String
+    fun readingReminderPlain(day: Int): String
+    val readingReminderStoppedTitle: String
+    val readingReminderStoppedBody: String
+    val settingsReadingReminder: String
+    val settingsReadingReminderDesc: String
     /** ሥርዓተ ማኅሌት — the orders of service sung on a feast. */
     val mahletTitle: String
     val mahletSubtitle: String
@@ -957,6 +965,17 @@ object AmharicStrings : Strings {
     override fun mezmurFullHymn(book: String) = "ሙሉውን መዝሙር ክፈት · $book"
     override val readingStartAction = "ጀምር"
     override val readingStartBody = "ንባቡ ከዛሬ ጀምሮ ይቆጠራል። በማንኛውም ጊዜ ማቆም ይችላሉ።"
+    override val readingReminderChannel = "የንባብ ማስታወሻ"
+    override val readingReminderTitle = "የዛሬው ንባብ"
+    override fun readingReminderBody(day: Int, passages: String) =
+        "ዕለት ${com.agpeya.app.ui.reading.geezNumeral(day)} · $passages"
+    override fun readingReminderPlain(day: Int) =
+        "ዕለት ${com.agpeya.app.ui.reading.geezNumeral(day)}"
+    override val readingReminderStoppedTitle = "ማስታወሻውን አቆምነው"
+    override val readingReminderStoppedBody =
+        "ማስታወሻው እየረዳ አይመስልም፤ ለጊዜው አናስታውስዎትም። በቅንብር መልሰው ማብራት ይችላሉ።"
+    override val settingsReadingReminder = "የንባብ ማስታወሻ"
+    override val settingsReadingReminderDesc = "ንባብ ሲጀምሩ ብቻ፤ የዕለቱን ንባብ ይሰይማል"
     override val mahletSubtitle = "የበዓላት ማኅሌትና ዋዜማ"
     override val mahletVigil = "ዋዜማ"
     override val mahletMovable = "የወር ቀን የሌላቸው"
@@ -1715,6 +1734,15 @@ object EnglishStrings : Strings {
     override fun mezmurFullHymn(book: String) = "Open the whole hymn · $book"
     override val readingStartAction = "Start"
     override val readingStartBody = "The plan is counted from today. You can stop at any time."
+    override val readingReminderChannel = "Reading reminder"
+    override val readingReminderTitle = "Today's reading"
+    override fun readingReminderBody(day: Int, passages: String) = "Day $day · $passages"
+    override fun readingReminderPlain(day: Int) = "Day $day"
+    override val readingReminderStoppedTitle = "Reminders paused"
+    override val readingReminderStoppedBody =
+        "These reminders don't seem to be helping, so we've stopped them for now. Turn them back on in Settings whenever you like."
+    override val settingsReadingReminder = "Reading reminder"
+    override val settingsReadingReminderDesc = "Only once a plan is started; names the day's passage"
     override val mahletSubtitle = "Orders of service for the feasts"
     override val mahletVigil = "ዋዜማ"
     override val mahletMovable = "Movable feasts"
