@@ -405,6 +405,72 @@ ul.plain li:first-child::before { top: 11px; }
 .source p { margin: 0 0 14px; max-width: 34em; }
 .source p:last-child { margin-bottom: 0; }
 
+/* ---- Feedback form ------------------------------------------------------
+   The only place on the site that sends anything anywhere, and only when the
+   reader presses the button. Styled like the rest: hairlines and spacing
+   rather than boxes, gold for the thing you are about to do. */
+.form { margin: 0; max-width: 34em; }
+.field { margin: 0 0 26px; }
+.field > label, .field > .legend {
+  display: block; font-weight: 600; font-size: 16.5px; margin: 0 0 7px;
+}
+.field .opt { color: var(--muted); font-size: 14.5px; font-weight: 400; }
+.field .hint { display: block; color: var(--muted); font-size: 14.5px; margin: 0 0 9px; }
+
+.field input[type="text"],
+.field input[type="email"],
+.field textarea {
+  display: block; width: 100%; font: inherit; font-size: 16.5px;
+  color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 12px 14px; transition: border-color .16s, box-shadow .16s;
+}
+.field textarea { min-height: 168px; resize: vertical; line-height: 1.6; }
+.field input::placeholder, .field textarea::placeholder { color: var(--muted); opacity: .75; }
+.field input:focus, .field textarea:focus {
+  outline: none; border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--chip-bg);
+}
+.field input:user-invalid, .field textarea:user-invalid { border-color: #A6402F; }
+
+/* The kind of feedback, as a row of chips rather than a dropdown: the four
+   options are the point, so they should be readable without opening anything. */
+fieldset.kinds { border: 0; margin: 0 0 26px; padding: 0; }
+.kinds .row { display: flex; flex-wrap: wrap; gap: 9px; }
+.kinds label {
+  display: inline-block; cursor: pointer;
+  font-size: 15px; padding: 9px 16px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  transition: border-color .16s, background .16s, color .16s;
+}
+.kinds input { position: absolute; opacity: 0; width: 0; height: 0; }
+.kinds label:hover { border-color: var(--gold); }
+.kinds input:checked + label {
+  background: var(--chip-bg); border-color: var(--gold);
+  color: var(--gold); font-weight: 600;
+}
+.kinds input:focus-visible + label { outline: 2px solid var(--gold-lit); outline-offset: 2px; }
+
+/* Bots fill in everything they can see. This one they cannot. */
+.trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+.form button {
+  font: inherit; font-weight: 600; font-size: 16px; cursor: pointer;
+  background: var(--gold-lit); color: #14231D;
+  border: 1px solid transparent; border-radius: 999px; padding: 13px 30px;
+  transition: background .16s;
+}
+.form button:hover { background: #EFCD76; }
+.form button[disabled] { opacity: .6; cursor: default; }
+.form-foot { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.form-foot .fine { color: var(--muted); font-size: 14px; margin: 0; }
+
+/* Status is written by script; it stays empty and invisible without it. */
+.form-status { margin: 20px 0 0; font-size: 16px; }
+.form-status:empty { display: none; }
+.form-status.ok { color: var(--link); font-weight: 600; }
+.form-status.bad { color: #A6402F; font-weight: 600; }
+
 /* ---- Footer ------------------------------------------------------------- */
 footer { background: var(--hero); color: #A9C1B6; padding: 64px 20px 52px; font-size: 15.5px; }
 .foot-in { max-width: 880px; margin: 0 auto; }

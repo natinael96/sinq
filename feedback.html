@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feedback · ስንቅ Sinq</title>
+<meta name="description" content="Tell the maintainer what is wrong, what is missing, or what a passage should have said. Corrections to the prayer text and the Amharic are the most useful thing anyone can send.">
+<meta name="color-scheme" content="light dark">
+<link rel="canonical" href="https://sinq.natinael96.tech/feedback.html">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+<script src="site.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main"><span>Skip to content</span></a>
+
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html">
+      <svg viewBox="0 0 108 108" aria-hidden="true"><rect width="108" height="108" rx="24" fill="#0E3B31"/><g fill="#E8C46B"><path d="M51.2,26 h5.6 v8 h9.2 v5.6 h-9.2 v12.4 h-5.6 v-12.4 h-9.2 v-5.6 h9.2 Z"/><path d="M43.5,66 A10.5,10.5 0 0 1 64.5,66 Z"/></g><g fill="none" stroke="#E8C46B" stroke-width="2.5" stroke-linecap="round"><path d="M29,66 L79,66"/><path d="M60.3,52.4 L62.9,47 M65.5,56.4 L70.1,52.5 M68.5,62.1 L74.3,60.6 M47.7,52.4 L45.1,47 M42.5,56.4 L37.9,52.5 M39.5,62.1 L33.7,60.6"/></g></svg>
+      <span class="name ethi">ስንቅ</span>
+    </a>
+    <div class="nav-links">
+      <a href="install.html"><span>Install</span></a>
+      <a href="changelog.html"><span>Changes</span></a>
+      <a href="credits.html"><span>Sources</span></a>
+      <a href="privacy-policy.html"><span>Privacy</span></a>
+      <a href="feedback.html" aria-current="page"><span>Feedback</span></a>
+      <a href="https://github.com/natinael96/sinq">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+
+<div class="page-head">
+  <h1><span>Send feedback</span></h1>
+  <p>
+    <span>A wrong reading on a day, a translation that reads badly, a commemoration that is missing, an idea, or something that simply broke. Corrections to the prayer text and the Amharic are the most useful thing anyone can send.</span>
+  </p>
+</div>
+
+<section>
+  <form class="form" method="post" action="/api/feedback" id="feedback-form">
+
+    <fieldset class="kinds">
+      <span class="legend">What is this about?</span>
+      <div class="row">
+        <input type="radio" id="k-text" name="kind" value="A mistake in the text" checked>
+        <label for="k-text">A mistake in the text</label>
+
+        <input type="radio" id="k-broken" name="kind" value="Something is broken">
+        <label for="k-broken">Something is broken</label>
+
+        <input type="radio" id="k-idea" name="kind" value="An idea">
+        <label for="k-idea">An idea</label>
+
+        <input type="radio" id="k-other" name="kind" value="Something else">
+        <label for="k-other">Something else</label>
+      </div>
+    </fieldset>
+
+    <div class="field">
+      <label for="message">Your message</label>
+      <span class="hint">Write in Amharic or English, whichever is easier. If it is a correction, saying what the text should be is worth more than saying it is wrong.</span>
+      <textarea id="message" name="message" required maxlength="4000"
+                placeholder="ምን እንደሆነ ይንገሩን…"></textarea>
+    </div>
+
+    <div class="field">
+      <label for="where">Where in the app <span class="opt">optional</span></label>
+      <span class="hint">The screen or the day it happened on, for example &ldquo;ግጻዌ, ሐምሌ ፯&rdquo; or &ldquo;the Psalter, መዝሙር ፻፲፰&rdquo;.</span>
+      <input type="text" id="where" name="where" maxlength="200">
+    </div>
+
+    <div class="field">
+      <label for="contact">Your email <span class="opt">optional</span></label>
+      <span class="hint">Only if you want an answer. Nothing is sent to you otherwise, and it is never shown to anyone else.</span>
+      <input type="email" id="contact" name="contact" maxlength="200" autocomplete="email">
+    </div>
+
+    <div class="trap" aria-hidden="true">
+      <label for="website">Leave this field empty</label>
+      <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+    </div>
+
+    <input type="hidden" name="version" value="2.0.0">
+
+    <div class="form-foot">
+      <button type="submit">Send feedback</button>
+      <p class="fine"><span>Sent only when you press the button.</span></p>
+    </div>
+
+    <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
+  </form>
+</section>
+
+<section>
+  <h2><span>What happens to it</span></h2>
+  <p>
+    <span>The form sends what you typed and nothing else. No cookie is set, your address is not logged, and the page carries no analytics, so reading this page leaves no trace at all. What arrives is your message, the kind you picked, the screen you named, the app version, and your email if you chose to give one.</span>
+  </p>
+  <p>
+    <span>This is about the <b>website</b>, not the app. Sinq itself still has no internet permission and cannot send anything anywhere. See the <a href="privacy-policy.html">privacy policy</a>.</span>
+  </p>
+</section>
+
+<section>
+  <h2><span>Other ways</span></h2>
+  <p>
+    <span>If you have a GitHub account, an <a href="https://github.com/natinael96/sinq/issues">issue</a> is better for anything that needs a conversation, because you get replies and can see what was done about it. The form is here for everyone who does not.</span>
+  </p>
+</section>
+
+</main>
+
+<footer>
+  <div class="foot-in">
+    <ul class="foot-links">
+      <li><a href="index.html"><span>Home</span></a></li>
+      <li><a href="https://github.com/natinael96/sinq">GitHub</a></li>
+      <li><a href="https://github.com/natinael96/sinq/releases"><span>Releases</span></a></li>
+      <li><a href="credits.html"><span>Sources and licences</span></a></li>
+      <li><a href="privacy-policy.html"><span>Privacy policy</span></a></li>
+    </ul>
+    <p class="fine"><span>ስንቅ, provisions for the journey.</span></p>
+  </div>
+</footer>
+
+</body>
+</html>
