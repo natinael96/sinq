@@ -79,11 +79,7 @@ fun AboutScreen(onBack: () -> Unit) {
             Spacer(Modifier.height(Spacing.xl))
             Surface(
                 onClick = {
-                    runCatching {
-                        context.startActivity(
-                            Intent(Intent.ACTION_VIEW, "https://t.me/natinael96".toUri()),
-                        )
-                    }
+                    com.agpeya.app.ui.common.openUrl(context, "https://t.me/natinael96")
                 },
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.medium,

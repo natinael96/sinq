@@ -298,6 +298,8 @@ interface Strings {
     val reminderModes: String
     val whatsNew: String
     val licensesTitle: String
+    val feedbackTitle: String
+    val feedbackSubtitle: String
     val about: String
     val alarmSection: String
     val alertSoundVibrate: String
@@ -1125,6 +1127,8 @@ object AmharicStrings : Strings {
     override val reminderModes = "የጸሎት ማንቂያ ሁነታዎች"
     override val whatsNew = "ምን አዲስ ነገር አለ"
     override val licensesTitle = "ፈቃዶች እና ምንጮች"
+    override val feedbackTitle = "አስተያየት ይላኩ"
+    override val feedbackSubtitle = "በጽሑፉ ላይ ስሕተት፣ የተበላሸ ነገር፣ ወይም ሐሳብ"
     override val about = "ስለ መተግበሪያው"
     override val alarmSection = "ማንቂያ"
     override val alertSoundVibrate = "ድምፅና ንዝረት"
@@ -1908,6 +1912,8 @@ object EnglishStrings : Strings {
     override val reminderModes = "Prayer reminder modes"
     override val whatsNew = "What's new"
     override val licensesTitle = "Licenses & sources"
+    override val feedbackTitle = "Send feedback"
+    override val feedbackSubtitle = "A mistake in the text, something broken, or an idea"
     override val about = "About"
     override val alarmSection = "Alarm"
     override val alertSoundVibrate = "Sound & vibrate"

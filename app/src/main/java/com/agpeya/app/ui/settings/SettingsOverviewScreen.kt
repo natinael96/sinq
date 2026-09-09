@@ -124,6 +124,13 @@ fun SettingsScreen(
                 NavRow(s.tutorial, onOpenTutorial)
                 NavRow(s.whatsNewTour, onOpenWhatsNew)
                 NavRow(s.whatsNew, onOpenChangelog, subtitle = "v${appVersion(context)}")
+                // Above About, because someone looking for where to report a
+                // wrong word is not looking for a page about the app.
+                NavRow(
+                    s.feedbackTitle,
+                    { com.agpeya.app.ui.common.openUrl(context, com.agpeya.app.ui.common.FEEDBACK_URL) },
+                    subtitle = s.feedbackSubtitle,
+                )
                 NavRow(s.about, onOpenAbout)
                 NavRow(s.licensesTitle, onOpenLicenses)
                 Spacer(Modifier.height(Spacing.lg))

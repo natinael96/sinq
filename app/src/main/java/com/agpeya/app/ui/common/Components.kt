@@ -211,6 +211,25 @@ fun openNotificationSettings(context: android.content.Context) {
     runCatching { context.startActivity(intent) }
 }
 
+/**
+ * Open a link in whatever the reader browses with.
+ *
+ * Wrapped because a device can have no browser at all — a stripped ROM, a
+ * managed profile, an emulator — and an unhandled ACTION_VIEW takes the screen
+ * down. A link that quietly does nothing is a poor outcome; a crash is a worse
+ * one, and there is nothing useful to say in between.
+ */
+fun openUrl(context: android.content.Context, url: String) {
+    runCatching {
+        context.startActivity(
+            android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url)),
+        )
+    }
+}
+
+/** Where the app sends people who have something to tell the maintainer. */
+const val FEEDBACK_URL = "https://sinq.natinael96.tech/feedback.html"
+
 @Composable
 fun SinqWordmark(modifier: Modifier = Modifier) {
     Text(
