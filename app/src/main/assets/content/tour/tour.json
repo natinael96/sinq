@@ -2,6 +2,58 @@
   "contentVersion": 1,
   "tours": [
     {
+      "versionCode": 66,
+      "version": "2.0.0",
+      "title": {
+        "am": "በዚህ እትም",
+        "en": "In this version"
+      },
+      "pages": [
+        {
+          "kicker": {
+            "am": "መልክአ ቅዱሳን",
+            "en": "The መልክእ"
+          },
+          "title": {
+            "am": "በቀይ ተጽፈዋል",
+            "en": "Written in red"
+          },
+          "body": {
+            "am": "መጻሕፍቱ እንደሚጽፉት፦ እያንዳንዱን ቤት የሚከፍተው ሰላም፣ የሚሰላመውም ነገር፣ የእግዚአብሔርም ስም በየትም ቢገኝ በቀይ ተጽፈዋል። የሕሙ ባለቤት ግን በጥቁር ይቀራል፤ ቀዩ ስሙን እንጂ የተጠራውን አይመለክትምና።",
+            "en": "As the printed books set them: the ሰላም that opens each stanza, the thing it greets, and the Name of God wherever it falls. The hymn's own subject stays in black — the red marks the Name, not the one addressed."
+          }
+        },
+        {
+          "kicker": {
+            "am": "ማኅሌት",
+            "en": "ማኅሌት"
+          },
+          "title": {
+            "am": "ከሚደረሰው ቤት ላይ ይከፍታል",
+            "en": "It opens at the stanza being sung"
+          },
+          "body": {
+            "am": "በማኅሌት ውስጥ የሕሙ ስም የያዘ ክፍል ሙሉውን ሕሙ ይከፍታል — ከመጀመሪያው ገጽ ሳይሆን አሁን ከሚደረሰው ቤት ላይ። በአርባ ቤት ሕሙ ውስጥ ይህ አርባ ማንሸራተት ይቆጥባል።",
+            "en": "A movement named after a hymn opens the whole hymn — not at its first page, but at the stanza being sung. In a hymn of forty stanzas that is forty scrolls saved."
+          }
+        },
+        {
+          "kicker": {
+            "am": "ቤት",
+            "en": "Home"
+          },
+          "title": {
+            "am": "የሰዓታት መስመር ተመልሷል",
+            "en": "The hours line is back"
+          },
+          "body": {
+            "am": "ከጸሎቱ ካርድ በታች፣ በሁለት ስስ መስመሮች መካከል፦ ቀጥሎ የሚመጣው ሰዓት፣ «ሁሉም»ም ሰባቱን በአንድ ላይ ይከፍታል። ካርዱ አሁን የደረሰውን ይናገራል፤ መስመሩ የሚቀጥለውን።",
+            "en": "Under the prayer card, between two hairlines: the hour that follows, and ሁሉም to open all seven. The card says what is due now; the line says what comes after it."
+          }
+        }
+      ]
+    },
+    {
       "versionCode": 62,
       "version": "1.7.4",
       "title": {

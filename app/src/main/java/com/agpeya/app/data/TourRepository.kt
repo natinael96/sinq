@@ -60,12 +60,19 @@ object TourRepository {
      * install, or an upgrade from a build made before the tour existed. Both
      * get the newest tour, so nobody arrives at the app with no idea what is
      * in it.
+     *
+     * A tour is only ever shown once, and the test for that is the tour's own
+     * versionCode — not the installed one. Comparing against the install alone
+     * meant that a release which added no tour re-showed the last one that
+     * existed: with tours written for 61 and 62 and 66 installed, every update
+     * from 63 on presented the 1.7.4 tour again as though it were new.
      */
     fun pending(tours: List<Tour>, lastSeen: Int?, installed: Int): Tour? {
         if (installed <= 0) return null
         if (lastSeen != null && lastSeen >= installed) return null
         return tours
             .filter { it.versionCode <= installed && it.pages.isNotEmpty() }
+            .filter { lastSeen == null || it.versionCode > lastSeen }
             .maxByOrNull { it.versionCode }
     }
 }
