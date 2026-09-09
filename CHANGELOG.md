@@ -1654,3 +1654,52 @@ _versionCode 11_
 ### Added
 - Full Psalter (መዝሙረ ዳዊት) screen and navigation.
 - Share your streak as an image card.
+
+## [0.1.0] — 2026-07-16
+
+_versionCode 1 to 4_
+
+### Note
+- **Reconstructed from the commit history**, which this file did not yet cover.
+  It gathers 60 commits between 29 May and 16 July 2026, versions 0.1.0 through
+  0.1.3. None of them were tagged or published: the first release anyone could
+  install was 0.2.2.
+
+### Added
+- **The seven hours.** ጸሎተ ነግህ, ሠለስት, ቀትር, ተሰዓት, ሰርክ and ንዋም, with መንፈቀ ሌሊት
+  and its three watches and the Veil prayer. Each was assembled from a psalm
+  and gospel mapping rather than typed out: `content/hour_mapping.json` and
+  `tools/extract_content.py` date from here, and so does the rule that bundled
+  JSON is generated and never hand-edited.
+- **The reading screen**, with verse numbers set in Ge'ez numerals.
+- **The home screen**, listing the hours and opening the one the time suggests.
+- **Prayer reminders.** Prayer modes with weekday selection, an alarm that
+  rings from a foreground service with a full-screen activity behind it,
+  snooze, rescheduling after a reboot or a clock change, and a follow-up
+  asking whether the hour was actually prayed.
+- **Amharic search that forgives spelling**, treating ሀ/ሐ/ኀ, ሰ/ሠ and ጸ/ፀ as
+  equal.
+- **Bookmarks, recents, and verse highlighting.**
+- **The full Psalter, bundled**, so that any psalm could be added to any hour.
+  It had no screen of its own yet; that came with 0.2.0.
+- **Hours you shape yourself**: show, hide and reorder the sections of an hour,
+  and add a psalm to any of them.
+- **Habit tracking**, with streaks and a heatmap laid out on the Ethiopian
+  calendar. It had no name of its own yet.
+- **A local profile**, a name and a baptismal name, and a greeting on the home
+  screen.
+- **A first-launch introduction**, settings and about screens, and help for
+  getting past a battery manager aggressive enough to silence the alarms.
+- **Amharic and English throughout**, with Noto Sans Ethiopic and Abyssinica
+  SIL bundled for reading.
+
+### Changed
+- **The app became ስንቅ.** It was built as ጸሎት and renamed on 18 June, together
+  with the green and gold it still wears. The package id `com.agpeya.app` is
+  older than both and has never been changed, because changing it would make
+  every phone that already has the app treat an update as a different one.
+- **The home screen was rebuilt** around a card for the day, with an hour
+  switcher inside the reader.
+- **The Veil prayer became ሌሊት ፱ ሰዓት** and now ships hidden, for those who do
+  not pray it.
+- **Search and bookmarks moved** off the bottom bar and into the home header.
