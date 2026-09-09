@@ -1087,6 +1087,8 @@ fun RemindersSettingsScreen(
                     }
                     Spacer(Modifier.height(Spacing.md))
                 }
+                DayTimeline()
+                Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(s.remindersGroupDaily)
                 ToggleRow(s.settingsNightReminder, streak, { on ->
                     if (on) requestNotifications()
@@ -1287,6 +1289,81 @@ fun ReadingFontScreen(onBack: () -> Unit) {
     ) { inner ->
         Column(Modifier.fillMaxSize().padding(inner).padding(horizontal = 16.dp, vertical = 12.dp)) {
             ReadingFontPicker(selected) { scope.launch { SettingsRepository.setReadingFont(context, it) } }
+        }
+    }
+}
+
+/**
+ * The day as it will actually be experienced.
+ *
+ * Six notification channels and two lists of custom reminders each arm
+ * themselves behind their own switch, and until now no screen showed the
+ * result — so a reminder set inside quiet hours was armed, silent, and
+ * indistinguishable from one that worked. Every row here is derived from
+ * settings that already exist; nothing on this page arms anything new.
+ */
+@Composable
+private fun DayTimeline() {
+    val context = LocalContext.current
+    val s = com.agpeya.app.ui.strings.LocalStrings.current
+    val entries by androidx.compose.runtime.produceState(
+        emptyList<com.agpeya.app.data.DaySchedule.Entry>(),
+    ) {
+        value = runCatching { com.agpeya.app.data.DaySchedule.forDay(context) }
+            .getOrDefault(emptyList())
+    }
+    if (entries.isEmpty()) return
+
+    val silenced = entries.count { it.silenced }
+    Column(Modifier.fillMaxWidth()) {
+        SectionHeader(s.remindersDayTitle)
+        Text(
+            s.remindersDaySubtitle(entries.count { it.today }),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = Spacing.sm),
+        )
+        entries.forEach { entry ->
+            Row(
+                Modifier.fillMaxWidth().padding(vertical = 5.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    entry.minute?.let { "%02d:%02d".format(it / 60, it % 60) } ?: "—",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(46.dp),
+                )
+                Text(
+                    text = entry.label.ifBlank { s.reminderKindLabel(entry.kind) },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (entry.today && !entry.silenced) MaterialTheme.colorScheme.onBackground
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
+                // Why a row will not reach you today, said where it is read.
+                val note = when {
+                    entry.silenced -> s.reminderSilenced
+                    !entry.today -> s.reminderNotToday
+                    else -> null
+                }
+                note?.let {
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (entry.silenced) MaterialTheme.colorScheme.error
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+        if (silenced > 0) {
+            Spacer(Modifier.height(Spacing.xs))
+            Text(
+                s.remindersQuietWarning(silenced),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.error,
+            )
         }
     }
 }

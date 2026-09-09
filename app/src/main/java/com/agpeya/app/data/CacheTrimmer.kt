@@ -35,6 +35,7 @@ object CacheTrimmer : ComponentCallbacks2 {
             ScriptureRepository.trimCaches()
             SynaxariumRepository.trimCaches()
             MahletRepository.trimCaches()
+            PrayerDuration.trimCaches()
             com.agpeya.app.search.AmharicSearch.trimCaches()
         }
     }

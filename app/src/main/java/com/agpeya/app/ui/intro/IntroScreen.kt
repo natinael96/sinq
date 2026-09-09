@@ -42,6 +42,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.agpeya.app.data.PrayerLevel
+import com.agpeya.app.data.HoursRepository
+import androidx.compose.foundation.clickable
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.strings.Strings
@@ -95,18 +98,25 @@ fun IntroScreen(onDone: () -> Unit) {
     var stage by remember { mutableStateOf(IntroStage.PAGES) }
     var name by remember { mutableStateOf("") }
     var christianName by remember { mutableStateOf("") }
+    // መጀመሪያ, not ሙሉ. The five levels have always existed and the app has always
+    // opened on the longest without asking — two hours of reading a day, where
+    // the same seven hours at መጀመሪያ are thirty-six minutes. Writing it here
+    // rather than changing the stored default means only people who see this
+    // question are answered by it; anyone already praying keeps what they had.
+    var level by remember { mutableStateOf(com.agpeya.app.data.PrayerLevel.BEGINNING) }
 
-    fun saveName() {
+    fun saveAnswers() {
         scope.launch {
             if (name.isNotBlank()) SettingsRepository.setProfileName(context, name)
             if (christianName.isNotBlank()) SettingsRepository.setChristianName(context, christianName)
+            SettingsRepository.setPrayerLevel(context, level)
         }
     }
 
     when (stage) {
         IntroStage.PAGES -> {
             val pages = introPages(s)
-            val pageCount = pages.size + 1 // + the name form
+            val pageCount = pages.size + 2 // + the name form + how much to pray
             val pagerState = rememberPagerState(pageCount = { pageCount })
             val isLast = pagerState.currentPage == pageCount - 1
             TourScaffold(
@@ -114,18 +124,18 @@ fun IntroScreen(onDone: () -> Unit) {
                 pageCount = pageCount,
                 isLast = isLast,
                 finishLabel = s.next, // name page → the tour question, not straight to Home
-                onSkip = { saveName(); onDone() },
-                onFinish = { saveName(); stage = IntroStage.ASK },
+                onSkip = { saveAnswers(); onDone() },
+                onFinish = { saveAnswers(); stage = IntroStage.ASK },
             ) { page ->
-                if (page < pages.size) {
-                    IntroPageContent(pages[page])
-                } else {
-                    NameForm(
+                when (page) {
+                    in pages.indices -> IntroPageContent(pages[page])
+                    pages.size -> NameForm(
                         name = name,
                         christianName = christianName,
                         onName = { name = it },
                         onChristianName = { christianName = it },
                     )
+                    else -> LevelForm(level = level, onLevel = { level = it })
                 }
             }
         }
@@ -351,6 +361,94 @@ private fun NameForm(
             singleLine = true,
             label = { Text(s.christianNameLabel) },
             modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+/**
+ * How much to pray — the question the app has never asked.
+ *
+ * Three of the five levels, not all five: the two extremes are reachable in
+ * Settings and offering five on a first run turns a welcome into a form. Each
+ * carries what it actually costs, computed from the bundled text at the level
+ * itself, because "መጀመሪያ" means nothing until it says thirty-six minutes.
+ */
+@Composable
+private fun LevelForm(level: PrayerLevel, onLevel: (PrayerLevel) -> Unit) {
+    val s = LocalStrings.current
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val offered = listOf(PrayerLevel.BEGINNING, PrayerLevel.GROWTH, PrayerLevel.FULL)
+    val hours by androidx.compose.runtime.produceState(emptyList<com.agpeya.app.model.Hour>()) {
+        value = runCatching { HoursRepository.visibleHours(context) }.getOrDefault(emptyList())
+    }
+    val cost by androidx.compose.runtime.produceState(emptyMap<PrayerLevel, Int>(), hours) {
+        if (hours.isEmpty()) return@produceState
+        value = offered.associateWith { com.agpeya.app.data.PrayerDuration.dayMinutes(context, hours, it) }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = s.introLevelTitle,
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(Spacing.sm))
+        Text(
+            text = s.introLevelBody,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(Spacing.screen))
+        offered.forEach { choice ->
+            val selected = choice == level
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = Spacing.sm)
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(
+                        if (selected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f)
+                        else androidx.compose.ui.graphics.Color.Transparent,
+                    )
+                    .clickable { onLevel(choice) }
+                    .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        com.agpeya.app.ui.settings.prayerLevelLabel(choice),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                    Text(
+                        text = s.introLevelDesc(choice),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                // The day's whole cost at this level, not one hour's.
+                cost[choice]?.let {
+                    Text(
+                        s.minutesLabel(it),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = if (selected) MaterialTheme.colorScheme.secondary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(Spacing.md))
+        Text(
+            text = s.introLevelFooter,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
         )
     }
 }

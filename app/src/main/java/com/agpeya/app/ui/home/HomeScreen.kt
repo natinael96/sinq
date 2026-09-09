@@ -796,6 +796,17 @@ private fun ZewotrCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
 @Composable
 private fun AllHoursSheet(hours: List<Hour>, currentHourId: String?, onOpenHour: (String) -> Unit) {
     val s = LocalStrings.current
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val level by com.agpeya.app.data.SettingsRepository.prayerLevel(context)
+        .collectAsState(initial = com.agpeya.app.data.PrayerLevel.FULL)
+    // What each hour will actually cost at the level it will be read at. The
+    // list named the hour and the time it belongs to and never how long it
+    // takes, which is the one thing you want before opening one.
+    val minutes by androidx.compose.runtime.produceState(emptyMap<String, Int>(), hours, level) {
+        value = hours.mapNotNull { hour ->
+            com.agpeya.app.data.PrayerDuration.minutes(context, hour, level)?.let { hour.id to it }
+        }.toMap()
+    }
     Column(Modifier.fillMaxWidth().padding(horizontal = Spacing.screen).padding(bottom = Spacing.xxl)) {
         Text(s.hoursHeader, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
         Spacer(Modifier.height(Spacing.md))
@@ -819,7 +830,16 @@ private fun AllHoursSheet(hours: List<Hour>, currentHourId: String?, onOpenHour:
                             )
                         }
                     }
-                    Text(hour.timeHint, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(hour.timeHint, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        minutes[hour.id]?.let {
+                            Text(
+                                s.minutesLabel(it),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.secondary,
+                            )
+                        }
+                    }
                 }
                 if (index < hours.lastIndex) SinqDivider()
             }

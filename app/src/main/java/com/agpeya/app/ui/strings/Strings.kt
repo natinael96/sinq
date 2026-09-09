@@ -403,6 +403,17 @@ interface Strings {
     /** Screen-reader state for a completed habit dot. */
     val doneLabel: String
     val currentHourBadge: String
+    fun minutesLabel(n: Int): String
+    val remindersDayTitle: String
+    fun remindersDaySubtitle(n: Int): String
+    fun reminderKindLabel(kind: com.agpeya.app.data.DaySchedule.Kind): String
+    val reminderSilenced: String
+    val reminderNotToday: String
+    fun remindersQuietWarning(n: Int): String
+    val introLevelTitle: String
+    val introLevelBody: String
+    fun introLevelDesc(level: com.agpeya.app.data.PrayerLevel): String
+    val introLevelFooter: String
     val previousHour: String
     val nextHour: String
     val copyAction: String
@@ -1213,6 +1224,32 @@ object AmharicStrings : Strings {
     override val filterAll = "ሁሉም"
     override val doneLabel = "ተጠናቋል"
     override val currentHourBadge = "አሁን"
+    override fun minutesLabel(n: Int) = "${com.agpeya.app.ui.reading.geezNumeral(n)} ደቂቃ"
+    override val remindersDayTitle = "የዛሬው ቀን"
+    override fun remindersDaySubtitle(n: Int) =
+        "${com.agpeya.app.ui.reading.geezNumeral(n)} ማስታወሻ ይደርስዎታል"
+    override fun reminderKindLabel(kind: com.agpeya.app.data.DaySchedule.Kind) = when (kind) {
+        com.agpeya.app.data.DaySchedule.Kind.HOUR -> "ሰዓት"
+        com.agpeya.app.data.DaySchedule.Kind.GITSAWE -> "ግጻዌ"
+        com.agpeya.app.data.DaySchedule.Kind.READING -> "የዕለቱ ንባብ"
+        com.agpeya.app.data.DaySchedule.Kind.NIGHTLY -> "የሌሊት ማስታወሻ"
+        com.agpeya.app.data.DaySchedule.Kind.BREATH -> "የትንፋሽ ጸሎት"
+        com.agpeya.app.data.DaySchedule.Kind.GIVING -> "ምጽዋት"
+    }
+    override val reminderSilenced = "በጸጥታ ሰዓት"
+    override val reminderNotToday = "ዛሬ አይደለም"
+    override fun remindersQuietWarning(n: Int) =
+        "${com.agpeya.app.ui.reading.geezNumeral(n)} ማስታወሻ በጸጥታ ሰዓት ውስጥ ነው፤ ድምፅ አያሰማም።"
+    override val introLevelTitle = "በየቀኑ ምን ያህል?"
+    override val introLevelBody = "ሰዓታቱ በአምስት መጠን ይነበባሉ። አሁን የሚመርጡት በኋላ ይለወጣል።"
+    override fun introLevelDesc(level: com.agpeya.app.data.PrayerLevel) = when (level) {
+        com.agpeya.app.data.PrayerLevel.PSALM_50 -> "መዝሙር ፶ ብቻ"
+        com.agpeya.app.data.PrayerLevel.BEGINNING -> "ከየሰዓቱ ጥቂት መዝሙራት"
+        com.agpeya.app.data.PrayerLevel.GROWTH -> "ከየሰዓቱ አብዛኞቹ"
+        com.agpeya.app.data.PrayerLevel.STEADFAST -> "ከሙሉው ጥቂት የሚያንስ"
+        com.agpeya.app.data.PrayerLevel.FULL -> "እንደ መጽሐፉ፣ ሙሉ በሙሉ"
+    }
+    override val introLevelFooter = "በቅንብር ውስጥ በማንኛውም ጊዜ መቀየር ይችላሉ።"
     override val previousHour = "ቀዳሚ"
     override val nextHour = "ቀጣይ"
     override val copyAction = "ቅዳ"
@@ -1991,6 +2028,32 @@ object EnglishStrings : Strings {
     override val filterAll = "All"
     override val doneLabel = "Done"
     override val currentHourBadge = "Now"
+    override fun minutesLabel(n: Int) = "$n min"
+    override val remindersDayTitle = "Today"
+    override fun remindersDaySubtitle(n: Int) = if (n == 1) "1 reminder will reach you" else "$n reminders will reach you"
+    override fun reminderKindLabel(kind: com.agpeya.app.data.DaySchedule.Kind) = when (kind) {
+        com.agpeya.app.data.DaySchedule.Kind.HOUR -> "Hour"
+        com.agpeya.app.data.DaySchedule.Kind.GITSAWE -> "ግጻዌ"
+        com.agpeya.app.data.DaySchedule.Kind.READING -> "The day's reading"
+        com.agpeya.app.data.DaySchedule.Kind.NIGHTLY -> "Nightly reminder"
+        com.agpeya.app.data.DaySchedule.Kind.BREATH -> "Breath prayer"
+        com.agpeya.app.data.DaySchedule.Kind.GIVING -> "Giving"
+    }
+    override val reminderSilenced = "in quiet hours"
+    override val reminderNotToday = "not today"
+    override fun remindersQuietWarning(n: Int) =
+        if (n == 1) "1 reminder falls inside quiet hours and will stay silent."
+        else "$n reminders fall inside quiet hours and will stay silent."
+    override val introLevelTitle = "How much each day?"
+    override val introLevelBody = "The hours can be read at five lengths. What you choose now can change later."
+    override fun introLevelDesc(level: com.agpeya.app.data.PrayerLevel) = when (level) {
+        com.agpeya.app.data.PrayerLevel.PSALM_50 -> "Psalm 50 alone"
+        com.agpeya.app.data.PrayerLevel.BEGINNING -> "A few psalms from each hour"
+        com.agpeya.app.data.PrayerLevel.GROWTH -> "Most of each hour"
+        com.agpeya.app.data.PrayerLevel.STEADFAST -> "Just short of the whole"
+        com.agpeya.app.data.PrayerLevel.FULL -> "The whole office, as the book has it"
+    }
+    override val introLevelFooter = "You can change this in Settings at any time."
     override val previousHour = "Previous"
     override val nextHour = "Next"
     override val copyAction = "Copy"
