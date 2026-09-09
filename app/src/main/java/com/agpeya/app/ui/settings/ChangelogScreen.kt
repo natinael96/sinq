@@ -31,6 +31,31 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "2.0.1",
+        title = "The margin and the hand",
+        titleAm = "ጠርዙና እጅ ጽሑፉ",
+        changes = listOf(
+            "ሞትን አስብ can stand on your home screen, lettered in ዋልድባ — the same hand now sets it on the opening screen.",
+            "Verse numbers moved out of the line and into a margin of their own, where Ge'ez numerals can be read as an index rather than as debris between words.",
+            "The chapter is the title now: it says where you are, and tapping it lists the chapters by their own names.",
+            "The mark down the edge of a reading can be dragged, and a reading says how far in you are.",
+            "The books reader steps to the next chapter from the foot of one, as the Bible reader already did.",
+            "ውዳሴ ማርያም puts ይወድስዋ መላእክት after አንቀጸ ብርሃን, and opens መልክአ ማርያም and መልክአ ኢየሱስ from its foot.",
+            "Setting up the app asks how much of each hour you want to pray, instead of quietly choosing the longest.",
+            "Every update since 1.7.4 showed the same What's New; each one is shown once now.",
+        ),
+        changesAm = listOf(
+            "ሞትን አስብ በመነሻ ገጽዎ ላይ ሊቆም ይችላል፤ በዋልድባ ተጽፎ — ያው እጅ ጽሑፍ አሁን በመክፈቻው ገጽ ላይም አለ።",
+            "የቁጥሮቹ ስፍራ ተለውጧል፦ ከመስመሩ ውስጥ ወጥተው የራሳቸውን ጠርዝ ይዘዋል፤ የግእዝ ቁጥሮች በቃላት መካከል ከመሰበቅ ይልቅ እንደ ማውጫ ይነበባሉ።",
+            "ምዕራፉ ራሱ አርእስቱ ሆኗል፦ የት እንዳሉ ይናገራል፤ ሲነኩትም ምዕራፎቹን በየስማቸው ይዘረዝራል።",
+            "በንባቡ ጠርዝ ያለው ምልክት ይጎተታል፤ ንባቡም ምን ያህል እንደገሰገሱ ይናገራል።",
+            "የመጻሕፍቱ አንባቢ ከምዕራፉ መጨረሻ ወደሚቀጥለው ይሻገራል፤ እንደ መጽሐፍ ቅዱሱ አንባቢ።",
+            "ውዳሴ ማርያም ይወድስዋ መላእክትን ከአንቀጸ ብርሃን በኋላ አስቀምጧል፤ መልክአ ማርያምንና መልክአ ኢየሱስንም ከሥሩ ይከፍታል።",
+            "አፕሊኬሽኑን ሲያዘጋጁ ከእያንዳንዱ ሰዓት ምን ያህል መጸለይ እንደሚፈልጉ ይጠይቃል፤ ረዥሙን በዝምታ ከመምረጥ ይልቅ።",
+            "ከ፩.፯.፬ ወዲህ ያለው እያንዳንዱ ዝማኔ ያንኑ «በዚህ እትም» ያሳይ ነበር፤ አሁን እያንዳንዱ አንዴ ብቻ ይታያል።",
+        ),
+    ),
+    ReleaseNote(
         version = "2.0.0",
         title = "In red ink",
         titleAm = "በቀይ ቀለም",

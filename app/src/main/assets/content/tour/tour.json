@@ -2,6 +2,58 @@
   "contentVersion": 1,
   "tours": [
     {
+      "versionCode": 67,
+      "version": "2.0.1",
+      "title": {
+        "am": "በዚህ እትም",
+        "en": "In this version"
+      },
+      "pages": [
+        {
+          "kicker": {
+            "am": "ንባብ",
+            "en": "Reading"
+          },
+          "title": {
+            "am": "ቁጥሮቹ የራሳቸውን ጠርዝ ያዙ",
+            "en": "The numbers took a margin of their own"
+          },
+          "body": {
+            "am": "የቁጥሩ ስፍራ ከመስመሩ ውስጥ ወደ ጎን ተለውጧል። የግእዝ ቁጥሮች የተጻፉ እንጂ የተደረደሩ አይደሉምና ቦታ ይሻሉ፤ በራሳቸው ዓምድ ውስጥ እንደ ማውጫ ይነበባሉ፣ ንባቡም የቀና ጠርዝ ያገኛል — የታተመ መዝሙረ ዳዊት እንደሚያደርገው።",
+            "en": "The verse number has moved out of the line and into a column of its own. Ge'ez numerals are composed rather than positional and need the room; in a margin they read as an index, and the verse keeps a flush edge — the way a printed Psalter sets it."
+          }
+        },
+        {
+          "kicker": {
+            "am": "ምዕራፍ",
+            "en": "Chapters"
+          },
+          "title": {
+            "am": "ምዕራፉ ራሱ አርእስቱ ነው",
+            "en": "The chapter is the title"
+          },
+          "body": {
+            "am": "ከንባቡ በላይ ተዘርግቶ የነበረው የምዕራፍ ሰንሰለት ወጥቷል — በመዝሙረ ዳዊት ውስጥ ከመቶ ኀምሳው አራቱን ብቻ ያሳይ ነበር። አሁን ምዕራፉ በአርእስቱ ሥር ነው፦ የት እንዳሉ ይናገራል፣ ሲነኩትም ምዕራፎቹን በየስማቸው ይዘረዝራል። ከምዕራፉ መጨረሻም ወደሚቀጥለው ይሻገራል።",
+            "en": "The chapter strip above the text is gone — in መዝሙረ ዳዊት it showed four of a hundred and fifty. The chapter now sits under the title: it says where you are, and tapping it lists the chapters by their own names. The foot of a chapter steps to the next one."
+          }
+        },
+        {
+          "kicker": {
+            "am": "ሞትን አስብ",
+            "en": "Memento mori"
+          },
+          "title": {
+            "am": "በመነሻ ገጽዎ ላይ",
+            "en": "On your home screen"
+          },
+          "body": {
+            "am": "መክፈቻው ገጽ የሚከፍትበት ቃል አሁን በመነሻ ገጽ ላይ ሊቆም ይችላል። ቀን የለውም፣ ንባብ የለውም፣ የሚታደስም ነገር የለውም — የሚለወጥ ቢሆን ኖሮ ሌላ ነገር በሆነ ነበር። በዋልድባ ተጽፏል፤ ያው እጅ ጽሑፍ አሁን በመክፈቻው ገጽ ላይም አለ።",
+            "en": "The words the app opens on can stand on your home screen. No date, no reading, nothing to refresh — one that changed would be a different thing. Lettered in ዋልድባ, the same hand that now sets it on the opening screen."
+          }
+        }
+      ]
+    },
+    {
       "versionCode": 66,
       "version": "2.0.0",
       "title": {

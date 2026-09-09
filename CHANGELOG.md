@@ -6,6 +6,58 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [2.0.1] — 2026-09-09
+
+_versionCode 67 · The margin and the hand_
+
+### Added
+- **ሞትን አስብ on the home screen.** A second widget, and the only one in the app
+  that says nothing about today: the phrase the splash opens on, kept in view.
+  No date, no reading, no state, and deliberately no refresh — something that
+  updated would be a different thing entirely. It is lettered in ዋልድባ
+  (ይገዙ ብሥራት ጎፈር, by Abass Alamnehe, under the SIL OFL like every other face
+  here), which now sets ሞትን አስብ on the splash as well: an Ethiopic display hand
+  for an Ethiopic phrase.
+- **The mark down the edge of a reading moves it.** Drag it and a bubble names
+  where you would land. It is faint but always drawn now, because a mark that
+  fades cannot be grabbed.
+- **A reading says how far in you are** — ፲፪ / ፵፭ beside the title, where the
+  content is countable. For a hymn of numbered stanzas that beats any bar, and
+  unlike the bar it is legible without scrolling.
+- **Onboarding asks how much to pray.** The app has had five prayer levels since
+  before any of this and opened on the longest without mentioning the other four
+  existed. It asks now, preselects መጀመሪያ, and describes each level by how much of
+  the hour it keeps.
+- **A way to report a wrong word**, in Settings › More, above About.
+
+### Changed
+- **Verse numerals moved out of the line and into a margin.** As a 58%
+  superscript inside the text, ፳፬ read as debris between words; Ge'ez numerals
+  are composed rather than positional and need room to be scanned. In their own
+  column they become an index, and the verse keeps a flush left edge — the
+  arrangement a printed Psalter uses. Every reader at once.
+- **The chapter strip became the title.** It was drawn above the text on every
+  screen of every chapter whether or not anyone wanted a different one, and in
+  መዝሙረ ዳዊት it showed four of a hundred and fifty. The chapter is now the title's
+  second line: it says where you are, and tapping it opens the chapters as a
+  list, with each chapter's own name where the book has them.
+- **The books reader steps from the foot of a chapter**, as the Bible reader has
+  since 1.9.0. ሥርዓተ ቅዳሴ is twenty-three chapters and the end of one was a dead
+  end two thousand paragraphs from the strip at the top.
+- **ውዳሴ ማርያም ends where it should.** ይወድስዋ መላእክት now follows አንቀጸ ብርሃን rather
+  than preceding it, and መልክአ ማርያም and መልክአ ኢየሱስ are reachable from the foot of
+  it — linked to the copies on the shelf rather than a second copy of each.
+- **Eight books came off the ዜማ shelf** — the አቋቋም and ድጓ books, which are
+  learned by ear from a teacher rather than read, and which a scan serves worst.
+  95 books to 87.
+
+### Fixed
+- **Every update since 1.7.4 showed the 1.7.4 What's New again.** The check asked
+  whether you had caught up with the installed version, not whether you had seen
+  *that* tour, so a release which shipped no tour of its own re-offered the last
+  one that existed — four times over. A tour is shown once now, and a release
+  with nothing to say says nothing.
+
 ## [2.0.0] — 2026-09-09
 
 _versionCode 66 · In red ink_
