@@ -385,6 +385,16 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, onBack: () -> Unit)
                 item { Spacer(Modifier.height(Spacing.huge)) }
             }
         }
+        // ስንክሳር builds its own list rather than using ReadingColumn, so the
+        // mark saying where in the day you are is added here by hand. A single
+        // commemoration can run to forty paragraphs.
+        com.agpeya.app.ui.common.ScrollIndicator(
+            state = listState,
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .widthIn(max = ReadingMaxWidth)
+                .padding(innerPadding),
+        )
         // The selected run, ready to copy or leave as text or a PNG card.
         val selBody = if (selRange.isEmpty()) null
         else pieces.filterIndexed { i, _ -> i in selRange }

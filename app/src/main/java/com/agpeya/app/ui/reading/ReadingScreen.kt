@@ -583,9 +583,13 @@ internal fun PageIndicator(current: Int, total: Int) {
 }
 
 /**
- * The reading list every reader is built on: page margins, and a ceiling on how
- * wide a line of text may get. On a phone the ceiling never binds; on a tablet
- * it is the difference between a book and a spreadsheet.
+ * The reading list every reader is built on: page margins, a ceiling on how
+ * wide a line of text may get, and the mark saying where in it you are. On a
+ * phone the ceiling never binds; on a tablet it is the difference between a
+ * book and a spreadsheet.
+ *
+ * The mark is inside the width ceiling rather than at the screen edge, so on a
+ * tablet it hugs the column it belongs to instead of floating in the margin.
  */
 @Composable
 internal fun ReadingColumn(
@@ -599,12 +603,18 @@ internal fun ReadingColumn(
             .padding(innerPadding),
         contentAlignment = Alignment.TopCenter,
     ) {
-        LazyColumn(
-            state = state,
-            modifier = Modifier.fillMaxSize().widthIn(max = ReadingMaxWidth),
-            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.sm),
-            content = content,
-        )
+        Box(Modifier.fillMaxSize().widthIn(max = ReadingMaxWidth)) {
+            LazyColumn(
+                state = state,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.sm),
+                content = content,
+            )
+            com.agpeya.app.ui.common.ScrollIndicator(
+                state = state,
+                modifier = Modifier.align(Alignment.CenterEnd),
+            )
+        }
     }
 }
 
