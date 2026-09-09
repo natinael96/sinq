@@ -174,6 +174,7 @@ fun ScriptureReaderScreen(
         }
     }
     val lastChapters by SettingsRepository.lastChapters(context).collectAsState(initial = emptyMap())
+    var chaptersOpen by remember { mutableStateOf(false) }
     var chapter by rememberSaveable(bookKey) {
         mutableIntStateOf(initialChapter.coerceIn(1, b.chapters.size))
     }
@@ -268,8 +269,15 @@ fun ScriptureReaderScreen(
         topBar = {
             SinqTopBar(
                 title = b.nameAm,
-                subtitle = "${s.chapterUnit} ${geezNumeral(chapter)}",
                 onBack = onBack,
+                titleContent = {
+                    com.agpeya.app.ui.common.ReaderTitleBar(
+                        title = b.nameAm,
+                        chapterLabel = "${s.chapterUnit} ${geezNumeral(chapter)}",
+                        pickable = b.chapters.size > 1,
+                        onPick = { chaptersOpen = true },
+                    )
+                },
                 // The top bar has no bookmark of its own any more. It could
                 // only ever mark a whole chapter, which is not the grain anyone
                 // reads at; the selection bar marks what was actually chosen,
@@ -360,14 +368,6 @@ fun ScriptureReaderScreen(
         },
     ) { innerPadding ->
         ReadingColumn(state = listState, innerPadding = innerPadding) {
-            item(key = "chapters") {
-                ChapterStrip(
-                    count = b.chapters.size,
-                    selected = chapter,
-                    onSelect = { chapter = it },
-                )
-                Spacer(Modifier.height(Spacing.sm))
-            }
             // The cited verses are emitted as ONE row so the citation reads as a
             // single tinted block instead of a stack of separate boxes.
             items(rows, key = { it.first().n }) { row ->
@@ -485,6 +485,14 @@ fun ScriptureReaderScreen(
                 Spacer(Modifier.height(Spacing.huge))
             }
         }
+        if (chaptersOpen) {
+            com.agpeya.app.ui.common.ChapterSheet(
+                count = b.chapters.size,
+                current = chapter - 1,
+                onPick = { chaptersOpen = false; chapter = it + 1 },
+                onDismiss = { chaptersOpen = false },
+            )
+        }
     }
 }
 
@@ -522,29 +530,3 @@ private fun ChapterStepper(onPrevious: (() -> Unit)?, onNext: (() -> Unit)?) {
     }
 }
 
-/**
- * The chapter picker. It scrolls itself to the chapter in view, so arriving at
- * ማርቆስ ፲፬ from a ግጻዌ link doesn't leave the strip sitting at chapter one with
- * the selection somewhere off-screen to the right.
- */
-@Composable
-private fun ChapterStrip(count: Int, selected: Int, onSelect: (Int) -> Unit) {
-    val state = rememberLazyListState()
-    androidx.compose.runtime.LaunchedEffect(selected) {
-        state.animateScrollToItem((selected - 3).coerceAtLeast(0))
-    }
-    LazyRow(
-        state = state,
-        modifier = Modifier.padding(vertical = Spacing.sm),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-    ) {
-        items(count) { i ->
-            val n = i + 1
-            SelectPill(
-                label = geezNumeral(n),
-                selected = n == selected,
-                onClick = { onSelect(n) },
-            )
-        }
-    }
-}

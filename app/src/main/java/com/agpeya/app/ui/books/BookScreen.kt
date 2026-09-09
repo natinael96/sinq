@@ -11,30 +11,40 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.BookRepository
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.model.Book
@@ -49,6 +59,7 @@ import com.agpeya.app.ui.reading.advanceFlatSelection
 import com.agpeya.app.ui.reading.flatSelectionRange
 import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.inReadingFont
 import com.agpeya.app.ui.theme.readingBodyStyle
@@ -103,10 +114,18 @@ fun BookScreen(
     // another chapter, would be the screen taking the wheel back off them.
     var landed by rememberSaveable(bookId) { mutableStateOf(false) }
     val blocksNow = shown?.blocks.orEmpty()
-    // The stanza's row is preceded by the chapter strip and the recension line,
-    // each of which is one item and each of which may not be there.
-    val leadingItems = (if (chapters.size > 1) 1 else 0) +
-        (if (meta?.let { it.variants.isNotEmpty() || it.variantOf != null } == true) 1 else 0)
+    // The stanza's row is preceded only by the recension line now, and that may
+    // not be there either: the chapter strip has moved into the title.
+    val leadingItems =
+        if (meta?.let { it.variants.isNotEmpty() || it.variantOf != null } == true) 1 else 0
+    var chaptersOpen by remember { mutableStateOf(false) }
+    // Which stanza is at the top of the screen. derivedStateOf so the top bar
+    // recomposes when the number changes and not on every frame of the scroll.
+    val atBlock by remember(blocks.size, leadingItems) {
+        derivedStateOf {
+            (listState.firstVisibleItemIndex - leadingItems + 1).coerceIn(1, blocks.size.coerceAtLeast(1))
+        }
+    }
     LaunchedEffect(bookId, blocksNow.size, openAtBlock) {
         if (!landed && openAtBlock >= 0 && openAtBlock < blocksNow.size) {
             landed = true
@@ -126,11 +145,22 @@ fun BookScreen(
         topBar = {
             SinqTopBar(
                 title = book?.title ?: meta?.title.orEmpty(),
-                subtitle = shown?.title?.takeIf { it.isNotBlank() && chapters.size > 1 },
                 // Which scanned copy this chapter came from, when the book was
                 // merged from several — the reader should never have to guess.
                 accentLine = shown?.source,
                 onBack = onBack,
+                titleContent = {
+                    com.agpeya.app.ui.common.ReaderTitleBar(
+                        title = book?.title ?: meta?.title.orEmpty(),
+                        chapterLabel = shown?.title?.takeIf { it.isNotBlank() }
+                            ?: geezNumeral(chapter + 1).takeIf { chapters.size > 1 },
+                        pickable = chapters.size > 1,
+                        onPick = { chaptersOpen = true },
+                        position = if (blocks.size > 1) {
+                            "${geezNumeral(atBlock)} / ${geezNumeral(blocks.size)}"
+                        } else null,
+                    )
+                },
             )
         },
         bottomBar = {
@@ -152,27 +182,6 @@ fun BookScreen(
     ) { inner ->
         Box(Modifier.fillMaxSize()) {
             ReadingColumn(innerPadding = inner, state = listState) {
-                if (chapters.size > 1) {
-                    item(key = "chapters") {
-                        // Twenty-five chapters will not fit across a phone, so the
-                        // strip scrolls rather than wrapping into a wall of pills.
-                        Row(
-                            Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState())
-                                .padding(vertical = Spacing.sm),
-                            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                        ) {
-                            chapters.forEachIndexed { index, ch ->
-                                SelectPill(
-                                    label = ch.title.ifBlank { geezNumeral(index + 1) },
-                                    selected = index == chapter,
-                                    onClick = { chapter = index; selA = -1; selB = -1 },
-                                )
-                            }
-                        }
-                    }
-                }
                 // A second recension is the one thing a reader of these hymns
                 // most wants to know exists, and the shelf does not say it.
                 meta?.let { m ->
@@ -211,8 +220,33 @@ fun BookScreen(
                         },
                     )
                 }
+                // The end of a chapter is a junction, not a dead end. The Bible
+                // reader has said so since 1.9.0; these books had to be scrolled
+                // back to the strip at the top, which in ሥርዓተ ቅዳሴ is two
+                // thousand paragraphs away.
+                if (chapters.size > 1) {
+                    item(key = "stepper") {
+                        ChapterStepper(
+                            onPrevious = if (chapter > 0) {
+                                { chapter -= 1; selA = -1; selB = -1 }
+                            } else null,
+                            onNext = if (chapter < chapters.size - 1) {
+                                { chapter += 1; selA = -1; selB = -1 }
+                            } else null,
+                        )
+                    }
+                }
                 item { Spacer(Modifier.height(Spacing.huge)) }
             }
+        }
+        if (chaptersOpen) {
+            com.agpeya.app.ui.common.ChapterSheet(
+                count = chapters.size,
+                current = chapter,
+                onPick = { chaptersOpen = false; chapter = it; selA = -1; selB = -1 },
+                onDismiss = { chaptersOpen = false },
+                labelFor = { chapters[it].title.takeIf { t -> t.isNotBlank() } },
+            )
         }
     }
 }
@@ -293,5 +327,33 @@ private fun BookBlockRow(
             color = if (isGloss) MaterialTheme.colorScheme.secondary
             else MaterialTheme.colorScheme.onBackground,
         )
+    }
+}
+
+/** Prev/next at the foot of a chapter, matching the Bible reader's own. */
+@Composable
+private fun ChapterStepper(onPrevious: (() -> Unit)?, onNext: (() -> Unit)?) {
+    if (onPrevious == null && onNext == null) return
+    val s = com.agpeya.app.ui.strings.LocalStrings.current
+    val colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = Spacing.xxl),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (onPrevious != null) {
+            androidx.compose.material3.TextButton(onClick = onPrevious, colors = colors) {
+                Text("‹  ${s.previousChapter}", style = MaterialTheme.typography.labelLarge)
+            }
+        } else {
+            Spacer(Modifier.width(Spacing.xxs))
+        }
+        if (onNext != null) {
+            androidx.compose.material3.TextButton(onClick = onNext, colors = colors) {
+                Text("${s.nextChapter}  ›", style = MaterialTheme.typography.labelLarge)
+            }
+        }
     }
 }

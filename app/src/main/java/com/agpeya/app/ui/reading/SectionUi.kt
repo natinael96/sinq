@@ -187,7 +187,14 @@ internal fun VerseText(
 ) {
     val markerColor = MaterialTheme.colorScheme.secondary
     val style = readingBodyStyle(bodyFontSp)
-    val markerSize = scaledReadingSp(bodyFontSp) * 0.58f
+    // The numeral sits in a gutter now rather than superscript inside the line,
+    // so it no longer has to be tiny to stay out of the way — it has its own
+    // column to be out of the way in. 0.72 keeps it subordinate to the verse
+    // while staying legible as ፻፳፯ rather than a smudge.
+    val markerSize = scaledReadingSp(bodyFontSp) * 0.72f
+    // Wide enough for three Ge'ez glyphs at the current size: the Psalter runs
+    // to ፻፶ and a fixed dp would clip it at the larger font steps.
+    val gutterWidth = (bodyFontSp * 1.65f).dp
     val citedShape = RoundedCornerShape(10.dp)
     val sinq = sinqColors
     // Verses have to stay visibly apart at 29sp as well as at 17sp, so the gap
@@ -210,23 +217,12 @@ internal fun VerseText(
             insideCitation -> Color.Transparent          // the block behind it carries the tint
             else -> Color.Transparent
         }
-        val annotated = remember(verse, verseNumber, markerColor, markerSize) {
-            buildAnnotatedString {
-                withStyle(
-                    SpanStyle(
-                        color = markerColor,
-                        fontSize = markerSize,
-                        baselineShift = BaselineShift.Superscript,
-                    )
-                ) { append(geezNumeral(verseNumber)) }
-                append(" ")
-                append(verse)
-            }
-        }
-        Text(
-            text = annotated,
-            style = style,
-            color = MaterialTheme.colorScheme.onBackground,
+        // Numeral in a gutter, verse flush beside it — the arrangement a printed
+        // Psalter uses, and the one Ge'ez numerals need: as a 58% superscript
+        // inside the line, ፳፬ read as debris between words rather than as an
+        // index. The row is one tap target and one highlight, exactly as the
+        // single Text was.
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = verseGap / 2)
@@ -236,7 +232,26 @@ internal fun VerseText(
                     detectTapGestures(onTap = { onVerseTap(verseKey) })
                 }
                 .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
-        )
+        ) {
+            Text(
+                text = geezNumeral(verseNumber),
+                // style.copy, not a fresh style: it keeps the body's lineHeight,
+                // so the numeral's first line box matches the verse's and the
+                // two sit on the same baseline at every font step.
+                style = style.copy(fontSize = markerSize),
+                color = markerColor,
+                textAlign = TextAlign.End,
+                maxLines = 1,
+                modifier = Modifier.width(gutterWidth),
+            )
+            Spacer(Modifier.width(Spacing.sm))
+            Text(
+                text = verse,
+                style = style,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.weight(1f),
+            )
+        }
     }
 
     Column(Modifier.fillMaxWidth()) {
