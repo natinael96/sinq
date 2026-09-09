@@ -6,6 +6,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [2.0.0] — 2026-09-09
+
+_versionCode 66 · In red ink_
+
+### Added
+- **The መልክእ are written in red, the way the books write them.** On a መልክእ the
+  salutation opening each stanza — ሰላም and the ለ… phrase naming what is greeted —
+  and the Name of God wherever it falls are rubricated, and nothing else is. The
+  rule was measured against the 2,148 salutation stanzas on the shelf rather than
+  guessed: what follows the ለ… word is either a function word beginning a new
+  clause or a noun continuing the construct. The hymn's own subject stays in ink,
+  because red marks the Name and not the one addressed.
+- **A ማኅሌት part opens the hymn at the stanza being sung**, not at its first page —
+  which, in a hymn of forty stanzas, was forty scrolls from the answer. Where the
+  ማኅሌት and the scan spell a line differently it still opens the book.
+
+### Changed
+- **The red is blood red in both themes.** On the dark theme it had been a light
+  crimson, nearer salmon than ink.
+- **A bilingual book's translation reads as text.** Gold rather than muted grey,
+  and without the italic — Ge'ez has no italic form, so that was a synthesised
+  slant that read as a rendering fault rather than a voice.
+- **The hours line is back on ቤት**, between hairlines under the hero: the hero says
+  what is due now, the line says what follows and opens the rest.
+- **ቁርባን preparation is no longer offered in ቤተ መጻሕፍት.** The screen stays,
+  unreached, until it is finished.
+
+### Fixed
+- **An Amharic book is no longer dimmed end to end.** ድርሳነ ሚካኤል is written in
+  Amharic rather than translated into it, and its 591 paragraphs were being
+  indented and greyed as though the whole book were a footnote to something.
+
 ## [1.9.9] — 2026-09-09
 
 _versionCode 65 · What the day already knew_

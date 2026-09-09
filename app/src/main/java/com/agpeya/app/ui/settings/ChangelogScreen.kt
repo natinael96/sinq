@@ -31,6 +31,25 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "2.0.0",
+        title = "In red ink",
+        titleAm = "በቀይ ቀለም",
+        changes = listOf(
+            "The መልክእ are written in red the way the books write them: the ሰላም that opens each stanza, and the Name of God wherever it falls.",
+            "A ማኅሌት part opens the hymn at the stanza being sung, not at its first page.",
+            "The red is a blood red in both themes now, where the dark theme's had faded towards salmon.",
+            "In a bilingual book the translation reads as text rather than as a footnote, and an Amharic book is no longer dimmed from end to end.",
+            "On ቤት the hours line is back under the hero, between two hairlines: what is due now, then what follows.",
+        ),
+        changesAm = listOf(
+            "መልክአ ቅዱሳን መጻሕፍቱ እንደሚጽፉት በቀይ ተጽፈዋል፦ እያንዳንዱን ቤት የሚከፍተው ሰላም፣ የእግዚአብሔርም ስም በየትም ቦታ ቢገኝ።",
+            "በማኅሌት የሚደረሰው ክፍል ሙሉውን ሕሙ የሚከፍተው ከሚደረሰው ቤት ላይ ነው እንጂ ከመጀመሪያው ገጽ አይደለም።",
+            "ቀዩ በሁለቱም ገጽታዎች የደም ቀይ ሆኗል፤ በጨለማው ገጽታ ላይ ገርጥቶ ነበርና።",
+            "በሁለት ቋንቋ በተጻፈ መጽሐፍ ትርጓሜው እንደ ግርጌ ማስታወሻ ሳይሆን እንደ ንባብ ይነበባል፤ በአማርኛ የተጻፈ መጽሐፍም ከጫፍ እስከ ጫፍ አይደበዝዝም።",
+            "በቤት የሰዓታት መስመር ከካርዱ ሥር ተመልሷል፤ በሁለት ስስ መስመሮች መካከል፦ አሁን የደረሰው፣ ቀጥሎም የሚመጣው።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.9.9",
         title = "What the day already knew",
         titleAm = "ዕለቱ የሚያውቀው",
