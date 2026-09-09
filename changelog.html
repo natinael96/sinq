@@ -43,6 +43,31 @@
 <!-- releases:start -->
 <article class="release">
   <header>
+    <h2>2.0.0 <span class="date">9 September 2026</span></h2>
+    <p class="motto"><span>In red ink</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>The መልክእ are written in red, the way the books write them.</b> On a መልክእ the salutation opening each stanza — ሰላም and the ለ… phrase naming what is greeted — and the Name of God wherever it falls are rubricated, and nothing else is. The rule was measured against the 2,148 salutation stanzas on the shelf rather than guessed: what follows the ለ… word is either a function word beginning a new clause or a noun continuing the construct. The hymn&#x27;s own subject stays in ink, because red marks the Name and not the one addressed.</span></li>
+    <li><span><b>A ማኅሌት part opens the hymn at the stanza being sung</b>, not at its first page — which, in a hymn of forty stanzas, was forty scrolls from the answer. Where the ማኅሌት and the scan spell a line differently it still opens the book.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>The red is blood red in both themes.</b> On the dark theme it had been a light crimson, nearer salmon than ink.</span></li>
+    <li><span><b>A bilingual book&#x27;s translation reads as text.</b> Gold rather than muted grey, and without the italic — Ge&#x27;ez has no italic form, so that was a synthesised slant that read as a rendering fault rather than a voice.</span></li>
+    <li><span><b>The hours line is back on ቤት</b>, between hairlines under the hero: the hero says what is due now, the line says what follows and opens the rest.</span></li>
+    <li><span><b>ቁርባን preparation is no longer offered in ቤተ መጻሕፍት.</b> The screen stays, unreached, until it is finished.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>An Amharic book is no longer dimmed end to end.</b> ድርሳነ ሚካኤል is written in Amharic rather than translated into it, and its 591 paragraphs were being indented and greyed as though the whole book were a footnote to something.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
     <h2>1.9.9 <span class="date">9 September 2026</span></h2>
     <p class="motto"><span>What the day already knew</span></p>
   </header>
@@ -220,25 +245,6 @@
     <li><span><b>Checking for a new version is on by default.</b> Sinq is installed by hand, so an update nobody is told about is an update nobody gets — and left opt-in, nobody found the switch and the notice never appeared for anyone. One request a day, carrying nothing about you, and Settings can turn it off.</span></li>
     <li><span><b>ዘወትር reads as prose.</b> It was verse-shaped in the data: 74 entries of which only 30 ended in a full stop, the rest being fragments split at the source&#x27;s line breaks. Now 30 paragraphs, and the Ge&#x27;ez 17. The weekday ውዳሴ portions were already one sentence per line and are untouched.</span></li>
     <li><span>The hour shortcut pills are gone from ቤት; the hours moved into the header menu.</span></li>
-  </ul>
-  </div>
-</article>
-
-<article class="release">
-  <header>
-    <h2>1.7.2 <span class="date">4 September 2026</span></h2>
-    <p class="motto"><span>the home page stops squeezing</span></p>
-  </header>
-  <div class="body">
-  <h3><span>Fixed</span></h3>
-  <ul>
-    <li><span><b>ቤት squeezed its cards on small phones.</b> Every card was pinned to a fixed height so the dashboard fitted one screen without scrolling. That held while the page ended at መዝሙር and ዘወትር; the ንባብ card added a fourth block below them and the reading line was the first thing to lose room. Cards now wrap their own text and the page scrolls. The side-by-side pair matches the taller of the two rather than a height chosen in advance.</span></li>
-    <li><span><b>The update line&#x27;s × was too small to hit</b> — a 36dp target, the only one in the app under the 48dp the design system asks for. The strip stays 28dp tall, but the × now takes a full 48dp of width and announces itself as a button.</span></li>
-  </ul>
-  <h3><span>Changed</span></h3>
-  <ul>
-    <li><span><b>97 spacings and nine icon sizes across 22 screens are back on the scale.</b> An audit against <code>docs/DESIGN_SYSTEM.md</code>, which asks for no raw dp gaps and icons at 18/22/26 only. Most were already on the scale and only change name; the strays snap to their nearest step. Settings, About, Licenses and the battery help page held most of them — screens written before the scale did.</span></li>
-    <li><span>በቅርቡ now uses the shared <code>StatePanel</code>, so &quot;nothing here yet&quot; reads in the same voice as every other empty state.</span></li>
   </ul>
   </div>
 </article>
