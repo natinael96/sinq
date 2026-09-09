@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ሞትን አስብ widget. Nothing here changes with the day, so there is no refresh
+  period and no alarm: updatePeriodMillis is 0 and the provider draws only when
+  the launcher asks or the size changes. The language can change under it,
+  which is why it listens for LOCALE_CHANGED in the manifest.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="180dp"
+    android:minHeight="110dp"
+    android:targetCellWidth="4"
+    android:targetCellHeight="2"
+    android:minResizeWidth="140dp"
+    android:minResizeHeight="60dp"
+    android:maxResizeWidth="480dp"
+    android:maxResizeHeight="240dp"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/widget_memento"
+    android:initialKeyguardLayout="@layout/widget_memento"
+    android:previewLayout="@layout/widget_memento"
+    android:description="@string/widget_memento_description"
+    android:widgetCategory="home_screen|keyguard" />

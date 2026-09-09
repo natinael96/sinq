@@ -4,4 +4,6 @@
 <resources>
     <string name="widget_gitsawe_label">Today\'s Gitsawe</string>
     <string name="widget_gitsawe_description">See today\'s misbak and gospel reading on your home screen.</string>
+    <string name="widget_memento_label">Remember death</string>
+    <string name="widget_memento_description">Memento mori, on your home screen.</string>
 </resources>

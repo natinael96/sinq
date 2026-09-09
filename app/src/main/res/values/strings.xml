@@ -12,4 +12,10 @@
     <string name="widget_preview_msbak_ref" translatable="false">መዝሙረ ዳዊት ፷፬፥፲፩–፲፪</string>
     <string name="widget_preview_wengel" translatable="false">ወንጌል</string>
     <string name="widget_preview_wengel_ref" translatable="false">የማቴዎስ ወንጌል ፲፩፥፩–፳</string>
+
+    <!-- ሞትን አስብ widget. The Amharic is drawn by the provider, not from here:
+         it is rendered in ዋልድባ to a bitmap so the face survives API 23-25. -->
+    <string name="widget_memento_label">ሞትን አስብ</string>
+    <string name="widget_memento_description">ሞትን አስብ — በመነሻ ገጽ ላይ።</string>
+    <string name="widget_memento_latin" translatable="false">MEMENTO MORI</string>
 </resources>
