@@ -425,6 +425,26 @@ footer .fine { color: #8FA99C; font-size: 13.5px; }
 /* ---- Reveal on scroll ---------------------------------------------------
    The class is added by script, never by the stylesheet, so a page with no
    JavaScript renders everything visible instead of blank. */
+/* The folded archive on the changelog page.
+
+   Everything inside starts life display:none, so the reveal-on-scroll observer
+   has nothing to report on until the fold is opened. Rather than rely on it
+   firing at that moment, the releases inside are exempted from the animation
+   outright — they are already the result of a deliberate click. */
+.more-releases { border-top: 1px solid var(--hair); margin-top: 44px; padding-top: 28px; }
+.more-releases > summary {
+  cursor: pointer; color: var(--gold); font-size: 16px; list-style: none;
+  padding: 12px 0; display: flex; align-items: center; gap: 10px;
+}
+.more-releases > summary::-webkit-details-marker { display: none; }
+.more-releases > summary::after { content: "\203A"; transform: rotate(90deg); font-size: 20px; line-height: 1; }
+.more-releases[open] > summary::after { transform: rotate(-90deg); }
+.more-releases > summary:hover { text-decoration: underline; }
+.more-releases > summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+.more-body { padding-top: 26px; }
+.more-body .release:first-of-type { border-top: none; padding-top: 0; }
+.more-releases .reveal, .more-releases .reveal.in { opacity: 1; transform: none; transition: none; }
+
 .reveal { opacity: 0; transform: translateY(16px); }
 .reveal.in { opacity: 1; transform: none; transition: opacity .55s ease, transform .55s ease; }
 

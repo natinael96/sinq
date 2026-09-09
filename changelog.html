@@ -36,7 +36,7 @@
 <div class="page-head">
   <h1><span>What changed</span></h1>
   <p>
-    <span>The most recent releases, in short. Each version's full notes, including why a bug happened, are in the <a href="https://github.com/natinael96/sinq/blob/master/CHANGELOG.md">changelog</a>.</span>
+    <span>Every release, in short — the seven most recent open, and the fifty before them a click away. The full notes, including why a bug happened, are in the <a href="https://github.com/natinael96/sinq/blob/master/CHANGELOG.md">changelog</a>.</span>
   </p>
 </div>
 
@@ -248,6 +248,978 @@
   </ul>
   </div>
 </article>
+
+<article class="release">
+  <header>
+    <h2>1.7.2 <span class="date">4 September 2026</span></h2>
+    <p class="motto"><span>the home page stops squeezing</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>ቤት squeezed its cards on small phones.</b> Every card was pinned to a fixed height so the dashboard fitted one screen without scrolling. That held while the page ended at መዝሙር and ዘወትር; the ንባብ card added a fourth block below them and the reading line was the first thing to lose room. Cards now wrap their own text and the page scrolls. The side-by-side pair matches the taller of the two rather than a height chosen in advance.</span></li>
+    <li><span><b>The update line&#x27;s × was too small to hit</b> — a 36dp target, the only one in the app under the 48dp the design system asks for. The strip stays 28dp tall, but the × now takes a full 48dp of width and announces itself as a button.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>97 spacings and nine icon sizes across 22 screens are back on the scale.</b> An audit against <code>docs/DESIGN_SYSTEM.md</code>, which asks for no raw dp gaps and icons at 18/22/26 only. Most were already on the scale and only change name; the strays snap to their nearest step. Settings, About, Licenses and the battery help page held most of them — screens written before the scale did.</span></li>
+    <li><span>በቅርቡ now uses the shared <code>StatePanel</code>, so &quot;nothing here yet&quot; reads in the same voice as every other empty state.</span></li>
+  </ul>
+  </div>
+</article>
+
+<details class="more-releases">
+  <summary><span>50 earlier releases, 1.7.1 back to 0.2.0</span></summary>
+  <div class="more-body">
+<article class="release">
+  <header>
+    <h2>1.7.1 <span class="date">4 September 2026</span></h2>
+    <p class="motto"><span>ንስሐ and ቁርባን wait for their text</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>ንስሐ ዝግጅት and ቁርባን ዝግጅት now say በቅርቡ.</b> Both shipped in 1.7.0 with text written for the app rather than received from the Church — an examination of conscience, the ሥርዓተ መቅረቢያ, and prayers before and after receiving. These are the two screens in Sinq that teach rather than record, and that is the wrong provenance for them, so the text is removed and the screens wait.</span></li>
+    <li><span>The entry points stay visible and say so. The state follows the bundled content being empty, so adding the text turns the screens on with no code change.</span></li>
+    <li><span>ቀኖና is unaffected and still works: it holds only what its owner enters.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.7.0 <span class="date">4 September 2026</span></h2>
+    <p class="motto"><span>what the Church does not read to you</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>The app would not install on anything below Android 8.0.</b> <code>minSdk</code> was 26, held there only by <code>java.time</code> (used in some 50 files) and <code>java.util.Base64</code> in the journal lock. Core library desugaring carries both down, so the floor is now 23 — Android 6.0. Notification channels, which do not exist before Oreo, are behind version checks; <code>PBKDF2WithHmacSHA256</code>, which also needs 26, now records which algorithm hashed a passphrase so one set on Android 6 keeps verifying after its owner upgrades.</span></li>
+    <li><span><b>Release APKs now carry the v1 JAR signature.</b> v2 alone covers API 24 and up, which would have excluded the Android 6 devices the change is for.</span></li>
+    <li><span>Two long-standing lint errors that were keeping the CI workflow red.</span></li>
+  </ul>
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>ንስሐ ዝግጅት</b> — a guided examination of conscience, walked one section at a time. The questions are read, never ticked, and the walk produces a single confession draft that &quot;ንስሐ ገብቻለሁ&quot; deletes.</span></li>
+    <li><span><b>ቀኖና</b> — the penance received from a ንስሐ አባት, with its measure and what has been done against it. It reminds until it is finished and then falls silent. Kept on the device only: never in a backup, and its label never appears in a notification.</span></li>
+    <li><span><b>ቁርባን ዝግጅት</b> — the order of approach as the tradition states it, with the prayers before and after receiving.</span></li>
+    <li><span><b>ንባብ</b> — a reading plan for the 1,067 chapters of the Old Testament and deuterocanon that the ግጻዌ never reaches, over a year or six months. The day&#x27;s ግጻዌ is shown inside the plan, above the plan&#x27;s own reading and never marked done. It is also the first screen to reach ሲራክ, ኩፋሌ, ሄኖክ and መቃብያን, which have been bundled all along with no way in.</span></li>
+    <li><span><b>A line on ቤት when a new version is out.</b> Opt-in and off by default; one request a day, the app&#x27;s only use of the network. It opens the release page in the browser and never downloads anything itself.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span>The Journey page&#x27;s vertical rhythm is a little tighter again.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.6.1 <span class="date">31 August 2026</span></h2>
+    <p class="motto"><span>the journal keeps what you wrote</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>Journal entries could be lost when the editor closed.</b> The final save was launched from the screen&#x27;s own <code>rememberCoroutineScope</code>, which Compose cancels at exactly the moment <code>onDispose</code> runs — so the write raced its own cancellation and could drop what had just been typed. The last write now goes to a process-lived scope, so a save that starts always finishes.</span></li>
+    <li><span><b>Nothing was written until the editor closed.</b> Switching apps or the system reclaiming the process left no record at all, despite a comment claiming otherwise. Entries now save a second after typing stops, so leaving the screen cleanly is no longer what the text depends on.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>The journal says when it has saved.</b> A tick appears in the entry header once the text is on disk. The editor still has no Save button, but &quot;is this saved?&quot; was a question the screen previously gave no way to answer.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.6.0 <span class="date">31 August 2026</span></h2>
+    <p class="motto"><span>what is owed, what was promised, what was thought</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>አስራት.</b> A ledger for the tithe: record what you receive and the tenth is worked out for you; record what you give and it shows what is still owed, over an Ethiopian month or year. The share is adjustable for those who keep a different fraction, and amounts are counted in a currency you name. Giving beyond the tithe is shown as a surplus rather than a negative debt.</span></li>
+    <li><span><b>ስዕለት.</b> Vows and pledges, each tied to the feast it was promised on, with what was promised set against what has been kept. A one-time vow stops reminding once it is fulfilled; a standing one keeps its rhythm.</span></li>
+    <li><span><b>Feast-anchored reminders.</b> Cadences now include a yearly date and a named feast, alongside the weekly, every-other-day and monthly ones. The ወርኀዊ በዓላት come from the bundled ስንክሳር itself, so choosing &quot;ቀን ፲፱&quot; and choosing &quot;ቅዱስ ገብርኤል&quot; are the same act; movable feasts such as ፋሲካ are computed each year from the ባሕረ ሓሳብ.</span></li>
+    <li><span><b>ማስታወሻ — a journal.</b> Write the day down, browsed a ግእዝ month at a time. Every entry keeps the Church&#x27;s day it was written on — the feast, the fast, the day&#x27;s ግጻዌ — so an old entry reads as more than a date. A &quot;write about this&quot; action in the Psalter and the ግጻዌ reader starts an entry linked back to the passage. Entries can be locked behind a passphrase, and the journal never appears in screenshots or the app switcher.</span></li>
+    <li><span><b>Preparing for ንስሐ.</b> A kind of entry built to be destroyed: it never leaves the device, never enters a backup, and &quot;ንስሐ ገብቻለሁ&quot; deletes it rather than filing it away.</span></li>
+    <li><span><b>Choose what a backup contains.</b> Export is now a checklist rather than all-or-nothing. The journal is off by default and asks for your passphrase before it can be included — the file itself is plain text, so what happens to it afterwards is yours to look after.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Quiet hours now silence every reminder.</b> They previously applied only to the ringing prayer alarms and the ሕሊና prayer; the nightly, ግጻዌ, ምጽዋት and ንስሐ notifications ignored them entirely. A silenced reminder still keeps its schedule — only that one occurrence is dropped. Because the silence is now total, the setting warns when a reminder is timed inside the window and would never arrive.</span></li>
+    <li><span><b>The Reminders page is grouped</b> — daily, giving, and sound — rather than one flat run of rows, and the reminder descriptions now speak in one voice instead of three.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>The text-size control was labelled &quot;የንባብ ፊደል&quot;</b>, the same as the font picker directly above it, leaving the size stepper with no label of its own.</span></li>
+    <li><span><b>&quot;Keep screen on&quot; never showed its explanation</b>, though one was written and translated.</span></li>
+    <li><span><b>The last-backup date</b> was printed as a raw Gregorian date in an app that is otherwise ግእዝ-first everywhere.</span></li>
+    <li><span><b>&quot;1 reminders on.&quot;</b> The English count had no singular form.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.5.2 <span class="date">31 August 2026</span></h2>
+    <p class="motto"><span>the alarm asks again</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>&quot;ጨርሰዋል?&quot; comes back after an alarm.</b> The 1.5.0 notification rework hung that follow-up on the notification&#x27;s delete intent, which only fires when a user clears a notification — not on the app-side cancel behind Dismiss, the auto-cancel behind Open, or the 60-second timeout. Only swiping the alarm away reached it. Every ending now posts the prompt explicitly, with the timeout carried by its own alarm; Snooze stays the one ending that asks nothing.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>The ጉዞ page is more compact.</b> About 80dp less chrome — a tighter heading, hero, and section rhythm — so more of the day&#x27;s habits sit on screen. The year heatmap and the habit rows&#x27; touch targets are untouched.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.5.1 <span class="date">31 August 2026</span></h2>
+    <p class="motto"><span>the home page, restored</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>The daily-psalms and ጸሎት ዘዘወትር cards are back on the home page.</b> 1.5.0 removed the upper bound on the cards&#x27; heights to stop large text clipping, but each card holds an internal <code>weight()</code>; unbounded, those weights grew into the whole page and pushed the bottom two cards off a dashboard that does not scroll at normal text size. Heights are bounded again and now scale with the text instead of being outgrown by it.</span></li>
+    <li><span><b>The streak grid grows with its card.</b> The heatmap and candle are drawn in dp, so a card stretched by a large text size left them adrift in a half-empty box; they now scale with the card (capped so the grid cannot crowd out the reading beside it).</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>The ስንክሳር button says which day it opens.</b> It is now a filled button rather than a list row, and outside today it names the day in view — &quot;የሐምල ፰ ስንክሳር&quot; — so moving between days relabels it.</span></li>
+    <li><span><b>The ባሕረ ሐሳብ year card matches the rest of the app.</b> It used the Material primary colour, which resolves to a pale mint in dark theme; it now uses Sinq&#x27;s own deep green and muted ivory like every other hero surface.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.5.0 <span class="date">31 August 2026</span></h2>
+  </header>
+  <div class="body">
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Alarms ring without a foreground service.</b> The prayer alarm is now an insistent alarm-channel notification (alarm-stream sound + vibration looping up to 60s) — the <code>systemExempted</code> service and both foreground-service permissions are gone, and <code>SCHEDULE_EXACT_ALARM</code> (≤ API 32) fixes silently inexact alarms on Android 12/12L. Snooze, dismiss, and the &quot;done?&quot; follow-up are unchanged.</span></li>
+    <li><span><b>The ግጻዌ widget shows today, always, at any size.</b> No more 19:00 flip to tomorrow; the card renders directly (no collection service), adapts its rows/kidase/footer to the granted size, can shrink to a slim strip, rolls over just past midnight, and stops its refresh alarm when removed. The widget picker now has English text on English-system devices.</span></li>
+    <li><span><b>All Amharic UI text addresses the user in the polite plural.</b> Notification, backup, reminder, and prayer-list strings no longer slip into familiar masculine singular.</span></li>
+    <li><span><b>What&#x27;s New is bilingual.</b> Every release entry now has an Amharic rendering; the page follows the app language.</span></li>
+    <li><span><b>A Licenses &amp; sources screen.</b> Settings now carries the full attribution record: scripture (corrected scope), ግጻዌ, both Synaxarium sources (with the MIT notice), Wudase Maryam, all five fonts with the full OFL 1.1 text, and the app&#x27;s own Apache-2.0.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>A corrupted backup can no longer plant later crashes.</b> Restored reminder times are clamped and duplicate added-psalms deduplicated.</span></li>
+    <li><span><b>Search no longer permanently retains ~25–35 MB.</b> Indexing stops pinning parsed books, the book cache became an 8-entry LRU, and all content caches release under memory pressure.</span></li>
+    <li><span><b>Small hardening and polish.</b> Distinct alarm-notification request codes (taps can&#x27;t misroute), negative-numeral and empty-book guards, home cards grow instead of clipping at large font scales, Synaxarium red meets light contrast, 48dp touch targets for the week-day toggle, memento-mori text follows the app language, and &quot;coming soon&quot; wording states facts instead.</span></li>
+    <li><span><b>Dead weight removed:</b> the Se&#x27;atat settings remnants, an unreferenced legacy settings screen, and an unused asset file.</span></li>
+    <li><span><b>The version is visible.</b> The What&#x27;s New row shows the installed version (read from the package, never hardcoded again) and the Settings page closes with a quiet version footer. A hosted privacy policy now backs the Play listing, and the licenses screen records the Gitsawe transcription&#x27;s open-content release and the Font.et provenance of all three local fonts.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.4.0 <span class="date">31 August 2026</span></h2>
+    <p class="motto"><span>the Psalter and the ግጻዌ agree</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>The Psalter now uses the Ge&#x27;ez (LXX) psalm numbering everywhere.</b> Both bundled editions were renumbered (<code>tools/renumber_psalms_geez.py</code>) so መዝሙር ፶ is the Miserere and the numbers match every ግጻዌ citation — misbak links no longer land one psalm off (the reported 150/151 mismatch). Existing psalm bookmarks/highlights keyed by number will shift accordingly.</span></li>
+    <li><span><b>The ግጻዌ page turns with a swipe.</b> Sliding the page horizontally moves to the neighbouring day, and a permanent &quot;ዛሬ&quot; pill button returns to (and marks) today&#x27;s ግጻዌ.</span></li>
+    <li><span><b>Manage-hours no longer offers manual reordering.</b> The up/down arrows are gone; hours keep their canonical order.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>Prayer-list Marian conclusion spelling.</b> ጠጣሳት/ጠጣስ corrected to ጳጳሳት/ጳጳስ.</span></li>
+    <li><span><b>Toggling &quot;Full Psalms&quot; in an hour no longer crashes.</b> The paged reader guarded against the section list changing size mid-frame.</span></li>
+    <li><span><b>Release page only offers the installable APK.</b> The <code>.aab</code> (not installable on phones) moved off the public release assets into a workflow artifact.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.3.2 <span class="date">28 August 2026</span></h2>
+    <p class="motto"><span>Bahre Hasab renders correctly</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>The Bahre Hasab year card shows real values.</b> The hero card no longer displays raw template text in place of the year, evangelist, and Fasika date.</span></li>
+    <li><span><b>Ge&#x27;ez numerals are correct beyond 199.</b> Years and ዓመተ ዓለም now render in proper positional notation (e.g. ፳፻፲፰ for 2018) instead of a run of repeated ፻ marks, across the year rail and cycle-value chips.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.3.1 <span class="date">28 August 2026</span></h2>
+    <p class="motto"><span>a focused, more accessible reading experience</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>The Gitsawe widget follows the day automatically.</b> It shows today&#x27;s readings during the day and tomorrow&#x27;s from 19:00, with a single uncluttered page and the restored dawn-and-cross Sinq mark.</span></li>
+    <li><span><b>Long-form readers are easier to use.</b> Scripture, Synaxarium, and Wudase Maryam now share the reading-alignment setting, readable tablet-width limits, explicit retry states, and clearer accessibility selection state.</span></li>
+    <li><span><b>Bahre Hasab is now a live year explorer.</b> A highlighted current year and horizontal year rail expose computus values and movable observances for the current Ethiopian year plus the next 25 years.</span></li>
+    <li><span><b>Incomplete specialist readers have been removed from the interface.</b> The dedicated Se&#x27;atat reader and Athanasius funeral collection no longer appear; the app&#x27;s canonical prayer hours remain unchanged.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>Small UI controls and widget text are more accessible.</b> The prayer-list remove action now has a full touch target, and compact widget labels meet the minimum supported text size.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.3.0 <span class="date">28 August 2026</span></h2>
+    <p class="motto"><span>the complete source-backed Gitsawe</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Movable weekday Gitsawe.</b> Readings for Nineveh, Heraclius, Great Lent, Rikbe Kahnat, Ascension, and the Apostles&#x27; Fast now follow the Ethiopian computus instead of being limited to the fixed calendar.</span></li>
+    <li><span><b>Sunday Gitsawe and mezmur.</b> Sundays with an unambiguous printed date or movable-season rule expose their additional readings and hymns from the daily Gitsawe, with valid citations opening directly in Scripture.</span></li>
+    <li><span><b>Athanasius funeral and memorial lectionary.</b> The Library now includes the source&#x27;s funeral, burial, supplication, and memorial collections.</span></li>
+    <li><span><b>Bahre Hasab reference.</b> The printed 2001–2015 EC table is available in the Library as a historical reference, while live dates continue to use the app&#x27;s computus.</span></li>
+    <li><span><b>Text alignment controls.</b> Reading settings now offer justified, left, right, and centred text across the app&#x27;s reading surfaces.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>A new Sinq launcher mark.</b> Seven pieces form the Provision cross, tying the app icon to the seven canonical prayer hours and Sinq&#x27;s name.</span></li>
+    <li><span><b>The complete licensed Gitsawe source is reproducible.</b> Parts 1–5 retain scan provenance, source-preserving splits, importers, and validation tests.</span></li>
+    <li><span><b>Content rights are explicit.</b> Repository and in-app asset notices now distinguish the separately licensed Gitsawe transcription from Apache-2.0 code and CC-licensed Scripture.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.2.0 <span class="date">28 August 2026</span></h2>
+    <p class="motto"><span>the complete fixed-cycle Gitsawe</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Every Ethiopian calendar day now has a fixed-cycle Gitsawe entry.</b> The 65 previously missing dates are bundled, bringing coverage to all 366 possible month-days, including leap-year Pagumen 6.</span></li>
+    <li><span><b>The evening office is now visible.</b> Source-backed ሠርክ readings appear after ነግህ and ቅዳሴ and are included when sharing the day&#x27;s Gitsawe. Hidar 28 remains without ሠርክ because the transcribed source explicitly omits it.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Printed but malformed citations remain readable without becoming broken links.</b> Sinq preserves their source text while only making validated chapter references tappable.</span></li>
+    <li><span><b>The fixed calendar import is reproducible.</b> A checked-in importer merges newly transcribed days and evening offices without replacing existing translations or synaxarium notes.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.0.5 <span class="date">24 August 2026</span></h2>
+    <p class="motto"><span>quieter alarms, daytime breath prayer</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Prayer alarms stay in the notification shade.</b> Ringing reminders no longer launch or wake a full-screen activity; Open, Snooze, and Dismiss remain available directly on the ongoing notification.</span></li>
+    <li><span><b>Breath prayer follows the waking day.</b> Its single daily time is now chosen randomly from the active mode&#x27;s Morning prayer time through 21:00, without being re-rolled by completed prayers or constrained by later prayer alarms.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.0.4 <span class="date">24 August 2026</span></h2>
+    <p class="motto"><span>a clearer Library, an accessible Journey</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>The year&#x27;s journey can be explored without tiny touch targets.</b> Every available heatmap day now has a spoken date, habit count, fasting context, and selected state, while full-size previous and next controls provide a comfortable way to move through the calendar.</span></li>
+    <li><span><b>Journey controls explain their state.</b> The prayer-hours disclosure now announces whether it is expanded or collapsed, and the heatmap legend and monthly summaries adapt more safely to narrow screens and larger text.</span></li>
+    <li><span><b>Library descriptions follow the interface language.</b> Wudase Maryam and Zewotr supporting copy now appears in Amharic or English as selected.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>Journey stays on the right day.</b> Its date advances at local midnight and refreshes when the app resumes, preventing an overnight session from writing prayer records to yesterday.</span></li>
+    <li><span><b>Year and day selection remain consistent.</b> Switching heatmap years now selects a valid day in the displayed year, and dates before Sinq&#x27;s data epoch are no longer interactive.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.0.3 <span class="date">24 August 2026</span></h2>
+    <p class="motto"><span>today&#x27;s path, given room to be seen</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Today&#x27;s progress has a row of its own.</b> The Home dashboard now gives the completion count, candle, Journey status, and ten-week heatmap the full screen width instead of sharing a half-width card.</span></li>
+    <li><span><b>Daily readings sit together.</b> Today&#x27;s Psalms and ዘወትር ጸሎት / ውዳሴ ማርያም appear as compact companion cards, with the latter opening directly to the existing daily Wudase reading.</span></li>
+    <li><span><b>The new reading row remains adaptive.</b> Its cards sit side by side on normal phones and stack on narrow screens or with larger accessibility text.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.0.2 <span class="date">24 August 2026</span></h2>
+    <p class="motto"><span>the day at a glance, settings with room to breathe</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Focused Settings pages.</b> Reading, prayer, reminders, and local data now have dedicated screens, while the Settings landing page keeps only the eight choices people need to scan.</span></li>
+    <li><span><b>Reading comfort controls.</b> A real prayer-text preview now accompanies a safely migrated 16–28sp size scale, four Ethiopic font previews, and compact, normal, or relaxed line spacing shared by the app&#x27;s readers.</span></li>
+    <li><span><b>Editable quiet hours and reminder health warnings.</b> Start and end times can be changed directly, and notification or background restrictions are shown while relevant and rechecked when the app resumes.</span></li>
+    <li><span><b>Backup recency.</b> Successful local backups record their time so Settings can show whether the last backup was today, yesterday, or earlier.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Home is a glanceable dashboard.</b> Current and next prayer shortcuts replace the expanding hour list, all hours remain available in a sheet, and the full Gitsawe feast and reading card stays visible alongside today&#x27;s heatmap and Psalter portion.</span></li>
+    <li><span><b>Reminder controls are coherent.</b> Prayer level uses an explanatory radio sheet, alert behavior and sound share one sheet, and the randomized reminder is now named የሕሊና ጸሎት (Prayer of the heart).</span></li>
+    <li><span><b>Settings remain green and gold.</b> The visual identity, selected checks, and gold accents are preserved while spacing and navigation become calmer.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>Home stays current across time boundaries.</b> The date, suggested prayer, daily Gitsawe, progress, and Psalter portion refresh while Home is visible.</span></li>
+    <li><span><b>Settings adapt safely.</b> Narrow screens, large accessibility text, and wide displays reflow instead of truncating localized choices or stretching cards.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.0.1 <span class="date">23 August 2026</span></h2>
+    <p class="motto"><span>prayer that meets people where they are</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Five selectable Agpeya prayer levels.</b> Settings now offers መዝሙር ፶, መጀመሪያ, እድገት, ጽናት, and ሙሉ, with a curated, progressive Psalm priority for every hour and the larger 7/14/24/full progression at Midnight.</span></li>
+    <li><span><b>Continue with the complete hour.</b> A reader using a shorter level can reveal all Psalms for the current hour without changing the saved default.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>The Gospel remains foundational at every level.</b> Shorter levels affect only the Psalms; every Gospel reading remains present and concludes its hour or Midnight watch. The complete level preserves all bundled prayer content.</span></li>
+    <li><span><b>Prayer-level allocation is offline and data-driven.</b> Psalm priorities and the Psalm 50-only choice live in bundled configuration rather than UI code.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.0 <span class="date">23 August 2026</span></h2>
+    <p class="motto"><span>the first stable Sinq release</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Persistent Bible highlighting and dependable verse sharing.</b> Bible verses can now keep one of four highlight colours, selected ranges update in one atomic operation, and copied/shared passages retain their book or reference. Existing Psalm highlights migrate safely to the Amharic 1980 edition.</span></li>
+    <li><span><b>A complete daily checklist.</b> Sinkisar joins church and prostrations as a trackable practice, and the nightly reminder names what remains without being suppressed when an hour of prayer has already been marked.</span></li>
+    <li><span><b>Creator attribution.</b> About now links “Built by Natinael M.” directly to <code>@natinael96</code> on Telegram.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>The offline Bible now uses Amharic 1980 throughout.</b> The unused Amharic 2000 bundle and non-Psalm Ge&#x27;ez books have been removed; Ge&#x27;ez 1980 remains available specifically for Psalms. This cuts the optimized APK substantially while keeping the requested reading library offline.</span></li>
+    <li><span><b>Home makes the day&#x27;s paths visible.</b> Hours is an early, compact expandable card, and Today&#x27;s Gitsawe uses the same devotional green-and-gold hero treatment as Prayer for now.</span></li>
+    <li><span><b>Prayer List is denser and easier to scan.</b> Prayers use an adaptive two-column card grid, with the Marian prayer presented as a distinct concluding element.</span></li>
+    <li><span><b>Reader and Settings headers adapt to narrow screens.</b> Long titles ellipsize cleanly, secondary reader actions live in a compact tools menu, and Settings rows no longer crowd or clip their current value.</span></li>
+    <li><span><b>Selection actions are responsive and accessible.</b> Highlight colours and copy/share actions use an inset-safe two-row panel, announce individual colour names to screen readers, and dismiss after completing an action.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>Fasting boundaries are exact.</b> ጾመ ሐዋርያት ends on ሐምሌ 4 and ጾመ ፍልሠታ ends on ነሐሴ 15 without an added day; ጾመ ነቢያት and ዐቢይ ጾም retain their existing calculations.</span></li>
+    <li><span><b>Sinkisar search no longer crashes on valid entries.</b> Same-day results have stable unique identities, and Ge&#x27;ez text, Ethiopic punctuation, empty queries, no-result queries, and result navigation are covered by regression tests.</span></li>
+    <li><span><b>Psalm highlights cannot cross translations incorrectly.</b> Amharic and Ge&#x27;ez use separate identities, and switching language clears any pending selection before copy, share, or highlight can target different versification.</span></li>
+    <li><span><b>Reminder chains recover reliably.</b> Breath-prayer and daily reminder alarms re-arm independently after firing and after reboot, update, time, or timezone changes.</span></li>
+    <li><span><b>Image shares cannot overwrite one another.</b> Each generated passage card has a unique cache file and sharing failures are handled without crashing.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.10 <span class="date">22 August 2026</span></h2>
+    <p class="motto"><span>one Scripture, one day&#x27;s Gitsawe</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>The complete Ethiopian Orthodox Bible is now in the Library.</b> Old and New Testaments read from the Amharic 2000 edition, fully offline. Scripture has a single home with Bible and Psalms as clear categories instead of two competing Library entries.</span></li>
+    <li><span><b>Psalms now carry their proper editions.</b> Amharic 1980 is the default and Ge&#x27;ez 1980 is available from the Psalm reader. Misbak remembers its own language choice without changing the rest of Scripture.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>የዕለቱ ግጻዌ now reads as a day, not a directory.</b> The selected Ethiopian and Gregorian date leads the page, previous and next days sit within reach, and a historical day returns to Today in one tap. Misbak and Scripture are distinct devotional preview cards that open into the focused cited passage.</span></li>
+    <li><span><b>Gitsawe continuity is explicit.</b> Misbak opens in Ge&#x27;ez by default and carries that choice into its Psalm; Scripture remains Amharic 2000 and leads naturally from passage to chapter to book. Existing bookmark and Gitsawe routes remain compatible.</span></li>
+  </ul>
+  <h3><span>Removed</span></h3>
+  <ul>
+    <li><span>The duplicated legacy <code>psalms.json</code> and New-Testament-only <code>content/scripture</code> bundle. All canonical reading content now comes from the unified, reproducible 80-weahadu edition bundle.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.9.9.8 <span class="date">15 August 2026</span></h2>
+    <p class="motto"><span>the whole week fits</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>The &quot;how often&quot; dialog no longer cuts off half the week.</b> Saturday and Sunday were being clipped off the right edge of the day row, so they could not be picked at all, and &quot;Monthly&quot; was squeezed into a column one letter tall. The cadence chips now wrap to a second line instead of being crushed, and each day takes an equal share of the row — all seven are visible and tappable on any screen width. Affects both the ምጽዋት and ንስሐ reminders, which share the dialog.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.9.9.7 <span class="date">15 August 2026</span></h2>
+    <p class="motto"><span>the reminder writes itself</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>The opening spinner is gone; the reminder is written instead.</b> Where the splash used to mark its pause with a small spinning ring, *Memento Mori* is now inked onto the screen letter by letter under a soft gold nib, then signed off with a hand-drawn underline; <b>Remember Death</b> and <b>ሞትን አስብ</b> settle beneath it. The words are drawn in the reading serif, scaled to fit narrow screens, and a tap still moves on early. Nothing spins — the wait reads as a moment of attention rather than a loading state. With animations turned off system-wide the words simply appear already written.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.9.9.6 <span class="date">15 August 2026</span></h2>
+    <p class="motto"><span>a reminder for every intention</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>ምጽዋት and ንስሐ can hold many reminders now.</b> Each intention used to be a single nudge; now it is a list. Keep as many as you like, each with its own name (which rides in the notification so they read apart in the tray), its own cadence (weekly, every other day, or monthly on an Ethiopian day) and its own time. Your existing reminder migrates in as the first entry, unchanged. They are still intentions, not habits — nothing is recorded or shown as done.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>ሰዓታት is tucked away for now.</b> The bundled digitization is still partial (መሐረነ አብ and other portions are missing), so the Library card and its search entries are hidden until the text is whole. The reader, route and data stay intact for when it returns.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>Search no longer goes blank behind a stale filter.</b> A source filter (say መጻሕፍት) chosen for one query stayed on for the next; if the new query didn&#x27;t match that source, the results vanished even though other sources had matches. The filter now falls back to &quot;All&quot; whenever it names a source the current query didn&#x27;t hit.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.9.9.5 <span class="date">15 August 2026</span></h2>
+    <p class="motto"><span>the widget shows where it stands</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>The ግጻዌ widget got its polish.</b> Each card now carries a page indicator — gold for the shown day, muted for the other — baked into the card itself so the dots always agree with what&#x27;s visible; with only one day available they disappear along with the swipe. Today is explicitly labelled ዛሬ (symmetric with ነገ), a gold &quot;ግጻዌውን ክፈት →&quot; action line names what a tap does, and every refresh snaps the stack back to Today so a browse to tomorrow never lingers overnight. Tomorrow&#x27;s card only exists when tomorrow actually has readings; an empty today says so honestly instead of letting tomorrow pose as today.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.9.9.4 <span class="date">15 August 2026</span></h2>
+    <p class="motto"><span>the real መጽሐፈ ሰዓታት</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>ሰዓታት is now the real book.</b> The starter text is replaced by a full digitization of መጽሐፈ ሰዓታት ዘሌሊት ወዘነግህ (Tinsae Ze-Gubae edition, Addis Ababa, ፲፱፻፶፯ ዓ.ም.): the መቅድም on አባ ጊዮርጊስ ዘጋሥጫ, then all 42 sections in printed order — the fifteen ስብሐት parts of the night office alternating with the biblical canticles and the ምስለ intercessions — 199 Ge&#x27;ez–Amharic paired lines. It is one office, not four hours, so the reader now reads as one continuous scroll: the hour chips are gone, and a ይዘት (contents) sheet jumps to any section. Line pairing, the three language modes, tap-to-select sharing and the red typo-review flag all carry over; search now normalizes the traditional ፡ word separators, so queries typed with plain spaces match the printed text in either language.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.9.9.3 <span class="date">14 August 2026</span></h2>
+    <p class="motto"><span>ሰዓታት in the Library, and pages of their own</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>ሰዓታት (Seatat) in the Library.</b> The prayers of the hours, Ge&#x27;ez-first with a line-by-line Amharic translation: each Amharic line sits directly under its Ge&#x27;ez line — smaller, italic, visually attached — so the page reads as one continuous prayer with an inline translation. Three persisted language modes (ግዕዝና አማርኛ · ግዕዝ · አማርኛ); hour chips (ጠዋት · ቀትር · ማታ · ሌሊት) that keep each hour&#x27;s reading position; tap-to-select sharing and font sizing like the other readers; searchable in both languages from the unified search. A word marked <code>*</code> in the bundled text renders a small red asterisk — an in-app review flag for a spelling that still needs checking (stripped from shares and search).</span></li>
+    <li><span><b>Dedicated pages for ምጽዋት and ንስሐ.</b> Each scheduled intention now opens its own page from Settings — toggle, cadence, time, and the next due day in the Ethiopian calendar — instead of expanding rows inline.</span></li>
+    <li><span><b>A focused page for every ግጻዌ section.</b> Tapping ምስባክ, ወንጌል or any reading opens only the cited verses in the reading face, with the lectionary role in the header and two doors out: open the book, or open the chapter that holds the passage.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Open-ended ግጻዌ citations read to the chapter&#x27;s end.</b> A reference with a start verse and no end is not a single verse: the passage page shows from the start through the chapter&#x27;s last verse, across all Gitsawe types.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.9.9.2 <span class="date">13 August 2026</span></h2>
+    <p class="motto"><span>the streak becomes a journey</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>ጉዞ (Journey) replaces the streak.</b> The tab, formerly Streak, keeps its Amharic name and gains it in English, under a path icon instead of a flame. The hero is today&#x27;s candle — lit when prayer is recorded, waiting when not, never sized by history — beside the period&#x27;s count of distinct prayer days: &quot;በዚህ ወር ፳፫ ቀን ጸልየዋል&quot; / &quot;23 days of prayer this month&quot;, or during a fast &quot;የዐቢይ ጾም ፲፰ኛ ቀን — ፲፮ ቀን ጸልየዋል&quot; / &quot;Day 18 of ዐቢይ ጾም — prayed 16 days&quot;. Missing a day changes nothing but that day; coming back after a gap shows only &quot;ተመልሰዋል — ዛሬ ይጀምሩ&quot; / &quot;You&#x27;re back — begin today&quot;. Home&#x27;s Today card speaks the same line from the same source of truth. Prayer records and backups are untouched — the new count derives from the same day records.</span></li>
+    <li><span><b>The year heatmap is the historical view.</b> Promoted under its own header, with a quiet liturgical-green wash on unprayed fasting days and the fast named in the tapped-day readout — prayer history read inside the Church&#x27;s year. Per-habit rows now count distinct days this month; current/longest runs are gone.</span></li>
+    <li><span><b>The nightly nudge stops carrying a number.</b> &quot;ሰርክ ደርሷል — ዕለቱን በጸሎት ዝጉ&quot; every night; &quot;ጾሙ በጸሎት ይታጀብ&quot; on a fasting day; the feast named on a feast. The wording never depends on history — nothing at stake, nothing to lose.</span></li>
+    <li><span><b>The ringing alarm names its hour</b> — &quot;ሰርክ ደርሷል&quot; over the generic &quot;ጊዜው ደርሷል&quot;, on the full-screen alarm and the notification title.</span></li>
+  </ul>
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Passage sharing from every reader.</b> A tap anchors a verse run, the next tap moves its end; a slide-up bar offers copy, share as text, or share as an image card — now also in ስንክሳር, ውዳሴ ማርያም and the New Testament reader.</span></li>
+    <li><span><b>የመሃል ጸሎት — the in-between prayer.</b> Once a day, at a random moment between the last recorded prayer and the next scheduled one, a notification carrying one short prayer in full. Praying, not reading: nothing to open.</span></li>
+    <li><span><b>ምጽዋት and ንስሐ reminders.</b> Scheduled intentions, deliberately not habits — the app reminds and then looks away; weekly, every other day, or monthly on an Ethiopian month day.</span></li>
+    <li><span><b>The ግጻዌ widget carries tomorrow.</b> A two-card stack: today&#x27;s readings, and tomorrow&#x27;s for preparing.</span></li>
+  </ul>
+  <h3><span>Removed</span></h3>
+  <ul>
+    <li><span><b>The streak, everywhere.</b> No current or longest streak, no flame icon, no streak share card (passage sharing carries the meaning now), no &quot;streak lost&quot; state — and no setting to bring any of it back.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.9.9.1 <span class="date">13 August 2026</span></h2>
+    <p class="motto"><span>the streak nudge fires every night</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>The nightly streak reminder now behaves like the morning ግጻዌ one.</b> It fires every night while enabled — it used to skip any day that already had a log, which meant it stayed silent on exactly the nights you were paying attention and so read as broken. And where the ግጻዌ nudge carries the day&#x27;s reading, this one now carries the streak at stake: &quot;የ5 ቀን ጉዞህ እንዳይቋረጥ — የዛሬን መዝግብ&quot; / &quot;Keep your 5-day streak going — log today.&quot;</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.9.9 <span class="date">13 August 2026</span></h2>
+    <p class="motto"><span>prayer list, sharing, and the day&#x27;s psalm on Home</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>የጸሎት ዝርዝር — a prayer list.</b> The people you remember in prayer, each with an optional intention, reached from the Home header. Plain rows, local like everything else, included in backups (older backup files still restore).</span></li>
+    <li><span><b>Sharing from the ግጻዌ and ስንክሳር readers.</b> Copy, share as text, or share as a rendered image card carrying the passage with its source and date.</span></li>
+    <li><span><b>The day&#x27;s ቅዳሴ on the widget</b>, one quiet line under the readings.</span></li>
+    <li><span><b>Choose the streak reminder&#x27;s time.</b> A ሰዓት row under the toggle in Settings opens the same clock the prayer-mode editor uses; saving re-arms the alarm immediately. Default unchanged at 21:30.</span></li>
+    <li><span><b>Two smaller reading sizes</b> — 13 and 15sp below the old floor of 17. Your saved size is unchanged.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Home names the day&#x27;s psalm.</b> የዕለቱ መዝሙረ ዳዊት sits beside Today as two equal cards, naming today&#x27;s portion by the traditional weekday division; Sunday, which has no fixed portion, offers the whole Psalter. The library shortcut row is gone — መዝሙረ ዳዊት, ዘወትር ጸሎት and ውዳሴ ማርያም live on the Library tab. The Today card keeps the count, flame and heatmap; the per-habit dots now live only on the Streak screen it opens.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>Prose no longer renders inside the አርኬ.</b> The mirror of 0.9.8&#x27;s fix: after an explicit አርኬ line, everything to the end of the entry stayed hymn verse — 22 lines across the year, including an entire second commemoration on ጥር ፲. Lines opening with formulas only prose uses (በዚችም ቀን…, ለእግዚአብሔርም ምስጋና…, the month colophon) now return to narrative, and a following ሰላም salutation reopens the hymn. All 366 days verified: no prose inside hymns, no hymn left in prose, and the 11 days without a hymn confirmed hymn-less in the source.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.9.8 <span class="date">13 August 2026</span></h2>
+    <p class="motto"><span>the አርኬ reads as a hymn again</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>The ስንክሳር&#x27;s አርኬ ran on as part of the saint&#x27;s life.</b> The hymn was only set apart when the source wrote the word አርኬ on its own line, and much of the data never does — the entry goes straight from the closing benediction into the salutation. Those hymns were rendered as one more paragraph of narrative. It is worst in the last two months of the year: ነሐሴ labelled 12 of its hymns and left 44 unlabelled, and ጳጉሜን labelled none of its 13. A salutation opening with ሰላም and carrying the Ge&#x27;ez clause stops ፡፡ or ። now begins the hymn and is given the heading the source omitted. 815 → 880 entries across the year read correctly; ነሐሴ 12 → 53 and ጳጉሜን 0 → 12. Ordinary prose is untouched — the clause stops are what distinguish the sung salutation from the plain word ሰላም.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.9.7 <span class="date">13 August 2026</span></h2>
+    <p class="motto"><span>the nightly nudge actually arrives</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>The nightly streak reminder never appeared.</b> The schedule was never the problem — it is armed on app open, on the toggle, and on boot, and the alarm fired on time. The notification was dropped by the system: <code>POST_NOTIFICATIONS</code> is a runtime grant on Android 13+, and the app asked for it in exactly one place, the prayer *mode* editor. Switching the reminder on from Settings armed an alarm that fired into nothing. This is why it looked selective — a prayer alarm rings and shows a full-screen intent without the grant, so only the notification-only reminders (the streak nudge and the ግጻዌ nudge) vanished. Switching either on now asks for the permission, and a banner above the toggles links to the system settings page when notifications are blocked outright — which the prompt alone cannot fix, since Android stops offering it after two denials.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.9.6 <span class="date">13 August 2026</span></h2>
+    <p class="motto"><span>a quieter Home</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Removed</span></h3>
+  <ul>
+    <li><span><b>&quot;እንደተነበበ ምልክት አድርግ&quot; (Mark as read), and the prayer progress it fed.</b> Marking each section off by hand turned praying into a checklist. Gone with it: the progress bar in the reader, the &quot;Resume where you left off&quot; row on Home, the &quot;3 of 12&quot; counts on the hours list, and the ✓ on a finished hour. Streaks are unaffected — the &quot;ጨርሰዋል?&quot; prompt after an alarm still records the hour.</span></li>
+    <li><span><b>The attribution line under ውዳሴ ማርያም.</b> The page carries the prayer and nothing else. The digitization is still credited in NOTICE and README.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>The hours list on Home starts collapsed.</b> The prayer for now is already on screen as a card; the full list is something you go looking for.</span></li>
+    <li><span><b>The Today block is smaller</b> — smaller dots, a tighter heatmap over ten weeks instead of fourteen, less space around both.</span></li>
+    <li><span><b>Section headings are legible as headings</b> — 15sp bold rather than a 13sp label, and collapsible headings now match plain ones instead of reading as a lesser rank with a chevron.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>Three light-theme contrast failures.</b> The unchecked habit dot (2.89:1) and the unset bookmark icon (2.29:1) sat under the 3:1 an icon control needs, and the current-hour badge&#x27;s gold-on-gold reached only 4.20:1 against a 4.5:1 bar. Now 3.19, 3.33 and 4.57. Dark theme already passed throughout.</span></li>
+    <li><span><b>The ስንክሳር data test.</b> It asserted 365 days and 1817 entries against data that 0.9.1 re-extracted to 366 and 2308, so master and the v0.9.1 tag both shipped a failing build. The totals were stale, not the data: 366 is the whole fixed-calendar book — twelve months of thirty days plus all six of ጳጉሜን. The test now also checks the manifest agrees with each month file, and that a month covers its days with no gap and no repeat.</span></li>
+  </ul>
+  <h3><span>Internal</span></h3>
+  <ul>
+    <li><span>CI no longer runs on every push and pull request; it is manual-only from the Actions tab. Releases are unaffected and still gate themselves on content validation, the unit tests and lint before building anything.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.9.1 <span class="date">12 August 2026</span></h2>
+    <p class="motto"><span>a ስንክሳር for the whole year</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>ስንክሳር for the seven months that had none.</b> ጥር, የካቲት, መጋቢት, ሚያዝያ, ግንቦት, ሰኔ and ሐምሌ carried only a day heading and a feast list — over half the year opened to nothing to read. They now hold the full daily commemorations — some 650 new entries, re-extracted from the <code>Nexuss0781/synaxarium</code> dataset by the new <code>tools/extract_sinksar_hf.py</code>.</span></li>
+    <li><span><b>The closing ጸሎት reads in Amharic.</b> Tapping the salutation that ends each day&#x27;s ስንክሳር switches between the Ge&#x27;ez verses and their Amharic rendering. The last two stanzas have no Amharic counterpart and stay in Ge&#x27;ez. The choice is a reading aid for the moment, not a saved setting.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span>መስከረም, ጥቅምት, ታኅሣሥ, ነሐሴ and ጳጉሜን now come from the same source as the rest of the year, for one consistent voice throughout. Their readings are more condensed than in 0.9.0: several saints who had a full entry of their own are now commemorated within the day&#x27;s narrative instead.</span></li>
+  </ul>
+  <h3><span>Known issues</span></h3>
+  <ul>
+    <li><span>Four months repeat a day from the source data: ጥር 21 repeats ጥር 20, መጋቢት 29 repeats መጋቢት 28, ሚያዝያ 4 and 6 repeat 3 and 5, and ሐምሌ 21 repeats ሐምሌ 20.</span></li>
+    <li><span>ሕዳር is untouched: it keeps the original extraction rather than the new source, because that source is not the daily synaxarium for this month but a single ድርሳነ መስቀል homily repeated across all 30 days. (Corrected in 0.9.6: this entry previously implied the homily had shipped. It never did — the bundled ሕዳር is and always was the daily synaxarium.)</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.9.0 <span class="date">12 August 2026</span></h2>
+    <p class="motto"><span>prayer progress, search, quiet hours, and a design system</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Your place in an hour is kept.</b> Each section in the prayer reader has a read toggle, a thin bar under the app bar shows how far through the hour you are, and Home offers to resume an hour you started but didn&#x27;t finish. Marks are held against the section itself, so reordering or hiding sections never loses them, and the day resets at midnight — an hour is prayed anew each day.</span></li>
+    <li><span><b>Home marks the current hour</b> with a &quot;now&quot; badge and shows how much of each hour you have read.</span></li>
+    <li><span><b>Search understands references.</b> Typing &quot;መዝሙር 23&quot;, &quot;ሉቃስ 10&quot;, &quot;Luke 4&quot; or just &quot;23&quot; jumps straight to the page. Results are grouped by where they came from, in a fixed order, with a filter row showing each source&#x27;s match count — so one prayer match is no longer buried under scripture hits.</span></li>
+    <li><span><b>Restoring a backup shows you what will happen first.</b> Choosing a file now reports when it was made, what it holds, and how much of that is actually new on this device, before anything is written. A file from a newer version of the app is refused rather than half-applied.</span></li>
+    <li><span><b>Quiet hours</b> silence reminders overnight without switching them off. The alarm still re-arms while silent, so tomorrow&#x27;s reminder is never lost.</span></li>
+    <li><span><b>Today&#x27;s ግጻዌ on Home</b> now names the day&#x27;s reading and feast, instead of being a label with an arrow on it.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>A shared design system.</b> One set of spacing, corner radii, icon sizes, cards, rows, headers and app bars across every screen, so the prayers, Psalter, scripture, ግጻዌ, ስንክሳር and ውዳሴ ማርያም read as one application rather than as neighbours. Recorded in <code>docs/DESIGN_SYSTEM.md</code>.</span></li>
+    <li><span><b>The readers are quieter.</b> Section titles are properly centred, bookmarking sits at the head of a section and marking-as-read at its foot, so nothing stands between the title and the first verse. Verse spacing now grows with the text instead of collapsing at the largest size, and lines stop widening past a comfortable measure on a tablet.</span></li>
+    <li><span><b>The dark theme was designed on its own terms</b> rather than inverted: a warmer, lower-glare ground for night prayer, surfaces that step up gently, and highlight colours retuned so they stay distinguishable over green.</span></li>
+    <li><span><b>Motion throughout</b> — expanding sections, selection, sheets, page transitions — kept short and small, and switched off entirely when the system animation setting is off.</span></li>
+    <li><span><b>Settings is grouped</b> into Reading, Prayer and reminders, Your data, and More, instead of one long list.</span></li>
+    <li><span><b>Backup and restore failures explain themselves</b>, including whether your own data was affected. They no longer report a bare &quot;failed&quot;.</span></li>
+    <li><span>The gold accent is deeper on the light theme. It carries nearly every small label in the app and only reached 3.1:1 on the ivory ground; it now clears WCAG AA.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>Amharic labels across Home, ግጻዌ and search were rendering in the device&#x27;s font</b>, not the bundled one, and with Latin letter spacing that pulled Ethiopic syllables apart. Four undefined text roles were falling through to Material&#x27;s defaults.</span></li>
+    <li><span><b>Dark-theme controls were painted from Material&#x27;s stock palette</b> — switches, chips, bottom sheets, dropdown menus and the date picker all drew from colours the app had never defined, and switches were dark-on-dark.</span></li>
+    <li><span>The heatmap&#x27;s year arrows were unlabelled; a screen reader announced two anonymous buttons.</span></li>
+    <li><span>The bookmark remove button was labelled in Amharic even in English.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.8.3 <span class="date">10 August 2026</span></h2>
+  </header>
+  <div class="body">
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>The opening is quicker</b> — memento mori now holds for about 1.3 seconds instead of 2.2, with a faster fade, and a small spinner sits beneath the words. A tap still skips straight through.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.8.2 <span class="date">10 August 2026</span></h2>
+    <p class="motto"><span>backup &amp; restore</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Backup and restore</b> in Settings. Your streak history, bookmarks and highlights save to a file through the system file picker and come back on restore. Restoring <b>merges</b> rather than replaces — a day marked done in either the file or on the device stays done — so bringing back an old backup can never erase newer progress. Nothing is uploaded anywhere; the app still has no internet permission.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.8.1 <span class="date">10 August 2026</span></h2>
+    <p class="motto"><span>አጽዋማት</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>The fasting calendar</b>, from a button beside search on Home. It shows what&#x27;s in effect today — a named fast with which day of it you&#x27;re on, or the ረቡዕ/ዓርብ rule — then every fast of the Ethiopian year with its dates and length: ጾመ ነነዌ, ዐቢይ ጾም, ጾመ ሐዋርያት, ጾመ ፍልሰታ, ጾመ ነቢያት and ጾመ ገሃድ.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.8.0 <span class="date">10 August 2026</span></h2>
+    <p class="motto"><span>search everywhere &amp; reading fixes</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Search now reaches the whole app</b> — the New Testament, all 1,817 ስንክሳር commemorations, and ውዳሴ ማርያም join the prayer hours and Psalter.</span></li>
+    <li><span><b>Copy and share</b> — a tapped verse can be copied or shared, a ግጻዌ day shares its ነግህ and ቅዳሴ readings, and a scripture chapter shares in full. Shared text is signed &quot;— ስንቅ&quot;.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>A ግጻዌ citation now highlights as one block</b> instead of a separate box per verse, in both the prayer/Psalter reader and the scripture reader.</span></li>
+    <li><span><b>The ስንክሳር closing ጸሎት reads as a coda</b> — smaller and tightly set, rather than claiming a screenful at the end of every day.</span></li>
+    <li><span><b>The About page is tighter</b>, and the Menbere font is removed.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span>Bookmarks open the right section again after you reorder or hide sections in an hour; they now follow the section itself rather than its position.</span></li>
+    <li><span>Finishing the first-run intro no longer re-anchors the navigation graph.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.7.1 <span class="date">9 August 2026</span></h2>
+    <p class="motto"><span>memento mori &amp; a roomier Home</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>The app opens on <i>memento mori</i></b> (ሞትን አስብ) — the monastic reminder, held for a moment, tap to move on.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>The hours list is collapsible</b> from its header on Home, with the count shown beside it. Expanded by default.</span></li>
+    <li><span><b>The &quot;prayer for now&quot; card is about a third shorter</b>, and the &quot;Continue&quot; strip is gone — so the hours start much higher up the screen.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.7.0 <span class="date">9 August 2026</span></h2>
+    <p class="motto"><span>የዕለቱ ግጻዌ widget &amp; typography polish</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>የዕለቱ ግጻዌ home-screen widget.</b> Today&#x27;s ምስባክ and ወንጌል with the Ethiopian date, at a glance; tapping it opens the ግጻዌ screen. It rolls over to the new day&#x27;s readings at midnight, and adds no weight to the app.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>The reading fonts now sit together properly.</b> The bundled faces are not the same size at a given setting — x-heights differ by up to 19% — so pages looked bigger, smaller, or unevenly spaced depending on which font was chosen. Every face now carries a size correction, and line spacing is applied consistently rather than being left to each font&#x27;s own metrics.</span></li>
+    <li><span><b>Tighter line spacing</b> on every reading page — prayers, Psalter, scripture, ስንክሳር, ውዳሴ ማርያም — so more text fits on screen without crowding it. The አርኬ hymn keeps its wider spacing, being verse rather than prose.</span></li>
+    <li><span><b>The font picker is collapsed by default</b> in Settings, with the current face named in the header.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.6.0 <span class="date">9 August 2026</span></h2>
+    <p class="motto"><span>choose your reading font</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Reading font setting.</b> Settings now offers four bundled Ethiopic faces beside the Abyssinica SIL default — <b>Ethiopic Abay Light</b>, <b>Bela Bereka</b>, <b>Zemenay</b>, and <b>Menbere</b>, all from <a href="https://www.font.et/">Font.et</a> under the SIL Open Font License. Each row in the picker is rendered in its own face, and the choice applies to every prayer, Psalter, scripture, ስንክሳር, and ውዳሴ ማርያም page. Designers are credited in the README and <code>docs/fonts/</code>.</span></li>
+  </ul>
+  <h3><span>Notes</span></h3>
+  <ul>
+    <li><span>The APK grows from 4.3 MB to 6.2 MB for the bundled faces.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.5.2 <span class="date">8 August 2026</span></h2>
+    <p class="motto"><span>audit fixes &amp; ዘወትር ጸሎት</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>ዘወትር ጸሎት.</b> The daily opening prayer (ጸሎት ዘዘወትር) — no longer &quot;coming soon&quot;. It opens from Home and the library as the first section of the ውዳሴ ማርያም reader, Amharic with the same Ge&#x27;ez toggle, from the same credited source.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span>The Bookmarks screen crashed when one group carried two names (hour rename, or bookmarks created in both app languages).</span></li>
+    <li><span>Eight ስንክሳር entries whose አርኬ marker was glued to its verse rendered the hymn as numbered prose instead of the red centered verse style.</span></li>
+    <li><span>Tapping the nightly streak notification could land on Home instead of the Streak screen after any prayer alarm re-armed.</span></li>
+    <li><span>ግጻዌ citations naming chapters that don&#x27;t exist (e.g. Mark 17) showed chapter 1 under the cited title and highlighted the wrong verses.</span></li>
+    <li><span>Yekatit 3 showed Hamle 29&#x27;s commemorations — the source carried a mislabeled duplicate day; it now honestly shows no entry until a trusted text for the day is found.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.5.1 <span class="date">7 August 2026</span></h2>
+  </header>
+  <div class="body">
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>Synaxarium paragraphs are centered again.</b> The Ge&#x27;ez paragraph numeral sat in a left-only gutter that pushed the prose off-center; it now renders inline at the head of the paragraph, so the text spans the full width.</span></li>
+    <li><span><b>ውዳሴ ማርያም opens from the Home screen.</b> The Home library row still showed the disabled &quot;coming soon&quot; stub even though the reader shipped in 0.5.0.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.5.0 <span class="date">7 August 2026</span></h2>
+    <p class="motto"><span>ውዳሴ ማርያም, synaxarium reader reformat &amp; bookmarkable scripture</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>ውዳሴ ማርያም (Wudase Maryam).</b> The daily Praise of Mary opens from the library — no longer &quot;coming soon&quot;. One portion per weekday (defaulting to today) plus ይወድስዋ መላእክት and አንቀጸ ብርሃን, in Amharic by default with a Ge&#x27;ez toggle on top. Text from the community dataset credited in-app and in the README.</span></li>
+    <li><span><b>Bookmark scripture.</b> The scripture-quote entries within the ስንክሳር and the library&#x27;s Bible reader now carry a bookmark toggle; saved passages land in the existing Bookmarks screen and reopen where they came from.</span></li>
+    <li><span><b>Closing ጸሎት.</b> The fixed synaxarium closing prayer is now appended once at the end of every day, set apart in its own card, with the holy names in red.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Synaxarium reader reformatted.</b> Each commemoration&#x27;s paragraphs are numbered with Ge&#x27;ez numerals and given real spacing; the <b>አርኬ</b> hymn is set apart as centered red italic verse; the editorial emojis that prefixed lines in the source (❖ ✍️ 📌 📖 …) are stripped at render time, leaving the Ge&#x27;ez untouched.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.4.0 <span class="date">7 August 2026</span></h2>
+    <p class="motto"><span>ስንክሳር &amp; daily reminder</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>ስንክሳር (Synaxarium).</b> The full Amharic synaxarium — the daily commemorations of saints and events (367 days, 1,822 entries) — opens from a card on the ግጻዌ screen and follows the day picker, so any day&#x27;s synaxarium is a tap away.</span></li>
+    <li><span><b>Daily ግጻዌ reminder.</b> An optional morning notification with today&#x27;s ግጻዌ reading heading; tapping it opens the day&#x27;s readings. Toggle it in Settings (on by default), scheduled with an exact, doze-exempt alarm.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.3.1 <span class="date">7 August 2026</span></h2>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span>Browse the ግጻዌ readings for <b>any day</b> — a date picker on the Gitsawe screen reloads that day&#x27;s daily, seasonal, and monthly readings.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span>The A− / A+ <b>font-size controls now appear on every reader</b> (the scripture reader included) and stay legible in dark mode — previously they used a deep green that vanished on the dark background.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span>Opening a psalm from a ግጻዌ reading now <b>highlights the cited verses</b> in the Psalter, with a stronger, more visible tint on both readers.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.3.0 <span class="date">7 August 2026</span></h2>
+    <p class="motto"><span>ግጻዌ, Scriptures library &amp; Bahre Hasab</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>ግጻዌ (Gitsawe) — the daily lectionary.</b> A &quot;የዕለቱ ግጻዌ&quot; card on the home screen opens the day&#x27;s readings — the synaxarium plus the ነግህ and ቅዳሴ offices — with every scripture reference tappable through to the text.</span></li>
+    <li><span><b>Daily, seasonal, and monthly offices.</b> When a date carries more than one office, a switcher lets you move between the daily reading, the movable-season reading, and the monthly reading.</span></li>
+    <li><span><b>ባሕረ ሓሳብ (Bahre Hasab).</b> The Ethiopian computus now locates the movable feasts and fasts (ጾመ ነነዌ, ዐቢይ ጾም, ትንሣኤ, ዕርገት …), so the correct seasonal readings appear during Lent and the Resurrection season.</span></li>
+    <li><span><b>ቤተ መጻሕፍት — a new Library tab</b> in the bottom navigation, holding the Psalter and the full <b>New Testament</b> (27 books) with a chapter-by-chapter reader in Ge&#x27;ez numerals. Gitsawe references open the exact passage and highlight the cited verses.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>Prayer alarms could go silent for days at a time.</b> The schedule was rebuilt only on boot, update, clock change, or a mode edit; an aggressive battery manager force-stopping the app left the reminder chain broken until the next reboot. Opening the app now re-arms the full schedule, self-healing on launch.</span></li>
+    <li><span><b>The nightly 9:30 PM streak reminder often failed to fire.</b> It was an inexact, doze-deferrable alarm that App-Standby throttling suppressed once the app had gone unopened for a day or two. It now uses an exact, doze-exempt alarm.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.2.6 <span class="date">28 July 2026</span></h2>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span>Guided tutorial for new users covering reminders, streaks, and the Psalter.</span></li>
+    <li><span>Settings option to replay the tutorial.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span>About screen shown in English; recorded CC BY-NC-ND terms for the prayer text.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.2.5 <span class="date">24 July 2026</span></h2>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span>Unified search across the prayer hours and the Psalter.</span></li>
+    <li><span>Nightly streak reminder.</span></li>
+    <li><span>In-app guidance for granting the notification permission.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.2.3 <span class="date">24 July 2026</span></h2>
+  </header>
+  <div class="body">
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span>Four reminder and content bugs, including alarm deep-linking, crash safety, and main-thread I/O.</span></li>
+    <li><span>Release crash caused by R8 stripping DataStore protobuf fields.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>0.2.0 <span class="date">16 July 2026</span></h2>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span>Full Psalter (መዝሙረ ዳዊት) screen and navigation.</span></li>
+    <li><span>Share your streak as an image card.</span></li>
+  </ul>
+  </div>
+</article>
+  </div>
+</details>
 <!-- releases:end -->
 
 
