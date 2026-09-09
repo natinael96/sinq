@@ -122,10 +122,11 @@ reserved names are not used by derivative works.
   * Ethiopic Abay Light — abass alamnehe (via Font.et)
   * Bela Bereka — Abel Daniel (via Font.et)
   * Zemenay — Abel Yeshewalem (via Font.et)
+  * ዋልድባ (Waldba, Yigezu Bisrat Goffer) — Abass Alamnehe (via Font.et)
 
   Per-font notices are in docs/fonts/.
 
-  All three Font.et faces are obtained from the Font.et open font library
+  All four Font.et faces are obtained from the Font.et open font library
   (https://font.et), which distributes them under the SIL OFL. (Zemenay's
   embedded metadata also names an "ETHL" licence; per the maintainer, the
   Font.et open-library terms are the ones this app relies on.)

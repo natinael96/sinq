@@ -87,14 +87,7 @@ class MementoWidgetProvider : AppWidgetProvider() {
         return views
     }
 
-    /**
-     * The phrase, drawn in ዋልድባ.
-     *
-     * Looked up by name rather than as R.font.waldba so the app builds and runs
-     * without the file present, falling back to the display face it already
-     * ships. Drop `waldba.ttf` into res/font and this picks it up with no code
-     * change — see the licence note in docs/fonts.
-     */
+    /** The phrase, drawn in ዋልድባ. */
     private fun lettering(context: Context, text: String, sizeSp: Float, maxWidthDp: Int): Bitmap {
         val density = context.resources.displayMetrics.density
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -121,15 +114,20 @@ class MementoWidgetProvider : AppWidgetProvider() {
         return bitmap
     }
 
-    private fun displayTypeface(context: Context): Typeface {
-        val res = context.resources
-        val id = res.getIdentifier("waldba", "font", context.packageName)
-            .takeIf { it != 0 }
-            ?: R.font.bela_bereka
-        return runCatching { ResourcesCompat.getFont(context, id) }
-            .onFailure { Log.d(TAG, "display font unavailable, using default: ${it.message}") }
+    /**
+     * ዋልድባ — the ይገዙ ብሥራት ጎፈር cut, by Abass Alamnehe, under the OFL like every
+     * other face here. It is the widget's whole design: an Ethiopic display
+     * hand for an Ethiopic phrase, rather than a blackletter borrowed from a
+     * script that has nothing to do with this one.
+     *
+     * Falls back to the system face if it cannot be loaded. A widget that threw
+     * would be a blank rectangle on someone's home screen with no way to
+     * diagnose it, and the phrase in plain type still says what it says.
+     */
+    private fun displayTypeface(context: Context): Typeface =
+        runCatching { ResourcesCompat.getFont(context, R.font.waldba) }
+            .onFailure { Log.d(TAG, "ዋልድባ unavailable, using default: ${it.message}") }
             .getOrNull() ?: Typeface.DEFAULT
-    }
 
     private fun openApp(context: Context): PendingIntent = PendingIntent.getActivity(
         context,

@@ -4,7 +4,7 @@
   changes: a widget that updated would be a different thing entirely.
 
   The Amharic is an ImageView and not a TextView on purpose. It is drawn in
-  ዋልድባ, and a widget layout can only name a font resource from API 26 —
+  ዋልድባ (@font/waldba), and a widget layout can only name a font resource from API 26 —
   below that android:fontFamily is ignored and the line would silently fall
   back to sans on exactly the old phones the 6.0 floor was lowered for. The
   provider renders it to a bitmap with the typeface instead, which is the same

@@ -155,7 +155,8 @@ fun LicensesScreen(onBack: () -> Unit) {
                         "• Noto Sans Ethiopic — Copyright (c) Google\n" +
                         "• Ethiopic Abay Light — abass alamnehe, via the Font.et open font library\n" +
                         "• Bela Bereka — Abel Daniel, via the Font.et open font library\n" +
-                        "• Zemenay — Abel Yeshewalem, via the Font.et open font library (font.et)",
+                        "• Zemenay — Abel Yeshewalem, via the Font.et open font library\n" +
+                        "• ዋልድባ (ይገዙ ብሥራት ጎፈር) — Abass Alamnehe, via the Font.et open font library (font.et)",
                 )
             }
             item {
