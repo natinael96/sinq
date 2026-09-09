@@ -403,7 +403,6 @@ interface Strings {
     /** Screen-reader state for a completed habit dot. */
     val doneLabel: String
     val currentHourBadge: String
-    fun minutesLabel(n: Int): String
     val remindersDayTitle: String
     fun remindersDaySubtitle(n: Int): String
     fun reminderKindLabel(kind: com.agpeya.app.data.DaySchedule.Kind): String
@@ -1224,7 +1223,6 @@ object AmharicStrings : Strings {
     override val filterAll = "ሁሉም"
     override val doneLabel = "ተጠናቋል"
     override val currentHourBadge = "አሁን"
-    override fun minutesLabel(n: Int) = "${com.agpeya.app.ui.reading.geezNumeral(n)} ደቂቃ"
     override val remindersDayTitle = "የዛሬው ቀን"
     override fun remindersDaySubtitle(n: Int) =
         "${com.agpeya.app.ui.reading.geezNumeral(n)} ማስታወሻ ይደርስዎታል"
@@ -2028,7 +2026,6 @@ object EnglishStrings : Strings {
     override val filterAll = "All"
     override val doneLabel = "Done"
     override val currentHourBadge = "Now"
-    override fun minutesLabel(n: Int) = "$n min"
     override val remindersDayTitle = "Today"
     override fun remindersDaySubtitle(n: Int) = if (n == 1) "1 reminder will reach you" else "$n reminders will reach you"
     override fun reminderKindLabel(kind: com.agpeya.app.data.DaySchedule.Kind) = when (kind) {
