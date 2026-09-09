@@ -21,9 +21,15 @@ from datetime import date
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CHANGELOG = os.path.join(ROOT, "CHANGELOG.md")
-# How many releases the page carries. Older ones stay in CHANGELOG.md, which
-# the page links to — a marketing page is not an archive.
-KEEP = 6
+# How many releases the page shows open. The rest are still on the page, folded
+# into a <details> beneath them — every release back to 0.2.0, so the page is
+# the archive it used to send people to GitHub for, without making a first-time
+# reader scroll through fifty of them to reach the install link.
+#
+# A <details> and not a script: the site's own reveal-on-scroll degrades to
+# "show everything" when JavaScript is off, and the fold has to degrade the
+# same way rather than hiding most of the page from a reader without it.
+KEEP = 7
 
 MONTHS = ["January", "February", "March", "April", "May", "June", "July",
           "August", "September", "October", "November", "December"]
@@ -157,10 +163,22 @@ def main():
     # ── changelog.html ───────────────────────────────────────────────────
     p = os.path.join(site, "changelog.html")
     s = open(p, encoding="utf-8").read()
-    body = "\n\n".join(article(r) for r in releases[:KEEP])
+    shown, rest = releases[:KEEP], releases[KEEP:]
+    body = "\n\n".join(article(r) for r in shown)
+    if rest:
+        first, last = rest[0]["version"], rest[-1]["version"]
+        body += "\n\n" + "\n".join([
+            '<details class="more-releases">',
+            f'  <summary><span>{len(rest)} earlier releases,'
+            f' {html.escape(first)} back to {html.escape(last)}</span></summary>',
+            '  <div class="more-body">',
+            "\n\n".join(article(r) for r in rest),
+            "  </div>",
+            "</details>",
+        ])
     s = replace_between(s, "<!-- releases:start -->", "<!-- releases:end -->", body)
     open(p, "w", encoding="utf-8").write(s)
-    print(f"  changelog.html: {min(KEEP, len(releases))} releases")
+    print(f"  changelog.html: {len(shown)} shown, {len(rest)} folded")
 
     # ── version strings elsewhere ────────────────────────────────────────
     ver = latest["version"]
