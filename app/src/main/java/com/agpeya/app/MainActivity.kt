@@ -544,6 +544,7 @@ private fun AgpeyaNavHost(
             com.agpeya.app.ui.library.WudaseMaryamScreen(
                 onBack = { navController.popBackStack() },
                 initialSectionId = backStackEntry.arguments?.getString("sec"),
+                onOpenBook = { id -> navController.navigate("book/$id") { launchSingleTop = true } },
             )
         }
         composable("scriptures") {

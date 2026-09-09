@@ -74,7 +74,11 @@ private val FONT_STEPS_SP = com.agpeya.app.data.SettingsRepository.FONT_STEPS_SP
  *  card opens the same reader on the daily prayer); otherwise today's portion. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
+fun WudaseMaryamScreen(
+    onBack: () -> Unit,
+    initialSectionId: String? = null,
+    onOpenBook: (String) -> Unit = {},
+) {
     val context = LocalContext.current
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
@@ -100,6 +104,17 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
     }
     val initialIndex = remember(sections, initialSectionId) {
         initialSectionId?.let { id -> sections.indexOfFirst { it.id == id }.takeIf { it >= 0 } }
+    }
+    // መልክአ ማርያም and መልክአ ኢየሱስ belong beside ውዳሴ ማርያም, but they are books and
+    // they are already on the shelf. Linked rather than copied: one text, in one
+    // place, reached from both. Resolved by title through the folded key the
+    // generator wrote, because hard-coding the ids would break the day the
+    // content pipeline rehashes them.
+    val companions by produceState(emptyList<Pair<String, String>>()) {
+        value = listOf("መልክአ ማርያም", "መልክአ ኢየሱስ").mapNotNull { title ->
+            com.agpeya.app.data.BookRepository.byPartName(context, title)
+                ?.let { title to it.id }
+        }
     }
     var picked by rememberSaveable { mutableIntStateOf(-1) }
     val selected = if (picked >= 0) picked else initialIndex ?: todayIndex
@@ -219,6 +234,18 @@ fun WudaseMaryamScreen(onBack: () -> Unit, initialSectionId: String? = null) {
                                     selB = bSel
                                 }
                                 .padding(bottom = 16.dp),
+                        )
+                    }
+                }
+            }
+            if (companions.isNotEmpty()) {
+                item(key = "companions") {
+                    Spacer(Modifier.height(Spacing.lg))
+                    com.agpeya.app.ui.common.SinqDivider()
+                    companions.forEach { (title, id) ->
+                        com.agpeya.app.ui.common.ListRow(
+                            title = title,
+                            onClick = { onOpenBook(id) },
                         )
                     }
                 }

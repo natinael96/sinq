@@ -63,6 +63,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
+import com.agpeya.app.ui.theme.Waldba
 
 // The reminder writes itself, then rests a moment before the app opens. A tap
 // moves on early for anyone who doesn't want to wait.
@@ -182,11 +183,16 @@ fun MementoMoriScreen(onDone: () -> Unit) {
             }
 
             Spacer(Modifier.height(Spacing.xl))
-            // The gloss leads in the app language; its counterpart in the other
-            // language settles quietly beneath.
+            // The gloss leads in the app language; its counterpart settles
+            // quietly beneath. Whichever of the two is the Amharic is set in
+            // ዋልድባ — the Latin above it is written by a nib, and the Amharic
+            // deserves a hand of its own rather than the interface's sans.
             Text(
                 text = s.mementoMoriGloss,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyLarge.let {
+                    if (s.isAmharic) it.copy(fontFamily = Waldba, fontSize = it.fontSize * 1.35f)
+                    else it
+                },
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.alpha(subtitle.value),
@@ -194,7 +200,10 @@ fun MementoMoriScreen(onDone: () -> Unit) {
             Spacer(Modifier.height(Spacing.sm))
             Text(
                 text = if (s.isAmharic) EnglishStrings.mementoMoriGloss else AmharicStrings.mementoMoriGloss,
-                style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = 1.sp),
+                style = MaterialTheme.typography.bodyMedium.let {
+                    if (s.isAmharic) it.copy(letterSpacing = 1.sp)
+                    else it.copy(fontFamily = Waldba, fontSize = it.fontSize * 1.35f)
+                },
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.alpha(subtitle.value),

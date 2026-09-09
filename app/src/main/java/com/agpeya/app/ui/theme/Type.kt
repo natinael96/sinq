@@ -24,6 +24,12 @@ val AbayLight = FontFamily(Font(R.font.ethiopic_abay_light))
 val BelaBereka = FontFamily(Font(R.font.bela_bereka))
 val Zemenay = FontFamily(Font(R.font.zemenay))
 
+// ዋልድባ (ይገዙ ብሥራት ጎፈር) — a display hand, not a reading face. It is deliberately
+// absent from ReadingFont: a manuscript hand is a pleasure for four words and a
+// punishment for a psalm, and the reader's four faces are all chosen for length.
+// This is for ሞትን አስብ on the splash and on the widget, and nothing else.
+val Waldba = FontFamily(Font(R.font.waldba))
+
 fun readingFontFamily(choice: ReadingFont): FontFamily = when (choice) {
     ReadingFont.ABYSSINICA -> Abyssinica
     ReadingFont.ABAY_LIGHT -> AbayLight
