@@ -82,11 +82,26 @@ TIER_MARK = re.compile(r"\s*(?:፪ማ|(?<=\s)ማ)[፡:]\s*")
 AMHARIC = re.compile(r"(?:^|\s)(?:የ|እን[ደዲ]|ስለ|ሲ|ብት)|ናቸው|ነው|ነበር|ዘንድ|ችሁ|ኛል|ናል|ሆይ|ጋር|ውስጥ")
 GEEZ = re.compile(r"(?:^|\s)(?:ወ|ዘ|እም|ኀበ|ከመ|እስመ|እንዘ|ላዕለ|ኵሉ)|ውእቱ|ሆሙ|ኪያ")
 
-# የተክሌ አቋቋም ዝማሜ is not shipped: its ማሳሰቢያ is a bare heading whose text the scan
-# lost entirely, and a chant book cannot be trusted where it fails on the order
-# the chants are sung. It remains in sources/books/ and comes back by emptying
-# this set.
-DROPPED = {"የተክሌ አቋቋም ዝማሜ"}
+# Not shipped. Each remains in sources/books/ and comes back by removing it here.
+#
+# የተክሌ አቋቋም ዝማሜ: its ማሳሰቢያ is a bare heading whose text the scan lost entirely,
+# and a chant book cannot be trusted where it fails on the order the chants are
+# sung.
+#
+# The eight below come off the ዜማ shelf at the maintainer's direction. They are
+# the አቋቋም and ድጓ books — the ones a singer learns by ear from a teacher rather
+# than reads, and which a scan serves worst.
+DROPPED = {
+    "የተክሌ አቋቋም ዝማሜ",
+    "መዋሥዕት ዘቅዱስ ያሬድ",
+    "መዋሥዕት እምዮሐንስ እስከ ዮሐንስ",
+    "መዝሙር እምዮሐንስ እስከ ዮሐንስ",
+    "መዝሙረ ክርስቶስ",
+    "ምዕራፍ ዘቅዱስ ያሬድ",
+    "ዘመነ ጽጌ",
+    "የአባ ጽጌ ድንግል ታሪክ",
+    "ጾመ ድጓ ዘቅዱስ ያሬድ",
+}
 
 # A ማሳሰቢያ with nothing after the marker is a heading the scan lost the text of.
 # The notice itself is kept wherever it still says something — "ማሳሰቢያ፦ ቅደም ተከሉ
