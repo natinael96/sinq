@@ -31,6 +31,25 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "2.1.0",
+        title = "The book beside the channel",
+        titleAm = "መጽሐፉ ከቻናሉ ጎን",
+        changes = listOf(
+            "ሥርዓተ ማኅሌት is the merged edition: the book's orders with the Telegram editions of them beside — 215 orders, 275 editions, each read in place of the book's text, never after it.",
+            "A part the book offers instead of the one before is marked ወይም.",
+            "ሆሣዕና, ትንሣኤ, ዕርገት, ጰራቅሊጦስ, ስብከት, ብርሃን, ኖላዊ and the ዘመነ ጽጌ weeks are appointed by the calendar, and the list says when each falls this year.",
+            "The ማኅሌት opens three times as many hymns on the shelf.",
+            "The shelf is thirty-seven books: the ቅዳሴ, ዚቅ, ዝማሬ, ድርሳናት, ገድላት and መዝሙር ዘሰናብት came off, and the መልክእ were cut to the ones asked for.",
+        ),
+        changesAm = listOf(
+            "ሥርዓተ ማኅሌት የተዋሐደው እትም ነው፦ የመጽሐፉ ሥርዓቶች ከቴሌግራም እትሞቻቸው ጋር — ፪፻፲፭ ሥርዓቶች፣ ፪፻፸፭ እትሞች፤ እያንዳንዱ እትም በመጽሐፉ ጽሑፍ ፋንታ ይነበባል እንጂ ከኋላው አይቀጥልም።",
+            "መጽሐፉ ከቀደመው ክፍል ይልቅ የሚያቀርበው ክፍል «ወይም» ተብሎ ተመልክቷል።",
+            "ሆሣዕና፣ ትንሣኤ፣ ዕርገት፣ ጰራቅሊጦስ፣ ስብከት፣ ብርሃን፣ ኖላዊና የዘመነ ጽጌ ሳምንታት በባሕረ ሐሳብ ይሾማሉ፤ ዝርዝሩም ዘንድሮ የት እንደሚውሉ ይናገራል።",
+            "ማኅሌቱ በመደርደሪያው ላይ ያሉትን ሕሙዎች ሦስት እጥፍ ይከፍታል።",
+            "መደርደሪያው ሠላሳ ሰባት መጻሕፍት ነው፦ ቅዳሴው፣ ዚቁ፣ ዝማሬው፣ ድርሳናቱ፣ ገድላቱና መዝሙር ዘሰናብት ወጥተዋል፤ መልክኦቹም ወደተጠየቁት ተቆርጠዋል።",
+        ),
+    ),
+    ReleaseNote(
         version = "2.0.1",
         title = "The margin and the hand",
         titleAm = "ጠርዙና እጅ ጽሑፉ",

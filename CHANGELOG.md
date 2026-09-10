@@ -6,6 +6,43 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [2.1.0] — 2026-09-10
+
+_versionCode 68 · The book beside the channel_
+
+### Added
+- **ሥርዓተ ማኅሌት is the merged edition now**: the scanned book set beside the
+  editions of the same orders posted on the EOTC Mahlet Telegram channel.
+  142 orders to 215, and 275 editions holding 5,422 further parts. An edition
+  is a whole alternative text of an order, read in place of the book's and never
+  after it — they are pills under the tabs, the book's own text as እትም 0, and
+  where the book has no order at all the first edition stands for it and says so.
+  A part the book offers *instead of* the one before is marked ወይም, because set
+  as one more rubric a choice reads as a sequence. Every edition keeps the link
+  to the post it came from.
+- **The feasts the book could not date are appointed by the calendar.** ሆሣዕና,
+  ትንሣኤ, ዕርገት and ጰራቅሊጦስ with their week, because they move with Fasika; ስብከት,
+  ብርሃን, ኖላዊ and the ዘመነ ጽጌ weeks, because each is a Sunday the calendar has
+  to find. Twenty-one orders, appointed by the same two calendars the ግጻዌ
+  already keeps, so the two agree on which day a feast is by construction. The
+  list says when each falls this year.
+- **Four kinds of order the book has and the app did not name**: አንገርጋሪ, ዑደት,
+  ጸሎት, and one the merge could not classify.
+- **The ማኅሌት opens three times as many hymns on the shelf** — 586 parts name a
+  book where 192 did — because the merge puts each መልክእ's own name where the
+  part's name is.
+
+### Changed
+- **The shelf is thirty-seven books.** The ቅዳሴ, ዚቅ, ዝማሬ, the ድርሳናት, the ገድላት
+  and መዝሙር ዘሰናብት came off, and the መልክእ were cut to the thirty-two asked for.
+  Deleted from the project, not withheld: nothing on the shelf is a thing the
+  app is quietly carrying. Every remaining መልክእ records that it was scanned
+  from መልክዐ ጉባኤ; መጽሐፈ ሰዓታት names the Church's own PDF it was scanned from.
+- **Orders that stand on a Telegram edition alone stay off the ግጻዌ.** They are
+  appointed like any other and remain in the ማኅሌት, labelled; but the merge is
+  explicit that they are reported by the channel and not checked against the
+  calendar, and the ግጻዌ is the one page that claims to know what today is.
+
 ## [2.0.1] — 2026-09-09
 
 _versionCode 67 · The margin and the hand_

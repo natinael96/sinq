@@ -2,6 +2,44 @@
   "contentVersion": 1,
   "tours": [
     {
+      "versionCode": 68,
+      "version": "2.1.0",
+      "title": {
+        "am": "በዚህ እትም",
+        "en": "In this version"
+      },
+      "pages": [
+        {
+          "kicker": {
+            "am": "ማኅሌት",
+            "en": "ማኅሌት"
+          },
+          "title": {
+            "am": "እትሞቹ ከመጽሐፉ ጎን",
+            "en": "The editions, beside the book"
+          },
+          "body": {
+            "am": "ሥርዓተ ማኅሌት አሁን የመጽሐፉ ሥርዓቶች ከቴሌግራም እትሞቻቸው ጋር ነው። እትም በመጽሐፉ ጽሑፍ ፋንታ የሚነበብ ሌላ ጽሑፍ ነው እንጂ ከኋላው የሚቀጥል አይደለም፤ ከመስመሮቹ ሥር ያሉት ክቦች ናቸው፣ የመጽሐፉ «እትም 0» ነው። መጽሐፉ ከቀደመው ክፍል ይልቅ የሚያቀርበውን ክፍል «ወይም» ይላል።",
+            "en": "The ማኅሌት is now the book's orders with the Telegram editions of them beside. An edition is another text read in place of the book's, never after it — the pills under the tabs, the book's own being እትም 0. A part the book offers instead of the one before says ወይም."
+          }
+        },
+        {
+          "kicker": {
+            "am": "ባሕረ ሐሳብ",
+            "en": "The calendar"
+          },
+          "title": {
+            "am": "የሚዘዋወሩት በዓላት ቀናቸውን አገኙ",
+            "en": "The moving feasts have their days"
+          },
+          "body": {
+            "am": "ሆሣዕና፣ ትንሣኤ፣ ዕርገትና ጰራቅሊጦስ ከፋሲካ ጋር ይዘዋወራሉ፤ ስብከት፣ ብርሃን፣ ኖላዊና የጽጌ ሳምንታት እሑድ ናቸው። መጽሐፉ ቀን ሊሰጣቸው አልቻለም፤ አሁን ግጻዌው በሚያውቀው ባሕረ ሐሳብ ይሾማሉ፣ ዝርዝሩም ዘንድሮ የት እንደሚውሉ ይናገራል።",
+            "en": "ሆሣዕና, ትንሣኤ, ዕርገት and ጰራቅሊጦስ move with Fasika; ስብከት, ብርሃን, ኖላዊ and the ጽጌ weeks are Sundays. The book could not date them; they are appointed now by the same calendar the ግጻዌ keeps, and the list says when each falls this year."
+          }
+        }
+      ]
+    },
+    {
       "versionCode": 67,
       "version": "2.0.1",
       "title": {
