@@ -38,10 +38,14 @@ SHELVES = [
     ("tselot", "የጸሎት መጻሕፍት",     "የነቢያት ጸሎት"),
 ]
 
+# The printed collection every መልክእ on the shelf was scanned out of. The
+# individual scans carry no provenance of their own, so it is recorded here
+# rather than repeated into seventy-odd source files by hand.
+MELKIE_SOURCE = "መልክዐ ጉባኤ"
+
 # Books whose shelf the title alone does not give away.
 SHELF_BY_TITLE = {
     "ማኅሌተ ጽጌ": "zema",
-    "መዝሙር ዘሰናብት": "zema",
     "መጽሐፈ ሰዓታት": "zema",
     "ሰቆቃወ ድንግል": "zema",
 }
@@ -209,7 +213,15 @@ def build():
                 # first recension, and folding the suffix away let the second one
                 # answer to the first one's name.
                 "key": fold(title),
-                "sources": [s["name"] for s in data.get("sources", [])] or None,
+                # Where the scan came from. A merged book names the copies it
+                # was folded from; every መልክእ came out of the same printed
+                # collection, መልክዐ ጉባኤ, which the individual scans do not say
+                # on their own — so the shelf says it for them.
+                "sources": (
+                    [s["name"] for s in data.get("sources", [])]
+                    or ([MELKIE_SOURCE] if shelf_of(title) == "melkie" else [])
+                    or None
+                ),
             },
         })
 
