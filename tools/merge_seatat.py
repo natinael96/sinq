@@ -22,6 +22,12 @@ ABAY = SRC / "መጽሐፈ ሰዓታት ዘደብረ ዓባይ.json"
 
 ABAY_SOURCE = "ዘደብረ ዓባይ"
 
+# Where the scans came from: the printed መጽሐፈ ሰዓታት the Ethiopian Orthodox
+# Tewahedo Church itself publishes, as the PDF on its own site. Recorded here
+# and in NOTICE; not written into the shipped book, where a URL beside three
+# copy names would be noise a reader cannot use.
+ORIGIN = "https://www.ethiopianorthodox.org/amharic/holybooks/Metsehafeseatat.pdf"
+
 # Offices ዘደብረ ዓባይ alone carries, by its own chapter number.  Measured: each of
 # these overlaps the bilingual book by less than a tenth of its lines.
 ABAY_ONLY = {
