@@ -50,9 +50,6 @@ SHELF_BY_TITLE = {
 # worse than broken words in a page: the title is the only thing on the shelf.
 TITLE_FIXES = {
     "መልክአ ቍርባን ።": "መልክአ ቍርባን",
-    "መልክአ ፍልሰታ (2)": "መልክአ ፍልሰታ ካልዕ",
-    "መልክእ ዓቢብ": "መልክአ ዓቢብ",
-    "መልክአ ዐቢብ ካልዕ": "መልክአ ዓቢብ ካልዕ",
 }
 
 # Words the scan ran together or split, seen while reading the corpus. Each is
