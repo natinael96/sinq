@@ -230,11 +230,6 @@ fun ScriptureReaderScreen(
             }
         }
     }
-    val hasFathers by androidx.compose.runtime.produceState(false, bookKey) {
-        value = runCatching {
-            com.agpeya.app.data.FathersRepository.covers(context, bookKey)
-        }.getOrDefault(false)
-    }
     val bookNames by androidx.compose.runtime.produceState(emptyMap<String, String>()) {
         value = runCatching { ScriptureRepository.bookNames(context) }.getOrDefault(emptyMap())
     }
@@ -346,18 +341,6 @@ fun ScriptureReaderScreen(
                 // the action rather than offering a page that is not there.
                 commentaryUrl = selRange.firstOrNull()?.let {
                     com.agpeya.app.data.CatenaLink.url(bookKey, chapter, it)
-                },
-                // The bundled Fathers win over the link when the book is one of
-                // the twenty they reach, so the reader never has two doors to
-                // the same thing.
-                onOpenFathers = selRange.firstOrNull()?.takeIf { hasFathers }?.let { verse ->
-                    {
-                        selA = -1; selB = -1
-                        onOpenRoute(
-                            "fathers/$bookKey/$chapter/$verse?name=" +
-                                android.net.Uri.encode(b.nameAm),
-                        )
-                    }
                 },
                 // The bar is the only bookmark control now, so a bookmark is
                 // made at the grain the reader chose rather than always at the

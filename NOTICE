@@ -124,43 +124,6 @@ The text is reproduced as the scans carry it, with three disclosed exceptions:
   Built by tools/build_books.py, tools/merge_seatat.py and tools/merge_tsige.py.
 
 --------------------------------------------------------------------------------
-THE FATHERS (BUNDLED)
----------------------------------------------------------------------------------
-
-Sinq carries the commentary of the Fathers on the New Testament and the Psalter
-in its own assets, so it is read offline like everything else. The text is drawn
-from three public-domain works, all long out of copyright:
-
-  Catena Aurea, collected by Thomas Aquinas, translated under the direction of
-  John Henry Newman, 1841-1845 — on Matthew and Mark.
-
-  Nicene and Post-Nicene Fathers, first series, edited by Philip Schaff,
-  1886-1889 — Augustine on John, on 1 John and on the Psalms; John Chrysostom
-  on Matthew, Acts, Romans, the Corinthians, Galatians through Philemon,
-  John and Hebrews.
-
-The markup used to anchor each extract to a verse comes from the Christian
-Classics Ethereal Library's editions of those volumes.
-
-Only the Fathers the Oriental Orthodox churches receive are kept — those of the
-undivided Church, who died before Chalcedon in 451. The build therefore drops
-every voice the Catena Aurea quotes from the later Latin and Byzantine
-tradition: Gregory the Great, Bede, Rabanus, Remigius, Anselm, the Glossa
-Ordinaria, Theophylact and John Damascene, together with Leo, whose Tome is the
-very thing rejected at that council, and Origen and Eusebius. What remains is
-Ambrose, Augustine, Chrysostom, Cyprian, Cyril, Gregory of Nyssa, Hilary, Jerome, Severianus, Theodotus, Titus of Bostra. That is 21,367 extracts over 20 books.
-
-The Fathers expound passages, not single verses, so an extract is anchored where
-its source pinned the lemma and a tapped verse opens the nearest anchor at or
-before it. Augustine expounds a psalm as one discourse and the Ge'ez and Hebrew
-numberings disagree about which line is verse one, so the Psalter is anchored to
-the psalm. Its numbers are translated on the way in: the volumes print Augustine
-under the Hebrew numbering, and Sinq numbers its psalms as the Church does.
-
-The books outside this corpus keep the catenabible.com link described below.
-
-tools/build_fathers.py rebuilds all of it from the sources it names.
-
 PATRISTIC COMMENTARY (CATENA BIBLE)
 --------------------------------------------------------------------------------
 

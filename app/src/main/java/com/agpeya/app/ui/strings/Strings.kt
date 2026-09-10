@@ -131,12 +131,6 @@ interface Strings {
     /** The selection bar's reference action, with how many the verse carries. */
     fun crossRefsAction(n: Int): String
     val commentaryAction: String
-    /** The bundled Fathers: the bar's action, and the reader it opens. */
-    val fathersAction: String
-    val fathersTitle: String
-    val fathersEmpty: String
-    fun fathersOnVerse(book: String, chapter: Int, verse: Int): String
-    fun fathersOnChapter(book: String, chapter: Int): String
     /** ስንክሳር's own row in ቤተ መጻሕፍት. */
     val synaxariumLibrarySubtitle: String
     val sinksarAmharic: String
@@ -993,13 +987,6 @@ object AmharicStrings : Strings {
     override val crossRefsTitle = "የጥቅስ ማጣቀሻዎች"
     override fun crossRefsAction(n: Int) = "ማጣቀሻ ${com.agpeya.app.ui.reading.geezNumeral(n)}"
     override val commentaryAction = "Catena"
-    override val fathersAction = "Catena"
-    override val fathersTitle = "Catena"
-    override val fathersEmpty = "ስለዚህ ጥቅስ የተጻፈ የለም።"
-    override fun fathersOnVerse(book: String, chapter: Int, verse: Int) =
-        "$book ${com.agpeya.app.ui.reading.geezNumeral(chapter)}፥${com.agpeya.app.ui.reading.geezNumeral(verse)}"
-    override fun fathersOnChapter(book: String, chapter: Int) =
-        "$book ${com.agpeya.app.ui.reading.geezNumeral(chapter)}"
     override val mahletTitle = "ሥርዓተ ማኅሌት"
     override val synaxariumLibrarySubtitle = "የዓመቱ የቅዱሳን መታሰቢያ"
     override val sinksarAmharic = "አማርኛ"
@@ -1813,11 +1800,6 @@ object EnglishStrings : Strings {
     override val crossRefsTitle = "Cross references"
     override fun crossRefsAction(n: Int) = "Refs $n"
     override val commentaryAction = "Catena"
-    override val fathersAction = "Catena"
-    override val fathersTitle = "Catena"
-    override val fathersEmpty = "Nothing here reaches this verse."
-    override fun fathersOnVerse(book: String, chapter: Int, verse: Int) = "$book $chapter:$verse"
-    override fun fathersOnChapter(book: String, chapter: Int) = "$book $chapter"
     override val mahletTitle = "ሥርዓተ ማኅሌት"
     override val synaxariumLibrarySubtitle = "The year's commemorations"
     override val sinksarAmharic = "አማርኛ"

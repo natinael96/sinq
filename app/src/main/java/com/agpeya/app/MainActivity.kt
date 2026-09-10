@@ -447,31 +447,6 @@ private fun AgpeyaNavHost(
                 },
             )
         }
-        // The bundled Fathers on one verse. The book is the Bible asset's slug,
-        // and verse 0 means the anchor covers the whole chapter or psalm.
-        composable(
-            route = "fathers/{book}/{chapter}/{verse}?name={name}",
-            arguments = listOf(
-                navArgument("book") { type = NavType.StringType },
-                navArgument("chapter") { type = NavType.IntType },
-                navArgument("verse") { type = NavType.IntType },
-                navArgument("name") { type = NavType.StringType; defaultValue = "" },
-            ),
-        ) { backStackEntry ->
-            val args = backStackEntry.arguments
-            val book = args?.getString("book").orEmpty()
-            val chapter = args?.getInt("chapter") ?: 1
-            val verse = args?.getInt("verse") ?: 0
-            val name = args?.getString("name").orEmpty()
-            com.agpeya.app.ui.fathers.FathersScreen(
-                book = book,
-                bookName = name,
-                chapter = chapter,
-                verse = verse,
-                reference = if (verse > 0) "$name $chapter:$verse" else "$name $chapter",
-                onBack = { navController.popBackStack() },
-            )
-        }
         composable("bahreHasabReference") {
             com.agpeya.app.ui.library.BahreHasabReferenceScreen(onBack = { navController.popBackStack() })
         }
@@ -497,9 +472,6 @@ private fun AgpeyaNavHost(
                     navController.navigate(writeNoteRoute(route, label)) { launchSingleTop = true }
                 },
                 // Sunday has no division of the Psalter; it has the canticles.
-                onOpenRoute = { route ->
-                    navController.navigate(route) { launchSingleTop = true }
-                },
                 onOpenBook = { id, chapter ->
                     navController.navigate("book/$id?ch=$chapter") { launchSingleTop = true }
                 },

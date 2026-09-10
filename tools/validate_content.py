@@ -490,91 +490,6 @@ def check_mahlet() -> None:
           f"{from_gitsawe} from the ግጻዌ), {parts} parts, {editions} editions")
 
 
-def check_fathers() -> None:
-    """The bundled Fathers: the index must agree with the files, every extract
-    must be credited to a father the build receives, and the Psalter must carry
-    all 150 psalms in the Church's numbering."""
-    index = load("fathers", "index.json")
-    if index is None:
-        return
-    works = index.get("works") or []
-    authors = index.get("authors") or []
-    if not works or not authors:
-        fail("fathers: the index names no works or no fathers")
-        return
-
-    # Kept in step with ORIENTAL in tools/build_fathers.py.
-    received = {
-        "Athanasius", "Basil", "Gregory of Nyssa", "Gregory Nazianzen",
-        "Chrysostom", "Cyril", "Theodotus", "Titus of Bostra", "Severianus",
-        "Ephrem", "Severus", "Dioscorus",
-        "Augustine", "Jerome", "Ambrose", "Hilary", "Cyprian",
-    }
-    for name in authors:
-        if name not in received:
-            fail(f"fathers: '{name}' is not a father this build receives")
-
-    listed = {b["book"] for b in index.get("books") or []}
-    on_disk = {
-        f[:-5] for f in os.listdir(os.path.join(CONTENT, "fathers"))
-        if f.endswith(".json") and f != "index.json"
-    }
-    if listed != on_disk:
-        fail(f"fathers: index and files disagree: {listed ^ on_disk}")
-
-    total = 0
-    for meta in index.get("books") or []:
-        book = load("fathers", meta["file"])
-        if book is None:
-            continue
-        entries = book.get("entries") or {}
-        if len(entries) != meta.get("anchors"):
-            fail(f"fathers/{meta['file']}: index says {meta.get('anchors')} anchors, file has {len(entries)}")
-        for key, rows in entries.items():
-            chapter, _, verse = key.partition(":")
-            if not chapter.isdigit() or not verse.isdigit():
-                fail(f"fathers/{meta['file']}: '{key}' is not a chapter:verse anchor")
-                continue
-            for row in rows:
-                if len(row) != 3 or not isinstance(row[2], str):
-                    fail(f"fathers/{meta['file']}: malformed extract at {key}")
-                    continue
-                if not 0 <= row[0] < len(works) or not 0 <= row[1] < len(authors):
-                    fail(f"fathers/{meta['file']}: extract at {key} points outside the index")
-                    continue
-                check_text(f"fathers/{meta['file']} {key}", row[2])
-                total += 1
-
-    psalms = load("fathers", "psalms.json")
-    if psalms is not None:
-        have = {int(k.split(":")[0]) for k in (psalms.get("entries") or {})}
-        missing = sorted(set(range(1, 151)) - have)
-        if missing:
-            fail(f"fathers: the Psalter is missing {len(missing)} psalms: {missing[:8]}")
-
-    # The Ge'ez-to-Hebrew psalm table is written twice: once in
-    # tools/build_fathers.py, which uses it to place Augustine, and once in
-    # CatenaLink.kt, which uses it to build the outgoing link. They must agree.
-    def table(path: str, name: str) -> list[int]:
-        with open(os.path.join(ROOT, path), encoding="utf-8") as f:
-            text = f.read()
-        start = text.index(name)
-        body = text[text.index("[", start) if "[" in text[start:start + 80] else text.index("(", start):]
-        body = body[: body.index("]") if body.startswith("[") else body.index(")")]
-        return [int(n) for n in re.findall(r"\d+", body)]
-
-    try:
-        py = table("tools/build_fathers.py", "PSALM_TO_HEBREW = [")
-        kt = table("app/src/main/java/com/agpeya/app/data/CatenaLink.kt", "PSALM_TO_MASORETIC = intArrayOf(")
-        if py != kt:
-            first = next((i for i, (a, b) in enumerate(zip(py, kt)) if a != b), min(len(py), len(kt)))
-            fail(f"fathers: the psalm tables disagree from psalm {first + 1}")
-    except (OSError, ValueError) as e:
-        fail(f"fathers: could not compare the psalm tables: {e}")
-
-    print(f"fathers: {len(listed)} books, {total:,} extracts, {len(authors)} fathers")
-
-
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument(
@@ -590,7 +505,6 @@ def main() -> int:
     check_wudase()
     check_books()
     check_mahlet()
-    check_fathers()
     check_id_stability(ids, args.update_snapshot)
 
     total_sections = sum(len(v) for v in ids.values())
