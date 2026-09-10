@@ -42,11 +42,13 @@ class MahletTest {
     }
 
     @Test
-    fun `the merged corpus is two hundred and ten orders, none of them empty`() {
-        // 215 as built, less the five left out on request: the ሆሣዕና
-        // procession, ሰሙነ ሕማማት, ዓርብ ስቅለት, ቀዳም ስዑር and ትንሣኤ.
-        assertEquals(210, orders.size)
-        assertEquals(3375, orders.sumOf { it.parts.size })
+    fun `the merged corpus is one hundred and ninety orders, none of them empty`() {
+        // 215 as built, less the twenty-five left out on request (the
+        // builder's DROPPED table): Holy Week and Easter, the ታኅሣሥ Sundays,
+        // and the book-only orders the channel never posted in ታኅሣሥ, ጥር,
+        // ግንቦት and ሐምሌ.
+        assertEquals(190, orders.size)
+        assertEquals(3128, orders.sumOf { it.parts.size })
         assertTrue("an order has no parts", orders.all { it.parts.isNotEmpty() })
         assertTrue("a part has no verse", orders.all { o -> o.parts.all { it.verse.isNotBlank() } })
     }
@@ -68,7 +70,7 @@ class MahletTest {
             .flatMap { o -> listOf(o.parts) + o.versions.map { it.parts } }
         val nameless = runs.flatten().filter { it.key.isBlank() && !it.rubric }
         assertEquals(nameless.map { it.verse.take(40) }.toString(), 0, nameless.size)
-        assertEquals(24, runs.flatten().count { it.rubric })
+        assertEquals(22, runs.flatten().count { it.rubric })
     }
 
     /**
@@ -199,12 +201,14 @@ class MahletTest {
         val unreachable = orders.filter {
             it.day == null && it.season == null && it.movable == null && it.source == null
         }
-        assertEquals(listOf("ተክለ ሃይማኖት ወክርስቶሰ ሰምራ"), unreachable.map { it.feast })
+        // ተክለ ሃይማኖት ወክርስቶሰ ሰምራ, the one the book could not date, was
+        // left out on request, so nothing is allowed here now.
+        assertEquals(emptyList<String>(), unreachable.map { it.feast })
         val movable = orders.filter { it.movable != null }
-        // Six ጽጌ weeks, ስብከት/ብርሃን/ኖላዊ with their vigils, ሆሣዕና, and ዳግም
-        // ትንሣኤ, ዕርገት and ጰራቅሊጦስ — the Holy Week and Easter orders were
-        // left out on request, so their computus keys have no order.
-        assertEquals(16, movable.size)
+        // The six ጽጌ weeks. ስብከት/ብርሃን/ኖላዊ, ሆሣዕና, Holy Week, Easter, ዕርገት
+        // and ጰራቅሊጦስ were all left out on request, so those computus keys
+        // have no order to appoint.
+        assertEquals(6, movable.size)
         assertTrue("a movable order also has a day", movable.none { it.day != null })
     }
 

@@ -89,15 +89,35 @@ TSIGE_WEEK = re.compile(r"^ዘመነ ጽጌ\s*[—–-]\s*([፩-፱])ኛ")
 # The one feast whose printed date the merge could not settle (the book prints
 # ፲ /፪/; the channel says ፲፪) and whose calendar it therefore left unresolved.
 # Named so the build can say it is known, not silently shipped unreachable.
-# Orders the user asked to leave out of the app (10 Sept 2026): the ሆሣዕና
-# procession and the Holy Week and Easter orders, by feast name and kind.
+# Orders the user asked to leave out of the app (10 Sept 2026), by feast
+# name, kind and month — the month because ሚካኤል has an order every month
+# and only the ታኅሣሥ one goes. None for the month matches every month.
 DROPPED = {
-    ("ሆሣዕና", "procession"),
-    ("ሰሙነ ሕማማት", "prayer"),
-    ("ዓርብ ስቅለት", "prayer"),
-    ("ቀዳም ስዑር", "prayer"),
-    ("ትንሣኤ", "mahlet"),
+    ("ሆሣዕና", "procession", None),
+    ("ሰሙነ ሕማማት", "prayer", None),
+    ("ዓርብ ስቅለት", "prayer", None),
+    ("ቀዳም ስዑር", "prayer", None),
+    ("ትንሣኤ", "mahlet", None),
+    ("ፋሲለደስ", "vigil", 1),
+    ("ሚካኤል", "mahlet", 4),
+    ("አማኑኤል", "vigil", 4),
+    ("ስብከት", "vigil", 4), ("ብርሃን", "vigil", 4), ("ኖላዊ", "vigil", 4),
+    ("ስብከት", "mahlet", 4), ("ብርሃን", "mahlet", 4), ("ኖላዊ", "mahlet", 4),
+    ("ጊዮርጊስ", "vigil", 5), ("ጊዮርጊስ", "mahlet", 5),
+    ("አስተርእዮ ማርያም", "vigil", 5), ("አስተርእዮ ማርያም", "mahlet", 5),
+    ("በዓለ እግዚአብሔር", "mahlet", 5),
+    ("ሆሣዕና", "mahlet", 7),
+    ("ዳግም ትንሣኤ", "prayer", 7),
+    ("ዕርገት", "mahlet", 9),
+    ("ተክለ ሃይማኖት ወክርስቶሰ ሰምራ", "mahlet", 9),
+    ("ጰራቅሊጦስ", "mahlet", 9),
+    ("በዓለ እግዚአብሔር", "mahlet", 11),
 }
+
+
+def dropped(feast, kind, month):
+    return any(f == feast and k == kind and m in (None, month) for f, k, m in DROPPED)
+
 
 UNRESOLVED_DATES = {"ተክለ ሃይማኖት ወክርስቶሰ ሰምራ"}
 
@@ -569,7 +589,7 @@ def build_spine(report):
                 if kind is None:
                     report["unknown_kind"].append((feast["name"], service))
                     continue
-                if (feast["name"].strip(), kind) in DROPPED:
+                if dropped(feast["name"].strip(), kind, month):
                     report["dropped"] += 1
                     continue
                 versions = []
@@ -811,7 +831,7 @@ def build_missing(spine, report):
         kind = VIGIL if "ዋዜማ" in title else MAHLET
         feast = re.sub(r"^ሥርዓተ\s+(ዋዜማ|ማኅሌት)\s+ዘ?", "", title).strip()
         # An order left out on request is not a gap for the ግጻዌ to fill.
-        if any(d in feast for d, _ in DROPPED):
+        if any(d in feast for d, _, _ in DROPPED):
             report["dropped"] += 1
             continue
         kept.append({
