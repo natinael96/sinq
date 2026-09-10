@@ -22,3 +22,6 @@ docs/extracted/
 # Python bytecode from the content tools
 __pycache__/
 *.pyc
+
+# CCEL source volumes for tools/build_fathers.py (downloaded on demand)
+sources/fathers/

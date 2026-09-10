@@ -110,6 +110,8 @@ fun PsalterScreen(
     onWriteNote: (route: String, label: String) -> Unit,
     /** Opens a chapter of a shelf book — Sunday's reading lives there, not here. */
     onOpenBook: (bookId: String, chapter: Int) -> Unit = { _, _ -> },
+    /** Opens the bundled Fathers on the selected psalm. */
+    onOpenRoute: (route: String) -> Unit = {},
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
@@ -298,6 +300,18 @@ fun PsalterScreen(
                 commentaryUrl = selectedPsalm?.number?.let { psalm ->
                     selStart?.substringAfterLast(':')?.toIntOrNull()?.let { verse ->
                         com.agpeya.app.data.CatenaLink.url("psalms", psalm, verse)
+                    }
+                },
+                // Augustine expounds a psalm whole, and the Ge'ez and Hebrew
+                // numberings disagree about which line is verse one, so the
+                // bundled corpus is anchored to the psalm rather than the verse.
+                onOpenFathers = selectedPsalm?.number?.let { psalm ->
+                    {
+                        selStart = null; selEnd = null
+                        onOpenRoute(
+                            "fathers/psalms/$psalm/0?name=" +
+                                android.net.Uri.encode(s.psalterTitle),
+                        )
                     }
                 },
                 onBookmark = selectedPsalm?.let { section -> { toggleBookmark(section) } },

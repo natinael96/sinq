@@ -355,6 +355,12 @@ internal fun SelectionBar(
      * seventeen of the books the app carries have no page there.
      */
     commentaryUrl: String? = null,
+    /**
+     * The bundled Fathers on this verse. Null hides the action — the corpus
+     * reaches the New Testament and the Psalter only. When it is present the
+     * Catena link is not offered, so the reader sees one way in, not two.
+     */
+    onOpenFathers: (() -> Unit)? = null,
 ) {
     val motion = LocalMotion.current
     AnimatedVisibility(
@@ -485,7 +491,14 @@ internal fun SelectionBar(
                             // Beside the cross references, because both answer
                             // "what else is there about this verse" — one inside
                             // the book, one outside it.
-                            commentaryUrl?.let { url ->
+                            if (onOpenFathers != null) {
+                                add(
+                                    SelectionAct(s.fathersAction, Icons.Outlined.HistoryEdu) {
+                                        onOpenFathers()
+                                        onDismiss()
+                                    },
+                                )
+                            } else commentaryUrl?.let { url ->
                                 add(
                                     SelectionAct(s.commentaryAction, Icons.Outlined.HistoryEdu) {
                                         // In this task, in the app's colours —
