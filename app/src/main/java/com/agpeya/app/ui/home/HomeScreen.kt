@@ -57,6 +57,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.ContentRepository
 import com.agpeya.app.data.DayReadings
@@ -69,12 +70,13 @@ import com.agpeya.app.model.Hour
 import com.agpeya.app.model.HoursConfig
 import com.agpeya.app.ui.common.AgpeyaBottomBar
 import com.agpeya.app.ui.common.Candle
+import com.agpeya.app.ui.common.FillColumn
 import com.agpeya.app.ui.common.HeroCard
 import com.agpeya.app.ui.common.SinqCard
 import com.agpeya.app.ui.common.SinqDivider
 import com.agpeya.app.ui.common.Tab
 import com.agpeya.app.ui.common.liturgicalSeasonLabel
-import com.agpeya.app.ui.habits.HabitHeatmap
+import com.agpeya.app.ui.habits.CompactHeatmap
 import com.agpeya.app.ui.habits.journeyLine
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.IconSize
@@ -188,12 +190,14 @@ fun HomeScreen(
                     .widthIn(max = 600.dp)
                     .fillMaxWidth()
                     .align(Alignment.TopCenter)
-                    // Always scrollable. The cards size to their own text now, so
-                    // the page is as tall as the day's content makes it — on a
-                    // short screen that is taller than the viewport, and the
-                    // alternative to scrolling is squeezing.
+                    // The page is built to be exactly the height of the viewport,
+                    // so this scrolls only when it cannot be — a small screen at
+                    // a large type size. At every other size there is nothing
+                    // below the fold and nothing to scroll to.
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = Spacing.screen, vertical = Spacing.md),
+                // What the page has to fill: the viewport, less its own margin.
+                targetHeight = maxHeight - Spacing.md * 2,
                 stackReadingCards = stackReadingCards,
                 today = today,
                 seasonLabel = seasonLabel,
@@ -238,6 +242,7 @@ private sealed interface HomeReadingsState {
 @Composable
 private fun HomeDashboard(
     modifier: Modifier,
+    targetHeight: Dp,
     stackReadingCards: Boolean,
     today: LocalDate,
     seasonLabel: String?,
@@ -258,30 +263,32 @@ private fun HomeDashboard(
     onOpenPsalter: () -> Unit,
     onOpenZewotr: () -> Unit,
 ) {
-    // Cards size to their content. They used to be pinned to fixed heights
-    // scaled by the font, which held the page to one screen — but a card whose
-    // text outgrew its box got squeezed rather than given room, and the ንባብ
-    // card at the foot was the one that showed it first on a small phone.
-    // The page scrolls instead.
     val cardScale = LocalDensity.current.fontScale.coerceIn(1f, 2f)
-    // The order is the day's: what is due now, what the Church appoints, the
-    // two standing prayers — and ዛሬ last, because a tally of what has been done
-    // is a summary and not a task.
+    // The ceilings rise with the type size, so a page set large can still use
+    // the room it has instead of stopping at a height meant for small text.
+    val room = LocalDensity.current.fontScale.coerceIn(1f, 1.6f)
+
+    // ቤት is one screen, and it ends where the screen ends. Each block keeps the
+    // height its own content asks for; the three marked grow share what is left
+    // over, and what their ceilings turn down becomes air between them. See
+    // [FillColumn] — the same page therefore fills a 640dp phone and a 932dp one
+    // without either squeezing the text or leaving a band of empty ground.
+    //
+    // The order is the day's: what is due now, what the Church appoints, then
+    // ዛሬ, and the two standing prayers last.
     //
     // ንባብ is not here. It is a plan you are partway through rather than
-    // something the day asks of you, it was the fifth card competing for one
-    // screen, and its own reminder already opens it by name. It lives in
-    // ቤተ መጻሕፍት, which is where a plan belongs.
-    Column(modifier) {
+    // something the day asks of you, and its own reminder already opens it by
+    // name. It lives in ቤተ መጻሕፍት, which is where a plan belongs.
+    FillColumn(targetHeight = targetHeight, gap = Spacing.sm, modifier = modifier) {
         DayHeader(today, seasonLabel, onOpenSearch, onOpenFasting, onOpenBookmarks, onOpenPrayerList)
-        Spacer(Modifier.height(Spacing.sm))
         if (suggested != null) {
             NowCard(
                 hour = suggested,
                 prayed = HabitsRepository.hourHabitId(suggested.id) in doneToday,
                 onClick = { onOpenHour(suggested.id) },
+                modifier = Modifier.grow(3f, max = NOW_CEILING * room),
             )
-            Spacer(Modifier.height(Spacing.sm))
             HoursLine(
                 next = com.agpeya.app.data.PrayerSchedule.next(hours, suggested.id),
                 onOpenAll = onOpenAllHours,
@@ -289,25 +296,11 @@ private fun HomeDashboard(
         } else {
             EmptyHoursCard(onOpenAllHours)
         }
-        Spacer(Modifier.height(Spacing.sm))
-        GitsaweCard(readingsState, onOpenGitsawe)
-        Spacer(Modifier.height(Spacing.sm))
-        if (stackReadingCards) {
-            DailyPsalmCard(today, onOpenPsalter, Modifier.fillMaxWidth())
-            Spacer(Modifier.height(Spacing.sm))
-            ZewotrCard(onOpenZewotr, Modifier.fillMaxWidth())
-        } else {
-            // IntrinsicSize.Min so the pair matches the taller of the two
-            // rather than a guessed height — they read as one row either way.
-            Row(
-                modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-            ) {
-                DailyPsalmCard(today, onOpenPsalter, Modifier.weight(1f).fillMaxHeight())
-                ZewotrCard(onOpenZewotr, Modifier.weight(1f).fillMaxHeight())
-            }
-        }
-        Spacer(Modifier.height(Spacing.md))
+        GitsaweCard(
+            state = readingsState,
+            onClick = onOpenGitsawe,
+            modifier = Modifier.grow(2f, max = GITSAWE_CEILING * room),
+        )
         TodayRow(
             habitIds = habitIds,
             doneToday = doneToday,
@@ -315,8 +308,49 @@ private fun HomeDashboard(
             today = today,
             onClick = onOpenJourney,
             scale = cardScale,
+            modifier = Modifier.grow(1f, max = TODAY_CEILING * room),
         )
-        Spacer(Modifier.height(Spacing.md))
+        ShortcutsRow(stackReadingCards, today, onOpenPsalter, onOpenZewotr)
+    }
+}
+
+/**
+ * How tall a growing block may become.
+ *
+ * A hero card given the whole surplus turns into a slab of green with two lines
+ * of text adrift in it; past these heights the page is better served by the
+ * space going between the blocks instead. ዛሬ stops a little above its own
+ * height because the grid it carries can only use so much.
+ */
+private val NOW_CEILING = 200.dp
+private val GITSAWE_CEILING = 168.dp
+private val TODAY_CEILING = 110.dp
+
+/** መዝሙረ ዳዊት and ውዳሴ ማርያም, side by side unless the page is too narrow for it. */
+@Composable
+private fun ShortcutsRow(
+    stacked: Boolean,
+    today: LocalDate,
+    onOpenPsalter: () -> Unit,
+    onOpenZewotr: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (stacked) {
+        Column(modifier.fillMaxWidth()) {
+            DailyPsalmCard(today, onOpenPsalter, Modifier.fillMaxWidth())
+            Spacer(Modifier.height(Spacing.sm))
+            ZewotrCard(onOpenZewotr, Modifier.fillMaxWidth())
+        }
+    } else {
+        // IntrinsicSize.Min so the pair matches the taller of the two rather
+        // than a guessed height — they read as one row either way.
+        Row(
+            modifier = modifier.fillMaxWidth().height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            DailyPsalmCard(today, onOpenPsalter, Modifier.weight(1f).fillMaxHeight())
+            ZewotrCard(onOpenZewotr, Modifier.weight(1f).fillMaxHeight())
+        }
     }
 }
 
@@ -413,13 +447,18 @@ private fun NowCard(
     hour: Hour,
     prayed: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val s = LocalStrings.current
     val sinq = sinqColors
     // The room the ንባብ card left goes here rather than to the gap below it.
     // This is the one card on ቤት that says what to do now, and it was the same
     // height as the two shortcuts under it.
-    HeroCard(onClick = onClick, contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.xl)) {
+    HeroCard(
+        onClick = onClick,
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.xl),
+    ) {
         Column(Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
@@ -477,43 +516,47 @@ private fun NowCard(
  * ሁሉም opens the rest — each thing said once.
  */
 @Composable
-private fun HoursLine(next: Hour?, onOpenAll: () -> Unit) {
+private fun HoursLine(next: Hour?, onOpenAll: () -> Unit, modifier: Modifier = Modifier) {
     val s = LocalStrings.current
-    SinqDivider()
-    Row(
-        modifier = Modifier.fillMaxWidth().heightIn(min = 36.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-    ) {
-        Box(
-            Modifier.size(5.dp).clip(CircleShape)
-                .background(MaterialTheme.colorScheme.secondary),
-        )
-        Text(
-            text = next?.let {
-                listOf("${s.hoursNext} ${it.name}", it.timeHint)
-                    .filter { part -> part.isNotBlank() }.joinToString("  ·  ")
-            }.orEmpty(),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f),
-        )
-        // Its own target, so tapping "all" never opens the current hour.
-        Text(
-            s.hoursAll,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.secondary,
-            maxLines = 1,
-            modifier = Modifier
-                .clip(MaterialTheme.shapes.small)
-                .clickable(onClick = onOpenAll)
-                .semantics { role = Role.Button }
-                .padding(horizontal = Spacing.xs, vertical = Spacing.xxs),
-        )
+    // One block on the page, so its two hairlines and the strip between them
+    // travel together — see [HomeDashboard].
+    Column(modifier.fillMaxWidth()) {
+        SinqDivider()
+        Row(
+            modifier = Modifier.fillMaxWidth().heightIn(min = 36.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            Box(
+                Modifier.size(5.dp).clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.secondary),
+            )
+            Text(
+                text = next?.let {
+                    listOf("${s.hoursNext} ${it.name}", it.timeHint)
+                        .filter { part -> part.isNotBlank() }.joinToString("  ·  ")
+                }.orEmpty(),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+            // Its own target, so tapping "all" never opens the current hour.
+            Text(
+                s.hoursAll,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary,
+                maxLines = 1,
+                modifier = Modifier
+                    .clip(MaterialTheme.shapes.small)
+                    .clickable(onClick = onOpenAll)
+                    .semantics { role = Role.Button }
+                    .padding(horizontal = Spacing.xs, vertical = Spacing.xxs),
+            )
+        }
+        SinqDivider()
     }
-    SinqDivider()
 }
 
 @Composable
@@ -529,7 +572,7 @@ private fun EmptyHoursCard(onClick: () -> Unit) {
 
 /** Preserves the full feast and reading content from the existing Home card. */
 @Composable
-private fun GitsaweCard(state: HomeReadingsState, onClick: () -> Unit) {
+private fun GitsaweCard(state: HomeReadingsState, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val s = LocalStrings.current
     val sinq = sinqColors
     val readings = (state as? HomeReadingsState.Ready)?.readings
@@ -540,7 +583,11 @@ private fun GitsaweCard(state: HomeReadingsState, onClick: () -> Unit) {
         ?: readings?.sundayCycle?.firstOrNull()?.title
     val mezmur = readings?.sundayCycle?.firstNotNullOfOrNull { it.mezmur }
 
-    HeroCard(onClick = onClick, contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.md)) {
+    HeroCard(
+        onClick = onClick,
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.md),
+    ) {
         Icon(Icons.AutoMirrored.Outlined.MenuBook, contentDescription = null, tint = sinq.onHeroMuted, modifier = Modifier.size(IconSize.large))
         Spacer(Modifier.width(Spacing.md))
         Column(Modifier.weight(1f)) {
@@ -585,6 +632,7 @@ private fun TodayRow(
     onClick: () -> Unit,
     /** Matches the page's own font-driven growth — see [HomeDashboard]. */
     scale: Float,
+    modifier: Modifier = Modifier,
 ) {
     val s = LocalStrings.current
     val doneCount = habitIds.count { it in doneToday }
@@ -593,11 +641,14 @@ private fun TodayRow(
     // the text beside it. It grows with the row, but capped: past 1.5x it
     // would take the width that text needs.
     val glyphScale = scale.coerceAtMost(1.5f)
-    Column(Modifier.fillMaxWidth()) {
+    Column(modifier.fillMaxWidth()) {
         SinqDivider()
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                // The row takes whatever height the block was given, so the
+                // hairlines stay at its edges and the tally sits in the middle.
+                .weight(1f)
                 .heightIn(min = 64.dp)
                 .clickable(onClick = onClick)
                 .semantics { role = Role.Button }
@@ -636,13 +687,13 @@ private fun TodayRow(
                 )
             }
             Spacer(Modifier.width(Spacing.xs))
-            HabitHeatmap(
+            // Drawn, not laid out, so the squares grow with the row: the one
+            // thing on ዛሬ that a taller block can actually spend height on.
+            CompactHeatmap(
                 records = records,
                 today = today,
-                weeksBack = 10,
-                showLegend = false,
-                cell = 6.dp * glyphScale,
-                gap = 1.dp * glyphScale,
+                weeks = 10,
+                maxCell = 10.dp * glyphScale,
             )
         }
         SinqDivider()

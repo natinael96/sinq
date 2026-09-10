@@ -47,7 +47,9 @@ import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -336,20 +338,34 @@ fun HeroCard(
     content: @Composable RowScope.() -> Unit,
 ) {
     val sinq = sinqColors
+    val glowColor = sinq.heroGlow
     val body: @Composable () -> Unit = {
-        Box(Modifier.fillMaxWidth()) {
-            if (glow) {
-                Box(
-                    Modifier
-                        .align(Alignment.TopEnd)
-                        .offset(x = 24.dp, y = (-24).dp)
-                        .size(104.dp)
-                        .background(
-                            Brush.radialGradient(listOf(sinq.heroGlow, Color.Transparent)),
-                            CircleShape,
-                        ),
-                )
-            }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(
+                    if (!glow) Modifier else Modifier.drawWithCache {
+                        // The same bloom as before — a 104dp circle hung off the
+                        // top-end corner, clipped by the card — but drawn rather
+                        // than laid out. As a child it had a size of its own, so
+                        // a card asked how short it could be answered 104dp,
+                        // which is not true of the card and matters now that
+                        // FillColumn asks exactly that question.
+                        val radius = 52.dp.toPx()
+                        val centre = Offset(size.width - 28.dp.toPx(), 28.dp.toPx())
+                        val brush = Brush.radialGradient(
+                            colors = listOf(glowColor, Color.Transparent),
+                            center = centre,
+                            radius = radius,
+                        )
+                        onDrawBehind { drawCircle(brush, radius = radius, center = centre) }
+                    },
+                ),
+            // Given more height than the text needs — which is what FillColumn
+            // does on a tall screen — the text sits in the middle of the card
+            // rather than at the top of it. At its own height this is a no-op.
+            contentAlignment = Alignment.CenterStart,
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(contentPadding),
                 verticalAlignment = Alignment.CenterVertically,
