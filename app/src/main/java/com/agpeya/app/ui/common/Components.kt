@@ -50,6 +50,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -225,6 +226,41 @@ fun openUrl(context: android.content.Context, url: String) {
             android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url)),
         )
     }
+}
+
+/**
+ * Open a link without leaving the app.
+ *
+ * A Custom Tab renders in this task, wearing the hero green and the app's own
+ * back arrow, so the Fathers on a verse arrive over the reader rather than
+ * throwing it into a separate browser task the reader then has to find their
+ * way out of. It is still the browser and still shows the address, which is the
+ * honest part: the page belongs to whoever wrote it, not to Sinq.
+ *
+ * Falls back to [openUrl] where no browser supports Custom Tabs.
+ */
+fun openInAppTab(
+    context: android.content.Context,
+    url: String,
+    toolbar: androidx.compose.ui.graphics.Color,
+    onToolbar: androidx.compose.ui.graphics.Color,
+) {
+    val opened = runCatching {
+        androidx.browser.customtabs.CustomTabsIntent.Builder()
+            .setShowTitle(true)
+            .setUrlBarHidingEnabled(true)
+            .setDefaultColorSchemeParams(
+                androidx.browser.customtabs.CustomTabColorSchemeParams.Builder()
+                    .setToolbarColor(toolbar.toArgb())
+                    .setNavigationBarColor(toolbar.toArgb())
+                    .build(),
+            )
+            .build()
+            .also { it.intent.putExtra("androidx.browser.customtabs.extra.TOOLBAR_ITEM_COLOR", onToolbar.toArgb()) }
+            .launchUrl(context, android.net.Uri.parse(url))
+        true
+    }.getOrDefault(false)
+    if (!opened) openUrl(context, url)
 }
 
 /** Where the app sends people who have something to tell the maintainer. */

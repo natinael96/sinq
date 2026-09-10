@@ -111,6 +111,9 @@ room {
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.core.ktx)
+    // Custom Tabs: the Fathers open in a tab wearing the app's own colours
+    // rather than throwing the reader out into a separate browser task.
+    implementation(libs.androidx.browser)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)

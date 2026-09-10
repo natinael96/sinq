@@ -366,6 +366,10 @@ internal fun SelectionBar(
         val s = LocalStrings.current
         val ctx = androidx.compose.ui.platform.LocalContext.current
         val scope = androidx.compose.runtime.rememberCoroutineScope()
+        // Read here rather than in the click handler: sinqColors is a composable
+        // getter and a lambda is not a composition.
+        val tabToolbar = sinqColors.hero
+        val tabOnToolbar = sinqColors.onHero
         val format by com.agpeya.app.data.SettingsRepository.copyFormat(ctx)
             .collectAsState(initial = com.agpeya.app.ui.common.CopyFormat())
         val names by com.agpeya.app.data.SettingsRepository.highlightNames(ctx)
@@ -484,7 +488,12 @@ internal fun SelectionBar(
                             commentaryUrl?.let { url ->
                                 add(
                                     SelectionAct(s.commentaryAction, Icons.Outlined.HistoryEdu) {
-                                        com.agpeya.app.ui.common.openUrl(ctx, url)
+                                        // In this task, in the app's colours —
+                                        // the reader is one back-press from the
+                                        // verse rather than in another browser.
+                                        com.agpeya.app.ui.common.openInAppTab(
+                                            ctx, url, tabToolbar, tabOnToolbar,
+                                        )
                                         onDismiss()
                                     },
                                 )
