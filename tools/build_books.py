@@ -27,6 +27,11 @@ SKIP = {
 SHELVES = [
     ("zema",   "የዜማ መጻሕፍት",     "ማኅሌትና ሰዓታት የሚደረስባቸው"),
     ("melkie", "መልክአ ቅዱሳን",      "የቅዱሳን መልክእ"),
+    # Empty since the ድርሳናት and the ቅዳሴ scans were taken out of the project.
+    # Kept because shelf_of still routes ድርሳነ- and ቅዳሴ-titled books here, and a
+    # book routed to a shelf this list does not name is dropped from the index
+    # without a word. An empty shelf costs nothing: only shelves with books are
+    # written out.
     ("dersan", "ድርሳናትና ተአምራት",   "የመላእክትና የጌታ ድርሳናት"),
     ("gedl",   "ገድላት",           "የቅዱሳን ገድል"),
     ("kidase", "የቅዳሴ መጻሕፍት",     "ሥርዓተ ቅዳሴ"),
@@ -36,28 +41,15 @@ SHELVES = [
 # Books whose shelf the title alone does not give away.
 SHELF_BY_TITLE = {
     "ማኅሌተ ጽጌ": "zema",
-    "ዘመነ ጽጌ": "zema",
-    "የአባ ጽጌ ድንግል ታሪክ": "zema",
-    "መዋሥዕት እምዮሐንስ እስከ ዮሐንስ": "zema",
     "መዝሙር ዘሰናብት": "zema",
-    "መዝሙር እምዮሐንስ እስከ ዮሐንስ": "zema",
-    "መዋሥዕት ዘቅዱስ ያሬድ": "zema",
-    "መዝሙረ ክርስቶስ": "zema",
     "መጽሐፈ ሰዓታት": "zema",
-    "መጽሐፈ ዚቅ ወመዝሙር": "zema",
-    "ምዕራፍ ዘቅዱስ ያሬድ": "zema",
     "ሰቆቃወ ድንግል": "zema",
-    "ዝማሬ ዘቅዱስ ያሬድ": "zema",
-    "የተክሌ አቋቋም ዝማሜ": "zema",
-    "ጾመ ድጓ ዘቅዱስ ያሬድ": "zema",
-    "የቅዱስ ሚካኤል ድርሳን": "dersan",
 }
 
 # Title as the scan left it → the spelling to ship. Broken words in a title are
 # worse than broken words in a page: the title is the only thing on the shelf.
 TITLE_FIXES = {
     "መልክአ ቍርባን ።": "መልክአ ቍርባን",
-    "ሥርዓት ቅዳሴ በአማርኛ": "ሥርዓተ ቅዳሴ በአማርኛ",
     "መልክአ ፍልሰታ (2)": "መልክአ ፍልሰታ ካልዕ",
     "መልክእ ዓቢብ": "መልክአ ዓቢብ",
     "መልክአ ዐቢብ ካልዕ": "መልክአ ዓቢብ ካልዕ",
@@ -81,27 +73,6 @@ TIER_MARK = re.compile(r"\s*(?:፪ማ|(?<=\s)ማ)[፡:]\s*")
 # Word-initial የ is the Amharic genitive and never opens a Ge'ez word.
 AMHARIC = re.compile(r"(?:^|\s)(?:የ|እን[ደዲ]|ስለ|ሲ|ብት)|ናቸው|ነው|ነበር|ዘንድ|ችሁ|ኛል|ናል|ሆይ|ጋር|ውስጥ")
 GEEZ = re.compile(r"(?:^|\s)(?:ወ|ዘ|እም|ኀበ|ከመ|እስመ|እንዘ|ላዕለ|ኵሉ)|ውእቱ|ሆሙ|ኪያ")
-
-# Not shipped. Each remains in sources/books/ and comes back by removing it here.
-#
-# የተክሌ አቋቋም ዝማሜ: its ማሳሰቢያ is a bare heading whose text the scan lost entirely,
-# and a chant book cannot be trusted where it fails on the order the chants are
-# sung.
-#
-# The eight below come off the ዜማ shelf at the maintainer's direction. They are
-# the አቋቋም and ድጓ books — the ones a singer learns by ear from a teacher rather
-# than reads, and which a scan serves worst.
-DROPPED = {
-    "የተክሌ አቋቋም ዝማሜ",
-    "መዋሥዕት ዘቅዱስ ያሬድ",
-    "መዋሥዕት እምዮሐንስ እስከ ዮሐንስ",
-    "መዝሙር እምዮሐንስ እስከ ዮሐንስ",
-    "መዝሙረ ክርስቶስ",
-    "ምዕራፍ ዘቅዱስ ያሬድ",
-    "ዘመነ ጽጌ",
-    "የአባ ጽጌ ድንግል ታሪክ",
-    "ጾመ ድጓ ዘቅዱስ ያሬድ",
-}
 
 # A ማሳሰቢያ with nothing after the marker is a heading the scan lost the text of.
 # The notice itself is kept wherever it still says something — "ማሳሰቢያ፦ ቅደም ተከሉ
@@ -165,7 +136,6 @@ def book_id(title):
 
 def build():
     applied = {before: 0 for before, _ in CORRECTIONS}
-    dropped = set()
     books, seen_ids = [], {}
 
     for path in sorted(p for d in SOURCES for p in d.glob("*.json")):
@@ -177,9 +147,6 @@ def build():
             continue
 
         title = TITLE_FIXES.get(raw_title, raw_title)
-        if title in DROPPED:
-            dropped.add(title)
-            continue
         bid = book_id(title)
         if bid in seen_ids:
             sys.exit(f"id collision: {title} and {seen_ids[bid]}")
@@ -260,10 +227,6 @@ def build():
         other = by_title[base]
         b["meta"]["variantOf"] = {"id": other["id"], "title": other["title"]}
         other["meta"].setdefault("variants", []).append({"id": b["id"], "title": b["title"]})
-
-    if dropped != DROPPED:
-        sys.exit(f"expected to drop {sorted(DROPPED)}, but found {sorted(dropped)} — "
-                 f"a dropped scan was renamed or removed upstream")
 
     missing = [b for b, n in applied.items() if n == 0]
     if missing:
