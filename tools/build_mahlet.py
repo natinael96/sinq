@@ -89,6 +89,16 @@ TSIGE_WEEK = re.compile(r"^ዘመነ ጽጌ\s*[—–-]\s*([፩-፱])ኛ")
 # The one feast whose printed date the merge could not settle (the book prints
 # ፲ /፪/; the channel says ፲፪) and whose calendar it therefore left unresolved.
 # Named so the build can say it is known, not silently shipped unreachable.
+# Orders the user asked to leave out of the app (10 Sept 2026): the ሆሣዕና
+# procession and the Holy Week and Easter orders, by feast name and kind.
+DROPPED = {
+    ("ሆሣዕና", "procession"),
+    ("ሰሙነ ሕማማት", "prayer"),
+    ("ዓርብ ስቅለት", "prayer"),
+    ("ቀዳም ስዑር", "prayer"),
+    ("ትንሣኤ", "mahlet"),
+}
+
 UNRESOLVED_DATES = {"ተክለ ሃይማኖት ወክርስቶሰ ሰምራ"}
 
 # Two editions are the same text when their words, with the homophones folded
@@ -437,7 +447,7 @@ def fuller(a, b):
     return len(words(a)) >= len(words(b))
 
 
-def dedupe(base, versions, report, base_is_book):
+def dedupe(base, base_url, versions, report, base_is_book):
     """Fold the editions that only differ in spelling into the one that stands.
 
     An edition the same as [base] — the book's text, or the edition standing
@@ -454,33 +464,37 @@ def dedupe(base, versions, report, base_is_book):
     kept, into_base = [], []
     base_parts = base
     for v in versions:
+        # Every post behind an edition follows it wherever it folds: the
+        # merge's own second sources, and the posts folded into it here.
+        v_links = [v["url"]] + v.get("also", [])
         if same_text(base_parts, v["parts"]) and not (
             base_is_book
             and len(words(v["parts"])) > len(words(base_parts)) * (1 + BOOK_TOLERANCE)
         ):
             if not base_is_book and not fuller(base_parts, v["parts"]):
-                base_parts, v["parts"] = v["parts"], base_parts
-                # The order's own post is now the absorbed one; the caller
-                # records the swap through the returned parts and url.
-                into_base.append(v["url"])
-                v["url"], into_base[-1] = into_base[-1], v["url"]
-            else:
-                into_base.append(v["url"])
+                # The fuller edition becomes the order's text, and the post
+                # it stood on becomes one of the absorbed.
+                base_parts = v["parts"]
+                into_base.append(base_url)
+                base_url, v_links = v["url"], v_links[1:]
+            into_base.extend(v_links)
             report["folded_into_base"] += 1
             continue
         for k in kept:
             if same_text(k["parts"], v["parts"]):
+                k_links = [k["url"]] + k.get("also", [])
                 if not fuller(k["parts"], v["parts"]):
                     k["parts"], v["parts"] = v["parts"], k["parts"]
                     k["url"], v["url"] = v["url"], k["url"]
                     k["title"], v["title"] = v["title"], k["title"]
                     k["id"], v["id"] = v["id"], k["id"]
-                k.setdefault("also", []).append(v["url"])
+                    k_links, v_links = v_links, k_links
+                k["also"] = k_links[1:] + v_links
                 report["folded"] += 1
                 break
         else:
             kept.append(v)
-    return kept, [u for u in into_base if u], base_parts
+    return kept, [u for u in into_base if u], base_parts, base_url
 
 def chant_to_part(chant, alternative=False):
     """One chant of the merge as one part of an order, or None to drop it.
@@ -555,12 +569,16 @@ def build_spine(report):
                 if kind is None:
                     report["unknown_kind"].append((feast["name"], service))
                     continue
+                if (feast["name"].strip(), kind) in DROPPED:
+                    report["dropped"] += 1
+                    continue
                 versions = []
                 for v in order.get("versions") or []:
                     vparts = flatten(v.get("chants", []), report)
                     if not vparts:
                         continue
-                    src = (v.get("sources") or [{}])[0]
+                    sources = v.get("sources") or [{}]
+                    src = sources[0]
                     title = clean_name(normalise(GLYPHS.sub("", src.get("title") or "")).replace("#", " ")) or None
                     edition = {
                         "id": v["id"],
@@ -568,6 +586,11 @@ def build_spine(report):
                         "url": src.get("url"),
                         "parts": vparts,
                     }
+                    # The merge already set like posts together under one
+                    # edition; the rest of its sources are posts of this text.
+                    more = [x.get("url") for x in sources[1:] if x.get("url")]
+                    if more:
+                        edition["also"] = more
                     # A post that is the order's Amharic — its parts are ትርጉም,
                     # or its title says so — is a translation to read beside
                     # the chant, not another text of the chant to read instead.
@@ -588,6 +611,7 @@ def build_spine(report):
                     # first means representative, not preferred.
                     first = versions.pop(0)
                     parts, source, url = first["parts"], TELEGRAM, first["url"]
+                    first_also = first.get("also", [])
                     report["version_only"] += 1
                 else:
                     report["empty"] += 1
@@ -598,7 +622,9 @@ def build_spine(report):
                 parts = name_unnamed(parts, report)
                 for v in versions:
                     v["parts"] = name_unnamed(v["parts"], report)
-                versions, also, parts = dedupe(parts, versions, report, base_is_book=book is not None)
+                versions, also, parts, url = dedupe(parts, url, versions, report, base_is_book=book is not None)
+                if not book:
+                    also = first_also + also
                 o = {
                     "id": order_id("merged", feast["id"], service),
                     "kind": kind,
@@ -783,10 +809,15 @@ def build_missing(spine, report):
             continue
         title = order["title"]
         kind = VIGIL if "ዋዜማ" in title else MAHLET
+        feast = re.sub(r"^ሥርዓተ\s+(ዋዜማ|ማኅሌት)\s+ዘ?", "", title).strip()
+        # An order left out on request is not a gap for the ግጻዌ to fill.
+        if any(d in feast for d, _ in DROPPED):
+            report["dropped"] += 1
+            continue
         kept.append({
             "id": order_id("gitsawe", title),
             "kind": kind,
-            "feast": re.sub(r"^ሥርዓተ\s+(ዋዜማ|ማኅሌት)\s+ዘ?", "", title).strip(),
+            "feast": feast,
             "month": None,
             "day": None,
             "source": "ግጻዌ",
@@ -799,7 +830,7 @@ def build_missing(spine, report):
 # ── output ───────────────────────────────────────────────────────────────────
 
 def main():
-    report = {"empty": 0, "empty_chants": 0, "version_only": 0, "folded": 0, "folded_into_base": 0,
+    report = {"empty": 0, "dropped": 0, "empty_chants": 0, "version_only": 0, "folded": 0, "folded_into_base": 0,
               "named_by_line": 0, "named_by_shelf": 0, "rubrics": 0,
               "unknown_kind": [], "unmapped": [], "unappointable": [], "from_gitsawe": []}
     vocab = part_vocabulary()

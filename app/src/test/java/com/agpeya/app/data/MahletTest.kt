@@ -42,9 +42,11 @@ class MahletTest {
     }
 
     @Test
-    fun `the merged corpus is two hundred and fifteen orders, none of them empty`() {
-        assertEquals(215, orders.size)
-        assertEquals(3388, orders.sumOf { it.parts.size })
+    fun `the merged corpus is two hundred and ten orders, none of them empty`() {
+        // 215 as built, less the five left out on request: the ሆሣዕና
+        // procession, ሰሙነ ሕማማት, ዓርብ ስቅለት, ቀዳም ስዑር and ትንሣኤ.
+        assertEquals(210, orders.size)
+        assertEquals(3375, orders.sumOf { it.parts.size })
         assertTrue("an order has no parts", orders.all { it.parts.isNotEmpty() })
         assertTrue("a part has no verse", orders.all { o -> o.parts.all { it.verse.isNotBlank() } })
     }
@@ -59,10 +61,14 @@ class MahletTest {
      */
     @Test
     fun `every part has a name or is a rubric`() {
-        val runs = orders.flatMap { o -> listOf(o.parts) + o.versions.map { it.parts } }
+        // The ዘመነ ጽጌ volumes are shipped as scanned, on the user's word, and
+        // three of them open with the date heading of the order that follows
+        // — a nameless line the book itself prints. They are not swept.
+        val runs = orders.filter { it.season != "tsige" }
+            .flatMap { o -> listOf(o.parts) + o.versions.map { it.parts } }
         val nameless = runs.flatten().filter { it.key.isBlank() && !it.rubric }
         assertEquals(nameless.map { it.verse.take(40) }.toString(), 0, nameless.size)
-        assertEquals(27, runs.flatten().count { it.rubric })
+        assertEquals(24, runs.flatten().count { it.rubric })
     }
 
     /**
@@ -83,9 +89,15 @@ class MahletTest {
         assertTrue("an edition has no id", editions.all { it.id.isNotBlank() })
         assertTrue("an edition has no source post", editions.all { !it.url.isNullOrBlank() })
         // Folding keeps the links: every absorbed edition's post is still on the
-        // edition that stands for it, or on the order whose text it repeated.
+        // edition that stands for it, or on the order whose text it repeated —
+        // the 79 folded here, and the 11 the merge itself had already set
+        // under another post as the same text. Every post the merge knew of
+        // is reachable from exactly one place.
         val absorbed = editions.sumOf { it.also.size } + orders.sumOf { it.also.size }
-        assertEquals(79, absorbed)
+        assertEquals(90, absorbed)
+        val posts = editions.flatMap { listOf(it.url!!) + it.also } + orders.flatMap { listOfNotNull(it.url) + it.also }
+        assertEquals("a post is referenced twice", posts.size, posts.toSet().size)
+        assertEquals(358, posts.size)
         assertTrue("a folded post is blank", (editions.flatMap { it.also } + orders.flatMap { it.also }).all { it.isNotBlank() })
     }
 
@@ -189,9 +201,10 @@ class MahletTest {
         }
         assertEquals(listOf("ተክለ ሃይማኖት ወክርስቶሰ ሰምራ"), unreachable.map { it.feast })
         val movable = orders.filter { it.movable != null }
-        // Six ጽጌ weeks, ስብከት/ብርሃን/ኖላዊ with their vigils, ሆሣዕና with its
-        // procession, and the seven that stand alone from ሰሙነ ሕማማት to ጰራቅሊጦስ.
-        assertEquals(21, movable.size)
+        // Six ጽጌ weeks, ስብከት/ብርሃን/ኖላዊ with their vigils, ሆሣዕና, and ዳግም
+        // ትንሣኤ, ዕርገት and ጰራቅሊጦስ — the Holy Week and Easter orders were
+        // left out on request, so their computus keys have no order.
+        assertEquals(16, movable.size)
         assertTrue("a movable order also has a day", movable.none { it.day != null })
     }
 
