@@ -1,6 +1,7 @@
 package com.agpeya.app.data
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.DayOfWeek
@@ -58,6 +59,22 @@ class MahletComputusTest {
             assertTrue("$key has no date", d != null)
             assertEquals("$key is not a Sunday", DayOfWeek.SUNDAY, d!!.dayOfWeek)
             assertTrue("$key: dateOf is not a day on() appoints", key in MahletComputus.on(d))
+        }
+    }
+
+    /**
+     * The first Sunday of ዘመነ ጽጌ is the one on or after መስከረም ፳፮, and two
+     * years in seven it is ጥቅምት ፩ or ፪. A window that only looked at the
+     * last five days of መስከረም returned null for those years, and the list
+     * showed no date for the ጽጌ orders.
+     */
+    @Test
+    fun `every year has a first Sunday of tsige`() {
+        for (year in 2010..2040) {
+            val first = MahletComputus.dateOf("tsige1", year)
+            assertNotNull("no ጽጌ ፩ in $year", first)
+            assertTrue("tsige1" in MahletComputus.on(first!!))
+            assertNotNull("no ጽጌ ፭ in $year", MahletComputus.dateOf("tsige5", year))
         }
     }
 }

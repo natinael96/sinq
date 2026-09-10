@@ -88,8 +88,12 @@ object MahletComputus {
             "nolawi" -> sundayIn(ethYear, 4, 21..27)
             else -> {
                 val week = key.removePrefix("tsige").toIntOrNull() ?: return null
-                // The Nth Sunday on or after መስከረም ፳፮.
-                sundayIn(ethYear, 1, 26..30)?.plusDays(7L * (week - 1))
+                // The Nth Sunday on or after መስከረም ፳፮ — which can be ጥቅምት ፩
+                // or ፪, so the week is walked from the day rather than
+                // searched among the last days of the month.
+                val start = EthiopianDate(ethYear, 1, 26).toGregorian()
+                val toSunday = (DayOfWeek.SUNDAY.value - start.dayOfWeek.value + 7) % 7
+                start.plusDays(toSunday + 7L * (week - 1))
             }
         } ?: return null
         return candidate.takeIf { key in on(it) }
