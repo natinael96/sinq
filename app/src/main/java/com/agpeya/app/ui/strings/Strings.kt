@@ -384,6 +384,7 @@ interface Strings {
     val wudaseMariam: String
     val wudaseLangAmharic: String
     val wudaseLangGeez: String
+    fun psalterEditionSwitch(other: String): String
     val contentUnavailable: String
     val retryAction: String
     val mementoMoriGloss: String
@@ -805,7 +806,6 @@ interface Strings {
     fun readingDayLabel(day: String): String
     val readingTodayHeader: String
     val readingGitsaweHeader: String
-    val readingWithGitsawe: String
     val readingMarkDone: String
     val readingDone: String
     val readingAllDays: String
@@ -1221,6 +1221,7 @@ object AmharicStrings : Strings {
     override val wudaseMariam = "ውዳሴ ማርያም"
     override val wudaseLangAmharic = "አማርኛ"
     override val wudaseLangGeez = "ግዕዝ"
+    override fun psalterEditionSwitch(other: String) = "በ$other ያንብቡ"
     override val contentUnavailable = "ይዘቱን ማግኘት አልተቻለም"
     override val retryAction = "እንደገና ይሞክሩ"
     override val mementoMoriGloss = "ሞትን አስብ"
@@ -1609,7 +1610,7 @@ object AmharicStrings : Strings {
 
     override val readingTitle = "ንባብ"
     override val readingIntro =
-        "ግጻዌው ወንጌልንና መልእክታትን ያነብልዎታል፤ ይህ ንባብ ደግሞ ብሉይ ኪዳንንና መጻሕፍቱን ያስነብብዎታል።"
+        "መጽሐፍ ቅዱስን ከዳር እስከ ዳር፤ ፹፩ቱንም መጻሕፍት። የዕለቱ ግጻዌ ከንባቡ በላይ ይታያል።"
     override val readingChoose = "ንባብ ይምረጡ"
     override val readingStart = "ጀምር"
     override val readingStop = "አቁም"
@@ -1617,7 +1618,6 @@ object AmharicStrings : Strings {
     override fun readingDayLabel(day: String) = "ቀን $day"
     override val readingTodayHeader = "የዕለቱ ንባብ"
     override val readingGitsaweHeader = "የዕለቱ ግጻዌ"
-    override val readingWithGitsawe = "ከዕለቱ ግጻዌ ጋር"
     override val readingMarkDone = "አነበብኩ"
     override val readingDone = "ተነቧል"
     override val readingAllDays = "ሁሉንም ቀናት"
@@ -2040,6 +2040,7 @@ object EnglishStrings : Strings {
     override val wudaseMariam = "ውዳሴ ማርያም"
     override val wudaseLangAmharic = "Amharic"
     override val wudaseLangGeez = "Ge'ez"
+    override fun psalterEditionSwitch(other: String) = "Read in $other"
     override val contentUnavailable = "Content unavailable"
     override val retryAction = "Try again"
     override val mementoMoriGloss = "Remember death"
@@ -2428,7 +2429,7 @@ object EnglishStrings : Strings {
 
     override val readingTitle = "Reading"
     override val readingIntro =
-        "The Gitsawe reads you the Gospels and the Epistles; this reads the Old Testament and the books it does not reach."
+        "The whole Bible, all 81 books. The day's Gitsawe is shown above the plan's own reading."
     override val readingChoose = "Choose a reading"
     override val readingStart = "Begin"
     override val readingStop = "Stop"
@@ -2436,7 +2437,6 @@ object EnglishStrings : Strings {
     override fun readingDayLabel(day: String) = "Day $day"
     override val readingTodayHeader = "Today's reading"
     override val readingGitsaweHeader = "Today's Gitsawe"
-    override val readingWithGitsawe = "With the day's Gitsawe"
     override val readingMarkDone = "I have read it"
     override val readingDone = "Read"
     override val readingAllDays = "All days"

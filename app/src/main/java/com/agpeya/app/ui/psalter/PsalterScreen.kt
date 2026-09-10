@@ -1,5 +1,9 @@
 package com.agpeya.app.ui.psalter
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -198,16 +202,10 @@ fun PsalterScreen(
                 subtitle = if (daily && range != null) s.psalmRange(range.first, range.last) else null,
                 onBack = onBack,
                 actions = {
-                    TextButton(onClick = {
+                    EditionToggle(geez = geez) {
                         selStart = null
                         selEnd = null
                         geez = !geez
-                    }) {
-                        Text(
-                            if (geez) s.wudaseLangGeez else s.wudaseLangAmharic,
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.secondary,
-                        )
                     }
                     com.agpeya.app.ui.common.ReaderToolsMenu(
                         fontStep = fontStep,
@@ -472,6 +470,42 @@ private fun PsalterContents(psalms: List<Section>, onSelect: (Int) -> Unit) {
     }
 }
 
+
+/**
+ * Which edition is being read, and the way to the other one.
+ *
+ * This was a bare TextButton in the accent colour, which on a bar already
+ * holding a title, a subtitle and an overflow read as a caption rather than a
+ * control — the Psalter is the one shelf with two editions and most people
+ * never found the second. It is a pill now: bordered, filled, and carrying the
+ * name of the edition it will switch *to*, since a button that names where it
+ * is going is the one people press.
+ */
+@Composable
+private fun EditionToggle(geez: Boolean, onToggle: () -> Unit) {
+    val s = LocalStrings.current
+    val other = if (geez) s.wudaseLangAmharic else s.wudaseLangGeez
+    Box(
+        modifier = Modifier
+            .padding(end = Spacing.xs)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f))
+            .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.45f), CircleShape)
+            .clickable(
+                onClickLabel = s.psalterEditionSwitch(other),
+                onClick = onToggle,
+            )
+            .padding(horizontal = Spacing.md, vertical = Spacing.xs),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            other,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.secondary,
+            maxLines = 1,
+        )
+    }
+}
 
 /**
  * Sunday's reading: the twenty chapters of ጸሎት ነቢያት, in the edition the Psalter

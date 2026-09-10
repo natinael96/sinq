@@ -398,7 +398,6 @@ private fun AgpeyaNavHost(
                 onOpenPrayerList = { navController.navigate("prayerlist") { launchSingleTop = true } },
                 onOpenPsalter = { navController.navigate("psalter") { launchSingleTop = true } },
                 onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
-                onOpenReading = { navController.navigate("reading") { launchSingleTop = true } },
                 onOpenGitsawe = { navController.navigate("gitsawe") { launchSingleTop = true } },
                 onSelectTab = navController::switchTab,
             )

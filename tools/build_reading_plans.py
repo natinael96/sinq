@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """Generate the bundled ንባብ reading plans.
 
-The plan reads what the ግጻዌ does not: the Old Testament and the deuterocanon,
-in Ethiopian canonical order. The lectionary already carries 88.5% of the New
-Testament and every psalm it needs, so neither is in the plan corpus.
+The plan reads the whole canon, in Ethiopian canonical order: all 81 books, the
+New Testament and the Psalter included. It used to read only what the ግጻዌ does
+not — the Old Testament and the deuterocanon — on the grounds that the
+lectionary already carries 88.5% of the New Testament. That made the plan a
+supplement to the ግጻዌ rather than a way through the Bible, and someone who
+finished it had still never read Matthew straight through. Overlap with the
+day's ግጻዌ is the price, and it is the right one: the two are read differently.
 
 Days are packed to a VERSE budget rather than a chapter count. EOTC chapter
 divisions are wildly uneven — ሄኖክ averages 37 verses a chapter against
@@ -16,8 +20,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BIBLE = os.path.join(ROOT, "app/src/main/assets/content/bible")
 OUT = os.path.join(ROOT, "app/src/main/assets/content/reading/plans.json")
 
-# The nine broader-canon books: church order and history rather than Scripture
-# read in the same sense. Available as their own track, never in the default.
+# The nine broader-canon books — ሲኖዶስ, ክሌመንጦስ and the rest: church order and
+# history rather than Scripture read in the same sense. They are part of the 81
+# and the app bundles them, so "everything" includes them.
 BROADER = {"LAO", "OTH", "XXA", "XXB", "XXC", "XXD", "XXE", "XXF", "XXG"}
 
 
@@ -45,17 +50,8 @@ def chapter_verses(slug, order):
 
 
 def corpus(books):
-    """OT + deuterocanon, minus Psalms, minus the broader canon."""
-    out = []
-    for b in books:
-        if b["id"] in BROADER:
-            continue
-        if b["testament"] not in ("old", "deuterocanonical"):
-            continue
-        if b["id"] == "PSA":           # prayed in the hours; its own cycle
-            continue
-        out.append(b)
-    return out
+    """Everything bundled, in canonical order — the whole 81."""
+    return list(books)
 
 
 def units(books):
@@ -166,8 +162,8 @@ def main():
     print(f"corpus: {len(core)} books, {total_ch} chapters, {total_v} verses")
 
     plans = [
-        build(u, 360, "annual", "ዓመታዊ ንባብ", "ግጻዌው የማያነብልዎት"),
-        build(u, 180, "half", "የስድስት ወር ንባብ", "በስድስት ወር"),
+        build(u, 360, "annual", "ዓመታዊ ንባብ", "መጽሐፍ ቅዱስ በሙሉ፣ በአንድ ዓመት"),
+        build(u, 180, "half", "የስድስት ወር ንባብ", "መጽሐፍ ቅዱስ በሙሉ፣ በስድስት ወር"),
         build_psalter(psalter_units(books)),
     ]
     # The psalter track reads its own corpus, so each plan is checked against

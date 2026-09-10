@@ -102,7 +102,6 @@ fun HomeScreen(
     onOpenPsalter: () -> Unit,
     onOpenZewotr: () -> Unit,
     onOpenGitsawe: () -> Unit,
-    onOpenReading: () -> Unit,
     onSelectTab: (Tab) -> Unit,
 ) {
     val context = LocalContext.current
@@ -145,30 +144,6 @@ fun HomeScreen(
                 onFailure = { HomeReadingsState.Unavailable },
             )
     }
-    // Today's plan line, or null when no plan is being kept.
-    val planContent by produceState(com.agpeya.app.model.ReadingPlanContent()) {
-        value = com.agpeya.app.data.ReadingPlanRepository.content(context)
-    }
-    val planState by com.agpeya.app.data.ReadingPlanRepository.state(context)
-        .collectAsState(initial = com.agpeya.app.model.ReadingPlanState())
-    val planBookNames by produceState(emptyMap<String, String>()) {
-        value = runCatching { com.agpeya.app.data.ScriptureRepository.bookNames(context) }.getOrDefault(emptyMap())
-    }
-    val planLine = remember(planContent, planState, planBookNames, today) {
-        planContent.plans.firstOrNull { it.id == planState.activePlanId }?.let { plan ->
-            val day = com.agpeya.app.data.ReadingPlanRepository
-                .dayOn(planState.startedOn, today, plan.days)
-            val readings = com.agpeya.app.data.ReadingPlanRepository
-                .effectiveDays(plan, planState).firstOrNull { it.d == day }?.r.orEmpty()
-            val passages = readings.joinToString(" · ") { r ->
-                val name = com.agpeya.app.ui.reading.bookName(r.b, planBookNames)
-                val from = com.agpeya.app.ui.reading.geezNumeral(r.c)
-                if (r.to > r.c) "$name $from–${com.agpeya.app.ui.reading.geezNumeral(r.to)}" else "$name $from"
-            }
-            day to passages
-        }
-    }
-
     var showHours by remember { mutableStateOf(false) }
 
     // The only network-facing thing on this screen, and it draws nothing unless
@@ -238,8 +213,6 @@ fun HomeScreen(
                 onOpenJourney = { onSelectTab(Tab.JOURNEY) },
                 onOpenPsalter = onOpenPsalter,
                 onOpenZewotr = onOpenZewotr,
-                planLine = planLine,
-                onOpenReading = onOpenReading,
             )
         }
       }
@@ -284,8 +257,6 @@ private fun HomeDashboard(
     onOpenJourney: () -> Unit,
     onOpenPsalter: () -> Unit,
     onOpenZewotr: () -> Unit,
-    planLine: Pair<Int, String>?,
-    onOpenReading: () -> Unit,
 ) {
     // Cards size to their content. They used to be pinned to fixed heights
     // scaled by the font, which held the page to one screen — but a card whose
@@ -294,9 +265,13 @@ private fun HomeDashboard(
     // The page scrolls instead.
     val cardScale = LocalDensity.current.fontScale.coerceIn(1f, 2f)
     // The order is the day's: what is due now, what the Church appoints, the
-    // two standing prayers, the plan — and ዛሬ last, because a tally of what has
-    // been done is a summary and not a task. It used to sit in the middle,
-    // between the ግጻዌ and the readings it was summarising.
+    // two standing prayers — and ዛሬ last, because a tally of what has been done
+    // is a summary and not a task.
+    //
+    // ንባብ is not here. It is a plan you are partway through rather than
+    // something the day asks of you, it was the fifth card competing for one
+    // screen, and its own reminder already opens it by name. It lives in
+    // ቤተ መጻሕፍት, which is where a plan belongs.
     Column(modifier) {
         DayHeader(today, seasonLabel, onOpenSearch, onOpenFasting, onOpenBookmarks, onOpenPrayerList)
         Spacer(Modifier.height(Spacing.sm))
@@ -332,8 +307,6 @@ private fun HomeDashboard(
                 ZewotrCard(onOpenZewotr, Modifier.weight(1f).fillMaxHeight())
             }
         }
-        Spacer(Modifier.height(Spacing.md))
-        ReadingCard(planLine, onOpenReading, Modifier.fillMaxWidth())
         Spacer(Modifier.height(Spacing.md))
         TodayRow(
             habitIds = habitIds,
@@ -443,11 +416,15 @@ private fun NowCard(
 ) {
     val s = LocalStrings.current
     val sinq = sinqColors
-    HeroCard(onClick = onClick, contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.md)) {
+    // The room the ንባብ card left goes here rather than to the gap below it.
+    // This is the one card on ቤት that says what to do now, and it was the same
+    // height as the two shortcuts under it.
+    HeroCard(onClick = onClick, contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.xl)) {
         Column(Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(s.nowPrayer, style = MaterialTheme.typography.labelMedium, color = sinq.onHeroMuted)
+                    Spacer(Modifier.height(Spacing.xs))
                     Text(
                         buildAnnotatedString {
                             append(hour.name)
@@ -455,9 +432,12 @@ private fun NowCard(
                                 withStyle(SpanStyle(color = sinq.onHeroMuted)) { append("  ·  ${hour.timeHint}") }
                             }
                         },
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.headlineSmall,
                         color = sinq.onHero,
-                        maxLines = 1,
+                        // ጸሎተ መንፈቀ ሌሊት with its time hint does not fit one line
+                        // on a narrow phone, and clipping the name of the hour
+                        // you are being sent to is the wrong thing to clip.
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
@@ -573,10 +553,14 @@ private fun GitsaweCard(state: HomeReadingsState, onClick: () -> Unit) {
                 HomeReadingsState.Loading -> Text(s.loadingLabel, style = MaterialTheme.typography.bodySmall, color = sinq.onHeroMuted)
                 HomeReadingsState.Unavailable -> Text(s.contentMissingTitle, style = MaterialTheme.typography.bodySmall, color = sinq.onHeroMuted)
                 is HomeReadingsState.Ready -> {
+                    // The card grows down rather than cutting a feast off at
+                    // the edge. A day named "በዓለ ቅዱስ ገብርኤል ሊቀ መላእክት" was being
+                    // shown as much of itself as fitted and no more, on the one
+                    // card whose whole job is to name the day.
                     (feast ?: reading)?.let {
-                        Text(it, style = MaterialTheme.typography.bodySmall, color = sinq.onHeroMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(it, style = MaterialTheme.typography.bodySmall, color = sinq.onHeroMuted)
                     }
-                    mezmur?.let { Text("${s.sundayMezmurTitle} · $it", style = MaterialTheme.typography.bodySmall, color = sinq.onHero, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                    mezmur?.let { Text("${s.sundayMezmurTitle} · $it", style = MaterialTheme.typography.bodySmall, color = sinq.onHero) }
                 }
             }
         }
@@ -718,68 +702,6 @@ private fun DailyPsalmCard(today: LocalDate, onClick: () -> Unit, modifier: Modi
         onClick = onClick,
         modifier = modifier,
     )
-}
-
-/**
- * ንባብ — the day of the reading plan, below the Psalter and ዘወትር.
- *
- * Placed last on ቤት and below [GitsaweCard] on purpose: the appointed readings
- * lead, and the plan follows. It reads what the ግጻዌ does not.
- */
-@Composable
-private fun ReadingCard(planLine: Pair<Int, String>?, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val s = LocalStrings.current
-    if (planLine == null) {
-        ShortcutCard(
-            title = s.readingNoPlan,
-            caption = s.readingTitle,
-            onClick = onClick,
-            modifier = modifier,
-        )
-        return
-    }
-    val (day, passages) = planLine
-    // ንባብ leads the line in gold and the day follows it, so the card names
-    // itself without spending a line on a label. The first passage rides the
-    // same line; anything after it drops to the caption with the ግጻዌ note.
-    val parts = passages.split(" · ").filter { it.isNotBlank() }
-    SinqCard(
-        onClick = onClick,
-        modifier = modifier,
-        contentPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.sm),
-    ) {
-      Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Column(Modifier.weight(1f)) {
-            Text(
-                buildAnnotatedString {
-                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.secondary)) {
-                        append(s.readingTitle)
-                    }
-                    append("  ${s.readingDayLabel(com.agpeya.app.ui.reading.geezNumeral(day))}")
-                    parts.firstOrNull()?.let { append("  ·  $it") }
-                },
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                (parts.drop(1) + s.readingWithGitsawe).joinToString("  ·  "),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-        Spacer(Modifier.width(Spacing.sm))
-        Icon(
-            Icons.AutoMirrored.Outlined.ArrowForward,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(IconSize.small),
-        )
-      }
-    }
 }
 
 @Composable

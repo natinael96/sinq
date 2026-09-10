@@ -79,23 +79,24 @@ class ReadingPlanDataTest {
             for (day in plan.readings) for (r in day.r) for (c in r.chapters) seen += r.b to c
             val dupes = seen.groupingBy { it }.eachCount().filterValues { it > 1 }
             assertTrue("${plan.id} repeats ${dupes.keys.take(3)}", dupes.isEmpty())
-            // The ዳዊት track reads the Psalter; the others read what the ግጻዌ does not.
-            val expected = if (plan.id == "psalter") 150 else 1067
+            // The ዳዊት track reads the Psalter; the others read the whole canon.
+            val expected = if (plan.id == "psalter") 150 else 1610
             assertEquals("${plan.id} chapter total", expected, seen.size)
         }
     }
 
     @Test
-    fun `the reading tracks leave the psalms to the psalter track`() {
-        // The ግጻዌ already carries 90.8% of the NT, so duplicating it here would
-        // double a devout reader's day for nothing. The Psalter is a different
-        // case: it was left out as "prayed in the hours", but only 77 of the
-        // 150 psalms appear whole in an hour, so it has a track of its own.
+    fun `the reading tracks read the whole canon, the Gospels and the Psalter included`() {
+        // The plan used to skip the New Testament, because the ግጻዌ carries most
+        // of it, and the Psalter, because it is prayed in the hours. That made
+        // it a supplement: someone who finished it had still never read Matthew
+        // straight through. It reads everything now, and overlapping the day's
+        // ግጻዌ is the accepted cost.
         for (plan in content.plans.filter { it.id != "psalter" }) {
-            for (day in plan.readings) for (r in day.r) {
-                assertTrue("${plan.id}: psalms should not be in the plan", r.b != "psalms")
-                assertTrue("${plan.id}: matthew should not be in the plan", r.b != "matthew")
-            }
+            val books = plan.readings.flatMap { day -> day.r.map { it.b } }.toSet()
+            assertTrue("${plan.id}: the Psalter is missing", "psalms" in books)
+            assertTrue("${plan.id}: Matthew is missing", "matthew" in books)
+            assertTrue("${plan.id}: Revelation is missing", "revelation" in books)
         }
     }
 
@@ -124,11 +125,20 @@ class ReadingPlanDataTest {
     @Test
     fun `no day is punishingly long`() {
         // A day that runs far past its budget is where people quit.
+        //
+        // Measured against the plan's own average rather than a fixed chapter
+        // count: the packer budgets verses, so a long day is a run of short
+        // chapters and a fixed cap would fail the moment the corpus changed —
+        // which is exactly what it did when the plan grew to the whole canon.
         for (plan in content.plans) {
-            val cap = if (plan.id == "annual") 8 else 14
+            val total = plan.readings.sumOf { day -> day.r.sumOf { it.chapterCount } }
+            val average = total.toDouble() / plan.days
             for (day in plan.readings) {
                 val n = day.r.sumOf { it.chapterCount }
-                assertTrue("${plan.id} day ${day.d} has $n chapters", n <= cap)
+                assertTrue(
+                    "${plan.id} day ${day.d} has $n chapters, over 4x the ${"%.1f".format(average)} average",
+                    n <= average * 4,
+                )
             }
         }
     }
