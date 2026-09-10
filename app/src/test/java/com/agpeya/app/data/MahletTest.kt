@@ -14,10 +14,12 @@ import java.io.File
 /**
  * Guards the merged ሥርዓተ ማኅሌት.
  *
- * The old test asserted the ግጻዌ's own thirty-seven orders; that book is now a
- * source rather than an asset, folded into this corpus, so what is worth
- * asserting is that the merge held: the year is covered, the ጽጌ orders can
- * still be reached by date, and no order lost its parts on the way in.
+ * The numbers are the measured shape of the merge and are pinned on purpose:
+ * a rebuild that changes them is either a content change worth noticing or a
+ * regression in the builder, and either way the diff should have to say
+ * which. What matters beyond the counts is that the merge held — the year is
+ * covered, the ጽጌ orders can still be reached by date, no order or edition
+ * lost its text on the way in, and every edition can be traced to its post.
  */
 class MahletTest {
 
@@ -39,11 +41,38 @@ class MahletTest {
     }
 
     @Test
-    fun `the merged book is a hundred and forty-two orders, none of them empty`() {
-        assertEquals(142, orders.size)
-        assertEquals(2247, orders.sumOf { it.parts.size })
+    fun `the merged corpus is two hundred and fifteen orders, none of them empty`() {
+        assertEquals(215, orders.size)
+        assertEquals(3386, orders.sumOf { it.parts.size })
         assertTrue("an order has no parts", orders.all { it.parts.isNotEmpty() })
         assertTrue("a part has no verse", orders.all { o -> o.parts.all { it.verse.isNotBlank() } })
+    }
+
+    /**
+     * An edition is a whole alternative text of an order, read in place of the
+     * book's. One with no parts is a tab onto a blank page, and one with no
+     * post behind it cannot be checked against its source.
+     */
+    @Test
+    fun `every edition has text and a post it came from`() {
+        val editions = orders.flatMap { it.versions }
+        assertEquals(275, editions.size)
+        assertTrue("an edition has no parts", editions.all { it.parts.isNotEmpty() })
+        assertTrue("an edition part has no verse", editions.all { v -> v.parts.all { it.verse.isNotBlank() } })
+        assertTrue("an edition has no id", editions.all { it.id.isNotBlank() })
+        assertTrue("an edition has no source post", editions.all { !it.url.isNullOrBlank() })
+    }
+
+    /**
+     * Where the book has no order and the channel does, the first edition
+     * stands for it — and the order has to say so, because it is not the
+     * book's text and a reader comparing it to the printed page should know.
+     */
+    @Test
+    fun `an order standing on an edition says where it came from`() {
+        val fromChannel = orders.filter { it.source == "ቴሌግራም" }
+        assertEquals(72, fromChannel.size)
+        assertTrue(fromChannel.all { it.parts.isNotEmpty() })
     }
 
     /**
@@ -74,16 +103,24 @@ class MahletTest {
         )
     }
 
+    /**
+     * Down from six: the Telegram editions carry four of the orders the scan
+     * alone did not. The two left are the ones nothing else has.
+     */
     @Test
-    fun `the six orders the scan does not carry keep their source`() {
+    fun `the two orders nothing else carries keep their source`() {
         val fromGitsawe = orders.filter { it.source == "ግጻዌ" }
-        assertEquals(6, fromGitsawe.size)
+        assertEquals(2, fromGitsawe.size)
         assertTrue(fromGitsawe.all { it.parts.isNotEmpty() })
     }
 
     @Test
     fun `ids are unique, so a route reaches exactly one order`() {
         assertEquals(orders.size, orders.mapTo(mutableSetOf()) { it.id }.size)
-        assertTrue(orders.all { it.kind == MahletKind.VIGIL || it.kind == MahletKind.MAHLET })
+        val known = setOf(
+            MahletKind.VIGIL, MahletKind.MAHLET, MahletKind.ANGERGARI,
+            MahletKind.PROCESSION, MahletKind.PRAYER, MahletKind.UNSPECIFIED,
+        )
+        assertTrue("an order has a kind the app cannot label", orders.all { it.kind in known })
     }
 }

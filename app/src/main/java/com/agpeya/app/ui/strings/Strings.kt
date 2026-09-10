@@ -157,6 +157,14 @@ interface Strings {
     /** "፫ ከ፴፭" — which part of how many, since a name repeats up to 13 times. */
     fun mahletNth(n: Int, of: Int): String
     val mahletDawn: String
+    /** The label for any kind of order — ዋዜማ, ነግሥ, አንገርጋሪ, and the rarer ones. */
+    fun mahletKindLabel(kind: String): String
+    /** The book's own text, as opposed to an edition of it. */
+    val mahletBookText: String
+    /** "እትም ፫" — the nth Telegram edition of an order. */
+    fun mahletEdition(n: Int): String
+    /** Set between a part and the one it may be sung in place of. */
+    val mahletOr: String
     fun mahletParts(n: Int): String
     val mahletNone: String
     fun mahletOrders(n: Int): String
@@ -995,6 +1003,17 @@ object AmharicStrings : Strings {
         "${com.agpeya.app.ui.reading.geezNumeral(n)} ከ${com.agpeya.app.ui.reading.geezNumeral(of)}"
     override val mahletDawn = "ነግሥ"
     override fun mahletParts(n: Int) = "${com.agpeya.app.ui.reading.geezNumeral(n)} ክፍል"
+    override fun mahletKindLabel(kind: String) = when (kind) {
+        "vigil" -> "ዋዜማ"
+        "mahlet" -> "ነግሥ"
+        "angergari" -> "አንገርጋሪ"
+        "procession" -> "ዑደት"
+        "prayer" -> "ጸሎት"
+        else -> "ሥርዓት"
+    }
+    override val mahletBookText = "የመጽሐፉ"
+    override fun mahletEdition(n: Int) = "እትም ${com.agpeya.app.ui.reading.geezNumeral(n)}"
+    override val mahletOr = "ወይም"
     override val mahletNone = "ማኅሌቱ ገና አልገባም"
     override fun mahletOrders(n: Int) = "${com.agpeya.app.ui.reading.geezNumeral(n)} ሥርዓቶች"
     override val mahletToday = "የዛሬው ሥርዓት"
@@ -1788,6 +1807,17 @@ object EnglishStrings : Strings {
     override fun mahletNth(n: Int, of: Int) = "$n of $of"
     override val mahletDawn = "ነግሥ"
     override fun mahletParts(n: Int) = if (n == 1) "1 part" else "$n parts"
+    override fun mahletKindLabel(kind: String) = when (kind) {
+        "vigil" -> "ዋዜማ"
+        "mahlet" -> "ነግሥ"
+        "angergari" -> "አንገርጋሪ"
+        "procession" -> "Procession"
+        "prayer" -> "Prayer"
+        else -> "Order"
+    }
+    override val mahletBookText = "Book"
+    override fun mahletEdition(n: Int) = "Edition $n"
+    override val mahletOr = "or"
     override val mahletNone = "Coming soon"
     override fun mahletOrders(n: Int) = "$n orders"
     override val mahletToday = "Today's order"

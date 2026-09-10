@@ -278,8 +278,7 @@ fun GitsaweScreen(
                             ) {
                                 Column(Modifier.weight(1f)) {
                                     Text(
-                                        if (order.kind == com.agpeya.app.model.MahletKind.VIGIL)
-                                            s.mahletVigil else s.mahletDawn,
+                                        s.mahletKindLabel(order.kind),
                                         style = MaterialTheme.typography.labelMedium,
                                         color = MaterialTheme.colorScheme.secondary,
                                     )

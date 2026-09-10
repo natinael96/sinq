@@ -1,0 +1,894 @@
+{
+  "counts": {
+    "book_orders": 100,
+    "book_feasts": 61,
+    "telegram_feasts_matched": 36,
+    "telegram_orders_considered": 410,
+    "telegram_versions_retained": 347,
+    "text_variant_or_addition": 205,
+    "duplicate_editions_consolidated": 11,
+    "near_duplicate_editions_review": 52,
+    "telegram_feasts_new_feast": 48,
+    "new_feast": 137,
+    "telegram_feasts_review": 41,
+    "telegram_orders_review": 85,
+    "missing_service": 5
+  },
+  "feast_decisions": [
+    {
+      "month": 1,
+      "name": "ዓውደ ዓመት",
+      "day": 1,
+      "action": "matched",
+      "target": "book-01-1"
+    },
+    {
+      "month": 1,
+      "name": "ምትረተ ርእሱ ለቅዱስ ዮሐንስ",
+      "day": 2,
+      "action": "new_feast",
+      "target": "telegram-01-1"
+    },
+    {
+      "month": 1,
+      "name": "ልደቱ ለዮሐንስ ወልደ ነጎድጓድ",
+      "day": 4,
+      "action": "new_feast",
+      "target": "telegram-01-2"
+    },
+    {
+      "month": 1,
+      "name": "ጼዴንያ",
+      "day": 10,
+      "action": "new_feast",
+      "target": "telegram-01-3"
+    },
+    {
+      "month": 1,
+      "name": "ፋሲለደስ",
+      "day": 11,
+      "action": "matched",
+      "target": "book-01-78"
+    },
+    {
+      "month": 1,
+      "name": "ሚካኤል",
+      "day": 12,
+      "action": "new_feast",
+      "target": "telegram-01-5"
+    },
+    {
+      "month": 1,
+      "name": "ኪዳነ ምሕረት",
+      "day": 16,
+      "action": "new_feast",
+      "target": "telegram-01-6"
+    },
+    {
+      "month": 1,
+      "name": "አስተርእዮተ መስቀል",
+      "day": 17,
+      "action": "matched",
+      "target": "book-01-145"
+    },
+    {
+      "month": 1,
+      "name": "ገብርኤል",
+      "day": 19,
+      "action": "new_feast",
+      "target": "telegram-01-8"
+    },
+    {
+      "month": 1,
+      "name": "ብዙኃን ማርያም",
+      "day": 21,
+      "action": "matched",
+      "target": "book-01-203"
+    },
+    {
+      "month": 1,
+      "name": "ተክለ ሃይማኖት",
+      "day": 24,
+      "action": "new_feast",
+      "target": "telegram-01-10"
+    },
+    {
+      "month": 1,
+      "name": "መድኃኔዓለም",
+      "day": 27,
+      "action": "new_feast",
+      "target": "telegram-01-11"
+    },
+    {
+      "month": 1,
+      "name": "አርሴማ",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 1,
+      "name": "ወልድ ወቅድስት አርሴማ",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 2,
+      "name": "ገብረ መንፈስ ቅዱስ",
+      "day": 5,
+      "action": "matched",
+      "target": "book-02-1"
+    },
+    {
+      "month": 2,
+      "name": "አረጋዊ",
+      "day": 14,
+      "action": "new_feast",
+      "target": "telegram-02-1"
+    },
+    {
+      "month": 2,
+      "name": "እስጢፋኖስ",
+      "day": 17,
+      "action": "new_feast",
+      "target": "telegram-02-2"
+    },
+    {
+      "month": 2,
+      "name": "ማርያም",
+      "day": 21,
+      "action": "new_feast",
+      "target": "telegram-02-3"
+    },
+    {
+      "month": 2,
+      "name": "መድኃኔዓለም",
+      "day": 27,
+      "action": "matched",
+      "target": "book-02-386"
+    },
+    {
+      "month": 2,
+      "name": "ወልድ",
+      "day": 29,
+      "action": "new_feast",
+      "target": "telegram-02-5"
+    },
+    {
+      "month": 2,
+      "name": "ዕረፍተ ቅዱስ ፊልጶስ",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 3,
+      "name": "ቁስቋም",
+      "day": 6,
+      "action": "matched",
+      "target": "book-03-1"
+    },
+    {
+      "month": 3,
+      "name": "፬ቱ እንስሳ",
+      "day": 8,
+      "action": "new_feast",
+      "target": "telegram-03-1"
+    },
+    {
+      "month": 3,
+      "name": "ሚካኤል",
+      "day": 12,
+      "action": "matched",
+      "target": "book-03-130"
+    },
+    {
+      "month": 3,
+      "name": "አእላፍ",
+      "day": 13,
+      "action": "new_feast",
+      "target": "telegram-03-3"
+    },
+    {
+      "month": 3,
+      "name": "ገብርኤል",
+      "day": 19,
+      "action": "matched",
+      "target": "book-03-205"
+    },
+    {
+      "month": 3,
+      "name": "ጽዮን",
+      "day": 21,
+      "action": "matched",
+      "target": "book-03-232"
+    },
+    {
+      "month": 3,
+      "name": "ካህናተ ሰማይ ወተክለ ሃይማኖት",
+      "day": 24,
+      "action": "new_feast",
+      "target": "telegram-03-6"
+    },
+    {
+      "month": 3,
+      "name": "መርቆሬዎስ",
+      "day": 25,
+      "action": "matched",
+      "target": "book-03-365"
+    },
+    {
+      "month": 3,
+      "name": "ሀብተ ማርያም",
+      "day": 26,
+      "action": "new_feast",
+      "target": "telegram-03-8"
+    },
+    {
+      "month": 3,
+      "name": "ጴጥሮስ ወበዓለ እግዚአብሔር",
+      "day": 29,
+      "action": "new_feast",
+      "target": "telegram-03-9"
+    },
+    {
+      "month": 3,
+      "name": "ሐና",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 3,
+      "name": "ጊዮርጊስ",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 4,
+      "name": "በዓታ ለማርያም",
+      "day": 3,
+      "action": "matched",
+      "target": "book-04-1"
+    },
+    {
+      "month": 4,
+      "name": "ሩፋኤል",
+      "day": 13,
+      "action": "new_feast",
+      "target": "telegram-04-1"
+    },
+    {
+      "month": 4,
+      "name": "ኪዳነ ምሕረት",
+      "day": 16,
+      "action": "new_feast",
+      "target": "telegram-04-2"
+    },
+    {
+      "month": 4,
+      "name": "ገብርኤል",
+      "day": 19,
+      "action": "matched",
+      "target": "book-04-285"
+    },
+    {
+      "month": 4,
+      "name": "ደቅስዮስ",
+      "day": 22,
+      "action": "new_feast",
+      "target": "telegram-04-4"
+    },
+    {
+      "month": 4,
+      "name": "መድኃኔዓለም",
+      "day": 27,
+      "action": "new_feast",
+      "target": "telegram-04-5"
+    },
+    {
+      "month": 4,
+      "name": "ልደት",
+      "day": 29,
+      "action": "matched",
+      "target": "book-04-595"
+    },
+    {
+      "month": 4,
+      "name": "ማርያም",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 4,
+      "name": "ተክለ ሃይማኖት",
+      "day": null,
+      "action": "matched",
+      "target": "book-04-412"
+    },
+    {
+      "month": 4,
+      "name": "አማኑኤል",
+      "day": null,
+      "action": "matched",
+      "target": "book-04-504"
+    },
+    {
+      "month": 4,
+      "name": "አርሴማ",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 4,
+      "name": "አባ ሳሙኤል",
+      "day": null,
+      "action": "matched",
+      "target": "book-04-100"
+    },
+    {
+      "month": 4,
+      "name": "ኪሮስ",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 5,
+      "name": "ልደቱ ወእረፍቱ ለቅዱስ እስጢፋኖስ ቀዳሜ ሰማዕት",
+      "day": 1,
+      "action": "new_feast",
+      "target": "telegram-05-0"
+    },
+    {
+      "month": 5,
+      "name": "ግዝረት",
+      "day": 6,
+      "action": "new_feast",
+      "target": "telegram-05-1"
+    },
+    {
+      "month": 5,
+      "name": "ሥላሴ",
+      "day": 7,
+      "action": "matched",
+      "target": "book-05-95"
+    },
+    {
+      "month": 5,
+      "name": "ጥምቀት",
+      "day": 11,
+      "action": "matched",
+      "target": "book-05-164"
+    },
+    {
+      "month": 5,
+      "name": "ቃና ዘገሊላ",
+      "day": 12,
+      "action": "matched",
+      "target": "book-05-245"
+    },
+    {
+      "month": 5,
+      "name": "ቂርቆስ",
+      "day": 15,
+      "action": "new_feast",
+      "target": "telegram-05-5"
+    },
+    {
+      "month": 5,
+      "name": "እስጢፋኖስ",
+      "day": 17,
+      "action": "new_feast",
+      "target": "telegram-05-6"
+    },
+    {
+      "month": 5,
+      "name": "ሲመቱ ለቅዱስ ዑራኤል",
+      "day": 22,
+      "action": "new_feast",
+      "target": "telegram-05-7"
+    },
+    {
+      "month": 5,
+      "name": "ጊዮርጊስ",
+      "day": 23,
+      "action": "review",
+      "reason": "date_conflict"
+    },
+    {
+      "month": 5,
+      "name": "መድኃኔዓለም",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 5,
+      "name": "ተክለ ሃይማኖት",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 5,
+      "name": "እግዚአብሔር አብ",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 5,
+      "name": "ኪዳነ ምሕረት",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 5,
+      "name": "ወልድ",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 5,
+      "name": "ዑራኤል",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 5,
+      "name": "ዮሐንስ ወልደ ነጎድጓድ",
+      "day": null,
+      "action": "matched",
+      "target": "book-05-1"
+    },
+    {
+      "month": 5,
+      "name": "ገብርኤል",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 6,
+      "name": "ልደተ ስምዖን",
+      "day": 8,
+      "action": "new_feast",
+      "target": "telegram-06-0"
+    },
+    {
+      "month": 6,
+      "name": "ፊልጶስ",
+      "day": 20,
+      "action": "new_feast",
+      "target": "telegram-06-1"
+    },
+    {
+      "month": 6,
+      "name": "ዓድዋ ቅዱስ ጊዮርጊስ",
+      "day": 23,
+      "action": "new_feast",
+      "target": "telegram-06-2"
+    },
+    {
+      "month": 6,
+      "name": "ጊዮርጊስ",
+      "day": 23,
+      "action": "new_feast",
+      "target": "telegram-06-3"
+    },
+    {
+      "month": 6,
+      "name": "ሚካኤል",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 6,
+      "name": "ኪዳነ ምሕረት",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 7,
+      "name": "ገብረ መንፈስ ቅዱስ",
+      "day": 5,
+      "action": "new_feast",
+      "target": "telegram-07-0"
+    },
+    {
+      "month": 7,
+      "name": "መድኃኔዓለም",
+      "day": 27,
+      "action": "matched",
+      "target": "book-07-1"
+    },
+    {
+      "month": 7,
+      "name": "እግዚአብሔር",
+      "day": 29,
+      "action": "new_feast",
+      "target": "telegram-07-2"
+    },
+    {
+      "month": 7,
+      "name": "እግዚአብሔር ወልድ (ትስብእት",
+      "day": 29,
+      "action": "review",
+      "reason": "incomplete_name"
+    },
+    {
+      "month": 8,
+      "name": "ሚካኤል",
+      "day": 12,
+      "action": "new_feast",
+      "target": "telegram-08-0"
+    },
+    {
+      "month": 8,
+      "name": "ጊዮርጊስ",
+      "day": 23,
+      "action": "matched",
+      "target": "book-08-30"
+    },
+    {
+      "month": 8,
+      "name": "መድኃኔዓለም",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 8,
+      "name": "ማርያም",
+      "day": null,
+      "action": "matched",
+      "target": "book-08-1"
+    },
+    {
+      "month": 8,
+      "name": "ተክለ ሃይማኖት",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 8,
+      "name": "ኪዳነ ምሕረት",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 8,
+      "name": "ወልድ",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 8,
+      "name": "ገብርኤል",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 9,
+      "name": "ልደታ ለማርያም",
+      "day": 1,
+      "action": "matched",
+      "target": "book-09-1"
+    },
+    {
+      "month": 9,
+      "name": "ተክለ ሃይማኖት ወክርስቶሰ ሰምራ",
+      "day": 12,
+      "action": "review",
+      "reason": "ambiguous_book_date"
+    },
+    {
+      "month": 9,
+      "name": "ዓቢየ እግዚእ",
+      "day": 19,
+      "action": "matched",
+      "target": "book-09-273"
+    },
+    {
+      "month": 9,
+      "name": "አማኑኤል",
+      "day": 28,
+      "action": "new_feast",
+      "target": "telegram-09-3"
+    },
+    {
+      "month": 9,
+      "name": "መድኃኔዓለም",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 9,
+      "name": "ተክለ ሃይማኖት",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 9,
+      "name": "አረጋዊ ወገብረ ክርስቶስ",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 9,
+      "name": "ኪዳነ ምሕረት",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 9,
+      "name": "ወልድ",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 9,
+      "name": "ያሬድ",
+      "day": null,
+      "action": "matched",
+      "target": "book-09-141"
+    },
+    {
+      "month": 9,
+      "name": "ደብረ ምጥማቅ",
+      "day": null,
+      "action": "matched",
+      "target": "book-09-356"
+    },
+    {
+      "month": 9,
+      "name": "ገብርኤል",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 10,
+      "name": "ሚካኤል",
+      "day": 12,
+      "action": "matched",
+      "target": "book-10-1"
+    },
+    {
+      "month": 10,
+      "name": "ሕንፀተ ቤታ ለማርያም",
+      "day": 21,
+      "action": "matched",
+      "target": "book-10-84"
+    },
+    {
+      "month": 10,
+      "name": "ተክለ ሃይማኖት",
+      "day": 24,
+      "action": "new_feast",
+      "target": "telegram-10-2"
+    },
+    {
+      "month": 10,
+      "name": "ቅዳሴ ቤቱ ለገብርኤል",
+      "day": 26,
+      "action": "new_feast",
+      "target": "telegram-10-3"
+    },
+    {
+      "month": 10,
+      "name": "ዮሐንስ መጥምቅ",
+      "day": 30,
+      "action": "matched",
+      "target": "book-10-185"
+    },
+    {
+      "month": 10,
+      "name": "መድኃኔዓለም",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 10,
+      "name": "እግዚእ",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 10,
+      "name": "ኪዳነ ምሕረት",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 10,
+      "name": "ገብርኤል",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 10,
+      "name": "ጊዮርጊስ",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 11,
+      "name": "ጴጥሮስ ወጳውሎስ",
+      "day": 5,
+      "action": "matched",
+      "target": "book-11-1"
+    },
+    {
+      "month": 11,
+      "name": "ኪዳነ ምሕረት",
+      "day": 16,
+      "action": "new_feast",
+      "target": "telegram-11-1"
+    },
+    {
+      "month": 11,
+      "name": "ገብርኤል",
+      "day": 19,
+      "action": "matched",
+      "target": "book-11-169"
+    },
+    {
+      "month": 11,
+      "name": "ዑራኤል",
+      "day": 22,
+      "action": "new_feast",
+      "target": "telegram-11-3"
+    },
+    {
+      "month": 11,
+      "name": "ጊዮርጊስ",
+      "day": 23,
+      "action": "new_feast",
+      "target": "telegram-11-4"
+    },
+    {
+      "month": 11,
+      "name": "ተክለ ሃይማኖት",
+      "day": 24,
+      "action": "new_feast",
+      "target": "telegram-11-5"
+    },
+    {
+      "month": 11,
+      "name": "መርቆሬዎስ",
+      "day": 25,
+      "action": "new_feast",
+      "target": "telegram-11-6"
+    },
+    {
+      "month": 11,
+      "name": "መድኃኔዓለም",
+      "day": 27,
+      "action": "new_feast",
+      "target": "telegram-11-7"
+    },
+    {
+      "month": 11,
+      "name": "ሚካኤል",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 11,
+      "name": "ማርያም",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 11,
+      "name": "ሥላሴ",
+      "day": null,
+      "action": "matched",
+      "target": "book-11-83"
+    },
+    {
+      "month": 11,
+      "name": "አባ ኪሮስ",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 11,
+      "name": "ወልድ",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 12,
+      "name": "ጽንሰታ ለማርያም",
+      "day": 7,
+      "action": "new_feast",
+      "target": "telegram-12-0"
+    },
+    {
+      "month": 12,
+      "name": "ደብረ ታቦር",
+      "day": 13,
+      "action": "new_feast",
+      "target": "telegram-12-1"
+    },
+    {
+      "month": 12,
+      "name": "ኪዳነ ምሕረት",
+      "day": 16,
+      "action": "new_feast",
+      "target": "telegram-12-2"
+    },
+    {
+      "month": 12,
+      "name": "ማርያም",
+      "day": 21,
+      "action": "new_feast",
+      "target": "telegram-12-3"
+    },
+    {
+      "month": 12,
+      "name": "ተክለ ሃይማኖት",
+      "day": 24,
+      "action": "matched",
+      "target": "book-12-1"
+    },
+    {
+      "month": 12,
+      "name": "መድኃኔዓለም",
+      "day": 27,
+      "action": "new_feast",
+      "target": "telegram-12-5"
+    },
+    {
+      "month": 12,
+      "name": "እግዚአብሔር",
+      "day": 29,
+      "action": "new_feast",
+      "target": "telegram-12-6"
+    },
+    {
+      "month": 12,
+      "name": "ገብርኤል",
+      "day": null,
+      "action": "review",
+      "reason": "undated_unmatched"
+    },
+    {
+      "month": 13,
+      "name": "ሩፋኤል",
+      "day": null,
+      "action": "matched",
+      "target": "book-13-1"
+    }
+  ]
+}

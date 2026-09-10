@@ -392,6 +392,9 @@ def check_books() -> None:
     print(f"books: {len(listed)} books, {chapters} chapters, {blocks} blocks, {chars} chars")
 
 
+MAHLET_KINDS = ("vigil", "mahlet", "angergari", "procession", "prayer", "unspecified")
+
+
 def check_mahlet() -> None:
     """The merged ሥርዓተ ማኅሌት: the index and the month files must agree exactly.
 
@@ -418,7 +421,7 @@ def check_mahlet() -> None:
             listed[oid] = num
             if not meta.get("feast"):
                 fail(f"mahlet/index.json: order {oid} has no feast")
-            if meta.get("kind") not in ("vigil", "mahlet"):
+            if meta.get("kind") not in MAHLET_KINDS:
                 fail(f"mahlet/index.json: order {oid} has kind {meta.get('kind')!r}")
             if meta.get("season") == "tsige":
                 tsige += 1
@@ -430,7 +433,7 @@ def check_mahlet() -> None:
             if meta.get("source") == "ግጻዌ":
                 from_gitsawe += 1
 
-    parts = 0
+    parts = editions = 0
     for month in index.get("months", []):
         num = month["month"]
         data = load("mahlet", f"m{num}.json")
@@ -451,12 +454,28 @@ def check_mahlet() -> None:
                 if not p.get("verse", "").strip():
                     fail(f"mahlet/m{num}.json {meta['id']}: a part has no verse")
                 check_text(f"mahlet/m{num}.json {meta['id']}", p.get("verse", ""))
+            # An edition is a whole alternative text; one with nothing in it is
+            # a tab that opens on a blank page.
+            versions_ = order.get("versions", [])
+            if len(versions_) != meta.get("versions", 0):
+                fail(f"mahlet/m{num}.json {meta['id']}: {len(versions_)} editions, "
+                     f"index says {meta.get('versions', 0)}")
+            for v in versions_:
+                editions += 1
+                if not v.get("id"):
+                    fail(f"mahlet/m{num}.json {meta['id']}: an edition has no id")
+                if not v.get("parts"):
+                    fail(f"mahlet/m{num}.json {meta['id']}: edition {v.get('id')} has no parts")
+                for p in v.get("parts", []):
+                    if not p.get("verse", "").strip():
+                        fail(f"mahlet/m{num}.json {meta['id']}: edition {v.get('id')} has a part with no verse")
+                    check_text(f"mahlet/m{num}.json {meta['id']} {v.get('id')}", p.get("verse", ""))
         for oid in orders:
             if oid not in listed:
                 fail(f"mahlet/m{num}.json holds {oid}, which the index does not list")
 
     print(f"mahlet: {len(listed)} orders ({dated} dated, {tsige} ዘመነ ጽጌ, "
-          f"{from_gitsawe} from the ግጻዌ), {parts} parts")
+          f"{from_gitsawe} from the ግጻዌ), {parts} parts, {editions} editions")
 
 
 def main() -> int:

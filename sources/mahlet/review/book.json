@@ -1,0 +1,385 @@
+[
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-01-1",
+    "chant": "b1-25",
+    "alternative_to": "b1-23"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-01-1",
+    "chant": "b1-37",
+    "alternative_to": "b1-35"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-01-1",
+    "chant": "b1-42",
+    "alternative_to": "b1-40"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-01-78",
+    "chant": "b1-99",
+    "alternative_to": "b1-97"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-01-78",
+    "chant": "b1-108",
+    "alternative_to": "b1-106"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-01-145",
+    "chant": "b1-199",
+    "alternative_to": "b1-197"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-01-260",
+    "chant": "b1-267",
+    "alternative_to": "b1-265"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-01-260",
+    "chant": "b1-298",
+    "alternative_to": "b1-296"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-02-1",
+    "chant": "b2-31",
+    "alternative_to": "b2-29"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-02-62",
+    "chant": "b2-81",
+    "alternative_to": "b2-78"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-02-62",
+    "chant": "b2-94",
+    "alternative_to": "b2-92"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-02-62",
+    "chant": "b2-101",
+    "alternative_to": "b2-98"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-02-125",
+    "chant": "b2-144",
+    "alternative_to": "b2-141"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-02-125",
+    "chant": "b2-169",
+    "alternative_to": "b2-166"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-02-125",
+    "chant": "b2-175",
+    "alternative_to": "b2-173"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-02-323",
+    "chant": "b2-354",
+    "alternative_to": "b2-352"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-02-323",
+    "chant": "b2-362",
+    "alternative_to": "b2-359"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-02-323",
+    "chant": "b2-368",
+    "alternative_to": "b2-366"
+  },
+  {
+    "type": "book_date_unresolved",
+    "feast": "book-02-386",
+    "headings": [
+      "ሥርዓተ ዋዜማ ዘጥቅምት መድኃኔዓለም ጥቅምት ፳፮",
+      "ሥርዓተ ማኅሌት ዘጥቅምት መድኃኔዓለም"
+    ]
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-03-1",
+    "chant": "b3-61",
+    "alternative_to": "b3-59"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-03-64",
+    "chant": "b3-88",
+    "alternative_to": "b3-86"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-03-205",
+    "chant": "b3-215",
+    "alternative_to": "b3-213"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-03-205",
+    "chant": "b3-221",
+    "alternative_to": "b3-219"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-03-232",
+    "chant": "b3-266",
+    "alternative_to": "b3-264"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-03-232",
+    "chant": "b3-276",
+    "alternative_to": "b3-274"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-03-232",
+    "chant": "b3-293",
+    "alternative_to": "b3-291"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-03-232",
+    "chant": "b3-309",
+    "alternative_to": "b3-307"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-03-365",
+    "chant": "b3-454",
+    "alternative_to": "b3-451"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-04-100",
+    "chant": "b4-192",
+    "alternative_to": "b4-190"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-04-412",
+    "chant": "b4-427",
+    "alternative_to": "b4-425"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-04-412",
+    "chant": "b4-453",
+    "alternative_to": "b4-451"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-04-504",
+    "chant": "b4-529",
+    "alternative_to": "b4-527"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-04-504",
+    "chant": "b4-561",
+    "alternative_to": "b4-559"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-04-504",
+    "chant": "b4-583",
+    "alternative_to": "b4-581"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-05-1",
+    "chant": "b5-28",
+    "alternative_to": "b5-25"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-05-1",
+    "chant": "b5-59",
+    "alternative_to": "b5-56"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-05-1",
+    "chant": "b5-69",
+    "alternative_to": "b5-66"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-05-1",
+    "chant": "b5-85",
+    "alternative_to": "b5-82"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-05-309",
+    "chant": "b5-337",
+    "alternative_to": "b5-335"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-05-309",
+    "chant": "b5-351",
+    "alternative_to": "b5-348"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-05-309",
+    "chant": "b5-375",
+    "alternative_to": "b5-372"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-07-1",
+    "chant": "b6-23",
+    "alternative_to": "b6-21"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-07-1",
+    "chant": "b6-36",
+    "alternative_to": "b6-34"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-07-1",
+    "chant": "b6-53",
+    "alternative_to": "b6-51"
+  },
+  {
+    "type": "book_date_unresolved",
+    "feast": "book-07-1",
+    "headings": [
+      "ሥርዓተ ዋዜማ ዘመጋቢት (መድኃኔዓለም) መድኃኔዓለም",
+      "ሥርዓተ ማኅሌት ዘመጋቢት መድኃኔዓለም"
+    ]
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-08-1",
+    "chant": "b7-16",
+    "alternative_to": "b7-14"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-08-1",
+    "chant": "b7-23",
+    "alternative_to": "b7-21"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-08-30",
+    "chant": "b7-74",
+    "alternative_to": "b7-72"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-08-30",
+    "chant": "b7-76",
+    "alternative_to": "b7-74"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-08-30",
+    "chant": "b7-81",
+    "alternative_to": "b7-78"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-08-30",
+    "chant": "b7-110",
+    "alternative_to": "b7-108"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-09-85",
+    "chant": "b8-99",
+    "alternative_to": "b8-97"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-09-85",
+    "chant": "b8-109",
+    "alternative_to": "b8-107"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-09-85",
+    "chant": "b8-118",
+    "alternative_to": "b8-116"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-09-85",
+    "chant": "b8-127",
+    "alternative_to": "b8-125"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-09-85",
+    "chant": "b8-139",
+    "alternative_to": "b8-137"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-09-210",
+    "chant": "b8-242",
+    "alternative_to": "b8-240"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-09-210",
+    "chant": "b8-270",
+    "alternative_to": "b8-268"
+  },
+  {
+    "type": "book_date_unresolved",
+    "feast": "book-09-210",
+    "headings": [
+      "ሥርዓተ ማኅሌት ዘግንቦት ተክለሃይማኖት፣ ክርስቶስ ሠምራ ግንቦት ፲ /፪/"
+    ]
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-10-1",
+    "chant": "b9-78",
+    "alternative_to": "b9-76"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-11-1",
+    "chant": "b10-42",
+    "alternative_to": "b10-40"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-12-1",
+    "chant": "b11-9",
+    "alternative_to": "b11-7"
+  },
+  {
+    "type": "book_alternative_scope",
+    "feast": "book-12-1",
+    "chant": "b11-37",
+    "alternative_to": "b11-34"
+  }
+]

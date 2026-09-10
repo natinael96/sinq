@@ -64,12 +64,18 @@ the full SIL OFL 1.1 and MIT licence texts.
    bundled any longer.
 
 4. ሥርዓተ ማኅሌት (MAHLET)
-   The orders of service are merged from three books. The spine is
-   ሥርዓተ ማኅሌት ዘዓበይት በዓላት and the ዘመነ ጽጌ አቋቋም volumes, scanned from available
-   PDF scans of the printed books by the Sinq maintainer; the six orders those
-   do not carry come from the ግጻዌ credited below and are labelled with it.
+   The orders of service are merged from three sources. The spine is a
+   book-first editorial edition (sources/mahlet/) of ሥርዓተ ማኅሌት ዘዓበይት በዓላት,
+   scanned from an available PDF scan of the printed book by the Sinq
+   maintainer, set beside the editions of the same orders posted on the
+   EOTC Mahlet Telegram channel (https://t.me/EOTCmahlet); each edition keeps
+   the link to the post it came from, and where the book has no order and the
+   channel does, the order says so. The ዘመነ ጽጌ አቋቋም volumes, likewise scanned
+   by the maintainer, give the season its dated orders; the two orders nothing
+   else carries come from the ግጻዌ credited below and are labelled with it.
    Released as open content under CC BY-NC-ND 4.0. Built by
-   tools/build_mahlet.py.
+   tools/build_mahlet.py; the merge's own rules and review files are in
+   sources/mahlet/README.md.
 
 5. ግጻዌ (GITSAWE)
    The lectionary (the fixed 366-day cycle plus the movable, Sunday,

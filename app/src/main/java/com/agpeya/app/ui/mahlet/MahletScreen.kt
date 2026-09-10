@@ -2,6 +2,8 @@ package com.agpeya.app.ui.mahlet
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -83,19 +85,24 @@ fun MahletScreen(
         val opened = MahletRepository.order(context, orderId) ?: return@produceState
         val sameFeast = MahletRepository.month(context, opened.month ?: 0)
             .filter { it.feast.trim() == opened.feast.trim() && it.day == opened.day }
-            .sortedBy { it.kind != MahletKind.VIGIL }
+            .sortedBy { MahletKind.rank(it.kind) }
         value = sameFeast.ifEmpty { listOf(opened) }
     }
     var tab by rememberSaveable(orderId) { mutableIntStateOf(0) }
     val shown = orders.getOrNull(tab.coerceIn(0, (orders.size - 1).coerceAtLeast(0)))
-    val parts = shown?.parts.orEmpty()
+    // Which text of the order is on the page: -1 the book's own (or the edition
+    // standing in for it), n the nth further edition. An edition replaces the
+    // text wholesale — it is never read on after the book's.
+    var edition by rememberSaveable(orderId, tab) { mutableIntStateOf(-1) }
+    val editions = shown?.versions.orEmpty()
+    val parts = if (edition in editions.indices) editions[edition].parts else shown?.parts.orEmpty()
 
     // Resolved once per feast rather than per part: 137 of the book's movements
     // are named after a book on the shelf. Keyed by name AND opening words, not
     // by name alone — one feast can sing several stanzas of the same መልክእ, and
     // each of them opens the hymn at a different place.
     val bookByPart by produceState(emptyMap<String, BookRepository.BookLocation>(), orders) {
-        val wanted = orders.flatMap { it.parts }
+        val wanted = orders.flatMap { it.parts + it.versions.flatMap { v -> v.parts } }
             .filter { it.key.isNotBlank() && it.verse.isNotBlank() }
             .distinctBy { partAnchor(it.key, it.verse) }
         value = wanted.mapNotNull { part ->
@@ -118,8 +125,10 @@ fun MahletScreen(
             SinqTopBar(
                 title = s.mahletTitle,
                 subtitle = shown?.feast,
-                // Which book this order came from, when it is not the spine.
-                accentLine = shown?.source,
+                // Which book this order came from, when it is not the spine —
+                // or which edition is open, since that is a different text.
+                accentLine = editions.getOrNull(edition)?.let { it.title ?: s.mahletEdition(edition + 1) }
+                    ?: shown?.source,
                 onBack = onBack,
             )
         },
@@ -153,10 +162,39 @@ fun MahletScreen(
                                     // Not ነግሥ: that is also the name of a part,
                                     // sixty times over, so the tab and a header
                                     // inside it would read as the same word.
-                                    label = if (order.kind == MahletKind.VIGIL) s.mahletVigil
-                                    else s.mahletTitle,
+                                    label = if (order.kind == MahletKind.MAHLET) s.mahletTitle
+                                    else s.mahletKindLabel(order.kind),
                                     selected = index == tab,
                                     onClick = { tab = index; selA = -1; selB = -1 },
+                                )
+                            }
+                        }
+                    }
+                }
+                // The editions, where there are any: the book's text and then
+                // each Telegram edition, to be read one in place of another.
+                // The merge is explicit that they are choices — a version may
+                // be a fragment, and none is the preferred wording — so they
+                // are pills, not a longer page.
+                if (editions.isNotEmpty()) {
+                    item(key = "editions") {
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState())
+                                .padding(bottom = Spacing.sm),
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                        ) {
+                            SelectPill(
+                                label = shown?.source ?: s.mahletBookText,
+                                selected = edition < 0,
+                                onClick = { edition = -1; selA = -1; selB = -1 },
+                            )
+                            editions.forEachIndexed { index, v ->
+                                SelectPill(
+                                    label = s.mahletEdition(index + 1),
+                                    selected = index == edition,
+                                    onClick = { edition = index; selA = -1; selB = -1 },
                                 )
                             }
                         }
@@ -176,7 +214,7 @@ fun MahletScreen(
                         modifier = Modifier.padding(bottom = Spacing.md),
                     )
                 }
-                items(parts.size, key = { "$tab:$it" }) { index ->
+                items(parts.size, key = { "$tab:$edition:$it" }) { index ->
                     MahletPartRow(
                         part = parts[index],
                         ordinal = index + 1,
@@ -245,6 +283,16 @@ private fun MahletPartRow(
                 bottom = Spacing.xs,
             ),
     ) {
+        // "ወይም" over a part the book offers in place of the one before it. Set
+        // as a plain rubric, the choice would read as one more thing to sing.
+        if (part.alternative) {
+            Text(
+                s.mahletOr,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.padding(bottom = Spacing.xxs),
+            )
+        }
         if (part.key.isNotBlank()) {
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(

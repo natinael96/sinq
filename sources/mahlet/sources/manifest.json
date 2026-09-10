@@ -1,0 +1,60 @@
+{
+  "book": {
+    "path": "EOTC BOOKS JSON/ጸዋትወ ዜማ/ሥርዓተ ማኅሌት ዘዓበይት በዓላት.json",
+    "sha256": "fab3dd9be6467e438baab59f3031db04b7e4bc992ff34f64959fea6c3196689f"
+  },
+  "telegram": [
+    {
+      "path": "SIMPLE MAHLET JSON/01-meskerem.json",
+      "sha256": "a7d9218799fa7058f08e456f64ce0f595dcaa7b7a72d0a7af3e30fecce23d06d"
+    },
+    {
+      "path": "SIMPLE MAHLET JSON/02-tikimt.json",
+      "sha256": "662dc092a1d3428fb065e1134e9bdeeec70f871232422d3f9a8475c6e332c9cf"
+    },
+    {
+      "path": "SIMPLE MAHLET JSON/03-hidar.json",
+      "sha256": "48167123d34d54828be51735a9af76a5b2b9caaba98a664ba6be983074006727"
+    },
+    {
+      "path": "SIMPLE MAHLET JSON/04-tahsas.json",
+      "sha256": "8d2a7b76d89f58a2179c3034eec09cad12ea6b49a4a1666bfe6dc0bb2a913251"
+    },
+    {
+      "path": "SIMPLE MAHLET JSON/05-tir.json",
+      "sha256": "156055eb0d3fbbf27cc97b8c4a99f81578519dfa620b417e9a63e4e0105051d5"
+    },
+    {
+      "path": "SIMPLE MAHLET JSON/06-yekatit.json",
+      "sha256": "133b153186e8d74157fba25d461b37faa630f52d028736812351290e4d3ae5e6"
+    },
+    {
+      "path": "SIMPLE MAHLET JSON/07-megabit.json",
+      "sha256": "f3cf74226a32c10e332c59e64220ac738d45274bafb0e115bf9f88ed5062d65e"
+    },
+    {
+      "path": "SIMPLE MAHLET JSON/08-miyazya.json",
+      "sha256": "39c7d59042ec600067063fa3028221be5c8a048b675fdad605af4bb604b43863"
+    },
+    {
+      "path": "SIMPLE MAHLET JSON/09-ginbot.json",
+      "sha256": "5dc54e71eb9dab3da5edce0cbc1d4cfa484d02aee6f9239da792a34d5f32f775"
+    },
+    {
+      "path": "SIMPLE MAHLET JSON/10-sene.json",
+      "sha256": "5ec4c3321ed205b2c5c468b5a69995db447666b92f189f077a019b4a36d5dbf5"
+    },
+    {
+      "path": "SIMPLE MAHLET JSON/11-hamle.json",
+      "sha256": "1d37ba1087b1d66245e62b0654eb2eb0c8f90a0e378b042e5bbf5d7525fa9e92"
+    },
+    {
+      "path": "SIMPLE MAHLET JSON/12-nehase.json",
+      "sha256": "4e6369fada5d698e5891a658b19724a67ed685f8bd63561c4c78f7400ccc4e43"
+    },
+    {
+      "path": "SIMPLE MAHLET JSON/13-pagumen.json",
+      "sha256": "57f5948ffca5a144d58c8d67aef2102deeb6c42421f6e66b41fc034c3d015fcb"
+    }
+  ]
+}

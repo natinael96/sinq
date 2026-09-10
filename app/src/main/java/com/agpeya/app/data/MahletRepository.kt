@@ -16,7 +16,8 @@ import java.time.LocalDate
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * The merged ሥርዓተ ማኅሌት: 142 orders over the whole year.
+ * The merged ሥርዓተ ማኅሌት: the book's orders and the Telegram editions of them,
+ * over the whole year.
  *
  * The index is small and cached; a month's orders are read only when that month
  * is opened. What this repository adds over a plain loader is [ordersOn] — the

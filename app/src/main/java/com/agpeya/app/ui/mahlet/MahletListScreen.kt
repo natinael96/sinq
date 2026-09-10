@@ -180,7 +180,7 @@ private fun groupByFeast(orders: List<MahletOrderMeta>): List<List<MahletOrderMe
     orders.groupBy { it.feast.trim() to it.day }
         .toList()
         .sortedBy { (key, _) -> key.second ?: 99 }
-        .map { (_, group) -> group.sortedBy { it.kind != MahletKind.VIGIL } }
+        .map { (_, group) -> group.sortedBy { MahletKind.rank(it.kind) } }
 
 /** A horizontally scrolling strip of the months that hold orders. */
 @Composable
@@ -241,7 +241,7 @@ private fun TodayOrder(orders: List<MahletOrder>, onOpen: (String) -> Unit) {
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
             orders.forEach { o ->
                 Text(
-                    "${if (o.kind == MahletKind.VIGIL) s.mahletVigil else s.mahletDawn}  ${geezNumeral(o.parts.size)}",
+                    "${s.mahletKindLabel(o.kind)}  ${geezNumeral(o.parts.size)}",
                     style = MaterialTheme.typography.labelMedium,
                     color = sinqColors.onHeroMuted,
                 )
@@ -322,7 +322,7 @@ private fun FeastRow(group: List<MahletOrderMeta>, onOpen: (String) -> Unit) {
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
                 group.forEach { o ->
                     Text(
-                        "${if (o.kind == MahletKind.VIGIL) s.mahletVigil else s.mahletDawn} ${geezNumeral(o.parts)}",
+                        "${s.mahletKindLabel(o.kind)} ${geezNumeral(o.parts)}",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
