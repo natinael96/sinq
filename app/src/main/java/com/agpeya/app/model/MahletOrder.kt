@@ -63,6 +63,12 @@ data class MahletOrder(
     val whenSunday: Boolean = false,
     /** Which book it came from, when that is not the scanned spine. */
     val source: String? = null,
+    /**
+     * For a feast the book cannot date because it moves with Fasika or sits on
+     * a Sunday the calendar has to find: the key [com.agpeya.app.data.MahletComputus]
+     * appoints it by. Null for a feast with a day of its own.
+     */
+    val movable: String? = null,
     val parts: List<MahletPart> = emptyList(),
     /** The editions of this order, to choose between. Empty for most. */
     val versions: List<MahletVersion> = emptyList(),
@@ -101,6 +107,7 @@ data class MahletOrderMeta(
     val season: String? = null,
     val whenSunday: Boolean = false,
     val source: String? = null,
+    val movable: String? = null,
     val parts: Int = 0,
     /** How many editions the order has besides the one shown. */
     val versions: Int = 0,

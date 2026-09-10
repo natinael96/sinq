@@ -99,7 +99,7 @@ Attribution-NonCommercial-NoDerivatives 4.0 International licence
 bundled scripture. The underlying texts are traditional Ethiopian Orthodox
 Tewahedo liturgical material.
 
-The text is reproduced as the scans carry it, with two disclosed exceptions:
+The text is reproduced as the scans carry it, with three disclosed exceptions:
 
   * The printer's tier marks ፪ማ፡ and ማ፡, which mark where a line of a stanza
     breaks, are rendered as those line breaks rather than as characters.
@@ -109,6 +109,12 @@ The text is reproduced as the scans carry it, with two disclosed exceptions:
     The bilingual copy is the spine; the Ge'ez-only copy restores the lines its
     scan dropped; the offices carried only by the ደብረ ዓባይ recension are
     labelled with that name.
+  * ጸሎት ነቢያት በአማርኛ has twenty chapters where its scan has fifteen. The five
+    it lacked — መኃልየ መኃልይ in the five readings the Ge'ez copy divides it
+    into — are the Song of Songs from the bundled Bible (80-weahadu, above),
+    not a scan. The Ge'ez copy is missing 2:1–7 at the seam between its first
+    two readings; the Amharic is built from a complete text and does not
+    reproduce that gap.
 
   ማኅሌተ ጽጌ is shipped with its Amharic set against the Ge'ez verse by verse.
   ሰቆቃወ ድንግል's Amharic is one verse short of its Ge'ez and nothing in the text

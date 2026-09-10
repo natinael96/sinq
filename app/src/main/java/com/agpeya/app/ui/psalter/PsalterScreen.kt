@@ -104,6 +104,8 @@ fun PsalterScreen(
     initialGeez: Boolean = false,
     onBack: () -> Unit,
     onWriteNote: (route: String, label: String) -> Unit,
+    /** Opens a chapter of a shelf book — Sunday's reading lives there, not here. */
+    onOpenBook: (bookId: String, chapter: Int) -> Unit = { _, _ -> },
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
@@ -309,20 +311,17 @@ fun PsalterScreen(
                 selEnd = b
             }
             if (daily && range == null) {
-                // No daily division is appointed for Sunday — state the fact,
-                // and offer the way out (the whole Psalter) instead of a dead end.
-                Column(
+                // No division of the Psalter is appointed for Sunday, and this
+                // used to say so and stop. But the printed ዳዊት does not stop:
+                // after the hundred and fifty psalms it carries the fifteen
+                // canticles and መኃልየ መኃልይ, and those are Sunday's reading. The
+                // book on the shelf follows the edition being read here.
+                SundayCanticles(
+                    geez = geez,
                     modifier = Modifier.fillMaxSize().padding(innerPadding),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    StatePanel(
-                        icon = Icons.Outlined.LibraryMusic,
-                        title = s.noSundayDivision,
-                        actionLabel = s.wholePsalter,
-                        onAction = { daily = false },
-                    )
-                }
+                    onOpen = onOpenBook,
+                    onWholePsalter = { daily = false },
+                )
             } else when (readingMode) {
                 ReadingMode.VERTICAL -> {
                     ReadingColumn(state = listState, innerPadding = innerPadding) {
@@ -472,3 +471,81 @@ private fun PsalterContents(psalms: List<Section>, onSelect: (Int) -> Unit) {
         }
     }
 }
+
+
+/**
+ * Sunday's reading: the twenty chapters of ጸሎት ነቢያት, in the edition the Psalter
+ * is being read in. The chapters open in the book reader rather than inline,
+ * so a canticle bookmarks, highlights and shares the way every other book does.
+ */
+@Composable
+private fun SundayCanticles(
+    geez: Boolean,
+    modifier: Modifier,
+    onOpen: (bookId: String, chapter: Int) -> Unit,
+    onWholePsalter: () -> Unit,
+) {
+    val context = LocalContext.current
+    val s = LocalStrings.current
+    val title = if (geez) SUNDAY_BOOK_GEEZ else SUNDAY_BOOK_AMHARIC
+    val book by produceState<com.agpeya.app.model.Book?>(null, title) {
+        val meta = com.agpeya.app.data.BookRepository.all(context).find { it.title == title }
+        value = meta?.let { com.agpeya.app.data.BookRepository.book(context, it.id) }
+    }
+    val found = book
+    if (found == null) {
+        // The shelf is missing the book — say the old thing rather than nothing.
+        Column(
+            modifier = modifier,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            StatePanel(
+                icon = Icons.Outlined.LibraryMusic,
+                title = s.noSundayDivision,
+                actionLabel = s.wholePsalter,
+                onAction = onWholePsalter,
+            )
+        }
+        return
+    }
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+            horizontal = com.agpeya.app.ui.theme.Spacing.screen,
+            vertical = com.agpeya.app.ui.theme.Spacing.md,
+        ),
+    ) {
+        item(key = "head") {
+            com.agpeya.app.ui.common.SectionHeader(s.sundayCanticlesTitle)
+            Text(
+                s.sundayCanticlesBody,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = com.agpeya.app.ui.theme.Spacing.sm),
+            )
+        }
+        items(found.chapters.size, key = { found.chapters[it].number }) { i ->
+            val chapter = found.chapters[i]
+            com.agpeya.app.ui.common.ListRow(
+                title = chapter.title,
+                onClick = { onOpen(found.id, chapter.number) },
+            )
+        }
+        item(key = "whole") {
+            Spacer(Modifier.height(com.agpeya.app.ui.theme.Spacing.lg))
+            Text(
+                s.wholePsalter,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier
+                    .clickable(onClick = onWholePsalter)
+                    .padding(vertical = com.agpeya.app.ui.theme.Spacing.sm),
+            )
+        }
+    }
+}
+
+/** The two editions of the book on the shelf, matched by title. */
+private const val SUNDAY_BOOK_AMHARIC = "ጸሎት ነቢያት በአማርኛ"
+private const val SUNDAY_BOOK_GEEZ = "ጸሎት ነቢያት በግእዝ"

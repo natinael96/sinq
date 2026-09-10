@@ -133,13 +133,16 @@ fun LicensesScreen(onBack: () -> Unit) {
                         "liturgical material.",
                 )
                 LicPara(
-                    "The text is reproduced as the scans carry it, with two disclosed " +
+                    "The text is reproduced as the scans carry it, with three disclosed " +
                         "exceptions. The printer's tier marks ፪ማ፡ and ማ፡, which mark where a " +
                         "line of a stanza breaks, are shown as those line breaks rather than " +
                         "as characters. And መጽሐፈ ሰዓታት is merged from three scanned copies: " +
                         "the bilingual copy is the spine, the Ge'ez-only copy restores the " +
                         "lines its scan dropped, and the offices carried only by the ደብረ ዓባይ " +
-                        "recension are labelled with that name where they appear.",
+                        "recension are labelled with that name where they appear. And " +
+                        "ጸሎት ነቢያት በአማርኛ has twenty chapters where its scan has fifteen: the " +
+                        "five it lacked, መኃልየ መኃልይ in the Ge'ez copy's five readings, are the " +
+                        "Song of Songs from the bundled Bible rather than a scan.",
                 )
             }
             item {

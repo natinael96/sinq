@@ -165,6 +165,8 @@ interface Strings {
     fun mahletEdition(n: Int): String
     /** Set between a part and the one it may be sung in place of. */
     val mahletOr: String
+    /** "ዘንድሮ ሚያዝያ ፲፱" — when a movable feast falls this year. */
+    fun mahletThisYearOn(date: String): String
     fun mahletParts(n: Int): String
     val mahletNone: String
     fun mahletOrders(n: Int): String
@@ -372,6 +374,8 @@ interface Strings {
     val dailyPsalms: String
     /** The Psalter's Sunday state: no daily division is appointed — a fact, not a promise. */
     val noSundayDivision: String
+    val sundayCanticlesTitle: String
+    val sundayCanticlesBody: String
     /** Generic in-progress label while a card's content loads. */
     val loadingLabel: String
     val zewotrTselot: String
@@ -1014,6 +1018,7 @@ object AmharicStrings : Strings {
     override val mahletBookText = "የመጽሐፉ"
     override fun mahletEdition(n: Int) = "እትም ${com.agpeya.app.ui.reading.geezNumeral(n)}"
     override val mahletOr = "ወይም"
+    override fun mahletThisYearOn(date: String) = "ዘንድሮ $date"
     override val mahletNone = "ማኅሌቱ ገና አልገባም"
     override fun mahletOrders(n: Int) = "${com.agpeya.app.ui.reading.geezNumeral(n)} ሥርዓቶች"
     override val mahletToday = "የዛሬው ሥርዓት"
@@ -1205,6 +1210,8 @@ object AmharicStrings : Strings {
     override val wholePsalter = "ሙሉ"
     override val dailyPsalms = "የዕለቱ"
     override val noSundayDivision = "ለእሑድ የተመደበ የዕለት ክፍል የለም"
+    override val sundayCanticlesTitle = "የሰንበት ንባብ"
+    override val sundayCanticlesBody = "ዳዊት በስድስት ቀናት ይከፈላል፤ ለሰንበት የነቢያት ጸሎትና መኃልየ መኃልይ ተሰጥተዋል።"
     override val loadingLabel = "በመጫን ላይ…"
     override val zewotrTselot = "ዘወትር ጸሎት"
     override val wudaseMariam = "ውዳሴ ማርያም"
@@ -1818,6 +1825,7 @@ object EnglishStrings : Strings {
     override val mahletBookText = "Book"
     override fun mahletEdition(n: Int) = "Edition $n"
     override val mahletOr = "or"
+    override fun mahletThisYearOn(date: String) = "this year $date"
     override val mahletNone = "Coming soon"
     override fun mahletOrders(n: Int) = "$n orders"
     override val mahletToday = "Today's order"
@@ -2020,6 +2028,8 @@ object EnglishStrings : Strings {
     override val wholePsalter = "All"
     override val dailyPsalms = "Today's"
     override val noSundayDivision = "No daily division is appointed for Sunday"
+    override val sundayCanticlesTitle = "The Sunday reading"
+    override val sundayCanticlesBody = "The Psalter is divided over six days; Sunday is given the prayers of the prophets and the Song of Songs instead."
     override val loadingLabel = "Loading…"
     override val zewotrTselot = "ዘወትር ጸሎት"
     override val wudaseMariam = "ውዳሴ ማርያም"

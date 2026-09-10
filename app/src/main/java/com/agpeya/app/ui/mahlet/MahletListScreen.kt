@@ -40,14 +40,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.agpeya.app.data.MahletComputus
 import com.agpeya.app.data.MahletRepository
 import com.agpeya.app.model.MahletIndex
 import com.agpeya.app.model.MahletKind
 import com.agpeya.app.model.MahletOrder
 import com.agpeya.app.model.MahletOrderMeta
 import com.agpeya.app.model.MahletSeason
+import com.agpeya.app.ui.common.EthiopianDate
 import com.agpeya.app.ui.common.SelectPill
 import com.agpeya.app.ui.common.SectionHeader
+import com.agpeya.app.ui.common.formatEthiopianShort
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
@@ -335,6 +338,21 @@ private fun FeastRow(group: List<MahletOrderMeta>, onOpen: (String) -> Unit) {
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.secondary,
                     )
+                }
+                // A feast the book could not date has no day column to fill,
+                // so it says when it falls this year instead — which is the
+                // question a reader with a ሆሣዕና order in front of them has.
+                first.movable?.let { key ->
+                    val thisYear = remember(key) {
+                        MahletComputus.dateOf(key, EthiopianDate.from(LocalDate.now()).year)
+                    }
+                    thisYear?.let {
+                        Text(
+                            s.mahletThisYearOn(formatEthiopianShort(it, s)),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.secondary,
+                        )
+                    }
                 }
             }
         }

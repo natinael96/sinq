@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.agpeya.app.model.MahletIndex
 import com.agpeya.app.model.MahletMonth
+import com.agpeya.app.model.MahletKind
 import com.agpeya.app.model.MahletOrder
 import com.agpeya.app.model.MahletOrderMeta
 import com.agpeya.app.model.MahletSeason
@@ -74,18 +75,28 @@ object MahletRepository {
     /**
      * The orders appointed for a date.
      *
-     * Two rules, because the book has two. A dated feast is kept on its day. A
-     * ዘመነ ጽጌ order is kept when *its* date falls on a Sunday — the season's
-     * services move with the week, which is why the ግጻዌ could only ever call
-     * them "the fourth week" and why this needs the calendar to answer.
+     * Three rules, because the books have three. A dated feast is kept on its
+     * day. A ዘመነ ጽጌ order is kept when *its* date falls on a Sunday — the
+     * season's services move with the week, which is why the ግጻዌ could only
+     * ever call them "the fourth week" and why this needs the calendar to
+     * answer. And a feast the book could not date at all — ሆሣዕና, ትንሣኤ, ዕርገት,
+     * ጰራቅሊጦስ and their week; ስብከት, ብርሃን, ኖላዊ; the ጽጌ weeks by ordinal — is
+     * kept when [MahletComputus] says today is its day. Those live in the
+     * month the book printed them in, which need not be the month they fall
+     * in this year, so they are found through the index rather than the
+     * month file.
      */
     suspend fun ordersOn(context: Context, date: LocalDate): List<MahletOrder> {
         val eth = EthiopianDate.from(date)
         val orders = month(context, eth.month)
-        val onDay = orders.filter { it.season == null && it.day == eth.day }
+        val onDay = orders.filter { it.season == null && it.movable == null && it.day == eth.day }
         val tsige = if (date.dayOfWeek != DayOfWeek.SUNDAY) emptyList()
         else orders.filter { it.season == MahletSeason.TSIGE && it.whenSunday && it.day == eth.day }
-        return tsige + onDay
+        val keys = MahletComputus.on(date)
+        val movable = if (keys.isEmpty()) emptyList() else index(context).months
+            .flatMap { m -> m.orders.filter { it.movable in keys }.map { m.month to it.id } }
+            .mapNotNull { (m, id) -> month(context, m).find { it.id == id } }
+        return (tsige + onDay + movable).sortedBy { MahletKind.rank(it.kind) }
     }
 
     /** Which months actually hold orders, in the year's order, undated last. */

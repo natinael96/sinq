@@ -472,6 +472,10 @@ private fun AgpeyaNavHost(
                 onWriteNote = { route, label ->
                     navController.navigate(writeNoteRoute(route, label)) { launchSingleTop = true }
                 },
+                // Sunday has no division of the Psalter; it has the canticles.
+                onOpenBook = { id, chapter ->
+                    navController.navigate("book/$id?ch=$chapter") { launchSingleTop = true }
+                },
             )
         }
         composable(Tab.JOURNEY.route) {

@@ -139,9 +139,19 @@ def build():
     applied = {before: 0 for before, _ in CORRECTIONS}
     books, seen_ids = [], {}
 
+    # A generated file shadows a raw scan of the same name. ጸሎት ነቢያት በአማርኛ is
+    # the case: the scan stops at fifteen chapters and merge_tselot_nebiyat.py
+    # writes the same title with twenty, so the title alone cannot tell them
+    # apart the way SKIP does for the ሰዓታት copies. Same title, same id — the
+    # replacement keeps every bookmark that pointed at the shorter book.
+    generated = {p.stem for p in (ROOT / "sources/generated").glob("*.json")}
+    shadowed = set()
     for path in sorted(p for d in SOURCES for p in d.glob("*.json")):
         raw_title = path.stem
         if raw_title in SKIP:
+            continue
+        if path.parent.name == "books" and raw_title in generated:
+            shadowed.add(raw_title)
             continue
         data = json.loads(path.read_text(encoding="utf-8"))
         if "chapters" not in data:
@@ -236,6 +246,15 @@ def build():
         other = by_title[base]
         b["meta"]["variantOf"] = {"id": other["id"], "title": other["title"]}
         other["meta"].setdefault("variants", []).append({"id": b["id"], "title": b["title"]})
+
+    # Every generated book that claims to replace a scan must actually have one
+    # to replace; a stray file in sources/generated/ would otherwise ship as a
+    # second copy under a name nothing else knows.
+    orphans = generated - shadowed - {"መጽሐፈ ሰዓታት", "ማኅሌተ ጽጌ", "ሰቆቃወ ድንግል"}
+    if orphans:
+        sys.exit(f"generated with nothing to replace: {sorted(orphans)}")
+    if shadowed:
+        print("shadowed by sources/generated/: " + ", ".join(sorted(shadowed)))
 
     missing = [b for b, n in applied.items() if n == 0]
     if missing:
