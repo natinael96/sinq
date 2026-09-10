@@ -808,7 +808,7 @@ private fun AgpeyaNavHost(
                 onOpenVows = { navController.navigate("vows") { launchSingleTop = true } },
                 onOpenPenance = { navController.navigate("penance") { launchSingleTop = true } },
                 onOpenMarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
-                onOpenPrayerList = { navController.navigate("prayerList") { launchSingleTop = true } },
+                onOpenPrayerList = { navController.navigate("prayerlist") { launchSingleTop = true } },
                 onOpenFasting = { navController.navigate("fasting") { launchSingleTop = true } },
             )
         }
