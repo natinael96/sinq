@@ -190,9 +190,24 @@ fun MahletScreen(
                                 selected = edition < 0,
                                 onClick = { edition = -1; selA = -1; selB = -1 },
                             )
+                            // Editions count among themselves and translations
+                            // among themselves: "እትም ፪" is the second Ge'ez
+                            // text, "ትርጉም ፪" the second Amharic, and the
+                            // number never skips because the other kind sat
+                            // between.
+                            val nTranslations = editions.count { it.translation }
+                            var nthEdition = 0
+                            var nthTranslation = 0
                             editions.forEachIndexed { index, v ->
+                                val label = if (v.translation) {
+                                    nthTranslation += 1
+                                    s.mahletTranslation(nthTranslation, nTranslations)
+                                } else {
+                                    nthEdition += 1
+                                    s.mahletEdition(nthEdition)
+                                }
                                 SelectPill(
-                                    label = s.mahletEdition(index + 1),
+                                    label = label,
                                     selected = index == edition,
                                     onClick = { edition = index; selA = -1; selB = -1 },
                                 )
@@ -268,6 +283,9 @@ private fun MahletPartRow(
 ) {
     val s = LocalStrings.current
     val refrain = part.key.isNotBlank() && REFRAINS.containsMatchIn(part.key)
+    // A rubric is read, not sung: smaller, muted, and without a name, since
+    // the instruction is its own heading.
+    val rubric = part.rubric
     Column(
         Modifier
             .fillMaxWidth()
@@ -326,10 +344,12 @@ private fun MahletPartRow(
         }
         Text(
             part.verse,
-            style = readingBodyStyle(bodyFontSp).let {
-                if (refrain) it.copy(fontStyle = FontStyle.Italic) else it
+            style = when {
+                rubric -> MaterialTheme.typography.bodyMedium.inReadingFont()
+                refrain -> readingBodyStyle(bodyFontSp).copy(fontStyle = FontStyle.Italic)
+                else -> readingBodyStyle(bodyFontSp)
             },
-            color = if (refrain) MaterialTheme.colorScheme.onSurfaceVariant
+            color = if (refrain || rubric) MaterialTheme.colorScheme.onSurfaceVariant
             else MaterialTheme.colorScheme.onBackground,
         )
     }

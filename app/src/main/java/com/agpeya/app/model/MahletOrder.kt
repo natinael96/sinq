@@ -29,6 +29,11 @@ data class MahletPart(
      * must say so or a choice reads as a sequence.
      */
     val alternative: Boolean = false,
+    /**
+     * Not sung: an instruction to the singers — "በቁም ከከበሮና ጽናጽል ጋር", "ስቡዕ
+     * እንዳለቀ" — which the posts set among the chant. The page sets it apart.
+     */
+    val rubric: Boolean = false,
 )
 
 /**
@@ -47,6 +52,11 @@ data class MahletVersion(
      * an edition that vanished without its link could not be checked.
      */
     val also: List<String> = emptyList(),
+    /**
+     * The order's Amharic, to read beside the chant — not another text of the
+     * chant to read instead. Labelled ትርጉም rather than counted as an edition.
+     */
+    val translation: Boolean = false,
 )
 
 @Serializable

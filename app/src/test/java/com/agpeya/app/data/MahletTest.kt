@@ -44,9 +44,25 @@ class MahletTest {
     @Test
     fun `the merged corpus is two hundred and fifteen orders, none of them empty`() {
         assertEquals(215, orders.size)
-        assertEquals(3391, orders.sumOf { it.parts.size })
+        assertEquals(3388, orders.sumOf { it.parts.size })
         assertTrue("an order has no parts", orders.all { it.parts.isNotEmpty() })
         assertTrue("a part has no verse", orders.all { o -> o.parts.all { it.verse.isNotBlank() } })
+    }
+
+    /**
+     * A part is either chant with a name — the form it is sung in, or the
+     * hymn a stray stanza belongs to — or an instruction to the singers
+     * marked as a rubric. The builder lifts a name the post set on its own
+     * line and asks the shelf which መልክእ a nameless ሰላም is from; what is
+     * left nameless has to be a rubric, or the page shows a block with no
+     * heading and no way to say what it is.
+     */
+    @Test
+    fun `every part has a name or is a rubric`() {
+        val runs = orders.flatMap { o -> listOf(o.parts) + o.versions.map { it.parts } }
+        val nameless = runs.flatten().filter { it.key.isBlank() && !it.rubric }
+        assertEquals(nameless.map { it.verse.take(40) }.toString(), 0, nameless.size)
+        assertEquals(27, runs.flatten().count { it.rubric })
     }
 
     /**
@@ -86,6 +102,20 @@ class MahletTest {
         )
         val everyPart = orders.flatMap { it.parts + it.versions.flatMap { v -> v.parts } }
         assertTrue(everyPart.none { noise.containsMatchIn(it.verse) })
+    }
+
+    /**
+     * An edition that is the order's Amharic says so, or a reader opening it
+     * for another text of the chant gets a translation instead.
+     */
+    @Test
+    fun `the Amharic editions are labelled as translations`() {
+        val translations = orders.flatMap { it.versions }.filter { it.translation }
+        assertEquals(22, translations.size)
+        assertTrue(translations.all { v ->
+            v.parts.count { it.key == "ትርጉም" || it.key == "ትርጓሜ" } * 2 >= v.parts.size ||
+                Regex("ትርጉም|ትርጓሜ").containsMatchIn(v.title.orEmpty())
+        })
     }
 
     /** An order standing on an edition must say which post, or it cannot be checked. */

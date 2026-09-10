@@ -121,6 +121,8 @@ AD_CAPTION = re.compile(r"ዩኒቨርሲቲ|ጥያቄ ካለ|\+?[0-9]{9,}")
 # A scanned page's footer — crosses set around its number — on a line of its
 # own. Text, never; the ጽጌ scan carries them between stanzas.
 SCAN_FOOTER = re.compile(r"^[†\s]*[0-9]+[†\s]*$")
+# A post that announces itself as the Amharic of an order.
+TRANSLATION = re.compile(r"ትርጉም|ትርጓሜ")
 GLYPHS = re.compile("[\U0001F300-\U0001FAFF\u2600-\u27BF\uFE0F]")
 
 
@@ -224,7 +226,9 @@ PART_NAME_MAX = 45
 # the split rests on now comes from the merge's snapshot of the same scan;
 # if that ever yields a different count, the snapshot and the scan have
 # diverged and this must be read again.
-TSIGE_EXPECTED_PARTS = 626
+# 626 as split; 623 once the date heading each general chapter opens with —
+# the heading of the order after it — stopped being a part.
+TSIGE_EXPECTED_PARTS = 623
 
 
 def fold(s):
@@ -267,6 +271,130 @@ def order_id(*parts):
 
 def load(path):
     return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+# ── naming what the posts left unnamed ─────────────────────────────────────
+
+BOOKS = ROOT / "app/src/main/assets/content/books"
+
+# Letters and words Ge'ez does not use. Two of them in a part and it is
+# Amharic — an instruction to the singers, not a thing they sing.
+AMHARIC = re.compile(r"[ሸ-ሿቸ-ቿኘ-ኟጀ-ጇዠ-ዧጨ-ጯኸ-኿]|\b(ነው|ነበር|እንደ|ብለው|ጋር|ሁሉም|ሁሉ|ይሆናል|ማለት|ወይም|መጀመሪያ|መጀመርያ|መግቢያ)\b")
+
+
+def is_amharic(text):
+    return len(AMHARIC.findall(text)) >= 2
+
+
+_forms = None
+
+
+def form_vocabulary():
+    """Every name the merge gives a part, folded — what a first line may be."""
+    global _forms
+    if _forms is None:
+        names = set()
+
+        def walk(chants):
+            for c in chants:
+                if not isinstance(c, dict):
+                    continue
+                if "or" in c:
+                    for br in c["or"]:
+                        walk(br if isinstance(br, list) else [br])
+                elif c.get("form"):
+                    names.add(fold(c["form"]))
+
+        for path in MERGED.glob("*.json"):
+            for feast in load(path)["feasts"]:
+                for order in feast["orders"].values():
+                    if order.get("book"):
+                        walk(order["book"].get("chants", []))
+                    for v in order.get("versions") or []:
+                        walk(v.get("chants", []))
+        _forms = names | {fold(n) for n in EXTRA_FORMS}
+    return _forms
+
+
+_shelf = None
+
+
+def shelf_hymns():
+    """The መልክእ on the shelf, each as its folded text, to name a stray stanza by."""
+    global _shelf
+    if _shelf is None:
+        _shelf = []
+        index = load(BOOKS / "index.json")
+        for sh in index["shelves"]:
+            if sh["key"] != "melkie":
+                continue
+            for meta in sh["books"]:
+                book = load(BOOKS / f"{meta['id']}.json")
+                text = " ".join(b.get("text", "") for ch in book["chapters"] for b in ch["blocks"])
+                _shelf.append((meta["title"], fold(text)))
+    return _shelf
+
+
+# Letters only — ፡ and ። sit inside the Ethiopic block and would be eaten by
+# ሀ-፼ — and the mark is required: a name is what stands before the mark.
+NAME_LINE = re.compile(r"^([ሀ-ፚ][ሀ-ፚ ]{0,30})\s*[፡፦:\-]\s*(.*)$")
+
+# Names a post may set before a mark that the merge never used as a form —
+# the psalm verse, the gospel — so the vocabulary is the merge's forms and these.
+EXTRA_FORMS = {"ምስባክ", "ወንጌል", "ሥርዓተ ነግሥ", "ነግሥ", "ዋዜማ", "ዚቅ", "ወረብ", "አመላለስ",
+               "እስመ ለዓለም", "ምልጣን", "ሰላም", "ይትባረክ", "እግዚአብሔር ነግሠ", "ሃሌ ሉያ",
+               "አንገርጋሪ", "ዕዝል", "መዝሙር", "ቅንዋት", "ዓራራይ", "ትርጉም", "መመሪያ", "ገባሬ ኩሉ"}
+
+
+def name_unnamed(parts, report):
+    """Give a part its name where the post put it somewhere else.
+
+    Three cases the posts leave. The name is the first line, set off with a
+    mark — ምስባክ፡(መዝ ፴፫፤፯) — and is lifted. The part is a መልክእ stanza whose
+    hymn the post did not name — a ሰላም addressed to ሥላሴ — and the shelf,
+    which holds the hymn, says which. Or the part is not sung at all but an
+    instruction to the singers, in Amharic — "በቁም ከከበሮና ጽናጽል ጋር" — and is
+    marked a rubric so the page can set it as one rather than as chant.
+    """
+    vocab = form_vocabulary()
+    for p in parts:
+        if p["key"]:
+            continue
+        first, _, rest = p["verse"].partition("\n")
+        m = NAME_LINE.match(first)
+        if not m and rest.strip() and 1 < len(first.strip()) <= 20 and first.strip()[0] not in "ሰ":
+            # A short line of its own before the text and no mark at all —
+            # ገባሬ ኩሉ, or the station በቤተ መቅደስ in the ሆሣዕና order — is the name.
+            m = re.match(r"^(.*)()$", first.strip())
+        if m and (fold(m.group(1)) in vocab or not NAME_LINE.match(first)):
+            p["key"] = m.group(1).strip()
+            p["verse"] = "\n".join(x for x in (m.group(2).strip(), rest) if x).strip()
+            report["named_by_line"] += 1
+            if not p["verse"]:
+                p["verse"] = m.group(1).strip()
+            continue
+        if first.startswith("ሰላም"):
+            # The channel and the printer spell a word apart now and then —
+            # ዕሩያን for ኅሩያን — so the stanza's opening is matched by
+            # likeness, not letter for letter: the shelf hymn holding a window
+            # nine-tenths like the opening is the one.
+            probe = fold(p["verse"])[:40]
+            best, best_title = 0.0, None
+            for title, text in shelf_hymns():
+                i = 0
+                while (i := text.find(probe[:6], i)) >= 0:
+                    r = difflib.SequenceMatcher(None, probe, text[i:i + len(probe)]).ratio()
+                    if r > best:
+                        best, best_title = r, title
+                    i += 1
+            if best >= 0.9:
+                p["key"] = best_title
+                report["named_by_shelf"] += 1
+                continue
+        if is_amharic(p["verse"]) or len(p["verse"]) < 30:
+            p["rubric"] = True
+            report["rubrics"] += 1
+    return parts
 
 
 # ── the spine: the merged edition ───────────────────────────────────────────
@@ -433,12 +561,22 @@ def build_spine(report):
                     if not vparts:
                         continue
                     src = (v.get("sources") or [{}])[0]
-                    versions.append({
+                    title = clean_name(normalise(GLYPHS.sub("", src.get("title") or "")).replace("#", " ")) or None
+                    edition = {
                         "id": v["id"],
-                        "title": clean_name(normalise(GLYPHS.sub("", src.get("title") or "")).replace("#", " ")) or None,
+                        "title": title,
                         "url": src.get("url"),
                         "parts": vparts,
-                    })
+                    }
+                    # A post that is the order's Amharic — its parts are ትርጉም,
+                    # or its title says so — is a translation to read beside
+                    # the chant, not another text of the chant to read instead.
+                    # Labelled as such, or a reader opening "እትም ፫" for a
+                    # different Ge'ez gets Amharic.
+                    glossed = sum(1 for q in vparts if q["key"] in ("ትርጉም", "ትርጓሜ"))
+                    if glossed * 2 >= len(vparts) or TRANSLATION.search(title or ""):
+                        edition["translation"] = True
+                    versions.append(edition)
                 book = order.get("book")
                 url = None
                 if book:
@@ -457,6 +595,9 @@ def build_spine(report):
                 if not parts:
                     report["empty"] += 1
                     continue
+                parts = name_unnamed(parts, report)
+                for v in versions:
+                    v["parts"] = name_unnamed(v["parts"], report)
                 versions, also, parts = dedupe(parts, versions, report, base_is_book=book is not None)
                 o = {
                     "id": order_id("merged", feast["id"], service),
@@ -575,8 +716,11 @@ def build_tsige(vocab, report):
                 # Each file opens with the season's general order, undated. It
                 # is the one to fall back on when no date matches, so it is kept
                 # rather than skipped along with the empty trailing chapter.
+                # Its first block is the date heading of the order that follows
+                # it in the book — a heading, not a part of this one.
                 if not title or not blocks:
                     continue
+                blocks = [b for b in blocks if not TSIGE_HEAD.match(b)]
                 parts = cleaned(split_parts(blocks, vocab))
                 if parts:
                     orders.append({
@@ -656,6 +800,7 @@ def build_missing(spine, report):
 
 def main():
     report = {"empty": 0, "empty_chants": 0, "version_only": 0, "folded": 0, "folded_into_base": 0,
+              "named_by_line": 0, "named_by_shelf": 0, "rubrics": 0,
               "unknown_kind": [], "unmapped": [], "unappointable": [], "from_gitsawe": []}
     vocab = part_vocabulary()
 
@@ -731,6 +876,8 @@ def main():
     print("\n%d orders, %d parts (%d marked ወይም), %d editions holding %d more parts, %d appointed by the computus"
           % (len(orders), parts, alts, versions, vparts, movable))
     print("%d chars, %.2f MB in %d files" % (chars, size / 1e6, len(list(OUT.glob('*.json')))))
+    print("  %d unnamed parts named from their first line, %d from the shelf, %d marked as rubrics"
+          % (report["named_by_line"], report["named_by_shelf"], report["rubrics"]))
     print("  %d editions folded into a like edition, %d into the text they repeat — %d superficial in all"
           % (report["folded"], report["folded_into_base"], report["folded"] + report["folded_into_base"]))
     if report["empty_chants"]:
