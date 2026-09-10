@@ -876,7 +876,7 @@ object AmharicStrings : Strings {
     override val tabBookmarks = "ምልክቶች"
     override val tabJourney = "ጉዞ"
     override val tabSettings = "ቅንብር"
-    override val tabLibrary = "ቤተ መጻሕፍት"
+    override val tabLibrary = "መጻሕፍት"
 
     override val libraryTitle = "ቤተ መጻሕፍት"
     override val wudaseScheduleSubtitle = "ሰኞ–እሑድ"
@@ -1686,7 +1686,7 @@ object EnglishStrings : Strings {
     override val tabBookmarks = "Bookmarks"
     override val tabJourney = "Journey"
     override val tabSettings = "Settings"
-    override val tabLibrary = "Library"
+    override val tabLibrary = "Books"
 
     override val libraryTitle = "Library"
     override val wudaseScheduleSubtitle = "Monday–Sunday prayers"
