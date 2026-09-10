@@ -77,6 +77,7 @@ import com.agpeya.app.ui.theme.sinqColors
 import kotlinx.coroutines.launch
 import com.agpeya.app.ui.common.Passage
 import androidx.compose.material.icons.outlined.EditNote
+import androidx.compose.material.icons.outlined.HistoryEdu
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.setValue
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
@@ -349,6 +350,11 @@ internal fun SelectionBar(
     /** The edition's cross references for the selection; empty hides the action. */
     crossRefs: List<com.agpeya.app.data.CrossReference.Ref> = emptyList(),
     onOpenRef: (String) -> Unit = {},
+    /**
+     * The Fathers on this verse, at catenabible.com. Null hides the action —
+     * seventeen of the books the app carries have no page there.
+     */
+    commentaryUrl: String? = null,
 ) {
     val motion = LocalMotion.current
     AnimatedVisibility(
@@ -470,6 +476,17 @@ internal fun SelectionBar(
                                         s.crossRefsAction(crossRefs.size),
                                         Icons.AutoMirrored.Outlined.MenuBook,
                                     ) { refsOpen = true },
+                                )
+                            }
+                            // Beside the cross references, because both answer
+                            // "what else is there about this verse" — one inside
+                            // the book, one outside it.
+                            commentaryUrl?.let { url ->
+                                add(
+                                    SelectionAct(s.commentaryAction, Icons.Outlined.HistoryEdu) {
+                                        com.agpeya.app.ui.common.openUrl(ctx, url)
+                                        onDismiss()
+                                    },
                                 )
                             }
                             add(

@@ -336,6 +336,12 @@ fun ScriptureReaderScreen(
                         .distinctBy { it.route }
                 },
                 onOpenRef = { route -> selA = -1; selB = -1; onOpenRoute(route) },
+                // The Fathers on the first verse of the selection. Null for the
+                // seventeen books Catena's canon does not reach, which hides
+                // the action rather than offering a page that is not there.
+                commentaryUrl = selRange.firstOrNull()?.let {
+                    com.agpeya.app.data.CatenaLink.url(bookKey, chapter, it)
+                },
                 // The bar is the only bookmark control now, so a bookmark is
                 // made at the grain the reader chose rather than always at the
                 // chapter — the route has carried a verse range all along.

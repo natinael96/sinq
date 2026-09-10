@@ -124,6 +124,26 @@ The text is reproduced as the scans carry it, with three disclosed exceptions:
   Built by tools/build_books.py, tools/merge_seatat.py and tools/merge_tsige.py.
 
 --------------------------------------------------------------------------------
+PATRISTIC COMMENTARY (CATENA BIBLE)
+--------------------------------------------------------------------------------
+
+A selected verse offers a link to catenabible.com, where the commentary of the
+Church Fathers on that verse is collected. No commentary text is bundled with
+the app and nothing is sent when the link is opened: it is an ordinary link,
+handed to the browser.
+
+Catena carries 76 books. Sinq carries 93, so seventeen have no page there and
+are given no link — the Ethiopian deuterocanon the site does not reach (ሄኖክ,
+ኩፋሌ, ፫ መቃብያን, ዕዝራ ካልእ, and the Daniel and Esther fragments) and the nine
+broader-canon books. That is 19.5% of the app's verses.
+
+The Psalter's chapter number is translated on the way out. Sinq numbers its
+psalms as the Church does, following the Septuagint; Catena numbers them as the
+Masoretic text does, so መዝሙር ፳፪ is Psalm 23 there. The table is read out of the
+bundled Psalter, whose headings carry the other number in parentheses, and is
+held to it by CatenaLinkTest. Every other book is linked unchanged.
+
+--------------------------------------------------------------------------------
 FONTS
 --------------------------------------------------------------------------------
 

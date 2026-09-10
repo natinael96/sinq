@@ -290,6 +290,16 @@ fun PsalterScreen(
                     }
                 },
                 imageKicker = s.psalterTitle,
+                // The Fathers on the selected verse. This is the book where the
+                // link is easiest to get wrong: the Psalter is numbered as the
+                // Church numbers it and Catena numbers it as the Masoretic text
+                // does, so መዝሙር ፳፪ is Psalm 23 there. CatenaLink carries the
+                // translation; both editions here use the same numbering.
+                commentaryUrl = selectedPsalm?.number?.let { psalm ->
+                    selStart?.substringAfterLast(':')?.toIntOrNull()?.let { verse ->
+                        com.agpeya.app.data.CatenaLink.url("psalms", psalm, verse)
+                    }
+                },
                 onBookmark = selectedPsalm?.let { section -> { toggleBookmark(section) } },
                 onWriteNote = selectedPsalm?.let { section ->
                     {

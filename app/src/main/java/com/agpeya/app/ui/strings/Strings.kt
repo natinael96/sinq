@@ -130,6 +130,7 @@ interface Strings {
     val crossRefsTitle: String
     /** The selection bar's reference action, with how many the verse carries. */
     fun crossRefsAction(n: Int): String
+    val commentaryAction: String
     /** ስንክሳር's own row in ቤተ መጻሕፍት. */
     val synaxariumLibrarySubtitle: String
     val sinksarAmharic: String
@@ -981,6 +982,7 @@ object AmharicStrings : Strings {
     override val markAction = "ምልክት"
     override val crossRefsTitle = "የጥቅስ ማጣቀሻዎች"
     override fun crossRefsAction(n: Int) = "ማጣቀሻ ${com.agpeya.app.ui.reading.geezNumeral(n)}"
+    override val commentaryAction = "የሊቃውንት ትርጓሜ"
     override val mahletTitle = "ሥርዓተ ማኅሌት"
     override val synaxariumLibrarySubtitle = "የዓመቱ የቅዱሳን መታሰቢያ"
     override val sinksarAmharic = "አማርኛ"
@@ -1791,6 +1793,7 @@ object EnglishStrings : Strings {
     override val markAction = "Mark"
     override val crossRefsTitle = "Cross references"
     override fun crossRefsAction(n: Int) = "Refs $n"
+    override val commentaryAction = "Fathers"
     override val mahletTitle = "ሥርዓተ ማኅሌት"
     override val synaxariumLibrarySubtitle = "The year's commemorations"
     override val sinksarAmharic = "አማርኛ"
