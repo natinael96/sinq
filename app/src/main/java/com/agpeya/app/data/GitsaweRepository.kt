@@ -189,7 +189,14 @@ object GitsaweRepository {
         monthly = monthlyFor(context, date),
         sundayCycle = sundayCycleFor(context, date),
         feasts = feastsOn(context, date),
-        mahlets = MahletRepository.ordersOn(context, date),
+        // Not the orders that stand on a Telegram edition alone. The merge is
+        // explicit that those are reported by the channel, not checked against
+        // the calendar, and the ግጻዌ is the one page that claims to know what
+        // today is. They stay in the ማኅሌት itself, labelled, where the label
+        // can be read; here they would be the day's order with no book behind
+        // them.
+        mahlets = MahletRepository.ordersOn(context, date)
+            .filter { it.source != com.agpeya.app.model.MahletSource.TELEGRAM },
     )
 
     private fun monthlyMatches(m: MonthlyEntry, ethMonth: Int, ethDay: Int, isSunday: Boolean): Boolean {

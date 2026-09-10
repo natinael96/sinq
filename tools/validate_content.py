@@ -393,6 +393,11 @@ def check_books() -> None:
 
 
 MAHLET_KINDS = ("vigil", "mahlet", "angergari", "procession", "prayer", "unspecified")
+# The keys MahletComputus.on() can return. An order keyed to anything else is
+# appointed by a rule that does not exist.
+MAHLET_MOVABLE = {"sibket", "birhan", "nolawi", "hosanna", "himamat", "siklet",
+                  "kedamSiur", "fasika", "dagmTinsae", "erget", "peraklitos"} | {
+                  f"tsige{n}" for n in range(1, 7)}
 
 
 def check_mahlet() -> None:
@@ -408,7 +413,7 @@ def check_mahlet() -> None:
         return
     check_version("mahlet/index.json", index)
 
-    listed, dated, tsige, from_gitsawe = {}, 0, 0, 0
+    listed, dated, tsige, from_gitsawe, movable = {}, 0, 0, 0, 0
     for month in index.get("months", []):
         num = month.get("month")
         if not isinstance(num, int) or not 0 <= num <= 13:
@@ -430,6 +435,13 @@ def check_mahlet() -> None:
                          f"it does not carry")
             if meta.get("day") is not None:
                 dated += 1
+            mv = meta.get("movable")
+            if mv is not None:
+                movable += 1
+                if mv not in MAHLET_MOVABLE:
+                    fail(f"mahlet/index.json: order {oid} is appointed by unknown key {mv!r}")
+                if meta.get("day") is not None:
+                    fail(f"mahlet/index.json: order {oid} has both a day and a computus key")
             if meta.get("source") == "ግጻዌ":
                 from_gitsawe += 1
 
@@ -474,7 +486,7 @@ def check_mahlet() -> None:
             if oid not in listed:
                 fail(f"mahlet/m{num}.json holds {oid}, which the index does not list")
 
-    print(f"mahlet: {len(listed)} orders ({dated} dated, {tsige} ዘመነ ጽጌ, "
+    print(f"mahlet: {len(listed)} orders ({dated} dated, {movable} by the computus, {tsige} ዘመነ ጽጌ, "
           f"{from_gitsawe} from the ግጻዌ), {parts} parts, {editions} editions")
 
 

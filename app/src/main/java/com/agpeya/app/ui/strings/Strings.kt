@@ -159,7 +159,7 @@ interface Strings {
     val mahletDawn: String
     /** The label for any kind of order — ዋዜማ, ነግሥ, አንገርጋሪ, and the rarer ones. */
     fun mahletKindLabel(kind: String): String
-    /** The book's own text, as opposed to an edition of it. */
+    /** The book's own text, numbered as edition nought so the editions count from it. */
     val mahletBookText: String
     /** "እትም ፫" — the nth Telegram edition of an order. */
     fun mahletEdition(n: Int): String
@@ -1015,7 +1015,7 @@ object AmharicStrings : Strings {
         "prayer" -> "ጸሎት"
         else -> "ሥርዓት"
     }
-    override val mahletBookText = "የመጽሐፉ"
+    override val mahletBookText = "እትም 0"
     override fun mahletEdition(n: Int) = "እትም ${com.agpeya.app.ui.reading.geezNumeral(n)}"
     override val mahletOr = "ወይም"
     override fun mahletThisYearOn(date: String) = "ዘንድሮ $date"
@@ -1822,7 +1822,7 @@ object EnglishStrings : Strings {
         "prayer" -> "Prayer"
         else -> "Order"
     }
-    override val mahletBookText = "Book"
+    override val mahletBookText = "Edition 0"
     override fun mahletEdition(n: Int) = "Edition $n"
     override val mahletOr = "or"
     override fun mahletThisYearOn(date: String) = "this year $date"

@@ -64,6 +64,32 @@ VIGIL, MAHLET = "vigil", "mahlet"
 # labels the list shows beside an order ("ግጻዌ", "ማኅሌተ ጽጌ አቋቋም").
 TELEGRAM = "ቴሌግራም"
 
+# The feasts the book cannot date because they move with Fasika, or sit on a
+# Sunday the calendar has to find — and the computus key the app appoints them
+# by. See MahletComputus.on(). A feast the merge marks as not fixed must appear
+# here or in UNRESOLVED_DATES, or the build stops: an undated order is one that
+# no day can ever reach.
+MOVABLE = {
+    "ስብከት": "sibket",
+    "ብርሃን": "birhan",
+    "ኖላዊ": "nolawi",
+    "ሆሣዕና": "hosanna",
+    "ሰሙነ ሕማማት": "himamat",
+    "ዓርብ ስቅለት": "siklet",
+    "ቀዳም ስዑር": "kedamSiur",
+    "ትንሣኤ": "fasika",
+    "ዳግም ትንሣኤ": "dagmTinsae",
+    "ዕርገት": "erget",
+    "ጰራቅሊጦስ": "peraklitos",
+}
+# "ዘመነ ጽጌ — ፫ኛ ሳምንት": the book's own ordinal-week ጽጌ orders, keyed tsige1..6.
+TSIGE_WEEK = re.compile(r"^ዘመነ ጽጌ\s*[—–-]\s*([፩-፱])ኛ")
+
+# The one feast whose printed date the merge could not settle (the book prints
+# ፲ /፪/; the channel says ፲፪) and whose calendar it therefore left unresolved.
+# Named so the build can say it is known, not silently shipped unreachable.
+UNRESOLVED_DATES = {"ተክለ ሃይማኖት ወክርስቶሰ ሰምራ"}
+
 # The one form whose specific hymn lives in the chant's title: the merge writes
 # form "መልክእ" and title "መልክአ ሥላሴ". The title is the part's name, because the
 # name is what opens the hymn on the shelf.
@@ -192,6 +218,17 @@ def flatten(chants, report, alternative=False):
     return parts
 
 
+def movable_key(feast):
+    """The computus key a non-fixed feast is appointed by, or None."""
+    name = feast["name"].strip()
+    if name in MOVABLE:
+        return MOVABLE[name]
+    m = TSIGE_WEEK.match(name)
+    if m:
+        return "tsige%d" % geez_int(m.group(1))
+    return None
+
+
 def build_spine(report):
     orders = []
     for path in sorted(MERGED.glob("*.json")):
@@ -243,6 +280,11 @@ def build_spine(report):
                 }
                 if versions:
                     o["versions"] = versions
+                movable = movable_key(feast)
+                if movable:
+                    o["movable"] = movable
+                elif feast.get("day") is None and feast["name"].strip() not in UNRESOLVED_DATES:
+                    report["unappointable"].append((feast["name"], feast.get("calendar")))
                 orders.append(o)
     return orders
 
@@ -410,7 +452,7 @@ def build_missing(spine, report):
 
 def main():
     report = {"empty": 0, "empty_chants": 0, "version_only": 0,
-              "unknown_kind": [], "unmapped": [], "from_gitsawe": []}
+              "unknown_kind": [], "unmapped": [], "unappointable": [], "from_gitsawe": []}
     vocab = part_vocabulary()
 
     spine = build_spine(report)
@@ -423,6 +465,9 @@ def main():
                  + "; ".join(f"{f} ({k})" for f, k in report["unknown_kind"]))
     if report["unmapped"]:
         sys.exit("ጽጌ orders whose month could not be read: " + "; ".join(report["unmapped"]))
+    if report["unappointable"]:
+        sys.exit("feasts with no day and no computus key — add them to MOVABLE or UNRESOLVED_DATES: "
+                 + "; ".join(f"{n} ({c})" for n, c in report["unappointable"]))
     tsige_parts = sum(len(o["parts"]) for o in tsige)
     if tsige_parts != TSIGE_EXPECTED_PARTS:
         sys.exit(f"ዘመነ ጽጌ split to {tsige_parts} parts, not {TSIGE_EXPECTED_PARTS}: "
@@ -454,7 +499,7 @@ def main():
             # Only the fields an order actually has: a null in the index has to
             # be decoded into a non-null Kotlin default, and cannot be.
             "orders": [
-                {k: o[k] for k in ("id", "kind", "feast", "day", "season", "source")
+                {k: o[k] for k in ("id", "kind", "feast", "day", "season", "source", "movable")
                  if o.get(k) is not None}
                 | {"parts": len(o["parts"])}
                 | ({"whenSunday": True} if o.get("whenSunday") else {})
@@ -478,8 +523,9 @@ def main():
     print("from the ግጻዌ:           %d orders" % len(missing))
     for t, s in report["from_gitsawe"]:
         print("    %-56s %d%% carried by the merge" % (t[:54], s))
-    print("\n%d orders, %d parts (%d marked ወይም), %d editions holding %d more parts"
-          % (len(orders), parts, alts, versions, vparts))
+    movable = sum(1 for o in orders if o.get("movable"))
+    print("\n%d orders, %d parts (%d marked ወይም), %d editions holding %d more parts, %d appointed by the computus"
+          % (len(orders), parts, alts, versions, vparts, movable))
     print("%d chars, %.2f MB in %d files" % (chars, size / 1e6, len(list(OUT.glob('*.json')))))
     if report["empty_chants"]:
         print("  (%d chants had no text and were dropped)" % report["empty_chants"])

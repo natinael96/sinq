@@ -4,6 +4,7 @@ import com.agpeya.app.model.MahletIndex
 import com.agpeya.app.model.MahletKind
 import com.agpeya.app.model.MahletOrder
 import com.agpeya.app.model.MahletSeason
+import com.agpeya.app.model.MahletSource
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
@@ -70,7 +71,7 @@ class MahletTest {
      */
     @Test
     fun `an order standing on an edition says where it came from`() {
-        val fromChannel = orders.filter { it.source == "ቴሌግራም" }
+        val fromChannel = orders.filter { it.source == MahletSource.TELEGRAM }
         assertEquals(72, fromChannel.size)
         assertTrue(fromChannel.all { it.parts.isNotEmpty() })
     }
@@ -109,9 +110,27 @@ class MahletTest {
      */
     @Test
     fun `the two orders nothing else carries keep their source`() {
-        val fromGitsawe = orders.filter { it.source == "ግጻዌ" }
+        val fromGitsawe = orders.filter { it.source == MahletSource.GITSAWE }
         assertEquals(2, fromGitsawe.size)
         assertTrue(fromGitsawe.all { it.parts.isNotEmpty() })
+    }
+
+    /**
+     * An order with no day, no ጽጌ date and no computus key is one no date can
+     * reach. Exactly one is allowed, by name: the feast whose printed date the
+     * merge could not settle. A second is a feast that fell through the build.
+     */
+    @Test
+    fun `every undated order is appointed by the computus, save the one the book could not date`() {
+        val unreachable = orders.filter {
+            it.day == null && it.season == null && it.movable == null && it.source == null
+        }
+        assertEquals(listOf("ተክለ ሃይማኖት ወክርስቶሰ ሰምራ"), unreachable.map { it.feast })
+        val movable = orders.filter { it.movable != null }
+        // Six ጽጌ weeks, ስብከት/ብርሃን/ኖላዊ with their vigils, ሆሣዕና with its
+        // procession, and the seven that stand alone from ሰሙነ ሕማማት to ጰራቅሊጦስ.
+        assertEquals(21, movable.size)
+        assertTrue("a movable order also has a day", movable.none { it.day != null })
     }
 
     @Test

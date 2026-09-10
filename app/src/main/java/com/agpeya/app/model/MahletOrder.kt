@@ -97,6 +97,18 @@ object MahletSeason {
     const val TSIGE = "tsige"
 }
 
+/**
+ * The values [MahletOrder.source] takes, as the builder writes them. Amharic
+ * because the list shows them beside an order; constants because code that
+ * filters on them should not be matching a loose string.
+ */
+object MahletSource {
+    /** An order standing on a Telegram edition, the book having none. */
+    const val TELEGRAM = "ቴሌግራም"
+    const val GITSAWE = "ግጻዌ"
+    const val TSIGE_AKWAKWAM = "ማኅሌተ ጽጌ አቋቋም"
+}
+
 /** One order's row in the index — everything a list needs without opening it. */
 @Serializable
 data class MahletOrderMeta(
