@@ -91,12 +91,12 @@ TSIGE_WEEK = re.compile(r"^ዘመነ ጽጌ\s*[—–-]\s*([፩-፱])ኛ")
 # Named so the build can say it is known, not silently shipped unreachable.
 UNRESOLVED_DATES = {"ተክለ ሃይማኖት ወክርስቶሰ ሰምራ"}
 
-# Two editions are the same text when they have the same number of parts and
-# their words, with the homophones folded and the punctuation gone, agree to
-# this share. Below it a difference is a difference; above it, it is spelling.
-# The part count is the guard: an edition two stanzas longer can still score
-# 0.97 on the words it shares, and two stanzas are not superficial. The merge
-# held such pairs for review rather than deciding; the maintainer has decided.
+# Two editions are the same text when their words, with the homophones folded
+# and the punctuation gone, agree to this share. Below it a difference is a
+# difference; above it, it is spelling. Not the part count: a stanza broken in
+# two is the same stanza. What guards against a longer edition losing text is
+# that the fuller of a pair stands, and that nothing fuller than the book folds
+# into the book. The merge held such pairs for review; the maintainer decided.
 SUPERFICIAL = 0.95
 
 # What the channel appends to a post and what it points with, neither of which
@@ -106,20 +106,90 @@ SUPERFICIAL = 0.95
 # chant. Measured over every edition before being written: no part is only
 # boilerplate, so no part disappears here.
 BOILERPLATE = re.compile(
-    r"#ይቀላቀሉ|አስተያየት ካለ|join and share|@[A-Za-z_][A-Za-z0-9_]+|t\.me/|https?://")
+    r"#ይቀላቀሉ|አስተያየት ካለ|join and share|@[A-Za-z_][A-Za-z0-9_]+|t\.me/|https?://"
+    # a phone number; a recording's caption; the channel's dedication line;
+    # "for more, click the link and follow"; an editor's note and signature;
+    # a reposter's credit
+    r"|\+?[0-9]{9,}|ዩኒቨርሲቲ|የምርቃት ሥነ ሥርዐት|የቴሌግራም ቻናል|ለበለጠ ዕውቀት|ሊንኩን ተጭነው"
+    r"|^\s*ይጠይቁ ወይም\s*$|^\s*ማስታወሻ\s*-|ያሬዳውያን ነን|\bvia\b|ማህሌታውያን|ማኅሌታውያን",
+    re.I)
+# The ቅኔ-lesson menu that follows the caption above: one word a line. Struck
+# only from a part that carried the caption, since a lone ወርቅ is otherwise a
+# word of the chant and not a price list.
+AD_MENU = {"ፍቺ", "ርቃቄ", "ሠም", "ወርቅ", "ቅኔ", "ሙሉ ቤት ቅኔ"}
+AD_CAPTION = re.compile(r"ዩኒቨርሲቲ|ጥያቄ ካለ|\+?[0-9]{9,}")
+# A scanned page's footer — crosses set around its number — on a line of its
+# own. Text, never; the ጽጌ scan carries them between stanzas.
+SCAN_FOOTER = re.compile(r"^[†\s]*[0-9]+[†\s]*$")
 GLYPHS = re.compile("[\U0001F300-\U0001FAFF\u2600-\u27BF\uFE0F]")
 
 
+# The channel's typing, set as the book sets it. None of this changes a word.
+#   ASCII colon between letters is the wordspace ፡ the keyboard lacked; a
+#   question mark after a letter is ፧. A digit run is a Ge'ez numeral — in a
+#   repeat mark (/2/, [፪], X3 → /፪/, /፪/, /፫/), a rubric (በ 1 ሀሌታ → በ ፩ ሀሌታ) or
+#   a psalm reference (መዝ 21:1-2 → መዝ ፳፩፡፩-፪) alike, because that is the
+#   numeral the app prints everywhere else. A hashtag is a rubric the channel
+#   tagged (#ስቡዕ_ከተባለ_በኃላ → ስቡዕ ከተባለ በኃላ). ÷ stands in for ፣, ˮ for ”, -= for ፦.
+#   A no-break space is a space; a zero-width space and Word's private-use
+#   bullet are nothing; a stray single Latin letter glued to a word (ወረብe) is
+#   the keyboard's.
+GEEZ_ONES = "፩፪፫፬፭፮፯፰፱"
+GEEZ_TENS = "፲፳፴፵፶፷፸፹፺"
+
+
+def geez_numeral(n):
+    if n <= 0:
+        return str(n)
+    if n >= 10000:
+        return geez_numeral(n // 10000) + "፼" + (geez_numeral(n % 10000) if n % 10000 else "")
+    if n >= 100:
+        a, b = divmod(n, 100)
+        return (geez_numeral(a) if a > 1 else "") + "፻" + (geez_numeral(b) if b else "")
+    t, o = divmod(n, 10)
+    return (GEEZ_TENS[t - 1] if t else "") + (GEEZ_ONES[o - 1] if o else "")
+
+
+def normalise(line):
+    line = line.replace("\u00a0", " ").replace("\u200b", "").replace("\uf0d8", "")
+    # repeat marks first, so the digit inside is still a digit
+    line = re.sub(r"\[\s*([፩-፼]+|[0-9]+)\s*\]",
+                  lambda m: "/%s/" % (geez_numeral(int(m.group(1))) if m.group(1)[0] in "0123456789" else m.group(1)), line)
+    line = re.sub(r"/\s*([0-9]+)\s*ጊዜ\s*/", lambda m: "/%s/" % geez_numeral(int(m.group(1))), line)
+    line = re.sub(r"\b[Xx×]([0-9])\b", lambda m: "/%s/" % geez_numeral(int(m.group(1))), line)
+    line = re.sub(r"[0-9]+", lambda m: geez_numeral(int(m.group(0))), line)
+    line = re.sub(r"#([ሀ-፼][ሀ-፼_]*)", lambda m: m.group(1).replace("_", " "), line)
+    line = re.sub(r"(?<=[ሀ-፼])_(?=[ሀ-፼])", " ", line)
+    line = re.sub(r"(?<=[ሀ-፼])\s*:\s*(?=[ሀ-፼])", "፡", line)
+    line = re.sub(r"(?<=[ሀ-፼])\s*\?", "፧", line)
+    line = line.replace("÷", "፣").replace("ˮ", "”").replace(" -=", "፦").replace("-=", "፦")
+    line = re.sub(r"(?<=[ሀ-፼])[A-Za-z](?![A-Za-z])", "", line)
+    return line
+
+
 def clean_chant(text):
+    raw = (text or "").split("\n")
+    advert = any(AD_CAPTION.search(l) for l in raw)
     lines = []
-    for line in (text or "").split("\n"):
-        if BOILERPLATE.search(line):
+    for line in raw:
+        if BOILERPLATE.search(line) or SCAN_FOOTER.match(line):
             continue
-        line = GLYPHS.sub("", line)
+        if advert and line.strip() in AD_MENU:
+            continue
+        line = normalise(GLYPHS.sub("", line))
         line = re.sub(r"[ \t]+", " ", line).strip()
         if line:
             lines.append(line)
     return "\n".join(lines)
+
+
+def clean_name(s):
+    """A part name as the list shows it: no marks, no glyphs, nothing glued on."""
+    s = GLYPHS.sub("", s or "")
+    s = re.sub(r"[\u200b\uf0d8\u00a0]", " ", s)
+    s = re.sub(r"@[A-Za-z_][A-Za-z0-9_]+", "", s)
+    s = re.sub(r"[\s፦:\-\"'“”]+$", "", s).strip("\"'“” ")
+    return re.sub(r"\s+", " ", s).strip()
 
 
 # The one form whose specific hymn lives in the chant's title: the merge writes
@@ -199,12 +269,6 @@ def load(path):
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
-def clean_name(s):
-    """A part name as the list shows it: no trailing ፦, no doubled spaces."""
-    s = re.sub(r"[\s፦:]+$", "", s or "").strip()
-    return re.sub(r"\s+", " ", s)
-
-
 # ── the spine: the merged edition ───────────────────────────────────────────
 
 def words(parts):
@@ -222,12 +286,23 @@ def words(parts):
 
 
 def same_text(a, b):
-    if len(a) != len(b):
-        return False
+    """Whether two runs of parts are one text, spelling and segmentation aside.
+
+    Compared as words, not as parts: two posts of one order segment it
+    differently as often as not — a stanza broken in two, a refrain given its
+    own line — and a rule that counted parts would call those different. The
+    words are what is sung.
+    """
     wa, wb = words(a), words(b)
     if not wa or not wb:
         return False
     return difflib.SequenceMatcher(None, wa, wb, autojunk=False).ratio() >= SUPERFICIAL
+
+
+# An edition may fold into the book only if it carries no more text than the
+# book does, within this share of the words: the book is never replaced, so an
+# edition that is the book plus a stanza would lose the stanza on folding.
+BOOK_TOLERANCE = 0.02
 
 
 def fuller(a, b):
@@ -251,7 +326,10 @@ def dedupe(base, versions, report, base_is_book):
     kept, into_base = [], []
     base_parts = base
     for v in versions:
-        if same_text(base_parts, v["parts"]):
+        if same_text(base_parts, v["parts"]) and not (
+            base_is_book
+            and len(words(v["parts"])) > len(words(base_parts)) * (1 + BOOK_TOLERANCE)
+        ):
             if not base_is_book and not fuller(base_parts, v["parts"]):
                 base_parts, v["parts"] = v["parts"], base_parts
                 # The order's own post is now the absorbed one; the caller
@@ -284,10 +362,18 @@ def chant_to_part(chant, alternative=False):
     book's 1,645 — and is dropped, as the previous pipeline dropped them.
     """
     text = clean_chant(chant.get("text"))
-    if not text:
-        return None
     form = chant.get("form")
     title = clean_name(chant.get("title"))
+    # One post glued a stanza onto the hymn's name. A name is a few words; if
+    # it runs past that, the name is the words before the first ሰላም and the
+    # rest is verse.
+    if len(title) > PART_NAME_MAX:
+        cut = title.find("ሰላም", 1)
+        if cut > 0:
+            title, spill = title[:cut].strip(), title[cut:].strip()
+            text = (clean_chant(spill) + "\n" + text).strip()
+    if not text:
+        return None
     key = title if (form == TITLED_FORM and title) else (form or "")
     part = {"key": clean_name(key), "verse": text}
     if alternative or chant.get("alternative_to") is not None:
@@ -349,7 +435,7 @@ def build_spine(report):
                     src = (v.get("sources") or [{}])[0]
                     versions.append({
                         "id": v["id"],
-                        "title": clean_name(src.get("title")) or None,
+                        "title": clean_name(normalise(GLYPHS.sub("", src.get("title") or "")).replace("#", " ")) or None,
                         "url": src.get("url"),
                         "parts": vparts,
                     })
@@ -447,6 +533,17 @@ def gitsawe_orders():
     return _gitsawe
 
 
+def cleaned(parts):
+    """The scan's parts through the same cleaning as the channel's, after the
+    split — so the split, and the count asserted on it, see the scan as it is."""
+    out = []
+    for p in parts:
+        verse = clean_chant(p["verse"])
+        if verse:
+            out.append({**p, "verse": verse})
+    return out
+
+
 def split_parts(blocks, vocab):
     """Blocks into (name, verse) pairs. A verse with no name keeps an empty one."""
     parts, current = [], None
@@ -480,7 +577,7 @@ def build_tsige(vocab, report):
                 # rather than skipped along with the empty trailing chapter.
                 if not title or not blocks:
                     continue
-                parts = split_parts(blocks, vocab)
+                parts = cleaned(split_parts(blocks, vocab))
                 if parts:
                     orders.append({
                         "id": order_id("tsige-base", title),
@@ -493,7 +590,7 @@ def build_tsige(vocab, report):
             if month is None:
                 report["unmapped"].append(title)
                 continue
-            parts = split_parts(blocks, vocab)
+            parts = cleaned(split_parts(blocks, vocab))
             if not parts:
                 report["empty"] += 1
                 continue
@@ -549,7 +646,7 @@ def build_missing(spine, report):
             "month": None,
             "day": None,
             "source": "ግጻዌ",
-            "parts": [{"key": p["key"], "verse": p["verse"]} for p in order["detail"]],
+            "parts": cleaned([{"key": p["key"], "verse": p["verse"]} for p in order["detail"]]),
         })
         report["from_gitsawe"].append((title, round(share * 100)))
     return kept

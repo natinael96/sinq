@@ -44,7 +44,7 @@ class MahletTest {
     @Test
     fun `the merged corpus is two hundred and fifteen orders, none of them empty`() {
         assertEquals(215, orders.size)
-        assertEquals(3386, orders.sumOf { it.parts.size })
+        assertEquals(3391, orders.sumOf { it.parts.size })
         assertTrue("an order has no parts", orders.all { it.parts.isNotEmpty() })
         assertTrue("a part has no verse", orders.all { o -> o.parts.all { it.verse.isNotBlank() } })
     }
@@ -57,10 +57,11 @@ class MahletTest {
     @Test
     fun `every edition has text and a post it came from`() {
         val editions = orders.flatMap { it.versions }
-        // 275 as the merge shipped them; 40 of those differed from another
-        // only in spelling and marks — two of them only once the channel's
-        // join-and-share footer was off — and were folded, their posts kept.
-        assertEquals(235, editions.size)
+        // 275 as the merge shipped them; 79 of those were another edition
+        // again, spelling and segmentation aside, and were folded with their
+        // posts kept — 39 of them only once parts stopped being counted, since
+        // two posts of one order break its stanzas differently as often as not.
+        assertEquals(196, editions.size)
         assertTrue("an edition has no parts", editions.all { it.parts.isNotEmpty() })
         assertTrue("an edition part has no verse", editions.all { v -> v.parts.all { it.verse.isNotBlank() } })
         assertTrue("an edition has no id", editions.all { it.id.isNotBlank() })
@@ -68,7 +69,7 @@ class MahletTest {
         // Folding keeps the links: every absorbed edition's post is still on the
         // edition that stands for it, or on the order whose text it repeated.
         val absorbed = editions.sumOf { it.also.size } + orders.sumOf { it.also.size }
-        assertEquals(40, absorbed)
+        assertEquals(79, absorbed)
         assertTrue("a folded post is blank", (editions.flatMap { it.also } + orders.flatMap { it.also }).all { it.isNotBlank() })
     }
 
@@ -79,7 +80,10 @@ class MahletTest {
      */
     @Test
     fun `no part carries the channel's boilerplate or its glyphs`() {
-        val noise = Regex("ይቀላቀሉ|አስተያየት ካለ|@[A-Za-z_][A-Za-z0-9_]+|t\\.me/|https?://|join and share|[👉👈✅📌🔔]")
+        val noise = Regex(
+            "ይቀላቀሉ|አስተያየት ካለ|@[A-Za-z_][A-Za-z0-9_]+|t\\.me/|https?://|join and share|\\bvia\\b" +
+                "|ማህሌታውያን|ዩኒቨርሲቲ|ሊንኩን ተጭነው|ያሬዳውያን ነን|የቴሌግራም ቻናል|[0-9]|[👉👈✅📌🔔⛪🍒]|\\u200b|\\uf0d8|\\u00a0",
+        )
         val everyPart = orders.flatMap { it.parts + it.versions.flatMap { v -> v.parts } }
         assertTrue(everyPart.none { noise.containsMatchIn(it.verse) })
     }
