@@ -1,5 +1,7 @@
 package com.agpeya.app.ui.settings
 
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -33,7 +35,6 @@ import com.agpeya.app.data.PrayerLevel
 import com.agpeya.app.data.ReadingFont
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.data.ThemeChoice
-import com.agpeya.app.ui.common.AgpeyaBottomBar
 import com.agpeya.app.ui.common.NavRow
 import com.agpeya.app.ui.common.Tab
 import com.agpeya.app.ui.strings.LocalStrings
@@ -44,17 +45,13 @@ import com.agpeya.app.ui.common.SectionHeader
 /** The deliberately shallow Settings landing page: two direct choices and six doors. */
 @Composable
 fun SettingsScreen(
-    onSelectTab: (Tab) -> Unit,
     onOpenReading: () -> Unit,
     onOpenPrayer: () -> Unit,
     onOpenReminders: () -> Unit,
     onOpenRecords: () -> Unit,
-    onOpenData: () -> Unit,
     onOpenTutorial: () -> Unit,
-    onOpenWhatsNew: () -> Unit,
     onOpenChangelog: () -> Unit,
     onOpenAbout: () -> Unit,
-    onOpenLicenses: () -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -85,7 +82,9 @@ fun SettingsScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        bottomBar = { AgpeyaBottomBar(Tab.SETTINGS, onSelectTab) },
+        // The bar belongs to the host that holds all four tabs, and it carries
+        // its own navigation-bar padding; this page only insets for the status bar.
+        contentWindowInsets = WindowInsets.statusBars,
     ) { inner ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(inner),
@@ -117,12 +116,20 @@ fun SettingsScreen(
                 NavRow(s.remindersSettingsTitle, onOpenReminders, subtitle = if (enabledCount == 0) s.remindersOff else s.remindersOn(enabledCount))
                 Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(s.settingsGroupRecords)
-                NavRow(s.settingsGroupRecords, onOpenRecords, subtitle = s.settingsGroupRecordsDesc)
-                NavRow(s.settingsGroupData, onOpenData, subtitle = backupRelativeLabel(lastBackupAt, s))
+                // One row, not two: መረጃ's own page opened with this page's
+                // ምልክቶቼ row repeated, so the ledgers and the file they are
+                // saved to now share a screen.
+                NavRow(
+                    s.settingsGroupRecords,
+                    onOpenRecords,
+                    subtitle = "${s.settingsGroupRecordsDesc} · ${backupRelativeLabel(lastBackupAt, s)}",
+                )
                 Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(s.settingsGroupMore)
                 NavRow(s.tutorial, onOpenTutorial)
-                NavRow(s.whatsNewTour, onOpenWhatsNew)
+                // The tour of the new version was a row of its own beside this
+                // one. It is about the release, so it now opens from the top of
+                // the release notes instead.
                 NavRow(s.whatsNew, onOpenChangelog, subtitle = "v${appVersion(context)}")
                 // Above About, because someone looking for where to report a
                 // wrong word is not looking for a page about the app.
@@ -131,8 +138,8 @@ fun SettingsScreen(
                     { com.agpeya.app.ui.common.openUrl(context, com.agpeya.app.ui.common.FEEDBACK_URL) },
                     subtitle = s.feedbackSubtitle,
                 )
+                // ፈቃዶች እና ምንጮች is a section of ስለ መተግበሪያው, and now reads as one.
                 NavRow(s.about, onOpenAbout)
-                NavRow(s.licensesTitle, onOpenLicenses)
                 Spacer(Modifier.height(Spacing.lg))
                 // The installed version, quietly closing the page.
                 Text(
@@ -153,12 +160,43 @@ private fun appVersion(context: android.content.Context): String = runCatching {
     context.packageManager.getPackageInfo(context.packageName, 0).versionName
 }.getOrNull() ?: ""
 
+/**
+ * A label and its choice on one line, which is 48 dp rather than the 62 dp the
+ * stacked version cost. Above a font scale of 1.5 it still stacks and becomes a
+ * radio list, because at that size neither the label nor the segments fit
+ * beside each other.
+ */
 @Composable
 private fun CompactSegmented(label: String, options: List<String>, selected: Int, onSelect: (Int) -> Unit) {
+    if (LocalDensity.current.fontScale <= 1.5f) {
+        androidx.compose.foundation.layout.Row(
+            Modifier.fillMaxWidth().heightIn(min = 48.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(Spacing.md),
+        ) {
+            Text(
+                label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+            )
+            SingleChoiceSegmentedButtonRow(Modifier.weight(1f)) {
+                options.forEachIndexed { index, text ->
+                    SegmentedButton(
+                        selected = selected == index,
+                        onClick = { onSelect(index) },
+                        shape = SegmentedButtonDefaults.itemShape(index, options.size),
+                        icon = {},
+                    ) { Text(text, style = MaterialTheme.typography.labelSmall, maxLines = 1) }
+                }
+            }
+        }
+        return
+    }
     Column {
         Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.height(Spacing.xs))
-        if (LocalDensity.current.fontScale > 1.5f) {
+        if (true) {
             options.forEachIndexed { index, text ->
                 androidx.compose.foundation.layout.Row(
                     Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable { onSelect(index) },

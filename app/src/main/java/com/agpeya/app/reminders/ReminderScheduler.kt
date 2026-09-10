@@ -23,11 +23,17 @@ object ReminderScheduler {
     const val EXTRA_HOUR_ID = "hourId"
     const val EXTRA_HOUR_NAME = "hourName"
     const val EXTRA_SNOOZE = "snooze"
-    const val SNOOZE_MINUTES = 10
+    const val EXTRA_SNOOZE_COUNT = "snooze_count"
 
-    /** Schedule a one-shot alarm [SNOOZE_MINUTES] from now for the same hour. */
-    fun snooze(context: Context, hourId: String, hourName: String) {
-        val at = LocalDateTime.now().plusMinutes(SNOOZE_MINUTES.toLong())
+    /**
+     * Schedule a one-shot alarm for the same hour, as far ahead as the reader
+     * asked for in ማንቂያ. [count] is how many times this hour has been postponed
+     * already; it rides in the intent so it survives the process dying between
+     * one ring and the next. Returns when the alarm will come back.
+     */
+    fun snooze(context: Context, hourId: String, hourName: String, count: Int = 1): LocalDateTime {
+        val minutes = com.agpeya.app.data.SettingsRepository.snoozeMinutesBlocking(context)
+        val at = LocalDateTime.now().plusMinutes(minutes.toLong())
         val triggerAt = at.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             action = "com.agpeya.app.SNOOZE"
@@ -36,6 +42,7 @@ object ReminderScheduler {
             putExtra(EXTRA_HOUR_ID, hourId)
             putExtra(EXTRA_HOUR_NAME, hourName)
             putExtra(EXTRA_SNOOZE, true)
+            putExtra(EXTRA_SNOOZE_COUNT, count)
         }
         val pi = PendingIntent.getBroadcast(
             context, "snooze_$hourId".hashCode(), intent,
@@ -51,6 +58,7 @@ object ReminderScheduler {
         } catch (_: SecurityException) {
             am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
         }
+        return at
     }
 
     /** Next fire time for an entry, strictly after [now]. */

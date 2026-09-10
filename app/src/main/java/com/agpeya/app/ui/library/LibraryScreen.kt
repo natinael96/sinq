@@ -1,5 +1,7 @@
 package com.agpeya.app.ui.library
 
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontStyle
-import com.agpeya.app.ui.common.AgpeyaBottomBar
 import com.agpeya.app.ui.common.Tab
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.common.SinqCard
@@ -46,12 +47,13 @@ fun LibraryScreen(
     onOpenSynaxarium: () -> Unit,
     onOpenReading: () -> Unit,
     onOpenMarks: () -> Unit,
-    onSelectTab: (Tab) -> Unit,
 ) {
     val s = LocalStrings.current
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        bottomBar = { AgpeyaBottomBar(current = Tab.LIBRARY, onSelect = onSelectTab) },
+        // The bar belongs to the host that holds all four tabs, and it carries
+        // its own navigation-bar padding; this page only insets for the status bar.
+        contentWindowInsets = WindowInsets.statusBars,
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier

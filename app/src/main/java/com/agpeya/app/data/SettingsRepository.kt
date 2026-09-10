@@ -75,6 +75,7 @@ object SettingsRepository {
         val prayerLevel: String = PrayerLevel.FULL.name,
         val alarmAlert: String = AlarmAlert.SOUND_VIBRATE.name,
         val alarmSound: String = AlarmSound.ALARM.name,
+        val snoozeMinutes: Int = DEFAULT_SNOOZE_MINUTES,
         val misbakLanguage: String = MisbakLanguage.GEEZ.name,
         val profileName: String = "",
         val christianName: String = "",
@@ -103,6 +104,7 @@ object SettingsRepository {
     private val KEY_PRAYER_LEVEL = stringPreferencesKey("prayer_level")
     private val KEY_ALARM_ALERT = stringPreferencesKey("alarm_alert")
     private val KEY_ALARM_SOUND = stringPreferencesKey("alarm_sound")
+    private val KEY_SNOOZE_MINUTES = intPreferencesKey("snooze_minutes")
     private val KEY_MISBAK_LANGUAGE = stringPreferencesKey("misbak_language")
     // Which ስንክሳር edition is read. The two are parallel editions rather than a
     // parallel text, so this is a choice of book, not a display toggle.
@@ -219,6 +221,7 @@ object SettingsRepository {
             prayerLevel = prefs[KEY_PRAYER_LEVEL] ?: PrayerLevel.FULL.name,
             alarmAlert = prefs[KEY_ALARM_ALERT] ?: AlarmAlert.SOUND_VIBRATE.name,
             alarmSound = prefs[KEY_ALARM_SOUND] ?: AlarmSound.ALARM.name,
+            snoozeMinutes = prefs[KEY_SNOOZE_MINUTES] ?: DEFAULT_SNOOZE_MINUTES,
             misbakLanguage = prefs[KEY_MISBAK_LANGUAGE] ?: MisbakLanguage.GEEZ.name,
             profileName = prefs[KEY_NAME] ?: "",
             christianName = prefs[KEY_CHRISTIAN_NAME] ?: "",
@@ -260,6 +263,7 @@ object SettingsRepository {
             prefs[KEY_PRAYER_LEVEL] = runCatching { PrayerLevel.valueOf(value.prayerLevel) }.getOrDefault(PrayerLevel.FULL).name
             prefs[KEY_ALARM_ALERT] = runCatching { AlarmAlert.valueOf(value.alarmAlert) }.getOrDefault(AlarmAlert.SOUND_VIBRATE).name
             prefs[KEY_ALARM_SOUND] = runCatching { AlarmSound.valueOf(value.alarmSound) }.getOrDefault(AlarmSound.ALARM).name
+            prefs[KEY_SNOOZE_MINUTES] = value.snoozeMinutes.takeIf { it in SNOOZE_CHOICES } ?: DEFAULT_SNOOZE_MINUTES
             prefs[KEY_MISBAK_LANGUAGE] = runCatching { MisbakLanguage.valueOf(value.misbakLanguage) }.getOrDefault(MisbakLanguage.GEEZ).name
             prefs[KEY_NAME] = value.profileName.take(200)
             prefs[KEY_CHRISTIAN_NAME] = value.christianName.take(200)
@@ -570,6 +574,34 @@ object SettingsRepository {
     suspend fun setAlarmSound(context: Context, value: AlarmSound) {
         context.settingsDataStore.edit { it[KEY_ALARM_SOUND] = value.name }
     }
+
+    /**
+     * How long አሳድር postpones an hour, and how many times it may be asked for.
+     *
+     * The cap is the point: an alarm that can be snoozed without end is a way of
+     * never praying the hour while feeling as though it is still coming. After
+     * [MAX_SNOOZES] the alarm offers only Open and Dismiss.
+     */
+    val SNOOZE_CHOICES = listOf(5, 10, 15, 20)
+    const val DEFAULT_SNOOZE_MINUTES = 10
+    const val MAX_SNOOZES = 3
+
+    fun snoozeMinutes(context: Context): Flow<Int> =
+        context.settingsDataStore.data.map {
+            it[KEY_SNOOZE_MINUTES]?.takeIf { m -> m in SNOOZE_CHOICES } ?: DEFAULT_SNOOZE_MINUTES
+        }
+
+    suspend fun setSnoozeMinutes(context: Context, value: Int) {
+        context.settingsDataStore.edit {
+            it[KEY_SNOOZE_MINUTES] = value.takeIf { m -> m in SNOOZE_CHOICES } ?: DEFAULT_SNOOZE_MINUTES
+        }
+    }
+
+    /** Blocking read for use inside the alarm receiver. */
+    fun snoozeMinutesBlocking(context: Context): Int =
+        runCatching {
+            kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) { snoozeMinutes(context).first() }
+        }.getOrDefault(DEFAULT_SNOOZE_MINUTES)
 
     fun lastBackupAt(context: Context): Flow<Long> =
         context.settingsDataStore.data.map { it[KEY_LAST_BACKUP_AT] ?: 0L }

@@ -444,6 +444,13 @@ interface Strings {
     val fontAbyssinica: String
     fun psalmRange(from: Int, to: Int): String
     val snooze: String
+    /** How long አሳድር postpones an hour, and what it says when it does. */
+    val snoozeLengthTitle: String
+    fun snoozeMinutesLabel(n: Int): String
+    fun snoozedUntil(hourName: String, time: String): String
+    fun snoozedUntilPlain(time: String): String
+    fun snoozedTimes(n: Int): String
+    val snoozeLastOne: String
     val addPsalm: String
     val choosePsalm: String
     val remove: String
@@ -878,7 +885,7 @@ object AmharicStrings : Strings {
     override val tabSettings = "ቅንብር"
     override val tabLibrary = "መጻሕፍት"
 
-    override val libraryTitle = "ቤተ መጻሕፍት"
+    override val libraryTitle = "መጻሕፍት"
     override val wudaseScheduleSubtitle = "ሰኞ–እሑድ"
     override val zewotrSubtitle = "የዕለት ጸሎቶች"
     override val librarySubtitle = "የጸሎትና የቅዱሳት መጻሕፍት ስብስብ"
@@ -1300,6 +1307,12 @@ object AmharicStrings : Strings {
     override val fontAbyssinica = "አቢሲኒካ"
     override fun psalmRange(from: Int, to: Int) = "መዝሙር $from–$to"
     override val snooze = "አሳድር"
+    override val snoozeLengthTitle = "የማሳደሪያ ጊዜ"
+    override fun snoozeMinutesLabel(n: Int) = "${com.agpeya.app.ui.reading.geezNumeral(n)} ደቂቃ"
+    override fun snoozedUntil(hourName: String, time: String) = "$hourName ታሳድሯል · $time ይመለሳል"
+    override fun snoozedUntilPlain(time: String) = "ታሳድሯል · $time ይመለሳል"
+    override fun snoozedTimes(n: Int) = "${com.agpeya.app.ui.reading.geezNumeral(n)} ጊዜ ታሳድሯል"
+    override val snoozeLastOne = "የመጨረሻው ማሳደሪያ ነው"
     override val addPsalm = "መዝሙር ጨምር"
     override val choosePsalm = "መዝሙር ይምረጡ"
     override val remove = "አስወግድ"
@@ -1688,7 +1701,7 @@ object EnglishStrings : Strings {
     override val tabSettings = "Settings"
     override val tabLibrary = "Books"
 
-    override val libraryTitle = "Library"
+    override val libraryTitle = "Books"
     override val wudaseScheduleSubtitle = "Monday–Sunday prayers"
     override val zewotrSubtitle = "Daily prayers"
     override val librarySubtitle = "Prayers and holy scriptures"
@@ -2123,6 +2136,12 @@ object EnglishStrings : Strings {
     override val fontAbyssinica = "Abyssinica"
     override fun psalmRange(from: Int, to: Int) = "Psalms $from–$to"
     override val snooze = "Snooze"
+    override val snoozeLengthTitle = "Snooze for"
+    override fun snoozeMinutesLabel(n: Int) = "$n min"
+    override fun snoozedUntil(hourName: String, time: String) = "$hourName snoozed · back at $time"
+    override fun snoozedUntilPlain(time: String) = "Snoozed · back at $time"
+    override fun snoozedTimes(n: Int) = if (n == 1) "Snoozed once" else "Snoozed $n times"
+    override val snoozeLastOne = "That was the last snooze"
     override val addPsalm = "Add psalm"
     override val choosePsalm = "Choose a psalm"
     override val remove = "Remove"

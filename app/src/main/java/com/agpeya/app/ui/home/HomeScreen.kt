@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -68,7 +70,6 @@ import com.agpeya.app.data.PrayerJourney
 import com.agpeya.app.model.HabitsState
 import com.agpeya.app.model.Hour
 import com.agpeya.app.model.HoursConfig
-import com.agpeya.app.ui.common.AgpeyaBottomBar
 import com.agpeya.app.ui.common.Candle
 import com.agpeya.app.ui.common.FillColumn
 import com.agpeya.app.ui.common.HeroCard
@@ -156,7 +157,9 @@ fun HomeScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        bottomBar = { AgpeyaBottomBar(current = Tab.HOME, onSelect = onSelectTab) },
+        // The bar belongs to the host that holds all four tabs, and it carries
+        // its own navigation-bar padding; this page only insets for the status bar.
+        contentWindowInsets = WindowInsets.statusBars,
     ) { innerPadding ->
       Column(Modifier.fillMaxSize().padding(innerPadding)) {
         // Above the day, outside the screen margin: a notice about the app

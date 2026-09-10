@@ -44,6 +44,7 @@ object AlarmRinger {
     private const val LEGACY_CHANNEL_ID = "prayer_alarms"
     private const val NOTIFICATION_ID = 7001
     private const val DONE_NOTIFICATION_BASE = 7100
+    private const val SNOOZE_NOTIFICATION_BASE = 7200
     private const val TIMEOUT_MS = 60_000L
 
     // Request codes 8-12: distinct from the reminder PendingIntents (0-3, 5-7).
@@ -58,8 +59,13 @@ object AlarmRinger {
     const val ACTION_REMOVED = "com.agpeya.app.ALARM_REMOVED"
     const val ACTION_TIMEOUT = "com.agpeya.app.ALARM_TIMEOUT"
 
-    /** Post the ringing notification. Call from a background thread — it reads settings. */
-    fun ring(context: Context, hourId: String, hourName: String) {
+    /**
+     * Post the ringing notification. Call from a background thread — it reads
+     * settings. [snoozeCount] is how many times this hour has already been
+     * postponed; past [SettingsRepository.MAX_SNOOZES] the alarm stops offering
+     * to postpone it again.
+     */
+    fun ring(context: Context, hourId: String, hourName: String, snoozeCount: Int = 0) {
         val app = context.applicationContext
         val alert = SettingsRepository.alarmAlertBlocking(app)
         val sound = SettingsRepository.alarmSoundBlocking(app)
@@ -90,6 +96,7 @@ object AlarmRinger {
                 data = Uri.parse("agpeya://alarm/${action.substringAfterLast('.')}/$hourId")
                 putExtra(ReminderScheduler.EXTRA_HOUR_ID, hourId)
                 putExtra(ReminderScheduler.EXTRA_HOUR_NAME, hourName)
+                putExtra(ReminderScheduler.EXTRA_SNOOZE_COUNT, snoozeCount + 1)
             },
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
@@ -106,8 +113,19 @@ object AlarmRinger {
             .setDeleteIntent(broadcastPi(DELETE_REQUEST_CODE, ACTION_REMOVED))
             .setTimeoutAfter(TIMEOUT_MS)
             .addAction(0, s.openShort, open)
-            .addAction(0, s.snooze, broadcastPi(SNOOZE_REQUEST_CODE, ACTION_SNOOZE))
+            .also { b ->
+                // An hour that can be postponed for ever is an hour that is
+                // never prayed, so the third አሳድር is the last one offered.
+                if (snoozeCount < SettingsRepository.MAX_SNOOZES) {
+                    b.addAction(0, s.snooze, broadcastPi(SNOOZE_REQUEST_CODE, ACTION_SNOOZE))
+                }
+            }
             .addAction(0, s.dismiss, broadcastPi(DISMISS_REQUEST_CODE, ACTION_DISMISS))
+            // The count is worth showing: it is the difference between an alarm
+            // that has just arrived and one that has been put off twice already.
+            .also { b ->
+                if (snoozeCount > 0) b.setContentText(s.snoozedTimes(snoozeCount))
+            }
             .build()
         notification.flags = notification.flags or Notification.FLAG_INSISTENT
         nm.notify(NOTIFICATION_ID, notification)
@@ -183,6 +201,57 @@ object AlarmRinger {
         )
     }
 
+    /**
+     * A quiet line confirming a postponed hour and when it returns.
+     *
+     * Snoozing used to do its work in silence: the notification vanished and
+     * nothing said whether the alarm had been put off or lost. It clears itself
+     * as the alarm comes back.
+     */
+    fun postSnoozeNotice(
+        context: Context,
+        hourId: String,
+        hourName: String,
+        backAt: java.time.LocalDateTime,
+        count: Int,
+    ) {
+        val app = context.applicationContext
+        val s = stringsFor(
+            runCatching {
+                runBlocking { SettingsRepository.language(app).first() }
+            }.getOrDefault(Language.SYSTEM),
+        )
+        val nm = app.getSystemService(NotificationManager::class.java)
+        ensureFollowupChannel(app, nm)
+        val at = backAt.toLocalTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
+        val notification = NotificationCompat.Builder(app, FOLLOWUP_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(if (hourName.isNotBlank()) s.snoozedUntil(hourName, at) else s.snoozedUntilPlain(at))
+            .apply { if (count >= SettingsRepository.MAX_SNOOZES) setContentText(s.snoozeLastOne) }
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setSilent(true)
+            .setAutoCancel(true)
+            .setTimeoutAfter(
+                (java.time.Duration.between(java.time.LocalDateTime.now(), backAt).toMillis())
+                    .coerceAtLeast(1_000L),
+            )
+            .build()
+        nm.notify(SNOOZE_NOTIFICATION_BASE + Math.floorMod(hourId.hashCode(), 1000), notification)
+    }
+
+    /** The silent channel both quiet follow-ups share. */
+    private fun ensureFollowupChannel(app: Context, nm: NotificationManager) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        if (nm.getNotificationChannel(FOLLOWUP_CHANNEL_ID) != null) return
+        nm.createNotificationChannel(
+            NotificationChannel(FOLLOWUP_CHANNEL_ID, "የጸሎት ማንቂያ ክትትል", NotificationManager.IMPORTANCE_DEFAULT).apply {
+                description = "Prayer alarm follow-up"
+                setSound(null, null)
+                enableVibration(false)
+            },
+        )
+    }
+
     /** Quiet follow-up after the alarm ends: "Done?" with a Yes that marks the hour. */
     fun postDonePrompt(context: Context, hourId: String) {
         val app = context.applicationContext
@@ -192,19 +261,7 @@ object AlarmRinger {
             }.getOrDefault(Language.SYSTEM),
         )
         val nm = app.getSystemService(NotificationManager::class.java)
-        // Channels only exist from Oreo. Below it a notification carries its own
-        // sound and importance, so there is simply nothing to create.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-            nm.getNotificationChannel(FOLLOWUP_CHANNEL_ID) == null
-        ) {
-            nm.createNotificationChannel(
-                NotificationChannel(FOLLOWUP_CHANNEL_ID, "የጸሎት ማንቂያ ክትትል", NotificationManager.IMPORTANCE_DEFAULT).apply {
-                    description = "Prayer alarm follow-up"
-                    setSound(null, null)
-                    enableVibration(false)
-                },
-            )
-        }
+        ensureFollowupChannel(app, nm)
         val notifId = DONE_NOTIFICATION_BASE + Math.floorMod(hourId.hashCode(), 1000)
         val yes = PendingIntent.getBroadcast(
             app,

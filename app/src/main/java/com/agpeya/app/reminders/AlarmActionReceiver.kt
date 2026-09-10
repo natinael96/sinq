@@ -23,9 +23,21 @@ class AlarmActionReceiver : BroadcastReceiver() {
         when (intent.action) {
             AlarmRinger.ACTION_SNOOZE -> {
                 val hourName = intent.getStringExtra(ReminderScheduler.EXTRA_HOUR_NAME) ?: hourId
+                val count = intent.getIntExtra(ReminderScheduler.EXTRA_SNOOZE_COUNT, 1)
                 AlarmRinger.cancelTimeout(context)
                 AlarmRinger.stop(context)
-                ReminderScheduler.snooze(context, hourId, hourName)
+                // Reads the snooze length from DataStore, so off the main thread.
+                val pending = goAsync()
+                Thread {
+                    try {
+                        val backAt = ReminderScheduler.snooze(context, hourId, hourName, count)
+                        // Snoozing used to be silent, which left no way to tell a
+                        // postponed hour from one that never rang.
+                        AlarmRinger.postSnoozeNotice(context, hourId, hourName, backAt, count)
+                    } finally {
+                        pending.finish()
+                    }
+                }.start()
             }
             // Dismissed, opened, rung out, or swiped away: all of them are the
             // alarm ending, and all of them are worth asking about.

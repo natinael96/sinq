@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -216,11 +217,18 @@ fun stringsFor(language: Language): Strings = when (language) {
 }
 
 /** Switch bottom-nav tabs preserving each tab's state. */
-private fun NavController.switchTab(tab: Tab) {
-    navigate(tab.route) {
-        popUpTo(Tab.HOME.route) { saveState = true }
-        launchSingleTop = true
-        restoreState = true
+/**
+ * Bring the tab host to the front, whatever page is showing over it.
+ *
+ * The four tabs stopped being four destinations when they became four pages of
+ * one pager, so switching between them is a scroll rather than a navigation —
+ * see the [Tab.HOME] destination below. This only handles the other half: a
+ * reminder that wants ጉዞ while the reader is open has to close the reader
+ * first.
+ */
+private fun NavController.showTabs() {
+    if (currentDestination?.route != Tab.HOME.route) {
+        popBackStack(Tab.HOME.route, inclusive = false)
     }
 }
 
@@ -246,6 +254,16 @@ private fun AgpeyaNavHost(
     val onboarded by SettingsRepository.onboarded(context).collectAsState(initial = null as Boolean?)
 
     val ready = onboarded ?: return
+    // The four tabs live side by side in one pager, so a swipe carries the page
+    // under the finger and the bar's light follows it. Selecting a tab is the
+    // same movement, asked for from the other end.
+    val tabPager = androidx.compose.foundation.pager.rememberPagerState(
+        pageCount = { Tab.entries.size },
+    )
+    val goToTab: (Tab) -> Unit = { tab ->
+        navController.showTabs()
+        scope.launch { tabPager.animateScrollToPage(tab.ordinal) }
+    }
 
     // Self-heal the alarm schedule on every launch. Alarm chains are otherwise
     // only re-armed on boot/update/time-change or a mode edit, so an OEM
@@ -308,7 +326,7 @@ private fun AgpeyaNavHost(
     // Opened from the nightly reminder notification → jump to the Journey tab.
     LaunchedEffect(ready, openJourney) {
         if (ready && openJourney) {
-            navController.switchTab(Tab.JOURNEY)
+            goToTab(Tab.JOURNEY)
             onJourneyHandled()
         }
     }
@@ -357,6 +375,7 @@ private fun AgpeyaNavHost(
 
     val startDestination = rememberSaveable { if (ready) Tab.HOME.route else "intro" }
 
+
     // One motion for the whole graph: the page fades and drifts a fraction of a
     // screen in the direction of travel. Short (220ms) and small (a twelfth of
     // the width) — enough to say "this came from there" and not enough to make
@@ -390,17 +409,78 @@ private fun AgpeyaNavHost(
             )
         }
         composable(Tab.HOME.route) {
-            HomeScreen(
-                onOpenHour = { hourId -> navController.navigate("reading/$hourId") { launchSingleTop = true } },
-                onOpenSearch = { navController.navigate("search") { launchSingleTop = true } },
-                onOpenFasting = { navController.navigate("fasting") { launchSingleTop = true } },
-                onOpenBookmarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
-                onOpenPrayerList = { navController.navigate("prayerlist") { launchSingleTop = true } },
-                onOpenPsalter = { navController.navigate("psalter") { launchSingleTop = true } },
-                onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
-                onOpenGitsawe = { navController.navigate("gitsawe") { launchSingleTop = true } },
-                onSelectTab = navController::switchTab,
-            )
+            // The four tabs are one destination now, laid side by side, so a
+            // swipe carries the page under the finger and the bar's light
+            // follows it. They used to be four destinations, and the only way
+            // between them was a tap.
+            val page = Tab.entries[tabPager.targetPage]
+            androidx.compose.material3.Scaffold(
+                containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background,
+                // Every page is a Scaffold of its own and insets for the status
+                // bar, and the tab bar carries its own navigation-bar padding.
+                // This one contributes nothing, or both would be applied twice.
+                contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0),
+                bottomBar = {
+                    com.agpeya.app.ui.common.AgpeyaBottomBar(current = page, onSelect = goToTab)
+                },
+            ) { inner ->
+                androidx.compose.foundation.pager.HorizontalPager(
+                    state = tabPager,
+                    modifier = Modifier.fillMaxSize().padding(inner),
+                    // The next page is composed before it is reached, so a swipe
+                    // uncovers a page rather than a blank that fills in late.
+                    beyondViewportPageCount = 1,
+                    key = { it },
+                ) { index ->
+                    when (Tab.entries[index]) {
+                        Tab.HOME ->
+                            HomeScreen(
+                                onOpenHour = { hourId -> navController.navigate("reading/$hourId") { launchSingleTop = true } },
+                                onOpenSearch = { navController.navigate("search") { launchSingleTop = true } },
+                                onOpenFasting = { navController.navigate("fasting") { launchSingleTop = true } },
+                                onOpenBookmarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
+                                onOpenPrayerList = { navController.navigate("prayerlist") { launchSingleTop = true } },
+                                onOpenPsalter = { navController.navigate("psalter") { launchSingleTop = true } },
+                                onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
+                                onOpenGitsawe = { navController.navigate("gitsawe") { launchSingleTop = true } },
+                                onSelectTab = goToTab,
+                            )
+                        Tab.JOURNEY ->
+                            com.agpeya.app.ui.habits.JourneyScreen(
+                                onOpenJournal = { navController.navigate("journal") { launchSingleTop = true } },
+                            )
+                        Tab.LIBRARY ->
+                            com.agpeya.app.ui.library.LibraryScreen(
+                                onOpenScriptures = { navController.navigate("scriptures") { launchSingleTop = true } },
+                                onOpenWudase = { navController.navigate("wudase") { launchSingleTop = true } },
+                                onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
+                                onOpenBahreHasab = { navController.navigate("bahreHasabReference") { launchSingleTop = true } },
+                                onOpenMahlets = { navController.navigate("mahlets") { launchSingleTop = true } },
+                                onOpenBooks = { navController.navigate("books") { launchSingleTop = true } },
+                                onOpenSynaxarium = {
+                                    navController.navigate("synaxarium/${java.time.LocalDate.now().toEpochDay()}") { launchSingleTop = true }
+                                },
+                                onOpenReading = { navController.navigate("reading") { launchSingleTop = true } },
+                                onOpenMarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
+                            )
+                        Tab.SETTINGS ->
+                            SettingsScreen(
+                                onOpenReading = { navController.navigate("settings/reading") { launchSingleTop = true } },
+                                onOpenPrayer = { navController.navigate("settings/prayer") { launchSingleTop = true } },
+                                onOpenReminders = { navController.navigate("settings/reminders") { launchSingleTop = true } },
+                                onOpenRecords = { navController.navigate("settings/records") { launchSingleTop = true } },
+                                onOpenTutorial = { navController.navigate("tutorial") { launchSingleTop = true } },
+                                onOpenChangelog = { navController.navigate("changelog") { launchSingleTop = true } },
+                                onOpenAbout = { navController.navigate("about") { launchSingleTop = true } },
+                            )
+                    }
+                }
+            }
+            // Back from any other tab returns to ቤት before it leaves the app,
+            // which is what four separate destinations used to do for free.
+            androidx.activity.compose.BackHandler(enabled = tabPager.currentPage != 0) {
+                scope.launch { tabPager.animateScrollToPage(0) }
+            }
         }
         composable("prayerlist") {
             com.agpeya.app.ui.prayerlist.PrayerListScreen(onBack = { navController.popBackStack() })
@@ -477,12 +557,6 @@ private fun AgpeyaNavHost(
                 },
             )
         }
-        composable(Tab.JOURNEY.route) {
-            com.agpeya.app.ui.habits.JourneyScreen(
-                onSelectTab = navController::switchTab,
-                onOpenJournal = { navController.navigate("journal") { launchSingleTop = true } },
-            )
-        }
         composable("journal") {
             com.agpeya.app.ui.journal.JournalScreen(
                 onBack = { navController.popBackStack() },
@@ -523,22 +597,6 @@ private fun AgpeyaNavHost(
         }
         composable("habits") {
             com.agpeya.app.ui.habits.ManageHabitsScreen(onBack = { navController.popBackStack() })
-        }
-        composable(Tab.LIBRARY.route) {
-            com.agpeya.app.ui.library.LibraryScreen(
-                onOpenScriptures = { navController.navigate("scriptures") { launchSingleTop = true } },
-                onOpenWudase = { navController.navigate("wudase") { launchSingleTop = true } },
-                onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
-                onOpenBahreHasab = { navController.navigate("bahreHasabReference") { launchSingleTop = true } },
-                onOpenMahlets = { navController.navigate("mahlets") { launchSingleTop = true } },
-                onOpenBooks = { navController.navigate("books") { launchSingleTop = true } },
-                onOpenSynaxarium = {
-                    navController.navigate("synaxarium/${java.time.LocalDate.now().toEpochDay()}") { launchSingleTop = true }
-                },
-                onOpenReading = { navController.navigate("reading") { launchSingleTop = true } },
-                onOpenMarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
-                onSelectTab = navController::switchTab,
-            )
         }
         composable(
             route = "wudase?sec={sec}",
@@ -694,21 +752,6 @@ private fun AgpeyaNavHost(
                 onBack = { navController.popBackStack() },
             )
         }
-        composable(Tab.SETTINGS.route) {
-            SettingsScreen(
-                onSelectTab = navController::switchTab,
-                onOpenReading = { navController.navigate("settings/reading") { launchSingleTop = true } },
-                onOpenPrayer = { navController.navigate("settings/prayer") { launchSingleTop = true } },
-                onOpenReminders = { navController.navigate("settings/reminders") { launchSingleTop = true } },
-                onOpenRecords = { navController.navigate("settings/records") { launchSingleTop = true } },
-                onOpenData = { navController.navigate("settings/data") { launchSingleTop = true } },
-                onOpenTutorial = { navController.navigate("tutorial") { launchSingleTop = true } },
-                onOpenWhatsNew = { navController.navigate("whatsNew") { launchSingleTop = true } },
-                onOpenChangelog = { navController.navigate("changelog") { launchSingleTop = true } },
-                onOpenAbout = { navController.navigate("about") { launchSingleTop = true } },
-                onOpenLicenses = { navController.navigate("licenses") { launchSingleTop = true } },
-            )
-        }
         composable("settings/reading") {
             com.agpeya.app.ui.settings.ReadingSettingsScreen(
                 onBack = { navController.popBackStack() },
@@ -810,12 +853,6 @@ private fun AgpeyaNavHost(
                 onOpenMarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
                 onOpenPrayerList = { navController.navigate("prayerlist") { launchSingleTop = true } },
                 onOpenFasting = { navController.navigate("fasting") { launchSingleTop = true } },
-            )
-        }
-        composable("settings/data") {
-            com.agpeya.app.ui.settings.DataSettingsScreen(
-                onBack = { navController.popBackStack() },
-                onOpenMarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
             )
         }
         composable(
@@ -957,10 +994,16 @@ private fun AgpeyaNavHost(
             com.agpeya.app.ui.intro.TutorialScreen(onDone = { navController.popBackStack() })
         }
         composable("changelog") {
-            ChangelogScreen(onBack = { navController.popBackStack() })
+            ChangelogScreen(
+                onBack = { navController.popBackStack() },
+                onOpenTour = { navController.navigate("whatsNew") { launchSingleTop = true } },
+            )
         }
         composable("about") {
-            AboutScreen(onBack = { navController.popBackStack() })
+            AboutScreen(
+                onBack = { navController.popBackStack() },
+                onOpenLicenses = { navController.navigate("licenses") { launchSingleTop = true } },
+            )
         }
         composable("licenses") {
             com.agpeya.app.ui.settings.LicensesScreen(onBack = { navController.popBackStack() })

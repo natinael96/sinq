@@ -19,6 +19,7 @@ class AlarmReceiver : BroadcastReceiver() {
         val hourId = intent.getStringExtra(ReminderScheduler.EXTRA_HOUR_ID) ?: return
         val hourName = intent.getStringExtra(ReminderScheduler.EXTRA_HOUR_NAME) ?: hourId
         val isSnooze = intent.getBooleanExtra(ReminderScheduler.EXTRA_SNOOZE, false)
+        val snoozeCount = intent.getIntExtra(ReminderScheduler.EXTRA_SNOOZE_COUNT, 0)
 
         // DataStore reads off the main thread; goAsync keeps the receiver alive for them.
         val pending = goAsync()
@@ -27,7 +28,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 // A snoozed alarm fires once, unconditionally — no active-entry
                 // check, no chaining.
                 if (isSnooze) {
-                    AlarmRinger.ring(context, hourId, hourName)
+                    AlarmRinger.ring(context, hourId, hourName, snoozeCount)
                     return@Thread
                 }
                 val stillActive = runBlocking {

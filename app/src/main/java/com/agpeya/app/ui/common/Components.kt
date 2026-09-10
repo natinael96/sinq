@@ -426,7 +426,10 @@ fun ListRow(
             .heightIn(min = 48.dp)
             .clip(MaterialTheme.shapes.small)
             .then(if (onClick != null) Modifier.clickable(enabled = enabled, onClick = onClick) else Modifier)
-            .padding(vertical = Spacing.md),
+            // sm, not md: a one-line row is held at 48 dp by heightIn either
+            // way, so this only tightens the two-line rows, which are most of
+            // ቅንብሮች — 69 dp down to 61.
+            .padding(vertical = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (leadingIcon != null) {

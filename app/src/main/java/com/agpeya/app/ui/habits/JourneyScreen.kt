@@ -1,6 +1,8 @@
 package com.agpeya.app.ui.habits
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -35,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.HabitsRepository
 import com.agpeya.app.data.PrayerJourney
 import com.agpeya.app.model.HabitsState
-import com.agpeya.app.ui.common.AgpeyaBottomBar
 import com.agpeya.app.ui.common.Candle
 import com.agpeya.app.ui.common.EthiopianDate
 import com.agpeya.app.ui.common.Tab
@@ -108,7 +109,6 @@ fun journeyLine(summary: PrayerJourney.Summary, s: Strings): String {
  */
 @Composable
 fun JourneyScreen(
-    onSelectTab: (Tab) -> Unit,
     onOpenJournal: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -141,7 +141,9 @@ fun JourneyScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        bottomBar = { AgpeyaBottomBar(current = Tab.JOURNEY, onSelect = onSelectTab) },
+        // The bar belongs to the host that holds all four tabs, and it carries
+        // its own navigation-bar padding; this page only insets for the status bar.
+        contentWindowInsets = WindowInsets.statusBars,
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier

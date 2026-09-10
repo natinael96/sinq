@@ -477,7 +477,7 @@ private val releaseHistory = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChangelogScreen(onBack: () -> Unit) {
+fun ChangelogScreen(onBack: () -> Unit, onOpenTour: () -> Unit = {}) {
     val s = LocalStrings.current
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -488,6 +488,11 @@ fun ChangelogScreen(onBack: () -> Unit) {
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            // የአዲሱ እትም ጉብኝት had a row of its own in ቅንብሮች, beside this page.
+            // It walks through what this page lists, so it opens from here.
+            item(key = "tour") {
+                com.agpeya.app.ui.common.NavRow(s.whatsNewTour, onOpenTour)
+            }
             items(releaseHistory, key = { it.version }) { release ->
                 Surface(
                     modifier = Modifier.fillMaxWidth(),

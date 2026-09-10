@@ -113,64 +113,9 @@ private fun NotificationsOffBanner(onOpenSettings: () -> Unit) {
         }
     }
 }
-
-@Composable
-private fun <T> DropdownSetting(
-    label: String,
-    current: String,
-    options: List<Pair<T, String>>,
-    onSelect: (T) -> Unit,
-    enabled: Boolean = true,
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val alpha = if (enabled) 1f else 0.4f
-    Box {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 48.dp)
-                .clip(MaterialTheme.shapes.small)
-                .clickable(enabled = enabled) { expanded = true }
-                .padding(vertical = Spacing.md),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(Modifier.weight(1f)) {
-                Text(
-                    label,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha),
-                )
-                Text(
-                    current,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = alpha),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            Icon(
-                Icons.Outlined.ExpandMore,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha),
-            )
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            options.forEach { (value, text) ->
-                DropdownMenuItem(
-                    text = { Text(text) },
-                    onClick = {
-                        expanded = false
-                        onSelect(value)
-                    },
-                )
-            }
-        }
-    }
-}
-
 /** Label + current value; tapping opens a dialog with a single text field. */
 @Composable
-private fun EditableRow(
+internal fun EditableRow(
     label: String,
     value: String,
     emptyLabel: String,
@@ -300,7 +245,7 @@ private fun fontDisplayName(font: com.agpeya.app.data.ReadingFont): String =
  * the fact.
  */
 @Composable
-private fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
+internal fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     // Headline plus an explanation. A failed backup or a rejected file has to
@@ -1039,6 +984,8 @@ fun RemindersSettingsScreen(
     val penanceEntries by com.agpeya.app.data.PenanceRepository.penances(context).collectAsState(initial = emptyList())
     val alert by SettingsRepository.alarmAlert(context).collectAsState(initial = com.agpeya.app.data.AlarmAlert.SOUND_VIBRATE)
     val sound by SettingsRepository.alarmSound(context).collectAsState(initial = com.agpeya.app.data.AlarmSound.ALARM)
+    val snoozeMinutes by SettingsRepository.snoozeMinutes(context)
+        .collectAsState(initial = SettingsRepository.DEFAULT_SNOOZE_MINUTES)
     var soundSheetOpen by remember { mutableStateOf(false) }
     var permissionPulse by remember { mutableStateOf(0) }
     val lifecycleOwner = context as? LifecycleOwner
@@ -1143,7 +1090,16 @@ fun RemindersSettingsScreen(
                 }
                 NavRow(
                     title = s.alarmSection,
-                    subtitle = if (alert == com.agpeya.app.data.AlarmAlert.SOUND_VIBRATE || alert == com.agpeya.app.data.AlarmAlert.SOUND_ONLY) "$alertLabel · $soundLabel" else alertLabel,
+                    // The snooze length rides on the end so it can be read
+                    // without opening the sheet to find it.
+                    subtitle = listOfNotNull(
+                        alertLabel,
+                        soundLabel.takeIf {
+                            alert == com.agpeya.app.data.AlarmAlert.SOUND_VIBRATE ||
+                                alert == com.agpeya.app.data.AlarmAlert.SOUND_ONLY
+                        },
+                        s.snoozeMinutesLabel(snoozeMinutes),
+                    ).joinToString(" · "),
                     onClick = { soundSheetOpen = true },
                 )
                 QuietHoursRow(s)
@@ -1156,8 +1112,10 @@ fun RemindersSettingsScreen(
             ReminderSoundSheetContent(
                 alert = alert,
                 sound = sound,
+                snoozeMinutes = snoozeMinutes,
                 onAlert = { scope.launch { SettingsRepository.setAlarmAlert(context, it) } },
                 onSound = { scope.launch { SettingsRepository.setAlarmSound(context, it) } },
+                onSnooze = { scope.launch { SettingsRepository.setSnoozeMinutes(context, it) } },
             )
         }
     }
@@ -1183,8 +1141,10 @@ private fun SettingsWarningPanel(title: String, body: String, action: String, on
 private fun ReminderSoundSheetContent(
     alert: com.agpeya.app.data.AlarmAlert,
     sound: com.agpeya.app.data.AlarmSound,
+    snoozeMinutes: Int,
     onAlert: (com.agpeya.app.data.AlarmAlert) -> Unit,
     onSound: (com.agpeya.app.data.AlarmSound) -> Unit,
+    onSnooze: (Int) -> Unit,
 ) {
     val s = com.agpeya.app.ui.strings.LocalStrings.current
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 28.dp)) {
@@ -1204,6 +1164,14 @@ private fun ReminderSoundSheetContent(
                 com.agpeya.app.data.AlarmSound.RINGTONE to s.soundRingtone,
                 com.agpeya.app.data.AlarmSound.NOTIFICATION to s.soundNotification,
             ).forEach { (choice, label) -> SettingsRadioRow(label, choice == sound) { onSound(choice) } }
+        }
+        // How long አሳድር puts the hour off. It belongs beside the alarm's other
+        // settings rather than on the reminders page, because it is only ever
+        // reached from a ringing alarm.
+        Spacer(Modifier.height(Spacing.lg))
+        Text(s.snoozeLengthTitle, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.secondary)
+        SettingsRepository.SNOOZE_CHOICES.forEach { minutes ->
+            SettingsRadioRow(s.snoozeMinutesLabel(minutes), minutes == snoozeMinutes) { onSnooze(minutes) }
         }
     }
 }
@@ -1229,53 +1197,6 @@ private fun SettingsRadioRow(
         }
     }
 }
-
-/** Local identity and recoverable user-created data. */
-@Composable
-fun DataSettingsScreen(onBack: () -> Unit, onOpenMarks: () -> Unit) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val s = com.agpeya.app.ui.strings.LocalStrings.current
-    val name by SettingsRepository.profileName(context).collectAsState(initial = "")
-    val christianName by SettingsRepository.christianName(context).collectAsState(initial = "")
-    val lastBackupAt by SettingsRepository.lastBackupAt(context).collectAsState(initial = 0L)
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = { com.agpeya.app.ui.common.SinqTopBar(s.settingsGroupData, onBack) },
-    ) { inner ->
-        LazyColumn(
-            Modifier.fillMaxSize().padding(inner),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-        ) {
-            item {
-                // The reader's own record, beside the backup that carries it.
-                NavRow(
-                    title = s.marksTitle,
-                    subtitle = "${s.marksTabBookmarks} · ${s.marksTabHighlights} · ${s.marksTabNotes}",
-                    onClick = onOpenMarks,
-                )
-                EditableRow(s.yourNameLabel, name, s.addName) {
-                    scope.launch { SettingsRepository.setProfileName(context, it) }
-                }
-                EditableRow(s.christianNameLabel, christianName, s.addChristianName) {
-                    scope.launch { SettingsRepository.setChristianName(context, it) }
-                }
-                if (lastBackupAt > 0L) {
-                    val saved = java.time.Instant.ofEpochMilli(lastBackupAt)
-                        .atZone(java.time.ZoneId.systemDefault()).toLocalDate()
-                    Text(
-                        "${s.lastBackupLabel}: ${com.agpeya.app.ui.common.formatEthiopian(saved, s)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                BackupRows(s)
-                Spacer(Modifier.height(Spacing.xxl))
-            }
-        }
-    }
-}
-
 /** Four honest previews; each sample is rendered in the font it selects. */
 @Composable
 fun ReadingFontScreen(onBack: () -> Unit) {

@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutScreen(onBack: () -> Unit) {
+fun AboutScreen(onBack: () -> Unit, onOpenLicenses: () -> Unit = {}) {
     // This page stays English regardless of the app language: the source attribution and
     // licence terms it carries are legal notices, and they should read exactly as worded.
     val s = com.agpeya.app.ui.strings.EnglishStrings
@@ -123,6 +123,10 @@ fun AboutScreen(onBack: () -> Unit) {
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
             )
+            // ፈቃዶች እና ምንጮች was a row of its own in ቅንብሮች, directly under this
+            // page. It is a section of what this page says, so it opens here.
+            Spacer(Modifier.height(Spacing.lg))
+            com.agpeya.app.ui.common.NavRow(s.licensesTitle, onOpenLicenses)
             Spacer(Modifier.height(Spacing.screen))
         }
     }
