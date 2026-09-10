@@ -25,6 +25,7 @@ Three sources, merged:
 
 Never edited by hand; corrections live below as asserted swaps.
 """
+import difflib
 import hashlib
 import json
 import re
@@ -89,6 +90,37 @@ TSIGE_WEEK = re.compile(r"^ዘመነ ጽጌ\s*[—–-]\s*([፩-፱])ኛ")
 # ፲ /፪/; the channel says ፲፪) and whose calendar it therefore left unresolved.
 # Named so the build can say it is known, not silently shipped unreachable.
 UNRESOLVED_DATES = {"ተክለ ሃይማኖት ወክርስቶሰ ሰምራ"}
+
+# Two editions are the same text when they have the same number of parts and
+# their words, with the homophones folded and the punctuation gone, agree to
+# this share. Below it a difference is a difference; above it, it is spelling.
+# The part count is the guard: an edition two stanzas longer can still score
+# 0.97 on the words it shares, and two stanzas are not superficial. The merge
+# held such pairs for review rather than deciding; the maintainer has decided.
+SUPERFICIAL = 0.95
+
+# What the channel appends to a post and what it points with, neither of which
+# is chant. The join-and-share line, the feedback handle, and the bare English
+# invitation go whole; the pointing hand the channel sets before a sung line
+# — 292 of them — goes as a glyph and the line stays, because the line is the
+# chant. Measured over every edition before being written: no part is only
+# boilerplate, so no part disappears here.
+BOILERPLATE = re.compile(
+    r"#ይቀላቀሉ|አስተያየት ካለ|join and share|@[A-Za-z_][A-Za-z0-9_]+|t\.me/|https?://")
+GLYPHS = re.compile("[\U0001F300-\U0001FAFF\u2600-\u27BF\uFE0F]")
+
+
+def clean_chant(text):
+    lines = []
+    for line in (text or "").split("\n"):
+        if BOILERPLATE.search(line):
+            continue
+        line = GLYPHS.sub("", line)
+        line = re.sub(r"[ \t]+", " ", line).strip()
+        if line:
+            lines.append(line)
+    return "\n".join(lines)
+
 
 # The one form whose specific hymn lives in the chant's title: the merge writes
 # form "መልክእ" and title "መልክአ ሥላሴ". The title is the part's name, because the
@@ -175,6 +207,75 @@ def clean_name(s):
 
 # ── the spine: the merged edition ───────────────────────────────────────────
 
+def words(parts):
+    """The text of an order as folded words: homophones one letter, no marks."""
+    out = []
+    for p in parts:
+        for c in p["verse"]:
+            cp = ord(c)
+            for start, target in FOLD_SERIES:
+                if start <= cp <= start + 7:
+                    c = chr(target + cp - start)
+                    break
+            out.append(c)
+    return re.sub(r"[()፡።፣፤፥፦:.,;\-–—\"«»'“”]+", " ", "".join(out)).split()
+
+
+def same_text(a, b):
+    if len(a) != len(b):
+        return False
+    wa, wb = words(a), words(b)
+    if not wa or not wb:
+        return False
+    return difflib.SequenceMatcher(None, wa, wb, autojunk=False).ratio() >= SUPERFICIAL
+
+
+def fuller(a, b):
+    return len(words(a)) >= len(words(b))
+
+
+def dedupe(base, versions, report, base_is_book):
+    """Fold the editions that only differ in spelling into the one that stands.
+
+    An edition the same as [base] — the book's text, or the edition standing
+    for a bookless order — adds nothing and goes, its post kept on the order.
+    Among the rest a like pair becomes one, and it is the fuller of the two
+    that stands: two posts of one order can differ by a clause the shorter
+    lost, and a rule that kept the first would keep the truncated one when
+    it happened to come first. Every link survives either way.
+
+    The book's own text is never replaced, even by a fuller edition: it is
+    the book. An order standing on an edition takes the fuller edition as
+    its text, since neither is the book and the fuller is the better copy.
+    """
+    kept, into_base = [], []
+    base_parts = base
+    for v in versions:
+        if same_text(base_parts, v["parts"]):
+            if not base_is_book and not fuller(base_parts, v["parts"]):
+                base_parts, v["parts"] = v["parts"], base_parts
+                # The order's own post is now the absorbed one; the caller
+                # records the swap through the returned parts and url.
+                into_base.append(v["url"])
+                v["url"], into_base[-1] = into_base[-1], v["url"]
+            else:
+                into_base.append(v["url"])
+            report["folded_into_base"] += 1
+            continue
+        for k in kept:
+            if same_text(k["parts"], v["parts"]):
+                if not fuller(k["parts"], v["parts"]):
+                    k["parts"], v["parts"] = v["parts"], k["parts"]
+                    k["url"], v["url"] = v["url"], k["url"]
+                    k["title"], v["title"] = v["title"], k["title"]
+                    k["id"], v["id"] = v["id"], k["id"]
+                k.setdefault("also", []).append(v["url"])
+                report["folded"] += 1
+                break
+        else:
+            kept.append(v)
+    return kept, [u for u in into_base if u], base_parts
+
 def chant_to_part(chant, alternative=False):
     """One chant of the merge as one part of an order, or None to drop it.
 
@@ -182,7 +283,7 @@ def chant_to_part(chant, alternative=False):
     name. A chant with no text is a bare heading the scan carried — 66 of the
     book's 1,645 — and is dropped, as the previous pipeline dropped them.
     """
-    text = (chant.get("text") or "").strip()
+    text = clean_chant(chant.get("text"))
     if not text:
         return None
     form = chant.get("form")
@@ -253,6 +354,7 @@ def build_spine(report):
                         "parts": vparts,
                     })
                 book = order.get("book")
+                url = None
                 if book:
                     parts = flatten(book.get("chants", []), report)
                     source = None
@@ -261,7 +363,7 @@ def build_spine(report):
                     # the rest remain to be chosen. The merge is explicit that
                     # first means representative, not preferred.
                     first = versions.pop(0)
-                    parts, source = first["parts"], TELEGRAM
+                    parts, source, url = first["parts"], TELEGRAM, first["url"]
                     report["version_only"] += 1
                 else:
                     report["empty"] += 1
@@ -269,6 +371,7 @@ def build_spine(report):
                 if not parts:
                     report["empty"] += 1
                     continue
+                versions, also, parts = dedupe(parts, versions, report, base_is_book=book is not None)
                 o = {
                     "id": order_id("merged", feast["id"], service),
                     "kind": kind,
@@ -278,6 +381,10 @@ def build_spine(report):
                     "source": source,
                     "parts": parts,
                 }
+                if url:
+                    o["url"] = url
+                if also:
+                    o["also"] = also
                 if versions:
                     o["versions"] = versions
                 movable = movable_key(feast)
@@ -451,7 +558,7 @@ def build_missing(spine, report):
 # ── output ───────────────────────────────────────────────────────────────────
 
 def main():
-    report = {"empty": 0, "empty_chants": 0, "version_only": 0,
+    report = {"empty": 0, "empty_chants": 0, "version_only": 0, "folded": 0, "folded_into_base": 0,
               "unknown_kind": [], "unmapped": [], "unappointable": [], "from_gitsawe": []}
     vocab = part_vocabulary()
 
@@ -527,6 +634,8 @@ def main():
     print("\n%d orders, %d parts (%d marked ወይም), %d editions holding %d more parts, %d appointed by the computus"
           % (len(orders), parts, alts, versions, vparts, movable))
     print("%d chars, %.2f MB in %d files" % (chars, size / 1e6, len(list(OUT.glob('*.json')))))
+    print("  %d editions folded into a like edition, %d into the text they repeat — %d superficial in all"
+          % (report["folded"], report["folded_into_base"], report["folded"] + report["folded_into_base"]))
     if report["empty_chants"]:
         print("  (%d chants had no text and were dropped)" % report["empty_chants"])
     if report["empty"]:

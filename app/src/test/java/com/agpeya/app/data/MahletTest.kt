@@ -57,11 +57,39 @@ class MahletTest {
     @Test
     fun `every edition has text and a post it came from`() {
         val editions = orders.flatMap { it.versions }
-        assertEquals(275, editions.size)
+        // 275 as the merge shipped them; 40 of those differed from another
+        // only in spelling and marks — two of them only once the channel's
+        // join-and-share footer was off — and were folded, their posts kept.
+        assertEquals(235, editions.size)
         assertTrue("an edition has no parts", editions.all { it.parts.isNotEmpty() })
         assertTrue("an edition part has no verse", editions.all { v -> v.parts.all { it.verse.isNotBlank() } })
         assertTrue("an edition has no id", editions.all { it.id.isNotBlank() })
         assertTrue("an edition has no source post", editions.all { !it.url.isNullOrBlank() })
+        // Folding keeps the links: every absorbed edition's post is still on the
+        // edition that stands for it, or on the order whose text it repeated.
+        val absorbed = editions.sumOf { it.also.size } + orders.sumOf { it.also.size }
+        assertEquals(40, absorbed)
+        assertTrue("a folded post is blank", (editions.flatMap { it.also } + orders.flatMap { it.also }).all { it.isNotBlank() })
+    }
+
+    /**
+     * The channel's own furniture — its join-and-share line, its feedback
+     * handle, the pointing hand it sets before a sung line — is not chant and
+     * must not reach the page. Asserted on the shipped text, not the builder.
+     */
+    @Test
+    fun `no part carries the channel's boilerplate or its glyphs`() {
+        val noise = Regex("ይቀላቀሉ|አስተያየት ካለ|@[A-Za-z_][A-Za-z0-9_]+|t\\.me/|https?://|join and share|[👉👈✅📌🔔]")
+        val everyPart = orders.flatMap { it.parts + it.versions.flatMap { v -> v.parts } }
+        assertTrue(everyPart.none { noise.containsMatchIn(it.verse) })
+    }
+
+    /** An order standing on an edition must say which post, or it cannot be checked. */
+    @Test
+    fun `an order standing on an edition names its post`() {
+        val fromChannel = orders.filter { it.source == MahletSource.TELEGRAM }
+        assertTrue(fromChannel.all { !it.url.isNullOrBlank() })
+        assertTrue("a book order carries a post url", orders.filter { it.source == null }.all { it.url == null })
     }
 
     /**

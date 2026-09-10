@@ -41,6 +41,12 @@ data class MahletVersion(
     val title: String? = null,
     val url: String? = null,
     val parts: List<MahletPart> = emptyList(),
+    /**
+     * The posts of editions folded into this one for differing from it only
+     * in spelling and marks. The text is one; the links are all kept, because
+     * an edition that vanished without its link could not be checked.
+     */
+    val also: List<String> = emptyList(),
 )
 
 @Serializable
@@ -70,6 +76,10 @@ data class MahletOrder(
      */
     val movable: String? = null,
     val parts: List<MahletPart> = emptyList(),
+    /** The post an order standing on an edition took its text from. */
+    val url: String? = null,
+    /** Posts of editions that were this text again, spelling aside. */
+    val also: List<String> = emptyList(),
     /** The editions of this order, to choose between. Empty for most. */
     val versions: List<MahletVersion> = emptyList(),
 )
