@@ -170,6 +170,10 @@ interface Strings {
     fun mahletThisYearOn(date: String): String
     /** An edition that is the order's Amharic: "ትርጉም", or "ትርጉም ፪" when there are several. */
     fun mahletTranslation(n: Int, of: Int): String
+    /** Heading of the list of Telegram posts an order's texts came from. */
+    val mahletReferences: String
+    /** A post folded into the text named before it, being the same text again. */
+    val mahletRepeats: String
     fun mahletParts(n: Int): String
     val mahletNone: String
     fun mahletOrders(n: Int): String
@@ -1025,6 +1029,8 @@ object AmharicStrings : Strings {
     override fun mahletThisYearOn(date: String) = "ዘንድሮ $date"
     override fun mahletTranslation(n: Int, of: Int) =
         if (of > 1) "ትርጉም ${com.agpeya.app.ui.reading.geezNumeral(n)}" else "ትርጉም"
+    override val mahletReferences = "ቴሌግራም ማጣቀሻ"
+    override val mahletRepeats = "የሚደግም ልጥፍ"
     override val mahletNone = "ማኅሌቱ ገና አልገባም"
     override fun mahletOrders(n: Int) = "${com.agpeya.app.ui.reading.geezNumeral(n)} ሥርዓቶች"
     override val mahletToday = "የዛሬው ሥርዓት"
@@ -1834,6 +1840,8 @@ object EnglishStrings : Strings {
     override val mahletOr = "or"
     override fun mahletThisYearOn(date: String) = "this year $date"
     override fun mahletTranslation(n: Int, of: Int) = if (of > 1) "Translation $n" else "Translation"
+    override val mahletReferences = "Telegram references"
+    override val mahletRepeats = "repeating post"
     override val mahletNone = "Coming soon"
     override fun mahletOrders(n: Int) = "$n orders"
     override val mahletToday = "Today's order"

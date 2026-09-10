@@ -29,8 +29,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.BookRepository
 import com.agpeya.app.data.MahletRepository
 import com.agpeya.app.data.SettingsRepository
@@ -229,6 +232,16 @@ fun MahletScreen(
                         modifier = Modifier.padding(bottom = Spacing.md),
                     )
                 }
+                // Where the order's texts came from, post by post — the one
+                // the text is, the ones folded into it, each edition's. An
+                // order the channel never posted has no list, and says
+                // nothing: the book is the book.
+                val references = shown?.let { telegramReferences(it, s) }.orEmpty()
+                if (references.isNotEmpty()) {
+                    item(key = "references") {
+                        MahletReferences(references, s.mahletReferences)
+                    }
+                }
                 items(parts.size, key = { "$tab:$edition:$it" }) { index ->
                     MahletPartRow(
                         part = parts[index],
@@ -246,6 +259,75 @@ fun MahletScreen(
                     )
                 }
                 item { Spacer(Modifier.height(Spacing.huge)) }
+            }
+        }
+    }
+}
+
+/** One line of the reference list: the text it belongs to, and the post. */
+private data class MahletReference(val label: String, val url: String)
+
+/**
+ * The posts behind an order, in the order the pills show them: the text on
+ * the page first (its own post if it is a Telegram order, then the posts
+ * folded into it as the same text), then each edition with its own folded
+ * posts. Labels are the pills' labels, so a line answers to a pill.
+ */
+private fun telegramReferences(order: MahletOrder, s: com.agpeya.app.ui.strings.Strings): List<MahletReference> {
+    val out = mutableListOf<MahletReference>()
+    val base = order.source ?: s.mahletBookText
+    order.url?.let { out += MahletReference(base, it) }
+    order.also.forEach { out += MahletReference("$base · ${s.mahletRepeats}", it) }
+    val nTranslations = order.versions.count { it.translation }
+    var nthEdition = 0
+    var nthTranslation = 0
+    for (v in order.versions) {
+        val label = if (v.translation) {
+            nthTranslation += 1
+            s.mahletTranslation(nthTranslation, nTranslations)
+        } else {
+            nthEdition += 1
+            s.mahletEdition(nthEdition)
+        }
+        v.url?.let { out += MahletReference(label, it) }
+        v.also.forEach { out += MahletReference("$label · ${s.mahletRepeats}", it) }
+    }
+    return out
+}
+
+@Composable
+private fun MahletReferences(references: List<MahletReference>, heading: String) {
+    val uriHandler = LocalUriHandler.current
+    Column(Modifier.fillMaxWidth().padding(bottom = Spacing.md)) {
+        Text(
+            heading,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.padding(bottom = Spacing.xs),
+        )
+        references.forEach { r ->
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .clickable { uriHandler.openUri(r.url) }
+                    .padding(vertical = 2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    r.label,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Spacer(Modifier.width(Spacing.sm))
+                Text(
+                    r.url.removePrefix("https://"),
+                    style = MaterialTheme.typography.labelMedium.copy(textDecoration = TextDecoration.Underline),
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
         }
     }
