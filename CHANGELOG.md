@@ -6,6 +6,47 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [2.2.0] — 2026-09-11
+
+_versionCode 69 · A light on where you are_
+
+### Added
+- **The four tabs are one pager.** Moving between ቤት, መጻሕፍት, ጉዞ and ቅንብር is a
+  swipe now, and the bar's light travels with the page under the finger.
+- **አሳድር has a length, a voice, and an end.** It was ten minutes, fixed,
+  unlimited and silent. It is now a choice of 5, 10, 15 or 20 minutes in the
+  ማንቂያ sheet; snoozing leaves a quiet line naming the hour and the time it
+  comes back, which clears itself as the alarm returns; and it stops at three.
+  A second or third ring says how many times the hour has been pushed away.
+- **The ግጻዌ passage has a Catena row**, beside the doors to the chapter and the
+  book. It was the one place a reader met scripture with no way through to the
+  Fathers, because it renders plain text and has no selection bar.
+
+### Changed
+- **The tab bar is cut from the hero's deep green in both themes.** A pale bar
+  with a pale gold mark had nothing to be seen against on ivory. The tab you are
+  on fills its glyph, lights a lozenge behind it, and opens sideways to say its
+  name in full.
+- **ቤተ መጻሕፍት is መጻሕፍት**, in the tab and on the page. The old name was the room
+  rather than what is in it, and it was the longest label in the bar.
+- **ቅንብሮች is a third shorter.** The landing page ran 1,027 dp on a screen that
+  shows 540, with eleven of its thirteen rows leading somewhere else. The tour
+  of the new version moved into the release notes it describes; ፈቃዶች እና ምንጮች
+  became a section of ስለ መተግበሪያው; መዝገብ absorbed መረጃ, which had been opening
+  with መዝገብ's own ምልክቶቼ row repeated; the two pickers put their label beside
+  the control; and every list row in the app gave back 4 dp of padding. Eleven
+  doors down to eight, and nothing removed.
+- The verse commentary action is called **Catena** in both languages, naming
+  where it goes rather than what it is.
+
+### Fixed
+- **መዝገብ's የጸሎት ዝርዝር row did nothing.** It navigated to a route spelled with a
+  capital L that was never registered.
+
+### Removed
+- `DataSettingsScreen`, whose every row now lives on መዝገብ, and
+  `DropdownSetting`, which was fully written and never called.
+
 ## [2.1.0] — 2026-09-10
 
 _versionCode 68 · The book beside the channel_

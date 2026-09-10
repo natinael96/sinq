@@ -2,6 +2,58 @@
   "contentVersion": 1,
   "tours": [
     {
+      "versionCode": 69,
+      "version": "2.2.0",
+      "title": {
+        "am": "በዚህ እትም",
+        "en": "In this version"
+      },
+      "pages": [
+        {
+          "kicker": {
+            "am": "አሰሳ",
+            "en": "Getting around"
+          },
+          "title": {
+            "am": "ያሉበት ትር ይበራል",
+            "en": "The tab you are on lights up"
+          },
+          "body": {
+            "am": "አራቱ ትሮች አንድ ገጽ ሆነዋል። በቤት፣ በመጻሕፍት፣ በጉዞና በቅንብር መካከል በማንሸራተት መዘዋወር ይችላሉ፤ የአሞሌውም ብርሃን ከእጅዎ ጋር አብሮ ይሄዳል። ያሉበት ትር ስሙን በሙሉ ይናገራል፤ አሞሌውም በብርሃንም በጨለማም አንድ ሆኖ ይታያል። «ቤተ መጻሕፍት» ደግሞ «መጻሕፍት» ሆኗል — ቤቱ ሳይሆን በውስጡ ያለው።",
+            "en": "The four tabs are one page now. Swipe between ቤት, መጻሕፍት, ጉዞ and ቅንብር and the bar's light travels with your finger. The tab you are on says its name in full, and the bar reads the same in light and dark. ቤተ መጻሕፍት is simply መጻሕፍት — the books, not the room they sit in."
+          }
+        },
+        {
+          "kicker": {
+            "am": "ማንቂያ",
+            "en": "The alarm"
+          },
+          "title": {
+            "am": "ማሳደሪያው ልክ አለው",
+            "en": "Snooze has an end"
+          },
+          "body": {
+            "am": "አሳድር ዐሥር ደቂቃ ብቻ ነበር፤ ልክም አልነበረውም፤ ዝምም ይል ነበር። አሁን ፭፣ ፲፣ ፲፭ ወይም ፳ ደቂቃ መምረጥ ይችላሉ። ሲያሳድሩም ሰዓቱ መቼ እንደሚመለስ በጸጥታ ይነግርዎታል፤ ማንቂያው ሲመለስም ራሱ ይጠፋል። ከሦስት ጊዜ በኋላ ግን ማሳደሪያው አይቀርብም — ሁልጊዜ የሚታሳደር ሰዓት ከቶ የማይጸለይ ሰዓት ነውና።",
+            "en": "Snooze was ten minutes, fixed, unlimited and silent. Now it is 5, 10, 15 or 20, it leaves a quiet line telling you when the hour comes back, and that line clears itself as the alarm returns. After the third it is not offered again: an hour that can be put off for ever is an hour that is never prayed, while still feeling as though it is coming."
+          }
+        },
+        {
+          "kicker": {
+            "am": "ቅንብር",
+            "en": "Settings"
+          },
+          "title": {
+            "am": "ቅንብሮች አጥሯል",
+            "en": "ቅንብሮች got shorter"
+          },
+          "body": {
+            "am": "የቅንብሮች ገጽ በሲሶ አጥሯል፤ የተወሰደ ግን አንዳች የለም። ፈቃዶች ወደ «ስለ መተግበሪያው» ገብተዋል፤ የእትሙ ጉብኝት ወደሚገልጻቸው የለውጦች ገጽ ሄዷል፤ መረጃም ከመዝገብ ጋር አንድ ሆኗል — ሁለቱ «ምልክቶቼ»ን ደግመው ይዘው ነበርና። በተጨማሪም የመዝገቡ «የጸሎት ዝርዝር» መስመር ምንም አይከፍትም ነበር፤ አሁን ይከፍታል።",
+            "en": "The settings page is a third shorter, with nothing taken out of it. Licences moved inside ስለ መተግበሪያው, the version tour into the release notes it describes, and መረጃ joined መዝገብ, since the two were carrying the same ምልክቶቼ row. One more thing: መዝገብ's የጸሎት ዝርዝር row opened nothing at all. It opens now."
+          }
+        }
+      ]
+    },
+    {
       "versionCode": 68,
       "version": "2.1.0",
       "title": {

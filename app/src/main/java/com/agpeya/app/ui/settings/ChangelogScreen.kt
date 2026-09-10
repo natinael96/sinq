@@ -31,6 +31,29 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "2.2.0",
+        title = "A light on where you are",
+        titleAm = "ባሉበት ላይ ብርሃን",
+        changes = listOf(
+            "The four tabs are one pager: swipe between ቤት, መጻሕፍት, ጉዞ and ቅንብር, and the bar's light travels with you.",
+            "The tab you are on lights up and says its name in full, on a bar that now reads the same in light and dark.",
+            "ቤተ መጻሕፍት is መጻሕፍት — the books, not the room they sit in.",
+            "ቅንብሮች is a third shorter, with nothing taken out of it. Licences moved inside ስለ መተግበሪያው, the version tour into the release notes, and መረጃ onto መዝገብ.",
+            "አሳድር can be 5, 10, 15 or 20 minutes, tells you when the hour comes back, and stops after three — an hour put off for ever is an hour never prayed.",
+            "The ግጻዌ passage has a Catena row now, beside the doors to the chapter and the book.",
+            "መዝገብ's የጸሎት ዝርዝር row opened nothing at all. It opens now.",
+        ),
+        changesAm = listOf(
+            "አራቱ ትሮች አንድ ገጽ ሆነዋል፦ በቤት፣ በመጻሕፍት፣ በጉዞና በቅንብር መካከል በማንሸራተት ይዘዋወራሉ፤ የአሞሌው ብርሃንም አብሮዎት ይሄዳል።",
+            "ያሉበት ትር ይበራል፤ ስሙንም በሙሉ ይናገራል። አሞሌውም በብርሃንም በጨለማም አንድ ሆኖ ይታያል።",
+            "ቤተ መጻሕፍት «መጻሕፍት» ሆኗል — ቤቱ ሳይሆን በውስጡ ያለው።",
+            "ቅንብሮች በሲሶ አጥሯል፤ የተወሰደ ግን አንዳች የለም። ፈቃዶች ወደ «ስለ መተግበሪያው»፣ የእትሙ ጉብኝት ወደ ለውጦቹ ገጽ፣ መረጃም ወደ መዝገብ ገብተዋል።",
+            "ማሳደሪያው ፭፣ ፲፣ ፲፭ ወይም ፳ ደቂቃ ሊሆን ይችላል፤ ሰዓቱ መቼ እንደሚመለስ ይነግርዎታል፤ ከሦስት ጊዜ በኋላም ይቆማል — ሁልጊዜ የሚታሳደር ሰዓት ከቶ የማይጸለይ ሰዓት ነውና።",
+            "የግጻዌው ምንባብ የCatena መስመር አግኝቷል፤ ከምዕራፉና ከመጽሐፉ በሮች ጎን።",
+            "የመዝገቡ «የጸሎት ዝርዝር» መስመር ምንም አይከፍትም ነበር። አሁን ይከፍታል።",
+        ),
+    ),
+    ReleaseNote(
         version = "2.1.0",
         title = "The book beside the channel",
         titleAm = "መጽሐፉ ከቻናሉ ጎን",
