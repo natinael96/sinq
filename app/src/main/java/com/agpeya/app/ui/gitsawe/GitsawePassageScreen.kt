@@ -83,6 +83,9 @@ fun GitsawePassageScreen(
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
     val misbakLanguage by SettingsRepository.misbakLanguage(context)
         .collectAsState(initial = MisbakLanguage.GEEZ)
+    // Read here, not in the click lambda: sinqColors is a @Composable getter.
+    val tabToolbar = com.agpeya.app.ui.theme.sinqColors.hero
+    val tabOnToolbar = com.agpeya.app.ui.theme.sinqColors.onHero
 
     // `loaded` distinguishes "still resolving" from "genuinely not bundled":
     // the first shows the spinner, the second an honest empty state.
@@ -211,6 +214,28 @@ fun GitsawePassageScreen(
                                 onClick = { onOpenChapter(false) },
                             )
                             NavRow(title = s.goToBook, onClick = onOpenBook)
+                        }
+                        // The Fathers on the first verse cited. The Psalter is
+                        // numbered as the Church numbers it and Catena numbers
+                        // it as the Masoretic text does, so the psalm carries a
+                        // translation that CatenaLink holds; a book Catena does
+                        // not reach simply has no row.
+                        val catena = if (isPsalm) {
+                            com.agpeya.app.data.CatenaLink.url("psalms", psalm, start.coerceAtLeast(1))
+                        } else {
+                            bookKey?.let {
+                                com.agpeya.app.data.CatenaLink.url(it, chapter, start.coerceAtLeast(1))
+                            }
+                        }
+                        catena?.let { url ->
+                            NavRow(
+                                title = s.commentaryAction,
+                                onClick = {
+                                    com.agpeya.app.ui.common.openInAppTab(
+                                        context, url, tabToolbar, tabOnToolbar,
+                                    )
+                                },
+                            )
                         }
                         Spacer(Modifier.height(Spacing.xl))
                     }
