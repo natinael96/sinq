@@ -1947,9 +1947,12 @@ _versionCode 1 to 4_
 
 ### Changed
 - **The app became ስንቅ.** It was built as ጸሎት and renamed on 18 June, together
-  with the green and gold it still wears. The package id `com.agpeya.app` is
-  older than both and has never been changed, because changing it would make
-  every phone that already has the app treat an update as a different one.
+  with the green and gold it still wears. The package id `com.agpeya.app` was
+  older than both and was kept then, because changing it would make every phone
+  that already had the app treat an update as a different one. (It did change
+  later, before the first Play listing existed and while the only installs were
+  by hand: the app registers as `com.sinq.app`. The Kotlin still lives under
+  `com/agpeya/app`, which nothing outside the source tree ever sees.)
 - **The home screen was rebuilt** around a card for the day, with an hour
   switcher inside the reader.
 - **The Veil prayer became ሌሊት ፱ ሰዓት** and now ships hidden, for those who do

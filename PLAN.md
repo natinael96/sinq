@@ -13,7 +13,8 @@
 > **Renamed 2026-07-16:** the app is now **Sinq (ስንቅ — "provisions for the journey")**; repo:
 > [github.com/natinael96/---sinq](https://github.com/natinael96/---sinq). Where "Agpeya" appears
 > below it refers to the prayer book itself (and the built-in reminder mode named after it), not
-> the app. The `com.agpeya.app` applicationId is a permanent contract and does not change.
+> the app. The `com.sinq.app` applicationId is a permanent contract and does not change;
+> the Kotlin namespace stays `com.agpeya.app`, which is invisible outside the source tree.
 
 ---
 

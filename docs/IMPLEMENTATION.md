@@ -1502,7 +1502,7 @@ Prayer content is **never** in `Strings` — it stays Amharic, as data.
 ### 13.1 Build configuration
 
 ```kotlin
-namespace  = "com.agpeya.app"      // applicationId unchanged despite the Sinq rename
+namespace  = "com.agpeya.app"      // source only; applicationId is com.sinq.app
 compileSdk = 36 ; minSdk = 26 ; targetSdk = 36
 versionCode = 11 ; versionName = "0.2.6"
 sourceCompatibility/targetCompatibility = JavaVersion.VERSION_11 ; jvmTarget = "11"
@@ -1632,7 +1632,7 @@ Recorded honestly so the next change starts from the truth.
 - `docs/SDS.md` predates the unified search, the streak nudge, and the tutorial
   replay; this document supersedes it where they disagree.
 - `docs/SRS.md`/`SDS.md` refer to the app as "ጸሎት (Tselot)"; it is now **Sinq
-  (ስንቅ)**, though `applicationId` remains `com.agpeya.app`.
+  (ስንቅ)**, and `applicationId` is `com.sinq.app`; only the Kotlin namespace stays `com.agpeya.app`.
 
 **Content provenance**
 
