@@ -485,6 +485,9 @@ fieldset.kinds { border: 0; margin: 0 0 26px; padding: 0; }
   --app-muted:#56655A; --app-hero:#0E3B31; --app-on-hero:#F4F1E4;
   --app-on-hero-dim:#B9CCC0; --app-gold:#7E5F1E; --app-gold-lit:#E0BC65;
   --app-arke:#A5140A; --app-hair:rgba(29,43,36,.13);
+  /* gold on a gold tint: the tint darkens the ground enough that
+     #7E5F1E drops under 4.5:1, so tinted chips take this instead. */
+  --app-gold-ink:#6B5018;
   display: grid; gap: 26px; margin-top: 30px;
   grid-template-columns: repeat(auto-fit, minmax(232px, 1fr));
 }
@@ -510,7 +513,7 @@ fieldset.kinds { border: 0; margin: 0 0 26px; padding: 0; }
 .scr-bar .ttl { font-size: 12.5px; font-weight: 700; flex: 1; line-height: 1.3; }
 .scr-bar .ttl small { display: block; font-size: 9px; font-weight: 400; color: var(--app-muted); }
 .scr-bar .pill {
-  font-size: 9px; font-weight: 600; color: var(--app-gold);
+  font-size: 9px; font-weight: 600; color: var(--app-gold-ink);
   border: 1px solid rgba(126,95,30,.45); background: rgba(126,95,30,.12);
   border-radius: 999px; padding: 3px 9px;
 }
@@ -579,7 +582,7 @@ fieldset.kinds { border: 0; margin: 0 0 26px; padding: 0; }
   color: var(--app-ink); background: rgba(126,95,30,.10);
   border: 1px solid rgba(126,95,30,.42); border-radius: 999px; padding: 6px 11px;
 }
-.scr-door em { font-style: normal; color: var(--app-gold); }
+.scr-door em { font-style: normal; color: var(--app-gold-ink); }
 
 .scr-ttl {
   text-align: center; color: var(--app-gold); font-size: 10.5px;
