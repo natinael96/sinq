@@ -1,5 +1,7 @@
 package com.agpeya.app.data
 
+import com.agpeya.app.model.ActivePlan
+import com.agpeya.app.model.ReadingPlanContent
 import com.agpeya.app.model.PlanDay
 import com.agpeya.app.model.PlanReading
 import com.agpeya.app.model.ReadingPlan
@@ -41,24 +43,30 @@ class ReadingPlanTest {
     // ── the chapter ledger ───────────────────────────────────────────────────
 
     /** The state a reader would be in having read [dayNumbers] of [days]. */
-    private fun read(days: List<PlanDay>, vararg dayNumbers: Int) = ReadingPlanState(
-        readChapters = days.filter { it.d in dayNumbers.toSet() }
-            .flatMapTo(mutableSetOf()) { ReadingPlanRepository.chaptersOf(it) },
-    )
+    private fun read(days: List<PlanDay>, vararg dayNumbers: Int): ReadingPlanState {
+        val chapters = days.filter { it.d in dayNumbers.toSet() }
+            .flatMapTo(mutableSetOf()) { ReadingPlanRepository.chaptersOf(it) }
+        // Both ledgers: the plan's own count, and the record of what has been
+        // read that the map of the books draws.
+        return ReadingPlanState(read = mapOf(PLAN to chapters), readChapters = chapters)
+    }
+
+    /** The plan every test in this file is about. */
+    private val PLAN = "annual"
 
     @Test
     fun `progress counts distinct days read, never a streak`() {
         // Days 1, 2 then a gap then 9: five days later, three days read.
         val d = days(10)
-        assertEquals(3, ReadingPlanRepository.daysRead(read(d, 1, 2, 9), d))
+        assertEquals(3, ReadingPlanRepository.daysRead(read(d, 1, 2, 9), PLAN, d))
     }
 
     @Test
     fun `a missed day changes nothing but that day`() {
         val d = days(10)
         // Day 4 is simply never added. Nothing resets.
-        assertEquals(3, ReadingPlanRepository.daysRead(read(d, 1, 2, 3), d))
-        assertEquals(4, ReadingPlanRepository.daysRead(read(d, 1, 2, 3, 5), d))
+        assertEquals(3, ReadingPlanRepository.daysRead(read(d, 1, 2, 3), PLAN, d))
+        assertEquals(4, ReadingPlanRepository.daysRead(read(d, 1, 2, 3, 5), PLAN, d))
     }
 
     @Test
@@ -66,16 +74,18 @@ class ReadingPlanTest {
         // The same chapter can be reached from the Library or from another
         // plan; what is recorded is the chapter, so the day is already read.
         val d = days(3)
-        val st = ReadingPlanState(readChapters = setOf(ReadingPlanRepository.chapterKey("genesis", 2)))
-        assertTrue(ReadingPlanRepository.isRead(st, d[1]))
-        assertEquals(setOf(2), ReadingPlanRepository.readDayNumbers(st, d))
+        val chapters = setOf(ReadingPlanRepository.chapterKey("genesis", 2))
+        val st = ReadingPlanState(read = mapOf(PLAN to chapters), readChapters = chapters)
+        assertTrue(ReadingPlanRepository.isRead(st, PLAN, d[1]))
+        assertEquals(setOf(2), ReadingPlanRepository.readDayNumbers(st, PLAN, d))
     }
 
     @Test
     fun `a partly read day is not a read day`() {
         val day = PlanDay(d = 1, r = listOf(PlanReading("genesis", 1, 3)))
-        val st = ReadingPlanState(readChapters = setOf(ReadingPlanRepository.chapterKey("genesis", 1)))
-        assertFalse(ReadingPlanRepository.isRead(st, day))
+        val chapters = setOf(ReadingPlanRepository.chapterKey("genesis", 1))
+        val st = ReadingPlanState(read = mapOf(PLAN to chapters), readChapters = chapters)
+        assertFalse(ReadingPlanRepository.isRead(st, PLAN, day))
     }
 
     @Test
@@ -200,7 +210,93 @@ class ReadingPlanTest {
         val d = days(10)
         val a = read(d, 1, 2)
         val b = read(d, 2, 3)
-        val union = ReadingPlanState(readChapters = a.readChapters + b.readChapters)
-        assertEquals(3, ReadingPlanRepository.daysRead(union, d))
+        val union = ReadingPlanState(
+            read = mapOf(PLAN to (a.readFor(PLAN) + b.readFor(PLAN))),
+            readChapters = a.readChapters + b.readChapters,
+        )
+        assertEquals(3, ReadingPlanRepository.daysRead(union, PLAN, d))
+    }
+
+    // ── the repacking, and plans kept side by side ───────────────────────────
+
+    /**
+     * The bug this fixes: chunking by a rounded-up size gave fewer chunks than
+     * there were days to fill, so a repacked plan ran out early and every day
+     * after it had no reading at all. A ዳዊት reader who fell behind on day 5 and
+     * repacked on day 40 was left with 38 blank days at the end of the year.
+     */
+    @Test
+    fun `repacking fills every day it was given`() {
+        val one = (1..150).map { PlanDay(d = it, r = listOf(PlanReading("psalms", it, it))) }
+        val repacked = ReadingPlanRepository.redistribute(
+            one, fromDay = 5, remainingDays = 111, startDay = 40,
+        )
+        assertEquals(111, repacked.size)
+        assertEquals(40, repacked.first().d)
+        assertEquals(150, repacked.last().d)
+        assertTrue("a repacked day asks for nothing", repacked.all { it.r.isNotEmpty() })
+        // Nothing is dropped and nothing is read twice.
+        assertEquals(146, repacked.sumOf { ReadingPlanRepository.chaptersOf(it).size })
+    }
+
+    /** Fewer readings than days left: the plan ends early rather than blank. */
+    @Test
+    fun `a repacking shorter than its days ends early`() {
+        val d = days(10)
+        val repacked = ReadingPlanRepository.redistribute(d, fromDay = 9, remainingDays = 6, startDay = 5)
+        assertEquals(2, repacked.size)
+        assertTrue(repacked.all { it.r.isNotEmpty() })
+    }
+
+    /** Two plans over the same corpus are refused; one inside another is not. */
+    @Test
+    fun `the same text at two speeds cannot be kept twice`() {
+        val whole = (1..10).map { PlanDay(d = it, r = listOf(PlanReading("genesis", it, it))) }
+        val faster = (1..5).map { PlanDay(d = it, r = listOf(PlanReading("genesis", it * 2 - 1, it * 2))) }
+        val part = (1..3).map { PlanDay(d = it, r = listOf(PlanReading("genesis", it, it))) }
+        val content = ReadingPlanContent(
+            plans = listOf(
+                ReadingPlan(id = "slow", days = 10, readings = whole),
+                ReadingPlan(id = "fast", days = 5, readings = faster),
+                ReadingPlan(id = "part", days = 3, readings = part),
+            ),
+        )
+        val keepingSlow = ReadingPlanState(active = listOf(ActivePlan("slow", "2026-01-01")))
+        assertEquals("slow", ReadingPlanRepository.conflict(content, keepingSlow, "fast"))
+        assertNull(ReadingPlanRepository.conflict(content, keepingSlow, "part"))
+        assertNull(ReadingPlanRepository.conflict(content, ReadingPlanState(), "fast"))
+    }
+
+    /**
+     * The reason plans need ledgers of their own: የዳዊት ንባብ reads the psalms a
+     * Bible plan has already read, and against one shared ledger it would be
+     * handed to the reader already finished.
+     */
+    @Test
+    fun `two plans over the same chapters keep separate counts`() {
+        val psalms = (1..3).map { PlanDay(d = it, r = listOf(PlanReading("psalms", it, it))) }
+        val chapters = psalms.flatMap { ReadingPlanRepository.chaptersOf(it) }.toSet()
+        val st = ReadingPlanState(
+            active = listOf(ActivePlan("annual", "2026-01-01"), ActivePlan("psalter", "2026-06-01")),
+            read = mapOf("annual" to chapters),
+            readChapters = chapters,
+        )
+        assertEquals(3, ReadingPlanRepository.daysRead(st, "annual", psalms))
+        assertEquals(0, ReadingPlanRepository.daysRead(st, "psalter", psalms))
+        assertTrue(ReadingPlanRepository.isComplete(st, "annual", psalms))
+        assertFalse(ReadingPlanRepository.isComplete(st, "psalter", psalms))
+    }
+
+    /** A state written before plans were plural is read as the one it held. */
+    @Test
+    fun `an older state is read as the single plan it kept`() {
+        val old = ReadingPlanState(
+            activePlanId = "annual",
+            startedOn = "2026-01-01",
+            readChapters = setOf(ReadingPlanRepository.chapterKey("genesis", 1)),
+        )
+        assertEquals(listOf(ActivePlan("annual", "2026-01-01")), old.plansKept)
+        assertEquals(1, old.readFor("annual").size)
+        assertEquals(0, old.readFor("psalter").size)
     }
 }

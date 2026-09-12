@@ -141,8 +141,22 @@ def build_psalter(u):
                 for i, (slug, ch, _) in enumerate(u)]
     return {
         "id": "psalter", "title": "የዳዊት ንባብ", "subtitle": "በየቀኑ አንድ መዝሙር",
-        "days": len(readings), "withGitsawe": True, "readings": readings,
+        "days": len(readings), "withGitsawe": True,
+        "versesADay": verses_a_day([[(slug, ch)] for slug, ch, _ in u], u), "readings": readings,
     }
+
+
+def verses_a_day(packed, u):
+    """The middle day's verse count — what the plan actually asks of a day.
+
+    Chapters are the wrong unit to advertise a plan in: these are packed by
+    verses, so the chapter count runs from one to sixteen while the reading
+    stays the same length. The app shows this instead, and the minutes it
+    implies.
+    """
+    counts = {(slug, ch): v for slug, ch, v in u}
+    per = sorted(sum(counts.get(x, 0) for x in day) for day in packed if day)
+    return per[len(per) // 2] if per else 0
 
 
 def build(u, days, plan_id, title, subtitle):
@@ -150,7 +164,8 @@ def build(u, days, plan_id, title, subtitle):
     readings = [{"d": i + 1, "r": to_readings(day)} for i, day in enumerate(packed) if day]
     return {
         "id": plan_id, "title": title, "subtitle": subtitle,
-        "days": len(readings), "withGitsawe": True, "readings": readings,
+        "days": len(readings), "withGitsawe": True,
+        "versesADay": verses_a_day(packed, u), "readings": readings,
     }
 
 

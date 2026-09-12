@@ -69,6 +69,26 @@ interface Strings {
     // at its foot — two chips on a psalm, three on a gospel.
     /** Said of a link that leaves the app — the Fathers live on the web. */
     val opensOutside: String
+    /** ንባብ's second face: the map of the books, and a plan that can be finished. */
+    val readingAdd: String
+    fun readingConflict(other: String): String
+    fun readingPerDay(minutes: String): String
+    fun readingCost(verses: String, days: String): String
+    val readingKeeping: String
+    val readingMapTitle: String
+    fun readingChaptersOf(read: String, total: String): String
+    fun readingBooksDone(n: String): String
+    fun readingInBook(book: String, left: String): String
+    fun readingSectionLeft(section: String, left: String): String
+    fun readingWeekDays(days: String): String
+    val readingMap: String
+    val readingCompleteTitle: String
+    fun readingCompleteBody(days: String): String
+    val readingRestart: String
+    val readingNothingToday: String
+    fun readingBookChapters(read: String, total: String): String
+    fun readingOpenChapter(n: String): String
+    val readingPsalterAlongside: String
     val goToBook: String
     val goToChapter: String
     val goToPsalm: String
@@ -1673,6 +1693,25 @@ object AmharicStrings : Strings {
     override val readingRedistribute = "ቀሪውን አከፋፍል"
     override val readingRedistributeDesc = "ቀሪው በቀሩት ቀናት ይከፋፈላል፤ በጊዜው ይጠናቀቃል።"
     override fun readingPlanMeta(days: String, perDay: String) = "$days ቀን · በቀን $perDay ምዕራፍ"
+    override val readingAdd = "ንባብ ጨምር"
+    override fun readingConflict(other: String) = "ከ$other ጋር ተመሳሳይ ምዕራፎችን ያነብባል። አንዱን ብቻ ይጠብቁ።"
+    override fun readingPerDay(minutes: String) = "በቀን ወደ $minutes ደቂቃ"
+    override fun readingCost(verses: String, days: String) = "$verses ቁጥር · $days ቀን"
+    override val readingKeeping = "እየጠበቁት ነው"
+    override val readingMapTitle = "የመጻሕፍቱ ካርታ"
+    override fun readingChaptersOf(read: String, total: String) = "$read ከ $total ምዕራፍ"
+    override fun readingBooksDone(n: String) = "$n መጽሐፍ ተጠናቋል"
+    override fun readingInBook(book: String, left: String) = "አሁን $book ላይ ነዎት · $left ምዕራፍ ይቀራል"
+    override fun readingSectionLeft(section: String, left: String) = "${section}ን ለመጨረስ $left ምዕራፍ ቀርቷል"
+    override fun readingWeekDays(days: String) = "በዚህ ሳምንት $days ቀን"
+    override val readingMap = "ካርታው"
+    override val readingCompleteTitle = "መጽሐፍ ቅዱስን ጨረሱ"
+    override fun readingCompleteBody(days: String) = "በ$days ቀን። ያነበቡት ተጠብቆ ይቀራል።"
+    override val readingRestart = "እንደገና ጀምር"
+    override val readingNothingToday = "ዛሬ የተመደበ ንባብ የለም"
+    override fun readingBookChapters(read: String, total: String) = "$read ከ $total ምዕራፍ"
+    override fun readingOpenChapter(n: String) = "ምዕራፍ $n ክፈት"
+    override val readingPsalterAlongside = "ከመጽሐፍ ቅዱስ ንባብ ጎን ሊጠበቅ ይችላል። እያንዳንዱ ንባብ የራሱን ቆጠራ ይይዛል።"
     override val readingNoPlan = "ገና ንባብ አልጀመሩም"
 
     // ── የአዲስ እትም ማሳወቂያ ────────────────────────────────────────────────────
@@ -2510,6 +2549,25 @@ object EnglishStrings : Strings {
     override val readingRedistribute = "Spread the rest out"
     override val readingRedistributeDesc = "What is left is shared across the days that remain; the plan finishes on time."
     override fun readingPlanMeta(days: String, perDay: String) = "$days days · $perDay chapters a day"
+    override val readingAdd = "Add a plan"
+    override fun readingConflict(other: String) = "Reads the same chapters as $other. Keep one of them."
+    override fun readingPerDay(minutes: String) = "About $minutes minutes a day"
+    override fun readingCost(verses: String, days: String) = "$verses verses · $days days"
+    override val readingKeeping = "Keeping"
+    override val readingMapTitle = "Map of the books"
+    override fun readingChaptersOf(read: String, total: String) = "$read of $total chapters"
+    override fun readingBooksDone(n: String) = "$n books finished"
+    override fun readingInBook(book: String, left: String) = "You are in $book · $left chapters left"
+    override fun readingSectionLeft(section: String, left: String) = "$left chapters to finish $section"
+    override fun readingWeekDays(days: String) = "$days days this week"
+    override val readingMap = "The map"
+    override val readingCompleteTitle = "You have read the Bible"
+    override fun readingCompleteBody(days: String) = "In $days days. What you read is kept."
+    override val readingRestart = "Begin again"
+    override val readingNothingToday = "Nothing is set for today"
+    override fun readingBookChapters(read: String, total: String) = "$read of $total chapters"
+    override fun readingOpenChapter(n: String) = "Open chapter $n"
+    override val readingPsalterAlongside = "Can be kept beside a Bible plan. Each keeps its own count."
     override val readingNoPlan = "No reading started yet"
 
     // ── Update notice ────────────────────────────────────────────────────────

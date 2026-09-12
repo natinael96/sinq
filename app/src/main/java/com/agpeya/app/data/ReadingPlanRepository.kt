@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.agpeya.app.model.ActivePlan
 import com.agpeya.app.model.PlanDay
 import com.agpeya.app.model.ReadingPlan
 import com.agpeya.app.model.Redistribution
@@ -75,14 +76,65 @@ object ReadingPlanRepository {
         }
     }
 
-    /** Begin a plan today. Any days already read of it are kept. */
+    /**
+     * Begin a plan today, beside any already being kept.
+     *
+     * Starting the same plan again re-dates it rather than adding it twice;
+     * what has been read of it is kept either way.
+     */
     suspend fun start(context: Context, planId: String, today: LocalDate = LocalDate.now()) {
-        update(context) { it.copy(activePlanId = planId, startedOn = today.toString()) }
+        update(context) { st ->
+            val kept = st.plansKept.filterNot { it.planId == planId }
+            st.copy(
+                active = kept + ActivePlan(planId, today.toString()),
+                // Folded now, so the legacy pair never disagrees with the list.
+                activePlanId = "",
+                startedOn = "",
+                read = st.read + (planId to st.readFor(planId)),
+            )
+        }
     }
 
-    suspend fun stop(context: Context) {
-        update(context) { it.copy(activePlanId = "") }
+    /** Stop one plan. The others carry on, and what was read stays read. */
+    suspend fun stop(context: Context, planId: String) {
+        update(context) { st ->
+            st.copy(
+                active = st.plansKept.filterNot { it.planId == planId },
+                activePlanId = "",
+                startedOn = "",
+            )
+        }
     }
+
+    /**
+     * Why [planId] cannot be kept beside what already is, or null when it can.
+     *
+     * The only pairing that makes no sense is the same text at two speeds: the
+     * year and the six months read the same 1,610 chapters, so keeping both
+     * would print every day's reading twice. A plan contained in another —
+     * የዳዊት ንባብ inside a Bible plan — is a different matter: the psalms are
+     * read twice on purpose, and each plan counts its own.
+     */
+    fun conflict(content: ReadingPlanContent, state: ReadingPlanState, planId: String): String? {
+        val candidate = chaptersIn(content, planId) ?: return null
+        if (candidate.isEmpty()) return null
+        for (kept in state.plansKept) {
+            if (kept.planId == planId) continue
+            val other = chaptersIn(content, kept.planId) ?: continue
+            if (other.isEmpty()) continue
+            val shared = candidate.count { it in other }
+            // The same corpus, whatever the pace: nine tenths of each.
+            if (shared * 10 >= candidate.size * 9 && shared * 10 >= other.size * 9) {
+                return kept.planId
+            }
+        }
+        return null
+    }
+
+    /** Every chapter a plan asks for, across all its days. */
+    fun chaptersIn(content: ReadingPlanContent, planId: String): Set<String>? =
+        content.plans.firstOrNull { it.id == planId }
+            ?.readings?.flatMapTo(mutableSetOf()) { chaptersOf(it) }
 
     /**
      * Mark a day's chapters read. Idempotent — reading the same day twice is
@@ -93,9 +145,15 @@ object ReadingPlanRepository {
      * writes ጉዞ's `bible` habit for the day it was marked on — the ledger and
      * the plan were two records of one act, and the reader had to keep both.
      */
-    suspend fun markDay(context: Context, day: PlanDay, today: LocalDate = LocalDate.now()) {
+    suspend fun markDay(
+        context: Context,
+        planId: String,
+        day: PlanDay,
+        today: LocalDate = LocalDate.now(),
+    ) {
         update(context) { st ->
             st.copy(
+                read = st.read + (planId to (st.readFor(planId) + chaptersOf(day))),
                 readChapters = st.readChapters + chaptersOf(day),
                 lastReadOn = today.toString(),
             )
@@ -115,11 +173,53 @@ object ReadingPlanRepository {
     suspend fun unmarkDay(context: Context, plan: ReadingPlan, day: PlanDay) {
         update(context) { st ->
             val elsewhere = effectiveDays(plan, st)
-                .filter { it.d != day.d && isRead(st, it) }
+                .filter { it.d != day.d && isRead(st, plan.id, it) }
                 .flatMapTo(mutableSetOf()) { chaptersOf(it) }
-            st.copy(readChapters = st.readChapters - (chaptersOf(day).toSet() - elsewhere))
+            val taken = chaptersOf(day).toSet() - elsewhere
+            // Only this plan's count goes back. [ReadingPlanState.readChapters]
+            // is the record of what has been read, and unmarking a day does not
+            // make it unread — it says the day is not finished.
+            st.copy(read = st.read + (plan.id to (st.readFor(plan.id) - taken)))
         }
     }
+
+    /**
+     * Keep or release one passage of a day.
+     *
+     * The day was always stored chapter by chapter; only the marking was
+     * all-or-nothing. A day of three passages can now be kept as it is read,
+     * and the day counts as read when its last passage does.
+     */
+    suspend fun toggleReading(
+        context: Context,
+        planId: String,
+        chapters: List<String>,
+        today: LocalDate = LocalDate.now(),
+    ) {
+        if (chapters.isEmpty()) return
+        var kept = false
+        update(context) { st ->
+            val mine = st.readFor(planId)
+            kept = !chapters.all { it in mine }
+            st.copy(
+                read = st.read + (planId to (if (kept) mine + chapters else mine - chapters.toSet())),
+                // What has been read stays read: the map draws this, and
+                // releasing a passage says the day is unfinished, not unread.
+                readChapters = if (kept) st.readChapters + chapters else st.readChapters,
+                lastReadOn = if (kept) today.toString() else st.lastReadOn,
+            )
+        }
+        if (kept) {
+            HabitsRepository.markDone(context, today.toString(), BIBLE_HABIT)
+            SettingsRepository.clearReadingReminderUnanswered(context)
+        }
+    }
+
+    /** Days of the last week (today back six) the reading habit was kept. */
+    fun daysReadInWeek(records: Map<String, Set<String>>, today: LocalDate): Int =
+        (0L..6L).count { back ->
+            BIBLE_HABIT in (records[today.minusDays(back).toString()] ?: emptySet())
+        }
 
     /**
      * Fold the old day-number ledger into chapters, and drop a repacking that
@@ -131,15 +231,32 @@ object ReadingPlanRepository {
         // against the bundle it is being read on. Only a version that changed
         // under a reader renumbers the days.
         val stale = st.contentVersion != 0 && st.contentVersion != content.contentVersion
-        if (st.completedDays.isEmpty() && !stale && st.contentVersion == content.contentVersion) {
+        val plural = st.activePlanId.isBlank() || st.active.isNotEmpty()
+        if (st.completedDays.isEmpty() && plural && !stale &&
+            st.contentVersion == content.contentVersion
+        ) {
             return@update st
         }
         val chapters = st.readChapters.toMutableSet()
+        val perPlan = st.read.toMutableMap()
         st.completedDays.forEach { (planId, days) ->
             val plan = content.plans.firstOrNull { it.id == planId } ?: return@forEach
-            effectiveDays(plan, st).forEach { d -> if (d.d in days) chapters += chaptersOf(d) }
+            val folded = mutableSetOf<String>()
+            effectiveDays(plan, st).forEach { d -> if (d.d in days) folded += chaptersOf(d) }
+            chapters += folded
+            perPlan[planId] = (perPlan[planId] ?: emptySet()) + folded
+        }
+        // A state written before plans were plural: the one plan it held keeps
+        // the chapters it recorded, and the pair of legacy fields is retired.
+        val kept = st.plansKept
+        if (st.activePlanId.isNotBlank() && st.active.isEmpty()) {
+            perPlan[st.activePlanId] = (perPlan[st.activePlanId] ?: emptySet()) + st.readChapters
         }
         st.copy(
+            active = kept,
+            activePlanId = "",
+            startedOn = "",
+            read = perPlan,
             readChapters = chapters,
             completedDays = emptyMap(),
             redistributed = if (stale) emptyMap() else st.redistributed,
@@ -151,8 +268,20 @@ object ReadingPlanRepository {
      * Shift day 1 so that [day] becomes today — "finish later, same daily
      * reading". Nothing is skipped; the plan's last day simply moves out.
      */
-    suspend fun rebaseTo(context: Context, day: Int, today: LocalDate = LocalDate.now()) {
-        update(context) { it.copy(startedOn = today.minusDays((day - 1).toLong()).toString()) }
+    suspend fun rebaseTo(
+        context: Context,
+        planId: String,
+        day: Int,
+        today: LocalDate = LocalDate.now(),
+    ) {
+        val began = today.minusDays((day - 1).toLong()).toString()
+        update(context) { st ->
+            st.copy(
+                active = st.plansKept.map { if (it.planId == planId) it.copy(startedOn = began) else it },
+                activePlanId = "",
+                startedOn = "",
+            )
+        }
     }
 
     /**
@@ -190,9 +319,15 @@ object ReadingPlanRepository {
             val days = (cur.completedDays.keys + restored.completedDays.keys).associateWith {
                 cur.readDays(it) + restored.readDays(it)
             }
+            val kept = cur.plansKept.ifEmpty { restored.plansKept }
+            val merged = (cur.read.keys + restored.read.keys).associateWith {
+                cur.readFor(it) + restored.readFor(it)
+            }
             cur.copy(
-                activePlanId = cur.activePlanId.ifBlank { restored.activePlanId },
-                startedOn = cur.startedOn.ifBlank { restored.startedOn },
+                active = kept,
+                activePlanId = "",
+                startedOn = "",
+                read = merged,
                 completedDays = days,
                 readChapters = cur.readChapters + restored.readChapters,
                 lastReadOn = maxOf(cur.lastReadOn, restored.lastReadOn),
@@ -223,16 +358,38 @@ object ReadingPlanRepository {
     fun chaptersOf(day: PlanDay): List<String> =
         day.r.flatMap { r -> r.chapters.map { chapterKey(r.b, it) } }
 
-    /** A day is read when every chapter it asks for has been. */
-    fun isRead(state: ReadingPlanState, day: PlanDay): Boolean =
-        day.r.isNotEmpty() && chaptersOf(day).all { it in state.readChapters }
+    /** A day is read when every chapter it asks for has been, for this plan. */
+    fun isRead(state: ReadingPlanState, planId: String, day: PlanDay): Boolean {
+        if (day.r.isEmpty()) return false
+        val read = state.readFor(planId)
+        return chaptersOf(day).all { it in read }
+    }
 
     /** Which of [days] are read, by day number. */
-    fun readDayNumbers(state: ReadingPlanState, days: List<PlanDay>): Set<Int> =
-        days.filterTo(mutableListOf()) { isRead(state, it) }.mapTo(mutableSetOf()) { it.d }
+    fun readDayNumbers(state: ReadingPlanState, planId: String, days: List<PlanDay>): Set<Int> =
+        days.filterTo(mutableListOf()) { isRead(state, planId, it) }.mapTo(mutableSetOf()) { it.d }
 
     /** Days actually read — the only progress number the app shows. */
-    fun daysRead(state: ReadingPlanState, days: List<PlanDay>): Int = days.count { isRead(state, it) }
+    fun daysRead(state: ReadingPlanState, planId: String, days: List<PlanDay>): Int =
+        days.count { isRead(state, planId, it) }
+
+    /** Chapters of the plan read, and chapters it asks for in all. */
+    fun chapterProgress(
+        state: ReadingPlanState,
+        planId: String,
+        days: List<PlanDay>,
+    ): Pair<Int, Int> {
+        val asked = days.flatMapTo(mutableSetOf()) { chaptersOf(it) }
+        val read = state.readFor(planId)
+        return asked.count { it in read } to asked.size
+    }
+
+    /** Every day read: the plan is finished, whatever the calendar says. */
+    fun isComplete(state: ReadingPlanState, planId: String, days: List<PlanDay>): Boolean =
+        days.isNotEmpty() && days.all { isRead(state, planId, it) }
+
+    /** The last day that asks for anything — a repacked plan can end early. */
+    fun lastDay(days: List<PlanDay>): Int = days.maxOfOrNull { it.d } ?: 0
 
     /**
      * The earliest unread day at or before [currentDay] — where "catch up"
@@ -251,7 +408,7 @@ object ReadingPlanRepository {
         val byNumber = days.associateBy { it.d }
         return (floor..currentDay).firstOrNull { n ->
             val day = byNumber[n] ?: return@firstOrNull false
-            !isRead(state, day)
+            !isRead(state, planId, day)
         }
     }
 
@@ -273,7 +430,20 @@ object ReadingPlanRepository {
         if (remainingDays <= 0) return emptyList()
         val tail = days.filter { it.d >= fromDay }.flatMap { it.r }
         if (tail.isEmpty()) return emptyList()
-        val per = kotlin.math.ceil(tail.size.toDouble() / remainingDays).toInt().coerceAtLeast(1)
-        return tail.chunked(per).mapIndexed { i, r -> PlanDay(d = startDay + i, r = r) }
+        // Spread across the days themselves rather than into chunks of a
+        // rounded-up size. Chunking by ceil(n/d) yields ceil(n/ceil(n/d))
+        // chunks, which is fewer than d whenever the division is not tight:
+        // a ዳዊት reader who fell behind on day 5 and repacked on day 40 was
+        // given readings to day 112 and nothing at all for the 38 days after.
+        val spread = minOf(remainingDays, tail.size)
+        val each = tail.size / spread
+        val extra = tail.size % spread
+        var from = 0
+        return (0 until spread).map { i ->
+            val take = each + if (i < extra) 1 else 0
+            val slice = tail.subList(from, from + take).toList()
+            from += take
+            PlanDay(d = startDay + i, r = slice)
+        }
     }
 }

@@ -40,7 +40,7 @@ import java.time.LocalDate
  */
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-fun ReadingPlanDaysScreen(onBack: () -> Unit, onOpenRoute: (String) -> Unit) {
+fun ReadingPlanDaysScreen(planId: String, onBack: () -> Unit, onOpenRoute: (String) -> Unit) {
     val context = LocalContext.current
     val s = LocalStrings.current
     val today = remember { LocalDate.now() }
@@ -50,10 +50,11 @@ fun ReadingPlanDaysScreen(onBack: () -> Unit, onOpenRoute: (String) -> Unit) {
         value = runCatching { com.agpeya.app.data.ScriptureRepository.bookNames(context) }.getOrDefault(emptyMap())
     }
     val state by ReadingPlanRepository.state(context).collectAsState(initial = ReadingPlanState())
-    val plan = content.plans.firstOrNull { it.id == state.activePlanId }
+    val kept = state.kept(planId)
+    val plan = content.plans.firstOrNull { it.id == planId }
     val listState = rememberLazyListState()
 
-    val currentDay = plan?.let { ReadingPlanRepository.dayOn(state.startedOn, today, it.days) } ?: 1
+    val currentDay = plan?.let { ReadingPlanRepository.dayOn(kept?.startedOn.orEmpty(), today, it.days) } ?: 1
     // Open where the person actually is, not at day 1 of a year.
     LaunchedEffect(plan?.id, currentDay) {
         if (plan != null) listState.scrollToItem((currentDay - 1).coerceAtLeast(0))
@@ -61,7 +62,13 @@ fun ReadingPlanDaysScreen(onBack: () -> Unit, onOpenRoute: (String) -> Unit) {
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        topBar = { SinqTopBar(title = s.readingAllDays, onBack = onBack) },
+        topBar = {
+            SinqTopBar(
+                title = s.readingAllDays,
+                accentLine = plan?.title,
+                onBack = onBack,
+            )
+        },
     ) { inner ->
         if (plan == null) {
             Text(
@@ -74,7 +81,7 @@ fun ReadingPlanDaysScreen(onBack: () -> Unit, onOpenRoute: (String) -> Unit) {
         // The days as they now stand: repacked from the day the reader chose to
         // finish on time, and the bundled days before it.
         val days = ReadingPlanRepository.effectiveDays(plan, state)
-        val read = ReadingPlanRepository.readDayNumbers(state, days)
+        val read = ReadingPlanRepository.readDayNumbers(state, plan.id, days)
         LazyColumn(
             Modifier.fillMaxSize().padding(inner),
             state = listState,
@@ -89,7 +96,9 @@ fun ReadingPlanDaysScreen(onBack: () -> Unit, onOpenRoute: (String) -> Unit) {
                     else "$name ${geezNumeral(r.c)}"
                 }
                 ListRow(
-                    title = s.readingDayLabel(day.d.toString()),
+                    // Ge'ez, like the passages beside it: "ቀን 120" over
+                    // "ኢሳይያስ ፩–፫" was two numbering systems in one row.
+                    title = s.readingDayLabel(geezNumeral(day.d)),
                     subtitle = passages,
                     onClick = { day.r.firstOrNull()?.let { onOpenRoute(planReadingRoute(it.b, it.c)) } },
                     trailing = {

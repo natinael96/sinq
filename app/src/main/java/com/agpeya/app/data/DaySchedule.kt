@@ -70,7 +70,7 @@ object DaySchedule {
             val minute = SettingsRepository.readingReminderTime(context).first()
             // It stays silent until a plan is begun, so say so rather than
             // promising a notification that will not come.
-            val started = runCatching { ReadingPlanRepository.current(context).activePlanId.isNotBlank() }
+            val started = runCatching { ReadingPlanRepository.current(context).plansKept.isNotEmpty() }
                 .getOrDefault(false)
             out += Entry(Kind.READING, "", minute, silenced(minute), today = started)
         }

@@ -55,7 +55,7 @@ internal enum class ReadingNudge { SEND, SILENT, STOP }
  * responding" to notifications that were never sent.
  */
 internal fun decideReadingNudge(
-    activePlanId: String,
+    keeping: Boolean,
     lastReadOn: String,
     today: String,
     inQuietHours: Boolean,
@@ -64,7 +64,7 @@ internal fun decideReadingNudge(
 ): ReadingNudge = when {
     // Nothing started, nothing to be reminded of. The setting is on by
     // default, so this is what keeps it from advertising itself.
-    activePlanId.isBlank() -> ReadingNudge.SILENT
+    !keeping -> ReadingNudge.SILENT
     // The errand is done. Unlike the nightly ጉዞ nudge, which fires either way
     // on purpose, this one has a single thing to ask about.
     lastReadOn == today -> ReadingNudge.SILENT
@@ -89,7 +89,7 @@ class ReadingReminderReceiver : BroadcastReceiver() {
                     val state = runCatching { ReadingPlanRepository.current(context) }.getOrNull()
                         ?: return@runBlocking
                     val decision = decideReadingNudge(
-                        activePlanId = state.activePlanId,
+                        keeping = state.plansKept.isNotEmpty(),
                         lastReadOn = state.lastReadOn,
                         today = today.toString(),
                         inQuietHours = SettingsRepository.inQuietHoursNow(context),
@@ -129,14 +129,23 @@ class ReadingReminderReceiver : BroadcastReceiver() {
         s: Strings,
     ): String? {
         val content = runCatching { ReadingPlanRepository.content(context) }.getOrNull() ?: return null
-        val plan = content.plans.firstOrNull { it.id == state.activePlanId } ?: return null
-        val days = ReadingPlanRepository.effectiveDays(plan, state)
-        val dayNumber = ReadingPlanRepository.dayOn(state.startedOn, LocalDate.now(), plan.days)
-        val day = days.firstOrNull { it.d == dayNumber } ?: return null
+        // Every plan being kept, in the order they are kept: a reader keeping
+        // the year and the Psalter is owed both names, not whichever came first.
         val names = runCatching { ScriptureRepository.bookNames(context) }.getOrDefault(emptyMap())
-        val passages = describe(day, names)
-        return if (passages.isBlank()) s.readingReminderPlain(dayNumber)
-        else s.readingReminderBody(dayNumber, passages)
+        var firstDay = 0
+        val parts = state.plansKept.mapNotNull { kept ->
+            val plan = content.plans.firstOrNull { it.id == kept.planId } ?: return@mapNotNull null
+            val days = ReadingPlanRepository.effectiveDays(plan, state)
+            val n = ReadingPlanRepository.dayOn(kept.startedOn, LocalDate.now(), plan.days)
+            val day = days.firstOrNull { it.d == n } ?: return@mapNotNull null
+            if (ReadingPlanRepository.isRead(state, plan.id, day)) return@mapNotNull null
+            if (firstDay == 0) firstDay = n
+            describe(day, names).takeIf { it.isNotBlank() }
+        }
+        if (firstDay == 0) return null
+        val passages = parts.joinToString("  ·  ")
+        return if (passages.isBlank()) s.readingReminderPlain(firstDay)
+        else s.readingReminderBody(firstDay, passages)
     }
 
     private fun describe(day: PlanDay, names: Map<String, String>): String =

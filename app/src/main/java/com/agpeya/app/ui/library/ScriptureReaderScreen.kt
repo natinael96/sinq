@@ -166,11 +166,16 @@ fun ScriptureReaderScreen(
     val planState by com.agpeya.app.data.ReadingPlanRepository.state(context)
         .collectAsState(initial = com.agpeya.app.model.ReadingPlanState())
     val today = com.agpeya.app.ui.common.rememberCurrentDate().value
-    val planDay = remember(planContent, planState, today) {
-        planContent.plans.firstOrNull { it.id == planState.activePlanId }?.let { plan ->
-            val n = com.agpeya.app.data.ReadingPlanRepository.dayOn(planState.startedOn, today, plan.days)
-            plan to com.agpeya.app.data.ReadingPlanRepository.effectiveDays(plan, planState)
-                .firstOrNull { it.d == n }
+    // Every plan being kept, with the day it is on. A psalm can belong to
+    // today in two plans at once — the year reaches it, and የዳዊት ንባብ is on it —
+    // and each wants its own tick.
+    val planDays = remember(planContent, planState, today) {
+        planState.plansKept.mapNotNull { kept ->
+            val plan = planContent.plans.firstOrNull { it.id == kept.planId } ?: return@mapNotNull null
+            val n = com.agpeya.app.data.ReadingPlanRepository.dayOn(kept.startedOn, today, plan.days)
+            val day = com.agpeya.app.data.ReadingPlanRepository.effectiveDays(plan, planState)
+                .firstOrNull { it.d == n } ?: return@mapNotNull null
+            plan to day
         }
     }
     val lastChapters by SettingsRepository.lastChapters(context).collectAsState(initial = emptyMap())
@@ -445,25 +450,28 @@ fun ScriptureReaderScreen(
             }
             item {
                 // The day's own chapters, when this is one of them: which of
-                // them this is, the next of them, and the tick.
-                val day = planDay?.second
-                val dayChapters = day?.r.orEmpty().flatMap { r -> r.chapters.map { r.b to it } }
-                val here = dayChapters.indexOf(bookKey to chapter)
-                if (day != null && here >= 0) {
-                    val read = com.agpeya.app.data.ReadingPlanRepository.isRead(planState, day)
+                // them this is, the next of them, and the tick. One row per
+                // plan that asks for this chapter today, which for a psalm read
+                // under both a Bible plan and የዳዊት ንባብ is two.
+                planDays.forEach { (plan, day) ->
+                    val dayChapters = day.r.flatMap { r -> r.chapters.map { r.b to it } }
+                    val here = dayChapters.indexOf(bookKey to chapter)
+                    if (here < 0) return@forEach
+                    val read = com.agpeya.app.data.ReadingPlanRepository.isRead(planState, plan.id, day)
                     ListRow(
                         title = s.readingChapterOfDay(here + 1, dayChapters.size),
-                        subtitle = if (read) s.readingDone else s.readingMarkDone,
+                        // Which plan, when more than one is being kept; the
+                        // action otherwise, since there is nothing to tell apart.
+                        subtitle = if (planDays.size > 1) plan.title
+                        else if (read) s.readingDone else s.readingMarkDone,
                         leadingIcon = if (read) Icons.Outlined.Check else Icons.AutoMirrored.Outlined.MenuBook,
                         leadingTint = if (read) MaterialTheme.colorScheme.secondary else null,
                         onClick = {
                             scope.launch {
                                 if (read) {
-                                    planDay.first.let { plan ->
-                                        com.agpeya.app.data.ReadingPlanRepository.unmarkDay(context, plan, day)
-                                    }
+                                    com.agpeya.app.data.ReadingPlanRepository.unmarkDay(context, plan, day)
                                 } else {
-                                    com.agpeya.app.data.ReadingPlanRepository.markDay(context, day, today)
+                                    com.agpeya.app.data.ReadingPlanRepository.markDay(context, plan.id, day, today)
                                 }
                             }
                         },

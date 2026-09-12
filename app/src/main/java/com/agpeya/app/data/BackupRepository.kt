@@ -221,7 +221,7 @@ object BackupRepository {
             // Days read union rather than replace, so restoring an old file
             // never erases reading done since it was written.
             if (backup.readingPlan.completedDays.isNotEmpty() ||
-                backup.readingPlan.activePlanId.isNotBlank()
+                backup.readingPlan.plansKept.isNotEmpty()
             ) {
                 ReadingPlanRepository.merge(context, backup.readingPlan)
             }

@@ -927,11 +927,30 @@ private fun AgpeyaNavHost(
                 onBack = { navController.popBackStack() },
                 onOpenRoute = { route -> navController.navigate(route) { launchSingleTop = true } },
                 onOpenGitsawe = { navController.navigate("gitsawe") { launchSingleTop = true } },
-                onOpenAllDays = { navController.navigate("reading/days") { launchSingleTop = true } },
+                onOpenAllDays = { planId ->
+                    navController.navigate("reading/days/$planId") { launchSingleTop = true }
+                },
+                onOpenMap = { navController.navigate("reading/map") { launchSingleTop = true } },
             )
         }
-        composable("reading/days") {
+        composable("reading/choose") {
+            com.agpeya.app.ui.reading.ReadingChooseScreen(
+                onBack = { navController.popBackStack() },
+                onStarted = { navController.popBackStack() },
+            )
+        }
+        composable("reading/map") {
+            com.agpeya.app.ui.reading.ReadingMapScreen(
+                onBack = { navController.popBackStack() },
+                onOpenRoute = { route -> navController.navigate(route) { launchSingleTop = true } },
+            )
+        }
+        composable(
+            route = "reading/days/{planId}",
+            arguments = listOf(navArgument("planId") { type = NavType.StringType }),
+        ) { backStackEntry ->
             com.agpeya.app.ui.reading.ReadingPlanDaysScreen(
+                planId = backStackEntry.arguments?.getString("planId").orEmpty(),
                 onBack = { navController.popBackStack() },
                 onOpenRoute = { route -> navController.navigate(route) { launchSingleTop = true } },
             )

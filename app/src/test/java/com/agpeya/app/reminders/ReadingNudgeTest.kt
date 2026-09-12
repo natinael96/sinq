@@ -18,7 +18,8 @@ class ReadingNudgeTest {
     private val backoff = 7
 
     private fun decide(
-        plan: String = "canon",
+        // A plan being kept, rather than the one plan's id: plans are plural now.
+        plan: Boolean = true,
         lastReadOn: String = "2026-09-08",
         today: String = "2026-09-09",
         quiet: Boolean = false,
@@ -27,8 +28,8 @@ class ReadingNudgeTest {
 
     @Test
     fun `no plan means no nudge, however long the setting has been on`() {
-        assertEquals(ReadingNudge.SILENT, decide(plan = "", unanswered = 0))
-        assertEquals(ReadingNudge.SILENT, decide(plan = "", unanswered = 99))
+        assertEquals(ReadingNudge.SILENT, decide(plan = false, unanswered = 0))
+        assertEquals(ReadingNudge.SILENT, decide(plan = false, unanswered = 99))
     }
 
     @Test

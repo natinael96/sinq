@@ -83,6 +83,11 @@ fun LibraryScreen(
                 )
             }
             item {
+                // Every other card here is a shelf; this is a commitment being
+                // kept, so it reports itself rather than repeating a sentence.
+                com.agpeya.app.ui.reading.ReadingHeroCard(onOpen = onOpenReading)
+            }
+            item {
                 LibraryCard(icon = Icons.Outlined.Favorite, title = s.wudaseMariam, subtitle = s.wudaseScheduleSubtitle, onClick = onOpenWudase)
             }
             item {
@@ -114,14 +119,6 @@ fun LibraryScreen(
                     title = s.bahreHasabTitle,
                     subtitle = s.bahreHasabSubtitle,
                     onClick = onOpenBahreHasab,
-                )
-            }
-            item {
-                LibraryCard(
-                    icon = Icons.AutoMirrored.Outlined.EventNote,
-                    title = s.readingTitle,
-                    subtitle = s.readingIntro,
-                    onClick = onOpenReading,
                 )
             }
             item {

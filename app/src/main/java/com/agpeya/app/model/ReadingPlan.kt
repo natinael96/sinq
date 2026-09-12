@@ -38,6 +38,14 @@ data class ReadingPlan(
     val subtitle: String = "",
     val days: Int = 0,
     val withGitsawe: Boolean = true,
+    /**
+     * The middle day's verse count, measured by tools/build_reading_plans.py.
+     *
+     * The plans are packed to a verse budget, so the chapter count runs from
+     * one to sixteen while the reading stays the same length. This is the
+     * number worth showing, and the minutes it implies.
+     */
+    val versesADay: Int = 0,
     val readings: List<PlanDay> = emptyList(),
 ) {
     fun day(n: Int): PlanDay? = readings.firstOrNull { it.d == n }
@@ -51,8 +59,16 @@ data class ReadingPlanContent(
     val plans: List<ReadingPlan> = emptyList(),
 )
 
+/** One plan being kept, and the day it began. */
+@Serializable
+data class ActivePlan(
+    val planId: String = "",
+    /** ISO-8601 date this plan's day 1 fell on. */
+    val startedOn: String = "",
+)
+
 /**
- * Which plan is being kept, and what has been read of it.
+ * Which plans are being kept, and what has been read of each.
  *
  * Days, not dates. That is what makes a plan undated: falling behind shifts the
  * remaining days rather than accumulating a visible deficit, and redistributing
@@ -64,20 +80,36 @@ data class ReadingPlanContent(
  * a reader who had read ኦሪት ዘሌዋውያን would be told to read it once more. Chapters
  * are the thing actually read, so they are the thing stored, and a day counts
  * as read when every chapter it asks for has been.
+ *
+ * Recorded **per plan**, though, and that is the one thing the chapters alone
+ * could not carry. የዳዊት ንባብ reads the hundred and fifty psalms that ዓመታዊ ንባብ
+ * also reads; against a single ledger a reader two hundred days into the year
+ * would be handed a Psalter plan already finished. [readChapters] is still
+ * every chapter ever read by anyone — it is what the map of the books draws —
+ * while [read] says which plan asked for it.
  */
 @Serializable
 data class ReadingPlanState(
+    /** Superseded by [active]; folded into it on first read, then left blank. */
     val activePlanId: String = "",
-    /** ISO-8601 date the plan's day 1 fell on. */
+    /** Superseded by [ActivePlan.startedOn]; folded in the same way. */
     val startedOn: String = "",
+    /** The plans being kept. Two at most in practice — see the bundle. */
+    val active: List<ActivePlan> = emptyList(),
     /**
      * The old ledger: planId → day numbers read. Read once at launch, folded
      * into [readChapters], and then left empty. Restored backups written by an
      * older build arrive here too, and are folded the same way.
      */
     val completedDays: Map<String, Set<Int>> = emptyMap(),
-    /** Every chapter read, as "slug:chapter". Never cleared by a miss. */
+    /**
+     * Every chapter read, by any plan, as "slug:chapter". Never cleared by a
+     * miss, and never reduced by unmarking a day: it is the record of what has
+     * been read, which is what the map of the books shows.
+     */
     val readChapters: Set<String> = emptySet(),
+    /** planId → the chapters read *for that plan*. What its progress counts. */
+    val read: Map<String, Set<String>> = emptyMap(),
     val lastReadOn: String = "",
     /** planId → the repacking in force, when the reader chose to finish on time. */
     val redistributed: Map<String, Redistribution> = emptyMap(),
@@ -90,6 +122,25 @@ data class ReadingPlanState(
 ) {
     /** The old day-number ledger for one plan; empty once it has been folded in. */
     fun readDays(planId: String): Set<Int> = completedDays[planId] ?: emptySet()
+
+    /**
+     * The plans being kept, with a state written by an older build read as the
+     * one plan it could hold. Every screen goes through this rather than
+     * [active], so the fold costs nothing and can never be half-applied.
+     */
+    val plansKept: List<ActivePlan>
+        get() = when {
+            active.isNotEmpty() -> active
+            activePlanId.isNotBlank() -> listOf(ActivePlan(activePlanId, startedOn))
+            else -> emptyList()
+        }
+
+    fun kept(planId: String): ActivePlan? = plansKept.firstOrNull { it.planId == planId }
+
+    /** The chapters read for one plan, folding a pre-[read] state into its plan. */
+    fun readFor(planId: String): Set<String> = read[planId]
+        ?: readChapters.takeIf { planId == activePlanId && active.isEmpty() }
+        ?: emptySet()
 }
 
 /**
