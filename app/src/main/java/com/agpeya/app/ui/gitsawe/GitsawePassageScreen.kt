@@ -1,5 +1,25 @@
 package com.agpeya.app.ui.gitsawe
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.outlined.AutoStories
+import androidx.compose.material.icons.outlined.HistoryEdu
+import androidx.compose.material.icons.outlined.OpenInNew
+import androidx.compose.material3.Icon
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import com.agpeya.app.ui.theme.IconSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,7 +48,6 @@ import com.agpeya.app.data.MisbakLanguage
 import com.agpeya.app.data.ScriptureRepository
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.ui.common.LoadingPanel
-import com.agpeya.app.ui.common.NavRow
 import com.agpeya.app.ui.common.SharePayload
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.common.StatePanel
@@ -240,44 +259,67 @@ fun GitsawePassageScreen(
                             )
                         }
                     }
-                    // The two doors out, at the same rank as every other NavRow.
+                    // Where to go on from here, as a ቀጥል strip rather than a
+                    // stack of rows: two doors on a psalm and three on a
+                    // gospel, which as full-width rows made the foot of a
+                    // short passage longer than the passage. Chips wrap, so
+                    // the third one costs a line only when it needs one.
                     item(key = "doors") {
                         Spacer(Modifier.height(Spacing.lg))
                         HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
-                        Spacer(Modifier.height(Spacing.xs))
-                        if (isPsalm) {
-                            NavRow(
-                                title = "${s.goToPsalm} ${geezNumeral(psalm)}",
-                                onClick = { onOpenChapter(misbakLanguage == MisbakLanguage.GEEZ) },
-                            )
-                        } else {
-                            NavRow(
-                                title = "${s.goToChapter} ${geezNumeral(chapter)}",
-                                onClick = { onOpenChapter(false) },
-                            )
-                            NavRow(title = s.goToBook, onClick = onOpenBook)
-                        }
-                        // The Fathers on the first verse cited. The Psalter is
-                        // numbered as the Church numbers it and Catena numbers
-                        // it as the Masoretic text does, so the psalm carries a
-                        // translation that CatenaLink holds; a book Catena does
-                        // not reach simply has no row.
-                        val catena = if (isPsalm) {
-                            com.agpeya.app.data.CatenaLink.url("psalms", psalm, start.coerceAtLeast(1))
-                        } else {
-                            bookKey?.let {
-                                com.agpeya.app.data.CatenaLink.url(it, chapter, start.coerceAtLeast(1))
+                        Spacer(Modifier.height(Spacing.md))
+                        Text(
+                            s.continueReading,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.secondary,
+                        )
+                        Spacer(Modifier.height(Spacing.sm))
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                            verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+                        ) {
+                            if (isPsalm) {
+                                DoorChip(
+                                    icon = Icons.Outlined.AutoStories,
+                                    label = "${s.goToPsalm} ${geezNumeral(psalm)}",
+                                    onClick = { onOpenChapter(misbakLanguage == MisbakLanguage.GEEZ) },
+                                )
+                            } else {
+                                DoorChip(
+                                    icon = Icons.Outlined.AutoStories,
+                                    label = "${s.goToChapter} ${geezNumeral(chapter)}",
+                                    onClick = { onOpenChapter(false) },
+                                )
+                                DoorChip(
+                                    icon = Icons.AutoMirrored.Outlined.MenuBook,
+                                    label = s.goToBook,
+                                    onClick = onOpenBook,
+                                )
                             }
-                        }
-                        catena?.let { url ->
-                            NavRow(
-                                title = s.commentaryAction,
-                                onClick = {
-                                    com.agpeya.app.ui.common.openInAppTab(
-                                        context, url, tabToolbar, tabOnToolbar,
-                                    )
-                                },
-                            )
+                            // The Fathers on the first verse cited. The Psalter is
+                            // numbered as the Church numbers it and Catena numbers
+                            // it as the Masoretic text does, so the psalm carries a
+                            // translation that CatenaLink holds; a book Catena does
+                            // not reach simply has no chip.
+                            val catena = if (isPsalm) {
+                                com.agpeya.app.data.CatenaLink.url("psalms", psalm, start.coerceAtLeast(1))
+                            } else {
+                                bookKey?.let {
+                                    com.agpeya.app.data.CatenaLink.url(it, chapter, start.coerceAtLeast(1))
+                                }
+                            }
+                            catena?.let { url ->
+                                DoorChip(
+                                    icon = Icons.Outlined.HistoryEdu,
+                                    label = s.commentaryAction,
+                                    external = true,
+                                    onClick = {
+                                        com.agpeya.app.ui.common.openInAppTab(
+                                            context, url, tabToolbar, tabOnToolbar,
+                                        )
+                                    },
+                                )
+                            }
                         }
                         Spacer(Modifier.height(Spacing.xl))
                     }
@@ -353,5 +395,58 @@ private fun refLine(chapter: Int, lo: Int?, hi: Int?): String = buildString {
     if (lo != null) {
         append("፥"); append(geezNumeral(lo))
         if (hi != null && hi != lo) { append("–"); append(geezNumeral(hi)) }
+    }
+}
+
+/**
+ * One way on from the passage: an icon, a word, and a ring.
+ *
+ * A door that stays in the app is filled with the faintest gold and ringed in
+ * it; one that leaves — Catena, which is a website — is left unfilled, ringed
+ * in the page's own outline, and carries the mark that says so. That is the
+ * distinction the old rows did not draw: they sent you to the web looking
+ * exactly like the row that opened the next chapter.
+ */
+@Composable
+private fun DoorChip(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    external: Boolean = false,
+) {
+    val s = LocalStrings.current
+    val gold = MaterialTheme.colorScheme.secondary
+    Row(
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(if (external) Color.Transparent else gold.copy(alpha = 0.10f))
+            .border(
+                width = 1.dp,
+                color = if (external) MaterialTheme.colorScheme.outlineVariant else gold.copy(alpha = 0.42f),
+                shape = CircleShape,
+            )
+            .clickable(onClick = onClick)
+            .semantics { role = Role.Button }
+            // The app's own floor for anything you tap, chip or row alike.
+            .heightIn(min = 48.dp)
+            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        Icon(icon, contentDescription = null, tint = gold, modifier = Modifier.size(IconSize.small))
+        Text(
+            label,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1,
+        )
+        if (external) {
+            Icon(
+                Icons.Outlined.OpenInNew,
+                contentDescription = s.opensOutside,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(14.dp),
+            )
+        }
     }
 }

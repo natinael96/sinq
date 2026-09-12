@@ -65,7 +65,10 @@ interface Strings {
     val gitsaweChangeDay: String
     val previousDay: String
     val nextDay: String
-    // The dedicated passage page a ግጻዌ section opens on, and its two doors out.
+    // The dedicated passage page a ግጻዌ section opens on, and the ቀጥል strip
+    // at its foot — two chips on a psalm, three on a gospel.
+    /** Said of a link that leaves the app — the Fathers live on the web. */
+    val opensOutside: String
     val goToBook: String
     val goToChapter: String
     val goToPsalm: String
@@ -940,6 +943,7 @@ object AmharicStrings : Strings {
     override val gitsaweChangeDay = "ቀን ቀይር"
     override val previousDay = "ያለፈው ቀን"
     override val nextDay = "የሚቀጥለው ቀን"
+    override val opensOutside = "ከመተግበሪያው ውጭ"
     override val goToBook = "መጽሐፉን ክፈት"
     override val goToChapter = "ምዕራፉን ክፈት"
     override val goToPsalm = "መዝሙሩን ክፈት"
@@ -1756,6 +1760,7 @@ object EnglishStrings : Strings {
     override val gitsaweChangeDay = "Change day"
     override val previousDay = "Previous day"
     override val nextDay = "Next day"
+    override val opensOutside = "Opens outside the app"
     override val goToBook = "Open the book"
     override val goToChapter = "Open the chapter"
     override val goToPsalm = "Open the psalm"
