@@ -465,7 +465,11 @@ interface Strings {
     val choosePsalm: String
     val remove: String
     val manageHours: String
+    val manageHoursSubtitle: String
     val newHour: String
+    /** The row menu on ሰዓታት, and what a hidden hour says instead of a time. */
+    val moreActions: String
+    val hiddenHourNote: String
     val hourNameLabel: String
     val rename: String
     val manageHoursIntro: String
@@ -1333,10 +1337,13 @@ object AmharicStrings : Strings {
     override val choosePsalm = "መዝሙር ይምረጡ"
     override val remove = "አስወግድ"
     override val manageHours = "ሰዓታት አስተካክል"
+    override val moreActions = "ተጨማሪ"
+    override val hiddenHourNote = "ተደብቋል"
     override val newHour = "አዲስ ሰዓት"
     override val hourNameLabel = "የሰዓቱ ስም"
     override val rename = "ስም ቀይር"
-    override val manageHoursIntro = "ሰዓታትን ይጨምሩ፣ ስም ይቀይሩ፣ ደርድሩ ወይም ይደብቁ። ክፍሎችን ለማስተካከል ሰዓቱን ይንኩ።"
+    override val manageHoursSubtitle = "የሚጠሩበት ሰዓት"
+    override val manageHoursIntro = "የሚጠራበትን ሰዓት ለመቀየር ሰዓቱን፣ ክፍሎቹን ለማስተካከል ስሙን ይንኩ። ስም መቀየር፣ መደበቅና ማንቀሳቀስ በመስመሩ ⋮ ውስጥ ናቸው።"
 
 
     override val profileSection = "መገለጫ"
@@ -2168,10 +2175,13 @@ object EnglishStrings : Strings {
     override val choosePsalm = "Choose a psalm"
     override val remove = "Remove"
     override val manageHours = "Manage hours"
+    override val moreActions = "More"
+    override val hiddenHourNote = "Hidden"
     override val newHour = "New hour"
     override val hourNameLabel = "Hour name"
     override val rename = "Rename"
-    override val manageHoursIntro = "Add, rename, reorder or hide hours. Tap an hour to edit its sections."
+    override val manageHoursSubtitle = "When each one rings"
+    override val manageHoursIntro = "Tap a time to change when it rings, or a name to edit its sections. Rename, hide and reorder are in each row’s menu."
 
 
     override val profileSection = "Profile"

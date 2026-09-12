@@ -258,7 +258,7 @@ private fun EntryRow(
     }
 }
 
-private fun daysSummary(days: Set<Int>, labels: List<String>, daily: String, none: String): String = when {
+internal fun daysSummary(days: Set<Int>, labels: List<String>, daily: String, none: String): String = when {
     days.size == 7 -> daily
     days.isEmpty() -> none
     else -> days.sorted().joinToString(" ") { labels[it - 1] }
@@ -266,7 +266,7 @@ private fun daysSummary(days: Set<Int>, labels: List<String>, daily: String, non
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun EntryEditor(
+internal fun EntryEditor(
     entry: ReminderEntry,
     hours: List<Hour>,
     canPickHour: Boolean,

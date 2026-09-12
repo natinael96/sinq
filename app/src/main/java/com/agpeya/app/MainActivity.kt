@@ -800,6 +800,7 @@ private fun AgpeyaNavHost(
             com.agpeya.app.ui.settings.RemindersSettingsScreen(
                 onBack = { navController.popBackStack() },
                 onOpenModes = { navController.navigate("modes") { launchSingleTop = true } },
+                onOpenHours = { navController.navigate("customize") { launchSingleTop = true } },
                 onOpenSpecialHabit = { habit ->
                     navController.navigate("intention/${habit.name.lowercase()}") { launchSingleTop = true }
                 },
@@ -988,6 +989,7 @@ private fun AgpeyaNavHost(
             com.agpeya.app.ui.hours.ManageHoursScreen(
                 onBack = { navController.popBackStack() },
                 onEditHour = { hourId -> navController.navigate("customize/$hourId") { launchSingleTop = true } },
+                onOpenModes = { navController.navigate("modes") { launchSingleTop = true } },
             )
         }
         composable("customize/{hourId}") { backStackEntry ->

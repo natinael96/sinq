@@ -971,6 +971,7 @@ fun PrayerSettingsScreen(onBack: () -> Unit, onOpenManageHours: () -> Unit, onOp
 fun RemindersSettingsScreen(
     onBack: () -> Unit,
     onOpenModes: () -> Unit,
+    onOpenHours: () -> Unit,
     onOpenSpecialHabit: (com.agpeya.app.reminders.SpecialHabit) -> Unit,
 ) {
     val context = LocalContext.current
@@ -1059,8 +1060,23 @@ fun RemindersSettingsScreen(
                 // it is settled before the list of which ones ring. It used to
                 // sit last, under the day, the four switches and the two ledger
                 // doors — past the fold on any phone.
+                // The hours come first, and they lead to ሰዓታት — where the time
+                // an hour rings now sits beside the hour itself. This row used
+                // to open the modes list, from under a heading about sound,
+                // while the hours those modes point at lived in another branch
+                // of Settings entirely.
+                SectionHeader(s.settingsGroupPrayer)
+                NavRow(
+                    s.manageHours,
+                    onOpenHours,
+                    subtitle = when (armedHours) {
+                        -1 -> s.manageHoursSubtitle
+                        0 -> s.remindersOff
+                        else -> s.remindersOn(armedHours)
+                    },
+                )
+                Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(s.remindersGroupSound)
-                NavRow(s.reminderModes, onOpenModes)
                 val alertLabel = when (alert) {
                     com.agpeya.app.data.AlarmAlert.SOUND_VIBRATE -> s.alertSoundVibrate
                     com.agpeya.app.data.AlarmAlert.SOUND_ONLY -> s.alertSoundOnly
