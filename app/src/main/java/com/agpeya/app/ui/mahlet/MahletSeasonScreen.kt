@@ -82,7 +82,12 @@ fun MahletSeasonScreen(onBack: () -> Unit, onOpen: (String) -> Unit) {
             gregorianOf(today.year, month, day)?.dayOfWeek == DayOfWeek.SUNDAY
         }
     }
-    val rest = androidx.compose.runtime.remember(orders, sundays) { orders - sundays.toSet() }
+    // An order with no day cannot be tested against a Sunday, so it belongs in
+    // neither the appointed list nor the other-years list.
+    val undated = androidx.compose.runtime.remember(orders) { orders.filter { it.day == null } }
+    val rest = androidx.compose.runtime.remember(orders, sundays, undated) {
+        orders - sundays.toSet() - undated.toSet()
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -125,13 +130,31 @@ fun MahletSeasonScreen(onBack: () -> Unit, onOpen: (String) -> Unit) {
                     SeasonOrderRow(rest[i], appointed = false, onOpen = onOpen)
                 }
             }
+            if (undated.isNotEmpty()) {
+                item(key = "hu") {
+                    Spacer(Modifier.height(Spacing.lg))
+                    SectionHeader(s.mahletUndated)
+                }
+                items(undated.size, key = { undated[it].id }) { i ->
+                    SeasonOrderRow(undated[i], appointed = false, onOpen = onOpen)
+                }
+            }
             item { Spacer(Modifier.height(Spacing.huge)) }
         }
     }
 }
 
-/** መስከረም, ጥቅምት, ኅዳር — the three the season touches. */
-private val SEASON_MONTHS = listOf(1, 2, 3)
+/**
+ * መስከረም, ጥቅምት, ኅዳር — the three the season touches — and 0.
+ *
+ * Month 0 is the bucket for orders no book dates, and three ጽጌ orders sit in it:
+ * the seven-year አቋቋም and the ጥቅምት and ኅዳር ones. The list screen filters every
+ * ጽጌ order out of its own pages on the reasoning that the season has a door of
+ * its own, and this was that door reading only 1, 2 and 3 — so those three were
+ * reachable from nowhere in the app, forty-seven parts with no route in. It is
+ * also why the door said ፵፩ and the page behind it said ፴፰.
+ */
+private val SEASON_MONTHS = listOf(1, 2, 3, 0)
 
 @Composable
 private fun remember0(): EthiopianDate =
@@ -170,18 +193,28 @@ private fun SeasonOrderRow(order: MahletOrder, appointed: Boolean, onOpen: (Stri
         )
         Spacer(Modifier.width(Spacing.md))
         Column(Modifier.weight(1f)) {
+            // The feast, not the month. Thirty-three of these rows read
+            // "ጥቅምት · ፲፯ ክፍል" and nothing else, told apart only by the numeral
+            // in the day column — a wall rather than a list.
             Text(
-                order.month?.let { s.ethMonths.getOrNull(it - 1) }.orEmpty(),
+                order.feast.ifBlank {
+                    order.month?.let { s.ethMonths.getOrNull(it - 1) }.orEmpty()
+                },
                 style = MaterialTheme.typography.titleSmall.inReadingFont(),
                 color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
             Spacer(Modifier.height(Spacing.xxs))
             Text(
-                s.mahletParts(order.parts.size),
+                listOfNotNull(
+                    order.month?.let { s.ethMonths.getOrNull(it - 1) },
+                    s.mahletParts(order.parts.size),
+                ).joinToString(" · "),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
         Icon(

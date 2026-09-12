@@ -60,6 +60,15 @@ import com.agpeya.app.ui.theme.inReadingFont
 import com.agpeya.app.ui.theme.sinqColors
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Close
 
 /**
  * The whole year of ማኅሌት, in the order it is sung.
@@ -84,12 +93,12 @@ fun MahletListScreen(
     val context = LocalContext.current
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
-    val listState = rememberLazyListState()
 
     val index by produceState(MahletIndex()) { value = MahletRepository.index(context) }
     val today by produceState(emptyList<MahletOrder>()) {
         value = MahletRepository.ordersOn(context, LocalDate.now())
     }
+    var query by rememberSaveable { mutableStateOf("") }
 
     // The dated months, in the year's order. Month 0 holds the orders no book
     // dates; it goes last, under its own heading rather than a month's name.
@@ -101,20 +110,28 @@ fun MahletListScreen(
         index.months.sumOf { m -> m.orders.count { it.season == MahletSeason.TSIGE } }
     }
 
-    // Where each month's header lands, so the strip can jump to it. Counted the
-    // same way the list is built, which is the only way the two stay in step.
-    val anchors = remember(months, today, tsigeCount) {
-        var row = if (today.isEmpty()) 0 else 1
-        buildMap {
-            months.forEach { m ->
-                val dated = m.orders.filter { it.season != MahletSeason.TSIGE }
-                val groups = groupByFeast(dated)
-                if (groups.isEmpty() && m.month != TSIGE_HOME) return@forEach
-                put(m.month, row)
-                row += 1 + groups.size + (if (m.month == TSIGE_HOME) 1 else 0)
-            }
+    // A month earns a page if it has dated orders of its own, or if it is the
+    // one that carries the ዘመነ ጽጌ door.
+    val pages = remember(months, tsigeCount) {
+        months.filter {
+            groupByFeast(it.orders.filter { o -> o.season != MahletSeason.TSIGE }).isNotEmpty() ||
+                (it.month == TSIGE_HOME && tsigeCount > 0)
         }
     }
+    if (pages.isEmpty()) {
+        MahletEmpty(s.mahletTitle, onBack)
+        return
+    }
+
+    // Open on the month the year is actually in, so the book arrives where the
+    // reader is rather than at መስከረም every time.
+    val startPage = remember(pages) {
+        val m = EthiopianDate.from(LocalDate.now()).month
+        pages.indexOfFirst { it.month == m }.takeIf { it >= 0 } ?: 0
+    }
+    val pager = rememberPagerState(initialPage = startPage) { pages.size }
+
+    val hits = remember(index, query) { searchOrders(index, query) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -127,46 +144,136 @@ fun MahletListScreen(
         },
     ) { inner ->
         Column(Modifier.fillMaxSize().padding(inner)) {
-            if (months.size > 1) {
-                MonthStrip(
-                    months = months.filter { anchors.containsKey(it.month) },
-                    onJump = { month ->
-                        anchors[month]?.let { scope.launch { listState.scrollToItem(it) } }
-                    },
-                )
+            MahletSearchField(query, { query = it }, Modifier.padding(horizontal = Spacing.screen))
+
+            if (query.isNotBlank()) {
+                // Searching leaves the months behind: a feast is looked up by
+                // name, and which month it falls in is the answer, not the way in.
+                SearchResults(hits, onOpen)
+                return@Column
             }
-            LazyColumn(
-                Modifier.fillMaxSize(),
-                state = listState,
-                contentPadding = PaddingValues(horizontal = Spacing.screen),
-            ) {
-                if (today.isNotEmpty()) {
-                    item(key = "today") { TodayOrder(today, onOpen) }
+
+            // The strip is the pager's own tab row now: tapping moves the pages
+            // and swiping moves the strip, so the two can never disagree about
+            // which month is showing — which is what the old one could not say
+            // at all, every pill being drawn unselected.
+            MonthStrip(
+                months = pages,
+                selected = pager.currentPage,
+                onJump = { i -> scope.launch { pager.animateScrollToPage(i) } },
+            )
+            HorizontalPager(state = pager, modifier = Modifier.fillMaxSize()) { page ->
+                val m = pages[page]
+                val groups = remember(m) {
+                    groupByFeast(m.orders.filter { it.season != MahletSeason.TSIGE })
                 }
-                months.forEach { m ->
-                    val dated = m.orders.filter { it.season != MahletSeason.TSIGE }
-                    val groups = groupByFeast(dated)
-                    if (groups.isEmpty() && m.month != TSIGE_HOME) return@forEach
-                    item(key = "h${m.month}") {
-                        Spacer(Modifier.height(Spacing.lg))
-                        SectionHeader(
-                            if (m.month == 0) s.mahletUndated
-                            else s.ethMonths.getOrNull(m.month - 1).orEmpty(),
-                        )
+                LazyColumn(
+                    Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = Spacing.screen),
+                ) {
+                    // Today's order rides on the month it belongs to rather
+                    // than above the pager, so swiping away from ጥቅምት does not
+                    // leave a card for a ጥቅምት feast hanging over ኅዳር.
+                    if (today.isNotEmpty() && m.month == EthiopianDate.from(LocalDate.now()).month) {
+                        item(key = "today") { TodayOrder(today, onOpen) }
                     }
-                    // ዘመነ ጽጌ sits in ጥቅምት, where most of its Sundays fall, and
-                    // opens its own screen: forty-one dated orders in a month
-                    // list would be the month.
                     if (m.month == TSIGE_HOME && tsigeCount > 0) {
-                        item(key = "tsige") { SeasonRow(tsigeCount, onOpenSeason) }
+                        item(key = "tsige") {
+                            Spacer(Modifier.height(Spacing.sm))
+                            SeasonRow(tsigeCount, onOpenSeason)
+                        }
                     }
                     items(groups.size, key = { groups[it].first().id }) { i ->
                         FeastRow(groups[i], onOpen)
                     }
+                    if (groups.isEmpty()) {
+                        item(key = "none") { MonthHasNothing(s.mahletNone) }
+                    }
+                    item { Spacer(Modifier.height(Spacing.huge)) }
                 }
-                item { Spacer(Modifier.height(Spacing.huge)) }
             }
         }
+    }
+}
+
+/** Feast name, part key or day, folded the way the app's search folds. */
+private fun searchOrders(index: MahletIndex, query: String): List<MahletOrderMeta> {
+    val q = com.agpeya.app.search.AmharicSearch.fold(query.trim())
+    if (q.isBlank()) return emptyList()
+    return index.months
+        .sortedBy { if (it.month == 0) 99 else it.month }
+        .flatMap { m -> m.orders.map { m.month to it } }
+        .filter { (_, o) -> com.agpeya.app.search.AmharicSearch.fold(o.feast).contains(q) }
+        .sortedWith(compareBy({ (_, o) -> o.day ?: 99 }))
+        .map { (_, o) -> o }
+}
+
+@Composable
+private fun MahletSearchField(value: String, onValue: (String) -> Unit, modifier: Modifier = Modifier) {
+    val s = LocalStrings.current
+    androidx.compose.material3.OutlinedTextField(
+        value = value,
+        onValueChange = onValue,
+        placeholder = { Text(s.mahletSearchHint, style = MaterialTheme.typography.bodyMedium) },
+        leadingIcon = {
+            Icon(
+                androidx.compose.material.icons.Icons.Outlined.Search,
+                contentDescription = null,
+                modifier = Modifier.size(IconSize.medium),
+            )
+        },
+        trailingIcon = if (value.isNotBlank()) ({
+            androidx.compose.material3.IconButton(onClick = { onValue("") }) {
+                Icon(
+                    androidx.compose.material.icons.Icons.Outlined.Close,
+                    contentDescription = s.clearAction,
+                    modifier = Modifier.size(IconSize.medium),
+                )
+            }
+        }) else null,
+        singleLine = true,
+        modifier = modifier.fillMaxWidth().padding(top = Spacing.sm),
+    )
+}
+
+@Composable
+private fun SearchResults(hits: List<MahletOrderMeta>, onOpen: (String) -> Unit) {
+    val s = LocalStrings.current
+    if (hits.isEmpty()) {
+        MonthHasNothing(s.noResults)
+        return
+    }
+    LazyColumn(
+        Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = Spacing.screen),
+    ) {
+        items(hits.size, key = { hits[it].id }) { i -> FeastRow(listOf(hits[i]), onOpen) }
+        item { Spacer(Modifier.height(Spacing.huge)) }
+    }
+}
+
+/** Said on the three mornings in four that appoint nothing. */
+@Composable
+private fun MonthHasNothing(text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xxl),
+        textAlign = TextAlign.Center,
+    )
+}
+
+/** A blank index is a broken install, not an empty month; say so rather than nothing. */
+@Composable
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+private fun MahletEmpty(title: String, onBack: () -> Unit) {
+    val s = LocalStrings.current
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = { SinqTopBar(title = title, onBack = onBack) },
+    ) { inner ->
+        Column(Modifier.fillMaxSize().padding(inner)) { MonthHasNothing(s.mahletNone) }
     }
 }
 
@@ -187,21 +294,32 @@ private fun groupByFeast(orders: List<MahletOrderMeta>): List<List<MahletOrderMe
 
 /** A horizontally scrolling strip of the months that hold orders. */
 @Composable
-private fun MonthStrip(months: List<com.agpeya.app.model.MahletMonth>, onJump: (Int) -> Unit) {
+private fun MonthStrip(
+    months: List<com.agpeya.app.model.MahletMonth>,
+    selected: Int,
+    onJump: (Int) -> Unit,
+) {
     val s = LocalStrings.current
+    val scroll = rememberScrollState()
+    // Keep the lit month on screen. Fourteen pills run about three times the
+    // width of a phone, so the one that matters is usually off it.
+    LaunchedEffect(selected) {
+        val approx = (selected * 88) - 96
+        scroll.animateScrollTo(approx.coerceIn(0, scroll.maxValue))
+    }
     Row(
         Modifier
             .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
+            .horizontalScroll(scroll)
             .padding(horizontal = Spacing.screen, vertical = Spacing.sm),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
-        months.forEach { m ->
+        months.forEachIndexed { i, m ->
             SelectPill(
                 label = if (m.month == 0) s.mahletUndated
                 else s.ethMonths.getOrNull(m.month - 1).orEmpty(),
-                selected = false,
-                onClick = { onJump(m.month) },
+                selected = i == selected,
+                onClick = { onJump(i) },
             )
         }
     }
@@ -322,12 +440,26 @@ private fun FeastRow(group: List<MahletOrderMeta>, onOpen: (String) -> Unit) {
                 overflow = TextOverflow.Ellipsis,
             )
             Spacer(Modifier.height(Spacing.xxs))
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
+            // Each kind opens its own order. These read as targets and were
+            // not: the row always opened the ዋዜማ, because vigil sorts first,
+            // so on the fifty feasts that have both, a reader after the morning
+            // ማኅሌት always landed on last night's service.
+            androidx.compose.foundation.layout.FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
+            ) {
                 group.forEach { o ->
                     Text(
                         "${s.mahletKindLabel(o.kind)} ${geezNumeral(o.parts)}",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (group.size > 1) MaterialTheme.colorScheme.secondary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = if (group.size > 1) {
+                            Modifier
+                                .clip(MaterialTheme.shapes.small)
+                                .clickable { onOpen(o.id) }
+                                .padding(horizontal = Spacing.xs, vertical = 2.dp)
+                        } else Modifier,
                     )
                 }
                 // Said only where it is true: most orders come from the scanned

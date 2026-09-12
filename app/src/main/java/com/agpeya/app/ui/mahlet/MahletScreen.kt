@@ -53,6 +53,16 @@ import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.inReadingFont
 import com.agpeya.app.ui.theme.readingBodyStyle
 import com.agpeya.app.ui.theme.sinqColors
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.text.style.TextAlign
+import com.agpeya.app.ui.theme.IconSize
+import kotlinx.coroutines.launch
 
 /**
  * One feast's order of service, sung in order.
@@ -74,6 +84,9 @@ fun MahletScreen(
     onOpenBook: (String, Int, Int) -> Unit = { _, _, _ -> },
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var contentsOpen by remember { mutableStateOf(false) }
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
     val s = LocalStrings.current
     val fontStep by SettingsRepository.fontStep(context)
         .collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
@@ -133,6 +146,29 @@ fun MahletScreen(
                 accentLine = editions.getOrNull(edition)?.let { it.title ?: s.mahletEdition(edition + 1) }
                     ?: shown?.source,
                 onBack = onBack,
+                actions = {
+                    if (parts.size > 6) {
+                        androidx.compose.material3.IconButton(onClick = { contentsOpen = true }) {
+                            Icon(
+                                androidx.compose.material.icons.Icons.Outlined.Menu,
+                                contentDescription = s.contents,
+                                modifier = Modifier.size(IconSize.medium),
+                            )
+                        }
+                    }
+                    // The screen has always obeyed the reader's text size and
+                    // never offered the control, so the only way to resize the
+                    // chant was to leave, change it in another reader and come
+                    // back. It is the longest reading in the app.
+                    com.agpeya.app.ui.common.ReaderToolsMenu(
+                        fontStep = fontStep,
+                        maxFontStep = SettingsRepository.FONT_STEPS_SP.lastIndex,
+                        onFontChange = { step ->
+                            scope.launch { SettingsRepository.setFontStep(context, step) }
+                        },
+                        shareEnabled = false,
+                    )
+                },
             )
         },
         bottomBar = {
@@ -153,7 +189,25 @@ fun MahletScreen(
         },
     ) { inner ->
         Box(Modifier.fillMaxSize()) {
-            ReadingColumn(innerPadding = inner) {
+            if (contentsOpen) {
+                PartsSheet(
+                    parts = parts,
+                    onPick = { i ->
+                        contentsOpen = false
+                        // The parts do not start at index 0. Counted exactly
+                        // the way the list is built, which is the only way the
+                        // two stay in step: the kind tabs, the edition pills,
+                        // the title, and the reference block — one item each.
+                        val before = (if (orders.size > 1) 1 else 0) +
+                            (if (editions.isNotEmpty()) 1 else 0) +
+                            1 +
+                            (if (shown?.let { telegramReferences(it, s) }.orEmpty().isNotEmpty()) 1 else 0)
+                        scope.launch { listState.animateScrollToItem(before + i) }
+                    },
+                    onDismiss = { contentsOpen = false },
+                )
+            }
+            ReadingColumn(innerPadding = inner, state = listState) {
                 if (orders.size > 1) {
                     item(key = "tabs") {
                         Row(
@@ -179,6 +233,20 @@ fun MahletScreen(
                 // The merge is explicit that they are choices — a version may
                 // be a fragment, and none is the preferred wording — so they
                 // are pills, not a longer page.
+                // Ninety-five of the hundred and ninety orders carry these,
+                // and nothing on the screen has ever said what they are. A
+                // reader met a row of pills and could only read it as more of
+                // the same order rather than another telling of all of it.
+                if (editions.isNotEmpty()) {
+                    item(key = "editionsNote") {
+                        Text(
+                            s.mahletEditionsNote(editions.size),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = Spacing.sm, bottom = Spacing.xs),
+                        )
+                    }
+                }
                 if (editions.isNotEmpty()) {
                     item(key = "editions") {
                         Row(
@@ -188,8 +256,12 @@ fun MahletScreen(
                                 .padding(bottom = Spacing.sm),
                             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                         ) {
+                            // The book's own text. It read "እትም 0" before,
+                            // with an ASCII zero in a numbering system that has
+                            // no zero, and read three different ways depending
+                            // on what the order happened to carry.
                             SelectPill(
-                                label = shown?.source ?: s.mahletBookText,
+                                label = s.mahletBookTextPlain,
                                 selected = edition < 0,
                                 onClick = { edition = -1; selA = -1; selB = -1 },
                             )
@@ -329,6 +401,69 @@ private fun MahletReferences(references: List<MahletReference>, heading: String)
                     overflow = TextOverflow.Ellipsis,
                 )
             }
+        }
+    }
+}
+
+
+/**
+ * The part keys, as a way through.
+ *
+ * A median order runs about five screenfuls and the longest twelve, with the
+ * ordinal on each row the only structural signal in the scroll — and you have to
+ * already be looking at it. This is the same affordance the Bible reader's
+ * chapter sheet and ስንክሳር's contents menu give.
+ */
+@Composable
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+private fun PartsSheet(
+    parts: List<com.agpeya.app.model.MahletPart>,
+    onPick: (Int) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val s = LocalStrings.current
+    androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDismiss) {
+        Text(
+            s.contents,
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.padding(horizontal = Spacing.screen, vertical = Spacing.sm),
+        )
+        androidx.compose.foundation.lazy.LazyColumn(
+            Modifier.fillMaxWidth(),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                horizontal = Spacing.screen,
+                vertical = Spacing.sm,
+            ),
+        ) {
+            items(parts.size) { i ->
+                val part = parts[i]
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 48.dp)
+                        .clickable { onPick(i) }
+                        .padding(vertical = Spacing.sm),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        geezNumeral(i + 1),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.secondary,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.width(30.dp),
+                    )
+                    Spacer(Modifier.width(Spacing.md))
+                    Text(
+                        part.key.ifBlank { part.verse.take(40) },
+                        style = MaterialTheme.typography.titleSmall.inReadingFont(),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+            item { Spacer(Modifier.height(Spacing.huge)) }
         }
     }
 }

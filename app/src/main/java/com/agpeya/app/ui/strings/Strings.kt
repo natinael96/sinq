@@ -202,6 +202,10 @@ interface Strings {
     val mahletRepeats: String
     fun mahletParts(n: Int): String
     val mahletNone: String
+    val mahletSearchHint: String
+    /** Said above the edition pills, which 95 orders carry. */
+    fun mahletEditionsNote(n: Int): String
+    val mahletBookTextPlain: String
     fun mahletOrders(n: Int): String
     val mahletToday: String
     val mahletUndated: String
@@ -1085,7 +1089,11 @@ object AmharicStrings : Strings {
         if (of > 1) "ትርጉም ${com.agpeya.app.ui.reading.geezNumeral(n)}" else "ትርጉም"
     override val mahletReferences = "ቴሌግራም ማጣቀሻ"
     override val mahletRepeats = "የሚደግም ልጥፍ"
-    override val mahletNone = "ማኅሌቱ ገና አልገባም"
+    override val mahletNone = "ለዚህ ወር የተመደበ ማኅሌት የለም"
+    override val mahletSearchHint = "በዓል ፈልግ"
+    override fun mahletEditionsNote(n: Int) =
+        "${com.agpeya.app.ui.reading.geezNumeral(n)} እትም አለው። እያንዳንዱ የዚሁ ሥርዓት ሌላ ጽሑፍ ነው — በአንዱ ፈንታ ይደረሳል እንጂ አይከተልም።"
+    override val mahletBookTextPlain = "የመጽሐፉ"
     override fun mahletOrders(n: Int) = "${com.agpeya.app.ui.reading.geezNumeral(n)} ሥርዓቶች"
     override val mahletToday = "የዛሬው ሥርዓት"
     override val mahletUndated = "ቀን ያልተወሰነላቸው"
@@ -1937,7 +1945,11 @@ object EnglishStrings : Strings {
     override fun mahletTranslation(n: Int, of: Int) = if (of > 1) "Translation $n" else "Translation"
     override val mahletReferences = "Telegram references"
     override val mahletRepeats = "repeating post"
-    override val mahletNone = "Coming soon"
+    override val mahletNone = "No ማኅሌት is appointed for this month"
+    override val mahletSearchHint = "Find a feast"
+    override fun mahletEditionsNote(n: Int) =
+        "$n editions. Each is another text of this same order — read in place of one another, never one after the other."
+    override val mahletBookTextPlain = "The book"
     override fun mahletOrders(n: Int) = "$n orders"
     override val mahletToday = "Today's order"
     override val mahletUndated = "Undated"

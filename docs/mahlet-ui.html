@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ማኅሌት, Redrawn</title>
+<style>
+:root{--paper:#F7F6F2;--card:#FFF;--ink:#17201C;--muted:#6E6A62;--hero:#0E3B31;
+ --onhero:#EFEDE6;--arke:#B23A2E;--gold:#9A7C33;--rule:#DEDAD0;--sunk:#EFEDE6;
+ --phone:#FBFAF7;--shadow:0 1px 2px rgba(23,32,28,.06),0 10px 26px rgba(23,32,28,.08)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+ --paper:#11140F;--card:#191D17;--ink:#E7E4DA;--muted:#9A968B;--hero:#123F34;
+ --onhero:#EFEDE6;--arke:#F0776A;--gold:#C9A857;--rule:#2A2F27;--sunk:#20251E;
+ --phone:#15190F;--shadow:0 1px 2px rgba(0,0,0,.4),0 12px 30px rgba(0,0,0,.4)}}
+:root[data-theme="dark"]{--paper:#11140F;--card:#191D17;--ink:#E7E4DA;--muted:#9A968B;
+ --hero:#123F34;--onhero:#EFEDE6;--arke:#F0776A;--gold:#C9A857;--rule:#2A2F27;
+ --sunk:#20251E;--phone:#15190F;--shadow:0 1px 2px rgba(0,0,0,.4),0 12px 30px rgba(0,0,0,.4)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+ font:400 16px/1.6 Georgia,"Times New Roman",serif}
+.wrap{max-width:1120px;margin:0 auto;padding:40px 24px 72px}
+.am{font-family:"Abyssinica SIL","Noto Sans Ethiopic",Nyala,serif}
+
+header{border-bottom:2px solid var(--hero);padding-bottom:20px;margin-bottom:34px}
+.eyebrow{font:600 11px/1 system-ui,sans-serif;letter-spacing:.16em;
+ text-transform:uppercase;color:var(--arke);margin:0 0 10px}
+h1{font-size:clamp(27px,4vw,38px);font-weight:300;margin:0 0 11px;line-height:1.15;
+ letter-spacing:-.015em}
+h1 b{font-weight:600}
+.lede{max-width:62ch;color:var(--muted);margin:0;font-size:16.5px}
+
+h2{font-size:20px;font-weight:600;margin:52px 0 6px}
+h2 + .sub{color:var(--muted);margin:0 0 22px;max-width:68ch;font-size:15px}
+
+.phones{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:28px}
+.frame{display:flex;flex-direction:column;gap:12px}
+.phone{background:var(--phone);border:1px solid var(--rule);border-radius:22px;
+ box-shadow:var(--shadow);overflow:hidden;height:568px;display:flex;flex-direction:column}
+.status{background:var(--hero);color:var(--onhero);display:flex;justify-content:space-between;
+ padding:7px 14px 3px;font:400 10px/1 system-ui,sans-serif;opacity:.8}
+.bar{background:var(--hero);color:var(--onhero);padding:5px 12px 11px;display:flex;
+ gap:9px;align-items:flex-start}
+.bar .back{font-size:18px;line-height:1.25;opacity:.85}
+.bar .t{font-size:13px;font-weight:600}
+.bar .s{font-size:10px;opacity:.72;margin-top:2px}
+.bar .acts{margin-left:auto;display:flex;gap:10px;font-size:14px;opacity:.85}
+.body{flex:1;overflow:hidden;padding:0 13px}
+
+/* search */
+.search{display:flex;align-items:center;gap:8px;margin:10px 0 4px;padding:8px 11px;
+ background:var(--sunk);border-radius:9px;font-size:11.5px;color:var(--muted)}
+
+/* month strip */
+.strip{display:flex;gap:6px;overflow:hidden;padding:8px 0 6px;
+ -webkit-mask-image:linear-gradient(90deg,#000 84%,transparent);
+ mask-image:linear-gradient(90deg,#000 84%,transparent)}
+.pill{flex:0 0 auto;padding:5px 11px;border-radius:20px;border:1px solid var(--rule);
+ font-size:10.5px;color:var(--muted);white-space:nowrap}
+.pill.on{background:var(--hero);border-color:var(--hero);color:var(--onhero);font-weight:600}
+
+.hdr{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.04em;
+ margin:12px 0 4px}
+.today{background:var(--hero);color:var(--onhero);border-radius:12px;padding:11px 13px;
+ margin:8px 0 4px}
+.today .k{font-size:9px;letter-spacing:.13em;text-transform:uppercase;opacity:.7}
+.today .n{font-size:14px;font-weight:600;margin-top:3px}
+.today .c{margin-top:7px;display:flex;gap:6px}
+.today .c span{background:rgba(255,255,255,.15);border-radius:14px;padding:3px 9px;font-size:9.5px}
+
+.row{display:flex;gap:10px;align-items:flex-start;padding:9px 2px;
+ border-bottom:1px solid var(--rule)}
+.row .day{width:26px;text-align:right;font-size:12px;color:var(--gold);padding-top:1px}
+.row .mid{flex:1;min-width:0}
+.row .name{font-size:12.5px;line-height:1.35}
+.row .chips{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap}
+.chip{border:1px solid var(--rule);border-radius:13px;padding:2px 8px;font-size:9.5px;
+ color:var(--muted);white-space:nowrap}
+.chip.act{border-color:var(--arke);color:var(--arke)}
+.empty{margin:14px 2px;padding:12px 13px;border:1px dashed var(--rule);border-radius:10px;
+ font-size:11.5px;color:var(--muted);line-height:1.55}
+
+/* order screen */
+.edhead{margin:10px 0 5px;font-size:10px;color:var(--muted);line-height:1.5}
+.eds{display:flex;gap:6px;overflow:hidden;padding-bottom:6px;
+ -webkit-mask-image:linear-gradient(90deg,#000 86%,transparent);
+ mask-image:linear-gradient(90deg,#000 86%,transparent)}
+.pos{display:flex;align-items:center;gap:7px;margin:8px 0 2px;font-size:10px;color:var(--muted)}
+.pos .track{flex:1;height:3px;border-radius:2px;background:var(--sunk);overflow:hidden}
+.pos .track i{display:block;height:100%;width:22%;background:var(--gold);border-radius:2px}
+.part{padding:9px 0 8px;border-bottom:1px solid var(--rule)}
+.part .key{font-size:10px;color:var(--arke);font-weight:600;display:flex;
+ justify-content:space-between;gap:8px}
+.part .key em{font-style:normal;color:var(--muted);font-weight:400}
+.part .vs{font-size:12px;line-height:1.78;margin-top:3px}
+.part.alt{border-left:2px solid var(--gold);padding-left:9px;margin-left:-11px}
+.part.alt .or{display:inline-block;font-size:9px;color:var(--gold);
+ border:1px solid var(--gold);border-radius:10px;padding:0 6px;margin-bottom:4px}
+.part.ref .vs{font-style:italic;color:var(--muted);padding-left:12px}
+
+.cap{font-size:13.5px;color:var(--muted);line-height:1.55}
+.cap b{display:block;color:var(--ink);font-weight:600;font-size:14px;margin-bottom:2px}
+
+.scroller{overflow-x:auto;border:1px solid var(--rule);border-radius:12px;
+ background:var(--card);box-shadow:var(--shadow);margin-top:6px}
+table{width:100%;border-collapse:collapse;font:400 14px/1.5 system-ui,sans-serif;min-width:560px}
+th{text-align:left;font:600 10px/1.4 system-ui,sans-serif;letter-spacing:.09em;
+ text-transform:uppercase;color:var(--muted);padding:12px 14px 9px;border-bottom:1px solid var(--rule)}
+td{padding:10px 14px;border-bottom:1px solid var(--rule);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.note{border-left:3px solid var(--arke);padding:2px 0 2px 15px;margin:24px 0 0;
+ color:var(--muted);max-width:70ch}
+.note b{color:var(--ink)}
+.foot{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
+ font:400 12.5px/1.6 system-ui,sans-serif;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+ <p class="eyebrow">ስንቅ · ማኅሌት, a proposal</p>
+ <h1>The same corpus, <b>with a way in</b></h1>
+ <p class="lede">Three screens redrawn against the audit. Every feast, part and
+ edition below is real content from the shipped data, not placeholder text.</p>
+</header>
+
+<div class="phones">
+
+ <!-- 1. the list -->
+ <div class="frame">
+  <div class="phone">
+   <div class="status"><span>9:41</span><span class="am">ስንቅ</span></div>
+   <div class="bar"><span class="back">‹</span>
+    <div><div class="t am">ሥርዓተ ማኅሌት</div><div class="s am">፻፺ ሥርዓቶች</div></div>
+    <div class="acts"><span>⌕</span></div>
+   </div>
+   <div class="body">
+    <div class="search am">⌕ &nbsp;ፈልግ — በዓል፣ ቀን ወይም ክፍል</div>
+    <div class="strip">
+     <span class="pill am">መስከረም</span>
+     <span class="pill on am">ጥቅምት</span>
+     <span class="pill am">ኅዳር</span>
+     <span class="pill am">ታኅሣሥ</span>
+    </div>
+    <div class="today">
+     <div class="k am">የዛሬው</div>
+     <div class="n am">ገብረ መንፈስ ቅዱስ</div>
+     <div class="c"><span class="am">ዋዜማ ፭</span><span class="am">ማኅሌት ፳፪</span></div>
+    </div>
+    <div class="hdr am">ጥቅምት</div>
+    <div class="row"><div class="day am">፪</div><div class="mid">
+     <div class="name am">አመ ፪ ለጥቅምት</div>
+     <div class="chips"><span class="chip am">ማኅሌት ፳፪</span></div></div></div>
+    <div class="row"><div class="day am">፫</div><div class="mid">
+     <div class="name am">አመ ፫ ለጥቅምት</div>
+     <div class="chips"><span class="chip am">ማኅሌት ፲፬</span></div></div></div>
+    <div class="row"><div class="day am">፭</div><div class="mid">
+     <div class="name am">ገብረ መንፈስ ቅዱስ</div>
+     <div class="chips"><span class="chip act am">ዋዜማ ፭</span><span class="chip act am">ማኅሌት ፳፪</span></div></div></div>
+   </div>
+  </div>
+  <p class="cap"><b>Find it, and open the one you meant</b>Search comes first,
+  since a feast name is what a reader knows. The month you are in is lit. Both
+  chips are real targets now, so a reader wanting the morning ማኅሌት no longer
+  lands on last night's ዋዜማ.</p>
+ </div>
+
+ <!-- 2. the order -->
+ <div class="frame">
+  <div class="phone">
+   <div class="status"><span>9:41</span><span class="am">ስንቅ</span></div>
+   <div class="bar"><span class="back">‹</span>
+    <div><div class="t am">ገብረ መንፈስ ቅዱስ</div><div class="s am">ማኅሌት · ጥቅምት ፭</div></div>
+    <div class="acts"><span>☰</span><span>A</span></div>
+   </div>
+   <div class="body">
+    <div class="edhead am">ሦስት እትም አለው። እያንዳንዱ የዚሁ ሥርዓት ሌላ ጽሑፍ ነው — በአንዱ ፈንታ ይነበባል እንጂ አይከተልም።</div>
+    <div class="eds">
+     <span class="pill on am">የመጽሐፉ</span>
+     <span class="pill am">ቴሌግራም ፩</span>
+     <span class="pill am">ቴሌግራም ፪</span>
+    </div>
+    <div class="pos"><span class="am">፫ / ፳፪</span><span class="track"><i></i></span><span class="am">☰ ማውጫ</span></div>
+    <div class="part"><div class="key am">መመሪያ <em>፩</em></div>
+     <div class="vs am">ስምዓኒ እግዚኦ ጸሎትየ፡ ሃሌ ሉያ ሃሌ ሉያ፡ ወይብጻሕ ቅድሜከ ገአርየ።</div></div>
+    <div class="part"><div class="key am">መልክአ ሥላሴ <em>፪</em></div>
+     <div class="vs am">ሰላም ለሕፅንክሙ ምርፋቀ ጻድቃን አግብርቲሁ፤ ማያተ ኢያሱ ሥላሴ።</div></div>
+    <div class="part ref"><div class="key am">ዚቅ <em>፫</em></div>
+     <div class="vs am">በአፍአኒ አንትሙ፣ ወበውሣጤኒ አንትሙ፤ በገዳምኒ አንትሙ።</div></div>
+    <div class="part alt"><span class="or am">ወይም</span>
+     <div class="key am">ዚቅ <em>፫</em></div>
+     <div class="vs am">ከመ መዓዛ ቅዱሳን፤ ውስተ አብያተ ክርስቲያን።</div></div>
+   </div>
+  </div>
+  <p class="cap"><b>Say what an edition is, and where you are</b>One line names
+  them as alternative texts rather than more of the same. A contents button and
+  a position readout make twelve screenfuls navigable, and <span class="am">A</span>
+  finally sets the text size here instead of in another reader.</p>
+ </div>
+
+ <!-- 3. the season -->
+ <div class="frame">
+  <div class="phone">
+   <div class="status"><span>9:41</span><span class="am">ስንቅ</span></div>
+   <div class="bar"><span class="back">‹</span>
+    <div><div class="t am">ዘመነ ጽጌ</div><div class="s am">፵፩ አቋቋም</div></div>
+   </div>
+   <div class="body">
+    <div class="hdr am">የዘንድሮ እሑዶች</div>
+    <div class="row"><div class="day am">፩</div><div class="mid">
+     <div class="name am">ዘመነ ጽጌ — ፩ኛ ሳምንት</div>
+     <div class="chips"><span class="chip am">ጥቅምት ፰</span><span class="chip am">፲፯ ክፍል</span></div></div></div>
+    <div class="row"><div class="day am">፪</div><div class="mid">
+     <div class="name am">ዘመነ ጽጌ — ፪ኛ ሳምንት</div>
+     <div class="chips"><span class="chip am">ጥቅምት ፲፭</span><span class="chip am">፲፬ ክፍል</span></div></div></div>
+    <div class="hdr am">ቀን ያልተወሰነላቸው</div>
+    <div class="row"><div class="day"></div><div class="mid">
+     <div class="name am">የሰባት ዓመትታ የማኅሌተ ጽጌ አቋቋም</div>
+     <div class="chips"><span class="chip am">፲፫ ክፍል</span></div></div></div>
+    <div class="row"><div class="day"></div><div class="mid">
+     <div class="name am">የወርኃ ጥቅምት የማኅሌተ ጽጌ አቋቋም</div>
+     <div class="chips"><span class="chip am">፲፮ ክፍል</span></div></div></div>
+    <div class="row"><div class="day"></div><div class="mid">
+     <div class="name am">የወርኃ ኅዳር የማኅሌተ ጽጌ አቋቋም</div>
+     <div class="chips"><span class="chip am">፲፰ ክፍል</span></div></div></div>
+   </div>
+  </div>
+  <p class="cap"><b>The three that were stranded</b>Each row carries its feast
+  name, so thirty-three stop reading alike. The undated ጽጌ orders get a section
+  here, which is the only place they belong — and the ፵፩ on the door finally
+  matches what is behind it.</p>
+ </div>
+
+</div>
+
+<h2>What each change answers</h2>
+<div class="scroller">
+<table>
+ <thead><tr><th>Audit finding</th><th>What the drawing does</th></tr></thead>
+ <tbody>
+  <tr><td>Three orders unreachable, and 41 ≠ 38</td><td>A ቀን ያልተወሰነላቸው section on the season screen. One fix closes both, because they are the same bug from two sides.</td></tr>
+  <tr><td>Nothing is searchable</td><td>A search field at the top of the list, over feast names, days and part keys.</td></tr>
+  <tr><td>No way to change text size</td><td>An <span class="am">A</span> in the order bar, the same control the Bible reader and ስንክሳር already have.</td></tr>
+  <tr><td>Twelve screenfuls with no way to jump</td><td>A contents button and an <span class="am">፫ / ፳፪</span> readout with a progress line.</td></tr>
+  <tr><td>Editions read as continuation</td><td>One sentence above the pills, and a plain first label instead of <span class="am">እትም 0</span>.</td></tr>
+  <tr><td>ወይም is one faint word</td><td>A gold rule down the alternative and a bordered <span class="am">ወይም</span> tag, so 150 dp of substitute chant is visibly a substitute.</td></tr>
+  <tr><td>Chips look tappable and are not</td><td>Each chip opens its own order. The row keeps its default.</td></tr>
+  <tr><td>Month strip never shows where you are</td><td>The current month is lit, and the strip fades at the edge to say it scrolls.</td></tr>
+  <tr><td>33 rows read identically</td><td>The feast name becomes the title; the month and part count become chips.</td></tr>
+ </tbody>
+</table>
+</div>
+
+<p class="note"><b>One thing deliberately not drawn.</b> A day with no order still
+needs a sentence, and the string for it already exists and is unused. It is not in
+these frames because all three happen to fall on days that do have one, which is
+itself the point: roughly three days in four have nothing, and that is the state
+the screen has never been designed for.</p>
+
+<div class="foot">
+ Content is real: ገብረ መንፈስ ቅዱስ on ጥቅምት ፭ genuinely carries a 5-part ዋዜማ and a
+ 22-part ማኅሌት with three editions, and the parts shown are its first four. The
+ three undated ጽጌ orders are the ones with no route in today. Colours are the app's
+ own hero green, arke red and gold. Nothing here is built yet.
+</div>
+
+</div>
+</body>
+</html>
