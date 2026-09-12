@@ -558,6 +558,7 @@ private fun AgpeyaNavHost(
                 initialEndVerse = backStackEntry.arguments?.getInt("end") ?: -1,
                 initialGeez = backStackEntry.arguments?.getString("lang") == "gez",
                 onBack = { navController.popBackStack() },
+                onOpenRoute = { route -> navController.navigate(route) { launchSingleTop = true } },
                 // Without this the Psalter's "ስለዚህ ጻፍ" item showed and did nothing:
                 // the screen's default is a no-op, and only the ግጻዌ passage page
                 // was ever wired to the journal.

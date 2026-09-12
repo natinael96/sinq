@@ -110,6 +110,8 @@ fun PsalterScreen(
     onWriteNote: (route: String, label: String) -> Unit,
     /** Opens a chapter of a shelf book — Sunday's reading lives there, not here. */
     onOpenBook: (bookId: String, chapter: Int) -> Unit = { _, _ -> },
+    /** Follows a route out of the selection bar — the Catena page. */
+    onOpenRoute: (route: String) -> Unit = {},
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
@@ -202,7 +204,7 @@ fun PsalterScreen(
                 subtitle = if (daily && range != null) s.psalmRange(range.first, range.last) else null,
                 onBack = onBack,
                 actions = {
-                    EditionToggle(geez = geez) {
+                    com.agpeya.app.ui.common.EditionToggle(geez = geez) {
                         selStart = null
                         selEnd = null
                         geez = !geez
@@ -290,6 +292,10 @@ fun PsalterScreen(
                     }
                 },
                 imageKicker = s.psalterTitle,
+                // Without this the bar's Catena action would call the default
+                // no-op: the Psalter has no cross references, so it had never
+                // needed to hand the bar a route before.
+                onOpenRef = { route -> selStart = null; selEnd = null; onOpenRoute(route) },
                 // The Fathers on the selected verse. This is the book where the
                 // link is easiest to get wrong: the Psalter is numbered as the
                 // Church numbers it and Catena numbers it as the Masoretic text
@@ -481,41 +487,6 @@ private fun PsalterContents(psalms: List<Section>, onSelect: (Int) -> Unit) {
 }
 
 
-/**
- * Which edition is being read, and the way to the other one.
- *
- * This was a bare TextButton in the accent colour, which on a bar already
- * holding a title, a subtitle and an overflow read as a caption rather than a
- * control — the Psalter is the one shelf with two editions and most people
- * never found the second. It is a pill now: bordered, filled, and carrying the
- * name of the edition it will switch *to*, since a button that names where it
- * is going is the one people press.
- */
-@Composable
-private fun EditionToggle(geez: Boolean, onToggle: () -> Unit) {
-    val s = LocalStrings.current
-    val other = if (geez) s.wudaseLangAmharic else s.wudaseLangGeez
-    Box(
-        modifier = Modifier
-            .padding(end = Spacing.xs)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f))
-            .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.45f), CircleShape)
-            .clickable(
-                onClickLabel = s.psalterEditionSwitch(other),
-                onClick = onToggle,
-            )
-            .padding(horizontal = Spacing.md, vertical = Spacing.xs),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            other,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.secondary,
-            maxLines = 1,
-        )
-    }
-}
 
 /**
  * Sunday's reading: the twenty chapters of ጸሎት ነቢያት, in the edition the Psalter
