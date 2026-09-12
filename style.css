@@ -539,6 +539,43 @@ fieldset.kinds { border: 0; margin: 0 0 26px; padding: 0; }
 .scr-candle i { position: absolute; top: 0; left: 4px; width: 5px; height: 7px; background: var(--app-gold-lit);
                 border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; }
 
+.scr-hero.small { padding: 8px 13px; }
+.scr-badge {
+  font-size: 8px; font-weight: 700; letter-spacing: .06em; flex: none;
+  color: var(--app-gold-lit); background: rgba(228,188,90,.16);
+  border: 1px solid rgba(228,188,90,.45); border-radius: 999px; padding: 3px 8px;
+  position: relative;
+}
+
+/* SinqCard(accented = true): the gold-ringed card the hours line uses. */
+.scr-card {
+  margin-top: 7px; background: var(--app-surface);
+  border: 1px solid rgba(126,95,30,.45); border-radius: 15px; padding: 9px 11px;
+}
+.scr-cardh {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 10.5px; font-weight: 600; margin: 0 0 7px;
+}
+.scr-cardh em { font-style: normal; font-size: 8.5px; font-weight: 600; color: var(--app-gold); }
+
+.scr-duo { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+.scr-tile {
+  background: var(--app-surface); border: 1px solid var(--app-hair);
+  border-radius: 13px; padding: 8px 10px; font-size: 9.5px; font-weight: 600;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.scr-tile em { font-style: normal; font-weight: 400; font-size: 8px; color: var(--app-muted); }
+
+/* A reader: verse numbers in Ge'ez, gold on the line, and a touched verse held
+   in gold. The numeral takes the darker gold when the tint sits behind it. */
+.scr-v { font-size: 9px; line-height: 1.8; margin: 0 0 5px; color: var(--app-ink); }
+.scr-v em { font-style: normal; font-weight: 600; color: var(--app-gold); margin-right: 3px; }
+.scr-v.lit {
+  background: rgba(228,188,90,.3); border-radius: 5px;
+  padding: 2px 4px; margin-left: -4px; margin-right: -4px;
+}
+.scr-v.lit em { color: var(--app-gold-ink); }
+
 .scr-h {
   font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase;
   color: var(--app-muted); font-weight: 600; margin: 11px 0 3px;
