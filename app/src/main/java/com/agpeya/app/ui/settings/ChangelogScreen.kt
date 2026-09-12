@@ -31,6 +31,31 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "2.3.1",
+        title = "A way into the ማኅሌት",
+        titleAm = "ወደ ማኅሌቱ መግቢያ",
+        changes = listOf(
+            "Swipe between the months of ሥርዓተ ማኅሌት, and the strip above finally shows which one you are in.",
+            "Search it. 190 feasts were reachable only by scrolling to the right month.",
+            "Three orders could not be opened from anywhere in the app. They can now.",
+            "The ዋዜማ and ማኅሌት labels on a feast open their own service. Tapping the row always gave you last night's.",
+            "Set the text size where the chant is, and jump through a long order by its parts.",
+            "An edition now says what it is: another telling of the same order, read in place of the book's, never after it.",
+            "One chapter stepper across both readers, in the app's own doors, each half naming the chapter it opens.",
+            "One way to add a name to the prayer list, typed on the row itself.",
+        ),
+        changesAm = listOf(
+            "በሥርዓተ ማኅሌት ወራት መካከል በማንሸራተት ይዘዋወራሉ፤ ከላይ ያለውም አሞሌ በየትኛው ወር እንዳሉ ይነግርዎታል።",
+            "ማኅሌቱን መፈለግ ይችላሉ። ፻፺ በዓላት እስከ ዛሬ የሚገኙት ወሩን አገላብጠው ብቻ ነበር።",
+            "ሦስት ሥርዓቶች ከየትም ሊከፈቱ አይችሉም ነበር። አሁን ይከፈታሉ።",
+            "የበዓሉ «ዋዜማ» እና «ማኅሌት» ምልክቶች የየራሳቸውን ያከፍታሉ። መስመሩን መንካት ሁልጊዜ ያለፈውን ሌሊት ዋዜማ ነበር የሚከፍተው።",
+            "የፊደሉን መጠን ማኅሌቱ ባለበት ያስተካክሉ፤ ረጅም ሥርዓትንም በክፍሎቹ ያገላብጡ።",
+            "እትም ምን እንደሆነ ይናገራል፦ የዚሁ ሥርዓት ሌላ ጽሑፍ ነው፤ በመጽሐፉ ፈንታ ይደረሳል እንጂ አይከተልም።",
+            "በሁለቱም አንባቢዎች አንድ የምዕራፍ መሸጋገሪያ፤ እያንዳንዱ ጎን የሚከፍተውን ምዕራፍ ይሰይማል።",
+            "ወደ ጸሎት ዝርዝር ስም ለመጨመር አንድ መንገድ፤ በመስመሩ ላይ ይጻፋል።",
+        ),
+    ),
+    ReleaseNote(
         version = "2.3.0",
         title = "The map and the hour",
         titleAm = "ካርታውና ሰዓቱ",

@@ -6,6 +6,57 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [2.3.1] — 2026-09-12
+
+_versionCode 71 · A way into the ማኅሌት_
+
+### Added
+- **The months of ሥርዓተ ማኅሌት are a pager.** Swiping moves between them and the
+  strip above is its tab row, so the two can never disagree about which month is
+  showing — the old strip could not say at all, every pill drawn unselected and
+  announced that way to a screen reader. It opens on the month the year is in
+  rather than መስከረም, and today's order sits on its own month instead of floating
+  above all of them.
+- **ማኅሌት can be searched.** A feast name is what a reader knows, and this was the
+  one large corpus in the app you could not type your way into: 190 feasts
+  reachable only by scrolling to the right month. Folded the way the app's own
+  search folds, so ሠ and ሰ find each other.
+- **The order page has the reader's toolbar.** It had always obeyed the chosen
+  text size and never offered the control, so resizing the chant meant leaving,
+  changing it in another reader, and coming back — on the longest reading in the
+  app. A contents sheet comes with it, because a median order runs five
+  screenfuls and the longest twelve with nothing to navigate by.
+
+### Fixed
+- **Three orders could not be opened from anywhere.** Month 0 holds the orders no
+  book dates, and three of them belong to ዘመነ ጽጌ: the seven-year አቋቋም and the
+  ጥቅምት and ኅዳር ones. The list filters every ጽጌ order out on the reasoning that
+  the season has a door of its own, and that door read only መስከረም, ጥቅምት and ኅዳር.
+  Forty-seven parts of chant with no route in. It reads month 0 now, which also
+  settles why the door said ፵፩ and the page behind it said ፴፰.
+- **The ዋዜማ and ማኅሌት chips open their own orders.** They read as targets and
+  were not: the row always opened the ዋዜማ, because a vigil sorts first, so on the
+  fifty feasts that have both, a reader after the morning service always landed
+  on last night's.
+- **A month with nothing appointed says so.** The sentence for it had been written
+  and never used.
+
+### Changed
+- **Editions say what they are.** Ninety-five of the 190 orders carry them and
+  nothing on the screen said they are another telling of the same order rather
+  than more of it. The book's own text was labelled "እትም 0", with an ASCII zero
+  in a numbering system that has none.
+- **The ዘመነ ጽጌ rows carry their feast.** Thirty-three of them read "ጥቅምት · ፲፯ ክፍል"
+  and nothing else, told apart only by a numeral — a wall rather than a list.
+- **One chapter stepper, in the app's own gold-ringed doors.** It had been two
+  bare text buttons in muted ink at the far corners of the row, copied once in
+  the Bible reader and once in the book reader. Each half now names the chapter it
+  opens, and holds its side so nothing slides under the thumb at the first chapter.
+- **One way to add a name to the prayer list**, on the row itself rather than in a
+  full-width form for a single word. The icon and the empty state open the same
+  row. ውዳሴ ማርያም can be swiped through, and ንባብ's ቀጥል strip uses the same chips
+  the ግጻዌ passage does.
+
 ## [2.3.0] — 2026-09-12
 
 _versionCode 70 · The map and the hour_

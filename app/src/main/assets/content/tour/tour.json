@@ -2,6 +2,58 @@
   "contentVersion": 1,
   "tours": [
     {
+      "versionCode": 71,
+      "version": "2.3.1",
+      "title": {
+        "am": "በዚህ እትም",
+        "en": "In this version"
+      },
+      "pages": [
+        {
+          "kicker": {
+            "am": "ማኅሌት",
+            "en": "ማኅሌት"
+          },
+          "title": {
+            "am": "ወሩን በማንሸራተት",
+            "en": "Swipe through the months"
+          },
+          "body": {
+            "am": "የሥርዓተ ማኅሌቱ ወራት አሁን በማንሸራተት ይገለበጣሉ፤ ከላይ ያለውም አሞሌ በየትኛው ወር እንዳሉ ያሳያል — ከዚህ በፊት አንዳችም አይበራም ነበር። ገጹም ዓመቱ ባለበት ወር ይከፈታል። በዓል በስሙ መፈለግም ተችሏል፤ እስከ ዛሬ ፻፺ው በዓል የሚገኙት ወሩን አገላብጦ ብቻ ነበር።",
+            "en": "The months of ሥርዓተ ማኅሌት turn by swiping now, and the strip above shows which one you are in — before, none of them lit. It opens on the month the year is in. And you can search a feast by name: until now all 190 were reachable only by scrolling to the right month."
+          }
+        },
+        {
+          "kicker": {
+            "am": "ማኅሌት",
+            "en": "ማኅሌት"
+          },
+          "title": {
+            "am": "ሦስት ሥርዓቶች ተመልሰዋል",
+            "en": "Three orders came back"
+          },
+          "body": {
+            "am": "ከየትም ሊከፈቱ የማይችሉ ሦስት የዘመነ ጽጌ ሥርዓቶች ነበሩ — የሰባት ዓመትታ፣ የጥቅምትና የኅዳር አቋቋም፤ ፵፯ ክፍል። አሁን በዘመነ ጽጌ ገጽ ውስጥ አሉ። በተጨማሪም የበዓሉ «ዋዜማ» እና «ማኅሌት» ምልክቶች የየራሳቸውን ያከፍታሉ፤ ከዚህ በፊት መስመሩን መንካት ሁልጊዜ ዋዜማውን ነበር የሚከፍተው።",
+            "en": "Three ዘመነ ጽጌ orders could not be opened from anywhere in the app — the seven-year, the ጥቅምት and the ኅዳር አቋቋም, forty-seven parts between them. They are on the ዘመነ ጽጌ page now. And a feast's ዋዜማ and ማኅሌት labels open their own service; tapping the row always gave you the vigil."
+          }
+        },
+        {
+          "kicker": {
+            "am": "ንባብ",
+            "en": "Reading"
+          },
+          "title": {
+            "am": "የፊደል መጠኑ ጽሑፉ ባለበት",
+            "en": "The text size, where the text is"
+          },
+          "body": {
+            "am": "የማኅሌቱ ገጽ የመረጡትን የፊደል መጠን ይከተል ነበር እንጂ የሚያስተካክልበት አልነበረውም፤ ለማሳደግ ወጥተው በሌላ አንባቢ መቀየር ያስፈልግ ነበር። አሁን በቦታው አለ፤ ረጅም ሥርዓትንም በክፍሎቹ ማውጫ ማገላበጥ ይችላሉ። የምዕራፍ መሸጋገሪያውም በሁለቱም አንባቢዎች አንድ ሆኗል፤ እያንዳንዱ ጎን የሚከፍተውን ምዕራፍ ይሰይማል።",
+            "en": "The ማኅሌት page obeyed the text size you chose but offered no way to change it, so making the chant bigger meant leaving, changing it in another reader, and coming back. The control is there now, along with a contents sheet for the long orders. The chapter stepper is one control across both readers, each half naming the chapter it opens."
+          }
+        }
+      ]
+    },
+    {
       "versionCode": 69,
       "version": "2.2.0",
       "title": {
