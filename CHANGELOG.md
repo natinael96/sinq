@@ -75,6 +75,20 @@ _versionCode 70 · The map and the hour_
   kept.
 - **ማኅሌት sits on ሌሎች መጻሕፍት** with the other books of the Church, counted the
   way the shelves count theirs.
+- **የጸሎት ዝርዝር is read down.** It was a two-column grid of cards, which is the
+  one shape a recited list cannot take: reading order zig-zagged across the
+  pair. One column now, one line per name, with the intention beside the name
+  rather than under it so a note costs no extra row. A name can be marked among
+  the departed, and removing one can be undone to the place it held — a list
+  that is recited has an order.
+- **ውዳሴ ማርያም opens on ጸሎት ዘዘወትር**, the prayer said every day, with the day's
+  own portion a tap away at the foot. Its two editions are the pill the Psalter
+  carries, in the same corner, rather than a full-width segmented bar.
+- **ጉዞ's journal button has a floating stand-in** while the real one is off
+  screen. Any sliver of it counts as reached.
+- **Latin prose is set in its own face.** The licence text was 11sp monospace,
+  a size and a face meant for code and right for neither; every role in the
+  type scale is Noto Sans Ethiopic with letter spacing tuned for Ethiopic.
 
 ### Fixed
 - **Twenty-eight ምስባክ cited a psalm their chant is not in.** The citation is

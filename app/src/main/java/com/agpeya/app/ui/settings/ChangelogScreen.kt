@@ -43,6 +43,8 @@ private val releaseHistory = listOf(
             "The ግጻዌ's ምስባክ is the one the book prints, in its own lines and without verse numbers, which is how a ምስባክ is sung.",
             "Twenty-eight ምስባክ pointed at a psalm their chant is not in. They point at the right one now.",
             "Catena asks for the Early Fathers — those venerated in the churches in communion with Alexandria.",
+            "የጸሎት ዝርዝር is read down one column, a name to a line, and a name can be marked among the departed. Removing one can be undone.",
+            "ውዳሴ ማርያም opens on ጸሎት ዘዘወትር, with the day's portion a tap away.",
         ),
         changesAm = listOf(
             "የመጻሕፍቱ ካርታ፦ መተግበሪያው የያዘው እያንዳንዱ መጽሐፍ፣ ቤተ ክርስቲያን በምትከፍልበት ክፍል ተሰድሮ፣ ምዕራፎቹ ሲነበቡ ይሞላል። መቶኛ ስንት እንደሆነ ይናገራል፤ ካርታው ግን የት እንዳሉ ያሳያል።",
@@ -53,6 +55,8 @@ private val releaseHistory = listOf(
             "የግጻዌው ምስባክ መጽሐፉ የሚያትመው ሆኗል — በራሱ መስመሮች፣ ያለ የቁጥር ምልክት፤ ምስባክ የሚዘመረው እንዲህ ነውና።",
             "ሃያ ስምንት ምስባክ ቃላቸው ወዳልሆነበት መዝሙር ይመሩ ነበር። አሁን ወደ ትክክለኛው ይመራሉ።",
             "Catena አሁን የቀደሙትን አባቶች ይጠይቃል — ከእስክንድርያ ቤተ ክርስቲያን ጋር በኅብረት ባሉት አብያተ ክርስቲያናት የሚከበሩትን።",
+            "የጸሎት ዝርዝር በአንድ ዓምድ ወደ ታች ይነበባል፤ አንድ ስም በአንድ መስመር። ስም በዕረፍተ ሥጋ ካሉት መካከል ሊመዘገብ ይችላል፤ የተሰረዘውንም መመለስ ይቻላል።",
+            "ውዳሴ ማርያም በጸሎት ዘዘወትር ላይ ይከፈታል፤ የዕለቱ ክፍል በአንድ ንካት ይደረሳል።",
         ),
     ),
     ReleaseNote(
