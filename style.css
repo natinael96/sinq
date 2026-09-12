@@ -10,28 +10,36 @@
    Nyala on Windows, Kefa on macOS and Noto elsewhere. Those look nothing like
    each other, so the drawn frames could not look like the app by construction.
 
-   Both files come from app/src/main/res/font. To regenerate after the app
-   changes a face, with fonttools installed:
+   The face comes from app/src/main/res/font, so the site reads in the same
+   letters the app does. To regenerate it after the app changes face, with
+   fonttools installed:
 
-     fonttools varLib.instancer noto_sans_ethiopic.ttf wght=400 wdth=100 \
-       -o noto400.ttf
-     pyftsubset noto400.ttf --flavor=woff2 --layout-features='*' \
-       --unicodes=U+0020-007E,U+00A0-00FF,U+2000-206F,U+20B0-20BF,\
-U+1200-137F,U+1380-139F,U+2D80-2DDF,U+AB00-AB2F \
-       --output-file=noto-ethiopic.woff2
+     Sinq Ethiopic    Abyssinica SIL, the face the app reads in. Kept at the
+                      FULL Ethiopic block, because changelog.html is
+                      regenerated from CHANGELOG.md on every release and a
+                      tight subset would turn the next release's new words
+                      into tofu. Built straight from the app's own copy:
 
-     Sinq Ethiopic    Noto Sans Ethiopic, the app's UI face. Kept at the FULL
-                      Ethiopic block, because changelog.html is regenerated
-                      from CHANGELOG.md on every release and a tight subset
-                      would turn the next release's new words into tofu.
+       pyftsubset app/src/main/res/font/abyssinica_sil.ttf \
+         --unicodes=U+1200-139F,U+2D80-2DDF,U+AB00-AB2F \
+         --layout-features='*' --flavor=woff2 \
+         --output-file=abyssinica-ethiopic.woff2
 
-   The app declares Noto as a single Font() with no weight, so Android renders
-   the 400 instance and synthesises bold. Both files are instanced at wght 400
-   for exactly that reason, and the frames turn font synthesis back on so a
-   browser fakes bold the same way Android does. */
+   Self-hosted, like the face before it. A web font pulled from Google would
+   tell a third party who read this page, which is not a thing a site about an
+   app that sends nothing should do.
+
+   Abyssinica SIL is SIL International's, under the Open Font Licence, which
+   permits serving it this way; the licence travels with the app in
+   docs/AbyssinicaSIL-OFL.txt.
+
+   The app declares it as a single Font() with no weight, so Android renders
+   the 400 instance and synthesises bold. This file is the 400 for exactly
+   that reason, and the frames turn font synthesis back on so a browser fakes
+   bold the same way Android does. */
 @font-face {
   font-family: "Sinq Ethiopic";
-  src: url("noto-ethiopic.woff2") format("woff2");
+  src: url("abyssinica-ethiopic.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -90,8 +98,8 @@ body {
 
 /* Ethiopic wants a touch more air between lines than Latin does. */
 .ethi {
-  font-family: "Sinq Ethiopic", "Noto Sans Ethiopic", "Nyala",
-               system-ui, -apple-system, sans-serif;
+  font-family: "Sinq Ethiopic", "Abyssinica SIL", "Noto Sans Ethiopic",
+               "Nyala", system-ui, -apple-system, sans-serif;
   line-height: 1.85;
 }
 
