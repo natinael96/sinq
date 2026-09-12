@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.FormatAlignCenter
 import androidx.compose.material.icons.outlined.FormatAlignJustify
@@ -66,6 +68,7 @@ import com.agpeya.app.ui.common.Tab
 import com.agpeya.app.ui.common.ToggleRow
 import com.agpeya.app.ui.theme.LocalMotion
 import com.agpeya.app.ui.theme.Motion
+import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
 import android.Manifest
 import android.content.pm.PackageManager
@@ -1034,6 +1037,39 @@ fun RemindersSettingsScreen(
                     }
                     Spacer(Modifier.height(Spacing.md))
                 }
+                // How a reminder sounds governs every reminder on the page, so
+                // it is settled before the list of which ones ring. It used to
+                // sit last, under the day, the four switches and the two ledger
+                // doors — past the fold on any phone.
+                SectionHeader(s.remindersGroupSound)
+                NavRow(s.reminderModes, onOpenModes)
+                val alertLabel = when (alert) {
+                    com.agpeya.app.data.AlarmAlert.SOUND_VIBRATE -> s.alertSoundVibrate
+                    com.agpeya.app.data.AlarmAlert.SOUND_ONLY -> s.alertSoundOnly
+                    com.agpeya.app.data.AlarmAlert.VIBRATE_ONLY -> s.alertVibrateOnly
+                    com.agpeya.app.data.AlarmAlert.SILENT -> s.alertSilent
+                }
+                val soundLabel = when (sound) {
+                    com.agpeya.app.data.AlarmSound.ALARM -> s.soundAlarm
+                    com.agpeya.app.data.AlarmSound.RINGTONE -> s.soundRingtone
+                    com.agpeya.app.data.AlarmSound.NOTIFICATION -> s.soundNotification
+                }
+                NavRow(
+                    title = s.alarmSection,
+                    // The snooze length rides on the end so it can be read
+                    // without opening the sheet to find it.
+                    subtitle = listOfNotNull(
+                        alertLabel,
+                        soundLabel.takeIf {
+                            alert == com.agpeya.app.data.AlarmAlert.SOUND_VIBRATE ||
+                                alert == com.agpeya.app.data.AlarmAlert.SOUND_ONLY
+                        },
+                        s.snoozeMinutesLabel(snoozeMinutes),
+                    ).joinToString(" · "),
+                    onClick = { soundSheetOpen = true },
+                )
+                QuietHoursRow(s)
+                Spacer(Modifier.height(Spacing.lg))
                 DayTimeline()
                 Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(s.remindersGroupDaily)
@@ -1074,35 +1110,6 @@ fun RemindersSettingsScreen(
                 SectionHeader(s.remindersGroupGiving)
                 NavRow(s.settingsAlmsReminder, { onOpenSpecialHabit(com.agpeya.app.reminders.SpecialHabit.ALMS) }, subtitle = s.settingsAlmsReminderDesc)
                 NavRow(s.settingsRepentReminder, { onOpenSpecialHabit(com.agpeya.app.reminders.SpecialHabit.REPENTANCE) }, subtitle = s.settingsRepentReminderDesc)
-                Spacer(Modifier.height(Spacing.lg))
-                SectionHeader(s.remindersGroupSound)
-                NavRow(s.reminderModes, onOpenModes)
-                val alertLabel = when (alert) {
-                    com.agpeya.app.data.AlarmAlert.SOUND_VIBRATE -> s.alertSoundVibrate
-                    com.agpeya.app.data.AlarmAlert.SOUND_ONLY -> s.alertSoundOnly
-                    com.agpeya.app.data.AlarmAlert.VIBRATE_ONLY -> s.alertVibrateOnly
-                    com.agpeya.app.data.AlarmAlert.SILENT -> s.alertSilent
-                }
-                val soundLabel = when (sound) {
-                    com.agpeya.app.data.AlarmSound.ALARM -> s.soundAlarm
-                    com.agpeya.app.data.AlarmSound.RINGTONE -> s.soundRingtone
-                    com.agpeya.app.data.AlarmSound.NOTIFICATION -> s.soundNotification
-                }
-                NavRow(
-                    title = s.alarmSection,
-                    // The snooze length rides on the end so it can be read
-                    // without opening the sheet to find it.
-                    subtitle = listOfNotNull(
-                        alertLabel,
-                        soundLabel.takeIf {
-                            alert == com.agpeya.app.data.AlarmAlert.SOUND_VIBRATE ||
-                                alert == com.agpeya.app.data.AlarmAlert.SOUND_ONLY
-                        },
-                        s.snoozeMinutesLabel(snoozeMinutes),
-                    ).joinToString(" · "),
-                    onClick = { soundSheetOpen = true },
-                )
-                QuietHoursRow(s)
                 Spacer(Modifier.height(Spacing.xxl))
             }
         }
@@ -1236,14 +1243,38 @@ private fun DayTimeline() {
     if (entries.isEmpty()) return
 
     val silenced = entries.count { it.silenced }
+    // Folded shut by default. Read end to end it is the tallest thing on the
+    // page — one row per reminder, the whole day — and it answers a question
+    // ("what is set for today?") that is asked far less often than the switches
+    // below it are reached for. The count stays on the header, so shut it still
+    // says how many times the phone will speak today.
+    var open by rememberSaveable { mutableStateOf(false) }
     Column(Modifier.fillMaxWidth()) {
-        SectionHeader(s.remindersDayTitle)
-        Text(
-            s.remindersDaySubtitle(entries.count { it.today }),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = Spacing.sm),
-        )
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clip(MaterialTheme.shapes.small)
+                .clickable { open = !open }
+                .padding(vertical = Spacing.xs),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                SectionHeader(s.remindersDayTitle)
+                Text(
+                    s.remindersDaySubtitle(entries.count { it.today }),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Icon(
+                if (open) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(IconSize.medium),
+            )
+        }
+        if (!open) return
+        Spacer(Modifier.height(Spacing.sm))
         entries.forEach { entry ->
             Row(
                 Modifier.fillMaxWidth().padding(vertical = 5.dp),
