@@ -31,6 +31,31 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "2.3.0",
+        title = "The map and the hour",
+        titleAm = "ካርታውና ሰዓቱ",
+        changes = listOf(
+            "የመጻሕፍቱ ካርታ: every book the app carries, grouped as the Church groups them, each filling with its chapters as they are read. A percentage says how much; this says where.",
+            "ንባብ's card in መጻሕፍት reports itself now — today's passage by name, the week behind you, and how far through the books you are.",
+            "A plan can be finished, and two can be kept at once: የዳዊት ንባብ beside a Bible plan, each counting its own.",
+            "An hour and the time it rings are one page. A row on ሰዓታት is the whole hour: the time, the name, the days it keeps, one switch.",
+            "The six day hours ring from first launch. ንዋም and ሌሊት ፱ ሰዓት still wait to be asked, and both are one switch away.",
+            "The ግጻዌ's ምስባክ is the one the book prints, in its own lines and without verse numbers, which is how a ምስባክ is sung.",
+            "Twenty-eight ምስባክ pointed at a psalm their chant is not in. They point at the right one now.",
+            "Catena asks for the Early Fathers — those venerated in the churches in communion with Alexandria.",
+        ),
+        changesAm = listOf(
+            "የመጻሕፍቱ ካርታ፦ መተግበሪያው የያዘው እያንዳንዱ መጽሐፍ፣ ቤተ ክርስቲያን በምትከፍልበት ክፍል ተሰድሮ፣ ምዕራፎቹ ሲነበቡ ይሞላል። መቶኛ ስንት እንደሆነ ይናገራል፤ ካርታው ግን የት እንዳሉ ያሳያል።",
+            "የንባብ ካርድ በመጻሕፍት ውስጥ ራሱን ይናገራል — የዛሬው ምንባብ በስሙ፣ ያለፈው ሳምንት፣ በመጻሕፍቱ ውስጥ እስከ የት እንደደረሱ።",
+            "ንባብ አሁን ሊጠናቀቅ ይችላል፤ ሁለት ንባብም በአንድ ጊዜ ሊጠበቅ ይችላል፦ የዳዊት ንባብ ከመጽሐፍ ቅዱስ ንባብ ጎን፣ እያንዳንዱ የራሱን ቆጠራ እየያዘ።",
+            "ሰዓቱና የሚደወልበት ጊዜ በአንድ ገጽ ሆነዋል። በሰዓታት ላይ ያለው መስመር ሰዓቱን በሙሉ ይዟል፦ ጊዜውን፣ ስሙን፣ የሚውልባቸውን ቀናትና አንድ ማብሪያ።",
+            "ስድስቱ የቀን ሰዓታት ከመጀመሪያው ጀምሮ ይደውላሉ። ንዋምና ሌሊት ፱ ሰዓት ግን ሳይጠየቁ አይደውሉም፤ ሁለቱም በአንድ ማብሪያ ይከፈታሉ።",
+            "የግጻዌው ምስባክ መጽሐፉ የሚያትመው ሆኗል — በራሱ መስመሮች፣ ያለ የቁጥር ምልክት፤ ምስባክ የሚዘመረው እንዲህ ነውና።",
+            "ሃያ ስምንት ምስባክ ቃላቸው ወዳልሆነበት መዝሙር ይመሩ ነበር። አሁን ወደ ትክክለኛው ይመራሉ።",
+            "Catena አሁን የቀደሙትን አባቶች ይጠይቃል — ከእስክንድርያ ቤተ ክርስቲያን ጋር በኅብረት ባሉት አብያተ ክርስቲያናት የሚከበሩትን።",
+        ),
+    ),
+    ReleaseNote(
         version = "2.2.0",
         title = "A light on where you are",
         titleAm = "ባሉበት ላይ ብርሃን",

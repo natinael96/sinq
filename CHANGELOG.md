@@ -6,6 +6,114 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [2.3.0] — 2026-09-12
+
+_versionCode 70 · The map and the hour_
+
+### Added
+- **የመጻሕፍቱ ካርታ.** Every book the app carries, grouped as the Church groups
+  them, each one a bar that fills with its chapters as they are read. A
+  percentage says how much; this says where, and the gaps read as clearly as
+  the gold. A line at the top names the book in your hands, or the group
+  nearest to finishing. Tapping a book opens its chapters. It needed no new
+  data — ንባብ has always recorded chapters, and this is the first screen to
+  draw them.
+- **ንባብ's card reports itself.** It was the sixth of seven identical cards in
+  መጻሕፍት, saying the same fixed sentence whether you had never started or were
+  two hundred days in. It is the one commitment on that shelf, so it is now the
+  one card cut from the hero's green: today's passage by name, the week behind
+  you, and how far through the books you are.
+- **A plan can be finished.** The day number used to stop at the last day and
+  sit there for ever. Reading the whole Bible is the largest thing this app
+  asks of anyone; it now says so, and offers to begin again. What was read is
+  kept whatever happens next.
+- **Two plans at once.** የዳዊት ንባብ can be kept beside a Bible plan, a block each
+  on the page and a line each on the card. Two plans that read the same corpus
+  at different speeds are refused with the reason rather than printed twice.
+- **The Fathers, as this Church receives them.** Catena's own Early Fathers
+  group — "all fathers venerated in all churches in communion with the Church
+  of Alexandria" — is now what the commentary asks for. On ማቴዎስ ፭፥፬ that is
+  eleven commentaries rather than nineteen. The ask is a cookie their own
+  settings panel writes, so the page moved out of a Custom Tab into a WebView
+  with a jar of its own: the preference applies here and never touches what a
+  reader has chosen on the site themselves.
+
+### Changed
+- **An hour and the time it rings are one page.** They were two screens in two
+  branches of ቅንብሮች — whether an hour existed at all under ጸሎት, what time it
+  rang four taps away under ማንቂያዎች, beneath a heading about sound — and the
+  second silently dropped any hour the first had hidden. A row on ሰዓታት is now
+  the whole hour: the time, the name, the days it keeps, one switch. The four
+  icon buttons it used to carry are behind the row's own menu.
+- **The six day hours ring from first launch.** The built-in mode shipped eight
+  hours with every one of them switched off: an app installed to be called to
+  prayer called its reader to nothing, and the count on ማንቂያዎች reported
+  reminders as on while the hours sat silent. ንዋም and ሌሊት ፱ ሰዓት still do not
+  ring unasked — waking a stranger at midnight on the day they install the app
+  misreads what was asked for — and both are one switch away. Where nothing
+  will ring, the page now says so, with a way straight to the switches.
+- **ድምፅና ጸጥታ comes first on ማንቂያዎች**, since how a reminder sounds governs
+  every reminder on the page. የዛሬው ቀን folds; shut, its header still says how
+  many times the phone will speak today.
+- **The ምስባክ on the ግጻዌ passage page is the one the book prints.** The page had
+  been slicing whole verses out of the Psalter for a chant three lines long. A
+  ምስባክ begins part-way through a verse, ends part-way through another, drops
+  the clauses between, and follows its own recension. Across the year the
+  sliced range ran half again as long as the chant, and at መዝሙር ፶ it gave 592
+  characters where the chant is 68. Only the ምስባክ: the ወንጌል and the deacons'
+  readings print an incipit, and for those the cited range is the reading.
+- **The ግጻዌ passage's exits are a ቀጥል strip.** Two chips on a psalm and three
+  on a gospel, wrapping, rather than full-width rows that on a seven-verse
+  passage made a list longer than the reading. Catena is drawn as what it is: a
+  link that leaves the app, marked, and named for a screen reader.
+- **ንባብ leads with what a day costs** — about eleven minutes for the year,
+  twenty-two for the six months — measured in verses, the unit the plans are
+  packed in. "Five chapters a day" was the average of a figure that runs from
+  one to sixteen.
+- **Each passage of a day keeps itself.** A day was recorded chapter by chapter
+  but could only be marked whole, so a day of three passages could not be half
+  kept.
+- **ማኅሌት sits on ሌሎች መጻሕፍት** with the other books of the Church, counted the
+  way the shelves count theirs.
+
+### Fixed
+- **Twenty-eight ምስባክ cited a psalm their chant is not in.** The citation is
+  what the passage page's doors and its Catena link are built from, so a reader
+  tapping through landed in the wrong psalm. Each chant was looked up in the
+  Ge'ez Psalter, folding the homophone series the app's own search folds. Two
+  of the twenty-eight came from the verse marker: it is spelled ቍ on almost
+  every page of the book and ቄ on five of them, and the importer split on ቍ
+  alone — which also gave four other readings a verse range they had been
+  shipping without. The chant itself is untouched and will stay so.
+- **Repacking a plan left the end of it blank.** The remainder was chunked by a
+  rounded-up size, which gives fewer chunks than there are days to fill: a ዳዊት
+  reader who fell behind on day 5 and repacked on day 40 was given readings to
+  day 112 and nothing at all for the 38 days after — and the screen answered
+  those days with "you have not started a plan yet".
+- **Hiding or deleting an hour left its reminder armed** until the next app
+  launch, so a hidden hour went on ringing and a deleted one rang with a name
+  that no longer existed. A pending snooze could not be cancelled at all: it
+  outlived the mode being switched and the entry being deleted, and rang ten
+  minutes after the reader had moved on.
+- **Hours could not be reordered.** The page has offered it since it shipped
+  and the repository was written for it, but nothing ever called it — order
+  could only be changed by restoring a backup.
+- **ሌሊት ፱ ሰዓት shipped hidden**, which filtered it out of the mode editor and
+  the scheduler alike: its reminder was stored, counted on the card, and
+  impossible to turn on from the page that listed it.
+- **The Psalter's Catena action went nowhere.** It built the right URL and then
+  called a default no-op, on the book the app reads most.
+- **ንባብ's day numbers were in Arabic digits** beside passages numbered in
+  Ge'ez, sometimes in the same row, while the reminder that opens the page
+  writes ዕለት ፻፳. The page also never named the plan it was keeping.
+
+### Removed
+- `CustomizeHoursScreen`, a second hours editor with no callers that the route,
+  the package and the title all still pointed at.
+- `androidx.browser`, with the Custom Tab it was added for.
+- ዘወትር ጸሎት's card in መጻሕፍት, which opened the ውዳሴ ማርያም screen at its daily
+  section: one text behind two doors.
+
 ## [2.2.0] — 2026-09-11
 
 _versionCode 69 · A light on where you are_
