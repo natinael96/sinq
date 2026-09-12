@@ -7733,11 +7733,13 @@
      "text": {
       "geez": "አልቦ ነገር ወአልቦ ነቢብ ዘኢተሰምዐ ቃሎሙ ። ውስተ ኵሉ ምድር ወፅአ ነገሮሙ ። ወእስከ አዕናፈ ዓለም በጽሐ ነቢቦሙ ።"
      },
-     "citation": "፲፰ ም· ፫ – ፬",
+     "citation": "፲፰ ቍ ፫ – ፬",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 25,
-      "citation": "፲፰ ም· ፫ – ፬"
+      "chapter": 18,
+      "citation": "፲፰ ቍ ፫ – ፬",
+      "start": 3,
+      "end": 4
      }
     }
    ],
@@ -8964,7 +8966,14 @@
      "text": {
       "geez": "አኀጋው ኩኑ በኵሉ ፍሥሓ ።"
      },
-     "citation": "ም· ፩ ቄ· ፪ – ፯"
+     "citation": "ም· ፩ ቄ· ፪ – ፯",
+     "verse": {
+      "bookTitle": "የያዕቆብ መልእክት",
+      "chapter": 1,
+      "citation": "ም· ፩ ቄ· ፪ – ፯",
+      "start": 2,
+      "end": 7
+     }
     }
    ],
    "secondKahn": [
@@ -11651,7 +11660,13 @@
      "text": {
       "geez": "ወአንትሙሰ አኃዊነ ።"
      },
-     "citation": "ም· ፩ ቄ· ፲፯ – ፍ፡ም፡"
+     "citation": "ም· ፩ ቄ· ፲፯ – ፍ፡ም፡",
+     "verse": {
+      "bookTitle": "የይሁዳ መልእክት",
+      "chapter": 1,
+      "citation": "ም· ፩ ቄ· ፲፯ – ፍ፡ም፡",
+      "start": 17
+     }
     }
    ],
    "secondKahn": [
@@ -11869,11 +11884,11 @@
      "text": {
       "geez": "እምቅድመ ገጽከ ይወጽእ ፍትሕየ ። አዕይንትየኒ ርእያ ጽድቀከ ። ሐወጽከኒ ሌሊተ ወፈተንኮ ለልብየ ።"
      },
-     "citation": "፲፯ ቍ· ፪ – ፫",
+     "citation": "፲፮ ቍ ፪ – ፫",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 17,
-      "citation": "፲፯ ቍ· ፪ – ፫",
+      "chapter": 16,
+      "citation": "፲፮ ቍ ፪ – ፫",
       "start": 2,
       "end": 3
      }
@@ -12901,13 +12916,13 @@
      "text": {
       "geez": "ሰብሕዎ ለእግዚአብሔር እስመ ሠናይ መዝሙር ። ወለአምላክነ ሐዋዝ ስብሑ ። የሐንጻ እግዚአብሔር ለኢየሩሳሌም ።"
      },
-     "citation": "፻፵፯ ቍ· ፩ – ፪",
+     "citation": "፻፵፮ ቍ ፩ – ፯",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 147,
-      "citation": "፻፵፯ ቍ· ፩ – ፪",
+      "chapter": 146,
+      "citation": "፻፵፮ ቍ ፩ – ፯",
       "start": 1,
-      "end": 2
+      "end": 7
      }
     }
    ],
@@ -17561,11 +17576,13 @@
      "text": {
       "geez": "ወመላእክትኒ ተጋብኡ ምስሌሆሙ ኀቡረ ። ላዕለ እግዚአብሔር ወላዕለ መሲሑ ። ንበትክ እምኔነ ማዕሠሪሆሙ ።"
      },
-     "citation": "፪ ም· ፪ – ፫",
+     "citation": "፪ ቍ ፪ – ፫",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 7,
-      "citation": "፪ ም· ፪ – ፫"
+      "chapter": 2,
+      "citation": "፪ ቍ ፪ – ፫",
+      "start": 2,
+      "end": 3
      }
     }
    ],
@@ -21169,13 +21186,12 @@
      "text": {
       "geez": "መንፈቀ ሌሊት እትነሣእ ። ከመ እግነይ ለከ በእንተ ኵነኔ ጽድቅከ ።"
      },
-     "citation": "፻፲፫ ቍ· ፴፭ – ፴፯",
+     "citation": "፻፲፰ ቍ ፷፩",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 113,
-      "citation": "፻፲፫ ቍ· ፴፭ – ፴፯",
-      "start": 35,
-      "end": 37
+      "chapter": 118,
+      "citation": "፻፲፰ ቍ ፷፩",
+      "start": 61
      }
     }
    ],
@@ -21314,11 +21330,11 @@
      "text": {
       "geez": "ወፀብኡኒ በከንቱ ። ዘእምአፍቀሩኒ አስተዋደዩኒ ።"
      },
-     "citation": "፻፯ ቍ· ፫ – ፬",
+     "citation": "፻፰ ቍ ፫ – ፬",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 107,
-      "citation": "፻፯ ቍ· ፫ – ፬",
+      "chapter": 108,
+      "citation": "፻፰ ቍ ፫ – ፬",
       "start": 3,
       "end": 4
      }
@@ -21987,11 +22003,13 @@
      "text": {
       "geez": "እበውዕ ቤተከ ምስለ መባዕየ ። ወእሁብ ብዕዓትየ ዘነበብኩ በአፉየ ። ዘእቤ በከናፍርየ አመ ምንዳቤየ ።"
      },
-     "citation": "፷፭ ፋ · ፲፫ – ፲፭",
+     "citation": "፷፭ ቍ ፲፫ – ፲፬",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 93,
-      "citation": "፷፭ ፋ · ፲፫ – ፲፭"
+      "chapter": 65,
+      "citation": "፷፭ ቍ ፲፫ – ፲፬",
+      "start": 13,
+      "end": 14
      }
     }
    ],
@@ -22193,13 +22211,13 @@
      "text": {
       "geez": "ሀበነ ረድኤተ ለምንዳቤነ ። ወከንቱ ተአምኖ በሰብእ ። በእግዚአብሔር ንገብር ኃይለ ።"
      },
-     "citation": "፻፯ ቍ· ፲፪ – ፲፫",
+     "citation": "፶፱ ቍ ፲፩ – ፲፪",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 107,
-      "citation": "፻፯ ቍ· ፲፪ – ፲፫",
-      "start": 12,
-      "end": 13
+      "chapter": 59,
+      "citation": "፶፱ ቍ ፲፩ – ፲፪",
+      "start": 11,
+      "end": 12
      }
     }
    ],
@@ -22307,7 +22325,14 @@
      "text": {
       "geez": "በተአምኖ ሰብእ ዘተሰምየ አብርሃም ።"
      },
-     "citation": "ም· ፲፩ ቄ· ፰ – ፲፯"
+     "citation": "ም· ፲፩ ቄ· ፰ – ፲፯",
+     "verse": {
+      "bookTitle": "ወደ ዕብራውያን",
+      "chapter": 11,
+      "citation": "ም· ፲፩ ቄ· ፰ – ፲፯",
+      "start": 8,
+      "end": 17
+     }
     }
    ],
    "secondDeacon": [
@@ -25109,7 +25134,13 @@
      "text": {
       "geez": "ርሑቅ ሕይወት እምኃጥአን ። እስመ ኢኀሠሡ ኵነኔከ ብዙኅ ሣህልከ እግዚኦ ፈድፋደ ።"
      },
-     "citation": "፻፲፰ ቄ· ፻፶፭"
+     "citation": "፻፲፰ ቄ· ፻፶፭",
+     "verse": {
+      "bookTitle": "መዝሙረ ዳዊት",
+      "chapter": 118,
+      "citation": "፻፲፰ ቄ· ፻፶፭",
+      "start": 155
+     }
     }
    ],
    "wengel": [
@@ -25255,8 +25286,10 @@
      "citation": "፴፰ ቄ· ፮ – ፯",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 51,
-      "citation": "፴፰ ቄ· ፮ – ፯"
+      "chapter": 38,
+      "citation": "፴፰ ቄ· ፮ – ፯",
+      "start": 6,
+      "end": 7
      }
     }
    ],
@@ -26475,13 +26508,12 @@
      "text": {
       "geez": "እስመ ሰማዕኩ ድምፀ ብዙኃን እለ ዐገቱኒ ዐውድየ ። ሶበ ተጋብኡ ኅቡረ ላዕሌየ ። ወተማከሩ ይምሥጥዋ ለነፍስየ ።"
      },
-     "citation": "፶ ቍ· ፲፫ – ፲፬",
+     "citation": "፴ ቍ ፲፫",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 50,
-      "citation": "፶ ቍ· ፲፫ – ፲፬",
-      "start": 13,
-      "end": 14
+      "chapter": 30,
+      "citation": "፴ ቍ ፲፫",
+      "start": 13
      }
     }
    ],
@@ -28389,11 +28421,13 @@
      "text": {
       "geez": "እግዚአብሔር መክፈልትየ ለዓለም ። እስመ ናሁ እለ ይርኅቁ እምኔከ ይትሐጐሉ ። ወሠረውከሙ ለኵሎሙ እለ ይዜምዉ እምኔከ ።"
      },
-     "citation": "፸፪ – ፸፫",
+     "citation": "፸፪ ቍ ፳፮ – ፳፯",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 145,
-      "citation": "፸፪ – ፸፫"
+      "chapter": 72,
+      "citation": "፸፪ ቍ ፳፮ – ፳፯",
+      "start": 26,
+      "end": 27
      }
     }
    ],
@@ -28949,13 +28983,13 @@
      "text": {
       "geez": "አለብወኒ ወእትመሀር ትእዛዘከ ። እለ ይፈርሁከ ይርአዩኒ ወይትፌሥሑ ። እስመ ተወከልኩ በነቢብከ ።"
      },
-     "citation": "፻፲፯ ቍ· ፸፫ – ፸፬",
+     "citation": "፻፲፰ ቍ ፸፪ – ፸፫",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 117,
-      "citation": "፻፲፯ ቍ· ፸፫ – ፸፬",
-      "start": 73,
-      "end": 74
+      "chapter": 118,
+      "citation": "፻፲፰ ቍ ፸፪ – ፸፫",
+      "start": 72,
+      "end": 73
      }
     }
    ],
@@ -29580,13 +29614,12 @@
      "text": {
       "geez": "ወትሰይመኒ ውስተ ርእሰ ሕዝብ ። ሕዝብ ዘኢየአምር ተቀንየ ሊተ ። ውስተ ምስማዕ ዕዝን ተሠጥወኒ ።"
      },
-     "citation": "፴ ቍ· ፱ – ፲",
+     "citation": "፲፯ ቍ ፵፫",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 30,
-      "citation": "፴ ቍ· ፱ – ፲",
-      "start": 9,
-      "end": 10
+      "chapter": 17,
+      "citation": "፲፯ ቍ ፵፫",
+      "start": 43
      }
     }
    ],
@@ -30516,13 +30549,13 @@
      "text": {
       "geez": "እግዚአብሔር ቆመ ውስተ ማኅበረ አማልክት ። ወይኴንን በማዕከለ አማልክት ። እስከ ማዕዜኑ ትኴንኑ ዐመፃ ።"
      },
-     "citation": "፻፬ ቍ· ፲፬ – ፲፭",
+     "citation": "፹፩ ቍ ፩ – ፪",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 104,
-      "citation": "፻፬ ቍ· ፲፬ – ፲፭",
-      "start": 14,
-      "end": 15
+      "chapter": 81,
+      "citation": "፹፩ ቍ ፩ – ፪",
+      "start": 1,
+      "end": 2
      }
     }
    ],
@@ -34229,13 +34262,13 @@
      "text": {
       "geez": "ወይትቃጸቡኒ ኵሎሙ ጸላእትየ ። ወይመክሩ እኩየ ላዕሌየ ። ነገረ ጌጋይ አውፅኡ ላዕሌየ ።"
      },
-     "citation": "፳፮ ቍ· ፲፩ – ፲፪",
+     "citation": "፵ ቍ ፯ – ፰",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 26,
-      "citation": "፳፮ ቍ· ፲፩ – ፲፪",
-      "start": 11,
-      "end": 12
+      "chapter": 40,
+      "citation": "፵ ቍ ፯ – ፰",
+      "start": 7,
+      "end": 8
      }
     }
    ],
@@ -36268,11 +36301,12 @@
      "text": {
       "geez": "መሠረታቲሃ ውስተ አድባር ቅዱሳን ። ያበድሮን እግዚአብሔር ለአናቅጸ ጽዮን ። እምኵሉ ተዐይኒሁ ለያዕቆብ ።"
      },
-     "citation": "፹፮ · ፩ – ፪",
+     "citation": "፹፮ ቍ ፩",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 89,
-      "citation": "፹፮ · ፩ – ፪"
+      "chapter": 86,
+      "citation": "፹፮ ቍ ፩",
+      "start": 1
      }
     }
    ],
@@ -39924,13 +39958,13 @@
      "text": {
       "geez": "ዘአቀመ ስምዐ ለዮሴፍ ። አመ የሐውር ብሔረ ግብጽ ። ወሰምዐ ልሳነ ዘኢየአምር ።"
      },
-     "citation": "፸፱ ቍ· ፭ – ፮",
+     "citation": "፹ ቍ ፬ – ፭",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 79,
-      "citation": "፸፱ ቍ· ፭ – ፮",
-      "start": 5,
-      "end": 6
+      "chapter": 80,
+      "citation": "፹ ቍ ፬ – ፭",
+      "start": 4,
+      "end": 5
      }
     }
    ],
@@ -43501,13 +43535,12 @@
      "text": {
       "geez": "ወይርአዩ አሕዛብ በቅድመ አዕይንቲነ ። በቀለ ደሞሙ ለአግብርቲክ ዘተክዕወ ። ይባእ ቅድሜክ ገዓሮሙ ለሙቁሓን ።"
      },
-     "citation": "፸ ቍ· ፲ – ፲፩",
+     "citation": "፸፰ ቍ ፲",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 70,
-      "citation": "፸ ቍ· ፲ – ፲፩",
-      "start": 10,
-      "end": 11
+      "chapter": 78,
+      "citation": "፸፰ ቍ ፲",
+      "start": 10
      }
     }
    ],
@@ -45206,13 +45239,12 @@
      "text": {
       "geez": "ይባርክ እግዚአብሔር እምጽዮን ። ወትሬኢ ሠናይታ ለኢየሩሳሌም ። በኵሉ መዋዕለ ሕይወትከ ።"
      },
-     "citation": "፻፳፯ ቍ· ፭ – ፮",
+     "citation": "፻፴፫ ቍ ፫",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 127,
-      "citation": "፻፳፯ ቍ· ፭ – ፮",
-      "start": 5,
-      "end": 6
+      "chapter": 133,
+      "citation": "፻፴፫ ቍ ፫",
+      "start": 3
      }
     }
    ],
@@ -46595,13 +46627,13 @@
      "text": {
       "geez": "ዘኢይትነበብ ኅቡዐ ጥበበከ አይዳዕከኒ ። ትነዝኀኒ በአዛብ ወእነጽሕ ።"
      },
-     "citation": "፲፯ ቍ· ፲፯ – ፲፰",
+     "citation": "፶ ቍ ፮ – ፯",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 17,
-      "citation": "፲፯ ቍ· ፲፯ – ፲፰",
-      "start": 17,
-      "end": 18
+      "chapter": 50,
+      "citation": "፶ ቍ ፮ – ፯",
+      "start": 6,
+      "end": 7
      }
     }
    ],
@@ -47491,11 +47523,11 @@
      "text": {
       "geez": "አንተ ታበርህ መንክረ ። እምአድባር ዘለዓለም ። ደንገፁ ኵሎሙ አብዳነ ልብ ።"
      },
-     "citation": "፸፬ ቍ· ፬ – ፭",
+     "citation": "፸፭ ቍ ፬ – ፭",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 74,
-      "citation": "፸፬ ቍ· ፬ – ፭",
+      "chapter": 75,
+      "citation": "፸፭ ቍ ፬ – ፭",
       "start": 4,
       "end": 5
      }
@@ -51339,13 +51371,12 @@
      "text": {
       "geez": "ኃይሎሙ ውእቱ እግዚአብሔር ለእለ ይፈርርዎ ። ወስምዒ ለእግዚአብሔር ለእለ ይጼውዕዎ ።"
      },
-     "citation": "፴፬ ቍ· ፲፬ – ፲፮",
+     "citation": "፳፬ ቍ ፲፬",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 34,
-      "citation": "፴፬ ቍ· ፲፬ – ፲፮",
-      "start": 14,
-      "end": 16
+      "chapter": 24,
+      "citation": "፳፬ ቍ ፲፬",
+      "start": 14
      }
     }
    ],
@@ -52144,13 +52175,12 @@
      "text": {
       "geez": "ወኢተፈሥሑ ጸላዕትየ ላዕሌየ ። ወሊተሰ በእንተ የዋህትየ ተወከፍከኒ ። ወአዕናዕከኒ ቅድሜከ ለዓለም"
      },
-     "citation": "፵፬ ቍ· ፱ – ፲",
+     "citation": "፵ ቍ ፲፩",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 44,
-      "citation": "፵፬ ቍ· ፱ – ፲",
-      "start": 9,
-      "end": 10
+      "chapter": 40,
+      "citation": "፵ ቍ ፲፩",
+      "start": 11
      }
     }
    ],
@@ -52460,13 +52490,13 @@
      "text": {
       "geez": "አድኅን በየማንከ ወስምዐኒ ። እግዚአብሔር ነበበ በመቅደሱ ። እትፌሣሕ ወእትካፈል ምህርካ ።"
      },
-     "citation": "፵፬ ቍ· ፱ – ፲",
+     "citation": "፶፱ ቍ ፭ – ፮",
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 44,
-      "citation": "፵፬ ቍ· ፱ – ፲",
-      "start": 9,
-      "end": 10
+      "chapter": 59,
+      "citation": "፶፱ ቍ ፭ – ፮",
+      "start": 5,
+      "end": 6
      }
     }
    ],

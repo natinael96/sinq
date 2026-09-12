@@ -744,10 +744,12 @@
      },
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 146,
-      "start": 13,
-      "end": 14
-     }
+      "chapter": 147,
+      "start": 1,
+      "end": 2,
+      "citation": "፻፵፯ ቍ ፩ – ፪"
+     },
+     "citation": "፻፵፯ ቍ ፩ – ፪"
     },
     {
      "text": {
@@ -1484,10 +1486,11 @@
      },
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 140,
+      "chapter": 143,
       "start": 7,
-      "end": 8
-     }
+      "citation": "፻፵፫ ቍ ፯"
+     },
+     "citation": "፻፵፫ ቍ ፯"
     }
    ],
    "firstDeacon": [
@@ -2047,10 +2050,12 @@
      },
      "verse": {
       "bookTitle": "መዝሙረ ዳዊት",
-      "chapter": 146,
-      "start": 13,
-      "end": 14
-     }
+      "chapter": 147,
+      "start": 1,
+      "end": 2,
+      "citation": "፻፵፯ ቍ ፩ – ፪"
+     },
+     "citation": "፻፵፯ ቍ ፩ – ፪"
     }
    ],
    "firstDeacon": [

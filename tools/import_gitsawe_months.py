@@ -90,15 +90,21 @@ def epistle_title(raw):
     return None
 
 
+# The verse marker is ቍ on almost every page and ቄ on five of them. Splitting
+# on ቍ alone left those five unsplit, so the whole citation was read as one
+# number: '፴፰ ቄ· ፮ – ፯' came out as psalm 51, being 38 + 6 + 7.
+VERSE_MARK = re.compile(r"[ቍቄቁ]")
+
+
 def verse_ref(citation, book, psalm=False):
     citation = citation or ""
     clean = citation.replace("ỻ", "")
+    normalized = re.sub(r"[·፡፤]", " ", clean)
+    parts = VERSE_MARK.split(normalized, 1)
+    before, after = parts[0], (parts[1] if len(parts) > 1 else "")
     if psalm:
-        before, _, after = re.sub(r"[·፡፤]", " ", clean).partition("ቍ")
         chapter = geez_number(before)
     else:
-        normalized = re.sub(r"[·፡፤]", " ", clean)
-        before, _, after = normalized.partition("ቍ")
         chapter = geez_number(before.partition("ም")[2])
     nums = [geez_number(x) for x in re.findall(r"[፩-፼]+", after)]
     nums = [x for x in nums if x is not None]
