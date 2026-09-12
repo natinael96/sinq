@@ -86,6 +86,12 @@ object ReminderScheduler {
         }
 
         val state = ModesRepository.current(app)
+        // A snooze is armed under its own id, keyed by the hour, and was never
+        // written into scheduledIds — so the loop above could not reach one. It
+        // outlived the mode being switched and the entry being deleted, and the
+        // old hour rang anyway, half an hour after the reader had moved on.
+        cancelSnoozes(app, alarmManager, state.modes.flatMap { m -> m.entries.map { it.hourId } })
+
         val active = state.activeMode ?: return ModesRepository.setScheduledIds(app, emptySet())
         val now = LocalDateTime.now()
         val scheduled = mutableSetOf<String>()
@@ -99,6 +105,28 @@ object ReminderScheduler {
             scheduled += entry.id
         }
         ModesRepository.setScheduledIds(app, scheduled)
+    }
+
+    /**
+     * Drop any snooze still pending for these hours.
+     *
+     * Looked up with NO_CREATE so a hour that has no snooze costs nothing and
+     * none is conjured into being by the asking.
+     */
+    private fun cancelSnoozes(context: Context, alarmManager: AlarmManager, hourIds: List<String>) {
+        for (hourId in hourIds.distinct()) {
+            val pi = PendingIntent.getBroadcast(
+                context,
+                "snooze_$hourId".hashCode(),
+                Intent(context, AlarmReceiver::class.java).apply {
+                    action = "com.agpeya.app.SNOOZE"
+                    data = android.net.Uri.parse("agpeya://snooze/$hourId")
+                },
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE,
+            ) ?: continue
+            alarmManager.cancel(pi)
+            pi.cancel()
+        }
     }
 
     /** Schedule one entry's next occurrence — used by the chain after a fire. */

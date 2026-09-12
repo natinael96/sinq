@@ -26,7 +26,11 @@ object HoursRepository {
     private val json = Json { ignoreUnknownKeys = true }
 
     /** ሌሊት 9 ሰዓት (veil) ships hidden; users opt in via Manage Hours. */
-    private val DEFAULT = HoursConfig(hidden = setOf("veil"))
+    // Nothing is hidden to begin with. ሌሊት ፱ ሰዓት used to be, which made the
+    // built-in mode's 22:00 reminder unreachable: a hidden hour is filtered out
+    // of the mode editor and out of the scheduler alike, so the entry was
+    // stored, counted, and impossible to turn on from the page that listed it.
+    private val DEFAULT = HoursConfig()
 
     private fun decode(raw: String?): HoursConfig =
         raw?.let { runCatching { json.decodeFromString<HoursConfig>(it) }.getOrNull() } ?: DEFAULT

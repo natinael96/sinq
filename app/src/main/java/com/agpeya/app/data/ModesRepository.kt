@@ -30,9 +30,28 @@ object ModesRepository {
     private val json = Json { ignoreUnknownKeys = true }
 
     /** Traditional times per hour — the built-in mode's defaults (PLAN.md §2.1). */
+    /**
+     * The hours of the built-in mode, and whether each one rings out of the box.
+     *
+     * Every one of these used to ship off, so an app installed to call someone
+     * to prayer called them to nothing and never said so. The six day hours are
+     * now armed: they are the round the Church keeps, and being called to them
+     * is the reason to install this at all.
+     *
+     * The two night offices are not. ንዋም at midnight and ሌሊት ፱ ሰዓት at ten are
+     * kept by those who have taken them up, and an app that wakes a stranger at
+     * midnight on the day they install it has misread what it was asked for.
+     * Both are one switch away in የጸሎት ማንቂያ ሁነታዎች.
+     */
     private val DEFAULT_TIMES = listOf(
-        "morning" to 6, "terce" to 9, "sext" to 12, "none" to 15,
-        "vespers" to 18, "compline" to 21, "midnight" to 0, "veil" to 22,
+        Triple("morning", 6, true),
+        Triple("terce", 9, true),
+        Triple("sext", 12, true),
+        Triple("none", 15, true),
+        Triple("vespers", 18, true),
+        Triple("compline", 21, true),
+        Triple("midnight", 0, false),
+        Triple("veil", 22, false),
     )
 
     const val BUILT_IN_NAME = "ሰዓታት"
@@ -41,8 +60,8 @@ object ModesRepository {
         id = BUILT_IN_ID,
         name = BUILT_IN_NAME,
         isBuiltIn = true,
-        entries = DEFAULT_TIMES.map { (hourId, h) ->
-            ReminderEntry(id = "builtin_$hourId", hourId = hourId, hour = h, minute = 0)
+        entries = DEFAULT_TIMES.map { (hourId, h, on) ->
+            ReminderEntry(id = "builtin_$hourId", hourId = hourId, hour = h, minute = 0, enabled = on)
         },
     )
 

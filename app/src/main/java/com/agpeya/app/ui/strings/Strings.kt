@@ -284,6 +284,10 @@ interface Strings {
     val remindersGroupGiving: String
     val remindersGroupSound: String
     val remindersOff: String
+    /** Said when the prayer hours themselves will not ring, whatever else does. */
+    val noHourWillRingTitle: String
+    val noHourWillRingBody: String
+    val noHourWillRingAction: String
     val noBackupYet: String
     val backedUpToday: String
     val backedUpYesterday: String
@@ -1143,6 +1147,9 @@ object AmharicStrings : Strings {
     override val remindersGroupGiving = "ምጽዋትና ስዕለት"
     override val remindersGroupSound = "ድምፅና ጸጥታ"
     override val remindersOff = "ጠፍቷል"
+    override val noHourWillRingTitle = "የጸሎት ሰዓት አይጠራዎትም"
+    override val noHourWillRingBody = "ከሰዓታቱ አንዱም አልበራም። ከታች ያሉት ማስታወሻዎች ይሰራሉ፤ ሰዓታቱ ግን ዝም ይላሉ።"
+    override val noHourWillRingAction = "ሰዓታቱን አብራ"
     override val noBackupYet = "እስካሁን ምትኬ የለም"
     override val backedUpToday = "ዛሬ ምትኬ ተቀምጧል"
     override val backedUpYesterday = "ትናንት ምትኬ ተቀምጧል"
@@ -1955,6 +1962,9 @@ object EnglishStrings : Strings {
     override val remindersGroupGiving = "Giving and vows"
     override val remindersGroupSound = "Sound and silence"
     override val remindersOff = "Off"
+    override val noHourWillRingTitle = "No hour will call you"
+    override val noHourWillRingBody = "Not one of the prayer hours is switched on. The reminders below still work; the hours themselves stay silent."
+    override val noHourWillRingAction = "Switch the hours on"
     override val noBackupYet = "No backup yet"
     override val backedUpToday = "Backed up today"
     override val backedUpYesterday = "Backed up yesterday"

@@ -1004,6 +1004,15 @@ fun RemindersSettingsScreen(
         titheEntries.any { it.enabled } || vowEntries.any { it.remindsStill } ||
         penanceEntries.any { it.remindsStill }
     @Suppress("UNUSED_VARIABLE") val refreshPermissions = permissionPulse
+    // The count on this page has never included the prayer hours — it is built
+    // from the switches below and the ledgers — so a reader whose hours are all
+    // off was told reminders were on. Say it plainly instead.
+    val armedHours by androidx.compose.runtime.produceState(-1, permissionPulse) {
+        value = runCatching {
+            com.agpeya.app.data.ModesRepository.current(context).activeMode
+                ?.entries?.count { it.enabled } ?: 0
+        }.getOrDefault(-1)
+    }
     val batteryRestricted = remindersOn &&
         !(context.getSystemService(android.os.PowerManager::class.java)?.isIgnoringBatteryOptimizations(context.packageName) ?: true)
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
@@ -1025,6 +1034,15 @@ fun RemindersSettingsScreen(
                     NotificationsOffBanner {
                         com.agpeya.app.ui.common.openNotificationSettings(context)
                     }
+                    Spacer(Modifier.height(Spacing.md))
+                }
+                if (armedHours == 0) {
+                    SettingsWarningPanel(
+                        title = s.noHourWillRingTitle,
+                        body = s.noHourWillRingBody,
+                        action = s.noHourWillRingAction,
+                        onClick = onOpenModes,
+                    )
                     Spacer(Modifier.height(Spacing.md))
                 }
                 if (batteryRestricted) {

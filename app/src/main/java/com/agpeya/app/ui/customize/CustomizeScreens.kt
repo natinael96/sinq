@@ -58,57 +58,6 @@ import com.agpeya.app.model.Section
 import kotlinx.coroutines.launch
 import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.IconSize
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CustomizeHoursScreen(onBack: () -> Unit, onOpenHour: (String) -> Unit) {
-    val context = LocalContext.current
-    val hours by produceState<List<Hour>>(initialValue = emptyList()) {
-        value = ContentRepository.hours(context)
-    }
-    val s = com.agpeya.app.ui.strings.LocalStrings.current
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            SinqTopBar(title = s.customizeTitle, onBack = onBack)
-        },
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-        ) {
-            item {
-                Text(
-                    text = s.customizeIntro,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.height(Spacing.sm))
-            }
-            items(hours, key = { it.id }) { hour ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onOpenHour(hour.id) }
-                        .padding(vertical = 18.dp),
-                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(hour.name, style = MaterialTheme.typography.titleMedium)
-                    Icon(
-                        Icons.AutoMirrored.Outlined.KeyboardArrowRight,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-            }
-        }
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomizeHourScreen(hourId: String, onBack: () -> Unit) {
