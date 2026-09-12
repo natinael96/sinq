@@ -620,6 +620,7 @@ private fun AgpeyaNavHost(
                 onBack = { navController.popBackStack() },
                 initialSectionId = backStackEntry.arguments?.getString("sec"),
                 onOpenBook = { id -> navController.navigate("book/$id") { launchSingleTop = true } },
+                onOpenPrayerList = { navController.navigate("prayerlist") { launchSingleTop = true } },
             )
         }
         composable("scriptures") {

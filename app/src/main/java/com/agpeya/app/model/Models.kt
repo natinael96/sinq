@@ -103,6 +103,16 @@ data class PrayerPerson(
     val id: String,
     val name: String,
     val note: String = "",
+    /**
+     * Whether this name is prayed among the departed.
+     *
+     * The ጸሎተ ማርያም printed at the foot of the list already prays for ሕዝበ
+     * ክርስቲያን and for ነፍሳተ ሙታን in separate lines; the list could not make the
+     * distinction its own prayer makes. Defaulting to false keeps every list
+     * written by an older version readable: the repository decodes with
+     * ignoreUnknownKeys and writes with encodeDefaults, so nobody's names move.
+     */
+    val departed: Boolean = false,
 )
 
 /** A saved bookmark — a snapshot so the bookmarks list renders without rescanning content. */

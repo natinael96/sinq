@@ -607,6 +607,14 @@ interface Strings {
     val prayerNoteLabel: String
     val noPrayerListTitle: String
     val noPrayerListBody: String
+    /** The two groups the ጸሎተ ማርያም at the foot of the list already prays apart. */
+    val prayerListLiving: String
+    val prayerListDeparted: String
+    fun prayerListCount(count: Int): String
+    /** Just the number, in the script the language counts in. */
+    fun countMark(count: Int): String
+    fun personRemoved(name: String): String
+    val undoAction: String
 
     // Scheduled intentions (ምጽዋት / ንስሐ): reminders configured in Settings.
     // Deliberately not habits — nothing is recorded or streaked.
@@ -1477,6 +1485,12 @@ object AmharicStrings : Strings {
     override val prayerNoteLabel = "ማስታወሻ (አማራጭ)"
     override val noPrayerListTitle = "ገና ማንም አልተጨመረም"
     override val noPrayerListBody = "በጸሎት የሚያስቧቸውን ሰዎች እዚህ ይጨምሩ።"
+    override val prayerListLiving = "ሕያዋን"
+    override val prayerListDeparted = "ነፍሳተ ሙታን"
+    override fun prayerListCount(count: Int) = "${geezNumeral(count)} ስሞች"
+    override fun countMark(count: Int) = geezNumeral(count)
+    override fun personRemoved(name: String) = "$name ተወግዷል"
+    override val undoAction = "መልስ"
 
     override val settingsAlmsReminder = "የምጽዋት ማስታወሻ"
     override val settingsAlmsReminderDesc = "በመረጡት ቀን ምጽዋት እንዲሰጡ ያስታውስዎታል"
@@ -2220,7 +2234,7 @@ object EnglishStrings : Strings {
     override val hourNameLabel = "Hour name"
     override val rename = "Rename"
     override val manageHoursSubtitle = "When each one rings"
-    override val manageHoursIntro = "Tap a time to change when it rings, or a name to edit its sections. Rename, hide and reorder are in each row’s menu."
+    override val manageHoursIntro = "Tap a time to change when it rings, or a name to edit its sections. Rename, hide and reorder are in each row\u2019s menu."
 
 
     override val profileSection = "Profile"
@@ -2333,6 +2347,12 @@ object EnglishStrings : Strings {
     override val prayerNoteLabel = "Note (optional)"
     override val noPrayerListTitle = "No one here yet"
     override val noPrayerListBody = "Add the people you want to remember in prayer."
+    override val prayerListLiving = "Living"
+    override val prayerListDeparted = "The departed"
+    override fun prayerListCount(count: Int) = if (count == 1) "1 name" else "$count names"
+    override fun countMark(count: Int) = count.toString()
+    override fun personRemoved(name: String) = "$name removed"
+    override val undoAction = "Undo"
 
     override val settingsAlmsReminder = "Almsgiving reminder"
     override val settingsAlmsReminderDesc = "Reminds you to give alms on the days you choose"

@@ -26,6 +26,7 @@ import androidx.core.net.toUri
 import com.agpeya.app.R
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.theme.Spacing
+import com.agpeya.app.ui.theme.inLatin
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -62,20 +63,20 @@ fun AboutScreen(onBack: () -> Unit, onOpenLicenses: () -> Unit = {}) {
             if (version.isNotBlank()) {
                 Text(
                     "v$version",
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelMedium.inLatin(),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.height(Spacing.sm))
             }
-            Para(s.aboutTagline, MaterialTheme.typography.bodyMedium)
+            Para(s.aboutTagline, MaterialTheme.typography.bodyMedium.inLatin())
             Section(s.aboutSourceTitle)
-            Para(s.aboutSourceBody, MaterialTheme.typography.bodyMedium)
+            Para(s.aboutSourceBody, MaterialTheme.typography.bodyMedium.inLatin())
             Section(s.aboutFontTitle)
-            Para(s.aboutFontBody, MaterialTheme.typography.bodyMedium)
+            Para(s.aboutFontBody, MaterialTheme.typography.bodyMedium.inLatin())
             Section(s.aboutPrivacyTitle)
-            Para(s.aboutPrivacyBody, MaterialTheme.typography.bodyMedium)
+            Para(s.aboutPrivacyBody, MaterialTheme.typography.bodyMedium.inLatin())
             Section(s.aboutLicenceTitle)
-            Para(s.aboutLicenceBody, MaterialTheme.typography.bodyMedium)
+            Para(s.aboutLicenceBody, MaterialTheme.typography.bodyMedium.inLatin())
             Spacer(Modifier.height(Spacing.xl))
             Surface(
                 onClick = {
@@ -99,12 +100,12 @@ fun AboutScreen(onBack: () -> Unit, onOpenLicenses: () -> Unit = {}) {
                     Column {
                         Text(
                             text = "Built by Natinael M.",
-                            style = MaterialTheme.typography.titleSmall,
+                            style = MaterialTheme.typography.titleSmall.inLatin(),
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
                             text = "@natinael96 · Telegram",
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodySmall.inLatin(),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
@@ -135,7 +136,11 @@ fun AboutScreen(onBack: () -> Unit, onOpenLicenses: () -> Unit = {}) {
 @Composable
 private fun Section(title: String) {
     Spacer(Modifier.height(Spacing.lg))
-    Text(title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+    Text(
+        title,
+        style = MaterialTheme.typography.labelMedium.inLatin(0.5.sp),
+        color = MaterialTheme.colorScheme.secondary,
+    )
     Spacer(Modifier.height(Spacing.xs))
 }
 

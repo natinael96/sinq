@@ -13,17 +13,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,14 +46,19 @@ import com.agpeya.app.ui.common.Candle
 import com.agpeya.app.ui.common.EthiopianDate
 import com.agpeya.app.ui.common.Tab
 import com.agpeya.app.ui.common.HeroCard
-import com.agpeya.app.ui.common.NavRow
 import com.agpeya.app.ui.common.SectionHeader
 import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.LocalMotion
 import com.agpeya.app.ui.theme.Motion
 import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.sinqColors
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
@@ -99,6 +109,9 @@ fun journeyLine(summary: PrayerJourney.Summary, s: Strings): String {
     }
 }
 
+/** The journal button's list key: the FAB asks the list whether this is on screen. */
+private const val JOURNAL_ACTION = "journal_action"
+
 /**
  * ጉዞ — where have I walked?
  *
@@ -139,13 +152,46 @@ fun JourneyScreen(
     var selectedEpochDay by rememberSaveable { androidx.compose.runtime.mutableStateOf<Long?>(null) }
     val selectedDay = selectedEpochDay?.let(LocalDate::ofEpochDay)
 
+    val listState = rememberLazyListState()
+    val motion = LocalMotion.current
+    // The floating copy is a stand-in for the real button, so it exists only
+    // while the real one cannot be reached. Any sliver counts as reached:
+    // visibleItemsInfo includes a partially shown item, which is the rule we
+    // want — a button half on screen is a button you can tap.
+    //
+    // Before the first layout there is nothing to go on, and guessing "hidden"
+    // would flash a FAB onto a screen short enough to show the button anyway.
+    val journalOnScreen by remember {
+        derivedStateOf {
+            val info = listState.layoutInfo
+            info.totalItemsCount == 0 ||
+                info.visibleItemsInfo.any { it.key == JOURNAL_ACTION }
+        }
+    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         // The bar belongs to the host that holds all four tabs, and it carries
         // its own navigation-bar padding; this page only insets for the status bar.
         contentWindowInsets = WindowInsets.statusBars,
+        floatingActionButton = {
+            AnimatedVisibility(
+                visible = !journalOnScreen,
+                enter = fadeIn(motion.spec()) + scaleIn(motion.spec(), initialScale = 0.85f),
+                exit = fadeOut(motion.spec()) + scaleOut(motion.spec(), targetScale = 0.85f),
+            ) {
+                ExtendedFloatingActionButton(
+                    onClick = onOpenJournal,
+                    icon = { Icon(Icons.Outlined.EditNote, contentDescription = null) },
+                    text = { Text(s.journalTitle) },
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary,
+                )
+            }
+        },
     ) { innerPadding ->
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
@@ -264,11 +310,31 @@ fun JourneyScreen(
                 )
             }
 
-            item {
+            item(key = JOURNAL_ACTION) {
                 Spacer(Modifier.height(Spacing.xs))
                 // The journal sits with ጉዞ because both are the day looked back
                 // on — but it is never counted or scored alongside the habits.
-                NavRow(s.journalTitle, onClick = onOpenJournal)
+                //
+                // It is a button and not a row because it is the one thing on
+                // this screen you write rather than read, and it was being read
+                // as one more setting at the end of a long scroll.
+                Button(
+                    onClick = onOpenJournal,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                    shape = MaterialTheme.shapes.medium,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary,
+                    ),
+                ) {
+                    Icon(
+                        Icons.Outlined.EditNote,
+                        contentDescription = null,
+                        modifier = Modifier.size(IconSize.small),
+                    )
+                    Spacer(Modifier.width(Spacing.sm))
+                    Text(s.journalTitle)
+                }
                 Spacer(Modifier.height(Spacing.md))
             }
         }

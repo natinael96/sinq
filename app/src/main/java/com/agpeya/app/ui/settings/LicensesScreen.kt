@@ -1,9 +1,15 @@
 package com.agpeya.app.ui.settings
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -12,11 +18,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.theme.inLatin
 import com.agpeya.app.ui.theme.Spacing
 
 /**
@@ -194,18 +199,38 @@ private fun LicPara(text: String) {
     Spacer(Modifier.height(Spacing.sm))
 }
 
-/** Verbatim licence text: small, monospace, never translated or reflowed by style. */
+/**
+ * The licence, verbatim.
+ *
+ * It was 11sp monospace, which is a size and a face for code and neither for
+ * four thousand characters of prose: it read as something pasted in by
+ * accident. It is the page's own small size now, in the platform sans because
+ * the text is pure ASCII, and it is marked as quoted by a rule down its left
+ * rather than by pretending to be a terminal.
+ *
+ * The surrounding paragraphs are NOT Latin: they name ግጻዌ and ሥርዓተ ማኅሌት
+ * mid-sentence, so they stay on the bundled Ethiopic face.
+ */
 @Composable
 private fun LicenseBlock(text: String) {
-    Text(
-        text,
-        style = MaterialTheme.typography.bodySmall.copy(
-            fontFamily = FontFamily.Monospace,
-            fontSize = 11.sp,
-            lineHeight = 15.sp,
-        ),
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
+    Row(
+        Modifier
+            .padding(vertical = Spacing.xs)
+            .height(IntrinsicSize.Min),
+    ) {
+        Box(
+            Modifier
+                .width(2.dp)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.outlineVariant),
+        )
+        Text(
+            text,
+            style = MaterialTheme.typography.bodySmall.inLatin(),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = Spacing.md),
+        )
+    }
     Spacer(Modifier.height(Spacing.sm))
 }
 

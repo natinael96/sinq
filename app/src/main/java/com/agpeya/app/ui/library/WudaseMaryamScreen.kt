@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,11 +18,14 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import androidx.compose.material.icons.outlined.Today
+import androidx.compose.material.icons.outlined.VolunteerActivism
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -45,6 +49,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -78,6 +84,7 @@ fun WudaseMaryamScreen(
     onBack: () -> Unit,
     initialSectionId: String? = null,
     onOpenBook: (String) -> Unit = {},
+    onOpenPrayerList: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
@@ -105,6 +112,12 @@ fun WudaseMaryamScreen(
     val initialIndex = remember(sections, initialSectionId) {
         initialSectionId?.let { id -> sections.indexOfFirst { it.id == id }.takeIf { it >= 0 } }
     }
+    // Opening ውዳሴ ማርያም lands on ጸሎት ዘዘወትር, not on the weekday portion. It is
+    // the prayer said every day, so it is the one most openings are for; the
+    // day's own portion is a tap away on the ቀጥል door at the foot of it.
+    val dailyIndex = remember(sections) {
+        sections.indexOfFirst { it.id == "daily" }.takeIf { it >= 0 } ?: 0
+    }
     // መልክአ ማርያም and መልክአ ኢየሱስ belong beside ውዳሴ ማርያም, but they are books and
     // they are already on the shelf. Linked rather than copied: one text, in one
     // place, reached from both. Resolved by title through the folded key the
@@ -117,7 +130,7 @@ fun WudaseMaryamScreen(
         }
     }
     var picked by rememberSaveable { mutableIntStateOf(-1) }
-    val selected = if (picked >= 0) picked else initialIndex ?: todayIndex
+    val selected = if (picked >= 0) picked else initialIndex ?: dailyIndex
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -126,6 +139,11 @@ fun WudaseMaryamScreen(
                 title = s.wudaseMariam,
                 onBack = onBack,
                 actions = {
+                    // The same pill the Psalter carries, in the same corner:
+                    // two editions, one control, named for the edition it
+                    // switches to. It was a full-width segmented bar at the top
+                    // of the text, which cost a row of reading on every open.
+                    com.agpeya.app.ui.common.EditionToggle(geez = geez) { geez = !geez }
                     // The whole portion being read, in the language being read.
                     val shown = sections.getOrNull(selected.coerceIn(0, (sections.size - 1).coerceAtLeast(0)))
                     com.agpeya.app.ui.common.ReaderToolsMenu(
@@ -192,12 +210,15 @@ fun WudaseMaryamScreen(
             modifier = Modifier.fillMaxSize().widthIn(max = ReadingMaxWidth),
             contentPadding = PaddingValues(horizontal = Spacing.screen),
         ) {
-            item(key = "lang") {
-                Spacer(Modifier.height(Spacing.sm))
-                LanguageToggle(geez = geez, amharicLabel = s.wudaseLangAmharic, geezLabel = s.wudaseLangGeez) { geez = it }
-            }
             item(key = "days") {
-                SectionStrip(sections, selected) { picked = it }
+                Spacer(Modifier.height(Spacing.sm))
+                SectionStrip(
+                    sections = sections,
+                    selected = selected,
+                    companions = companions,
+                    onSelect = { picked = it },
+                    onOpenBook = onOpenBook,
+                )
                 Spacer(Modifier.height(Spacing.sm))
             }
             if (section != null) {
@@ -238,15 +259,43 @@ fun WudaseMaryamScreen(
                     }
                 }
             }
-            if (companions.isNotEmpty()) {
-                item(key = "companions") {
+            // Where to go on from here, as one ቀጥል strip. Landing on ጸሎት
+            // ዘዘወትር means the day's own portion needs a door, and it names the
+            // day it opens rather than saying "continue" and leaving you to
+            // find out. ይወድስዋ መላእክት gets a second one: the praise ends and the
+            // names you carry are prayed next, which is what የጸሎት ዝርዝር holds.
+            val todaySection = sections.getOrNull(todayIndex)
+            val showToday = todaySection != null && selected != todayIndex
+            val showPrayerList = section?.id == "yiwedsewa_melaekt"
+            if (showToday || showPrayerList) {
+                item(key = "doors") {
                     Spacer(Modifier.height(Spacing.lg))
                     com.agpeya.app.ui.common.SinqDivider()
-                    companions.forEach { (title, id) ->
-                        com.agpeya.app.ui.common.ListRow(
-                            title = title,
-                            onClick = { onOpenBook(id) },
-                        )
+                    Spacer(Modifier.height(Spacing.md))
+                    Text(
+                        s.continueReading,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
+                    Spacer(Modifier.height(Spacing.sm))
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+                    ) {
+                        if (showToday && todaySection != null) {
+                            com.agpeya.app.ui.common.DoorChip(
+                                icon = Icons.Outlined.Today,
+                                label = "${s.todayLabel}  ·  ${todaySection.label}",
+                                onClick = { picked = todayIndex },
+                            )
+                        }
+                        if (showPrayerList) {
+                            com.agpeya.app.ui.common.DoorChip(
+                                icon = Icons.Outlined.VolunteerActivism,
+                                label = s.prayerListTitle,
+                                onClick = onOpenPrayerList,
+                            )
+                        }
                     }
                 }
             }
@@ -273,43 +322,26 @@ fun WudaseMaryamScreen(
     }
 }
 
-/** Amharic ⇄ Ge'ez segmented toggle. */
-@Composable
-private fun LanguageToggle(geez: Boolean, amharicLabel: String, geezLabel: String, onSelect: (Boolean) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
-            .padding(3.dp),
-        horizontalArrangement = Arrangement.spacedBy(3.dp),
-    ) {
-        ToggleHalf(amharicLabel, selected = !geez, modifier = Modifier.weight(1f)) { onSelect(false) }
-        ToggleHalf(geezLabel, selected = geez, modifier = Modifier.weight(1f)) { onSelect(true) }
-    }
-}
 
-@Composable
-private fun ToggleHalf(label: String, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(9.dp))
-            .background(if (selected) com.agpeya.app.ui.theme.sinqColors.hero else androidx.compose.ui.graphics.Color.Transparent)
-            .clickable(onClick = onClick)
-            .padding(vertical = 9.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            label,
-            style = MaterialTheme.typography.labelLarge.inReadingFont(),
-            color = if (selected) com.agpeya.app.ui.theme.sinqColors.onHero else MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
 
+/**
+ * The portions, as a strip: ጸሎት ዘዘወትር, the seven days, አንቀጸ ብርሃን, ይወድስዋ መላእክት,
+ * and then the two መልክእ that belong beside them.
+ *
+ * መልክአ ማርያም and መልክአ ኢየሱስ are books and live on the shelf, so these two chips
+ * leave the screen rather than selecting a portion. They are ringed rather than
+ * filled and carry a book, which is how the app already marks a door that goes
+ * somewhere else. They used to be two rows at the very foot of the text, which
+ * meant scrolling a whole portion to find out they were there.
+ */
 @Composable
-private fun SectionStrip(sections: List<WudaseSection>, selected: Int, onSelect: (Int) -> Unit) {
+private fun SectionStrip(
+    sections: List<WudaseSection>,
+    selected: Int,
+    companions: List<Pair<String, String>>,
+    onSelect: (Int) -> Unit,
+    onOpenBook: (String) -> Unit,
+) {
     val stripState = androidx.compose.foundation.lazy.rememberLazyListState()
     // Keep the highlighted chip on screen — Sunday and the appended prayers sit
     // past the fold on narrow devices.
@@ -339,6 +371,31 @@ private fun SectionStrip(sections: List<WudaseSection>, selected: Int, onSelect:
                     style = MaterialTheme.typography.labelLarge.inReadingFont(),
                     fontWeight = if (isSel) FontWeight.SemiBold else FontWeight.Normal,
                     color = if (isSel) com.agpeya.app.ui.theme.sinqColors.onHero else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        items(companions.size, key = { "bk_${companions[it].second}" }) { i ->
+            val (title, id) = companions[i]
+            Row(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
+                    .clickable { onOpenBook(id) }
+                    .semantics { role = Role.Button }
+                    .padding(horizontal = 16.dp, vertical = 9.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Outlined.MenuBook,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(16.dp),
+                )
+                Text(
+                    title,
+                    style = MaterialTheme.typography.labelLarge.inReadingFont(),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }

@@ -45,16 +45,38 @@ object PrayerListRepository {
         }
     }
 
-    suspend fun add(context: Context, name: String, note: String) = update(context) {
-        it + PrayerPerson(id = UUID.randomUUID().toString(), name = name.trim(), note = note.trim())
-    }
+    suspend fun add(context: Context, name: String, note: String, departed: Boolean = false) =
+        update(context) {
+            it + PrayerPerson(
+                id = UUID.randomUUID().toString(),
+                name = name.trim(),
+                note = note.trim(),
+                departed = departed,
+            )
+        }
 
-    suspend fun edit(context: Context, id: String, name: String, note: String) = update(context) { list ->
-        list.map { if (it.id == id) it.copy(name = name.trim(), note = note.trim()) else it }
-    }
+    suspend fun edit(context: Context, id: String, name: String, note: String, departed: Boolean) =
+        update(context) { list ->
+            list.map {
+                if (it.id == id) it.copy(name = name.trim(), note = note.trim(), departed = departed)
+                else it
+            }
+        }
 
     suspend fun remove(context: Context, id: String) = update(context) { list ->
         list.filterNot { it.id == id }
+    }
+
+    /**
+     * Put a removed person back where they were.
+     *
+     * Undo has to restore the position as well as the name: the list is recited
+     * in the order it was built, so a name that returns to the end has not
+     * really been restored.
+     */
+    suspend fun insertAt(context: Context, person: PrayerPerson, index: Int) = update(context) { list ->
+        if (list.any { it.id == person.id }) list
+        else list.toMutableList().apply { add(index.coerceIn(0, size), person) }
     }
 
     /** Add restored people that aren't already present, keyed by id. */

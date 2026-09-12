@@ -87,6 +87,29 @@ private fun ethiopic(
  * Hierarchy is carried by size and weight in even steps, so a heading reads as a
  * heading at any system font scale rather than at one particular size.
  */
+/**
+ * Latin prose, in the platform's own sans.
+ *
+ * Every role in [AgpeyaTypography] is Noto Sans Ethiopic with letter spacing
+ * forced to zero, which is right for Ethiopic and wrong for a paragraph of
+ * English: the Latin cut of an Ethiopic face reads as a different app, and
+ * Material's tracking is gone with it.
+ *
+ * Two places are English by design and nothing else — the About page body and
+ * the verbatim SIL licence. They take this instead.
+ *
+ * Only for runs that carry NO Ethiopic. The platform sans has no Ethiopic
+ * coverage, so a mixed string set in it would either tofu or fall through to
+ * whatever face the device happens to own, which is the one thing PLAN.md §2.6
+ * says never to do. The licence screen's own paragraphs name ግጻዌ and
+ * ሥርዓተ ማኅሌት in the middle of English sentences; they stay on the Ethiopic face
+ * for exactly that reason.
+ */
+fun TextStyle.inLatin(tracking: TextUnit = 0.15.sp): TextStyle = copy(
+    fontFamily = FontFamily.SansSerif,
+    letterSpacing = tracking,
+)
+
 val AgpeyaTypography = Typography(
     displayLarge = ethiopic(44.sp, 56.sp, FontWeight.Bold),
     displayMedium = ethiopic(36.sp, 46.sp, FontWeight.Bold),
