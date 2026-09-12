@@ -4,6 +4,40 @@
    The app's rule holds here too, hierarchy comes from spacing and type
    rather than from wrapping everything in a box. */
 
+/* ---- The app own Ethiopic, self-hosted ---------------------------------
+   The site used to name "Noto Sans Ethiopic" and hope: every Amharic string on
+   it rendered in whatever Ethiopic face the visitor happened to own, which is
+   Nyala on Windows, Kefa on macOS and Noto elsewhere. Those look nothing like
+   each other, so the drawn frames could not look like the app by construction.
+
+   Both files come from app/src/main/res/font. To regenerate after the app
+   changes a face, with fonttools installed:
+
+     fonttools varLib.instancer noto_sans_ethiopic.ttf wght=400 wdth=100 \
+       -o noto400.ttf
+     pyftsubset noto400.ttf --flavor=woff2 --layout-features='*' \
+       --unicodes=U+0020-007E,U+00A0-00FF,U+2000-206F,U+20B0-20BF,\
+U+1200-137F,U+1380-139F,U+2D80-2DDF,U+AB00-AB2F \
+       --output-file=noto-ethiopic.woff2
+
+     Sinq Ethiopic    Noto Sans Ethiopic, the app's UI face. Kept at the FULL
+                      Ethiopic block, because changelog.html is regenerated
+                      from CHANGELOG.md on every release and a tight subset
+                      would turn the next release's new words into tofu.
+
+   The app declares Noto as a single Font() with no weight, so Android renders
+   the 400 instance and synthesises bold. Both files are instanced at wght 400
+   for exactly that reason, and the frames turn font synthesis back on so a
+   browser fakes bold the same way Android does. */
+@font-face {
+  font-family: "Sinq Ethiopic";
+  src: url("noto-ethiopic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+1200-139F, U+2D80-2DDF, U+AB00-AB2F;
+}
+
 :root {
   color-scheme: light dark;
   --hero:    #0B3129;
@@ -49,14 +83,14 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font: 17px/1.68 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 17px/1.68 system-ui, -apple-system, "Segoe UI", Roboto, "Sinq Ethiopic", sans-serif;
   font-synthesis-weight: none;
   -webkit-font-smoothing: antialiased;
 }
 
 /* Ethiopic wants a touch more air between lines than Latin does. */
 .ethi {
-  font-family: "Noto Sans Ethiopic", "Abyssinica SIL", "Nyala",
+  font-family: "Sinq Ethiopic", "Noto Sans Ethiopic", "Nyala",
                system-ui, -apple-system, sans-serif;
   line-height: 1.85;
 }
@@ -470,186 +504,6 @@ fieldset.kinds { border: 0; margin: 0 0 26px; padding: 0; }
 .form-status:empty { display: none; }
 .form-status.ok { color: var(--link); font-weight: 600; }
 .form-status.bad { color: #A6402F; font-weight: 600; }
-
-/* ---- Drawn screens -----------------------------------------------------
-   The app's own screens, drawn in CSS rather than captured: there is no
-   screenshot pipeline, and a drawing built from the app's real tokens and real
-   strings is honest as long as the page says it is a drawing, which it does.
-
-   These tokens are the APP's, not the site's. The two grounds differ slightly
-   (the app reads on #EFEDE2, the site on #FAF9F6) and the frames should look
-   like the app, so they carry their own set and stay in the app's light theme
-   in both site themes, the way a product shot does. */
-.screens {
-  --app-ground:#EFEDE2; --app-surface:#F7F5EB; --app-ink:#1D2B24;
-  --app-muted:#56655A; --app-hero:#0E3B31; --app-on-hero:#F4F1E4;
-  --app-on-hero-dim:#B9CCC0; --app-gold:#7E5F1E; --app-gold-lit:#E0BC65;
-  --app-arke:#A5140A; --app-hair:rgba(29,43,36,.13);
-  /* gold on a gold tint: the tint darkens the ground enough that
-     #7E5F1E drops under 4.5:1, so tinted chips take this instead. */
-  --app-gold-ink:#6B5018;
-  display: grid; gap: 26px; margin-top: 30px;
-  grid-template-columns: repeat(auto-fit, minmax(232px, 1fr));
-}
-/* figure carries a 40px UA margin on each side, which was eating a third
-   of every column. */
-.screen { display: flex; flex-direction: column; gap: 12px; margin: 0; }
-.screen > figcaption { font-size: 14.5px; color: var(--muted); margin: 0; }
-.screen > figcaption b { display: block; color: var(--ink); font-weight: 600; }
-
-.scr {
-  background: var(--app-ground); color: var(--app-ink);
-  border: 1px solid var(--line); border-radius: 22px;
-  box-shadow: var(--shadow); overflow: hidden;
-  font-family: "Noto Sans Ethiopic", "Abyssinica SIL", system-ui, sans-serif;
-  padding: 11px 11px 0;
-}
-.scr-bar {
-  display: flex; align-items: center; gap: 8px;
-  padding-bottom: 9px; border-bottom: 1px solid var(--app-hair); margin: 0 -11px 0;
-  padding-left: 11px; padding-right: 11px;
-}
-.scr-bar .bk { color: var(--app-muted); font-size: 14px; }
-.scr-bar .ttl { font-size: 12.5px; font-weight: 700; flex: 1; line-height: 1.3; }
-.scr-bar .ttl small { display: block; font-size: 9px; font-weight: 400; color: var(--app-muted); }
-.scr-bar .pill {
-  font-size: 9px; font-weight: 600; color: var(--app-gold-ink);
-  border: 1px solid rgba(126,95,30,.45); background: rgba(126,95,30,.12);
-  border-radius: 999px; padding: 3px 9px;
-}
-.scr-bar .act { color: var(--app-gold); font-size: 14px; }
-.scr-in { padding: 10px 0 12px; }
-
-.scr-mark { font-size: 11.5px; font-weight: 700; color: var(--app-hero); }
-.scr-hero {
-  margin-top: 7px; background: var(--app-hero); border-radius: 17px;
-  padding: 10px 13px; display: flex; align-items: center; gap: 10px;
-  position: relative; overflow: hidden;
-}
-.scr-hero::after {
-  content: ""; position: absolute; right: -16px; top: -20px;
-  width: 84px; height: 84px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(228,188,90,.34), transparent 68%);
-}
-.scr-hero div { flex: 1; min-width: 0; position: relative; }
-.scr-hero .k { display: block; font-size: 8.5px; color: var(--app-on-hero-dim); }
-.scr-hero .v { display: block; font-size: 13px; color: var(--app-on-hero); font-weight: 600; margin-top: 2px; }
-.scr-candle { width: 13px; height: 23px; position: relative; flex: none; }
-.scr-candle b { position: absolute; bottom: 0; left: 2px; width: 8px; height: 16px; border-radius: 2px; background: var(--app-on-hero-dim); }
-.scr-candle i { position: absolute; top: 0; left: 4px; width: 5px; height: 7px; background: var(--app-gold-lit);
-                border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; }
-
-.scr-hero.small { padding: 8px 13px; }
-.scr-badge {
-  font-size: 8px; font-weight: 700; letter-spacing: .06em; flex: none;
-  color: var(--app-gold-lit); background: rgba(228,188,90,.16);
-  border: 1px solid rgba(228,188,90,.45); border-radius: 999px; padding: 3px 8px;
-  position: relative;
-}
-
-/* SinqCard(accented = true): the gold-ringed card the hours line uses. */
-.scr-card {
-  margin-top: 7px; background: var(--app-surface);
-  border: 1px solid rgba(126,95,30,.45); border-radius: 15px; padding: 9px 11px;
-}
-.scr-cardh {
-  display: flex; justify-content: space-between; align-items: baseline;
-  font-size: 10.5px; font-weight: 600; margin: 0 0 7px;
-}
-.scr-cardh em { font-style: normal; font-size: 8.5px; font-weight: 600; color: var(--app-gold); }
-
-.scr-duo { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
-.scr-tile {
-  background: var(--app-surface); border: 1px solid var(--app-hair);
-  border-radius: 13px; padding: 8px 10px; font-size: 9.5px; font-weight: 600;
-  display: flex; flex-direction: column; gap: 2px;
-}
-.scr-tile em { font-style: normal; font-weight: 400; font-size: 8px; color: var(--app-muted); }
-
-/* A reader: verse numbers in Ge'ez, gold on the line, and a touched verse held
-   in gold. The numeral takes the darker gold when the tint sits behind it. */
-.scr-v { font-size: 9px; line-height: 1.8; margin: 0 0 5px; color: var(--app-ink); }
-.scr-v em { font-style: normal; font-weight: 600; color: var(--app-gold); margin-right: 3px; }
-.scr-v.lit {
-  background: rgba(228,188,90,.3); border-radius: 5px;
-  padding: 2px 4px; margin-left: -4px; margin-right: -4px;
-}
-.scr-v.lit em { color: var(--app-gold-ink); }
-
-.scr-h {
-  font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--app-muted); font-weight: 600; margin: 11px 0 3px;
-  display: flex; justify-content: space-between;
-}
-.scr-h em { font-style: normal; color: var(--app-gold); letter-spacing: 0; }
-.scr-rule { height: 1px; background: var(--app-hair); margin: 7px 0; }
-
-.scr-hours { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px 5px; }
-.scr-hours span { font-size: 8px; color: var(--app-muted); }
-.scr-hours span.on { color: var(--app-gold); font-weight: 600; }
-
-.scr-row {
-  display: flex; justify-content: space-between; align-items: baseline;
-  font-size: 10px; padding: 5px 0; border-top: 1px solid var(--app-hair);
-}
-.scr-row:first-of-type { border-top: none; }
-.scr-row .nt { color: var(--app-muted); font-size: 9px; }
-.scr-row .tick { color: #44654F; font-size: 9px; }
-
-.scr-heat { display: grid; grid-template-columns: repeat(13, 1fr); gap: 2px; margin-top: 5px; }
-.scr-heat i { display: block; aspect-ratio: 1; border-radius: 1px; background: rgba(14,59,49,.10); }
-.scr-heat i.a { background: rgba(14,59,49,.30); }
-.scr-heat i.b { background: rgba(14,59,49,.54); }
-.scr-heat i.c { background: rgba(14,59,49,.76); }
-
-.scr-btn {
-  display: block; text-align: center; margin: 12px 0 2px;
-  background: var(--app-gold); color: #FFFFFF;
-  border-radius: 12px; padding: 9px; font-size: 10.5px; font-weight: 700;
-}
-.scr-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
-.scr-chip {
-  font-size: 8.5px; border-radius: 999px; padding: 5px 10px;
-  border: 1px solid var(--app-hair); color: var(--app-muted);
-}
-.scr-chip.sel { background: var(--app-hero); color: var(--app-on-hero); border-color: transparent; font-weight: 600; }
-.scr-chip.book { color: var(--app-muted); }
-.scr-door {
-  display: inline-flex; align-items: center; gap: 5px; font-size: 9px; font-weight: 600;
-  color: var(--app-ink); background: rgba(126,95,30,.10);
-  border: 1px solid rgba(126,95,30,.42); border-radius: 999px; padding: 6px 11px;
-}
-.scr-door em { font-style: normal; color: var(--app-gold-ink); }
-
-.scr-ttl {
-  text-align: center; color: var(--app-gold); font-size: 10.5px;
-  font-weight: 600; margin: 9px 0 7px;
-}
-.scr-p { font-size: 9px; line-height: 1.75; margin: 0 0 6px; color: var(--app-ink); }
-.scr-kick { font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase;
-            color: var(--app-gold); font-weight: 600; margin: 9px 0 4px; }
-.scr-p .inv { color: var(--app-arke); font-weight: 600; }
-
-.scr-add {
-  display: flex; align-items: center; gap: 6px; font-size: 9.5px; font-weight: 600;
-  color: var(--app-gold); padding: 8px 0 2px; border-top: 1px solid var(--app-hair);
-}
-.scr-add span {
-  width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--app-gold);
-  display: grid; place-items: center; font-size: 10px; line-height: 1;
-}
-
-.scr-tabs {
-  margin: 9px -11px 0; padding: 6px 11px 8px;
-  border-top: 1px solid var(--app-hair);
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px;
-  font-size: 7.5px; text-align: center; color: var(--app-muted);
-}
-.scr-tabs span.on { color: var(--app-gold); font-weight: 700; }
-
-@media (max-width: 560px) {
-  .screens { grid-template-columns: 1fr; gap: 34px; }
-}
 
 /* ---- Footer ------------------------------------------------------------- */
 footer { background: var(--hero); color: #A9C1B6; padding: 64px 20px 52px; font-size: 15.5px; }
