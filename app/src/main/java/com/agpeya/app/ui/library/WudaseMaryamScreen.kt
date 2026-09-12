@@ -129,8 +129,24 @@ fun WudaseMaryamScreen(
                 ?.let { title to it.id }
         }
     }
-    var picked by rememberSaveable { mutableIntStateOf(-1) }
-    val selected = if (picked >= 0) picked else initialIndex ?: dailyIndex
+    // The portions are pages: ውዳሴ ማርያም is read a portion at a time, one after
+    // another, so swiping turns one the way it turns a tab. The strip above the
+    // text still picks any of them directly — this is the gesture the reading
+    // already implies.
+    val pager = androidx.compose.foundation.pager.rememberPagerState(
+        pageCount = { sections.size },
+    )
+    val selected = pager.currentPage.coerceIn(0, (sections.size - 1).coerceAtLeast(0))
+    // The opening portion can only be chosen once the sections are loaded, and
+    // only once: after that the reader's own page stands.
+    var landed by rememberSaveable { mutableStateOf(false) }
+    androidx.compose.runtime.LaunchedEffect(sections.size) {
+        if (!landed && sections.isNotEmpty()) {
+            pager.scrollToPage(initialIndex ?: dailyIndex)
+            landed = true
+        }
+    }
+    val goToSection: (Int) -> Unit = { i -> scope.launch { pager.animateScrollToPage(i) } }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -190,21 +206,24 @@ fun WudaseMaryamScreen(
             return@Scaffold
         }
 
-        val section = sections.getOrNull(selected.coerceIn(0, sections.size - 1))
+        val section = sections.getOrNull(selected)
         // Live stanza selection: tap anchors, next tap moves the end; -1 = none.
         var selA by rememberSaveable(selected, geez) { mutableIntStateOf(-1) }
         var selB by rememberSaveable(selected, geez) { mutableIntStateOf(-1) }
         val selRange = com.agpeya.app.ui.reading.flatSelectionRange(selA, selB)
-        val listState = androidx.compose.foundation.lazy.rememberLazyListState()
-        // Jump back to the top when the user picks a different section — the keys
-        // are positional, so the old scroll offset would otherwise carry deep into
-        // the new day's text. Keyed off a saved sentinel so rotation doesn't jump.
-        var lastShown by rememberSaveable { mutableIntStateOf(-1) }
-        androidx.compose.runtime.LaunchedEffect(selected) {
-            if (lastShown != -1 && lastShown != selected) listState.scrollToItem(0)
-            lastShown = selected
-        }
         Box(Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.TopCenter) {
+        androidx.compose.foundation.pager.HorizontalPager(
+            state = pager,
+            modifier = Modifier.fillMaxSize(),
+            // The next portion is composed before it is reached, so a swipe
+            // uncovers text rather than a blank that fills in late.
+            beyondViewportPageCount = 1,
+            key = { sections[it].id },
+        ) { page ->
+        val pageSection = sections[page]
+        // Each portion keeps its own place in the text, so turning back to one
+        // returns to where it was left rather than to its first line.
+        val listState = androidx.compose.foundation.lazy.rememberLazyListState()
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize().widthIn(max = ReadingMaxWidth),
@@ -216,47 +235,47 @@ fun WudaseMaryamScreen(
                     sections = sections,
                     selected = selected,
                     companions = companions,
-                    onSelect = { picked = it },
+                    onSelect = goToSection,
                     onOpenBook = onOpenBook,
                 )
                 Spacer(Modifier.height(Spacing.sm))
             }
-            if (section != null) {
-                item(key = "title") {
+            item(key = "title") {
+                Text(
+                    text = if (geez) pageSection.titleGe else pageSection.titleAm,
+                    style = MaterialTheme.typography.titleMedium.inReadingFont(),
+                    color = MaterialTheme.colorScheme.secondary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 14.dp),
+                )
+            }
+            val stanzas = if (geez) pageSection.ge else pageSection.am
+            items(stanzas.size, key = { "st_$it" }) { i ->
+                // The highlight belongs to the portion being read, not to the
+                // one sliding past it under the finger.
+                val lit = page == selected && i in selRange
+                // Long-press still gives native character selection; a tap
+                // anchors/extends the stanza run for the share bar below.
+                androidx.compose.foundation.text.selection.SelectionContainer {
                     Text(
-                        text = if (geez) section.titleGe else section.titleAm,
-                        style = MaterialTheme.typography.titleMedium.inReadingFont(),
-                        color = MaterialTheme.colorScheme.secondary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 14.dp),
+                        text = stanzas[i],
+                        style = readingBodyStyle(bodyFontSp),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(
+                                if (lit) MaterialTheme.colorScheme.secondary.copy(alpha = 0.22f)
+                                else androidx.compose.ui.graphics.Color.Transparent
+                            )
+                            .semantics { this.selected = lit }
+                            .clickable {
+                                val (a, bSel) = com.agpeya.app.ui.reading.advanceFlatSelection(selA, i)
+                                selA = a
+                                selB = bSel
+                            }
+                            .padding(bottom = 16.dp),
                     )
-                }
-                val stanzas = if (geez) section.ge else section.am
-                items(stanzas.size, key = { "st_$it" }) { i ->
-                    // Long-press still gives native character selection; a tap
-                    // anchors/extends the stanza run for the share bar below.
-                    androidx.compose.foundation.text.selection.SelectionContainer {
-                        Text(
-                            text = stanzas[i],
-                            style = readingBodyStyle(bodyFontSp),
-                            color = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(
-                                    if (i in selRange)
-                                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.22f)
-                                    else androidx.compose.ui.graphics.Color.Transparent
-                                )
-                                .semantics { this.selected = i in selRange }
-                                .clickable {
-                                    val (a, bSel) = com.agpeya.app.ui.reading.advanceFlatSelection(selA, i)
-                                    selA = a
-                                    selB = bSel
-                                }
-                                .padding(bottom = 16.dp),
-                        )
-                    }
                 }
             }
             // Where to go on from here, as one ቀጥል strip. Landing on ጸሎት
@@ -265,8 +284,8 @@ fun WudaseMaryamScreen(
             // find out. ይወድስዋ መላእክት gets a second one: the praise ends and the
             // names you carry are prayed next, which is what የጸሎት ዝርዝር holds.
             val todaySection = sections.getOrNull(todayIndex)
-            val showToday = todaySection != null && selected != todayIndex
-            val showPrayerList = section?.id == "yiwedsewa_melaekt"
+            val showToday = todaySection != null && page != todayIndex
+            val showPrayerList = pageSection.id == "yiwedsewa_melaekt"
             if (showToday || showPrayerList) {
                 item(key = "doors") {
                     Spacer(Modifier.height(Spacing.lg))
@@ -286,7 +305,7 @@ fun WudaseMaryamScreen(
                             com.agpeya.app.ui.common.DoorChip(
                                 icon = Icons.Outlined.Today,
                                 label = "${s.todayLabel}  ·  ${todaySection.label}",
-                                onClick = { picked = todayIndex },
+                                onClick = { goToSection(todayIndex) },
                             )
                         }
                         if (showPrayerList) {
@@ -300,6 +319,7 @@ fun WudaseMaryamScreen(
                 }
             }
             item { Spacer(Modifier.height(Spacing.huge)) }
+        }
         }
         val stanzasNow = if (section == null) emptyList() else (if (geez) section.ge else section.am)
         val selBody = if (selRange.isEmpty()) null

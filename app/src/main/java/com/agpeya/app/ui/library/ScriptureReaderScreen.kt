@@ -478,7 +478,12 @@ fun ScriptureReaderScreen(
                     )
                     dayChapters.getOrNull(here + 1)?.let { (nextBook, nextChapter) ->
                         if (nextBook == bookKey) {
-                            ChapterStepper(onPrevious = null, onNext = { chapter = nextChapter })
+                            com.agpeya.app.ui.common.ChapterStepper(
+                                previousLabel = null,
+                                nextLabel = "${s.chapterUnit} ${com.agpeya.app.ui.reading.geezNumeral(nextChapter)}",
+                                onPrevious = null,
+                                onNext = { chapter = nextChapter },
+                            )
                         } else {
                             ListRow(
                                 title = s.nextChapter,
@@ -492,7 +497,9 @@ fun ScriptureReaderScreen(
                         }
                     }
                 }
-                ChapterStepper(
+                com.agpeya.app.ui.common.ChapterStepper(
+                    previousLabel = "${s.chapterUnit} ${com.agpeya.app.ui.reading.geezNumeral(chapter - 1)}",
+                    nextLabel = "${s.chapterUnit} ${com.agpeya.app.ui.reading.geezNumeral(chapter + 1)}",
                     onPrevious = { chapter -= 1 }.takeIf { chapter > 1 },
                     onNext = { chapter += 1 }.takeIf { chapter < b.chapters.size },
                 )
@@ -517,30 +524,4 @@ fun ScriptureReaderScreen(
  * top and finding it in the strip. Every other reader in the app steps from
  * where the reading ends; this one did not.
  */
-@Composable
-private fun ChapterStepper(onPrevious: (() -> Unit)?, onNext: (() -> Unit)?) {
-    if (onPrevious == null && onNext == null) return
-    val s = com.agpeya.app.ui.strings.LocalStrings.current
-    val colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(top = Spacing.xxl),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (onPrevious != null) {
-            androidx.compose.material3.TextButton(onClick = onPrevious, colors = colors) {
-                Text("‹  ${s.previousChapter}", style = MaterialTheme.typography.labelLarge)
-            }
-        } else {
-            Spacer(Modifier.width(Spacing.xxs))
-        }
-        if (onNext != null) {
-            androidx.compose.material3.TextButton(onClick = onNext, colors = colors) {
-                Text("${s.nextChapter}  ›", style = MaterialTheme.typography.labelLarge)
-            }
-        }
-    }
-}
 

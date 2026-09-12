@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -356,9 +358,11 @@ private fun BookSheet(book: ReadingMapBook, onOpen: (Int) -> Unit) {
             }
         }
         Spacer(Modifier.height(Spacing.md))
-        ReadingChip(s.readingOpenChapter(geezNumeral(minOf(book.read + 1, book.chapters)))) {
-            onOpen(minOf(book.read + 1, book.chapters))
-        }
+        com.agpeya.app.ui.common.DoorChip(
+            icon = Icons.AutoMirrored.Outlined.MenuBook,
+            label = s.readingOpenChapter(geezNumeral(minOf(book.read + 1, book.chapters))),
+            onClick = { onOpen(minOf(book.read + 1, book.chapters)) },
+        )
     }
 }
 

@@ -226,7 +226,11 @@ fun BookScreen(
                 // thousand paragraphs away.
                 if (chapters.size > 1) {
                     item(key = "stepper") {
-                        ChapterStepper(
+                        com.agpeya.app.ui.common.ChapterStepper(
+                            previousLabel = chapters.getOrNull(chapter - 1)?.title
+                                ?.takeIf { it.isNotBlank() } ?: s.previousChapter,
+                            nextLabel = chapters.getOrNull(chapter + 1)?.title
+                                ?.takeIf { it.isNotBlank() } ?: s.nextChapter,
                             onPrevious = if (chapter > 0) {
                                 { chapter -= 1; selA = -1; selB = -1 }
                             } else null,
@@ -330,30 +334,3 @@ private fun BookBlockRow(
     }
 }
 
-/** Prev/next at the foot of a chapter, matching the Bible reader's own. */
-@Composable
-private fun ChapterStepper(onPrevious: (() -> Unit)?, onNext: (() -> Unit)?) {
-    if (onPrevious == null && onNext == null) return
-    val s = com.agpeya.app.ui.strings.LocalStrings.current
-    val colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(top = Spacing.xxl),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (onPrevious != null) {
-            androidx.compose.material3.TextButton(onClick = onPrevious, colors = colors) {
-                Text("‹  ${s.previousChapter}", style = MaterialTheme.typography.labelLarge)
-            }
-        } else {
-            Spacer(Modifier.width(Spacing.xxs))
-        }
-        if (onNext != null) {
-            androidx.compose.material3.TextButton(onClick = onNext, colors = colors) {
-                Text("${s.nextChapter}  ›", style = MaterialTheme.typography.labelLarge)
-            }
-        }
-    }
-}

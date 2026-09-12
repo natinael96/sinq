@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
@@ -547,16 +548,23 @@ fun DoorChip(
     label: String,
     onClick: () -> Unit,
     external: Boolean = false,
+    /**
+     * Outlined and muted, for a chip that undoes rather than opens — አቁም
+     * beside ካርታው. It is not painted in the error colour: stopping a plan is
+     * a decision, not a mistake, and what was read is kept either way.
+     */
+    quiet: Boolean = false,
 ) {
     val s = LocalStrings.current
     val gold = MaterialTheme.colorScheme.secondary
+    val plain = external || quiet
     Row(
         modifier = Modifier
             .clip(CircleShape)
-            .background(if (external) Color.Transparent else gold.copy(alpha = 0.10f))
+            .background(if (plain) Color.Transparent else gold.copy(alpha = 0.10f))
             .border(
                 width = 1.dp,
-                color = if (external) MaterialTheme.colorScheme.outlineVariant else gold.copy(alpha = 0.42f),
+                color = if (plain) MaterialTheme.colorScheme.outlineVariant else gold.copy(alpha = 0.42f),
                 shape = CircleShape,
             )
             .clickable(onClick = onClick)
@@ -567,11 +575,17 @@ fun DoorChip(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
-        Icon(icon, contentDescription = null, tint = gold, modifier = Modifier.size(IconSize.small))
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = if (quiet) MaterialTheme.colorScheme.onSurfaceVariant else gold,
+            modifier = Modifier.size(IconSize.small),
+        )
         Text(
             label,
             style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onBackground,
+            color = if (quiet) MaterialTheme.colorScheme.onSurfaceVariant
+            else MaterialTheme.colorScheme.onBackground,
             maxLines = 1,
         )
         if (external) {
@@ -782,4 +796,102 @@ fun SinqTopBar(
             actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         ),
     )
+}
+
+/**
+ * The way on to the chapter before and the chapter after.
+ *
+ * It was two bare text buttons in the muted ink, pushed to the far corners of
+ * a full-width row — the least emphatic thing on a page whose whole business is
+ * moving through chapters, and the two readers carried a copy each. One pair of
+ * doors now, in the same gold-ringed shape as every other door in the app, each
+ * naming the chapter it opens rather than saying "next".
+ *
+ * The pair holds its sides: at the first chapter the ‹ side is empty rather
+ * than letting › slide across, so the control does not move under the thumb
+ * between one chapter and the next.
+ */
+@Composable
+fun ChapterStepper(
+    previousLabel: String?,
+    nextLabel: String?,
+    onPrevious: (() -> Unit)?,
+    onNext: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+) {
+    if (onPrevious == null && onNext == null) return
+    Row(
+        modifier = modifier.fillMaxWidth().padding(top = Spacing.xl),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (onPrevious != null && previousLabel != null) {
+            StepperHalf(
+                label = previousLabel,
+                leading = true,
+                onClick = onPrevious,
+                modifier = Modifier.weight(1f),
+            )
+        } else {
+            Spacer(Modifier.weight(1f))
+        }
+        if (onNext != null && nextLabel != null) {
+            StepperHalf(
+                label = nextLabel,
+                leading = false,
+                onClick = onNext,
+                modifier = Modifier.weight(1f),
+            )
+        } else {
+            Spacer(Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun StepperHalf(
+    label: String,
+    leading: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val gold = MaterialTheme.colorScheme.secondary
+    Row(
+        modifier = modifier
+            .clip(CircleShape)
+            .background(gold.copy(alpha = 0.10f))
+            .border(1.dp, gold.copy(alpha = 0.42f), CircleShape)
+            .clickable(onClick = onClick)
+            .semantics { role = Role.Button }
+            .heightIn(min = 48.dp)
+            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = if (leading) Arrangement.Start else Arrangement.End,
+    ) {
+        if (leading) {
+            Icon(
+                Icons.AutoMirrored.Outlined.KeyboardArrowLeft,
+                contentDescription = null,
+                tint = gold,
+                modifier = Modifier.size(IconSize.small),
+            )
+            Spacer(Modifier.width(Spacing.xs))
+        }
+        Text(
+            label,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        if (!leading) {
+            Spacer(Modifier.width(Spacing.xs))
+            Icon(
+                Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                contentDescription = null,
+                tint = gold,
+                modifier = Modifier.size(IconSize.small),
+            )
+        }
+    }
 }

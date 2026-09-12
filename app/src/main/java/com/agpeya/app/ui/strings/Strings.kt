@@ -603,6 +603,8 @@ interface Strings {
     val prayerListTitle: String
     val addPerson: String
     val editPerson: String
+    /** Where the note and ነፍሳተ ሙታን live, now that adding is only a name. */
+    val personAddHint: String
     val personNameLabel: String
     val prayerNoteLabel: String
     val noPrayerListTitle: String
@@ -1481,6 +1483,7 @@ object AmharicStrings : Strings {
     override val prayerListTitle = "የጸሎት ዝርዝር"
     override val addPerson = "ሰው ጨምር"
     override val editPerson = "አስተካክል"
+    override val personAddHint = "ማስታወሻ ለመጨመር ወይም በነፍሳተ ሙታን ለመመዝገብ ስሙን ይንኩ።"
     override val personNameLabel = "ስም"
     override val prayerNoteLabel = "ማስታወሻ (አማራጭ)"
     override val noPrayerListTitle = "ገና ማንም አልተጨመረም"
@@ -2343,6 +2346,7 @@ object EnglishStrings : Strings {
     override val prayerListTitle = "Prayer list"
     override val addPerson = "Add person"
     override val editPerson = "Edit"
+    override val personAddHint = "Tap a name to add a note or move it to the departed."
     override val personNameLabel = "Name"
     override val prayerNoteLabel = "Note (optional)"
     override val noPrayerListTitle = "No one here yet"

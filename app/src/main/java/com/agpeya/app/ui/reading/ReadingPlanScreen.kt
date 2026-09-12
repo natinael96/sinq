@@ -21,6 +21,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.EventNote
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.AutoStories
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
@@ -59,6 +64,7 @@ import com.agpeya.app.model.PlanReading
 import com.agpeya.app.model.ReadingPlan
 import com.agpeya.app.model.ReadingPlanContent
 import com.agpeya.app.model.ReadingPlanState
+import com.agpeya.app.ui.common.DoorChip
 import com.agpeya.app.ui.common.ListRow
 import com.agpeya.app.ui.common.NavRow
 import com.agpeya.app.ui.common.SectionHeader
@@ -522,7 +528,7 @@ private fun MapStrip(state: ReadingPlanState, onOpenMap: () -> Unit) {
     }
 }
 
-/** Where to go on from here. Chips, as elsewhere, rather than a stack of rows. */
+/** Where to go on from here — the same chips the ግጻዌ passage sends you on with. */
 @Composable
 private fun ContinueStrip(
     plans: List<Pair<ActivePlan, ReadingPlan>>,
@@ -544,51 +550,25 @@ private fun ContinueStrip(
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            ReadingChip(s.readingMap, onClick = onOpenMap)
+            DoorChip(Icons.Outlined.AutoStories, s.readingMap, onClick = onOpenMap)
             plans.forEach { (_, plan) ->
-                ReadingChip(
-                    if (plans.size > 1) "${s.readingAllDays} · ${plan.title}" else s.readingAllDays,
+                DoorChip(
+                    icon = Icons.AutoMirrored.Outlined.EventNote,
+                    label = if (plans.size > 1) "${s.readingAllDays} · ${plan.title}" else s.readingAllDays,
                     onClick = { onOpenAllDays(plan.id) },
                 )
             }
-            if (canAdd) ReadingChip(s.readingAdd, onClick = onAdd)
+            if (canAdd) DoorChip(Icons.Outlined.Add, s.readingAdd, onClick = onAdd)
+            // Quiet, and last: stopping is a decision the page should not press.
             plans.forEach { (_, plan) ->
-                ReadingChip(
-                    if (plans.size > 1) "${s.readingStop} · ${plan.title}" else s.readingStop,
-                    quiet = true,
+                DoorChip(
+                    icon = Icons.Outlined.Close,
+                    label = if (plans.size > 1) "${s.readingStop} · ${plan.title}" else s.readingStop,
                     onClick = { onStop(plan) },
+                    quiet = true,
                 )
             }
         }
-    }
-}
-
-/** The same chip the ግጻዌ passage page uses: gold for in, outline for quiet. */
-@Composable
-internal fun ReadingChip(label: String, quiet: Boolean = false, onClick: () -> Unit) {
-    val gold = MaterialTheme.colorScheme.secondary
-    Row(
-        modifier = Modifier
-            .clip(CircleShape)
-            .background(if (quiet) Color.Transparent else gold.copy(alpha = 0.10f))
-            .border(
-                width = 1.dp,
-                color = if (quiet) MaterialTheme.colorScheme.outlineVariant else gold.copy(alpha = 0.42f),
-                shape = CircleShape,
-            )
-            .clickable(onClick = onClick)
-            .semantics { role = Role.Button }
-            .heightIn(min = 48.dp)
-            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            label,
-            style = MaterialTheme.typography.labelLarge,
-            color = if (quiet) MaterialTheme.colorScheme.onSurfaceVariant
-            else MaterialTheme.colorScheme.onBackground,
-            maxLines = 1,
-        )
     }
 }
 
@@ -621,8 +601,8 @@ private fun CompletePanel(
         )
         Spacer(Modifier.height(Spacing.md))
         FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-            ReadingChip(s.readingMap, onClick = onOpenMap)
-            ReadingChip(s.readingRestart, onClick = onRestart)
+            DoorChip(Icons.Outlined.AutoStories, s.readingMap, onClick = onOpenMap)
+            DoorChip(Icons.Outlined.History, s.readingRestart, onClick = onRestart)
         }
     }
 }

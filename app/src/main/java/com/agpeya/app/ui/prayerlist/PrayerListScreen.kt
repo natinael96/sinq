@@ -24,6 +24,11 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.PersonAddAlt
 import androidx.compose.material.icons.outlined.VolunteerActivism
@@ -154,7 +159,7 @@ fun PrayerListScreen(onBack: () -> Unit) {
             )
         },
     ) { innerPadding ->
-        if (people.isEmpty()) {
+        if (people.isEmpty() && !adding) {
             Box(
                 Modifier.fillMaxSize().padding(innerPadding).padding(horizontal = Spacing.screen),
                 contentAlignment = Alignment.Center,
@@ -182,6 +187,9 @@ fun PrayerListScreen(onBack: () -> Unit) {
             // ነፍሳተ ሙታን by opening it, where the intention is written anyway.
             item(key = "add") {
                 AddNameRow(
+                    open = adding,
+                    onOpen = { adding = true },
+                    onClose = { adding = false },
                     onAdd = { name -> scope.launch { PrayerListRepository.add(context, name, "") } },
                 )
             }
@@ -191,16 +199,6 @@ fun PrayerListScreen(onBack: () -> Unit) {
         }
     }
 
-    if (adding) {
-        PersonDialog(
-            title = s.addPerson,
-            onConfirm = { name, note, isDeparted ->
-                scope.launch { PrayerListRepository.add(context, name, note, isDeparted) }
-                adding = false
-            },
-            onDismiss = { adding = false },
-        )
-    }
     if (editing != null) {
         PersonDialog(
             title = s.editPerson,
@@ -335,12 +333,17 @@ private fun PersonRow(person: PrayerPerson, onClick: () -> Unit) {
  * stays open and focused after each name so the next one is just typing.
  */
 @Composable
-private fun AddNameRow(onAdd: (String) -> Unit) {
+private fun AddNameRow(
+    open: Boolean,
+    onOpen: () -> Unit,
+    onClose: () -> Unit,
+    onAdd: (String) -> Unit,
+) {
     val s = LocalStrings.current
-    var open by rememberSaveable { mutableStateOf(false) }
     var draft by rememberSaveable { mutableStateOf("") }
     val focus = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
+    val gold = MaterialTheme.colorScheme.secondary
 
     Spacer(Modifier.height(Spacing.sm))
     SinqDivider()
@@ -350,65 +353,105 @@ private fun AddNameRow(onAdd: (String) -> Unit) {
                 .fillMaxWidth()
                 .heightIn(min = 48.dp)
                 .clip(MaterialTheme.shapes.small)
-                .clickable { open = true }
+                .clickable(onClick = onOpen)
                 .padding(vertical = Spacing.sm),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            Box(
-                Modifier
-                    .size(20.dp)
-                    .clip(CircleShape)
-                    .border(1.dp, MaterialTheme.colorScheme.secondary, CircleShape),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    Icons.Outlined.Add,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(14.dp),
-                )
-            }
-            Text(
-                s.addPerson,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.secondary,
-            )
+            AddMark(gold)
+            Text(s.addPerson, style = MaterialTheme.typography.labelLarge, color = gold)
         }
         return
     }
 
     fun commit() {
         val name = draft.trim()
-        if (name.isNotEmpty()) {
-            onAdd(name)
-            draft = ""
-        } else {
-            open = false
+        if (name.isEmpty()) {
+            onClose()
             keyboard?.hide()
+            return
         }
+        onAdd(name)
+        // A list of names is written in a burst, so the field stays open and
+        // the keyboard stays up for the next one.
+        draft = ""
     }
 
-    OutlinedTextField(
-        value = draft,
-        onValueChange = { draft = it },
-        singleLine = true,
-        label = { Text(s.personNameLabel) },
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-        keyboardActions = KeyboardActions(onDone = { commit() }),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = Spacing.sm)
-            .focusRequester(focus),
+    Row(
+        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(vertical = Spacing.xs),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        AddMark(gold)
+        // Typed on the row itself. It was a full-width outlined box with a
+        // floating label and its own pair of text buttons — a form for one
+        // word, in a list whose every other line is a name.
+        BasicTextField(
+            value = draft,
+            onValueChange = { draft = it },
+            singleLine = true,
+            textStyle = MaterialTheme.typography.titleSmall.copy(
+                color = MaterialTheme.colorScheme.onBackground,
+            ),
+            cursorBrush = SolidColor(gold),
+            keyboardOptions = KeyboardOptions(
+                capitalization = KeyboardCapitalization.Words,
+                imeAction = ImeAction.Done,
+            ),
+            keyboardActions = KeyboardActions(onDone = { commit() }),
+            modifier = Modifier.weight(1f).focusRequester(focus),
+            decorationBox = { field ->
+                if (draft.isEmpty()) {
+                    Text(
+                        s.personNameLabel,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                field()
+            },
+        )
+        IconButton(onClick = { commit() }, enabled = draft.isNotBlank()) {
+            Icon(
+                Icons.Outlined.Check,
+                contentDescription = s.save,
+                tint = if (draft.isBlank()) MaterialTheme.colorScheme.outlineVariant else gold,
+                modifier = Modifier.size(IconSize.medium),
+            )
+        }
+        IconButton(onClick = { draft = ""; onClose(); keyboard?.hide() }) {
+            Icon(
+                Icons.Outlined.Close,
+                contentDescription = s.cancel,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(IconSize.medium),
+            )
+        }
+    }
+    // Said once, where it is needed: the note and ነፍሳተ ሙታን are no longer part
+    // of adding, and a reader has to know where they went.
+    Text(
+        s.personAddHint,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 28.dp, bottom = Spacing.sm),
     )
     androidx.compose.runtime.LaunchedEffect(Unit) { focus.requestFocus() }
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.End,
+}
+
+/** The gold ring and cross that marks the one row which is not yet a name. */
+@Composable
+private fun AddMark(gold: androidx.compose.ui.graphics.Color) {
+    Box(
+        Modifier.size(20.dp).clip(CircleShape).border(1.dp, gold, CircleShape),
+        contentAlignment = Alignment.Center,
     ) {
-        TextButton(onClick = { draft = ""; open = false; keyboard?.hide() }) { Text(s.cancel) }
-        Spacer(Modifier.width(Spacing.xs))
-        TextButton(enabled = draft.isNotBlank(), onClick = { commit() }) { Text(s.save) }
+        Icon(
+            Icons.Outlined.Add,
+            contentDescription = null,
+            tint = gold,
+            modifier = Modifier.size(14.dp),
+        )
     }
 }
 
