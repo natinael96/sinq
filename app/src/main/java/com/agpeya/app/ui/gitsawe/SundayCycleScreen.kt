@@ -47,7 +47,7 @@ import java.time.LocalDate
 fun SundayCycleScreen(
     epochDay: Long,
     onBack: () -> Unit,
-    onOpenReading: (ReadingTarget, String) -> Unit,
+    onOpenReading: (ReadingTarget, String, com.agpeya.app.model.GitsaweReading) -> Unit,
     onOpenBook: (String, Int) -> Unit = { _, _ -> },
 ) {
     val context = LocalContext.current
@@ -102,7 +102,7 @@ private fun SundayOptions(entries: List<SundayCycleEntry>, modifier: Modifier, o
 private fun SundayReading(
     entry: SundayCycleEntry,
     modifier: Modifier,
-    onOpenReading: (ReadingTarget, String) -> Unit,
+    onOpenReading: (ReadingTarget, String, com.agpeya.app.model.GitsaweReading) -> Unit,
     onOpenBook: (String, Int) -> Unit,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -143,7 +143,7 @@ private fun SundayReading(
             val target = reading.verse?.let(GitsaweLinks::target)
             Column(
                 Modifier.fillMaxWidth().then(
-                    if (target != null) Modifier.clickable { onOpenReading(target, role) } else Modifier,
+                    if (target != null) Modifier.clickable { onOpenReading(target, role, reading) } else Modifier,
                 ).padding(vertical = Spacing.xs),
             ) {
                 Row(Modifier.fillMaxWidth()) {

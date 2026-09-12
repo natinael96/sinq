@@ -40,9 +40,7 @@ import androidx.compose.material.icons.outlined.AutoStories
 fun LibraryScreen(
     onOpenScriptures: () -> Unit,
     onOpenWudase: () -> Unit,
-    onOpenZewotr: () -> Unit,
     onOpenBahreHasab: () -> Unit,
-    onOpenMahlets: () -> Unit,
     onOpenBooks: () -> Unit,
     onOpenSynaxarium: () -> Unit,
     onOpenReading: () -> Unit,
@@ -88,9 +86,6 @@ fun LibraryScreen(
                 LibraryCard(icon = Icons.Outlined.Favorite, title = s.wudaseMariam, subtitle = s.wudaseScheduleSubtitle, onClick = onOpenWudase)
             }
             item {
-                LibraryCard(icon = Icons.Outlined.WbTwilight, title = s.zewotrTselot, subtitle = s.zewotrSubtitle, onClick = onOpenZewotr)
-            }
-            item {
                 // 1.6 MB and 366 days whose only doors were today's ግጻዌ and a
                 // search hit — the book was not browsable at all.
                 LibraryCard(
@@ -101,16 +96,11 @@ fun LibraryScreen(
                 )
             }
             item {
-                LibraryCard(
-                    icon = Icons.Outlined.Nightlight,
-                    title = s.mahletTitle,
-                    subtitle = s.mahletSubtitle,
-                    onClick = onOpenMahlets,
-                )
-            }
-            item {
-                // Ninety-one scanned church books — the መልክእ hymns, the ድርሳናት,
-                // the ገድላት and the chant books ማኅሌት is sung from.
+                // The scanned church books, ማኅሌት among them now: it is a book
+                // of the Church like the rest, and it was the only one with a
+                // door of its own on this page. ዘወትር ጸሎት had a card here too,
+                // opening the ውዳሴ ማርያም screen at its daily section — one text
+                // behind two doors.
                 LibraryCard(
                     icon = Icons.Outlined.AutoStories,
                     title = s.booksTitle,

@@ -453,9 +453,7 @@ private fun AgpeyaNavHost(
                             com.agpeya.app.ui.library.LibraryScreen(
                                 onOpenScriptures = { navController.navigate("scriptures") { launchSingleTop = true } },
                                 onOpenWudase = { navController.navigate("wudase") { launchSingleTop = true } },
-                                onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
                                 onOpenBahreHasab = { navController.navigate("bahreHasabReference") { launchSingleTop = true } },
-                                onOpenMahlets = { navController.navigate("mahlets") { launchSingleTop = true } },
                                 onOpenBooks = { navController.navigate("books") { launchSingleTop = true } },
                                 onOpenSynaxarium = {
                                     navController.navigate("synaxarium/${java.time.LocalDate.now().toEpochDay()}") { launchSingleTop = true }
@@ -659,9 +657,11 @@ private fun AgpeyaNavHost(
                 onBack = { navController.popBackStack() },
                 // A section opens its own focused passage page; the full reader
                 // is reached from there ("open the book / chapter"), not here.
-                onOpenReading = { target, role ->
+                onOpenReading = { target, role, reading ->
                     navController.navigate(
-                        com.agpeya.app.data.GitsaweLinks.passageRoute(target, role),
+                        com.agpeya.app.data.GitsaweLinks.passageRoute(
+                            target, role, reading.text?.geez, reading.text?.amharic,
+                        ),
                     ) { launchSingleTop = true }
                 },
                 onOpenSynaxarium = { epochDay -> navController.navigate("synaxarium/$epochDay") { launchSingleTop = true } },
@@ -674,10 +674,12 @@ private fun AgpeyaNavHost(
                 epochDay = backStackEntry.arguments?.getString("epochDay")?.toLongOrNull()
                     ?: java.time.LocalDate.now().toEpochDay(),
                 onBack = { navController.popBackStack() },
-                onOpenReading = { target, role ->
-                    navController.navigate(com.agpeya.app.data.GitsaweLinks.passageRoute(target, role)) {
-                        launchSingleTop = true
-                    }
+                onOpenReading = { target, role, reading ->
+                    navController.navigate(
+                        com.agpeya.app.data.GitsaweLinks.passageRoute(
+                            target, role, reading.text?.geez, reading.text?.amharic,
+                        ),
+                    ) { launchSingleTop = true }
                 },
                 onOpenBook = { id, chapter ->
                     navController.navigate("book/$id?ch=$chapter") { launchSingleTop = true }
@@ -685,7 +687,8 @@ private fun AgpeyaNavHost(
             )
         }
         composable(
-            route = "gitsawePassage?psalm={psalm}&book={book}&chapter={chapter}&start={start}&end={end}&role={role}",
+            route = "gitsawePassage?psalm={psalm}&book={book}&chapter={chapter}&start={start}&end={end}" +
+                "&role={role}&chant={chant}&chantAm={chantAm}",
             arguments = listOf(
                 navArgument("psalm") { type = NavType.IntType; defaultValue = -1 },
                 navArgument("book") { type = NavType.StringType; nullable = true; defaultValue = null },
@@ -693,6 +696,8 @@ private fun AgpeyaNavHost(
                 navArgument("start") { type = NavType.IntType; defaultValue = -1 },
                 navArgument("end") { type = NavType.IntType; defaultValue = -1 },
                 navArgument("role") { type = NavType.StringType; nullable = true; defaultValue = null },
+                navArgument("chant") { type = NavType.StringType; nullable = true; defaultValue = null },
+                navArgument("chantAm") { type = NavType.StringType; nullable = true; defaultValue = null },
             ),
         ) { backStackEntry ->
             val args = backStackEntry.arguments
@@ -728,6 +733,8 @@ private fun AgpeyaNavHost(
                 start = start,
                 end = end,
                 role = args?.getString("role"),
+                chant = args?.getString("chant"),
+                chantAmharic = args?.getString("chantAm"),
                 onBack = { navController.popBackStack() },
                 onOpenBook = {
                     navController.navigate(com.agpeya.app.data.GitsaweLinks.bookRoute(target)) { launchSingleTop = true }
@@ -785,6 +792,7 @@ private fun AgpeyaNavHost(
             com.agpeya.app.ui.books.BookShelfScreen(
                 onBack = { navController.popBackStack() },
                 onOpenShelf = { key -> navController.navigate("books/$key") { launchSingleTop = true } },
+                onOpenMahlets = { navController.navigate("mahlets") { launchSingleTop = true } },
             )
         }
         // The shelf keys are ASCII slugs from the content index ("zema",

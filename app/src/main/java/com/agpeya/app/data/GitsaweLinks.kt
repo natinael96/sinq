@@ -58,16 +58,30 @@ object GitsaweLinks {
      * opens on. [role] is the lectionary role label (ምስባክ, ወንጌል, …), carried
      * for the page header; it is display-only and URL-encoded here.
      */
-    fun passageRoute(target: ReadingTarget, role: String? = null): String {
+    fun passageRoute(
+        target: ReadingTarget,
+        role: String? = null,
+        chant: String? = null,
+        chantAmharic: String? = null,
+    ): String {
         val roleParam = role?.takeIf { it.isNotBlank() }
             ?.let { "&role=${android.net.Uri.encode(it)}" } ?: ""
+        // The ምስባክ as the ግጻዌ prints it. It rides in the route rather than
+        // being looked up again because the passage page is reached from four
+        // different lectionary tables and knows only where it was pointed.
+        val chantParam = chant?.takeIf { it.isNotBlank() }
+            ?.let { "&chant=${android.net.Uri.encode(it)}" } ?: ""
+        val chantAmParam = chantAmharic?.takeIf { it.isNotBlank() }
+            ?.let { "&chantAm=${android.net.Uri.encode(it)}" } ?: ""
         return when (target) {
             is ReadingTarget.Psalm ->
                 "gitsawePassage?psalm=${target.number}" +
-                    "&start=${target.startVerse ?: -1}&end=${target.endVerse ?: -1}" + roleParam
+                    "&start=${target.startVerse ?: -1}&end=${target.endVerse ?: -1}" +
+                    roleParam + chantParam + chantAmParam
             is ReadingTarget.NtPassage ->
                 "gitsawePassage?book=${target.bookKey}&chapter=${target.chapter}" +
-                    "&start=${target.start ?: -1}&end=${target.end ?: -1}" + roleParam
+                    "&start=${target.start ?: -1}&end=${target.end ?: -1}" +
+                    roleParam + chantParam + chantAmParam
         }
     }
 

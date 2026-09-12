@@ -46,11 +46,19 @@ import com.agpeya.app.ui.theme.inReadingFont
  */
 @Composable
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
-fun BookShelfScreen(onBack: () -> Unit, onOpenShelf: (String) -> Unit) {
+fun BookShelfScreen(
+    onBack: () -> Unit,
+    onOpenShelf: (String) -> Unit,
+    onOpenMahlets: () -> Unit = {},
+) {
     val context = LocalContext.current
     val s = LocalStrings.current
     val index by produceState(BookIndex()) { value = BookRepository.index(context) }
     val total = index.shelves.sumOf { it.books.size }
+    val mahletOrders by produceState(0) {
+        value = runCatching { com.agpeya.app.data.MahletRepository.months(context).sumOf { it.orders.size } }
+            .getOrDefault(0)
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -63,6 +71,18 @@ fun BookShelfScreen(onBack: () -> Unit, onOpenShelf: (String) -> Unit) {
         },
     ) { inner ->
         ReadingColumn(innerPadding = inner) {
+            // ማኅሌት is a book of the Church, not a section of the app, and it
+            // used to be the only one reached from ቤት's own page rather than
+            // from the shelf the rest of them sit on. Its orders are counted
+            // where the shelves count their books.
+            item(key = "mahlet") {
+                ShelfRow(
+                    name = s.mahletTitle,
+                    subtitle = s.mahletSubtitle,
+                    count = mahletOrders,
+                    onOpen = onOpenMahlets,
+                )
+            }
             items(index.shelves.size, key = { index.shelves[it].key }) { i ->
                 val shelf = index.shelves[i]
                 ShelfRow(

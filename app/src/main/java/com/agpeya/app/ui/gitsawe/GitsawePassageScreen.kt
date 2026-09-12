@@ -70,6 +70,13 @@ fun GitsawePassageScreen(
     start: Int,
     end: Int,
     role: String?,
+    /**
+     * The ምስባክ exactly as the ግጻዌ prints it, and its Amharic where the book
+     * gives one. When this is present it *is* the passage: see [resolvePassage]
+     * for why the cited range is not.
+     */
+    chant: String? = null,
+    chantAmharic: String? = null,
     onBack: () -> Unit,
     onWriteNote: (route: String, label: String) -> Unit,
     onOpenBook: () -> Unit,
@@ -89,11 +96,43 @@ fun GitsawePassageScreen(
 
     // `loaded` distinguishes "still resolving" from "genuinely not bundled":
     // the first shows the spinner, the second an honest empty state.
-    val state by produceState<Pair<Boolean, Passage?>>(false to null, psalm, bookKey, chapter, start, end, misbakLanguage) {
-        value = true to resolvePassage(
-            context, psalm, bookKey, chapter, start, end,
-            psalmGeez = misbakLanguage == MisbakLanguage.GEEZ,
-        )
+    val state by produceState<Pair<Boolean, Passage?>>(
+        false to null, psalm, bookKey, chapter, start, end, misbakLanguage, chant, chantAmharic,
+    ) {
+        // The ምስባክ the ግጻዌ prints wins over the verses it cites.
+        //
+        // A ምስባክ is three lines of chant. It begins part-way through a verse,
+        // ends part-way through another, drops the clauses between, and follows
+        // its own recension — መዓልተ where the Psalter has መዐልተ, and elsewhere a
+        // different word order altogether. Slicing whole verses out of the
+        // Psalter for it therefore gives the wrong text and too much of it: over
+        // the year's 1,312 citable ምስባክ the sliced range is half again as long
+        // as the chant, more than twice as long in one of every six, and at
+        // መዝሙር ፶ it runs 592 characters where the chant is 68.
+        //
+        // The citation is still right, and still worth keeping — it is what the
+        // doors at the foot of this page and the Catena link are built from. It
+        // just is not the text.
+        // Only the ምስባክ. The ወንጌል and the deacons' readings print an incipit —
+        // one opening phrase — and for those the cited range really is the text.
+        val printed = if (role == MSBAK_ROLE) {
+            if (misbakLanguage == MisbakLanguage.GEEZ) chant else chantAmharic ?: chant
+        } else null
+        value = true to (
+            printed?.takeIf { it.isNotBlank() }?.let { text ->
+                Passage(
+                    bookName = "መዝሙረ ዳዊት".takeIf { psalm >= 1 } ?: "",
+                    refLine = refLine(psalm, start.takeIf { it >= 1 }, end.takeIf { it >= 1 }),
+                    // n = 0 draws no number: the ምስባክ is sung as three lines,
+                    // and the lines are not whole verses to number.
+                    verses = text.split("።").map { it.trim() }.filter { it.isNotEmpty() }
+                        .map { PassageVerse(n = 0, text = "$it ።") },
+                )
+            } ?: resolvePassage(
+                context, psalm, bookKey, chapter, start, end,
+                psalmGeez = misbakLanguage == MisbakLanguage.GEEZ,
+            )
+            )
     }
     val (loaded, passage) = state
     val isPsalm = psalm >= 1
@@ -177,14 +216,17 @@ fun GitsawePassageScreen(
                             )
                         }
                         val annotated = buildAnnotatedString {
-                            withStyle(
-                                SpanStyle(
-                                    color = MaterialTheme.colorScheme.secondary,
-                                    fontSize = scaledReadingSp(bodyFontSp) * 0.58f,
-                                    baselineShift = BaselineShift.Superscript,
-                                ),
-                            ) { append(geezNumeral(verse.n)) }
-                            append("  ")
+                            // A ምስባክ line carries no number — see resolvePassage.
+                            if (verse.n > 0) {
+                                withStyle(
+                                    SpanStyle(
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        fontSize = scaledReadingSp(bodyFontSp) * 0.58f,
+                                        baselineShift = BaselineShift.Superscript,
+                                    ),
+                                ) { append(geezNumeral(verse.n)) }
+                                append("  ")
+                            }
                             append(verse.text)
                         }
                         androidx.compose.foundation.text.selection.SelectionContainer {
@@ -250,6 +292,9 @@ fun GitsawePassageScreen(
  * way [ScriptureRepository.passage] clamps them — a citation past the real end
  * shows what exists rather than an empty page.
  */
+/** The lectionary's own label for the chant, as the ግጻዌ tables spell it. */
+private const val MSBAK_ROLE = "ምስባክ"
+
 private suspend fun resolvePassage(
     context: android.content.Context,
     psalm: Int,

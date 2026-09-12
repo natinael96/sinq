@@ -117,7 +117,7 @@ private data class Source(
 @Composable
 fun GitsaweScreen(
     onBack: () -> Unit,
-    onOpenReading: (ReadingTarget, String) -> Unit,
+    onOpenReading: (ReadingTarget, String, GitsaweReading) -> Unit,
     onOpenSynaxarium: (Long) -> Unit,
     onOpenSundayCycle: (Long) -> Unit,
     onOpenMahlet: (subFeastKey: String) -> Unit,
@@ -361,7 +361,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.serviceSection(
     s: Strings,
     misbakLanguage: MisbakLanguage,
     onMisbakLanguage: (MisbakLanguage) -> Unit,
-    onOpenReading: (ReadingTarget, String) -> Unit,
+    onOpenReading: (ReadingTarget, String, GitsaweReading) -> Unit,
 ) {
     item(key = "svc_$label") {
         ServiceHeader(label, note)
@@ -429,7 +429,7 @@ private fun ReadingRow(
     s: Strings,
     misbakLanguage: MisbakLanguage,
     onMisbakLanguage: (MisbakLanguage) -> Unit,
-    onOpenReading: (ReadingTarget, String) -> Unit,
+    onOpenReading: (ReadingTarget, String, GitsaweReading) -> Unit,
 ) {
     val context = LocalContext.current
     val verse = reading.verse
@@ -460,7 +460,7 @@ private fun ReadingRow(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .then(if (clickable) Modifier.clickable { onOpenReading(target!!, role) } else Modifier),
+            .then(if (clickable) Modifier.clickable { onOpenReading(target!!, role, reading) } else Modifier),
         shape = RoundedCornerShape(10.dp),
         color = if (isMisbak) MaterialTheme.colorScheme.secondary.copy(alpha = 0.10f)
         else Color.Transparent,
