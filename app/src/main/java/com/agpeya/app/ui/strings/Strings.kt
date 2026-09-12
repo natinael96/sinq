@@ -134,6 +134,9 @@ interface Strings {
     /** The selection bar's reference action, with how many the verse carries. */
     fun crossRefsAction(n: Int): String
     val commentaryAction: String
+    /** The Catena page, and the tradition it is asked to show. */
+    val catenaEarlyFathers: String
+    val catenaOpenInBrowser: String
     /** ስንክሳር's own row in ቤተ መጻሕፍት. */
     val synaxariumLibrarySubtitle: String
     val sinksarAmharic: String
@@ -998,6 +1001,8 @@ object AmharicStrings : Strings {
     override val crossRefsTitle = "የጥቅስ ማጣቀሻዎች"
     override fun crossRefsAction(n: Int) = "ማጣቀሻ ${com.agpeya.app.ui.reading.geezNumeral(n)}"
     override val commentaryAction = "Catena"
+    override val catenaEarlyFathers = "የቀደሙት አበው"
+    override val catenaOpenInBrowser = "በአሳሽ ክፈት"
     override val mahletTitle = "ሥርዓተ ማኅሌት"
     override val synaxariumLibrarySubtitle = "የዓመቱ የቅዱሳን መታሰቢያ"
     override val sinksarAmharic = "አማርኛ"
@@ -1818,6 +1823,8 @@ object EnglishStrings : Strings {
     override val crossRefsTitle = "Cross references"
     override fun crossRefsAction(n: Int) = "Refs $n"
     override val commentaryAction = "Catena"
+    override val catenaEarlyFathers = "Early Fathers"
+    override val catenaOpenInBrowser = "Open in browser"
     override val mahletTitle = "ሥርዓተ ማኅሌት"
     override val synaxariumLibrarySubtitle = "The year's commemorations"
     override val sinksarAmharic = "አማርኛ"

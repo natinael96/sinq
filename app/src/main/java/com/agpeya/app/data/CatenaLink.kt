@@ -90,6 +90,17 @@ object CatenaLink {
     fun covers(slug: String): Boolean = slug in ABBREVIATION
 
     /**
+     * The in-app route that shows [url], with [reference] for the bar.
+     *
+     * The page is opened by the app rather than handed to the browser so that
+     * Catena can be asked for the early fathers alone; the ask is a cookie, and
+     * a Custom Tab's cookies are Chrome's, not ours.
+     */
+    fun route(url: String, reference: String = ""): String =
+        "catena?url=" + android.net.Uri.encode(url) +
+            "&ref=" + android.net.Uri.encode(reference)
+
+    /**
      * The page for one verse, or null when the book is not in Catena's canon.
      *
      * [slug] is the app's own book key. [chapter] and [verse] are the app's own

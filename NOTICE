@@ -128,11 +128,23 @@ PATRISTIC COMMENTARY (CATENA BIBLE)
 --------------------------------------------------------------------------------
 
 A selected verse offers a link to catenabible.com, where the commentary of the
-Church Fathers on that verse is collected. It opens in a Custom Tab — the
-browser, rendered inside this app's task and wearing its colours — so the page
-still shows its own address and still belongs to whoever wrote it. No
-commentary text is bundled with the app, none is copied out of the site, and
-nothing is sent when the link is opened.
+Church Fathers on that verse is collected. No commentary text is bundled with
+the app, none is copied out of the site, and nothing about the reader is sent
+when the page is opened.
+
+The page opens in a WebView inside the app rather than in the browser, for one
+reason: Catena groups its commentators by tradition and will serve a single
+group if asked, and the ask is a cookie its server reads. Sinq sets that cookie
+to Early Fathers — in Catena's own words, "all fathers venerated in all churches
+in communion with the Church of Alexandria" — so the page arrives without the
+later Western and Byzantine writers. A Custom Tab could not do this: its cookies
+are the browser's own, and no app may write to them.
+
+The cookie lives in this app's WebView store alone. It does not touch the
+browser, and it does not change what the reader has chosen for themselves on the
+site. The page is still plainly Catena's: its address is in the bar, links away
+from it open in a real browser, and an action in the corner hands the same URL
+to one.
 
 Catena carries 76 books. Sinq carries 93, so seventeen have no page there and
 are given no link — the Ethiopian deuterocanon the site does not reach (ሄኖክ,

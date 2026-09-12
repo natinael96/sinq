@@ -49,6 +49,7 @@ import com.agpeya.app.data.ScriptureRepository
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.ui.common.LoadingPanel
 import com.agpeya.app.ui.common.SharePayload
+import com.agpeya.app.ui.common.DoorChip
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.common.StatePanel
 import com.agpeya.app.ui.reading.ReadingColumn
@@ -97,6 +98,8 @@ fun GitsawePassageScreen(
     chant: String? = null,
     chantAmharic: String? = null,
     onBack: () -> Unit,
+    /** Opens Catena's page for the cited verse, inside the app. */
+    onOpenCatena: (route: String) -> Unit = {},
     onWriteNote: (route: String, label: String) -> Unit,
     onOpenBook: () -> Unit,
     onOpenChapter: (Boolean) -> Unit,
@@ -314,8 +317,11 @@ fun GitsawePassageScreen(
                                     label = s.commentaryAction,
                                     external = true,
                                     onClick = {
-                                        com.agpeya.app.ui.common.openInAppTab(
-                                            context, url, tabToolbar, tabOnToolbar,
+                                        onOpenCatena(
+                                            com.agpeya.app.data.CatenaLink.route(
+                                                url,
+                                                passage?.let { "${it.bookName} ${it.refLine}" }.orEmpty(),
+                                            ),
                                         )
                                     },
                                 )
@@ -398,55 +404,3 @@ private fun refLine(chapter: Int, lo: Int?, hi: Int?): String = buildString {
     }
 }
 
-/**
- * One way on from the passage: an icon, a word, and a ring.
- *
- * A door that stays in the app is filled with the faintest gold and ringed in
- * it; one that leaves — Catena, which is a website — is left unfilled, ringed
- * in the page's own outline, and carries the mark that says so. That is the
- * distinction the old rows did not draw: they sent you to the web looking
- * exactly like the row that opened the next chapter.
- */
-@Composable
-private fun DoorChip(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    label: String,
-    onClick: () -> Unit,
-    external: Boolean = false,
-) {
-    val s = LocalStrings.current
-    val gold = MaterialTheme.colorScheme.secondary
-    Row(
-        modifier = Modifier
-            .clip(CircleShape)
-            .background(if (external) Color.Transparent else gold.copy(alpha = 0.10f))
-            .border(
-                width = 1.dp,
-                color = if (external) MaterialTheme.colorScheme.outlineVariant else gold.copy(alpha = 0.42f),
-                shape = CircleShape,
-            )
-            .clickable(onClick = onClick)
-            .semantics { role = Role.Button }
-            // The app's own floor for anything you tap, chip or row alike.
-            .heightIn(min = 48.dp)
-            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-    ) {
-        Icon(icon, contentDescription = null, tint = gold, modifier = Modifier.size(IconSize.small))
-        Text(
-            label,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onBackground,
-            maxLines = 1,
-        )
-        if (external) {
-            Icon(
-                Icons.Outlined.OpenInNew,
-                contentDescription = s.opensOutside,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(14.dp),
-            )
-        }
-    }
-}

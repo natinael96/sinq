@@ -525,6 +525,21 @@ private fun AgpeyaNavHost(
                 },
             )
         }
+        // Catena's page for a verse, shown in a WebView rather than a Custom
+        // Tab so the app can ask for the early fathers alone — see CatenaScreen.
+        composable(
+            route = "catena?url={url}&ref={ref}",
+            arguments = listOf(
+                navArgument("url") { type = NavType.StringType },
+                navArgument("ref") { type = NavType.StringType; defaultValue = "" },
+            ),
+        ) { backStackEntry ->
+            com.agpeya.app.ui.catena.CatenaScreen(
+                url = backStackEntry.arguments?.getString("url").orEmpty(),
+                reference = backStackEntry.arguments?.getString("ref").orEmpty(),
+                onBack = { navController.popBackStack() },
+            )
+        }
         composable("bahreHasabReference") {
             com.agpeya.app.ui.library.BahreHasabReferenceScreen(onBack = { navController.popBackStack() })
         }
@@ -733,6 +748,7 @@ private fun AgpeyaNavHost(
                 start = start,
                 end = end,
                 role = args?.getString("role"),
+                onOpenCatena = { route -> navController.navigate(route) { launchSingleTop = true } },
                 chant = args?.getString("chant"),
                 chantAmharic = args?.getString("chantAm"),
                 onBack = { navController.popBackStack() },

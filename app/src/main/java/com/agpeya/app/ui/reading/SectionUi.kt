@@ -488,13 +488,17 @@ internal fun SelectionBar(
                             commentaryUrl?.let { url ->
                                 add(
                                     SelectionAct(s.commentaryAction, Icons.Outlined.HistoryEdu) {
-                                        // In this task, in the app's colours —
-                                        // the reader is one back-press from the
-                                        // verse rather than in another browser.
-                                        com.agpeya.app.ui.common.openInAppTab(
-                                            ctx, url, tabToolbar, tabOnToolbar,
-                                        )
+                                        // Opened inside the app rather than
+                                        // handed to a browser, so Catena can be
+                                        // asked for the early fathers alone.
+                                        // The ask is a cookie, and a Custom
+                                        // Tab's cookies belong to Chrome.
                                         onDismiss()
+                                        onOpenRef(
+                                            com.agpeya.app.data.CatenaLink.route(
+                                                url, passage?.citation.orEmpty(),
+                                            ),
+                                        )
                                     },
                                 )
                             }

@@ -28,6 +28,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -55,6 +56,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -229,42 +231,6 @@ fun openUrl(context: android.content.Context, url: String) {
         )
     }
 }
-
-/**
- * Open a link without leaving the app.
- *
- * A Custom Tab renders in this task, wearing the hero green and the app's own
- * back arrow, so the Fathers on a verse arrive over the reader rather than
- * throwing it into a separate browser task the reader then has to find their
- * way out of. It is still the browser and still shows the address, which is the
- * honest part: the page belongs to whoever wrote it, not to Sinq.
- *
- * Falls back to [openUrl] where no browser supports Custom Tabs.
- */
-fun openInAppTab(
-    context: android.content.Context,
-    url: String,
-    toolbar: androidx.compose.ui.graphics.Color,
-    onToolbar: androidx.compose.ui.graphics.Color,
-) {
-    val opened = runCatching {
-        androidx.browser.customtabs.CustomTabsIntent.Builder()
-            .setShowTitle(true)
-            .setUrlBarHidingEnabled(true)
-            .setDefaultColorSchemeParams(
-                androidx.browser.customtabs.CustomTabColorSchemeParams.Builder()
-                    .setToolbarColor(toolbar.toArgb())
-                    .setNavigationBarColor(toolbar.toArgb())
-                    .build(),
-            )
-            .build()
-            .also { it.intent.putExtra("androidx.browser.customtabs.extra.TOOLBAR_ITEM_COLOR", onToolbar.toArgb()) }
-            .launchUrl(context, android.net.Uri.parse(url))
-        true
-    }.getOrDefault(false)
-    if (!opened) openUrl(context, url)
-}
-
 /** Where the app sends people who have something to tell the maintainer. */
 const val FEEDBACK_URL = "https://sinq.natinael96.tech/feedback.html"
 
@@ -530,6 +496,94 @@ fun ToggleRow(
 }
 
 // ── Selection ────────────────────────────────────────────────────────────────
+
+/**
+ * The edition pill in a reader's title bar.
+ *
+ * It carries the name of the edition it will switch *to*, because a button that
+ * names where it is going is the one people press. Shared by the Psalter and
+ * ውዳሴ ማርያም: the same two editions, so the same control in the same corner.
+ */
+@Composable
+fun EditionToggle(geez: Boolean, onToggle: () -> Unit) {
+    val s = LocalStrings.current
+    val other = if (geez) s.wudaseLangAmharic else s.wudaseLangGeez
+    Box(
+        modifier = Modifier
+            .padding(end = Spacing.xs)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f))
+            .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.45f), CircleShape)
+            .clickable(
+                onClickLabel = s.psalterEditionSwitch(other),
+                onClick = onToggle,
+            )
+            .padding(horizontal = Spacing.md, vertical = Spacing.xs),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            other,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.secondary,
+            maxLines = 1,
+        )
+    }
+}
+
+/**
+ * A door at the foot of a reading: where to go on from here.
+ *
+ * Chips rather than rows, because a stack of full-width rows made the foot of a
+ * short passage longer than the passage, and chips wrap so a third one costs a
+ * line only when it needs one.
+ *
+ * One that stays inside the app is filled in the page's gold; one that leaves is
+ * left unfilled, ringed in the page's own outline, and carries the mark that
+ * says so. That is the distinction plain rows did not draw.
+ */
+@Composable
+fun DoorChip(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    external: Boolean = false,
+) {
+    val s = LocalStrings.current
+    val gold = MaterialTheme.colorScheme.secondary
+    Row(
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(if (external) Color.Transparent else gold.copy(alpha = 0.10f))
+            .border(
+                width = 1.dp,
+                color = if (external) MaterialTheme.colorScheme.outlineVariant else gold.copy(alpha = 0.42f),
+                shape = CircleShape,
+            )
+            .clickable(onClick = onClick)
+            .semantics { role = Role.Button }
+            // The app's own floor for anything you tap, chip or row alike.
+            .heightIn(min = 48.dp)
+            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        Icon(icon, contentDescription = null, tint = gold, modifier = Modifier.size(IconSize.small))
+        Text(
+            label,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1,
+        )
+        if (external) {
+            Icon(
+                Icons.AutoMirrored.Outlined.OpenInNew,
+                contentDescription = s.opensOutside,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(14.dp),
+            )
+        }
+    }
+}
 
 /**
  * A selectable pill — the ግጻዌ office switcher, a scripture chapter. The fill and
