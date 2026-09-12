@@ -44,6 +44,34 @@
 <!-- releases:start -->
 <article class="release">
   <header>
+    <h2>2.3.1 <span class="date">12 September 2026</span></h2>
+    <p class="motto"><span>A way into the ማኅሌት</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>The months of ሥርዓተ ማኅሌት are a pager.</b> Swiping moves between them and the strip above is its tab row, so the two can never disagree about which month is showing — the old strip could not say at all, every pill drawn unselected and announced that way to a screen reader. It opens on the month the year is in rather than መስከረም, and today&#x27;s order sits on its own month instead of floating above all of them.</span></li>
+    <li><span><b>ማኅሌት can be searched.</b> A feast name is what a reader knows, and this was the one large corpus in the app you could not type your way into: 190 feasts reachable only by scrolling to the right month. Folded the way the app&#x27;s own search folds, so ሠ and ሰ find each other.</span></li>
+    <li><span><b>The order page has the reader&#x27;s toolbar.</b> It had always obeyed the chosen text size and never offered the control, so resizing the chant meant leaving, changing it in another reader, and coming back — on the longest reading in the app. A contents sheet comes with it, because a median order runs five screenfuls and the longest twelve with nothing to navigate by.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>Three orders could not be opened from anywhere.</b> Month 0 holds the orders no book dates, and three of them belong to ዘመነ ጽጌ: the seven-year አቋቋም and the ጥቅምት and ኅዳር ones. The list filters every ጽጌ order out on the reasoning that the season has a door of its own, and that door read only መስከረም, ጥቅምት and ኅዳር. Forty-seven parts of chant with no route in. It reads month 0 now, which also settles why the door said ፵፩ and the page behind it said ፴፰.</span></li>
+    <li><span><b>The ዋዜማ and ማኅሌት chips open their own orders.</b> They read as targets and were not: the row always opened the ዋዜማ, because a vigil sorts first, so on the fifty feasts that have both, a reader after the morning service always landed on last night&#x27;s.</span></li>
+    <li><span><b>A month with nothing appointed says so.</b> The sentence for it had been written and never used.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Editions say what they are.</b> Ninety-five of the 190 orders carry them and nothing on the screen said they are another telling of the same order rather than more of it. The book&#x27;s own text was labelled &quot;እትም 0&quot;, with an ASCII zero in a numbering system that has none.</span></li>
+    <li><span><b>The ዘመነ ጽጌ rows carry their feast.</b> Thirty-three of them read &quot;ጥቅምት · ፲፯ ክፍል&quot; and nothing else, told apart only by a numeral — a wall rather than a list.</span></li>
+    <li><span><b>One chapter stepper, in the app&#x27;s own gold-ringed doors.</b> It had been two bare text buttons in muted ink at the far corners of the row, copied once in the Bible reader and once in the book reader. Each half now names the chapter it opens, and holds its side so nothing slides under the thumb at the first chapter.</span></li>
+    <li><span><b>One way to add a name to the prayer list</b>, on the row itself rather than in a full-width form for a single word. The icon and the empty state open the same row. ውዳሴ ማርያም can be swiped through, and ንባብ&#x27;s ቀጥል strip uses the same chips the ግጻዌ passage does.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
     <h2>2.3.0 <span class="date">12 September 2026</span></h2>
     <p class="motto"><span>The map and the hour</span></p>
   </header>
@@ -221,6 +249,9 @@
   </div>
 </article>
 
+<details class="more-releases">
+  <summary><span>56 earlier releases, 1.9.0 back to 0.1.0</span></summary>
+  <div class="more-body">
 <article class="release">
   <header>
     <h2>1.9.0 <span class="date">8 September 2026</span></h2>
@@ -267,9 +298,6 @@
   </div>
 </article>
 
-<details class="more-releases">
-  <summary><span>55 earlier releases, 1.8.1 back to 0.1.0</span></summary>
-  <div class="more-body">
 <article class="release">
   <header>
     <h2>1.8.1 <span class="date">8 September 2026</span></h2>
