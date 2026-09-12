@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Edit
@@ -61,8 +63,28 @@ fun ManageHoursScreen(onBack: () -> Unit, onEditHour: (String) -> Unit) {
     val builtIn by produceState(emptyList<Hour>()) { value = ContentRepository.hours(context) }
     val hours = remember(builtIn, config) { HoursRepository.merge(builtIn, config, includeHidden = true) }
 
+    // The intro has promised reordering since this screen shipped, and
+    // HoursRepository.setOrder was written for it, but nothing ever called it.
+    fun move(from: Int, to: Int) {
+        val ids = hours.map { it.id }.toMutableList().apply { add(to, removeAt(from)) }
+        scope.launch { HoursRepository.setOrder(context, ids) }
+    }
+
     var renaming by remember { mutableStateOf<Hour?>(null) }
     var creating by remember { mutableStateOf(false) }
+
+    // Hiding an hour takes its reminder out of the schedule, and deleting one
+    // takes the hour out from under it. Neither used to re-arm anything, so a
+    // hidden hour went on ringing — the scheduler only re-reads the visible
+    // hours on the next app launch — and a deleted one rang with a stale name.
+    fun reschedule() {
+        scope.launch {
+            runCatching {
+                val names = HoursRepository.visibleHours(context).associate { it.id to it.name }
+                com.agpeya.app.reminders.ReminderScheduler.rescheduleAll(context, names)
+            }
+        }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -93,9 +115,21 @@ fun ManageHoursScreen(onBack: () -> Unit, onEditHour: (String) -> Unit) {
                     hidden = hour.id in config.hidden,
                     isCustom = isCustom,
                     onOpen = { onEditHour(hour.id) },
-                    onToggleHidden = { scope.launch { HoursRepository.setHidden(context, hour.id, hour.id !in config.hidden) } },
+                    onToggleHidden = {
+                        scope.launch {
+                            HoursRepository.setHidden(context, hour.id, hour.id !in config.hidden)
+                            reschedule()
+                        }
+                    },
                     onRename = { renaming = hour },
-                    onDelete = { scope.launch { HoursRepository.deleteCustomHour(context, hour.id) } },
+                    onDelete = {
+                        scope.launch {
+                            HoursRepository.deleteCustomHour(context, hour.id)
+                            reschedule()
+                        }
+                    },
+                    onMoveUp = { move(index, index - 1) }.takeIf { index > 0 },
+                    onMoveDown = { move(index, index + 1) }.takeIf { index < hours.size - 1 },
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
@@ -146,6 +180,8 @@ private fun HourManageRow(
     onToggleHidden: () -> Unit,
     onRename: () -> Unit,
     onDelete: () -> Unit,
+    onMoveUp: (() -> Unit)? = null,
+    onMoveDown: (() -> Unit)? = null,
 ) {
     val s = LocalStrings.current
     Row(
@@ -172,6 +208,22 @@ private fun HourManageRow(
         )
         IconButton(onClick = onRename) {
             Icon(Icons.Outlined.Edit, contentDescription = s.rename, modifier = Modifier.size(IconSize.medium))
+        }
+        IconButton(onClick = { onMoveUp?.invoke() }, enabled = onMoveUp != null) {
+            Icon(
+                Icons.Filled.KeyboardArrowUp, contentDescription = s.moveUp,
+                modifier = Modifier.size(IconSize.medium),
+                tint = if (onMoveUp != null) MaterialTheme.colorScheme.onSurface
+                else MaterialTheme.colorScheme.surfaceVariant,
+            )
+        }
+        IconButton(onClick = { onMoveDown?.invoke() }, enabled = onMoveDown != null) {
+            Icon(
+                Icons.Filled.KeyboardArrowDown, contentDescription = s.moveDown,
+                modifier = Modifier.size(IconSize.medium),
+                tint = if (onMoveDown != null) MaterialTheme.colorScheme.onSurface
+                else MaterialTheme.colorScheme.surfaceVariant,
+            )
         }
         if (isCustom) {
             IconButton(onClick = onDelete) {
