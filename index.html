@@ -6,6 +6,9 @@
 <title>ስንቅ · Sinq: the Ethiopian Orthodox Book of Hours for Android</title>
 <meta name="description" content="Sinq (ስንቅ) brings the seven canonical prayer hours, the complete Psalter, ግጻዌ and ስንክሳር to Android in Amharic, entirely offline, with no account and no data collection.">
 <meta name="color-scheme" content="light dark">
+<script>/* the reader's theme, applied before first paint */
+(function(){try{var t=localStorage.getItem('sinq-theme');
+if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="ስንቅ · Sinq">
 <meta property="og:description" content="The Ethiopian Orthodox Tewahedo Book of Hours for Android. Offline, Amharic-first, no accounts, no tracking.">
@@ -33,6 +36,12 @@
       <a href="feedback.html"><span>Feedback</span></a>
       <a href="https://github.com/natinael96/sinq">GitHub</a>
     </div>
+    <button class="theme" id="theme-btn" type="button" aria-label="Theme: system">
+      <svg class="ic-system" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg>
+      <svg class="ic-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M4.2 4.2l1.5 1.5M18.3 18.3l1.5 1.5M2 12h2M20 12h2M4.2 19.8l1.5-1.5M18.3 5.7l1.5-1.5"/></svg>
+      <svg class="ic-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.5 8.5 0 1 1 9.8 4a7 7 0 0 0 10.2 10.2z"/></svg>
+      <span class="lbl">System</span>
+    </button>
   </div>
 </nav>
 
@@ -61,28 +70,39 @@
         <a class="cta-link" href="install.html"><span>How to install</span></a>
       </div>
 
-      <p class="hero-fine">
-        <span>v2.3.1 · Android 6.0+ · no account, no ads, no tracking</span>
-      </p>
-      <p class="hero-fine counts">
+      <ul class="facts">
+        <li class="fact lit">v2.3.1 · Android 6.0+</li>
+        <li>No account</li>
+        <li>No ads</li>
+        <li>No tracking</li>
+      </ul>
+      <p class="facts counts">
 <!-- counts:start -->
-        <span>68 downloads</span>
+        <span>69 downloads</span>
         <a class="star" href="https://github.com/natinael96/sinq" rel="noopener"><span>&#9733; 8 stars on GitHub</span></a>
 <!-- counts:end -->
       </p>
     </div>
 
     <div class="hours">
-      <h2>The seven hours</h2>
-      
-      <ol>
-        <li><span class="num">፩</span><span class="nm ethi">ጸሎተ ነግህ</span><span class="gl"><span>Morning</span></span></li>
-        <li><span class="num">፪</span><span class="nm ethi">ሠለስት</span><span class="gl"><span>Terce</span></span></li>
-        <li><span class="num">፫</span><span class="nm ethi">ቀትር</span><span class="gl"><span>Sext</span></span></li>
-        <li><span class="num">፬</span><span class="nm ethi">ተሰዓት</span><span class="gl"><span>None</span></span></li>
-        <li><span class="num">፭</span><span class="nm ethi">ሰርክ</span><span class="gl"><span>Vespers</span></span></li>
-        <li><span class="num">፮</span><span class="nm ethi">ንዋም</span><span class="gl"><span>Compline</span></span></li>
-        <li><span class="num">፯</span><span class="nm ethi">መንፈቀ ሌሊት</span><span class="gl"><span>Midnight</span></span></li>
+      <div class="dial-head">
+        <h2>The day, turning</h2>
+        <span class="live" hidden id="dial-clock-wrap"><i></i><span id="dial-clock">--:--</span></span>
+      </div>
+
+      <!-- Drawn by site.js from the visitor's own clock. Nothing is fetched:
+           without JavaScript this stays empty and the list below, which holds
+           the same seven hours, is the whole panel. -->
+      <div class="dial" id="dial" hidden></div>
+
+      <ol id="hours-list">
+        <li data-hour="06"><span class="num">፩</span><span class="nm ethi">ጸሎተ ነግህ</span><span class="gl"><span>Morning</span></span><span class="at">06:00</span></li>
+        <li data-hour="09"><span class="num">፪</span><span class="nm ethi">ሠለስት</span><span class="gl"><span>Terce</span></span><span class="at">09:00</span></li>
+        <li data-hour="12"><span class="num">፫</span><span class="nm ethi">ቀትር</span><span class="gl"><span>Sext</span></span><span class="at">12:00</span></li>
+        <li data-hour="15"><span class="num">፬</span><span class="nm ethi">ተሰዓት</span><span class="gl"><span>None</span></span><span class="at">15:00</span></li>
+        <li data-hour="18"><span class="num">፭</span><span class="nm ethi">ሰርክ</span><span class="gl"><span>Vespers</span></span><span class="at">18:00</span></li>
+        <li data-hour="21"><span class="num">፮</span><span class="nm ethi">ንዋም</span><span class="gl"><span>Compline</span></span><span class="at">21:00</span></li>
+        <li data-hour="00"><span class="num">፯</span><span class="nm ethi">መንፈቀ ሌሊት</span><span class="gl"><span>Midnight</span></span><span class="at">00:00</span></li>
       </ol>
       <p class="note-row">
         <span>መንፈቀ ሌሊት keeps its three watches, and the Veil prayer sits beside them.</span>
@@ -184,7 +204,7 @@
       </li>
       <li>
         <b>ሥርዓተ ማኅሌት, the whole year</b>
-        <span>215 orders of service — the scanned book with the Telegram editions of each order beside it — on the day they are sung and in the Library the rest of the year. A movement named after a hymn opens that hymn on the shelf, at the stanza being sung.</span>
+        <span>190 orders of service — the scanned book with the Telegram editions of each order beside it — on the day they are sung and in the Library the rest of the year. A movement named after a hymn opens that hymn on the shelf, at the stanza being sung.</span>
       </li>
       <li>
         <b>Reading plans</b>

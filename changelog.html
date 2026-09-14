@@ -6,6 +6,9 @@
 <title>What changed · ስንቅ Sinq</title>
 <meta name="description" content="Recent Sinq releases and what changed in each: the tithe ledger, vows, the journal, quieter reminders and the fixes since.">
 <meta name="color-scheme" content="light dark">
+<script>/* the reader's theme, applied before first paint */
+(function(){try{var t=localStorage.getItem('sinq-theme');
+if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <link rel="canonical" href="https://sinq.natinael96.tech/changelog.html">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="style.css">
@@ -29,12 +32,19 @@
       <a href="feedback.html"><span>Feedback</span></a>
       <a href="https://github.com/natinael96/sinq">GitHub</a>
     </div>
+    <button class="theme" id="theme-btn" type="button" aria-label="Theme: system">
+      <svg class="ic-system" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg>
+      <svg class="ic-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M4.2 4.2l1.5 1.5M18.3 18.3l1.5 1.5M2 12h2M20 12h2M4.2 19.8l1.5-1.5M18.3 5.7l1.5-1.5"/></svg>
+      <svg class="ic-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.5 8.5 0 1 1 9.8 4a7 7 0 0 0 10.2 10.2z"/></svg>
+      <span class="lbl">System</span>
+    </button>
   </div>
 </nav>
 
 <main id="main">
 
 <div class="page-head">
+  <p class="page-eyebrow">Releases</p>
   <h1><span>What changed</span></h1>
   <p>
     <span>Every release, in short — the seven most recent open, and the fifty before them a click away. The full notes, including why a bug happened, are in the <a href="https://github.com/natinael96/sinq/blob/master/CHANGELOG.md">changelog</a>.</span>

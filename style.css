@@ -65,10 +65,17 @@
   --shadow-lift: 0 2px 4px rgba(20,35,29,.05), 0 18px 44px rgba(20,35,29,.1);
   --radius:  14px;
   --radius-lg: 22px;
+  --chip-line: rgba(126,95,30,.22);
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 }
 
+/* ---- Themes -------------------------------------------------------------
+   One set of tokens, three ways in. The reader's OS preference decides unless
+   they have chosen a theme with the button in the nav, and an explicit choice
+   wins in both directions. Nothing below this point names a literal colour,
+   so the two themes cannot drift apart. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --gold:    #D3B04A;
     --bg:      #101613;
     --surface: #16201B;
@@ -79,10 +86,31 @@
     --hair:    #1E2822;
     --link:    #9FD0B8;
     --chip-bg: rgba(211,176,74,.1);
+    --chip-line: rgba(211,176,74,.28);
     --shadow:  0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.28);
     --shadow-lift: 0 2px 6px rgba(0,0,0,.34), 0 18px 44px rgba(0,0,0,.4);
+    color-scheme: dark;
   }
 }
+
+:root[data-theme="dark"] {
+    --gold:    #D3B04A;
+    --bg:      #101613;
+    --surface: #16201B;
+    --sunken:  #131A16;
+    --ink:     #E4E8E2;
+    --muted:   #A9B4AC;
+    --line:    #253029;
+    --hair:    #1E2822;
+    --link:    #9FD0B8;
+    --chip-bg: rgba(211,176,74,.1);
+    --chip-line: rgba(211,176,74,.28);
+    --shadow:  0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.28);
+    --shadow-lift: 0 2px 6px rgba(0,0,0,.34), 0 18px 44px rgba(0,0,0,.4);
+    color-scheme: dark;
+}
+
+:root[data-theme="light"] { color-scheme: light; }
 
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
@@ -129,15 +157,16 @@ h1.ethi, h2.ethi, h3.ethi, .ethi { letter-spacing: 0; }
 :focus-visible { outline: 2px solid var(--gold-lit); outline-offset: 3px; border-radius: 3px; }
 
 /* ---- Nav ---------------------------------------------------------------- */
+/* Phone first. On a phone the nav does not stick — sticky, it wrapped to
+   three rows and ate a fifth of the screen — and the links become one
+   swipeable row under the brand. From 560px up it behaves as a bar. */
 .nav {
-  position: sticky; top: 0; z-index: 5;
-  background: rgba(11,49,41,.92);
-  backdrop-filter: saturate(140%) blur(12px);
+  background: var(--hero);
   border-bottom: 1px solid rgba(228,188,90,.18);
 }
 .nav-in {
-  max-width: 1040px; margin: 0 auto; padding: 11px 20px;
-  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  max-width: 1040px; margin: 0 auto; padding: 10px 16px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
 }
 .brand {
   display: flex; align-items: center; gap: 10px;
@@ -145,27 +174,64 @@ h1.ethi, h2.ethi, h3.ethi, .ethi { letter-spacing: 0; }
 }
 .brand svg { width: 26px; height: 26px; display: block; }
 .brand .name { font-size: 19px; }
-.nav-links { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; }
+.nav-links {
+  order: 3; width: 100%;
+  display: flex; align-items: center; gap: 18px;
+  flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.nav-links::-webkit-scrollbar { display: none; }
 .nav-links a {
-  color: #C9DCD2; text-decoration: none; font-size: 15px; padding: 6px 0;
+  color: #C9DCD2; text-decoration: none; font-size: 14px; padding: 6px 0;
+  white-space: nowrap;
   border-bottom: 2px solid transparent; transition: color .18s, border-color .18s;
 }
 .nav-links a:hover, .nav-links a[aria-current="page"] {
   color: #F6F2E6; border-bottom-color: var(--gold-lit);
 }
 
+/* ---- Theme button -------------------------------------------------------
+   Three states, not two: the reader's system setting is the default and has
+   to stay reachable, so the button cycles system → light → dark rather than
+   flipping between two and stranding whoever wanted to follow their OS.
+   The choice is kept in localStorage and applied before first paint by a
+   small script in each page's head, so the page never flashes the wrong
+   theme on the way in. */
+.theme {
+  flex: none;
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 34px; padding: 0 12px;
+  border: 1px solid rgba(228,188,90,.34); border-radius: 999px;
+  background: rgba(255,255,255,.05); color: #C9DCD2;
+  font: 600 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase;
+  cursor: pointer;
+  transition: color .18s, border-color .18s, background-color .18s, transform .12s;
+}
+.theme svg {
+  width: 15px; height: 15px; display: none;
+  fill: none; stroke: currentColor; stroke-width: 1.7;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+:root:not([data-theme]) .theme .ic-system,
+:root[data-theme="light"] .theme .ic-light,
+:root[data-theme="dark"]  .theme .ic-dark { display: block; }
+.theme:hover { color: #F6F2E6; border-color: var(--gold-lit);
+               background: rgba(228,188,90,.12); }
+.theme:active { transform: scale(.96); }
+.theme .lbl { display: none; }
+
 /* ---- Layout ------------------------------------------------------------- */
-main { max-width: 880px; margin: 0 auto; padding: 0 20px 96px; }
-section { margin: 84px 0; }
+main { max-width: 880px; margin: 0 auto; padding: 0 20px 64px; }
+section { margin: 60px 0; }
 
 /* Prose stays inside a comfortable measure even when its section is wide. */
-section > p, .page-head > p, .measure { max-width: 34em; }
+section > p, .page-head > p:not(.page-eyebrow), .measure { max-width: 34em; }
 
 /* The section header: a short gold rule, a small label, then the line that
    carries the section. */
 section > h2 {
-  font-size: 13.5px; letter-spacing: .16em; text-transform: uppercase;
-  color: var(--gold); margin: 0 0 14px; font-weight: 600;
+  font: 600 12px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase;
+  color: var(--gold); margin: 0 0 14px;
   display: flex; align-items: center; gap: 14px;
 }
 section > h2::before {
@@ -178,21 +244,36 @@ section > .lede {
 }
 section > .lede .ethi { letter-spacing: 0; line-height: 1.5; }
 
-.page-head { padding: 68px 0 10px; }
-.page-head h1 { font-size: clamp(32px, 5vw, 46px); margin: 0 0 14px; }
-.page-head > p { color: var(--muted); margin: 0; font-size: 18.5px; line-height: 1.6; }
+.page-head { padding: 40px 0 26px; margin-bottom: 8px;
+              border-bottom: 1px solid var(--line); }
+.page-eyebrow {
+  font: 600 12px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase;
+  color: var(--gold); margin: 0 0 16px;
+  display: flex; align-items: center; gap: 14px;
+}
+.page-eyebrow::before {
+  content: ""; width: 26px; height: 2px; flex: none;
+  background: var(--gold); border-radius: 2px;
+}
+.page-head h1 { font-size: clamp(30px, 5vw, 44px); margin: 0 0 14px;
+                letter-spacing: -.022em; }
+/* :not(), because .page-head > p outranks .page-eyebrow on specificity and
+   was quietly repainting the label as body text. */
+.page-head > p:not(.page-eyebrow) {
+  color: var(--muted); margin: 0; font-size: 17px; line-height: 1.6;
+}
 
 /* ---- Hero ---------------------------------------------------------------
    Split layout: identity and the ask on the left, the seven hours on the
    right so the page shows what the app holds instead of only claiming it. */
 .hero {
   background: var(--hero); color: #F6F2E6;
-  padding: 88px 20px 84px;
+  padding: 44px 20px 48px;
 }
 .hero-in {
   max-width: 1040px; margin: 0 auto;
-  display: grid; grid-template-columns: 1.06fr .94fr;
-  gap: 72px; align-items: center;
+  display: grid; grid-template-columns: 1fr;
+  gap: 40px; align-items: center;
 }
 
 .eyebrow {
@@ -219,70 +300,160 @@ section > .lede .ethi { letter-spacing: 0; line-height: 1.5; }
 .hero .sub .hl { font-weight: 600; }
 
 .hero .sub {
-  font-size: 18.5px; line-height: 1.62; color: #A9C1B6;
-  margin: 22px 0 0; max-width: 42ch;
+  font-size: 17px; line-height: 1.62; color: #A9C1B6;
+  margin: 20px 0 0;
 }
 
+/* On a phone the two buttons are full width and stacked; they become a row
+   at 560px. A 44px-plus target either way. */
 .cta {
-  display: flex; gap: 12px 26px; align-items: center;
-  flex-wrap: wrap; margin: 34px 0 0;
+  display: flex; flex-direction: column; align-items: stretch;
+  gap: 14px; margin: 28px 0 0;
 }
 .btn {
   display: inline-block; text-decoration: none; font-weight: 600; font-size: 16px;
   padding: 14px 30px; border-radius: 999px; border: 1px solid transparent;
+  text-align: center;
 }
 .btn-primary { background: var(--gold-lit); color: #14231D; }
 .btn-primary:hover { background: #EFCD76; }
 .btn-ghost { border-color: rgba(228,188,90,.5); color: var(--gold-lit); }
 .btn-ghost:hover { background: rgba(228,188,90,.12); }
 .btn-sm { font-size: 15px; padding: 10px 22px; }
+/* align-self, not text-align: stretched to the column width its underline
+   spanned the whole hero and read as a divider rather than a link. */
 .cta-link {
+  align-self: center;
   color: #C9DCD2; font-size: 16px; text-decoration: none;
   border-bottom: 1px solid rgba(201,220,210,.35); padding-bottom: 2px;
 }
 .cta-link:hover { color: #F6F2E6; border-bottom-color: var(--gold-lit); }
 
-.hero-fine { margin: 30px 0 0; font-size: 13.5px; color: #8FA99C; }
+.hero-fine { margin: 24px 0 0; font-size: 13.5px; color: #8FA99C; }
+
+/* Facts about the build, as chips rather than a run-on line: on a phone the
+   old single line wrapped to three and read as a paragraph. */
+.facts { display: flex; flex-wrap: wrap; gap: 7px; margin: 22px 0 0; padding: 0;
+         list-style: none; }
+.facts li, .facts .fact, .facts > span, .facts > .star {
+  display: inline-flex; align-items: center;
+  padding: 5px 11px; border-radius: 999px;
+  border: 1px solid rgba(228,188,90,.24); background: rgba(255,255,255,.045);
+  color: #A9C1B6; font: 600 11.5px/1 var(--mono); letter-spacing: .04em;
+}
+.facts .fact.lit { color: var(--gold-lit); border-color: rgba(228,188,90,.5);
+                   background: rgba(228,188,90,.12); }
 
 /* The right-hand panel: the day's hours, as the app names them. */
 .hours {
   background: rgba(255,255,255,.045);
   border: 1px solid rgba(228,188,90,.2);
-  border-radius: 22px; padding: 26px 30px 20px;
+  border-radius: 22px; padding: 20px 18px 16px;
 }
 .hours h2 {
-  font-size: 12.5px; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--gold-lit); margin: 0 0 16px; font-weight: 600;
-}
-.hours ol { list-style: none; margin: 0; padding: 0; }
-.hours li {
-  display: flex; align-items: baseline; gap: 14px;
-  padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.07);
-}
-.hours li:last-of-type { border-bottom: none; }
-.hours .num { color: var(--gold-lit); font-size: 15px; min-width: 18px; }
-.hours .nm { color: #F6F2E6; font-size: 17px; }
-.hours .gl { color: #8FA99C; font-size: 13.5px; margin-left: auto; padding-left: 12px; }
-.hours .note-row {
-  margin: 14px 0 6px; font-size: 13px; color: #8FA99C;
-  border-top: 1px solid rgba(255,255,255,.07); padding-top: 14px;
+  font: 600 11.5px/1 var(--mono); letter-spacing: .18em; text-transform: uppercase;
+  color: var(--gold-lit); margin: 0;
 }
 
-@media (max-width: 900px) {
-  .hero-in { grid-template-columns: 1fr; gap: 48px; }
-  .hero .sub { max-width: none; }
+/* ---- The dial -----------------------------------------------------------
+   The day as a circle: the gold arc is the part of today that has already
+   gone, and the lit node is the hour being kept now, read from the visitor's
+   own clock. It is drawn, not fetched — the page still contacts nobody.
+   Without JavaScript the dial simply does not appear and the list below it,
+   which carries the same seven hours, is the whole panel. */
+.dial-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding-bottom: 14px; margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255,255,255,.09);
+}
+.dial-head .live {
+  display: inline-flex; align-items: center; gap: 7px;
+  font: 600 11px/1 var(--mono); letter-spacing: .08em;
+  color: var(--gold-lit); font-variant-numeric: tabular-nums;
+}
+.dial-head .live i {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--gold-lit);
+  animation: sinq-pulse 2.8s ease-in-out infinite;
+}
+@keyframes sinq-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+
+.dial { position: relative; width: 100%; max-width: 260px; aspect-ratio: 1;
+        margin: 14px auto 4px; }
+.dial svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.dial .track   { fill: none; stroke: rgba(255,255,255,.14); stroke-width: 1.5; }
+.dial .spoke   { stroke: rgba(255,255,255,.1); stroke-width: 1; }
+.dial .elapsed {
+  fill: none; stroke: var(--gold-lit); stroke-width: 2.5; stroke-linecap: round;
+  transition: stroke-dashoffset 1400ms cubic-bezier(.2,.7,.3,1);
+}
+.dial .hand { stroke: var(--gold-lit); stroke-width: 1.5; stroke-linecap: round;
+              opacity: .45; }
+.dial .hr { cursor: pointer; }
+.dial .hr circle {
+  fill: var(--hero); stroke: rgba(228,188,90,.4); stroke-width: 1.5;
+  transition: fill .18s, stroke .18s;
+}
+.dial .hr text {
+  fill: #A9C1B6; font-size: 12px; text-anchor: middle;
+  dominant-baseline: central; transition: fill .18s;
+}
+.dial .hr:hover circle { stroke: var(--gold-lit); }
+.dial .hr:hover text { fill: #F6F2E6; }
+.dial .hr:focus { outline: none; }
+.dial .hr:focus-visible circle { stroke: var(--gold-lit); stroke-width: 3; }
+.dial .hr.now circle { fill: var(--gold-lit); stroke: var(--gold-lit); }
+.dial .hr.now text { fill: #14231D; font-weight: 700; }
+
+.dial-readout {
+  position: absolute; inset: 0; display: grid; place-content: center;
+  text-align: center; pointer-events: none; padding: 0 16%;
+}
+.dial-readout .k {
+  font: 600 9.5px/1 var(--mono); letter-spacing: .18em; text-transform: uppercase;
+  color: #8FA99C;
+}
+.dial-readout .n { font-size: 19px; color: #F6F2E6; margin-top: 8px;
+                   line-height: 1.2; }
+.dial-readout .e { font: 400 11px/1 var(--mono); color: #8FA99C; margin-top: 6px;
+                   letter-spacing: .05em; }
+.dial-readout .t { font: 600 12px/1 var(--mono); color: var(--gold-lit);
+                   margin-top: 9px; font-variant-numeric: tabular-nums; }
+.hours ol { list-style: none; margin: 10px 0 0; padding: 0; }
+.hours li {
+  display: flex; align-items: center; gap: 10px;
+  padding: 5px 0; border-bottom: none;
+}
+.hours .num { color: var(--gold-lit); font-size: 13px; min-width: 15px;
+              line-height: 1; }
+.hours .nm { color: #F6F2E6; font-size: 15px; line-height: 1.5; }
+/* The English gloss is the first thing to go when the row is tight: the
+   Ge'ez numeral and the Amharic name are what the app itself shows. */
+.hours .gl { display: none; }
+.hours .at { color: #8FA99C; font: 600 11px/1 var(--mono); margin-left: auto;
+             padding-left: 10px; font-variant-numeric: tabular-nums;
+             min-width: 4.4em; text-align: right; }
+
+/* The hour being kept right now, marked in the list as well as on the dial,
+   so the mark survives a reader who never looks at the circle. */
+.hours li.is-now { background: rgba(228,188,90,.12); margin: 0 -8px;
+                   padding: 5px 8px; border-radius: 7px; }
+.hours li.is-now .nm { color: #FFFDF7; }
+.hours li.is-now .at { color: var(--gold-lit); }
+.hours .note-row {
+  margin: 12px 0 4px; font-size: 12.5px; line-height: 1.55; color: #8FA99C;
+  border-top: 1px solid rgba(255,255,255,.07); padding-top: 12px;
 }
 
 /* ---- Bands -------------------------------------------------------------- */
 .band {
   background: var(--hero); color: #E7EFE9;
-  padding: 76px 20px; margin: 96px 0;
+  padding: 56px 20px; margin: 64px 0;
   position: relative;
 }
 .band-in { max-width: 720px; margin: 0 auto; }
 .band h2 {
-  color: var(--gold-lit); font-size: 13.5px; letter-spacing: .16em;
-  text-transform: uppercase; margin: 0 0 20px; font-weight: 600;
+  color: var(--gold-lit); font: 600 12px/1 var(--mono); letter-spacing: .16em;
+  text-transform: uppercase; margin: 0 0 20px;
   display: flex; align-items: center; gap: 14px;
 }
 .band h2::before {
@@ -298,37 +469,45 @@ section > .lede .ethi { letter-spacing: 0; line-height: 1.5; }
    Two columns on wide screens: the group's name holds the left rail while
    its items scroll past on the right. */
 .group {
-  display: grid; grid-template-columns: 210px 1fr; gap: 20px 46px;
+  display: grid; grid-template-columns: 1fr; gap: 18px;
   margin: 0 0 66px; padding-top: 30px; border-top: 1px solid var(--line);
 }
 .group:first-of-type { border-top: none; padding-top: 0; }
-.group h3 {
-  font-size: 24px; margin: 0; align-self: start;
-  position: sticky; top: 88px;
-}
+.group h3 { font-size: 24px; margin: 0; align-self: start; }
 .group h3 .sub {
-  display: block; color: var(--muted); font-weight: 400;
-  font-size: 14.5px; letter-spacing: .01em; margin-top: 4px;
+  display: inline; margin-left: 8px; color: var(--muted); font-weight: 400;
+  font-size: 14.5px; letter-spacing: .01em;
 }
-.group ul { list-style: none; padding: 0; margin: 0; }
-.group li { margin: 0; padding: 18px 0 18px 18px; border-left: 2px solid var(--hair); }
-.group li:first-child { padding-top: 0; }
+.group ul {
+  list-style: none; padding: 0; margin: 0;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  overflow: hidden; background: var(--surface);
+}
+.group li {
+  margin: 0; padding: 16px 18px;
+  border-top: 1px solid var(--hair);
+  transition: background-color .18s ease;
+}
+.group li:first-child { border-top: none; }
+.group li:hover { background: var(--sunken); }
 .group li b {
-  display: block; font-size: 17.5px; margin-bottom: 5px; letter-spacing: -.008em;
+  display: block; font-size: 16.5px; margin-bottom: 4px; letter-spacing: -.008em;
 }
-.group li span { color: var(--muted); font-size: 16.5px; }
+.group li span { color: var(--muted); font-size: 15.5px; line-height: 1.6; }
 
 /* ---- Cards -------------------------------------------------------------- */
-.cards { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); }
-.card {
-  background: var(--surface); border: 1px solid var(--line);
-  border-radius: var(--radius-lg); padding: 26px 24px 22px;
-  box-shadow: var(--shadow);
-  display: flex; flex-direction: column;
-  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+.cards {
+  display: grid; gap: 1px; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+  background: var(--line); border: 1px solid var(--line);
+  border-radius: var(--radius); overflow: hidden;
 }
-.card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); border-color: rgba(126,95,30,.3); }
-.card h3 { margin: 0 0 10px; font-size: 19px; }
+.card {
+  background: var(--surface); padding: 24px 22px 20px;
+  display: flex; flex-direction: column;
+  transition: background-color .18s ease;
+}
+.card:hover { background: var(--sunken); }
+.card h3 { margin: 0 0 10px; font-size: 18px; }
 .card p { margin: 0; color: var(--muted); font-size: 15.5px; }
 .card p:last-child { margin-top: auto; padding-top: 16px; }
 .card a { font-weight: 600; text-decoration: none; }
@@ -338,7 +517,7 @@ section > .lede .ethi { letter-spacing: 0; line-height: 1.5; }
 .steps { list-style: none; counter-reset: step; padding: 0; margin: 0; }
 .steps > li {
   counter-increment: step; position: relative;
-  padding: 0 0 40px 62px; margin: 0 0 0 19px;
+  padding: 0 0 40px 52px; margin: 0 0 0 19px;
   border-left: 1px solid var(--line);
 }
 .steps > li:last-child { border-left-color: transparent; padding-bottom: 0; }
@@ -348,40 +527,46 @@ section > .lede .ethi { letter-spacing: 0; line-height: 1.5; }
   width: 39px; height: 39px; border-radius: 50%;
   background: var(--bg); color: var(--gold);
   border: 1.5px solid var(--gold);
-  display: grid; place-items: center; font-size: 15px; font-weight: 700;
+  display: grid; place-items: center; font: 700 15px/1 var(--mono);
 }
-.steps h3 { margin: 2px 0 8px; font-size: 21px; }
-.steps p { margin: 0 0 12px; color: var(--muted); max-width: 34em; }
+.steps h3 { margin: 2px 0 8px; font-size: 19px; }
+.steps p { margin: 0 0 12px; color: var(--muted); max-width: 34em;
+           font-size: 15.5px; line-height: 1.62; }
+.steps > li:last-child p:last-child { margin-bottom: 0; }
 
 /* ---- Notes, definition lists, chips, code -------------------------------- */
 .note {
   border: 1px solid var(--line); border-left: 3px solid var(--gold);
   background: var(--sunken);
-  padding: 22px 26px; border-radius: 0 var(--radius) var(--radius) 0;
-  margin: 32px 0; font-size: 16px;
+  padding: 20px 22px; border-radius: 0 var(--radius) var(--radius) 0;
+  margin: 32px 0; font-size: 15.5px; line-height: 1.62;
 }
 .note p { margin: 0 0 12px; }
 .note p:last-child { margin: 0; }
 
-dl.terms { margin: 0; }
-dl.terms dt {
-  font-weight: 700; margin: 0; padding: 26px 0 6px;
-  border-top: 1px solid var(--hair); font-size: 17.5px;
+dl.terms {
+  margin: 0; padding: 0 18px;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface);
 }
-dl.terms dt:first-of-type { border-top: none; padding-top: 0; }
-dl.terms dd { margin: 0; color: var(--muted); max-width: 34em; }
-dl.terms dd + dd { margin-top: 8px; }
-dl.terms dd.fine { font-size: 14.5px; margin-top: 10px; }
+dl.terms dt {
+  font-weight: 700; margin: 0; padding: 18px 0 5px;
+  border-top: 1px solid var(--hair); font-size: 16.5px;
+}
+dl.terms dt:first-of-type { border-top: none; }
+dl.terms dd { margin: 0 0 18px; color: var(--muted); max-width: 34em;
+              font-size: 15.5px; line-height: 1.62; }
+dl.terms dd + dd { margin-top: -10px; }
+dl.terms dd.fine { font: 400 13.5px/1.6 var(--mono); margin-top: -10px; }
 
 .chip {
-  display: inline-block; font-size: 12.5px; font-weight: 600;
+  display: inline-block; font: 600 12px/1.5 var(--mono);
   letter-spacing: .05em; text-transform: uppercase;
   padding: 5px 12px; border-radius: 999px;
   background: var(--chip-bg); color: var(--gold);
-  border: 1px solid rgba(126,95,30,.22);
+  border: 1px solid var(--chip-line);
   vertical-align: middle;
 }
-@media (prefers-color-scheme: dark) { .chip { border-color: rgba(211,176,74,.28); } }
 
 code {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .88em;
@@ -397,40 +582,43 @@ pre code { background: none; padding: 0; border: none; }
 
 ul.plain { list-style: none; padding: 0; margin: 0; }
 ul.plain li {
-  margin: 0; padding: 16px 0 16px 20px;
+  margin: 0; padding: 14px 0 14px 20px;
   border-top: 1px solid var(--hair); position: relative; max-width: 40em;
+  font-size: 15.5px; line-height: 1.62;
 }
-ul.plain li:first-child { border-top: none; }
+ul.plain li:first-child { border-top: none; padding-top: 0; }
 ul.plain li::before {
-  content: ""; position: absolute; left: 0; top: 27px;
+  content: ""; position: absolute; left: 0; top: 23px;
   width: 6px; height: 6px; border-radius: 50%; background: var(--gold);
 }
-ul.plain li:first-child::before { top: 11px; }
+ul.plain li:first-child::before { top: 9px; }
 
 /* ---- Release entries ----------------------------------------------------
    The version holds a left rail so a long release reads against its number. */
 .release {
-  display: grid; grid-template-columns: 150px 1fr; gap: 16px 44px;
+  display: grid; grid-template-columns: 1fr; gap: 18px;
   margin: 0 0 72px; padding-top: 34px; border-top: 1px solid var(--line);
 }
 .release:first-of-type { border-top: none; padding-top: 0; }
-.release header { align-self: start; position: sticky; top: 88px; }
-.release h2 { font-size: 32px; margin: 0; letter-spacing: -.02em; }
-.release .date { display: block; font-size: 13.5px; color: var(--muted); font-weight: 400; margin-top: 6px; }
+.release header { align-self: start;
+  border-bottom: 1px solid var(--hair); padding-bottom: 16px; }
+.release h2 { font: 700 30px/1.1 var(--mono); margin: 0; letter-spacing: -.02em; }
+.release .date { display: block; font: 400 13px/1 var(--mono); color: var(--muted);
+                 margin-top: 8px; }
 .release .motto { color: var(--gold); font-style: italic; margin: 12px 0 0; font-size: 15px; line-height: 1.45; }
 .release h3 {
-  font-size: 12.5px; letter-spacing: .05em; text-transform: uppercase;
-  margin: 0 0 14px; font-weight: 600;
+  font: 600 12px/1.5 var(--mono); letter-spacing: .05em; text-transform: uppercase;
+  margin: 0 0 14px;
   display: inline-block; padding: 5px 12px; border-radius: 999px;
   background: var(--chip-bg); color: var(--gold);
-  border: 1px solid rgba(126,95,30,.22);
+  border: 1px solid var(--chip-line);
 }
 .release .body > *:first-child { margin-top: 0; }
 .release .body h3 { margin-top: 30px; }
 .release .body > h3:first-child { margin-top: 0; }
 .release ul { margin: 0; padding: 0; list-style: none; }
 .release li {
-  margin: 0; padding: 0 0 16px 18px;
+  margin: 0; padding: 0 0 14px 18px;
   border-left: 2px solid var(--hair); max-width: 40em;
 }
 .release li:last-child { padding-bottom: 0; }
@@ -442,9 +630,9 @@ ul.plain li:first-child::before { top: 11px; }
   display: flex; align-items: baseline; gap: 14px;
   flex-wrap: wrap; margin: 0 0 14px;
 }
-.source-head h3 { margin: 0; font-size: 22px; }
+.source-head h3 { margin: 0; font-size: 20px; }
 .source-head h3 .sub { color: var(--muted); font-weight: 400; font-size: 15px; }
-.source p { margin: 0 0 14px; max-width: 34em; }
+.source p { margin: 0 0 14px; max-width: 34em; font-size: 15.5px; line-height: 1.62; }
 .source p:last-child { margin-bottom: 0; }
 
 /* ---- Feedback form ------------------------------------------------------
@@ -454,10 +642,12 @@ ul.plain li:first-child::before { top: 11px; }
 .form { margin: 0; max-width: 34em; }
 .field { margin: 0 0 26px; }
 .field > label, .field > .legend {
-  display: block; font-weight: 600; font-size: 16.5px; margin: 0 0 7px;
+  display: block; font-weight: 600; font-size: 15.5px; margin: 0 0 7px;
 }
-.field .opt { color: var(--muted); font-size: 14.5px; font-weight: 400; }
-.field .hint { display: block; color: var(--muted); font-size: 14.5px; margin: 0 0 9px; }
+.field .opt { color: var(--muted); font: 400 12px/1 var(--mono);
+              letter-spacing: .06em; text-transform: uppercase; margin-left: 6px; }
+.field .hint { display: block; color: var(--muted); font-size: 14px;
+               line-height: 1.55; margin: 0 0 9px; }
 
 .field input[type="text"],
 .field input[type="email"],
@@ -514,7 +704,7 @@ fieldset.kinds { border: 0; margin: 0 0 26px; padding: 0; }
 .form-status.bad { color: #A6402F; font-weight: 600; }
 
 /* ---- Footer ------------------------------------------------------------- */
-footer { background: var(--hero); color: #A9C1B6; padding: 64px 20px 52px; font-size: 15.5px; }
+footer { background: var(--hero); color: #A9C1B6; padding: 48px 20px 44px; font-size: 15.5px; }
 .foot-in { max-width: 880px; margin: 0 auto; }
 .foot-links {
   display: flex; gap: 12px 28px; flex-wrap: wrap;
@@ -528,7 +718,7 @@ footer { background: var(--hero); color: #A9C1B6; padding: 64px 20px 52px; font-
 .foot-links a:hover { border-bottom-color: var(--gold-lit); }
 footer p { margin: 0 0 12px; max-width: 40em; line-height: 1.62; }
 footer a { color: var(--gold-lit); }
-footer .fine { color: #8FA99C; font-size: 13.5px; }
+footer .fine { color: #8FA99C; font: 400 12.5px/1.7 var(--mono); }
 
 /* ---- Reveal on scroll ---------------------------------------------------
    The class is added by script, never by the stylesheet, so a page with no
@@ -553,8 +743,14 @@ footer .fine { color: #8FA99C; font-size: 13.5px; }
 .more-body .release:first-of-type { border-top: none; padding-top: 0; }
 .more-releases .reveal, .more-releases .reveal.in { opacity: 1; transform: none; transition: none; }
 
-.reveal { opacity: 0; transform: translateY(16px); }
-.reveal.in { opacity: 1; transform: none; transition: opacity .55s ease, transform .55s ease; }
+/* Entrances, not performances: .55s was long enough that a reader scrolling
+   at a normal pace met sections still fading in. ease-out, because an
+   entrance should arrive and settle rather than accelerate away. */
+.reveal { opacity: 0; transform: translateY(12px); }
+.reveal.in {
+  opacity: 1; transform: none;
+  transition: opacity .34s ease-out, transform .34s cubic-bezier(.2,.7,.3,1);
+}
 
 @media (prefers-reduced-motion: reduce) {
   .reveal, .reveal.in { opacity: 1; transform: none; transition: none; }
@@ -562,51 +758,65 @@ footer .fine { color: #8FA99C; font-size: 13.5px; }
   .card:hover { transform: none; }
 }
 
-/* ---- Narrow screens ------------------------------------------------------ */
-@media (max-width: 820px) {
-  .group, .release { grid-template-columns: 1fr; gap: 18px; }
-  .group h3, .release header { position: static; }
-  .release header { border-bottom: 1px solid var(--hair); padding-bottom: 16px; }
-  .group h3 .sub { display: inline; margin-left: 8px; }
+/* ---- Wider screens ------------------------------------------------------
+   Everything above is the phone layout. These are the only places the design
+   changes as the screen grows, so a narrow screen is never a stack of
+   overrides fighting a desktop rule it cannot see. */
+@media (min-width: 560px) {
+  .nav { position: sticky; top: 0; z-index: 5;
+         background: rgba(11,49,41,.92);
+         backdrop-filter: saturate(140%) blur(12px); }
+  .nav-in { padding: 11px 20px; gap: 18px; flex-wrap: nowrap; }
+  .nav-links { order: 0; width: auto; gap: 18px; margin-left: auto; }
+  .nav-links a { font-size: 15px; }
+  .theme .lbl { display: inline; min-width: 3.6em; text-align: left; }
+
+  .cta { flex-direction: row; align-items: center; flex-wrap: wrap;
+         gap: 12px 26px; margin: 34px 0 0; }
+  .btn { width: auto; }
+
+  .hero { padding: 64px 20px 64px; }
+  .hero .sub { font-size: 18.5px; }
+  .hours { padding: 24px 26px 18px; }
+  .hours .gl { display: block; color: #8FA99C; margin-left: auto;
+               font: 400 11.5px/1 var(--mono); letter-spacing: .04em; }
+  .hours .at { margin-left: 0; }
+  .dial { max-width: 300px; }
+
+  main { padding-bottom: 96px; }
+  section { margin: 84px 0; }
+  .page-head { padding: 68px 0 10px; }
+  .steps > li { padding-left: 62px; }
+  .band { padding: 76px 20px; margin: 96px 0; }
+  footer { padding: 64px 20px 52px; }
 }
 
-@media (max-width: 560px) {
-  /* The nav wrapped to three rows and, being sticky, ate a fifth of the
-     screen. On phones it releases the top and the links become one
-     swipeable row beneath the brand. */
-  .nav { position: static; backdrop-filter: none; background: var(--hero); }
-  .nav-in { padding: 10px 16px; gap: 10px; }
-  .nav-links {
-    order: 3; width: 100%; flex-wrap: nowrap;
-    overflow-x: auto; gap: 18px; scrollbar-width: none;
-  }
-  .nav-links::-webkit-scrollbar { display: none; }
-  .nav-links a { font-size: 14px; white-space: nowrap; }
+@media (min-width: 820px) {
+  .group { grid-template-columns: 210px 1fr; gap: 20px 46px; }
+  .group h3 { position: sticky; top: 88px; }
+  .group h3 .sub { display: block; margin-left: 0; }
+  .release { grid-template-columns: 150px 1fr; gap: 16px 44px; }
+  .release header { position: sticky; top: 88px; border-bottom: none;
+                    padding-bottom: 0; }
+}
 
-  .hero { padding: 56px 20px 56px; }
-  .hero .sub { font-size: 17px; }
-  .cta { flex-direction: column; align-items: stretch; gap: 18px; }
-  .btn { width: 100%; text-align: center; }
-  .cta-link { text-align: center; }
-  .hours { padding: 22px 22px 18px; }
-  .hours .gl { display: none; }
-
-  main { padding-bottom: 64px; }
-  section { margin: 60px 0; }
-  .band { padding: 56px 20px; margin: 64px 0; }
-  .page-head { padding: 44px 0 6px; }
-  .steps > li { padding-left: 52px; }
+@media (min-width: 900px) {
+  .hero { padding: 88px 20px 84px; }
+  .hero-in { grid-template-columns: 1.06fr .94fr; gap: 72px; }
+  .hero .sub { max-width: 42ch; }
+  .hours { padding: 26px 30px 20px; }
+  .dial { max-width: 320px; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }
 }
 
-/* Downloads and stars under the hero. The star is a link to the repository,
-   not GitHub's own button: that is an iframe from a third party, and this site
-   loads nothing from anywhere else. */
-.hero-fine.counts { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px 14px; }
-.hero-fine.counts .star { color: var(--gold-lit); text-decoration: none;
-  border-bottom: 1px solid transparent; transition: border-color .15s ease; }
-.hero-fine.counts .star:hover,
-.hero-fine.counts .star:focus-visible { border-bottom-color: var(--gold-lit); }
+/* Downloads and stars. The star is a link to the repository, not GitHub's own
+   button: that is an iframe from a third party, and this site loads nothing
+   from anywhere else. Both numbers are counted at build time and written in
+   as text, so the reader's browser never asks GitHub anything. */
+.facts .star { text-decoration: none; transition: color .18s, border-color .18s; }
+.facts .star:hover, .facts .star:focus-visible {
+  color: var(--gold-lit); border-color: rgba(228,188,90,.5);
+}
