@@ -32,7 +32,6 @@ object BreathPrayerScheduler {
 
     const val ACTION = "com.agpeya.app.BREATH_PRAYER"
     const val CHANNEL_ID = "breath_reminders"
-    const val NOTIFICATION_ID = 7600
 
     /** Tap code 7 — 0–3 are the alarm/ግጻዌ/streak/widget intents, 5/6 ምጽዋት/ንስሐ. */
     const val TAP_REQUEST_CODE = 7

@@ -6,6 +6,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [2.3.2] — 2026-09-15
+
+_versionCode 72 · The morning ግጻዌ comes back_
+
+### Fixed
+- **The morning ግጻዌ nudge was being deleted half an hour after it arrived.** It
+  posted at 06:00 under notification id 7300 and the reading plan's nudge posted
+  under the same 7300 at 06:30, which on Android does not add a second
+  notification — it replaces the first. So ግጻዌ appeared, sat for thirty minutes
+  and was wiped before most readers had picked up the phone. The alarm was
+  firing the whole time and the switch was on, which is why it looked like the
+  switch had stopped working.
+
+  It reads as a 2.3.1 regression and is not: the clash has been there since
+  1.9.9. The reading nudge stays silent while no reading plan is being kept, so
+  the day you start keeping one is the day ግጻዌ stops being visible.
+- **A snooze or a done-marker could delete any of the other nudges too.** Those
+  two ids are not ids but `base + hourId.hashCode() mod 1000`, so 7100 and 7200
+  were thousand-wide ranges, and both of them covered every fixed id above:
+  the ጉዞ nudge at 7200, ግጻዌ and the reading plan at 7300, the breath prayer at
+  7600. Which hour you snoozed decided which nudge you lost. The special-habit
+  notification was posting under a raw unbounded `hashCode()` and could land
+  anywhere at all.
+
+### Changed
+- Every notification id now lives in one file, each family in a thousand of its
+  own, well clear of the rest. Two receivers picking 7300 independently is how
+  this happened, and adding a notification now means adding a line there rather
+  than choosing a number where it is posted.
+
 ## [2.3.1] — 2026-09-12
 
 _versionCode 71 · A way into the ማኅሌት_

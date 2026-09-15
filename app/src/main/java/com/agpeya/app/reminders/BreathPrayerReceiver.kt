@@ -66,7 +66,7 @@ class BreathPrayerReceiver : BroadcastReceiver() {
                         .setContentIntent(tap)
                         .build()
                     context.getSystemService(NotificationManager::class.java)
-                        .notify(BreathPrayerScheduler.NOTIFICATION_ID, notification)
+                        .notify(NotificationIds.BREATH, notification)
                     SettingsRepository.setBreathLastFiredDay(context, today)
                     BreathPrayerScheduler.schedule(context)
                 }

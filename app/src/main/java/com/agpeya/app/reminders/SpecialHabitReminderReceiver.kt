@@ -116,7 +116,13 @@ class SpecialHabitReminderReceiver : BroadcastReceiver() {
                         .setContentIntent(tap)
                         .build()
                     context.getSystemService(NotificationManager::class.java)
-                        .notify("${habit.action}:$entryId".hashCode(), notification)
+                        .notify(
+                        NotificationIds.inFamily(
+                            NotificationIds.HABIT_BASE,
+                            "${habit.action}:$entryId",
+                        ),
+                        notification,
+                    )
                 }
             } finally {
                 pending.finish()

@@ -2,6 +2,30 @@
   "contentVersion": 1,
   "tours": [
     {
+      "versionCode": 72,
+      "version": "2.3.2",
+      "title": {
+        "am": "በዚህ እትም",
+        "en": "In this version"
+      },
+      "pages": [
+        {
+          "kicker": {
+            "am": "ግጻዌ",
+            "en": "ግጻዌ"
+          },
+          "title": {
+            "am": "የጠዋቱ ግጻዌ ተመልሷል",
+            "en": "The morning ግጻዌ comes back"
+          },
+          "body": {
+            "am": "የጠዋቱ የግጻዌ ማስታወሻ ይደርስ ነበር፤ ግን በ፲፪ ሰዓት ተኩል በንባብ መርሐ ግብሩ ማስታወሻ ይሰረዝ ነበር — ሁለቱም አንድ የማስታወቂያ ቁጥር ተሰጥቷቸው ነበርና፤ በአንድሮይድ ላይ ደግሞ ይህ ሁለተኛ ማስታወቂያ አይጨምርም፣ የመጀመሪያውን ይተካል እንጂ። ማብሪያው ሁሌም በርቶ ነበር። አሁን እያንዳንዱ ማስታወቂያ የራሱ ቁጥር አለው።",
+            "en": "The morning ግጻዌ nudge was arriving at 6:00 and being deleted at 6:30 by the reading plan's nudge — both had been given the same notification number, and on Android that does not add a second notification, it replaces the first. Your switch was on the whole time. Every notification has a number of its own now."
+          }
+        }
+      ]
+    },
+    {
       "versionCode": 71,
       "version": "2.3.1",
       "title": {

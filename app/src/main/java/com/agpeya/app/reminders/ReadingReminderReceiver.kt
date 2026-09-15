@@ -182,7 +182,7 @@ class ReadingReminderReceiver : BroadcastReceiver() {
             .setContentIntent(tap)
             .build()
         context.getSystemService(NotificationManager::class.java)
-            .notify(NOTIFICATION_ID, notification)
+            .notify(NotificationIds.READING, notification)
     }
 
     private fun ensureChannel(context: Context, name: String) {
@@ -198,6 +198,5 @@ class ReadingReminderReceiver : BroadcastReceiver() {
 
     companion object {
         const val CHANNEL_ID = "reading_reminders"
-        private const val NOTIFICATION_ID = 7300
     }
 }

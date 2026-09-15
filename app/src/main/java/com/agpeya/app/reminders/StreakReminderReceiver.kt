@@ -75,7 +75,7 @@ class StreakReminderReceiver : BroadcastReceiver() {
                         .setContentIntent(tap)
                         .build()
                     context.getSystemService(NotificationManager::class.java)
-                        .notify(NOTIFICATION_ID, notification)
+                        .notify(NotificationIds.STREAK, notification)
                 }
             } finally {
                 pending.finish()
@@ -128,7 +128,6 @@ class StreakReminderReceiver : BroadcastReceiver() {
 
     companion object {
         const val CHANNEL_ID = "streak_reminders"
-        private const val NOTIFICATION_ID = 7200
     }
 }
 

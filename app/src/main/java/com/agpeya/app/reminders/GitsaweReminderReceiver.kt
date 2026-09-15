@@ -60,7 +60,7 @@ class GitsaweReminderReceiver : BroadcastReceiver() {
                         .setContentIntent(tap)
                         .build()
                     context.getSystemService(NotificationManager::class.java)
-                        .notify(NOTIFICATION_ID, notification)
+                        .notify(NotificationIds.GITSAWE, notification)
                 }
             } finally {
                 pending.finish()
@@ -82,6 +82,5 @@ class GitsaweReminderReceiver : BroadcastReceiver() {
 
     companion object {
         const val CHANNEL_ID = "gitsawe_reminders"
-        private const val NOTIFICATION_ID = 7300
     }
 }

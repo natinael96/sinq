@@ -42,9 +42,6 @@ object AlarmRinger {
     private const val CHANNEL_PREFIX = "prayer_alarm_"
     private const val FOLLOWUP_CHANNEL_ID = "prayer_alarm_followup"
     private const val LEGACY_CHANNEL_ID = "prayer_alarms"
-    private const val NOTIFICATION_ID = 7001
-    private const val DONE_NOTIFICATION_BASE = 7100
-    private const val SNOOZE_NOTIFICATION_BASE = 7200
     private const val TIMEOUT_MS = 60_000L
 
     // Request codes 8-12: distinct from the reminder PendingIntents (0-3, 5-7).
@@ -128,7 +125,7 @@ object AlarmRinger {
             }
             .build()
         notification.flags = notification.flags or Notification.FLAG_INSISTENT
-        nm.notify(NOTIFICATION_ID, notification)
+        nm.notify(NotificationIds.ALARM, notification)
         // setTimeoutAfter removes the notification but tells us nothing, so the
         // unanswered alarm still has to ask "done?" — that needs our own alarm.
         scheduleTimeout(app, hourId)
@@ -185,7 +182,7 @@ object AlarmRinger {
      * "done?" prompt explicitly.
      */
     fun stop(context: Context) {
-        context.getSystemService(NotificationManager::class.java).cancel(NOTIFICATION_ID)
+        context.getSystemService(NotificationManager::class.java).cancel(NotificationIds.ALARM)
     }
 
     /**
@@ -236,7 +233,7 @@ object AlarmRinger {
                     .coerceAtLeast(1_000L),
             )
             .build()
-        nm.notify(SNOOZE_NOTIFICATION_BASE + Math.floorMod(hourId.hashCode(), 1000), notification)
+        nm.notify(NotificationIds.inFamily(NotificationIds.SNOOZE_BASE, hourId), notification)
     }
 
     /** The silent channel both quiet follow-ups share. */
@@ -262,7 +259,7 @@ object AlarmRinger {
         )
         val nm = app.getSystemService(NotificationManager::class.java)
         ensureFollowupChannel(app, nm)
-        val notifId = DONE_NOTIFICATION_BASE + Math.floorMod(hourId.hashCode(), 1000)
+        val notifId = NotificationIds.inFamily(NotificationIds.DONE_BASE, hourId)
         val yes = PendingIntent.getBroadcast(
             app,
             notifId,

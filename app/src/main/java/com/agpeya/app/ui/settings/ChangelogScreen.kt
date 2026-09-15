@@ -31,6 +31,23 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "2.3.2",
+        title = "The morning ግጻዌ comes back",
+        titleAm = "የጠዋቱ ግጻዌ ተመልሷል",
+        changes = listOf(
+            "The morning ግጻዌ nudge is back. It was arriving at 6:00 and being deleted at 6:30 by the reading plan's nudge, which had been given the same notification number.",
+            "The switch had been on the whole time and the reminder had been firing. Nothing you set was wrong.",
+            "Snoozing an hour could delete one of the other nudges as well, and which hour you snoozed decided which one you lost.",
+            "Every notification now has a number of its own, so none of them can take another's place again.",
+        ),
+        changesAm = listOf(
+            "የጠዋቱ የግጻዌ ማስታወሻ ተመልሷል። በ፲፪ ሰዓት ይደርስና በ፲፪ ሰዓት ተኩል በንባብ መርሐ ግብሩ ማስታወሻ ይሰረዝ ነበር፤ ሁለቱም አንድ የማስታወቂያ ቁጥር ተሰጥቷቸው ነበርና።",
+            "ማብሪያው ሁሌም በርቶ ነበር፤ ማስታወሻውም ይነሣ ነበር። እርስዎ ያደረጉት ምንም ስሕተት አልነበረም።",
+            "አንድ ሰዓት ማሳደር ከሌሎቹ ማስታወሻዎች አንዱን ሊሰርዝ ይችል ነበር፤ የትኛውን እንደሚያጡም ያሳደሩት ሰዓት ይወስነው ነበር።",
+            "አሁን እያንዳንዱ ማስታወቂያ የራሱ ቁጥር አለው፤ ስለዚህ አንዱ የሌላውን ቦታ ሊወስድ አይችልም።",
+        ),
+    ),
+    ReleaseNote(
         version = "2.3.1",
         title = "A way into the ማኅሌት",
         titleAm = "ወደ ማኅሌቱ መግቢያ",
