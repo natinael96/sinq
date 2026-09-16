@@ -109,7 +109,7 @@ Started 16 September 2026; follow-up reviewed 17 September 2026. Work follows [t
 
 The remaining named implementation recommendations have been addressed or explicitly dispositioned above; this is **not a device-tested all-clear**. Home's existing hierarchy and Library's shelf grouping are retained rather than introducing an unvalidated navigation redesign. Cross-references and verse highlights remain limited to content that supplies stable verse metadata. Confession preparation is now notes-only by user direction; specialist review of liturgical terminology remains outside the code closeout. TalkBack, 320dp/200% text, rotation/backgrounding, widget refresh, notification delivery and backup-provider flows still need a device or emulator. The user selected code/build checks only.
 
-The user authorized committing, pushing and releasing this implementation as v2.4.0 (versionCode 74). The tag-triggered GitHub workflow validates and builds the signed release artifacts; device checks remain open.
+Published as [v2.4.0](https://github.com/natinael96/sinq/releases/tag/v2.4.0), versionCode 74, from app commit `e090405`. The release workflow passed and attached the signed APK and Play-upload AAB. Device checks remain open.
 
 ## Follow-up on 17 September 2026
 
