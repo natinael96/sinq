@@ -827,3 +827,9 @@ main.home-more { max-width: 1040px; padding: 28px 20px; }
 footer.home-footer { padding: 24px 20px; }
 .home-footer .foot-links { margin-bottom: 14px; }
 .home-footer .fine { margin: 0; }
+
+footer .powered-by {
+  max-width: none; margin: 24px 0 0; text-align: center;
+  color: #A9C1B6; font-size: 14px; font-weight: 300;
+  font-style: italic; letter-spacing: .08em;
+}
