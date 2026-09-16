@@ -1,6 +1,6 @@
 # Foundation checklist — reconciled project status
 
-Reviewed **2026-09-16**, current build **2.3.2 / 72**. The original “Week 0” checklist is superseded: the app is implemented and has a release history. See [detailed project status](PROJECT_STATUS.md) for the current baseline and [historical plan](../PLAN.md) for the learning/release plan as originally written.
+Reviewed **2026-09-17**, current build **2.4.0 / 74**. The original “Week 0” checklist is superseded: the app is implemented and has a release history. See [detailed project status](PROJECT_STATUS.md) for the current baseline and [historical plan](../PLAN.md) for the learning/release plan as originally written.
 
 ## Completed in the repository
 

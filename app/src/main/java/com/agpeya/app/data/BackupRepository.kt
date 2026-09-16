@@ -27,7 +27,7 @@ import kotlinx.serialization.json.Json
 object BackupRepository {
 
     /** Bumped only if the shape changes incompatibly; readers tolerate older files. */
-    private const val VERSION = 2
+    private const val VERSION = 3
     private const val MAX_BACKUP_BYTES = 2 * 1024 * 1024
 
     @Serializable
@@ -54,8 +54,8 @@ object BackupRepository {
          * about giving is stored. Defaulted, so a v2 file without them decodes.
          */
         val titheEntries: List<TitheEntry> = emptyList(),
-        val tithePercent: Int = OfferingRepository.DEFAULT_TITHE_PERCENT,
-        val currency: String = "",
+        val tithePercent: Int? = null,
+        val currency: String? = null,
         val vows: List<Vow> = emptyList(),
         /**
          * Journal entries, in PLAINTEXT. Exporting them is opt-in and gated on
@@ -111,8 +111,8 @@ object BackupRepository {
             layouts = if (selection.setup) LayoutRepository.current(context) else emptyMap(),
             settings = if (selection.setup) SettingsRepository.backupSettings(context) else null,
             titheEntries = if (selection.offerings) OfferingRepository.titheEntries(context).first() else emptyList(),
-            tithePercent = OfferingRepository.tithePercent(context).first(),
-            currency = OfferingRepository.currency(context).first(),
+            tithePercent = if (selection.offerings) OfferingRepository.tithePercent(context).first() else null,
+            currency = if (selection.offerings) OfferingRepository.currency(context).first() else null,
             vows = if (selection.offerings) OfferingRepository.vows(context).first() else emptyList(),
             // Already filtered of ንስሐ drafts by the repository, so a bug in
             // the picker can never be the thing that lets one out.
@@ -152,6 +152,11 @@ object BackupRepository {
         val newDays: Int,
         /** Bookmarks in the file that the device does not already have. */
         val newBookmarks: Int,
+        val prayerPeople: Int,
+        val journalEntries: Int,
+        val offeringEntries: Int,
+        val hasSetup: Boolean,
+        val readChapters: Int,
     )
 
     /**
@@ -171,6 +176,11 @@ object BackupRepository {
         val have = localBookmarks.mapTo(mutableSetOf()) { it.hourId to it.sectionId }
 
         Summary(
+            prayerPeople = b.prayerList.size,
+            journalEntries = b.journal.size,
+            offeringEntries = b.titheEntries.size + b.vows.size,
+            hasSetup = b.settings != null || b.modes != null || b.hours != null || b.layouts.isNotEmpty(),
+            readChapters = b.readingPlan.readChapters.size,
             version = b.version,
             created = b.created,
             days = b.habits.records.size,
@@ -228,8 +238,8 @@ object BackupRepository {
             // Journal entries merge last-write-wins; any ንስሐ draft that
             // somehow appears in a file is discarded rather than restored.
             if (backup.journal.isNotEmpty()) JournalRepository.merge(context, backup.journal)
-            OfferingRepository.setTithePercent(context, backup.tithePercent)
-            if (backup.currency.isNotBlank()) OfferingRepository.setCurrency(context, backup.currency)
+            backup.tithePercent?.let { OfferingRepository.setTithePercent(context, it) }
+            backup.currency?.let { OfferingRepository.setCurrency(context, it) }
             if (backup.vows.isNotEmpty()) {
                 com.agpeya.app.reminders.SpecialHabitReminderScheduler.sync(
                     context, com.agpeya.app.reminders.SpecialHabit.VOW,
@@ -249,6 +259,7 @@ object BackupRepository {
                 )
                 com.agpeya.app.reminders.SpecialHabitReminderScheduler.syncAll(context)
             }
+            com.agpeya.app.reminders.ReadingReminderScheduler.sync(context, SettingsRepository.readingReminder(context).first())
             true
         }.getOrDefault(false)
     }

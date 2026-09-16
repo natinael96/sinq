@@ -2,6 +2,8 @@ package com.agpeya.app.ui.library
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -83,9 +85,12 @@ private val FONT_STEPS_SP = com.agpeya.app.data.SettingsRepository.FONT_STEPS_SP
 fun WudaseMaryamScreen(
     onBack: () -> Unit,
     initialSectionId: String? = null,
+    initialGeez: Boolean = false,
+    onWriteNote: ((String, String) -> Unit)? = null,
     onOpenBook: (String) -> Unit = {},
     onOpenPrayerList: () -> Unit = {},
 ) {
+    com.agpeya.app.ui.common.ReaderAwake()
     val context = LocalContext.current
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
@@ -97,7 +102,7 @@ fun WudaseMaryamScreen(
     val fontStep by SettingsRepository.fontStep(context).collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
 
-    var geez by rememberSaveable { mutableStateOf(false) }
+    var geez by rememberSaveable { mutableStateOf(initialGeez) }
 
     val data = contentResult?.getOrNull()
     val sections = data?.sections ?: emptyList()
@@ -166,6 +171,10 @@ fun WudaseMaryamScreen(
                         fontStep = fontStep,
                         maxFontStep = FONT_STEPS_SP.lastIndex,
                         onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
+                        onWriteNote = shown?.let { section -> onWriteNote?.let { write -> {
+                            write("wudase?sec=${android.net.Uri.encode(section.id)}&lang=${if (geez) "gez" else "am"}",
+                                if (geez) section.titleGe else section.titleAm)
+                        } } },
                         shareEnabled = shown != null,
                         sharePayload = {
                             shown?.let {
@@ -382,7 +391,8 @@ private fun SectionStrip(
                         if (isSel) Modifier.background(com.agpeya.app.ui.theme.sinqColors.hero)
                         else Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
                     )
-                    .clickable { onSelect(i) }
+                    .heightIn(min = 48.dp)
+                    .selectable(selected = isSel, role = Role.Tab, onClick = { onSelect(i) })
                     .padding(horizontal = 16.dp, vertical = 9.dp),
                 contentAlignment = Alignment.Center,
             ) {

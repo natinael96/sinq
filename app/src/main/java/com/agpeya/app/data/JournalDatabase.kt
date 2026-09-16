@@ -103,6 +103,10 @@ interface JournalDao {
     @Query("SELECT * FROM journal_entries WHERE id = :id")
     suspend fun byId(id: String): JournalEntry?
 
+    /** Resume the most recently edited confession note without creating duplicates. */
+    @Query("SELECT * FROM journal_entries WHERE kind = 'CONFESSION_DRAFT' ORDER BY updatedAt DESC, createdAt DESC, id DESC LIMIT 1")
+    suspend fun latestConfessionDraft(): JournalEntry?
+
     /** Every entry, for the export only. Never bound to a screen. */
     @Query("SELECT * FROM journal_entries ORDER BY date DESC")
     suspend fun all(): List<JournalEntry>

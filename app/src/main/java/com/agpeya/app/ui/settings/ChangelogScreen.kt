@@ -31,6 +31,19 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "2.3.3",
+        title = "Opening the ምስባክ in ግጻዌ",
+        titleAm = "የግጻዌ ምስባክ ንባብ",
+        changes = listOf(
+            "Tapping the ምስባክ in the ግጻዌ opens its chant lines directly without crashing.",
+            "Cleaned up verse line spacing when copying or sharing the ምስባክ chant.",
+        ),
+        changesAm = listOf(
+            "በግጻዌ ውስጥ ምስባክን ሲጫኑ ያለ ምንም መቆራረጥ በቀጥታ ይከፈታል።",
+            "የምስባኩን ዜማ ጽሑፍ ሲያጋሩ ወይም ሲገለብጡ የነበረውን ክፍተት አስተካክለናል።",
+        ),
+    ),
+    ReleaseNote(
         version = "2.3.2",
         title = "The morning ግጻዌ comes back",
         titleAm = "የጠዋቱ ግጻዌ ተመልሷል",

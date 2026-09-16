@@ -1,6 +1,6 @@
 # Sinq implementation reference
 
-Current as of **2026-09-16**, version **2.3.2 / 72**, baseline commit `69ef0a7`. For inventory, verification results and outstanding work, see [project status](PROJECT_STATUS.md). The previous deep dive is preserved as a [v0.2.6 archive](archive/IMPLEMENTATION_0.2.6.md).
+Current as of **2026-09-17**, version **2.4.0 / 74**, release source. For inventory, verification results and outstanding work, see [project status](PROJECT_STATUS.md). The previous deep dive is preserved as a [v0.2.6 archive](archive/IMPLEMENTATION_0.2.6.md).
 
 ## Build baseline
 
@@ -42,7 +42,7 @@ All paths below are relative to `app/src/main/java/com/agpeya/app/`.
 | `model/` | Content and user-record contracts |
 | `reminders/` | Alarm scheduling, receivers and notification identities |
 | `search/` | Amharic homophone folding and search helpers |
-| `widget/` | Gitsawe and memento mori widgets |
+| `widget/` | Gitsawe, memento mori and canonical prayer-clock widgets |
 | `ui/` | Screens, reader/share helpers, strings, theme and components |
 
 ## Persistence and compatibility
@@ -55,7 +55,7 @@ The journal uses the Room database `journal`, schema version 1. Queries browse b
 
 Section IDs, chapter routes, highlight identities and record IDs are compatibility contracts. `tools/section-ids.json` guards the 331 core section IDs. Do not update that snapshot merely to silence a regression after an accidental rename.
 
-Backup format version 2 supports older data through defaulted fields. It covers selected habits/reading progress, marks, prayer list, setup and offerings; journal inclusion is opt-in. Import has a 2 MiB size limit, previews changes and applies repository-specific restoration. Confession drafts are excluded from export. Files written by `BackupRepository.writeTo` are plaintext JSON; the optional journal passphrase does not encrypt the database or export.
+Backup format version 3 supports older data through defaulted fields. It covers selected habits/reading progress, marks, prayer list, setup and offerings; journal inclusion is opt-in. Import has a 2 MiB size limit, previews changes and applies repository-specific restoration. Confession drafts are excluded from export. Files written by `BackupRepository.writeTo` are plaintext JSON; the optional journal passphrase does not encrypt the database or export.
 
 ## Content generation
 
@@ -91,7 +91,7 @@ Mahlet keeps service types, alternative chant branches and source editions disti
 
 ## Reminders and widgets
 
-`ModesRepository` supplies the built-in schedule: 06:00, 09:00, 12:00, 15:00, 18:00 and 21:00 enabled by default; Midnight and Veil start disabled. OS notification permission and alarm capabilities still determine delivery. Additional schedulers handle Journey, Gitsawe, reading, breath prayer and special habits. System-event receivers rebuild relevant scheduling after boot/update/time changes.
+`ModesRepository` supplies the built-in schedule: 06:00, 09:00, 12:00, 15:00, 18:00 and 21:00 enabled by default; Midnight and Veil start disabled. OS notification permission and alarm capabilities still determine delivery. The unreleased reading-reminder update uses automatic 06:30, 14:00 and 20:00 local-time slots, checking unfinished passages across all kept plans at each delivery. It removes the time picker and unanswered-notification backoff; launch also restores the schedule. Existing disabled reminders remain disabled. Additional schedulers handle Journey, Gitsawe, reading, breath prayer and special habits. System-event receivers rebuild relevant scheduling after boot/update/time changes.
 
 `AlarmReceiver` delegates ringing to `AlarmRinger`, an insistent alarm-channel notification with a 60-second timeout, without a foreground service. `AlarmActionReceiver` handles endings and snooze. The old v0.2.6 alarm-service description is historical. Notification IDs are now centralized in `NotificationIds.kt`:
 
@@ -131,3 +131,26 @@ The release workflow validates content, runs unit tests and release-vital lint, 
 ```
 
 The first is the hand-installed APK; the second is the Play-upload AAB without update notices. CI's ordinary checks are manual-only. The site workflow operates on the separate `gh-pages` branch. See [project status](PROJECT_STATUS.md) for what was actually verified during this refresh.
+
+## UI/UX remediation architecture
+
+- `JournalAccess` gates complete private surfaces, with foreground-only shared authentication; `SecureScreen` tracks overlapping owners. Entry drafts remain restorable while private content is removed on lock.
+- `ContentLoad` distinguishes bundled-content loading, failure and retry; `rememberFlowLoad` does the same for saved-state flows without presenting initial empty values as real records. `ReaderSession` applies keep-awake consistently and provides explicit reversible completion.
+- `UserAction` serializes writes in the current screen scope, surfaces recoverable failures and propagates coroutine cancellation. Reading-plan, mode, special-reminder and reader-presentation actions use it.
+- Scripture routes may carry `plan` and `day` query parameters. `readerPlanDays` gives explicit assignment context precedence and does not substitute today's assignment for a stale link. Plan-day lists expose independent chapter completion, including Psalms.
+- Alms, repentance and tithe reminders use saveable local drafts; Save writes a complete entry and rebuilds the schedule. Cancel makes no change. New entries remain disabled until explicitly enabled.
+- `DaySchedule.observe` combines reminder/settings/progress flows for live summaries.
+- Backup format 3 makes offering preferences optional; prior versions remain readable. Selected categories survive the document picker and previews include additional records.
+- See [implementation progress](UI_UX_FIX_PROGRESS.md) for coverage and remaining work. No device QA or release approval is implied.
+
+### Prayer clock widget
+
+`PrayerClock` models the website's seven canonical times separately from personal reminder modes and the Home suggestion windows. `PrayerClockWidgetProvider` draws the Ge'ez-numbered dial into a bounded bitmap and uses `TextClock` for live digital time. Explicit broadcasts cover time/date/timezone changes, reboot, app replacement and widget resizing. A single non-wakeup alarm refreshes placed clocks; removing the last widget cancels it. Android may defer redraws while asleep or when exact-alarm access is unavailable. The clock opens a dedicated intent flag; MainActivity resolves the current canonical hour at tap time without treating that tap as an answered reminder.
+
+Penance configuration now separates summary/progress from editable drafts and waits for persistence before dismissing a save. Tour pages can carry optional bilingual actions; the latest release links to Gitsawe and the replayable tutorial links to its features. Verse-specific reader tools remain scoped to indexed verse content; whole-day/service notes and sharing cover other readers.
+
+## Notes-only confession preparation
+
+`ConfessionPrepScreen` reuses the journal editor in a minimal mode: title, editable note and save/error feedback. `JournalDao.latestConfessionDraft()` resumes the most recently edited confession draft; a new blank draft is only persisted after writing. The existing journal access gate, secure-screen handling and export exclusion apply. Older notes remain accessible through the journal. The dedicated communion-preparation screen and navigation route were removed by user direction; ordinary journal notes and existing records remain available.
+
+Confession note privacy also applies to journal cards: `JournalEntry.preview` returns an empty string for confession drafts, and the journal renders a fixed localized label. The body is only rendered in the editor; masking does not alter stored text.

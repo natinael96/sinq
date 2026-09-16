@@ -1,5 +1,8 @@
 package com.agpeya.app.ui.settings
 
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -137,7 +140,7 @@ fun ScheduleEditorDialog(
         onDismissRequest = onDismiss,
         title = { Text(s.scheduleLabel) },
         text = {
-            Column {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
                 val kinds = listOf(
                     HabitSchedule.Kind.WEEKLY to s.scheduleWeekly,
                     HabitSchedule.Kind.EVERY_OTHER_DAY to s.scheduleEveryOtherDay,
@@ -217,7 +220,8 @@ fun ScheduleEditorDialog(
                         Spacer(Modifier.height(Spacing.sm))
                         // ጳጉሜ is five or six days long, so a date chosen there
                         // cannot run to 30 the way the other months do.
-                        val maxDay = if (monthNum == 13) 5 else 30
+                        val maxDay = if (monthNum == 13) 6 else 30
+                    if (monthDay > maxDay) monthDay = maxDay
                         Stepper(
                             label = "$monthDay",
                             onDown = { monthDay = if (monthDay > 1) monthDay - 1 else maxDay },
@@ -277,7 +281,7 @@ fun ScheduleEditorDialog(
                         initial.copy(
                             kind = kind,
                             days = days,
-                            monthDay = monthDay.coerceIn(1, 30),
+                            monthDay = monthDay.coerceIn(1, if (kind == HabitSchedule.Kind.YEARLY && monthNum == 13) 6 else 30),
                             monthNum = monthNum.coerceIn(1, 13),
                             feastKey = feastKey,
                             anchor = if (initial.kind == HabitSchedule.Kind.EVERY_OTHER_DAY &&

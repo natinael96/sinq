@@ -30,7 +30,7 @@ object NotificationIds {
     const val STREAK = 7002
     /** The morning ግጻዌ reading nudge, 06:00. */
     const val GITSAWE = 7003
-    /** The reading plan's daily nudge; its time is the reader's to set. */
+    /** The reading plan's morning, afternoon and night reminders share one notification. */
     const val READING = 7004
     /** The breath prayer. */
     const val BREATH = 7005

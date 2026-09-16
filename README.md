@@ -1,6 +1,6 @@
 # Sinq (ስንቅ)
 
-> **Current baseline:** 2.3.2 (versionCode 72), reviewed 2026-09-16. See [detailed project status](docs/PROJECT_STATUS.md) for implemented features, content counts, verification results and outstanding work.
+> **Current baseline:** 2.4.0 (versionCode 74), reviewed 2026-09-17. See [detailed project status](docs/PROJECT_STATUS.md) for implemented features, content counts, verification results and outstanding work.
 
 **The Ethiopian Orthodox Tewahedo Book of Hours (ሰዓታት) for Android — Amharic-first, with prayer and Scripture available offline.**
 
@@ -11,6 +11,8 @@
 *Sinq (ስንቅ) — "provisions for the journey."*
 
 Sinq brings the Agpeya's seven canonical prayer hours and the complete Psalter (መዝሙረ ዳዊት) to your phone in a focused, distraction-free reading experience — deep liturgical green, gold accents, and Ge'ez verse numerals. No account or analytics SDK: the prayer and Scripture texts ship in the APK, and personal records are stored locally. GitHub APK builds check for updates online; optional Catena commentary opens a third-party website. User-selected backups and shares export files ([privacy policy](https://natinael96.github.io/sinq/privacy-policy.html)).
+
+The [UI/UX audit](docs/UI_UX_PRODUCT_AUDIT.md) and [fix tracker](docs/UI_UX_FIX_PROGRESS.md) document the current remediation work and remaining device checks.
 
 ## Features
 
@@ -32,7 +34,7 @@ Sinq brings the Agpeya's seven canonical prayer hours and the complete Psalter (
 - Two reading modes: vertical scroll or page-by-page swiping, remembered per preference.
 - Six font-size steps (16–28sp), four selectable Ethiopic faces, three line-spacing
   choices, and four text alignments, optically matched across reading surfaces.
-- Keep-screen-on while praying; scroll position remembered per hour.
+- Keep-screen-on across supported text readers; prayer positions retain their section identity and offset.
 - Light and dark themes; Amharic and English interface languages.
 
 ### Personal
@@ -44,8 +46,8 @@ Sinq brings the Agpeya's seven canonical prayer hours and the complete Psalter (
 - **Journey & habits** — track daily prayer and personal practices without punitive streaks or broken-run language.
 - **Reminders** — prayer-time notifications with per-mode configuration, plus a nightly streak nudge and a morning ግጻዌ reading.
 - **Home-screen widgets** — today's ምስባክ and ወንጌል, plus a memento mori widget.
-- **Reading plans** — day-by-day readings, progress, a book map and completion flow.
-- **Journal and personal records** — reflections, prayer intentions, tithe/vow records, penance and confession/communion preparation. The optional journal passphrase gates access; it does not encrypt the database.
+- **Reading plans** — day-by-day readings, progress, a book map and completion flow. Automatic reminders at 06:30, 14:00 and 20:00 local time follow up while today’s passages remain unfinished; quiet hours and the off switch still apply.
+- **Journal and personal records** — reflections, prayer intentions, tithe/vow records, penance and private confession notes. The optional journal passphrase gates access; it does not encrypt the database.
 
 ### Expanded library
 - **Church books** — 37 curated books with chapter navigation.
@@ -168,3 +170,7 @@ The code and the bundled prayer text are under **different licenses**. If you fo
 - **Reader fonts:** the selectable faces — Ethiopic Abay Light (abass alamnehe), Bela Bereka (Abel Daniel), and Zemenay (Abel Yeshewalem) — are distributed by [Font.et](https://www.font.et/) under the SIL Open Font License; per-font notices, including the additionally bundled Waldba face, are in [docs/fonts/](docs/fonts/). OFL permits bundling and redistribution with software provided the fonts are not sold on their own. *Note: Zemenay's embedded metadata names an "ETHL" license (t.me/ethelglyphs) while Font.et distributes it as OFL; we follow the distributor's stated terms.*
 
 > The Apache-2.0 grant covers the **source code only**. Nothing under `app/src/main/assets/content/` inherits it — see [NOTICE](NOTICE) for the per-source terms, and [docs/CONTENT_RIGHTS.md](docs/CONTENT_RIGHTS.md) for the full rights record.
+
+### Prayer clock widget
+
+Long-press the Android home screen, open **Widgets → Sinq → Prayer clock**, and place or resize it. The green-and-gold 24-hour dial matches the Sinq website, with seven canonical prayer hours, Ge'ez numerals and the current hour highlighted. The digital time is live; tapping opens the current prayer. The dial follows local time and canonical hours, independently of custom reminder schedules. Android power restrictions can delay dial redraws; no foreground service or wakeup alarm is used.

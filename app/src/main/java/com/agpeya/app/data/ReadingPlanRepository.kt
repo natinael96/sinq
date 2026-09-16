@@ -95,6 +95,19 @@ object ReadingPlanRepository {
         }
     }
 
+    /** Begin another cycle without erasing lifetime chapter history. */
+    internal fun restarted(st: ReadingPlanState, planId: String, today: LocalDate): ReadingPlanState = st.copy(
+        active = st.plansKept.filterNot { it.planId == planId } + ActivePlan(planId, today.toString()),
+        activePlanId = "", startedOn = "",
+        read = st.read + (planId to emptySet()),
+        completedDays = st.completedDays - planId,
+        redistributed = st.redistributed - planId,
+    )
+
+    suspend fun restart(context: Context, planId: String, today: LocalDate = LocalDate.now()) {
+        update(context) { restarted(it, planId, today) }
+    }
+
     /** Stop one plan. The others carry on, and what was read stays read. */
     suspend fun stop(context: Context, planId: String) {
         update(context) { st ->
@@ -159,10 +172,6 @@ object ReadingPlanRepository {
             )
         }
         HabitsRepository.markDone(context, today.toString(), BIBLE_HABIT)
-        // The nudge asked a question and this is the answer, so the count of
-        // unanswered ones goes back to nothing and the back-off never fires on
-        // someone who is actually reading.
-        SettingsRepository.clearReadingReminderUnanswered(context)
     }
 
     /**
@@ -201,18 +210,24 @@ object ReadingPlanRepository {
         update(context) { st ->
             val mine = st.readFor(planId)
             kept = !chapters.all { it in mine }
-            st.copy(
-                read = st.read + (planId to (if (kept) mine + chapters else mine - chapters.toSet())),
-                // What has been read stays read: the map draws this, and
-                // releasing a passage says the day is unfinished, not unread.
-                readChapters = if (kept) st.readChapters + chapters else st.readChapters,
-                lastReadOn = if (kept) today.toString() else st.lastReadOn,
-            )
+            toggledChapters(st, planId, chapters, today)
         }
         if (kept) {
             HabitsRepository.markDone(context, today.toString(), BIBLE_HABIT)
-            SettingsRepository.clearReadingReminderUnanswered(context)
         }
+    }
+
+    internal fun toggledChapters(
+        st: ReadingPlanState, planId: String, chapters: List<String>, today: LocalDate,
+    ): ReadingPlanState {
+        if (chapters.isEmpty()) return st
+        val mine = st.readFor(planId)
+        val kept = !chapters.all { it in mine }
+        return st.copy(
+            read = st.read + (planId to (if (kept) mine + chapters else mine - chapters.toSet())),
+            readChapters = if (kept) st.readChapters + chapters else st.readChapters,
+            lastReadOn = if (kept) today.toString() else st.lastReadOn,
+        )
     }
 
     /** Days of the last week (today back six) the reading habit was kept. */
@@ -363,6 +378,22 @@ object ReadingPlanRepository {
         if (day.r.isEmpty()) return false
         val read = state.readFor(planId)
         return chaptersOf(day).all { it in read }
+    }
+
+    /** Only today's unfinished passages, across every kept plan. Past reading is not completion. */
+    fun unreadToday(
+        content: ReadingPlanContent,
+        state: ReadingPlanState,
+        today: LocalDate,
+    ): List<PlanDay> = state.plansKept.mapNotNull { kept ->
+        val plan = content.plans.firstOrNull { it.id == kept.planId } ?: return@mapNotNull null
+        val number = dayOn(kept.startedOn, today, plan.days)
+        val day = effectiveDays(plan, state).firstOrNull { it.d == number } ?: return@mapNotNull null
+        val read = state.readFor(plan.id)
+        val remaining = day.r.filter { passage ->
+            passage.chapters.any { chapterKey(passage.b, it) !in read }
+        }
+        day.copy(r = remaining).takeIf { remaining.isNotEmpty() }
     }
 
     /** Which of [days] are read, by day number. */

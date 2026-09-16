@@ -1,5 +1,6 @@
 package com.agpeya.app.reminders
 
+import androidx.core.net.toUri
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
@@ -37,7 +38,7 @@ object ReminderScheduler {
         val triggerAt = at.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             action = "com.agpeya.app.SNOOZE"
-            data = android.net.Uri.parse("agpeya://snooze/$hourId")
+            data = "agpeya://snooze/$hourId".toUri()
             putExtra(EXTRA_ENTRY_ID, "snooze_$hourId")
             putExtra(EXTRA_HOUR_ID, hourId)
             putExtra(EXTRA_HOUR_NAME, hourName)
@@ -120,7 +121,7 @@ object ReminderScheduler {
                 "snooze_$hourId".hashCode(),
                 Intent(context, AlarmReceiver::class.java).apply {
                     action = "com.agpeya.app.SNOOZE"
-                    data = android.net.Uri.parse("agpeya://snooze/$hourId")
+                    data = "agpeya://snooze/$hourId".toUri()
                 },
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE,
             ) ?: continue
@@ -169,7 +170,7 @@ object ReminderScheduler {
     ): PendingIntent? {
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             action = "com.agpeya.app.REMINDER"
-            data = android.net.Uri.parse("agpeya://reminder/$entryId")
+            data = "agpeya://reminder/$entryId".toUri()
             putExtra(EXTRA_ENTRY_ID, entryId)
             if (hourId != null) putExtra(EXTRA_HOUR_ID, hourId)
             if (hourName != null) putExtra(EXTRA_HOUR_NAME, hourName)

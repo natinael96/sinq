@@ -171,8 +171,6 @@ interface Strings {
     val readingReminderTitle: String
     fun readingReminderBody(day: Int, passages: String): String
     fun readingReminderPlain(day: Int): String
-    val readingReminderStoppedTitle: String
-    val readingReminderStoppedBody: String
     val settingsReadingReminder: String
     val settingsReadingReminderDesc: String
     /** ሥርዓተ ማኅሌት — the orders of service sung on a feast. */
@@ -357,6 +355,8 @@ interface Strings {
     val alertSoundOnly: String
     val alertVibrateOnly: String
     val alertSilent: String
+    val soundPreview: String
+    val stopSoundPreview: String
     val soundLabel: String
     val soundAlarm: String
     val soundRingtone: String
@@ -427,6 +427,8 @@ interface Strings {
     val contentUnavailable: String
     val retryAction: String
     val mementoMoriGloss: String
+    val fastingPast: String
+    val fastingUpcoming: String
     val fastingTitle: String
     val fastingToday: String
     val fastingNone: String
@@ -678,6 +680,8 @@ interface Strings {
     fun writtenOn(date: String): String
     val journalMonthHeader: String
     /** Shown in the entry header once the text is on disk. */
+    val entrySaving: String
+    val entrySaveFailed: String
     val entrySaved: String
     /** Reader menu: start a journal entry about the passage on screen. */
     val writeAboutThis: String
@@ -856,6 +860,15 @@ interface Strings {
     // A supplement to the ግጻዌ, never a replacement: the lectionary is what the
     // Church appoints, and the plan reads what it does not reach.
 
+    val aboutTagline: String
+    val aboutSourceTitle: String
+    val aboutSourceBody: String
+    val aboutFontTitle: String
+    val aboutFontBody: String
+    val aboutPrivacyTitle: String
+    val aboutPrivacyBody: String
+    val aboutLicenceTitle: String
+    val aboutLicenceBody: String
     val readingTitle: String
     val readingIntro: String
     val readingChoose: String
@@ -866,7 +879,11 @@ interface Strings {
     fun readingDayLabel(day: String): String
     val readingTodayHeader: String
     val readingGitsaweHeader: String
+    val prayerFinished: String
+    val synaxariumFinished: String
+    val readingMarkChapterDone: String
     val readingMarkDone: String
+    val readingUnread: String
     val readingDone: String
     val readingAllDays: String
     /** Footer line: days read in the current period. Never a streak. */
@@ -1061,11 +1078,8 @@ object AmharicStrings : Strings {
         "ዕለት ${com.agpeya.app.ui.reading.geezNumeral(day)} · $passages"
     override fun readingReminderPlain(day: Int) =
         "ዕለት ${com.agpeya.app.ui.reading.geezNumeral(day)}"
-    override val readingReminderStoppedTitle = "ማስታወሻውን አቆምነው"
-    override val readingReminderStoppedBody =
-        "ማስታወሻው እየረዳ አይመስልም፤ ለጊዜው አናስታውስዎትም። በቅንብር መልሰው ማብራት ይችላሉ።"
     override val settingsReadingReminder = "የንባብ ማስታወሻ"
-    override val settingsReadingReminderDesc = "ንባብ ሲጀምሩ ብቻ፤ የዕለቱን ንባብ ይሰይማል"
+    override val settingsReadingReminderDesc = "የዛሬው ንባብ እስኪጠናቀቅ ጠዋት ፲፪፡፴፣ ከሰዓት ፰ እና ማታ ፪ ሰዓት በራሱ ያስታውሳል። የዝምታ ሰዓትን ያከብራል።"
     override val mahletSubtitle = "የበዓላት ማኅሌትና ዋዜማ"
     override val mahletVigil = "ዋዜማ"
     override val mahletMovable = "የወር ቀን የሌላቸው"
@@ -1236,6 +1250,8 @@ object AmharicStrings : Strings {
     override val alertSoundOnly = "ድምፅ ብቻ"
     override val alertVibrateOnly = "ንዝረት ብቻ"
     override val alertSilent = "ጸጥታ"
+    override val soundPreview = "ድምፁን ያዳምጡ"
+    override val stopSoundPreview = "ድምፁን አቁም"
     override val soundLabel = "ድምፅ"
     override val soundAlarm = "ማንቂያ"
     override val soundRingtone = "የስልክ ድምፅ"
@@ -1298,6 +1314,8 @@ object AmharicStrings : Strings {
     override val contentUnavailable = "ይዘቱን ማግኘት አልተቻለም"
     override val retryAction = "እንደገና ይሞክሩ"
     override val mementoMoriGloss = "ሞትን አስብ"
+    override val fastingPast = "ያለፈ"
+    override val fastingUpcoming = "የሚመጣ"
     override val fastingTitle = "አጽዋማት"
     override val fastingToday = "ዛሬ"
     override val fastingNone = "ጾም የለም"
@@ -1347,7 +1365,7 @@ object AmharicStrings : Strings {
     override fun remindersQuietWarning(n: Int) =
         "${com.agpeya.app.ui.reading.geezNumeral(n)} ማስታወሻ በጸጥታ ሰዓት ውስጥ ነው፤ ድምፅ አያሰማም።"
     override val introLevelTitle = "በየቀኑ ምን ያህል?"
-    override val introLevelBody = "ሰዓታቱ በአምስት መጠን ይነበባሉ። አሁን የሚመርጡት በኋላ ይለወጣል።"
+    override val introLevelBody = "እነዚህ ሦስት የመነሻ ምርጫዎች የሚነበቡትን መዝሙራት ብዛት ይወስናሉ። የንባብ መጠን እንጂ መንፈሳዊ ደረጃ አይደሉም። አምስቱም ምርጫዎች በቅንብር ውስጥ ይገኛሉ።"
     override fun introLevelDesc(level: com.agpeya.app.data.PrayerLevel) = when (level) {
         com.agpeya.app.data.PrayerLevel.PSALM_50 -> "መዝሙር ፶ ብቻ"
         com.agpeya.app.data.PrayerLevel.BEGINNING -> "ከየሰዓቱ ጥቂት መዝሙራት"
@@ -1411,7 +1429,7 @@ object AmharicStrings : Strings {
     override val skip = "ዝለል"
 
     override val batteryHelp = "ማስታወሻ አይሰራም?"
-    override val batteryHelpIntro = "አንዳንድ ስልኮች ባትሪ ለመቆጠብ መተግበሪያዎችን ያቆማሉ። ማስታወሻዎች በሰዓቱ እንዲሰሩ የሚከተሉትን ያድርጉ።"
+    override val batteryHelpIntro = "ማስታወሻዎች ከዘገዩ የማሳወቂያ ፈቃድ፣ የጸሎት መርሐ ግብርና የጸጥታ ሰዓታትን ያረጋግጡ። የባትሪ ገደብ አንዱ ምክንያት ሊሆን ይችላል፤ መቀየሩ ብቻ መድረሱን አያረጋግጥም። ቅንብሮች እንደ ስልኩ ይለያያሉ።"
     override val batteryStepUnrestrict = "የባትሪ ገደብ ያንሱ"
     override val batteryStepUnrestrictBody = "ቅንብሮች → ባትሪ → ይህን መተግበሪያ ያልተገደበ ያድርጉ (Unrestricted)።"
     override val batteryStepAutostart = "በራስ ማስጀመር ይፍቀዱ"
@@ -1546,6 +1564,8 @@ object AmharicStrings : Strings {
     override val deleteEntryConfirm = "ይህ ማስታወሻ ይሰረዛል።"
     override fun writtenOn(date: String) = "የተጻፈው፦ $date"
     override val journalMonthHeader = "የወሩ ማስታወሻዎች"
+    override val entrySaving = "በመቀመጥ ላይ…"
+    override val entrySaveFailed = "ማስቀመጥ አልተቻለም፤ እንደገና ይሞክሩ"
     override val entrySaved = "ተቀምጧል"
     override val writeAboutThis = "ስለዚህ ጻፍ"
 
@@ -1654,7 +1674,7 @@ object AmharicStrings : Strings {
     override val comingSoon = "በቅርቡ"
     override val comingSoonBody = "ይህ ክፍል በዝግጅት ላይ ነው። ጽሑፉ ሲዘጋጅ ይታያል።"
     override val confessionPrepTitle = "የንስሐ ዝግጅት"
-    override val confessionPrepDesc = "ልብን መርምሮ ለንስሐ መዘጋጀት"
+    override val confessionPrepDesc = "የግል የንስሐ ማስታወሻ"
     override fun confessionPrepStepOf(step: Int, total: Int) = "$step / $total"
     override val confessionPrepStart = "መመርመር ጀምር"
     override val confessionPrepNoteHint = "የሚያስታውሱት ካለ ይጻፉ (አማራጭ)"
@@ -1697,6 +1717,15 @@ object AmharicStrings : Strings {
 
     // ── ንባብ ────────────────────────────────────────────────────────────────
 
+    override val aboutTagline = "የኦርቶዶክስ ተዋሕዶ ጸሎትና ንባብ፤ የተካተቱት መጻሕፍት ያለ በይነ መረብ ይነበባሉ።"
+    override val aboutSourceTitle = "የጽሑፍ ምንጭ"
+    override val aboutSourceBody = "የመጽሐፍ ቅዱስ ጽሑፍ ከ EOTCOpenSource 80-weahadu ተወስዷል። የሁሉም መጻሕፍት ምንጮችና ፈቃዶች በፈቃዶች ገጽ ይገኛሉ።"
+    override val aboutFontTitle = "ቅርጸ ፊደላት"
+    override val aboutFontBody = "Abyssinica SIL፣ Noto Sans Ethiopic እና ከ Font.et የመጡ ቅርጸ ፊደላት በ SIL Open Font License 1.1 ይቀርባሉ።"
+    override val aboutPrivacyTitle = "ግላዊነት"
+    override val aboutPrivacyBody = "የግል ማስታወሻዎች በመሣሪያዎ ላይ ይቀመጣሉ። መተግበሪያው ለማሻሻያ ፍተሻና ለውጭ ማብራሪያ በይነ መረብን ይጠቀማል። የመጠባበቂያ ፋይሎች ያልተመሰጠሩ ናቸው፤ በጥንቃቄ ያስቀምጧቸው።"
+    override val aboutLicenceTitle = "ፈቃድ"
+    override val aboutLicenceBody = "የመተግበሪያው ኮድ በ Apache License 2.0 ይሰጣል። የተካተቱት መጻሕፍት የራሳቸው ፈቃዶች አሏቸው።"
     override val readingTitle = "ንባብ"
     override val readingIntro =
         "መጽሐፍ ቅዱስን ከዳር እስከ ዳር፤ ፹፩ቱንም መጻሕፍት። የዕለቱ ግጻዌ ከንባቡ በላይ ይታያል።"
@@ -1707,7 +1736,11 @@ object AmharicStrings : Strings {
     override fun readingDayLabel(day: String) = "ቀን $day"
     override val readingTodayHeader = "የዕለቱ ንባብ"
     override val readingGitsaweHeader = "የዕለቱ ግጻዌ"
+    override val prayerFinished = "ይህን ጸሎት ጸልያለሁ"
+    override val synaxariumFinished = "የዛሬውን ስንክሳር አንብቤዋለሁ"
+    override val readingMarkChapterDone = "ይህን ምዕራፍ አንብቤዋለሁ"
     override val readingMarkDone = "አነበብኩ"
+    override val readingUnread = "አልተነበበም"
     override val readingDone = "ተነቧል"
     override val readingAllDays = "ሁሉንም ቀናት"
     override fun readingDaysRead(count: Int) = "$count ቀናት ተነብቧል"
@@ -1919,11 +1952,8 @@ object EnglishStrings : Strings {
     override val readingReminderTitle = "Today's reading"
     override fun readingReminderBody(day: Int, passages: String) = "Day $day · $passages"
     override fun readingReminderPlain(day: Int) = "Day $day"
-    override val readingReminderStoppedTitle = "Reminders paused"
-    override val readingReminderStoppedBody =
-        "These reminders don't seem to be helping, so we've stopped them for now. Turn them back on in Settings whenever you like."
     override val settingsReadingReminder = "Reading reminder"
-    override val settingsReadingReminderDesc = "Only once a plan is started; names the day's passage"
+    override val settingsReadingReminderDesc = "Automatically at 6:30 AM, 2 PM and 8 PM while today’s readings are unfinished. Quiet hours apply."
     override val mahletSubtitle = "Orders of service for the feasts"
     override val mahletVigil = "ዋዜማ"
     override val mahletMovable = "Movable feasts"
@@ -2084,26 +2114,28 @@ object EnglishStrings : Strings {
     override val alertSoundOnly = "Sound only"
     override val alertVibrateOnly = "Vibrate only"
     override val alertSilent = "Silent"
+    override val soundPreview = "Preview sound"
+    override val stopSoundPreview = "Stop preview"
     override val soundLabel = "Sound"
     override val soundAlarm = "Alarm"
     override val soundRingtone = "Ringtone"
     override val soundNotification = "Notification"
 
     // About page body — English only, by design; see the note in the Strings interface.
-    val aboutTagline = "The Orthodox Tewahedo hours of prayer — fully offline."
-    val aboutSourceTitle = "Text source"
-    val aboutSourceBody =
+    override val aboutTagline = "The Orthodox Tewahedo hours of prayer — fully offline."
+    override val aboutSourceTitle = "Text source"
+    override val aboutSourceBody =
         "Psalms and gospels come from the 80-weahadu Amharic Bible by EOTCOpenSource, under " +
             "CC BY-NC-ND 4.0. Verse text is unchanged; Psalm 118's acrostic letters are shown as " +
             "stanza headings. Provided as-is."
-    val aboutFontTitle = "Fonts"
-    val aboutFontBody =
+    override val aboutFontTitle = "Fonts"
+    override val aboutFontBody =
         "Abyssinica SIL and Noto Sans Ethiopic, under the SIL Open Font License 1.1. The " +
             "selectable reading faces come from Font.et under the same licence."
-    val aboutPrivacyTitle = "Privacy"
-    val aboutPrivacyBody = "No data collected. No internet permission."
-    val aboutLicenceTitle = "Licence"
-    val aboutLicenceBody =
+    override val aboutPrivacyTitle = "Privacy"
+    override val aboutPrivacyBody = "Personal records stay on this device. Internet access is used for update checks and optional external commentary. Journal passphrases guard access within the app; backup files are plaintext and must be kept private."
+    override val aboutLicenceTitle = "Licence"
+    override val aboutLicenceBody =
         "App code under the Apache License 2.0. The bundled prayer text keeps its own " +
             "terms (CC BY-NC-ND 4.0) and is not covered by that licence."
 
@@ -2165,6 +2197,8 @@ object EnglishStrings : Strings {
     override val contentUnavailable = "Content unavailable"
     override val retryAction = "Try again"
     override val mementoMoriGloss = "Remember death"
+    override val fastingPast = "Past"
+    override val fastingUpcoming = "Upcoming"
     override val fastingTitle = "Fasts"
     override val fastingToday = "Today"
     override val fastingNone = "No fast today"
@@ -2215,7 +2249,7 @@ object EnglishStrings : Strings {
         if (n == 1) "1 reminder falls inside quiet hours and will stay silent."
         else "$n reminders fall inside quiet hours and will stay silent."
     override val introLevelTitle = "How much each day?"
-    override val introLevelBody = "The hours can be read at five lengths. What you choose now can change later."
+    override val introLevelBody = "These three starting presets choose how many Psalms to include. They are reading lengths, not spiritual ranks. All five choices are available later in Settings."
     override fun introLevelDesc(level: com.agpeya.app.data.PrayerLevel) = when (level) {
         com.agpeya.app.data.PrayerLevel.PSALM_50 -> "Psalm 50 alone"
         com.agpeya.app.data.PrayerLevel.BEGINNING -> "A few psalms from each hour"
@@ -2279,7 +2313,7 @@ object EnglishStrings : Strings {
     override val skip = "Skip"
 
     override val batteryHelp = "Reminders not firing?"
-    override val batteryHelpIntro = "Some phones stop apps to save battery. To keep reminders on time, do the following."
+    override val batteryHelpIntro = "If reminders are delayed, first check notification permission, the active prayer mode and quiet hours. Battery restrictions are one possible cause; changing them does not guarantee delivery. Available controls vary by phone."
     override val batteryStepUnrestrict = "Remove battery limits"
     override val batteryStepUnrestrictBody = "Settings → Battery → set this app to Unrestricted."
     override val batteryStepAutostart = "Allow auto-start"
@@ -2329,7 +2363,7 @@ object EnglishStrings : Strings {
     override val settingsGroupReading = "Reading"
     override val settingsGroupPrayer = "Prayer and reminders"
     override val prayerLevelTitle = "Prayer level"
-    override val prayerLevelDescription = "Choose the number of Psalms for your time and ability. The Gospel is always included."
+    override val prayerLevelDescription = "Choose the number of Psalms for your time and ability. The Gospel is always included. This changes prayer content; your visible hours, reminder times and past records stay as they are."
     override val prayerLevelPsalm50Description = "Psalm 50 only, followed by the other prayers and Gospel"
     override val prayerLevelBeginningDescription = "3 Psalms per hour · 7 at Midnight"
     override val prayerLevelGrowthDescription = "7 Psalms per hour · 14 at Midnight"
@@ -2413,6 +2447,8 @@ object EnglishStrings : Strings {
     override val deleteEntryConfirm = "This entry will be deleted."
     override fun writtenOn(date: String) = "Written on $date"
     override val journalMonthHeader = "This month"
+    override val entrySaving = "Saving…"
+    override val entrySaveFailed = "Couldn’t save. Try again."
     override val entrySaved = "Saved"
     override val writeAboutThis = "Write about this"
 
@@ -2521,7 +2557,7 @@ object EnglishStrings : Strings {
     override val comingSoon = "Coming soon"
     override val comingSoonBody = "This section is being prepared. It will appear once its text is ready."
     override val confessionPrepTitle = "Preparing for confession"
-    override val confessionPrepDesc = "Examine the heart and prepare for confession"
+    override val confessionPrepDesc = "Private notes for confession"
     override fun confessionPrepStepOf(step: Int, total: Int) = "$step / $total"
     override val confessionPrepStart = "Begin the examination"
     override val confessionPrepNoteHint = "Write anything you want to remember (optional)"
@@ -2574,7 +2610,11 @@ object EnglishStrings : Strings {
     override fun readingDayLabel(day: String) = "Day $day"
     override val readingTodayHeader = "Today's reading"
     override val readingGitsaweHeader = "Today's Gitsawe"
+    override val prayerFinished = "I have finished this prayer"
+    override val synaxariumFinished = "I have read today’s Synaxarium"
+    override val readingMarkChapterDone = "Mark this chapter read"
     override val readingMarkDone = "I have read it"
+    override val readingUnread = "Unread"
     override val readingDone = "Read"
     override val readingAllDays = "All days"
     override fun readingDaysRead(count: Int) = "$count days read"

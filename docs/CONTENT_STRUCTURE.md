@@ -1,6 +1,6 @@
 # Sinq content structure
 
-Reviewed **2026-09-16** against the bundled assets for **2.3.2 / 72**. This replaces the pre-implementation section skeleton. For provenance see [sources](../sources/README.md) and [rights](CONTENT_RIGHTS.md).
+Reviewed **2026-09-17** against the bundled assets for **2.4.0 / 74**. This replaces the pre-implementation section skeleton. For provenance see [sources](../sources/README.md) and [rights](CONTENT_RIGHTS.md).
 
 ## Source and runtime boundaries
 

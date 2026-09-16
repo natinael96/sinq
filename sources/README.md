@@ -1,6 +1,6 @@
 # Source inputs
 
-Reviewed **2026-09-16** for app **2.3.2 / 72**. These files feed the generators under `tools/`; Android reads their outputs from `app/src/main/assets/content/`, not from this directory.
+Reviewed **2026-09-16** for app **2.3.3 / 73**. These files feed the generators under `tools/`; Android reads their outputs from `app/src/main/assets/content/`, not from this directory.
 
 Preserve raw transcriptions and their provenance. Put scan corrections in explicit generator transformations, preferably with assertions. Mapping/configuration files such as `hours/hour_mapping.json` are editable inputs; the old blanket claim that nothing here may be edited was too broad.
 

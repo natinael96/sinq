@@ -1,5 +1,7 @@
 package com.agpeya.app.ui.home
 
+import androidx.core.net.toUri
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -97,6 +99,8 @@ private const val PRAYER_AGGREGATE_ID = "prayer"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    onOpenReading: () -> Unit,
+    onManageHours: () -> Unit,
     onOpenHour: (String) -> Unit,
     onOpenSearch: () -> Unit,
     onOpenFasting: () -> Unit,
@@ -109,10 +113,11 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val config by HoursRepository.config(context).collectAsState(initial = HoursConfig())
-    val builtIn by produceState<List<Hour>>(initialValue = emptyList()) {
-        value = ContentRepository.hours(context)
-    }
+    val hoursLoad = com.agpeya.app.ui.common.rememberContentLoad { ContentRepository.hours(context) }
+    val builtIn = hoursLoad.value.orEmpty()
     val hours = remember(builtIn, config) { HoursRepository.merge(builtIn, config, includeHidden = false) }
+    val readingState by com.agpeya.app.data.ReadingPlanRepository.state(context)
+        .collectAsState(initial = com.agpeya.app.model.ReadingPlanState())
 
     // Keeps the date, daily content, and current prayer correct across time boundaries.
     val now by produceState(initialValue = LocalDateTime.now()) {
@@ -172,7 +177,7 @@ fun HomeScreen(
                         context.startActivity(
                             android.content.Intent(
                                 android.content.Intent.ACTION_VIEW,
-                                android.net.Uri.parse(found.url),
+                                found.url.toUri(),
                             ),
                         )
                     }
@@ -202,6 +207,12 @@ fun HomeScreen(
                 // What the page has to fill: the viewport, less its own margin.
                 targetHeight = maxHeight - Spacing.md * 2,
                 stackReadingCards = stackReadingCards,
+                onOpenReading = onOpenReading,
+                hasReadingPlan = readingState.plansKept.isNotEmpty(),
+                onManageHours = onManageHours,
+                hoursLoading = hoursLoad.result == null,
+                hoursFailed = hoursLoad.result?.isFailure == true,
+                retryHours = hoursLoad.retry,
                 today = today,
                 seasonLabel = seasonLabel,
                 suggested = suggested,
@@ -244,6 +255,12 @@ private sealed interface HomeReadingsState {
 
 @Composable
 private fun HomeDashboard(
+    onOpenReading: () -> Unit,
+    hasReadingPlan: Boolean,
+    onManageHours: () -> Unit,
+    hoursLoading: Boolean,
+    hoursFailed: Boolean,
+    retryHours: () -> Unit,
     modifier: Modifier,
     targetHeight: Dp,
     stackReadingCards: Boolean,
@@ -280,9 +297,6 @@ private fun HomeDashboard(
     // The order is the day's: what is due now, what the Church appoints, then
     // ዛሬ, and the two standing prayers last.
     //
-    // ንባብ is not here. It is a plan you are partway through rather than
-    // something the day asks of you, and its own reminder already opens it by
-    // name. It lives in ቤተ መጻሕፍት, which is where a plan belongs.
     FillColumn(targetHeight = targetHeight, gap = Spacing.sm, modifier = modifier) {
         DayHeader(today, seasonLabel, onOpenSearch, onOpenFasting, onOpenBookmarks, onOpenPrayerList)
         if (suggested != null) {
@@ -297,12 +311,23 @@ private fun HomeDashboard(
                 onOpenAll = onOpenAllHours,
             )
         } else {
-            EmptyHoursCard(onOpenAllHours)
+            when {
+                hoursLoading -> com.agpeya.app.ui.common.LoadingPanel()
+                hoursFailed -> com.agpeya.app.ui.common.StatePanel(
+                    title = LocalStrings.current.contentUnavailable,
+                    actionLabel = LocalStrings.current.retryAction, onAction = retryHours,
+                )
+                else -> EmptyHoursCard(onManageHours)
+            }
         }
         GitsaweCard(
             state = readingsState,
             onClick = onOpenGitsawe,
             modifier = Modifier.grow(2f, max = GITSAWE_CEILING * room),
+        )
+        if (hasReadingPlan) com.agpeya.app.ui.common.ListRow(
+            title = LocalStrings.current.readingTitle,
+            onClick = onOpenReading,
         )
         TodayRow(
             habitIds = habitIds,
@@ -465,7 +490,8 @@ private fun NowCard(
         Column(Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text(s.nowPrayer, style = MaterialTheme.typography.labelMedium, color = sinq.onHeroMuted)
+                    Text(if (s.isAmharic) "በዕለቱ ሰዓት የሚመከር ጸሎት" else "Suggested by time of day",
+                        style = MaterialTheme.typography.labelMedium, color = sinq.onHeroMuted)
                     Spacer(Modifier.height(Spacing.xs))
                     Text(
                         buildAnnotatedString {
@@ -553,6 +579,7 @@ private fun HoursLine(next: Hour?, onOpenAll: () -> Unit, modifier: Modifier = M
                 maxLines = 1,
                 modifier = Modifier
                     .clip(MaterialTheme.shapes.small)
+                    .heightIn(min = 48.dp)
                     .clickable(onClick = onOpenAll)
                     .semantics { role = Role.Button }
                     .padding(horizontal = Spacing.xs, vertical = Spacing.xxs),
@@ -772,7 +799,7 @@ private fun ZewotrCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
 @Composable
 private fun AllHoursSheet(hours: List<Hour>, currentHourId: String?, onOpenHour: (String) -> Unit) {
     val s = LocalStrings.current
-    Column(Modifier.fillMaxWidth().padding(horizontal = Spacing.screen).padding(bottom = Spacing.xxl)) {
+    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = Spacing.screen).padding(bottom = Spacing.xxl)) {
         Text(s.hoursHeader, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
         Spacer(Modifier.height(Spacing.md))
         if (hours.isEmpty()) {
@@ -784,7 +811,7 @@ private fun AllHoursSheet(hours: List<Hour>, currentHourId: String?, onOpenHour:
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-                        Text(hour.name, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
+                        Text(hour.name, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
                         if (hour.id == currentHourId) {
                             Spacer(Modifier.width(Spacing.sm))
                             Text(

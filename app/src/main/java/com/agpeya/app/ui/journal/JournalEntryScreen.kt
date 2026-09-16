@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -62,9 +64,11 @@ private const val AUTOSAVE_DELAY_MS = 1000L
  */
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-fun JournalEntryScreen(
+private fun JournalEntryScreenContent(
+    editor: JournalEditorState,
     entryId: String?,
     initialKind: JournalKind,
+    confessionOnly: Boolean,
     anchorRoute: String?,
     anchorLabel: String?,
     onBack: () -> Unit,
@@ -78,15 +82,21 @@ fun JournalEntryScreen(
     // No screenshots, and nothing in the recents thumbnail.
     SecureScreen()
 
-    var entry by remember { mutableStateOf<JournalEntry?>(null) }
-    var body by remember { mutableStateOf("") }
-    var kind by remember { mutableStateOf(initialKind) }
+    var entry by editor::entry
+    var body by editor::body
+    var kind by editor::kind
     var deleting by remember { mutableStateOf(false) }
 
+    var loadFailed by remember { mutableStateOf(false) }
+    var loadAttempt by remember { androidx.compose.runtime.mutableIntStateOf(0) }
     // Load an existing entry, or mint a draft stamped with today's Church day.
-    LaunchedEffect(entryId) {
-        val loaded = entryId?.let { JournalRepository.byId(context, it) }
-            ?: JournalRepository.draft(
+    LaunchedEffect(entryId, loadAttempt) {
+        if (entry != null) return@LaunchedEffect
+        loadFailed = false
+        try {
+        val loaded = if (entryId != null) {
+            JournalRepository.byId(context, entryId) ?: error("Entry no longer exists")
+        } else (if (confessionOnly) JournalRepository.latestConfessionDraft(context) else null) ?: JournalRepository.draft(
                 context = context,
                 kind = initialKind,
                 anchorRoute = anchorRoute,
@@ -95,6 +105,8 @@ fun JournalEntryScreen(
         entry = loaded
         body = loaded.body
         kind = loaded.kind
+        } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+        catch (_: Exception) { loadFailed = true }
     }
 
     // Saved a second after typing stops, so nothing depends on leaving the
@@ -102,13 +114,20 @@ fun JournalEntryScreen(
     // process all leave the text on disk. `saved` drives the header, because a
     // journal that saves invisibly is indistinguishable from one that does not.
     var saved by remember { mutableStateOf(false) }
-    LaunchedEffect(body, kind) {
+    var saveFailed by remember { mutableStateOf(false) }
+    var saveAttempt by remember { androidx.compose.runtime.mutableIntStateOf(0) }
+    LaunchedEffect(entry, body, kind, saveAttempt) {
         val current = entry ?: return@LaunchedEffect
-        if (body == current.body && kind == current.kind) return@LaunchedEffect
+        if (body.trim() == current.body && kind == current.kind) return@LaunchedEffect
         saved = false
         delay(AUTOSAVE_DELAY_MS)
-        JournalRepository.save(context, current.copy(body = body.trim(), kind = kind))
-        saved = body.isNotBlank()
+        saveFailed = false
+        try {
+            JournalRepository.save(context, current.copy(body = body.trim(), kind = kind))
+            entry = current.copy(body = body.trim(), kind = kind)
+            saved = true
+        } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+        catch (_: Exception) { saveFailed = true }
     }
 
     // The last write, as the screen goes. It must NOT use the screen's own
@@ -120,10 +139,10 @@ fun JournalEntryScreen(
     val latestEntry by rememberUpdatedState(entry)
     DisposableEffect(Unit) {
         onDispose {
-            val current = latestEntry ?: return@onDispose
+            val current = editor.entry ?: return@onDispose
             JournalRepository.saveDetached(
                 context,
-                current.copy(body = latestBody.trim(), kind = latestKind),
+                current.copy(body = editor.body.trim(), kind = editor.kind),
             )
         }
     }
@@ -133,11 +152,11 @@ fun JournalEntryScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             SinqTopBar(
-                title = s.journalTitle,
-                subtitle = loaded?.localDate?.let { formatEthiopian(it, s) },
+                title = if (confessionOnly) s.confessionPrepTitle else s.journalTitle,
+                subtitle = if (confessionOnly) null else loaded?.localDate?.let { formatEthiopian(it, s) },
                 // The feast or fast the day carried, in the app's gold accent —
                 // the reason this entry reads as more than a dated note later.
-                accentLine = listOfNotNull(
+                accentLine = if (confessionOnly) null else listOfNotNull(
                     loaded?.context?.monthlyFeast,
                     loaded?.context?.fast,
                 ).joinToString(" · ").takeIf { it.isNotBlank() },
@@ -150,7 +169,7 @@ fun JournalEntryScreen(
                             tint = MaterialTheme.colorScheme.secondary,
                         )
                     }
-                    if (loaded != null && entryId != null) {
+                    if (loaded != null && (entryId != null || (confessionOnly && body.isNotBlank()))) {
                         IconButton(onClick = { deleting = true }) {
                             Icon(
                                 Icons.Outlined.Delete,
@@ -163,14 +182,22 @@ fun JournalEntryScreen(
             )
         },
     ) { inner ->
+        if (loaded == null) {
+            if (loadFailed) com.agpeya.app.ui.common.StatePanel(
+                title = s.contentUnavailable, actionLabel = s.retryAction,
+                onAction = { loadAttempt++ }, modifier = Modifier.padding(inner),
+            ) else com.agpeya.app.ui.common.LoadingPanel(Modifier.padding(inner))
+            return@Scaffold
+        }
         Column(
             Modifier
                 .fillMaxSize()
                 .padding(inner)
+                .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = Spacing.screen, vertical = Spacing.md),
         ) {
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            if (!confessionOnly) FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 listOf(
                     JournalKind.REFLECTION to s.journalKindReflection,
                     JournalKind.PASSAGE to s.journalKindPassage,
@@ -185,7 +212,7 @@ fun JournalEntryScreen(
             }
             // Said plainly, at the moment the kind is chosen, because it is the
             // one kind whose handling the person needs to be able to rely on.
-            if (kind == JournalKind.CONFESSION_DRAFT) {
+            if (!confessionOnly && kind == JournalKind.CONFESSION_DRAFT) {
                 Spacer(Modifier.height(Spacing.sm))
                 Text(
                     s.journalKindConfessionNote,
@@ -196,7 +223,7 @@ fun JournalEntryScreen(
             // The passage this was written about, as a way back to it. The
             // route has always been stored on the entry; until now nothing
             // opened it, so a note about a verse could not return to the verse.
-            loaded?.anchorLabel?.let { label ->
+            if (!confessionOnly) loaded?.anchorLabel?.let { label ->
                 Spacer(Modifier.height(Spacing.sm))
                 val route = loaded?.anchorRoute
                 com.agpeya.app.ui.common.ListRow(
@@ -213,11 +240,17 @@ fun JournalEntryScreen(
                 }
             }
             Spacer(Modifier.height(Spacing.md))
+            if (saveFailed) {
+                Text(s.entrySaveFailed, color = MaterialTheme.colorScheme.error)
+                TextButton(onClick = { saveAttempt++ }) { Text(s.retryAction) }
+            } else Text(if (saved || body == loaded.body) s.entrySaved else s.entrySaving,
+                style = MaterialTheme.typography.labelMedium)
             OutlinedTextField(
                 value = body,
                 onValueChange = { body = it },
-                placeholder = { Text(s.entryBodyHint) },
-                modifier = Modifier.fillMaxWidth().height(400.dp),
+                placeholder = { Text(if (confessionOnly) s.noteAction else s.entryBodyHint) },
+                minLines = if (confessionOnly) 12 else 1,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 200.dp),
             )
             Spacer(Modifier.height(Spacing.huge))
         }
@@ -245,4 +278,31 @@ fun JournalEntryScreen(
             dismissButton = { TextButton(onClick = { deleting = false }) { Text(s.cancel) } },
         )
     }
+}
+
+@Composable
+fun JournalEntryScreen(entryId: String?, initialKind: JournalKind, anchorRoute: String?, anchorLabel: String?, onBack: () -> Unit, onOpenAnchor: (String) -> Unit, confessionOnly: Boolean = false) {
+    // Keep the draft in memory while the private UI is removed on relock.
+    val editor = androidx.compose.runtime.saveable.rememberSaveable(entryId,
+        saver = androidx.compose.runtime.saveable.Saver<JournalEditorState, String>(
+            save = { state -> state.entry?.copy(body = state.body, kind = state.kind)?.let {
+                kotlinx.serialization.json.Json.encodeToString(JournalEntry.serializer(), it)
+            }.orEmpty() },
+            restore = { encoded -> JournalEditorState(initialKind).apply {
+                if (encoded.isNotEmpty()) {
+                    entry = kotlinx.serialization.json.Json.decodeFromString(JournalEntry.serializer(), encoded)
+                    body = entry!!.body; kind = entry!!.kind
+                }
+            } },
+        ),
+    ) { JournalEditorState(initialKind) }
+    com.agpeya.app.ui.journal.JournalAccess(onBack) {
+        JournalEntryScreenContent(editor, entryId, initialKind, confessionOnly, anchorRoute, anchorLabel, onBack, onOpenAnchor)
+    }
+}
+
+private class JournalEditorState(initialKind: JournalKind) {
+    var entry by mutableStateOf<JournalEntry?>(null)
+    var body by mutableStateOf("")
+    var kind by mutableStateOf(initialKind)
 }

@@ -1,5 +1,7 @@
 package com.agpeya.app.ui.books
 
+import androidx.compose.foundation.selection.selectable
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -80,7 +82,7 @@ import com.agpeya.app.ui.theme.sinqColors
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 fun BookScreen(
     bookId: String,
-    /** 1-based chapter to open at; 0 opens at the first. Set by a search hit. */
+    /** 1-based explicit chapter; 0 resumes the saved chapter. */
     openAtChapter: Int = 0,
     /**
      * Stanza within that chapter to land on; -1 lands at the top. Set when a
@@ -90,7 +92,10 @@ fun BookScreen(
     openAtBlock: Int = -1,
     onBack: () -> Unit,
     onOpenBook: (String) -> Unit,
+    onWriteNote: (String, String) -> Unit,
 ) {
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    com.agpeya.app.ui.common.ReaderAwake()
     val context = LocalContext.current
     val s = LocalStrings.current
     val fontStep by SettingsRepository.fontStep(context)
@@ -99,12 +104,25 @@ fun BookScreen(
         fontStep.coerceIn(0, SettingsRepository.FONT_STEPS_SP.lastIndex),
     ]
 
-    val book by produceState<Book?>(null, bookId) { value = BookRepository.book(context, bookId) }
-    val meta by produceState<BookMeta?>(null, bookId) { value = BookRepository.meta(context, bookId) }
+    val bookLoad = com.agpeya.app.ui.common.rememberContentLoad(bookId) { BookRepository.book(context, bookId) to BookRepository.meta(context, bookId) }
+    val book = bookLoad.value?.first
+    val meta = bookLoad.value?.second
+    if (com.agpeya.app.ui.common.contentLoadScreen(bookLoad, s.booksTitle, onBack, book?.chapters.isNullOrEmpty())) return
     val chapters = book?.chapters.orEmpty()
 
     var chapter by rememberSaveable(bookId) {
         mutableIntStateOf((openAtChapter - 1).coerceAtLeast(0))
+    }
+    val savedChapters by SettingsRepository.lastChapters(context).collectAsState(initial = null)
+    var restored by rememberSaveable(bookId) { mutableStateOf(false) }
+    LaunchedEffect(bookId, savedChapters) {
+        if (!restored && (openAtChapter > 0 || savedChapters != null)) {
+            if (openAtChapter <= 0) chapter = ((savedChapters?.get("book:$bookId") ?: 1) - 1).coerceIn(0, chapters.lastIndex)
+            restored = true
+        }
+    }
+    LaunchedEffect(bookId, chapter, restored) {
+        if (restored) SettingsRepository.setLastChapter(context, "book:$bookId", chapter + 1)
     }
     val shown = chapters.getOrNull(chapter.coerceIn(0, (chapters.size - 1).coerceAtLeast(0)))
     val blocks = shown?.blocks.orEmpty()
@@ -149,6 +167,16 @@ fun BookScreen(
                 // merged from several — the reader should never have to guess.
                 accentLine = shown?.source,
                 onBack = onBack,
+                actions = {
+                    com.agpeya.app.ui.common.ReaderToolsMenu(
+                        fontStep = fontStep, maxFontStep = SettingsRepository.FONT_STEPS_SP.lastIndex,
+                        onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
+                        sharePayload = { com.agpeya.app.ui.common.SharePayload(
+                            body = blocks.joinToString("\n\n") { it.text }, title = shown?.title, kicker = book?.title,
+                        ) },
+                        onWriteNote = { onWriteNote("book/$bookId?ch=${chapter + 1}&blk=${atBlock - 1}", book?.title.orEmpty()) },
+                    )
+                },
                 titleContent = {
                     com.agpeya.app.ui.common.ReaderTitleBar(
                         title = book?.title ?: meta?.title.orEmpty(),
@@ -232,10 +260,10 @@ fun BookScreen(
                             nextLabel = chapters.getOrNull(chapter + 1)?.title
                                 ?.takeIf { it.isNotBlank() } ?: s.nextChapter,
                             onPrevious = if (chapter > 0) {
-                                { chapter -= 1; selA = -1; selB = -1 }
+                                { chapter -= 1; selA = -1; selB = -1; scope.launch { listState.scrollToItem(0) } }
                             } else null,
                             onNext = if (chapter < chapters.size - 1) {
-                                { chapter += 1; selA = -1; selB = -1 }
+                                { chapter += 1; selA = -1; selB = -1; scope.launch { listState.scrollToItem(0) } }
                             } else null,
                         )
                     }
@@ -247,7 +275,7 @@ fun BookScreen(
             com.agpeya.app.ui.common.ChapterSheet(
                 count = chapters.size,
                 current = chapter,
-                onPick = { chaptersOpen = false; chapter = it; selA = -1; selB = -1 },
+                onPick = { chaptersOpen = false; chapter = it; selA = -1; selB = -1; scope.launch { listState.scrollToItem(0) } },
                 onDismiss = { chaptersOpen = false },
                 labelFor = { chapters[it].title.takeIf { t -> t.isNotBlank() } },
             )
@@ -300,7 +328,7 @@ private fun BookBlockRow(
     Column(
         Modifier
             .fillMaxWidth()
-            .clickable(onClick = onTap)
+            .selectable(selected = selected, onClick = onTap)
             .background(
                 if (selected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.20f)
                 else Color.Transparent,

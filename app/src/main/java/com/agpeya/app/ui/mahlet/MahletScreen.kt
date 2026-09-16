@@ -1,5 +1,6 @@
 package com.agpeya.app.ui.mahlet
 
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -80,9 +81,11 @@ import kotlinx.coroutines.launch
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 fun MahletScreen(
     orderId: String,
+    onWriteNote: ((String, String) -> Unit)? = null,
     onBack: () -> Unit,
     onOpenBook: (String, Int, Int) -> Unit = { _, _, _ -> },
 ) {
+    com.agpeya.app.ui.common.ReaderAwake()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var contentsOpen by remember { mutableStateOf(false) }
@@ -97,14 +100,19 @@ fun MahletScreen(
     // The whole feast, not only the order that was tapped: the ዋዜማ and the
     // ማኅሌት belong to one night and one morning, so they are two tabs rather
     // than two pages a reader has to go back and forth between.
-    val orders by produceState(emptyList<MahletOrder>(), orderId) {
-        val opened = MahletRepository.order(context, orderId) ?: return@produceState
-        val sameFeast = MahletRepository.month(context, opened.month ?: 0)
-            .filter { it.feast.trim() == opened.feast.trim() && it.day == opened.day }
-            .sortedBy { MahletKind.rank(it.kind) }
-        value = sameFeast.ifEmpty { listOf(opened) }
+    var tab by rememberSaveable(orderId) { mutableIntStateOf(-1) }
+    val ordersLoad = com.agpeya.app.ui.common.rememberContentLoad(orderId) {
+        val opened = MahletRepository.order(context, orderId)
+        if (opened == null) emptyList() else {
+            val matching = MahletRepository.month(context, opened.month ?: 0)
+                .filter { it.feast.trim() == opened.feast.trim() && it.day == opened.day }
+                .sortedBy { MahletKind.rank(it.kind) }.ifEmpty { listOf(opened) }
+            if (tab < 0) tab = matching.indexOfFirst { it.id == orderId }.coerceAtLeast(0)
+            matching
+        }
     }
-    var tab by rememberSaveable(orderId) { mutableIntStateOf(0) }
+    val orders = ordersLoad.value.orEmpty()
+    if (com.agpeya.app.ui.common.contentLoadScreen(ordersLoad, s.mahletTitle, onBack, orders.isEmpty())) return
     val shown = orders.getOrNull(tab.coerceIn(0, (orders.size - 1).coerceAtLeast(0)))
     // Which text of the order is on the page: -1 the book's own (or the edition
     // standing in for it), n the nth further edition. An edition replaces the
@@ -166,7 +174,14 @@ fun MahletScreen(
                         onFontChange = { step ->
                             scope.launch { SettingsRepository.setFontStep(context, step) }
                         },
-                        shareEnabled = false,
+                        onWriteNote = shown?.let { order -> onWriteNote?.let { write -> {
+                            write("mahlet/${order.id}", order.feast)
+                        } } },
+                        shareEnabled = parts.isNotEmpty(),
+                        sharePayload = { com.agpeya.app.ui.common.SharePayload(
+                            body = parts.joinToString("\n\n") { it.verse }, kicker = s.mahletTitle,
+                            title = shown?.feast,
+                        ) },
                     )
                 },
             )
@@ -199,7 +214,7 @@ fun MahletScreen(
                         // two stay in step: the kind tabs, the edition pills,
                         // the title, and the reference block — one item each.
                         val before = (if (orders.size > 1) 1 else 0) +
-                            (if (editions.isNotEmpty()) 1 else 0) +
+                            (if (editions.isNotEmpty()) 2 else 0) +
                             1 +
                             (if (shown?.let { telegramReferences(it, s) }.orEmpty().isNotEmpty()) 1 else 0)
                         scope.launch { listState.animateScrollToItem(before + i) }
@@ -222,7 +237,7 @@ fun MahletScreen(
                                     label = if (order.kind == MahletKind.MAHLET) s.mahletTitle
                                     else s.mahletKindLabel(order.kind),
                                     selected = index == tab,
-                                    onClick = { tab = index; selA = -1; selB = -1 },
+                                    onClick = { tab = index; selA = -1; selB = -1; scope.launch { listState.scrollToItem(0) } },
                                 )
                             }
                         }
@@ -263,7 +278,7 @@ fun MahletScreen(
                             SelectPill(
                                 label = s.mahletBookTextPlain,
                                 selected = edition < 0,
-                                onClick = { edition = -1; selA = -1; selB = -1 },
+                                onClick = { edition = -1; selA = -1; selB = -1; scope.launch { listState.scrollToItem(0) } },
                             )
                             // Editions count among themselves and translations
                             // among themselves: "እትም ፪" is the second Ge'ez
@@ -284,7 +299,7 @@ fun MahletScreen(
                                 SelectPill(
                                     label = label,
                                     selected = index == edition,
-                                    onClick = { edition = index; selA = -1; selB = -1 },
+                                    onClick = { edition = index; selA = -1; selB = -1; scope.launch { listState.scrollToItem(0) } },
                                 )
                             }
                         }
@@ -506,7 +521,7 @@ private fun MahletPartRow(
     Column(
         Modifier
             .fillMaxWidth()
-            .clickable(onClick = onTap)
+            .selectable(selected = selected, onClick = onTap)
             .background(
                 if (selected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.20f)
                 else Color.Transparent,

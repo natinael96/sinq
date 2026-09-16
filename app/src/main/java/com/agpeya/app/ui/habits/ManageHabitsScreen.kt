@@ -10,6 +10,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -67,6 +71,7 @@ fun ManageHabitsScreen(onBack: () -> Unit) {
 
     var renamingId by remember { mutableStateOf<String?>(null) }
     var schedulingId by remember { mutableStateOf<String?>(null) }
+    var deletingId by remember { mutableStateOf<String?>(null) }
     var creating by remember { mutableStateOf(false) }
 
     fun move(from: Int, to: Int) {
@@ -133,24 +138,19 @@ fun ManageHabitsScreen(onBack: () -> Unit) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    IconButton(onClick = { renamingId = id }) {
-                        Icon(Icons.Outlined.Edit, contentDescription = s.rename, modifier = Modifier.size(IconSize.medium))
-                    }
-                    IconButton(onClick = { move(index, index - 1) }, enabled = index > 0) {
-                        Icon(
-                            Icons.Filled.KeyboardArrowUp, contentDescription = s.moveUp, modifier = Modifier.size(IconSize.medium),
-                            tint = if (index > 0) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceVariant,
-                        )
-                    }
-                    IconButton(onClick = { move(index, index + 1) }, enabled = index < ids.size - 1) {
-                        Icon(
-                            Icons.Filled.KeyboardArrowDown, contentDescription = s.moveDown, modifier = Modifier.size(IconSize.medium),
-                            tint = if (index < ids.size - 1) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceVariant,
-                        )
-                    }
-                    if (isCustom) {
-                        IconButton(onClick = { scope.launch { HabitsRepository.deleteCustomHabit(context, id) } }) {
-                            Icon(Icons.Outlined.Close, contentDescription = s.remove, modifier = Modifier.size(IconSize.medium), tint = MaterialTheme.colorScheme.error)
+                    var menuOpen by remember(id) { mutableStateOf(false) }
+                    Box {
+                        IconButton(onClick = { menuOpen = true }) {
+                            Icon(Icons.Outlined.MoreVert, contentDescription = s.moreActions)
+                        }
+                        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                            DropdownMenuItem(text = { Text(s.rename) }, onClick = { menuOpen = false; renamingId = id })
+                            DropdownMenuItem(text = { Text(s.moveUp) }, enabled = index > 0,
+                                onClick = { menuOpen = false; move(index, index - 1) })
+                            DropdownMenuItem(text = { Text(s.moveDown) }, enabled = index < ids.lastIndex,
+                                onClick = { menuOpen = false; move(index, index + 1) })
+                            if (isCustom) DropdownMenuItem(text = { Text(s.remove) },
+                                onClick = { menuOpen = false; deletingId = id })
                         }
                     }
                 }
@@ -163,6 +163,18 @@ fun ManageHabitsScreen(onBack: () -> Unit) {
         }
     }
 
+    deletingId?.let { id ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { deletingId = null },
+            title = { Text(s.remove) },
+            text = { Text(habitName(id, state, s)) },
+            confirmButton = { TextButton(onClick = {
+                scope.launch { HabitsRepository.deleteCustomHabit(context, id) }
+                deletingId = null
+            }) { Text(s.remove) } },
+            dismissButton = { TextButton(onClick = { deletingId = null }) { Text(s.cancel) } },
+        )
+    }
     val editingId = renamingId
     if (editingId != null) {
         HabitNameDialog(

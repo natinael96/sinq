@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
@@ -76,6 +77,8 @@ fun CustomizeHourScreen(hourId: String, onBack: () -> Unit) {
         }
     }
     val s = com.agpeya.app.ui.strings.LocalStrings.current
+    var resetting by remember { mutableStateOf(false) }
+    var removing by remember { mutableStateOf<Int?>(null) }
     var showPicker by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
 
@@ -90,7 +93,7 @@ fun CustomizeHourScreen(hourId: String, onBack: () -> Unit) {
                 title = hour?.name ?: "",
                 onBack = onBack,
                 actions = {
-                    TextButton(onClick = { scope.launch { LayoutRepository.reset(context, hourId) } }) {
+                    TextButton(onClick = { resetting = true }) {
                         Text(s.resetLayout, style = MaterialTheme.typography.labelLarge)
                     }
                 },
@@ -124,7 +127,7 @@ fun CustomizeHourScreen(hourId: String, onBack: () -> Unit) {
                         persistOrder(list)
                     },
                     onRemove = if (added) {
-                        { scope.launch { LayoutRepository.removePsalm(context, hourId, section.number!!) } }
+                        { removing = section.number }
                     } else null,
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -136,10 +139,22 @@ fun CustomizeHourScreen(hourId: String, onBack: () -> Unit) {
         }
     }
 
+    if (resetting || removing != null) androidx.compose.material3.AlertDialog(
+        onDismissRequest = { resetting = false; removing = null },
+        title = { Text(if (resetting) s.resetLayout else s.remove) },
+        text = { Text(if (resetting) s.resetLayout else "${s.psalterTitle} ${removing}") },
+        confirmButton = { TextButton(onClick = { scope.launch {
+            if (resetting) LayoutRepository.reset(context, hourId)
+            else removing?.let { LayoutRepository.removePsalm(context, hourId, it) }
+            resetting = false; removing = null
+        } }) { Text(s.ok) } },
+        dismissButton = { TextButton(onClick = { resetting = false; removing = null }) { Text(s.cancel) } },
+    )
     if (showPicker) {
         ModalBottomSheet(onDismissRequest = { showPicker = false }, sheetState = sheetState) {
             PsalmPicker(
                 title = s.choosePsalm,
+                existing = ordered.mapNotNull { it.number }.toSet(),
                 onPick = { number ->
                     scope.launch {
                         LayoutRepository.addPsalm(context, hourId, number)
@@ -153,7 +168,7 @@ fun CustomizeHourScreen(hourId: String, onBack: () -> Unit) {
 }
 
 @Composable
-private fun PsalmPicker(title: String, onPick: (Int) -> Unit) {
+private fun PsalmPicker(title: String, existing: Set<Int>, onPick: (Int) -> Unit) {
     val context = LocalContext.current
     val psalms by produceState(emptyList<Section>()) { value = ContentRepository.psalter(context) }
     var query by remember { mutableStateOf("") }
@@ -179,7 +194,7 @@ private fun PsalmPicker(title: String, onPick: (Int) -> Unit) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { p.number?.let(onPick) }
+                        .clickable(enabled = p.number !in existing) { p.number?.let(onPick) }
                         .padding(vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -195,7 +210,7 @@ private fun PsalmPicker(title: String, onPick: (Int) -> Unit) {
                         }
                     }
                     Text(
-                        text = p.number?.toString().orEmpty(),
+                        text = p.number?.toString().orEmpty() + if (p.number in existing) " ✓" else "",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -248,30 +263,16 @@ private fun SectionEditRow(
                 )
             }
         }
-        IconButton(onClick = onMoveUp, enabled = canMoveUp) {
-            Icon(
-                Icons.Filled.KeyboardArrowUp,
-                contentDescription = s.moveUp,
-                modifier = Modifier.size(IconSize.medium),
-                tint = if (canMoveUp) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceVariant,
-            )
-        }
-        IconButton(onClick = onMoveDown, enabled = canMoveDown) {
-            Icon(
-                Icons.Filled.KeyboardArrowDown,
-                contentDescription = s.moveDown,
-                modifier = Modifier.size(IconSize.medium),
-                tint = if (canMoveDown) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceVariant,
-            )
-        }
-        if (onRemove != null) {
-            IconButton(onClick = onRemove) {
-                Icon(
-                    Icons.Outlined.Close,
-                    contentDescription = s.remove,
-                    modifier = Modifier.size(IconSize.medium),
-                    tint = MaterialTheme.colorScheme.error,
-                )
+        var open by remember { mutableStateOf(false) }
+        androidx.compose.foundation.layout.Box {
+            IconButton(onClick = { open = true }) { Icon(Icons.Outlined.MoreVert, contentDescription = s.moreActions) }
+            androidx.compose.material3.DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+                androidx.compose.material3.DropdownMenuItem(text = { Text(s.moveUp) }, enabled = canMoveUp,
+                    onClick = { open = false; onMoveUp() })
+                androidx.compose.material3.DropdownMenuItem(text = { Text(s.moveDown) }, enabled = canMoveDown,
+                    onClick = { open = false; onMoveDown() })
+                if (onRemove != null) androidx.compose.material3.DropdownMenuItem(text = { Text(s.remove) },
+                    onClick = { open = false; onRemove() })
             }
         }
     }

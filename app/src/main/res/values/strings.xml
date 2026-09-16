@@ -18,4 +18,8 @@
     <string name="widget_memento_label">ሞትን አስብ</string>
     <string name="widget_memento_description">ሞትን አስብ — በመነሻ ገጽ ላይ።</string>
     <string name="widget_memento_latin" translatable="false">MEMENTO MORI</string>
+    <string name="widget_prayer_clock_label">የጸሎት ሰዓት</string>
+    <string name="widget_prayer_clock_description">ሰባቱን የጸሎት ሰዓታት ያሳያል። የአሁኑን ጸሎት ለመክፈት ይንኩ።</string>
+    <string name="widget_prayer_clock_caption">የጸሎት ሰዓታት</string>
+    <string name="external_link_unavailable">አገናኙን የሚከፍት መተግበሪያ አልተገኘም። አሳሽ እንደተጫነና እንደነቃ ያረጋግጡ።</string>
 </resources>

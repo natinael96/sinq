@@ -1,5 +1,6 @@
 package com.agpeya.app.ui.common
 
+import androidx.core.net.toUri
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
@@ -222,14 +223,16 @@ fun openNotificationSettings(context: android.content.Context) {
  *
  * Wrapped because a device can have no browser at all — a stripped ROM, a
  * managed profile, an emulator — and an unhandled ACTION_VIEW takes the screen
- * down. A link that quietly does nothing is a poor outcome; a crash is a worse
- * one, and there is nothing useful to say in between.
+ * down. Report unavailable handlers so the person knows why a link did not open.
  */
 fun openUrl(context: android.content.Context, url: String) {
     runCatching {
         context.startActivity(
-            android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url)),
+            android.content.Intent(android.content.Intent.ACTION_VIEW, url.toUri()),
         )
+    }.onFailure {
+        android.widget.Toast.makeText(context, com.agpeya.app.R.string.external_link_unavailable,
+            android.widget.Toast.LENGTH_LONG).show()
     }
 }
 /** Where the app sends people who have something to tell the maintainer. */

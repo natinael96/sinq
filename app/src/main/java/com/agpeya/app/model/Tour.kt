@@ -15,6 +15,8 @@ data class TourPage(
     val kicker: TourText = TourText(),
     val title: TourText = TourText(),
     val body: TourText = TourText(),
+    val route: String? = null,
+    val actionLabel: TourText = TourText(),
 )
 
 /** The tour for one release, keyed to the versionCode that introduced it. */

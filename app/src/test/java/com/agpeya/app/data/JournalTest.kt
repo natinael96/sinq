@@ -45,6 +45,16 @@ class JournalTest {
     }
 
     @Test
+    fun `confession previews never expose note text or its length`() {
+        listOf("", "short secret", "\nprivate first line\nprivate second line", "secret ".repeat(1000)).forEach { body ->
+            val note = entry(JournalKind.CONFESSION_DRAFT, body)
+            assertEquals("", note.preview)
+            assertEquals("Masking must not erase the stored note", body, note.body)
+        }
+        assertEquals("passage note", entry(JournalKind.PASSAGE, "passage note\nsecond line").preview)
+    }
+
+    @Test
     fun `an unknown stored kind reads back as a plain reflection, never a draft`() {
         // Reordering the enum must never reclassify someone's reflection as a
         // confession — the converter stores names and fails safe on the way in.

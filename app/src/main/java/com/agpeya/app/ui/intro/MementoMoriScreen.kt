@@ -6,6 +6,9 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -114,7 +117,7 @@ fun MementoMoriScreen(onDone: () -> Unit) {
             flourish.animateTo(1f, tween(motion.millis(FLOURISH_MS), easing = FastOutSlowInEasing))
         }
         subtitle.animateTo(1f, tween(motion.millis(SUBTITLE_MS), easing = FastOutSlowInEasing))
-        delay(HOLD_AFTER_MS)
+        delay(motion.millis(HOLD_AFTER_MS.toInt()).toLong())
         finish()
     }
 
@@ -171,7 +174,8 @@ fun MementoMoriScreen(onDone: () -> Unit) {
             Canvas(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(96.dp),
+                    .height(96.dp)
+                    .semantics { contentDescription = TITLE; heading() },
             ) {
                 val w = titleLayout.size.width.toFloat()
                 // On a narrow screen the measured title can be wider than the

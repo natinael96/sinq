@@ -1,5 +1,8 @@
 package com.agpeya.app.ui.settings
 
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,32 +44,26 @@ import java.time.ZoneOffset
 
 /** "1,500.00 ብር", or without the currency when none is set. */
 fun formatCents(cents: Cents, currency: String): String =
-    "%,.2f %s".format(cents / 100.0, currency).trim()
+    java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols(java.util.Locale.US))
+        .format(java.math.BigDecimal.valueOf(cents, 2)) + currency.takeIf { it.isNotBlank() }?.let { " $it" }.orEmpty()
 
 /**
  * Read a typed amount into minor units, or null if it isn't a number.
  *
  * Tolerant of how people actually type: thousands separators, a stray space,
  * and either a dot or the comma used as a decimal mark in some locales. More
- * than two decimal places are truncated rather than rounded up, so the app
- * never records a larger gift than was entered.
+ * than two decimal places or amounts beyond the ledger range are rejected
+ * so the value saved always agrees with the value entered.
  */
 fun parseAmount(text: String): Cents? {
     val cleaned = text.trim().replace(" ", "")
-    if (cleaned.isEmpty()) return null
-    // A comma is a decimal mark only when it is the sole separator and is
-    // followed by one or two digits; otherwise it is grouping and comes out.
-    val normalized = if (Regex("""^\d+,\d{1,2}$""").matches(cleaned)) {
-        cleaned.replace(',', '.')
-    } else {
-        cleaned.replace(",", "")
+    val normalized = when {
+        Regex("""^\d+,\d{1,2}$""").matches(cleaned) -> cleaned.replace(',', '.')
+        Regex("""^\d{1,3}(,\d{3})+(\.\d{0,2})?$""").matches(cleaned) -> cleaned.replace(",", "")
+        else -> cleaned
     }
-    if (!Regex("""^\d+(\.\d*)?$""").matches(normalized)) return null
-    val (whole, fraction) = normalized.split('.').let {
-        it[0] to (it.getOrNull(1) ?: "")
-    }
-    val minor = fraction.padEnd(2, '0').take(2)
-    return runCatching { whole.toLong() * 100 + minor.toLong() }.getOrNull()
+    if (!Regex("""^\d+(\.\d{0,2})?$""").matches(normalized)) return null
+    return runCatching { java.math.BigDecimal(normalized).movePointRight(2).longValueExact() }.getOrNull()
 }
 
 /**
@@ -87,22 +84,23 @@ fun AmountEntryDialog(
     amountOptional: Boolean = false,
     initialAmount: Cents = 0,
     initialNote: String = "",
+    initialDate: LocalDate = LocalDate.now(),
 ) {
     var amountText by remember {
-        mutableStateOf(if (initialAmount > 0) "%.2f".format(initialAmount / 100.0) else "")
+        mutableStateOf(if (initialAmount > 0) java.math.BigDecimal.valueOf(initialAmount, 2).toPlainString() else "")
     }
     var note by remember { mutableStateOf(initialNote) }
-    var date by remember { mutableStateOf(LocalDate.now()) }
+    var date by remember { mutableStateOf(initialDate) }
     var pickingDate by remember { mutableStateOf(false) }
 
     val parsed = parseAmount(amountText)
-    val valid = if (amountOptional) amountText.isBlank() || parsed != null else parsed != null
+    val valid = if (amountOptional) amountText.isBlank() || (parsed != null && parsed > 0) else parsed != null && parsed > 0
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {
-            Column {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
                 OutlinedTextField(
                     value = amountText,
                     onValueChange = { amountText = it },
@@ -138,27 +136,10 @@ fun AmountEntryDialog(
     )
 
     if (pickingDate) {
-        val state = rememberDatePickerState(
-            initialSelectedDateMillis = date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
-        )
-        AlertDialog(
-            onDismissRequest = { pickingDate = false },
-            title = { Text(s.dateLabel) },
-            text = { DatePicker(state = state, showModeToggle = false) },
-            confirmButton = {
-                TextButton(onClick = {
-                    // The picker works in UTC midnights; reading the date back
-                    // in UTC keeps a gift recorded on the day it was tapped,
-                    // whatever side of midnight the local zone is on.
-                    state.selectedDateMillis?.let {
-                        date = java.time.Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate()
-                    }
-                    pickingDate = false
-                }) { Text(s.save) }
-            },
-            dismissButton = {
-                TextButton(onClick = { pickingDate = false }) { Text(s.cancel) }
-            },
+        com.agpeya.app.ui.common.EthiopianDatePickerDialog(
+            initial = date,
+            onDismiss = { pickingDate = false },
+            onSelect = { date = it; pickingDate = false },
         )
     }
 }

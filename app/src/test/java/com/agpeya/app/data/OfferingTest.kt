@@ -92,8 +92,11 @@ class OfferingTest {
         // A lone comma before one or two digits is a decimal mark.
         assertEquals(150_050L, parseAmount("1500,50"))
         assertEquals(50L, parseAmount("0.5"))
-        // Extra places truncate down — never record more than was entered.
-        assertEquals(19L, parseAmount("0.199"))
+        // Reject precision we cannot preserve.
+        assertNull(parseAmount("0.199"))
+        assertNull(parseAmount("92233720368547758.08"))
+        assertNull(parseAmount("12,34,56"))
+        assertEquals(Long.MAX_VALUE, parseAmount("92233720368547758.07"))
     }
 
     @Test

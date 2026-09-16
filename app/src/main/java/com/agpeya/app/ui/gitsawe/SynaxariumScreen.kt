@@ -127,7 +127,8 @@ private fun SynaxariumDay.pieces(): List<DayPiece> = buildList {
 /** ስንክሳር — the day's synaxarium commemorations for [epochDay]. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, onBack: () -> Unit) {
+fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: String? = null, onBack: () -> Unit, onWriteNote: ((String, String) -> Unit)? = null) {
+    com.agpeya.app.ui.common.ReaderAwake()
     val context = LocalContext.current
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
@@ -165,10 +166,18 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, onBack: () -> Unit)
     // ordinal all along and the route threw it away, so a hit on a twelve-entry
     // day landed at the top.
     var landed by rememberSaveable(epochDay) { mutableStateOf(false) }
-    LaunchedEffect(dayResult, initialEntry) {
-        if (landed || initialEntry < 0) return@LaunchedEffect
-        if (entries.isEmpty()) return@LaunchedEffect
-        if (initialEntry < entries.size) listState.scrollToItem(initialEntry + 1)
+    LaunchedEffect(dayResult, initialEntry, initialSection) {
+        if (landed || (initialEntry < 0 && initialSection == null)) return@LaunchedEffect
+        val loadedDay = day ?: return@LaunchedEffect
+        val section = initialSection?.substringAfterLast(':')
+        val target = when {
+            section == "reading" && loadedDay.reading != null ->
+                1 + entries.size + if (loadedDay.feasts.isNotEmpty() || loadedDay.monthly.isNotEmpty()) 1 else 0
+            section != null -> entries.indexOfFirst { it.id == section }.takeIf { it >= 0 }?.plus(1)
+            initialEntry in entries.indices -> initialEntry + 1
+            else -> null
+        }
+        target?.let { listState.scrollToItem(it) }
         landed = true
     }
 
@@ -183,15 +192,6 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, onBack: () -> Unit)
         bookmarks.filter { it.hourId == "sinksar_verse" }.mapTo(HashSet()) { it.sectionId }
     }
 
-    // Reading today's ስንክሳር marks it kept. Only today's: browsing back through
-    // the year is reading about a day, not keeping it, and a day already past
-    // cannot be kept now.
-    LaunchedEffect(date, dayResult) {
-        if (date != LocalDate.now()) return@LaunchedEffect
-        if (entries.isEmpty()) return@LaunchedEffect
-        HabitsRepository.markDone(context, date.toString(), "sinksar")
-    }
-
     fun mark(sectionId: String, title: String, rawText: String) {
         scope.launch {
             UserDataRepository.toggleBookmark(
@@ -202,7 +202,7 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, onBack: () -> Unit)
                     sectionId = sectionId,
                     title = title,
                     subtitle = snippet(rawText),
-                    route = "synaxarium/$epochDay",
+                    route = "synaxarium/$epochDay?section=${android.net.Uri.encode(sectionId)}",
                 ),
             )
         }
@@ -250,6 +250,9 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, onBack: () -> Unit)
                         fontStep = fontStep,
                         maxFontStep = FONT_STEPS_SP.lastIndex,
                         onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
+                        onWriteNote = day?.let { onWriteNote?.let { write -> {
+                            write("synaxarium/$epochDay", "${s.synaxariumTitle} · ${com.agpeya.app.ui.common.formatEthiopian(date, s)}")
+                        } } },
                         shareEnabled = day != null,
                         sharePayload = {
                             day?.let {
@@ -382,6 +385,10 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, onBack: () -> Unit)
                 }
 
                 item { ClosingPrayer(bodyFontSp) }
+                item {
+                    val today by com.agpeya.app.ui.common.rememberCurrentDate()
+                    if (date == today) com.agpeya.app.ui.common.ReadingCompletion("sinksar", s.synaxariumFinished)
+                }
                 item { Spacer(Modifier.height(Spacing.huge)) }
             }
         }

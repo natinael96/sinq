@@ -2,6 +2,10 @@ package com.agpeya.app.ui.reading
 
 import android.content.Context
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,8 +58,11 @@ internal data class ReadingMapBook(
     val name: String,
     val chapters: Int,
     val sectionKey: String,
-    val read: Int,
-)
+    val readChapterNumbers: Set<Int>,
+) {
+    val read: Int get() = readChapterNumbers.size
+    val nextUnread: Int? get() = (1..chapters).firstOrNull { it !in readChapterNumbers }
+}
 
 /**
  * Every book the app carries, with what has been read of each.
@@ -73,7 +80,7 @@ internal suspend fun readingMapBooks(context: Context, read: Set<String>): List<
             name = b.nameAm,
             chapters = b.chapters,
             sectionKey = canonSectionKey(b),
-            read = (1..b.chapters).count {
+            readChapterNumbers = (1..b.chapters).filterTo(mutableSetOf()) {
                 ReadingPlanRepository.chapterKey(b.key, it) in read
             },
         )
@@ -85,7 +92,7 @@ internal suspend fun readingMapBooks(context: Context, read: Set<String>): List<
         name = "መዝሙረ ዳዊት",
         chapters = PSALTER_CHAPTERS,
         sectionKey = "PoetryWisdom",
-        read = (1..PSALTER_CHAPTERS).count {
+        readChapterNumbers = (1..PSALTER_CHAPTERS).filterTo(mutableSetOf()) {
             ReadingPlanRepository.chapterKey(PSALMS_SLUG, it) in read
         },
     )
@@ -117,9 +124,11 @@ fun ReadingMapScreen(onBack: () -> Unit, onOpenRoute: (String) -> Unit) {
     val context = LocalContext.current
     val s = LocalStrings.current
     val state by ReadingPlanRepository.state(context).collectAsState(initial = ReadingPlanState())
-    val books by produceState(emptyList<ReadingMapBook>(), state.readChapters) {
-        value = readingMapBooks(context, state.readChapters)
+    val booksLoad = com.agpeya.app.ui.common.rememberContentLoad(state.readChapters) {
+        readingMapBooks(context, state.readChapters)
     }
+    val books = booksLoad.value.orEmpty()
+    if (com.agpeya.app.ui.common.contentLoadScreen(booksLoad, s.readingMapTitle, onBack, books.isEmpty())) return
     var open by remember { mutableStateOf<ReadingMapBook?>(null) }
 
     val read = books.sumOf { it.read }
@@ -319,6 +328,7 @@ private fun BookSheet(book: ReadingMapBook, onOpen: (Int) -> Unit) {
     Column(
         Modifier
             .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = Spacing.screen)
             .padding(bottom = Spacing.xxl),
     ) {
@@ -337,13 +347,13 @@ private fun BookSheet(book: ReadingMapBook, onOpen: (Int) -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
             verticalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
-            // Read from the front: the plans move through a book in order, so
-            // the count is enough to say which chapters they were.
+            // Progress may be noncontiguous after catch-up or partial reading.
             (1..book.chapters).forEach { n ->
-                val read = n <= book.read
+                val read = n in book.readChapterNumbers
                 Box(
                     Modifier
-                        .size(34.dp)
+                        .size(48.dp)
+                        .semantics { stateDescription = if (read) s.readingDone else s.readingUnread }
                         .clip(RoundedCornerShape(8.dp))
                         .background(if (read) gold else MaterialTheme.colorScheme.surfaceVariant)
                         .clickable { onOpen(n) },
@@ -358,11 +368,13 @@ private fun BookSheet(book: ReadingMapBook, onOpen: (Int) -> Unit) {
             }
         }
         Spacer(Modifier.height(Spacing.md))
+        book.nextUnread?.let { next ->
         com.agpeya.app.ui.common.DoorChip(
             icon = Icons.AutoMirrored.Outlined.MenuBook,
-            label = s.readingOpenChapter(geezNumeral(minOf(book.read + 1, book.chapters))),
-            onClick = { onOpen(minOf(book.read + 1, book.chapters)) },
+            label = s.readingOpenChapter(geezNumeral(next)),
+            onClick = { onOpen(next) },
         )
+        }
     }
 }
 

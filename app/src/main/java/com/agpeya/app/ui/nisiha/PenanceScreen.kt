@@ -1,5 +1,8 @@
 package com.agpeya.app.ui.nisiha
 
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -68,327 +71,159 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.UUID
 
-/**
- * ቀኖና — the penance received from one's ንስሐ አባት.
- *
- * Kept like a ስዕለት (a debt with a measure), guarded like the journal: the
- * screen sits behind the passphrase when one is set, stays out of screenshots,
- * and its records never enter a backup. Nothing here is a habit or a streak —
- * when a penance is finished the card says so plainly and the reminders stop,
- * and that is all.
- */
+/** Private penance summaries; configuration is a local draft until Save. */
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-fun PenanceScreen(onBack: () -> Unit) {
+private fun PenanceScreenContent(onBack: () -> Unit) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val s = LocalStrings.current
-
-    SecureScreen()
-    val locked by JournalLock.isLocked(context).collectAsState(initial = false)
-    var unlocked by remember { mutableStateOf(false) }
-
+    val action = com.agpeya.app.ui.common.rememberUserAction()
+    val load = com.agpeya.app.ui.common.rememberFlowLoad { PenanceRepository.penances(context) }
+    if (com.agpeya.app.ui.common.contentLoadScreen(load, s.penanceTitle, onBack)) return
+    val penances = load.value ?: return
+    val today by com.agpeya.app.ui.common.rememberCurrentDate()
+    var editing by remember { mutableStateOf<Penance?>(null) }
+    var recording by remember { mutableStateOf<Penance?>(null) }
+    var deleting by remember { mutableStateOf<Penance?>(null) }
+    var removeRecord by remember { mutableStateOf<Pair<Penance, String>?>(null) }
+    var permissionDenied by remember { mutableStateOf(false) }
+    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+        permissionDenied = !it
+    }
+    fun persist(next: List<Penance>, done: () -> Unit = {}) = action.run {
+        PenanceRepository.setPenances(context, next)
+        SpecialHabitReminderScheduler.sync(context, SpecialHabit.PENANCE)
+        done()
+    }
+    fun update(value: Penance, done: () -> Unit = {}) = persist(
+        if (penances.any { it.id == value.id }) penances.map { if (it.id == value.id) value else it }
+        else penances + value, done,
+    )
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        topBar = { SinqTopBar(title = s.penanceTitle, onBack = onBack) },
-    ) { innerPadding ->
-        if (locked && !unlocked) {
-            Column(Modifier.fillMaxSize().padding(innerPadding)) {
-                JournalLockGate(s) { unlocked = true }
-            }
-            return@Scaffold
-        }
-
-        val penances by PenanceRepository.penances(context).collectAsState(initial = emptyList())
-
-        val permissionLauncher = rememberLauncherForActivityResult(
-            ActivityResultContracts.RequestPermission(),
-        ) { /* a denial is reported by the Reminders banner, not a second dialog */ }
-        fun ensureNotificationPermission() {
-            if (Build.VERSION.SDK_INT >= 33 &&
-                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED
-            ) {
-                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-            }
-        }
-
-        // Renaming changes nothing about when it is due, so it saves without
-        // touching the AlarmManager; anything that moves the date, or settles
-        // the penance, re-arms (and a settled one un-arms itself).
-        fun persist(next: List<Penance>, reschedule: Boolean = true) {
-            scope.launch {
-                PenanceRepository.setPenances(context, next)
-                if (reschedule) SpecialHabitReminderScheduler.sync(context, SpecialHabit.PENANCE)
-            }
-        }
-
-        fun update(penance: Penance, reschedule: Boolean = true) =
-            persist(penances.map { if (it.id == penance.id) penance else it }, reschedule)
-
-        fun add() {
-            ensureNotificationPermission()
-            persist(
-                penances + Penance(
-                    id = UUID.randomUUID().toString(),
-                    // A ቀኖና is usually kept daily until it is finished; the
-                    // cadence has no daily kind, so every weekday stands in.
-                    schedule = HabitSchedule(
-                        kind = HabitSchedule.Kind.WEEKLY,
-                        days = (1..7).toSet(),
-                    ),
-                    assignedDate = LocalDate.now().toString(),
-                    enabled = true,
-                ),
-            )
-        }
-
-        var recording by remember { mutableStateOf<Penance?>(null) }
-        var deleting by remember { mutableStateOf<Penance?>(null) }
-
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.md),
-            verticalArrangement = Arrangement.spacedBy(Spacing.md),
-        ) {
+        topBar = { SinqTopBar(s.penanceTitle, onBack) },
+    ) { padding ->
+        LazyColumn(Modifier.fillMaxSize().padding(padding),
+            contentPadding = PaddingValues(Spacing.screen), verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
             item {
-                Text(
-                    s.penanceIntro,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.height(Spacing.xs))
-                Text(
-                    s.penancePrivacyNote,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                if (penances.isEmpty()) {
-                    Spacer(Modifier.height(Spacing.lg))
-                    Text(
-                        s.noPenances,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                Text(s.penanceIntro, style = MaterialTheme.typography.bodyMedium)
+                Text(s.penancePrivacyNote, style = MaterialTheme.typography.bodySmall)
+                if (permissionDenied) {
+                    Text(s.notifDisabledBody, color = MaterialTheme.colorScheme.error)
+                    TextButton(onClick = { com.agpeya.app.ui.common.openNotificationSettings(context) }) { Text(s.openSettings) }
                 }
+                if (penances.isEmpty()) Text(s.noPenances)
             }
-
             items(penances, key = { it.id }) { penance ->
-                PenanceCard(
-                    penance = penance,
-                    s = s,
-                    onChange = { updated ->
-                        if (updated.enabled) ensureNotificationPermission()
-                        update(updated)
-                    },
-                    onLabelChange = { update(it, reschedule = false) },
-                    onRecord = { recording = penance },
-                    onDelete = { deleting = penance },
-                )
-            }
-
-            item {
-                OutlinedButton(onClick = { add() }) {
-                    Icon(Icons.Outlined.Add, contentDescription = null)
-                    Spacer(Modifier.width(Spacing.sm))
-                    Text(s.penanceAdd)
+                var history by remember(penance.id) { mutableStateOf(false) }
+                Card {
+                    Column(Modifier.padding(Spacing.md)) {
+                        com.agpeya.app.ui.common.ToggleRow(
+                            title = penance.label.ifBlank { s.penanceTitle },
+                            checked = penance.enabled,
+                            subtitle = kindName(penance.kind, s),
+                            onCheckedChange = { enabled ->
+                                if (!action.busy) {
+                                    if (enabled && Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(
+                                        context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
+                                        permission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                    update(penance.copy(enabled = enabled))
+                                }
+                            },
+                        )
+                        Text(if (penance.settled) s.penanceSettled else if (penance.quota == 0) "${s.penanceQuotaLabel} —" else
+                            "${s.penanceDone} ${penance.done} · ${s.penanceRemaining} ${penance.remaining}",
+                            style = MaterialTheme.typography.titleSmall)
+                        Text(com.agpeya.app.ui.settings.scheduleSummary(penance.schedule, s, context),
+                            style = MaterialTheme.typography.bodySmall)
+                        Text("%02d:%02d".format(penance.minute / 60, penance.minute % 60))
+                        if (penance.remindsStill) penance.schedule.nextDueOnOrAfter(today)?.let {
+                            Text(s.nextDue(formatEthiopian(it, s)), style = MaterialTheme.typography.bodySmall)
+                        }
+                        androidx.compose.foundation.layout.FlowRow {
+                            TextButton(enabled = !action.busy, onClick = { recording = penance }) { Text(s.penanceLogProgress) }
+                            TextButton(enabled = !action.busy, onClick = { editing = penance }) { Text(s.editPerson) }
+                            TextButton(enabled = !action.busy, onClick = { deleting = penance }) { Text(s.delete) }
+                            if (penance.progress.isNotEmpty()) TextButton(onClick = { history = !history }) {
+                                Text("${s.penanceProgressHeader} (${penance.progress.size})")
+                            }
+                        }
+                        if (history) penance.progress.sortedByDescending { it.date }.forEach { progress ->
+                            Text(listOfNotNull(progress.localDate?.let { formatEthiopianShort(it, s) } ?: progress.date,
+                                progress.amount.takeIf { it > 0 }?.toString(), progress.note.takeIf { it.isNotBlank() })
+                                .joinToString(" · "), style = MaterialTheme.typography.bodySmall)
+                            TextButton(enabled = !action.busy, onClick = { removeRecord = penance to progress.id }) { Text(s.delete) }
+                        }
+                    }
                 }
+            }
+            item {
+                OutlinedButton(enabled = !action.busy, onClick = {
+                    editing = Penance(UUID.randomUUID().toString(), enabled = false,
+                        schedule = HabitSchedule(kind = HabitSchedule.Kind.WEEKLY, days = (1..7).toSet()),
+                        assignedDate = today.toString())
+                }) { Text(s.penanceAdd) }
                 Spacer(Modifier.height(Spacing.huge))
             }
         }
-
-        recording?.let { penance ->
-            ProgressDialog(
-                s = s,
-                onDismiss = { recording = null },
-                onSave = { amount, note ->
-                    recording = null
-                    update(
-                        penance.copy(
-                            progress = penance.progress + PenanceProgress(
-                                id = UUID.randomUUID().toString(),
-                                date = LocalDate.now().toString(),
-                                amount = amount,
-                                note = note,
-                            ),
-                        ),
-                    )
-                },
-            )
-        }
-
-        deleting?.let { penance ->
-            AlertDialog(
-                onDismissRequest = { deleting = null },
-                title = { Text(penance.label.ifBlank { s.penanceTitle }) },
-                text = { Text(s.deletePenanceConfirm) },
-                confirmButton = {
-                    TextButton(onClick = {
-                        deleting = null
-                        persist(penances.filterNot { it.id == penance.id })
-                    }) { Text(s.delete) }
-                },
-                dismissButton = { TextButton(onClick = { deleting = null }) { Text(s.cancel) } },
-            )
-        }
+    }
+    editing?.let { value ->
+        PenanceEditor(value, action.busy, onDismiss = { editing = null }, onSave = {
+            update(it) { editing = null }
+        })
+    }
+    recording?.let { value ->
+        ProgressDialog(s, action.busy, onDismiss = { if (!action.busy) recording = null }, onSave = { amount, note ->
+            update(value.copy(progress = value.progress + PenanceProgress(UUID.randomUUID().toString(),
+                today.toString(), amount, note))) { recording = null }
+        })
+    }
+    deleting?.let { value ->
+        AlertDialog(onDismissRequest = { if (!action.busy) deleting = null },
+            title = { Text(value.label.ifBlank { s.penanceTitle }) }, text = { Text(s.deletePenanceConfirm) },
+            confirmButton = { TextButton(enabled = !action.busy, onClick = {
+                persist(penances.filterNot { it.id == value.id }) { deleting = null }
+            }) { Text(s.delete) } },
+            dismissButton = { TextButton(enabled = !action.busy, onClick = { deleting = null }) { Text(s.cancel) } })
+    }
+    removeRecord?.let { (value, id) ->
+        AlertDialog(onDismissRequest = { if (!action.busy) removeRecord = null },
+            title = { Text(s.delete) }, text = { Text(s.deleteEntryConfirm) },
+            confirmButton = { TextButton(enabled = !action.busy, onClick = {
+                update(value.copy(progress = value.progress.filterNot { it.id == id })) { removeRecord = null }
+            }) { Text(s.delete) } },
+            dismissButton = { TextButton(enabled = !action.busy, onClick = { removeRecord = null }) { Text(s.cancel) } })
     }
 }
 
 @Composable
-private fun PenanceCard(
-    penance: Penance,
-    s: Strings,
-    onChange: (Penance) -> Unit,
-    onLabelChange: (Penance) -> Unit,
-    onRecord: () -> Unit,
-    onDelete: () -> Unit,
-) {
-    // The card owns a working copy keyed to the id, so the name field, switch,
-    // cadence and time stay mutually consistent no matter how the persistence
-    // round-trip is timed — the same guard the ስዕለት cards use.
-    var draft by remember(penance.id) { mutableStateOf(penance) }
-    // Progress is written by the dialog, not by this card, so it arrives
-    // through the flow and must be folded into the working copy.
-    if (draft.progress != penance.progress) draft = draft.copy(progress = penance.progress)
-
+private fun PenanceEditor(value: Penance, busy: Boolean, onDismiss: () -> Unit, onSave: (Penance) -> Unit) {
+    val s = LocalStrings.current
+    var draft by remember(value.id) { mutableStateOf(value) }
     var quotaEditing by remember { mutableStateOf(false) }
-    var showRecord by remember { mutableStateOf(false) }
-
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-    ) {
-        Column(Modifier.padding(Spacing.md)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                OutlinedTextField(
-                    value = draft.label,
-                    onValueChange = { draft = draft.copy(label = it); onLabelChange(draft) },
-                    singleLine = true,
-                    label = { Text(s.penanceNameLabel) },
-                    placeholder = { Text(s.penanceNameHint) },
-                    modifier = Modifier.weight(1f),
-                )
-                Switch(
-                    checked = draft.enabled,
-                    onCheckedChange = { draft = draft.copy(enabled = it); onChange(draft) },
-                    modifier = Modifier.padding(start = Spacing.sm),
-                )
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        Icons.Outlined.Delete,
-                        contentDescription = s.delete,
-                        tint = MaterialTheme.colorScheme.error,
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(Spacing.sm))
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                for (kind in PenanceKind.entries) {
-                    FilterChip(
-                        selected = draft.kind == kind,
-                        onClick = { draft = draft.copy(kind = kind); onChange(draft) },
-                        label = { Text(kindName(kind, s)) },
-                    )
-                }
-            }
-
-            // Plain figures, no bar to fill: what was given and what remains is
-            // stated the way a ledger states it, and a finished penance gets a
-            // quiet ተፈጽሟል rather than a celebration.
-            if (draft.settled) {
-                Spacer(Modifier.height(Spacing.sm))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Outlined.Check,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.secondary,
-                    )
-                    Spacer(Modifier.width(Spacing.sm))
-                    Text(
-                        s.penanceSettled,
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.secondary,
-                    )
-                }
-            } else if (draft.quota > 0) {
-                Spacer(Modifier.height(Spacing.sm))
-                Text(
-                    "${s.penanceDone} ${draft.done} · ${s.penanceRemaining} ${draft.remaining}",
-                    style = MaterialTheme.typography.labelLarge,
-                )
-            }
-
-            com.agpeya.app.ui.common.ListRow(
-                title = s.penanceQuotaLabel,
-                subtitle = if (draft.quota > 0) draft.quota.toString() else "—",
-                onClick = { quotaEditing = true },
-            )
-            ScheduleRow(
-                schedule = draft.schedule,
-                s = s,
-                onChange = { draft = draft.copy(schedule = it); onChange(draft) },
-            )
-            TimeRow(
-                minute = draft.minute,
-                s = s,
-                onChange = { draft = draft.copy(minute = it); onChange(draft) },
-            )
-
-            // A finished penance has no next date, and saying nothing is better
-            // than showing a date it will never fire on.
-            if (draft.remindsStill) {
-                draft.schedule.nextDueOnOrAfter(LocalDate.now())?.let { due ->
-                    Text(
-                        s.nextDue(formatEthiopian(due, s)),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.secondary,
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(Spacing.sm))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                OutlinedButton(onClick = onRecord) { Text(s.penanceLogProgress) }
-                if (draft.progress.isNotEmpty()) {
-                    Spacer(Modifier.width(Spacing.sm))
-                    TextButton(onClick = { showRecord = !showRecord }) {
-                        Text("${s.penanceProgressHeader} (${draft.progress.size})")
+    AlertDialog(onDismissRequest = { if (!busy) onDismiss() },
+        title = { Text(s.penanceTitle) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()).imePadding()) {
+                OutlinedTextField(draft.label, { draft = draft.copy(label = it) }, enabled = !busy,
+                    label = { Text(s.penanceNameLabel) }, placeholder = { Text(s.penanceNameHint) }, singleLine = true)
+                androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                    PenanceKind.entries.forEach { kind ->
+                        FilterChip(selected = draft.kind == kind, enabled = !busy,
+                            onClick = { draft = draft.copy(kind = kind) }, label = { Text(kindName(kind, s)) })
                     }
                 }
+                com.agpeya.app.ui.common.ListRow(s.penanceQuotaLabel,
+                    subtitle = draft.quota.takeIf { it > 0 }?.toString() ?: "—", onClick = { if (!busy) quotaEditing = true })
+                ScheduleRow(draft.schedule, s, { if (!busy) draft = draft.copy(schedule = it) })
+                TimeRow(draft.minute, s, { if (!busy) draft = draft.copy(minute = it) })
             }
-
-            if (showRecord) {
-                Spacer(Modifier.height(Spacing.xs))
-                draft.progress.sortedByDescending { it.date }.forEach { done ->
-                    Text(
-                        listOfNotNull(
-                            done.localDate?.let { formatEthiopianShort(it, s) } ?: done.date,
-                            done.amount.takeIf { it > 0 }?.toString(),
-                            done.note.takeIf { it.isNotBlank() },
-                        ).joinToString(" · "),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(vertical = Spacing.xxs),
-                    )
-                }
-            }
-        }
-    }
-
-    if (quotaEditing) {
-        QuotaDialog(
-            initial = draft.quota,
-            s = s,
-            onDismiss = { quotaEditing = false },
-            onSave = { quota ->
-                quotaEditing = false
-                draft = draft.copy(quota = quota)
-                // The quota decides whether the penance is settled, so changing
-                // it can revive or retire the alarm.
-                onChange(draft)
-            },
-        )
-    }
+        },
+        confirmButton = { TextButton(enabled = !busy, onClick = { onSave(draft) }) { Text(s.save) } },
+        dismissButton = { TextButton(enabled = !busy, onClick = onDismiss) { Text(s.cancel) } })
+    if (quotaEditing) QuotaDialog(draft.quota, s, { quotaEditing = false }, {
+        draft = draft.copy(quota = it); quotaEditing = false
+    })
 }
 
 private fun kindName(kind: PenanceKind, s: Strings): String = when (kind) {
@@ -437,6 +272,7 @@ private fun QuotaDialog(
 @Composable
 private fun ProgressDialog(
     s: Strings,
+    busy: Boolean,
     onDismiss: () -> Unit,
     onSave: (Int, String) -> Unit,
 ) {
@@ -449,7 +285,7 @@ private fun ProgressDialog(
         onDismissRequest = onDismiss,
         title = { Text(s.penanceLogProgress) },
         text = {
-            Column {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
                 OutlinedTextField(
                     value = amountText,
                     onValueChange = { amountText = it },
@@ -472,10 +308,15 @@ private fun ProgressDialog(
             }
         },
         confirmButton = {
-            TextButton(enabled = valid, onClick = { onSave(parsed ?: 0, note.trim()) }) {
+            TextButton(enabled = valid && !busy, onClick = { onSave(parsed ?: 0, note.trim()) }) {
                 Text(s.save)
             }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
     )
+}
+
+@Composable
+fun PenanceScreen(onBack: () -> Unit) {
+    com.agpeya.app.ui.journal.JournalAccess(onBack) { PenanceScreenContent(onBack) }
 }

@@ -1,6 +1,6 @@
 # Liturgical correctness review
 
-Updated **2026-09-16** for **2.3.2 / 72**. This record separates current implementation evidence from independent source approval. Code and automated tests can establish behavior and structural consistency; they cannot establish church approval.
+Updated **2026-09-17** for **2.4.0 / 74**. This record separates current implementation evidence from independent source approval. Code and automated tests can establish behavior and structural consistency; they cannot establish church approval.
 
 ## Current review register
 

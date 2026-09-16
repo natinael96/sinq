@@ -1,6 +1,6 @@
 # Sinq design system
 
-> Reviewed 2026-09-16 for 2.3.2 / 72 against the Compose theme/components. This is implementation guidance; device accessibility and visual QA are recorded separately in [project status](PROJECT_STATUS.md). Paths below are relative to `app/src/main/java/com/agpeya/app/`.
+> Reviewed 2026-09-17 for 2.4.0 / 74 against the Compose theme/components. This is implementation guidance; device accessibility and visual QA are recorded separately in [project status](PROJECT_STATUS.md). Paths below are relative to `app/src/main/java/com/agpeya/app/`.
 
 Sinq's look was not redesigned — it was made consistent. This file records the
 rules that hold it together, so the next screen doesn't invent a fifth card.
@@ -112,3 +112,7 @@ drift). No parallax, no bounce, no scaling.
 State is never carried by colour alone — pair it with a filled glyph, a label, or
 a semantics role. Interactive rows should use `toggleable`/`selectable` so the state is
 announced, not just the tap. Use `sp`/`dp` and wrapping to support system font scaling and long Amharic labels. Verify both on devices; the shared tokens alone do not prove every screen passes.
+
+## Current audit implementation
+
+Bottom navigation uses equal-width slots and persistent labels. Private surfaces use the complete-screen journal boundary. Content loading and retry share `ContentLoad`; completion is explicit and reversible. The dark liturgical red is `#FF8277`, measuring 6.08:1 on the background and 5.21:1 on the surface. Chapter/day controls expose selected or checked states; forms and long sheets scroll. These are source/build-verified changes, with device accessibility checks still unverified by the user's choice. See [fix coverage](UI_UX_FIX_PROGRESS.md).

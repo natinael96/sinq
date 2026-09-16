@@ -4,16 +4,10 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import com.agpeya.app.data.SettingsRepository
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.time.LocalTime
-import java.time.ZoneId
 
-/**
- * Arms the reading plan's daily nudge (06:30 unless changed). Same chain as the
- * other reminders: the receiver re-arms tomorrow, and boot, update and
- * time changes re-arm too.
- */
+/** Automatic local-time reading reminders; each delivery arms the next slot. */
 object ReadingReminderScheduler {
 
     const val ACTION_READING_REMINDER = "com.agpeya.app.READING_REMINDER"
@@ -25,15 +19,22 @@ object ReadingReminderScheduler {
         if (enabled) schedule(context) else cancel(context)
     }
 
+    val REMINDER_TIMES: List<LocalTime> = listOf(
+        LocalTime.of(6, 30),
+        LocalTime.of(14, 0),
+        LocalTime.of(20, 0),
+    )
+
+    /** Strictly future: never replay earlier slots after launch or a clock change. */
+    internal fun nextReminder(now: ZonedDateTime): ZonedDateTime =
+        (0L..1L).flatMap { offset ->
+            REMINDER_TIMES.map { time -> now.toLocalDate().plusDays(offset).atTime(time).atZone(now.zone) }
+        }.first { it.isAfter(now) }
+
     fun schedule(context: Context) {
-        val minute = SettingsRepository.readingReminderTimeBlocking(context)
-        val now = LocalDateTime.now()
-        var next = now.toLocalDate().atTime(LocalTime.of(minute / 60, minute % 60))
-        if (!next.isAfter(now)) next = next.plusDays(1)
-        val triggerAt = next.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-        // Doze-exempt, like the nightly nudge: once the app falls into the
-        // App-Standby "rare" bucket an inexact alarm is throttled to about once
-        // a day, which is exactly the case this reminder exists for.
+        val triggerAt = nextReminder(ZonedDateTime.now()).toInstant().toEpochMilli()
+        // Doze-exempt, like the nightly nudge. Android may still delay delivery;
+        // the receiver always schedules the next future slot, not a catch-up burst.
         context.getSystemService(AlarmManager::class.java)
             .setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent(context))
     }

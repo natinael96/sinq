@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/prayer_clock_root"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:gravity="center"
+    android:background="@drawable/widget_background" android:padding="12dp">
+    <TextClock
+        android:id="@+id/prayer_clock_time"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:format12Hour="HH:mm" android:format24Hour="HH:mm"
+        android:textSize="18sp" android:textColor="#E4BC5A"
+        android:fontFamily="sans-serif-medium" />
+    <ImageView
+        android:id="@+id/prayer_clock_dial"
+        android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:scaleType="fitCenter" android:src="@drawable/widget_prayer_clock_preview"
+        android:contentDescription="@string/widget_prayer_clock_description" />
+    <TextView
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="@string/widget_prayer_clock_caption" android:textColor="#B4C9BF"
+        android:textSize="11sp" android:gravity="center" android:maxLines="2" />
+</LinearLayout>

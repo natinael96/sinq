@@ -64,6 +64,7 @@ class MainActivity : ComponentActivity() {
     // Set when opened from the morning ግጻዌ-reminder notification.
     private val pendingOpenOffering = mutableStateOf<String?>(null)
     private val pendingOpenGitsawe = mutableStateOf(false)
+    private val bypassLaunchOverlays = mutableStateOf(false)
     private val pendingOpenReading = mutableStateOf(false)
     private val pendingGitsaweEpochDay = mutableStateOf<Long?>(null)
 
@@ -115,6 +116,8 @@ class MainActivity : ComponentActivity() {
                     val tour = if (lastTour == -1) null else com.agpeya.app.data.TourRepository
                         .pending(tourContent.tours, lastTour, installedCode)
                     val tourScope = rememberCoroutineScope()
+                    var tourRoute by rememberSaveable { mutableStateOf<String?>(null) }
+                    val tourAction = com.agpeya.app.ui.common.rememberUserAction()
                     // Asked once per launch, while the opening page is drawing:
                     // the notice is only ever read with the app open, so this is
                     // the moment it can matter.
@@ -124,6 +127,8 @@ class MainActivity : ComponentActivity() {
 
                     Box(Modifier.fillMaxSize()) {
                         AgpeyaNavHost(
+                            tourRoute = tourRoute,
+                            onTourRouteHandled = { tourRoute = null },
                             deepLinkHourId = pendingDeepLinkHourId.value,
                             onDeepLinkHandled = { pendingDeepLinkHourId.value = null },
                             openJourney = pendingOpenJourney.value,
@@ -139,9 +144,15 @@ class MainActivity : ComponentActivity() {
                                 pendingGitsaweEpochDay.value = null
                             },
                         )
-                        if (opened && tour != null) {
+                        if (opened && tour != null && !bypassLaunchOverlays.value) {
                             com.agpeya.app.ui.intro.WhatsNewTour(
                                 tour = tour,
+                                onOpenRoute = { route ->
+                                    tourAction.run {
+                                        SettingsRepository.setLastTourVersion(this@MainActivity, installedCode)
+                                        tourRoute = route
+                                    }
+                                },
                                 onDone = {
                                     tourScope.launch {
                                         SettingsRepository.setLastTourVersion(
@@ -151,7 +162,7 @@ class MainActivity : ComponentActivity() {
                                 },
                             )
                         }
-                        if (!opened) {
+                        if (!opened && !bypassLaunchOverlays.value) {
                             com.agpeya.app.ui.intro.MementoMoriScreen(onDone = { opened = true })
                         }
                     }
@@ -165,7 +176,13 @@ class MainActivity : ComponentActivity() {
          * Which offering page a fired አስራት / ስዕለት reminder wants opened —
          * the [com.agpeya.app.reminders.SpecialHabit] name.
          */
+        const val EXTRA_SKIP_INTRO = "skipIntro"
         const val EXTRA_OPEN_OFFERING = "openOffering"
+    }
+
+    override fun onStop() {
+        com.agpeya.app.ui.journal.JournalSession.lock()
+        super.onStop()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -177,6 +194,21 @@ class MainActivity : ComponentActivity() {
     /** Read the notification extras and strip them, so a rotation can't replay them. */
     private fun consumeDeepLink(intent: Intent?) {
         intent ?: return
+        if (intent.getBooleanExtra(EXTRA_SKIP_INTRO, false) ||
+            intent.hasExtra(ReminderScheduler.EXTRA_HOUR_ID) ||
+            intent.getBooleanExtra(com.agpeya.app.reminders.ReadingReminderScheduler.EXTRA_OPEN_READING, false) ||
+            intent.getBooleanExtra(StreakReminderScheduler.EXTRA_OPEN_STREAK, false) ||
+            intent.hasExtra(EXTRA_OPEN_OFFERING) ||
+            intent.getBooleanExtra(com.agpeya.app.reminders.GitsaweReminderScheduler.EXTRA_OPEN_GITSAWE, false)) {
+            bypassLaunchOverlays.value = true
+            // Persist the launch intent marker across activity recreation.
+            intent.putExtra(EXTRA_SKIP_INTRO, true)
+        }
+        if (intent.getBooleanExtra(com.agpeya.app.widget.PrayerClockWidgetProvider.EXTRA_OPEN_CLOCK, false)) {
+            // Resolve at tap time, even if the launcher delayed refreshing the dial.
+            pendingDeepLinkHourId.value = com.agpeya.app.widget.PrayerClock.current(java.time.LocalTime.now()).id
+            intent.removeExtra(com.agpeya.app.widget.PrayerClockWidgetProvider.EXTRA_OPEN_CLOCK)
+        }
         intent.getStringExtra(ReminderScheduler.EXTRA_HOUR_ID)?.let {
             // Opening a ringing reminder is also an answer: end the alarm (and
             // let it ask "done?") before navigating to the requested hour.
@@ -234,6 +266,8 @@ private fun NavController.showTabs() {
 
 @Composable
 private fun AgpeyaNavHost(
+    tourRoute: String?,
+    onTourRouteHandled: () -> Unit,
     deepLinkHourId: String?,
     onDeepLinkHandled: () -> Unit,
     openJourney: Boolean,
@@ -300,6 +334,12 @@ private fun AgpeyaNavHost(
                 )
             }
             runCatching {
+                com.agpeya.app.reminders.ReadingReminderScheduler.sync(
+                    context,
+                    SettingsRepository.readingReminder(context).first(),
+                )
+            }
+            runCatching {
                 com.agpeya.app.reminders.BreathPrayerScheduler.sync(
                     context,
                     SettingsRepository.breathReminder(context).first(),
@@ -316,6 +356,13 @@ private fun AgpeyaNavHost(
     // Deep link from a fired alarm. Gated on `ready` so it never runs before the
     // NavHost graph below is composed (navigating earlier crashes the app).
     // Consume it once so it isn't re-navigated on the next recomposition.
+    LaunchedEffect(ready, tourRoute) {
+        if (ready && tourRoute != null) {
+            if (tourRoute == Tab.JOURNEY.route) goToTab(Tab.JOURNEY)
+            else navController.navigate(tourRoute) { launchSingleTop = true }
+            onTourRouteHandled()
+        }
+    }
     LaunchedEffect(ready, deepLinkHourId) {
         if (ready && deepLinkHourId != null) {
             navController.navigate("reading/$deepLinkHourId") { launchSingleTop = true }
@@ -435,6 +482,8 @@ private fun AgpeyaNavHost(
                     when (Tab.entries[index]) {
                         Tab.HOME ->
                             HomeScreen(
+                                onOpenReading = { navController.navigate("reading") { launchSingleTop = true } },
+                                onManageHours = { navController.navigate("customize") { launchSingleTop = true } },
                                 onOpenHour = { hourId -> navController.navigate("reading/$hourId") { launchSingleTop = true } },
                                 onOpenSearch = { navController.navigate("search") { launchSingleTop = true } },
                                 onOpenFasting = { navController.navigate("fasting") { launchSingleTop = true } },
@@ -451,6 +500,7 @@ private fun AgpeyaNavHost(
                             )
                         Tab.LIBRARY ->
                             com.agpeya.app.ui.library.LibraryScreen(
+                                onSearch = { navController.navigate("search") { launchSingleTop = true } },
                                 onOpenScriptures = { navController.navigate("scriptures") { launchSingleTop = true } },
                                 onOpenWudase = { navController.navigate("wudase") { launchSingleTop = true } },
                                 onOpenBahreHasab = { navController.navigate("bahreHasabReference") { launchSingleTop = true } },
@@ -556,7 +606,7 @@ private fun AgpeyaNavHost(
                 initialPsalmIndex = backStackEntry.arguments?.getInt("section") ?: -1,
                 initialStartVerse = backStackEntry.arguments?.getInt("start") ?: -1,
                 initialEndVerse = backStackEntry.arguments?.getInt("end") ?: -1,
-                initialGeez = backStackEntry.arguments?.getString("lang") == "gez",
+                initialGeez = backStackEntry.arguments?.getString("lang") in setOf("gez", "geez"),
                 onBack = { navController.popBackStack() },
                 onOpenRoute = { route -> navController.navigate(route) { launchSingleTop = true } },
                 // Without this the Psalter's "ስለዚህ ጻፍ" item showed and did nothing:
@@ -613,18 +663,25 @@ private fun AgpeyaNavHost(
             com.agpeya.app.ui.habits.ManageHabitsScreen(onBack = { navController.popBackStack() })
         }
         composable(
-            route = "wudase?sec={sec}",
-            arguments = listOf(navArgument("sec") { type = NavType.StringType; nullable = true; defaultValue = null }),
+            route = "wudase?sec={sec}&lang={lang}",
+            arguments = listOf(
+                navArgument("sec") { type = NavType.StringType; nullable = true; defaultValue = null },
+                navArgument("lang") { type = NavType.StringType; defaultValue = "am" },
+            ),
         ) { backStackEntry ->
             com.agpeya.app.ui.library.WudaseMaryamScreen(
                 onBack = { navController.popBackStack() },
                 initialSectionId = backStackEntry.arguments?.getString("sec"),
+                initialGeez = backStackEntry.arguments?.getString("lang") == "gez",
+                onWriteNote = { route, label -> navController.navigate(writeNoteRoute(route, label)) },
                 onOpenBook = { id -> navController.navigate("book/$id") { launchSingleTop = true } },
                 onOpenPrayerList = { navController.navigate("prayerlist") { launchSingleTop = true } },
             )
         }
         composable("scriptures") {
             com.agpeya.app.ui.library.ScriptureHubScreen(
+                onResume = { key -> navController.navigate("scripture/$key/0") { launchSingleTop = true } },
+                onSearch = { navController.navigate("search") { launchSingleTop = true } },
                 onBack = { navController.popBackStack() },
                 onOpenOldTestament = { navController.navigate("scripture/books/old") { launchSingleTop = true } },
                 onOpenNewTestament = { navController.navigate("scripture/books/new") { launchSingleTop = true } },
@@ -635,12 +692,14 @@ private fun AgpeyaNavHost(
             com.agpeya.app.ui.library.ScriptureListScreen(
                 testament = backStackEntry.arguments?.getString("testament") ?: "new",
                 onBack = { navController.popBackStack() },
-                onOpenBook = { key -> navController.navigate("scripture/$key/1") { launchSingleTop = true } },
+                onOpenBook = { key -> navController.navigate("scripture/$key/0") { launchSingleTop = true } },
             )
         }
         composable(
-            route = "scripture/{book}/{chapter}?start={start}&end={end}",
+            route = "scripture/{book}/{chapter}?start={start}&end={end}&plan={plan}&day={day}",
             arguments = listOf(
+                navArgument("plan") { type = NavType.StringType; defaultValue = "" },
+                navArgument("day") { type = NavType.IntType; defaultValue = 0 },
                 navArgument("book") { type = NavType.StringType },
                 navArgument("chapter") { type = NavType.IntType; defaultValue = 1 },
                 navArgument("start") { type = NavType.IntType; defaultValue = -1 },
@@ -649,6 +708,8 @@ private fun AgpeyaNavHost(
         ) { backStackEntry ->
             com.agpeya.app.ui.library.ScriptureReaderScreen(
                 bookKey = backStackEntry.arguments?.getString("book") ?: "matthew",
+                selectedPlanId = backStackEntry.arguments?.getString("plan").orEmpty(),
+                selectedPlanDay = backStackEntry.arguments?.getInt("day") ?: 0,
                 initialChapter = backStackEntry.arguments?.getInt("chapter") ?: 1,
                 onWriteNote = { route, label ->
                     navController.navigate(writeNoteRoute(route, label)) { launchSingleTop = true }
@@ -765,8 +826,9 @@ private fun AgpeyaNavHost(
             )
         }
         composable(
-            route = "synaxarium/{epochDay}?entry={entry}",
+            route = "synaxarium/{epochDay}?entry={entry}&section={section}",
             arguments = listOf(
+                navArgument("section") { type = NavType.StringType; nullable = true; defaultValue = null },
                 navArgument("epochDay") { type = NavType.LongType },
                 navArgument("entry") { type = NavType.IntType; defaultValue = -1 },
             ),
@@ -774,6 +836,8 @@ private fun AgpeyaNavHost(
             com.agpeya.app.ui.gitsawe.SynaxariumScreen(
                 epochDay = backStackEntry.arguments?.getLong("epochDay") ?: 0L,
                 initialEntry = backStackEntry.arguments?.getInt("entry") ?: -1,
+                initialSection = backStackEntry.arguments?.getString("section"),
+                onWriteNote = { route, label -> navController.navigate(writeNoteRoute(route, label)) },
                 onBack = { navController.popBackStack() },
             )
         }
@@ -840,6 +904,7 @@ private fun AgpeyaNavHost(
                 bookId = backStackEntry.arguments?.getString("bookId").orEmpty(),
                 openAtChapter = backStackEntry.arguments?.getInt("ch") ?: 0,
                 openAtBlock = backStackEntry.arguments?.getInt("blk") ?: -1,
+                onWriteNote = { route, label -> navController.navigate(writeNoteRoute(route, label)) { launchSingleTop = true } },
                 onBack = { navController.popBackStack() },
                 onOpenBook = { id -> navController.navigate("book/$id") { launchSingleTop = true } },
             )
@@ -863,6 +928,7 @@ private fun AgpeyaNavHost(
         ) { backStackEntry ->
             com.agpeya.app.ui.mahlet.MahletScreen(
                 orderId = backStackEntry.arguments?.getString("orderId").orEmpty(),
+                onWriteNote = { route, label -> navController.navigate(writeNoteRoute(route, label)) },
                 onBack = { navController.popBackStack() },
                 // Straight to the stanza being sung, not the head of a hymn
                 // forty stanzas long.
@@ -917,10 +983,6 @@ private fun AgpeyaNavHost(
         composable("confessionPrep") {
             com.agpeya.app.ui.nisiha.ConfessionPrepScreen(
                 onBack = { navController.popBackStack() },
-                onOpenEntry = { id ->
-                    navController.navigate("journal/entry?id=$id") { launchSingleTop = true }
-                },
-                onOpenPenance = { navController.navigate("penance") { launchSingleTop = true } },
             )
         }
         composable("reading") {
@@ -954,18 +1016,6 @@ private fun AgpeyaNavHost(
                 planId = backStackEntry.arguments?.getString("planId").orEmpty(),
                 onBack = { navController.popBackStack() },
                 onOpenRoute = { route -> navController.navigate(route) { launchSingleTop = true } },
-            )
-        }
-        // Unreachable on purpose: ቁርባን preparation is finished enough to open
-        // but not to ship, so ቤተ መጻሕፍት no longer offers it. The screen, its
-        // strings and KurbanRepository all stay — putting the card back in
-        // LibraryScreen is the whole of restoring it.
-        composable("communionPrep") {
-            com.agpeya.app.ui.nisiha.CommunionPrepScreen(
-                onBack = { navController.popBackStack() },
-                onOpenConfessionPrep = {
-                    navController.navigate("confessionPrep") { launchSingleTop = true }
-                },
             )
         }
         composable(
@@ -1033,12 +1083,20 @@ private fun AgpeyaNavHost(
                 newest == null -> LaunchedEffect(Unit) { navController.popBackStack() }
                 else -> com.agpeya.app.ui.intro.WhatsNewTour(
                     tour = newest,
+                    onOpenRoute = { route ->
+                        navController.popBackStack()
+                        navController.navigate(route) { launchSingleTop = true }
+                    },
                     onDone = { navController.popBackStack() },
                 )
             }
         }
         composable("tutorial") {
-            com.agpeya.app.ui.intro.TutorialScreen(onDone = { navController.popBackStack() })
+            com.agpeya.app.ui.intro.TutorialScreen(onDone = { navController.popBackStack() }, onOpenRoute = { route ->
+                navController.popBackStack()
+                if (route == Tab.JOURNEY.route) goToTab(Tab.JOURNEY)
+                else navController.navigate(route) { launchSingleTop = true }
+            })
         }
         composable("changelog") {
             ChangelogScreen(

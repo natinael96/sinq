@@ -1,5 +1,6 @@
 package com.agpeya.app.ui.common
 
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -56,7 +57,7 @@ fun UpdateLine(
         modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.background)
-            .height(28.dp)
+            .heightIn(min = 48.dp)
             .clickable(onClick = onOpen)
             .padding(start = Spacing.screen),
         verticalAlignment = Alignment.CenterVertically,
@@ -89,7 +90,7 @@ fun UpdateLine(
         Box(
             modifier = Modifier
                 .width(48.dp)
-                .fillMaxHeight()
+                .height(48.dp)
                 .clip(MaterialTheme.shapes.small)
                 .clickable(onClick = onDismiss)
                 .semantics { role = Role.Button },

@@ -113,13 +113,14 @@ fun PsalterScreen(
     /** Follows a route out of the selection bar — the Catena page. */
     onOpenRoute: (route: String) -> Unit = {},
 ) {
+    com.agpeya.app.ui.common.ReaderAwake()
     val context = LocalContext.current
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
     var geez by rememberSaveable { mutableStateOf(initialGeez) }
-    val psalms by produceState(emptyList<Section>(), geez) {
-        value = ScriptureRepository.psalms(context, geez)
-    }
+    val psalmsLoad = com.agpeya.app.ui.common.rememberContentLoad(geez) { ScriptureRepository.psalms(context, geez) }
+    val psalms = psalmsLoad.value.orEmpty()
+    if (com.agpeya.app.ui.common.contentLoadScreen(psalmsLoad, s.psalterTitle, onBack, psalms.isEmpty())) return
     val fontStep by SettingsRepository.fontStep(context)
         .collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
     val readingMode by SettingsRepository.readingMode(context)
@@ -139,7 +140,7 @@ fun PsalterScreen(
     else IntRange.EMPTY
 
     // Opened from a bookmark: show the whole psalter so the target psalm exists.
-    var daily by remember { mutableStateOf(initialPsalmIndex < 0) }
+    var daily by rememberSaveable { mutableStateOf(initialPsalmIndex < 0) }
     val today by rememberCurrentDate()
     val range = remember(today) { dailyRange(today.dayOfWeek) }
     // derivedStateOf (not a plain remember) so the pager/list lambdas below read
@@ -222,8 +223,8 @@ fun PsalterScreen(
                                 pagerState.currentPage
                             }
                             onWriteNote(
-                                "psalter?section=$index",
-                                psalms.getOrNull(index)?.title ?: s.psalterTitle,
+                                "psalter?section=${((shown.getOrNull(index)?.number ?: 1) - 1)}&lang=${if (geez) "gez" else "am"}",
+                                shown.getOrNull(index)?.title ?: s.psalterTitle,
                             )
                         },
                         secondaryActionLabel = if (daily) s.wholePsalter else s.dailyPsalms,
@@ -310,7 +311,7 @@ fun PsalterScreen(
                 onWriteNote = selectedPsalm?.let { section ->
                     {
                         onWriteNote(
-                            "psalter?section=${(section.number ?: 1) - 1}",
+                            "psalter?section=${(section.number ?: 1) - 1}&lang=${if (geez) "gez" else "am"}",
                             section.title,
                         )
                     }

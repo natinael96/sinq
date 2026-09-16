@@ -38,6 +38,7 @@ import androidx.compose.material.icons.outlined.AutoStories
 /** ቤተ መጻሕፍት — Scripture is one entry; its categories live in its hub. */
 @Composable
 fun LibraryScreen(
+    onSearch: () -> Unit,
     onOpenScriptures: () -> Unit,
     onOpenWudase: () -> Unit,
     onOpenBahreHasab: () -> Unit,
@@ -73,6 +74,9 @@ fun LibraryScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.height(Spacing.sm))
+            }
+            item {
+                com.agpeya.app.ui.common.ListRow(title = s.tabSearch, onClick = onSearch)
             }
             item {
                 LibraryCard(

@@ -38,6 +38,9 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -84,22 +87,32 @@ fun SpecialHabitScreen(
     onOpenPenance: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
+    val action = com.agpeya.app.ui.common.rememberUserAction()
+    var draftJson by rememberSaveable { mutableStateOf<String?>(null) }
+    val draft = remember(draftJson) { draftJson?.let { kotlinx.serialization.json.Json.decodeFromString(SpecialReminder.serializer(), it) } }
+    fun setDraft(value: SpecialReminder?) {
+        draftJson = value?.let { kotlinx.serialization.json.Json.encodeToString(SpecialReminder.serializer(), it) }
+    }
+    var deleting by remember { mutableStateOf<SpecialReminder?>(null) }
     val s = LocalStrings.current
 
-    val reminders by when (habit) {
+    val remindersLoad = com.agpeya.app.ui.common.rememberFlowLoad(habit) { when (habit) {
         SpecialHabit.ALMS -> SettingsRepository.almsReminders(context)
         SpecialHabit.REPENTANCE -> SettingsRepository.repentanceReminders(context)
         // ስዕለት and ቀኖና never route here — each carries a record of its own, so
         // each has its own page — but the branch keeps the `when` exhaustive.
         SpecialHabit.TITHE, SpecialHabit.VOW, SpecialHabit.PENANCE ->
             SettingsRepository.titheReminders(context)
-    }.collectAsState(initial = emptyList())
+    } }
+    if (com.agpeya.app.ui.common.contentLoadScreen(remindersLoad, s.remindersSettingsTitle, onBack)) return
+    val reminders = remindersLoad.value ?: return
 
+    val today by com.agpeya.app.ui.common.rememberCurrentDate()
+    var permissionDenied by rememberSaveable { mutableStateOf(false) }
     // Notification-only nudges, so switching one on asks for POST_NOTIFICATIONS.
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
-    ) { /* denial is reported by the Settings banner, not a second dialog */ }
+    ) { granted -> permissionDenied = !granted }
     fun ensureNotificationPermission() {
         if (Build.VERSION.SDK_INT >= 33 &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
@@ -109,26 +122,25 @@ fun SpecialHabitScreen(
         }
     }
 
-    // Label edits don't change timing, so they save without re-arming alarms;
-    // cadence/time/enabled edits do. Skipping the reschedule on every keystroke
-    // also keeps the name field from thrashing the AlarmManager.
-    fun persist(newList: List<SpecialReminder>, reschedule: Boolean = true) {
-        scope.launch {
+    // Draft edits stay local until Save; one write then rebuilds the schedule.
+    fun persist(newList: List<SpecialReminder>, onSaved: () -> Unit = {}) {
+        action.run {
             when (habit) {
                 SpecialHabit.ALMS -> SettingsRepository.setAlmsReminders(context, newList)
                 SpecialHabit.REPENTANCE -> SettingsRepository.setRepentanceReminders(context, newList)
                 SpecialHabit.TITHE, SpecialHabit.VOW, SpecialHabit.PENANCE ->
                     SettingsRepository.setTitheReminders(context, newList)
             }
-            if (reschedule) SpecialHabitReminderScheduler.sync(context, habit)
+            SpecialHabitReminderScheduler.sync(context, habit)
+            onSaved()
         }
     }
 
-    fun update(entry: SpecialReminder, reschedule: Boolean = true) =
-        persist(reminders.map { if (it.id == entry.id) entry else it }, reschedule)
-    fun delete(id: String) = persist(reminders.filterNot { it.id == id })
+    fun update(entry: SpecialReminder, onSaved: () -> Unit = {}) =
+        persist(if (reminders.any { it.id == entry.id }) reminders.map { if (it.id == entry.id) entry else it }
+            else reminders + entry, onSaved)
     fun add() {
-        ensureNotificationPermission()
+
         val defaults = when (habit) {
             SpecialHabit.ALMS ->
                 HabitSchedule.DEFAULT_ALMS to SettingsRepository.DEFAULT_ALMS_REMINDER_MIN
@@ -140,12 +152,12 @@ fun SpecialHabitScreen(
                 HabitSchedule(kind = HabitSchedule.Kind.MONTHLY, monthDay = 1) to
                     SettingsRepository.DEFAULT_TITHE_REMINDER_MIN
         }
-        persist(
-            reminders + SpecialReminder(
+        setDraft(
+            SpecialReminder(
                 id = UUID.randomUUID().toString(),
                 schedule = defaults.first,
                 minute = defaults.second,
-                enabled = true,
+                enabled = false,
             ),
         )
     }
@@ -183,6 +195,10 @@ fun SpecialHabitScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(Spacing.lg))
+            if (permissionDenied) {
+                Text(s.notifDisabledBody, color = MaterialTheme.colorScheme.error)
+                TextButton(onClick = { com.agpeya.app.ui.common.openNotificationSettings(context) }) { Text(s.openSettings) }
+            }
 
             if (reminders.isEmpty()) {
                 Text(
@@ -194,23 +210,35 @@ fun SpecialHabitScreen(
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
                     reminders.forEach { entry ->
-                        ReminderCard(
-                            entry = entry,
-                            s = s,
-                            nameHint = nameHint,
-                            onChange = { updated ->
-                                if (updated.enabled) ensureNotificationPermission()
-                                update(updated)
-                            },
-                            onLabelChange = { updated -> update(updated, reschedule = false) },
-                            onDelete = { delete(entry.id) },
-                        )
+                        Card {
+                            Column(Modifier.padding(Spacing.md)) {
+                                com.agpeya.app.ui.common.ToggleRow(
+                                    title = entry.label.ifBlank { title },
+                                    checked = entry.enabled,
+                                    onCheckedChange = { enabled ->
+                                        if (!action.busy) {
+                                            if (enabled) ensureNotificationPermission()
+                                            update(entry.copy(enabled = enabled))
+                                        }
+                                    },
+                                    subtitle = scheduleSummary(entry.schedule, s, context),
+                                )
+                                Text("%02d:%02d".format(entry.minute / 60, entry.minute % 60), style = MaterialTheme.typography.bodyMedium)
+                                if (entry.enabled) entry.schedule.nextDueOnOrAfter(today)?.let { due ->
+                                    Text(s.nextDue(formatEthiopian(due, s)), style = MaterialTheme.typography.labelMedium)
+                                }
+                                FlowRow {
+                                    TextButton(enabled = !action.busy, onClick = { setDraft(entry) }) { Text(s.editPerson) }
+                                    TextButton(enabled = !action.busy, onClick = { deleting = entry }) { Text(s.delete) }
+                                }
+                            }
+                        }
                     }
                 }
                 Spacer(Modifier.height(Spacing.md))
             }
 
-            OutlinedButton(onClick = { add() }) {
+            OutlinedButton(enabled = !action.busy, onClick = { add() }) {
                 Icon(Icons.Outlined.Add, contentDescription = null)
                 Spacer(Modifier.width(Spacing.sm))
                 Text(s.addSpecialReminder)
@@ -224,7 +252,7 @@ fun SpecialHabitScreen(
                     com.agpeya.app.ui.common.NavRow(
                         title = s.confessionPrepTitle,
                         onClick = it,
-                        subtitle = "${s.confessionPrepDesc} · ${s.comingSoon}",
+                        subtitle = s.confessionPrepDesc,
                     )
                 }
                 onOpenPenance?.let {
@@ -238,70 +266,45 @@ fun SpecialHabitScreen(
             Spacer(Modifier.height(Spacing.huge))
         }
     }
-}
-
-@Composable
-private fun ReminderCard(
-    entry: SpecialReminder,
-    s: Strings,
-    nameHint: String,
-    onChange: (SpecialReminder) -> Unit,
-    onLabelChange: (SpecialReminder) -> Unit,
-    onDelete: () -> Unit,
-) {
-    // The card owns a working copy keyed to the entry id, so the name field,
-    // switch, cadence and time stay mutually consistent no matter how the
-    // persistence round-trip is timed — an edit is always based on the card's
-    // own latest state, never a stale value from the async flow.
-    var draft by remember(entry.id) { mutableStateOf(entry) }
-
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        ),
-    ) {
-        Column(Modifier.padding(Spacing.md)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                OutlinedTextField(
-                    value = draft.label,
-                    onValueChange = { draft = draft.copy(label = it); onLabelChange(draft) },
-                    singleLine = true,
-                    label = { Text(s.reminderNameLabel) },
-                    placeholder = { Text(nameHint) },
-                    modifier = Modifier.weight(1f),
-                )
-                Switch(
-                    checked = draft.enabled,
-                    onCheckedChange = { draft = draft.copy(enabled = it); onChange(draft) },
-                    modifier = Modifier.padding(start = Spacing.sm),
-                )
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        Icons.Outlined.Delete,
-                        contentDescription = s.delete,
-                        tint = MaterialTheme.colorScheme.error,
+    draft?.let { value ->
+        AlertDialog(
+            onDismissRequest = { if (!action.busy) setDraft(null) },
+            title = { Text(if (reminders.any { it.id == value.id }) s.editPerson else s.addSpecialReminder) },
+            text = {
+                Column(Modifier.verticalScroll(rememberScrollState()).imePadding()) {
+                    OutlinedTextField(
+                        value = value.label,
+                        onValueChange = { setDraft(value.copy(label = it)) },
+                        label = { Text(s.reminderNameLabel) },
+                        placeholder = { Text(nameHint) },
+                        singleLine = true,
+                        enabled = !action.busy,
                     )
+                    ScheduleRow(value.schedule, s, { setDraft(value.copy(schedule = it)) })
+                    TimeRow(value.minute, s, { setDraft(value.copy(minute = it)) })
                 }
-            }
-
-            ScheduleRow(
-                schedule = draft.schedule,
-                s = s,
-                onChange = { draft = draft.copy(schedule = it); onChange(draft) },
-            )
-            TimeRow(
-                minute = draft.minute,
-                s = s,
-                onChange = { draft = draft.copy(minute = it); onChange(draft) },
-            )
-            draft.schedule.nextDueOnOrAfter(LocalDate.now())?.let { due ->
-                Spacer(Modifier.height(Spacing.sm))
-                Text(
-                    s.nextDue(formatEthiopian(due, s)),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                )
-            }
-        }
+            },
+            confirmButton = {
+                TextButton(enabled = !action.busy, onClick = {
+                    update(value) { setDraft(null) }
+                }) { Text(s.save) }
+            },
+            dismissButton = {
+                TextButton(enabled = !action.busy, onClick = { setDraft(null) }) { Text(s.cancel) }
+            },
+        )
+    }
+    deleting?.let { entry ->
+        AlertDialog(
+            onDismissRequest = { if (!action.busy) deleting = null },
+            title = { Text(s.delete) },
+            text = { Text(entry.label.ifBlank { title }) },
+            confirmButton = {
+                TextButton(enabled = !action.busy, onClick = {
+                    persist(reminders.filterNot { it.id == entry.id }) { deleting = null }
+                }) { Text(s.delete) }
+            },
+            dismissButton = { TextButton(enabled = !action.busy, onClick = { deleting = null }) { Text(s.cancel) } },
+        )
     }
 }

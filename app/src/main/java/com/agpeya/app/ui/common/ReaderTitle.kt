@@ -1,5 +1,6 @@
 package com.agpeya.app.ui.common
 
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -134,7 +135,7 @@ fun ChapterSheet(
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .clickable { onPick(i) }
+                        .selectable(selected = selected, onClick = { onPick(i) })
                         .background(
                             if (selected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.14f)
                             else Color.Transparent,

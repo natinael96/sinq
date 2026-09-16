@@ -64,7 +64,8 @@ data class HabitSchedule(
      */
     fun nextDueOnOrAfter(from: LocalDate): LocalDate? {
         val bound = when (kind) {
-            Kind.YEARLY, Kind.FEAST -> ANNUAL_SCAN_DAYS
+            Kind.YEARLY -> if (monthNum == 13 && monthDay == 6) 1462 else ANNUAL_SCAN_DAYS
+            Kind.FEAST -> ANNUAL_SCAN_DAYS
             else -> SCAN_DAYS
         }
         for (i in 0..bound) {

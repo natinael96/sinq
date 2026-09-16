@@ -1,5 +1,8 @@
 package com.agpeya.app.ui.prayerlist
 
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -115,6 +118,13 @@ fun PrayerListScreen(onBack: () -> Unit) {
     // leave a stale copy on screen, and so rotation keeps the dialog open.
     var editingId by rememberSaveable { mutableStateOf<String?>(null) }
     var adding by rememberSaveable { mutableStateOf(false) }
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+    androidx.compose.runtime.LaunchedEffect(adding) {
+        if (adding) {
+            androidx.compose.runtime.snapshotFlow { listState.layoutInfo.totalItemsCount }
+                .collect { count -> if (count > 0) listState.scrollToItem((count - 3).coerceAtLeast(0)) }
+        }
+    }
     val editing = people.firstOrNull { it.id == editingId }
 
     /** Remove, then offer the way back for as long as the snackbar stands. */
@@ -176,6 +186,7 @@ fun PrayerListScreen(onBack: () -> Unit) {
         }
 
         LazyColumn(
+            state = listState,
             modifier = Modifier.fillMaxSize().padding(innerPadding),
             contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.sm),
         ) {
@@ -190,7 +201,7 @@ fun PrayerListScreen(onBack: () -> Unit) {
                     open = adding,
                     onOpen = { adding = true },
                     onClose = { adding = false },
-                    onAdd = { name -> scope.launch { PrayerListRepository.add(context, name, "") } },
+                    onAdd = { name -> PrayerListRepository.add(context, name, "") },
                 )
             }
 
@@ -337,8 +348,11 @@ private fun AddNameRow(
     open: Boolean,
     onOpen: () -> Unit,
     onClose: () -> Unit,
-    onAdd: (String) -> Unit,
+    onAdd: suspend (String) -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
+    var saving by remember { mutableStateOf(false) }
+    var saveFailed by remember { mutableStateOf(false) }
     val s = LocalStrings.current
     var draft by rememberSaveable { mutableStateOf("") }
     val focus = remember { FocusRequester() }
@@ -371,12 +385,20 @@ private fun AddNameRow(
             keyboard?.hide()
             return
         }
-        onAdd(name)
-        // A list of names is written in a burst, so the field stays open and
-        // the keyboard stays up for the next one.
-        draft = ""
+        if (saving) return
+        saving = true
+        scope.launch {
+            try {
+                onAdd(name)
+                if (draft.trim() == name) draft = ""
+                saveFailed = false
+            } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+            catch (_: Exception) { saveFailed = true }
+            finally { saving = false }
+        }
     }
 
+    if (saveFailed) Text(s.entrySaveFailed, color = MaterialTheme.colorScheme.error)
     Row(
         modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(vertical = Spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
@@ -529,7 +551,7 @@ private fun PersonDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {
-            Column {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },

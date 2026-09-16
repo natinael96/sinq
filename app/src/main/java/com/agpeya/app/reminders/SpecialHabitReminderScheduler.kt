@@ -1,5 +1,6 @@
 package com.agpeya.app.reminders
 
+import androidx.core.net.toUri
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
@@ -145,7 +146,7 @@ object SpecialHabitReminderScheduler {
     private fun pendingIntent(context: Context, habit: SpecialHabit, entryId: String): PendingIntent {
         val intent = Intent(context, SpecialHabitReminderReceiver::class.java)
             .setAction(habit.action)
-            .setData(android.net.Uri.parse("agpeya://special/${habit.name}/$entryId"))
+            .setData("agpeya://special/${habit.name}/$entryId".toUri())
             .putExtra(EXTRA_ENTRY_ID, entryId)
         return PendingIntent.getBroadcast(
             context,

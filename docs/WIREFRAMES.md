@@ -1,6 +1,6 @@
 # Sinq screen structure and flows
 
-Reviewed **2026-09-16** for **2.3.2 / 72** from `MainActivity.kt` and the Compose screens. These are structural wireframes, not pixel-accurate screenshots or a device visual-QA report. The original V1 Home/Search/Bookmarks/Streak/Settings tab layout is superseded.
+Reviewed **2026-09-17** for **2.4.0 / 74** from `MainActivity.kt` and the Compose screens. These are structural wireframes, not pixel-accurate screenshots or a device visual-QA report. The original V1 Home/Search/Bookmarks/Streak/Settings tab layout is superseded.
 
 ## Application shell
 
@@ -20,7 +20,7 @@ Search and marks are pushed destinations. `bookmarks` remains the route for the 
 
 ## Home and Journey
 
-Home presents today's context and prayer entry points, with access to the current hour and daily readings. Journey presents prayer/habit history, progress and management entry points. Supporting flows include reading plans, the prayer list, journal and preparation/record screens.
+Home presents today's context and prayer entry points, with access to the current hour, daily readings and active Bible plans. Journey presents prayer/habit history, progress and management entry points. Supporting flows include reading plans, the prayer list, journal and preparation/record screens.
 
 ```text
 Home → hour reader → contents / verse actions / reading preferences
@@ -69,7 +69,7 @@ Not every action applies to every corpus. Reader settings share six size steps, 
 
 ## Marks, journal and records
 
-The marks surface combines bookmarks, highlights and passage-linked journal reflections. The journal can be browsed by day/month and optionally gated by a passphrase. Confession drafts have their own preparation flow and are excluded from backup.
+The marks surface combines searchable bookmarks, filterable highlights and passage-linked journal reflections. Notes sit inside the same access gate as the journal. The journal can be browsed by day/month and optionally gated by a passphrase. Confession drafts have their own preparation flow and are excluded from backup.
 
 Backup uses a selection dialog, optional journal passphrase check, system document picker and restore preview. The exported JSON is plaintext; the gate protects access to the action, not the resulting file.
 

@@ -21,6 +21,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.platform.LocalContext
 import com.agpeya.app.data.ReadingPlanRepository
 import com.agpeya.app.model.ReadingPlanContent
@@ -43,13 +45,18 @@ import java.time.LocalDate
 fun ReadingPlanDaysScreen(planId: String, onBack: () -> Unit, onOpenRoute: (String) -> Unit) {
     val context = LocalContext.current
     val s = LocalStrings.current
-    val today = remember { LocalDate.now() }
+    val action = com.agpeya.app.ui.common.rememberUserAction()
+    val today by com.agpeya.app.ui.common.rememberCurrentDate()
 
-    val content by produceState(ReadingPlanContent()) { value = ReadingPlanRepository.content(context) }
+    val contentLoad = com.agpeya.app.ui.common.rememberContentLoad { ReadingPlanRepository.content(context) }
+    val content = contentLoad.value ?: ReadingPlanContent()
+    if (com.agpeya.app.ui.common.contentLoadScreen(contentLoad, s.readingTitle, onBack, content.plans.isEmpty())) return
     val bookNames by produceState(emptyMap<String, String>()) {
         value = runCatching { com.agpeya.app.data.ScriptureRepository.bookNames(context) }.getOrDefault(emptyMap())
     }
-    val state by ReadingPlanRepository.state(context).collectAsState(initial = ReadingPlanState())
+    val stateLoad = com.agpeya.app.ui.common.rememberFlowLoad { ReadingPlanRepository.state(context) }
+    if (com.agpeya.app.ui.common.contentLoadScreen(stateLoad, s.readingTitle, onBack)) return
+    val state = stateLoad.value ?: return
     val kept = state.kept(planId)
     val plan = content.plans.firstOrNull { it.id == planId }
     val listState = rememberLazyListState()
@@ -100,7 +107,7 @@ fun ReadingPlanDaysScreen(planId: String, onBack: () -> Unit, onOpenRoute: (Stri
                     // "ኢሳይያስ ፩–፫" was two numbering systems in one row.
                     title = s.readingDayLabel(geezNumeral(day.d)),
                     subtitle = passages,
-                    onClick = { day.r.firstOrNull()?.let { onOpenRoute(planReadingRoute(it.b, it.c)) } },
+                    onClick = null,
                     trailing = {
                         if (day.d in read) {
                             Icon(
@@ -111,6 +118,28 @@ fun ReadingPlanDaysScreen(planId: String, onBack: () -> Unit, onOpenRoute: (Stri
                         }
                     },
                 )
+                day.r.forEach { reading ->
+                    reading.chapters.forEach { chapter ->
+                        val chapterKey = ReadingPlanRepository.chapterKey(reading.b, chapter)
+                        val chapterRead = chapterKey in state.readFor(plan.id)
+                        ListRow(
+                            title = "${bookName(reading.b, bookNames)} ${geezNumeral(chapter)}",
+                            trailing = {
+                                if (kept != null) androidx.compose.material3.Checkbox(
+                                    checked = chapterRead,
+                                    enabled = !action.busy,
+                                    onCheckedChange = {
+                                        action.run { ReadingPlanRepository.toggleReading(context, plan.id, listOf(chapterKey), today) }
+                                    },
+                                    modifier = Modifier.semantics {
+                                        contentDescription = "${bookName(reading.b, bookNames)} ${geezNumeral(chapter)} · ${s.readingMarkChapterDone}"
+                                    },
+                                )
+                            },
+                            onClick = { onOpenRoute(planReadingRoute(reading.b, chapter, plan.id, day.d)) },
+                        )
+                    }
+                }
             }
             item { Spacer(Modifier.height(Spacing.huge)) }
         }

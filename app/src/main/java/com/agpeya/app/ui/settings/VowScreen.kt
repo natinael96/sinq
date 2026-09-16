@@ -113,7 +113,7 @@ fun VowScreen(onBack: () -> Unit) {
         persist(vows.map { if (it.id == vow.id) vow else it }, reschedule)
 
     fun add() {
-        ensureNotificationPermission()
+
         persist(
             vows + Vow(
                 id = UUID.randomUUID().toString(),
@@ -124,7 +124,7 @@ fun VowScreen(onBack: () -> Unit) {
                     monthDay = com.agpeya.app.ui.common.EthiopianDate.from(LocalDate.now()).day
                         .coerceIn(1, 30),
                 ),
-                enabled = true,
+                enabled = false,
             ),
         )
     }
@@ -244,6 +244,21 @@ private fun VowCard(
 
     var pledgeEditing by remember { mutableStateOf(false) }
     var showRecord by remember { mutableStateOf(false) }
+    var removeRecord by remember { mutableStateOf<String?>(null) }
+
+    removeRecord?.let { id ->
+        AlertDialog(
+            onDismissRequest = { removeRecord = null },
+            title = { Text(s.delete) },
+            text = { Text(s.deleteEntryConfirm) },
+            confirmButton = { TextButton(onClick = {
+                draft = draft.copy(fulfilments = draft.fulfilments.filterNot { it.id == id })
+                onChange(draft)
+                removeRecord = null
+            }) { Text(s.delete) } },
+            dismissButton = { TextButton(onClick = { removeRecord = null }) { Text(s.cancel) } },
+        )
+    }
 
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
@@ -369,6 +384,7 @@ private fun VowCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(vertical = 2.dp),
                     )
+                    TextButton(onClick = { removeRecord = paid.id }) { Text(s.delete) }
                 }
             }
         }

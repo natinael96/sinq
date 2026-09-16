@@ -1,5 +1,8 @@
 package com.agpeya.app.ui.modes
 
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -66,9 +69,16 @@ fun ModeEditorScreen(modeId: String, onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val s = com.agpeya.app.ui.strings.LocalStrings.current
-    val state by ModesRepository.state(context)
-        .collectAsState(initial = ModesState(ModesRepository.BUILT_IN_ID, emptyList()))
+    val loadedState by ModesRepository.state(context).collectAsState(initial = null)
+    val state = loadedState ?: ModesState(ModesRepository.BUILT_IN_ID, emptyList())
     val mode = state.modes.find { it.id == modeId }
+    if (mode == null) {
+        Scaffold(topBar = { com.agpeya.app.ui.common.SinqTopBar(s.modesTitle, onBack) }) { padding ->
+            if (loadedState == null) com.agpeya.app.ui.common.LoadingPanel(Modifier.padding(padding))
+            else com.agpeya.app.ui.common.StatePanel(title = s.contentUnavailable, modifier = Modifier.padding(padding))
+        }
+        return
+    }
     val hours by produceState<List<Hour>>(initialValue = emptyList()) {
         value = com.agpeya.app.data.HoursRepository.visibleHours(context)
     }
@@ -117,7 +127,6 @@ fun ModeEditorScreen(modeId: String, onBack: () -> Unit) {
         },
         containerColor = MaterialTheme.colorScheme.background,
     ) { innerPadding ->
-        if (mode == null) return@Scaffold
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -286,6 +295,7 @@ internal fun EntryEditor(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp),
     ) {
         if (canPickHour) {
@@ -328,7 +338,7 @@ internal fun EntryEditor(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(Spacing.sm))
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             s.dayLabels.forEachIndexed { index, label ->
                 val day = index + 1
                 FilterChip(

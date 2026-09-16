@@ -1,5 +1,6 @@
 package com.agpeya.app.ui.common
 
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -81,7 +82,7 @@ fun EthiopianDatePickerDialog(
                 IconButton(onClick = { year -= 1 }) {
                     Icon(
                         Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                        contentDescription = s.previousDay,
+                        contentDescription = s.previousYear,
                     )
                 }
                 Text(
@@ -93,7 +94,7 @@ fun EthiopianDatePickerDialog(
                 IconButton(onClick = { year += 1 }) {
                     Icon(
                         Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = s.nextDay,
+                        contentDescription = s.nextYear,
                     )
                 }
             }
@@ -115,7 +116,7 @@ fun EthiopianDatePickerDialog(
                 }
                 Spacer(Modifier.height(Spacing.md))
                 LazyVerticalGrid(
-                    columns = GridCells.Fixed(6),
+                    columns = GridCells.Adaptive(52.dp),
                     modifier = Modifier.fillMaxWidth().heightIn(max = 240.dp),
                     contentPadding = PaddingValues(vertical = Spacing.xxs),
                 ) {
@@ -130,7 +131,7 @@ fun EthiopianDatePickerDialog(
                                     if (selected) MaterialTheme.colorScheme.secondary
                                     else androidx.compose.ui.graphics.Color.Transparent,
                                 )
-                                .clickable { day = n },
+                                .selectable(selected = selected, role = androidx.compose.ui.semantics.Role.RadioButton, onClick = { day = n }),
                             contentAlignment = Alignment.Center,
                         ) {
                             Text(

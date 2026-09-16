@@ -88,6 +88,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.inReadingFont
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.snapshotFlow
 import com.agpeya.app.data.HabitsRepository
@@ -119,9 +120,11 @@ fun ReadingScreen(
     onWriteNote: (route: String, label: String) -> Unit,
 ) {
     val context = LocalContext.current
-    val hour by produceState<Hour?>(initialValue = null, hourId) {
-        value = com.agpeya.app.data.HoursRepository.hourById(context, hourId)
+    val hourLoad = com.agpeya.app.ui.common.rememberContentLoad(hourId) {
+        com.agpeya.app.data.HoursRepository.hourById(context, hourId)
     }
+    val hour = hourLoad.value
+    if (com.agpeya.app.ui.common.contentLoadScreen(hourLoad, com.agpeya.app.ui.strings.LocalStrings.current.hoursHeader, onBack, hour == null)) return
     // All hours for the title dropdown (switch prayer without going back).
     val allHours by produceState<List<Hour>>(initialValue = emptyList()) {
         value = com.agpeya.app.data.HoursRepository.visibleHours(context)
@@ -151,9 +154,9 @@ fun ReadingScreen(
     var selStart by remember(hourId) { mutableStateOf<String?>(null) }
     var selEnd by remember(hourId) { mutableStateOf<String?>(null) }
     // Apply the user's per-hour customization (show/hide, reorder, added psalms).
-    val sections by produceState(emptyList<Section>(), hour, layout, effectivePrayerLevel) {
+    val sectionLoad = com.agpeya.app.ui.common.rememberContentLoad(hour, layout, effectivePrayerLevel) {
         val h = hour
-        value = if (h == null) emptyList()
+        if (h == null) emptyList()
         else {
             val extras = layout.added.mapNotNull { ContentRepository.psalm(context, it) }
             PrayerLevelRepository.apply(
@@ -165,6 +168,8 @@ fun ReadingScreen(
             )
         }
     }
+    val sections = sectionLoad.value.orEmpty()
+    if (com.agpeya.app.ui.common.contentLoadScreen(sectionLoad, hour?.name.orEmpty(), onBack)) return
     val listState = rememberLazyListState()
     val pagerState = rememberPagerState(pageCount = { sections.size })
     val contentsIndex by remember(readingMode, listState, pagerState) {
@@ -186,12 +191,13 @@ fun ReadingScreen(
     // The section we want kept in view; shared across both readers so the
     // position survives a mode switch.
     var anchor by remember(hourId) { mutableIntStateOf(-1) }
+    var anchorOffset by remember(hourId) { mutableIntStateOf(0) }
     // Neighbours in the user's own order, so hiding an hour doesn't leave a gap.
     val prevHour = remember(allHours, hourId) { com.agpeya.app.data.PrayerSchedule.previous(allHours, hourId) }
     val nextHour = remember(allHours, hourId) { com.agpeya.app.data.PrayerSchedule.next(allHours, hourId) }
 
     // Record recent + decide the initial anchor once content is ready.
-    LaunchedEffect(hour, sections.size) {
+    LaunchedEffect(hour, sections.map { it.id }) {
         val h = hour ?: return@LaunchedEffect
         if (sections.isEmpty()) return@LaunchedEffect
         UserDataRepository.recordRecent(context, h.id)
@@ -205,60 +211,38 @@ fun ReadingScreen(
                 val targetId = h.sections.getOrNull(initialSectionIndex)?.id
                 sections.indexOfFirst { it.id == targetId }.takeIf { it >= 0 } ?: 0
             }
-            else -> UserDataRepository.savedPosition(context, h.id).coerceIn(0, sections.size - 1)
-        }
-    }
-
-    // Scroll whichever reader is currently active to the anchor. Keyed on
-    // readingMode so a mode switch re-runs this against the now-composed reader
-    // (calling scrollToPage on an un-composed pager would suspend forever).
-    LaunchedEffect(readingMode, anchor, sections.size) {
-        if (anchor < 0 || sections.isEmpty()) return@LaunchedEffect
-        val target = anchor.coerceIn(0, sections.size - 1)
-        if (readingMode == ReadingMode.VERTICAL) listState.scrollToItem(target)
-        else pagerState.scrollToPage(target)
-    }
-
-    // Keep-screen-on while this screen is visible.
-    val view = LocalView.current
-    DisposableEffect(keepScreenOn) {
-        val window = context.findActivity()?.window
-        if (keepScreenOn) window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        else window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        onDispose { window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
-    }
-
-    // Reaching the foot of the hour is the app seeing the prayer prayed. ጉዞ
-    // used to know only what the reader typed into it, so a morning spent in
-    // ጸሎተ ነግህ left the day blank unless it was also ticked afterwards. The
-    // flow completes on the first arrival, so this writes once per visit.
-    LaunchedEffect(hourId, readingMode, sections.size) {
-        if (sections.isEmpty()) return@LaunchedEffect
-        // The vertical reader carries one trailing item after the sections —
-        // the stepper — so its end is one past the last section.
-        val foot = if (readingMode == ReadingMode.VERTICAL) sections.size else sections.size - 1
-        snapshotFlow {
-            if (readingMode == ReadingMode.VERTICAL) {
-                listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
-            } else {
-                pagerState.currentPage
+            else -> {
+                val saved = UserDataRepository.readerPosition(context, h.id)
+                val target = UserDataRepository.resolvePosition(saved, sections.map { it.id }, UserDataRepository.savedPosition(context, h.id))
+                anchorOffset = if (saved?.sectionId == sections.getOrNull(target)?.id) saved?.offset ?: 0 else 0
+                target
             }
-        }.first { it >= foot }
-        HabitsRepository.markDone(
-            context,
-            LocalDate.now().toString(),
-            HabitsRepository.hourHabitId(hourId),
-        )
-    }
-
-    // Persist scroll position on leave.
-    DisposableEffect(hourId, readingMode) {
-        onDispose {
-            val index = if (readingMode == ReadingMode.VERTICAL) listState.firstVisibleItemIndex
-            else pagerState.currentPage
-            scope.launch { UserDataRepository.savePosition(context, hourId, index) }
         }
     }
+
+    // Restore before subscribing, otherwise the initial zero overwrites the saved place.
+    // A mode change captures the current section before moving the other reader.
+    var previousMode by remember(hourId) { mutableStateOf(readingMode) }
+    LaunchedEffect(readingMode, anchor, sections.map { it.id }) {
+        if (anchor < 0 || sections.isEmpty()) return@LaunchedEffect
+        val changedMode = previousMode != readingMode
+        val target = if (changedMode) {
+            if (previousMode == ReadingMode.VERTICAL) listState.firstVisibleItemIndex else pagerState.currentPage
+        } else anchor
+        previousMode = readingMode
+        if (readingMode == ReadingMode.VERTICAL) listState.scrollToItem(target.coerceIn(0, sections.lastIndex), if (changedMode) 0 else anchorOffset)
+        else pagerState.scrollToPage(target.coerceIn(0, sections.lastIndex))
+        snapshotFlow {
+            if (readingMode == ReadingMode.VERTICAL) listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset
+            else pagerState.currentPage to 0
+        }.collectLatest { (index, offset) ->
+            kotlinx.coroutines.delay(200)
+            sections.getOrNull(index)?.let { section ->
+                UserDataRepository.savePosition(context, hourId, index, section.id, offset)
+            }
+        }
+    }
+    com.agpeya.app.ui.common.ReaderAwake()
 
     fun toggleBookmark(section: Section, index: Int) {
         val h = hour ?: return
@@ -378,6 +362,11 @@ fun ReadingScreen(
             )
         },
         bottomBar = {
+            if (selStart == null && sections.isNotEmpty()) {
+                com.agpeya.app.ui.common.ReadingCompletion(
+                    HabitsRepository.hourHabitId(hourId), s.prayerFinished,
+                )
+            }
             val selectedSection = sections.firstOrNull { it.id == selStart?.substringBeforeLast(':') }
             SelectionBar(
                 visible = selStart != null,
@@ -412,6 +401,10 @@ fun ReadingScreen(
         containerColor = MaterialTheme.colorScheme.background,
     ) { innerPadding ->
         Box(Modifier.fillMaxSize()) {
+            if (sections.isEmpty()) com.agpeya.app.ui.common.StatePanel(
+                title = s.contentUnavailable, body = s.customizeIntro,
+                modifier = Modifier.padding(innerPadding),
+            )
             AnimatedVisibility(
                 visible = sections.isNotEmpty(),
                 enter = fadeIn(tween(motion.millis(300))),

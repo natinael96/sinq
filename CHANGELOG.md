@@ -6,10 +6,51 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
-## [Unreleased]
+## [2.4.0] — 2026-09-17
+
+_versionCode 74 · Prayer clock and a more dependable daily experience_
+
+### Added and improved
+
+- Hide confession text from journal previews; show a fixed confession label and lock icon, with content visible only in the editor.
+
+- Make confession preparation a minimal private note that resumes the latest draft; remove the dedicated communion-preparation screen.
+- Clean up Android lint issues in widget API metadata, backup configuration, scrolling and Kotlin helpers; show external-link failures and improve the Memento widget’s spoken caption.
+
+- Add a resizable Prayer clock home-screen widget matching the website's seven-hour dial, with live local time and direct current-prayer access.
+- Finish named audit recommendations: penance summary/draft separation, contextual tour actions, prayer-preset and backup explanations, reference calculation help and additional reader note/share actions.
+
+- Follow-up audit fixes: explicit historical plan/day context and chapter completion, consistent dated plan-start confirmation, loading/retry and write-failure feedback, Save/Cancel alms/repentance/tithe reminder drafts, reader appearance reset, accessible Memento title and navigable source credits.
+
+### UI/UX audit fixes
+- Gate private journal, notes, confession and penance surfaces; relock on background and retain editor drafts.
+- Fix chapter identity, explicit chapter links, Psalm-note anchors, requested Mahlet services, contents offsets and plan restart.
+- Make prayer and Synaxarium completion explicit; apply keep-screen-on across supported text readers.
+- Add loading/retry states, stable navigation labels, larger controls, scrollable forms and search entry points.
+- Correct reminder summaries and bypass launch overlays for explicit reminder/widget actions.
+- Preserve backup category choices, introduce scoped format-3 offering preferences and expand restore previews.
+- Add ledger editing, exact amount validation and correction of vow/penance progress.
+- Full scope and remaining work: [audit implementation tracker](docs/UI_UX_FIX_PROGRESS.md). Device checks remain unverified.
+
+### Changed
+- Bible reading reminders run automatically at 06:30, 14:00 and 20:00 local time after a plan is started; no reminder-time setup is needed. Quiet hours and the off switch remain available.
+- Follow-ups continue while any of today's planned passages remain unfinished, including across multiple plans. Reading one passage no longer silences the whole day, and ignored reminders no longer switch themselves off.
+- The reminders overview shows all three reading times; launch, reboot and time changes restore the automatic schedule.
+
+## [2.3.3] — 2026-09-16
+
+_versionCode 73 · The Misbak in ግጻዌ opens_
+
+### Fixed
+- **Tapping on the ምስባክ in ግጻዌ crashed the application.** The dedicated passage
+  screen was using verse numbers as its list item keys, but the three chant lines
+  of a printed ምስባክ all carry verse number 0. Jetpack Compose requires item keys
+  in a scrollable list to be unique, so displaying the chant failed immediately
+  on the second line. Keys are now uniquely qualified per line.
+- Removed an extra double-space prefix when copying or sharing ምስባክ chant verses.
 
 ### Documentation
-- Reconcile all maintained Markdown documentation with the 2.3.2 code and assets; add a detailed project status report with content inventory, build/test evidence and outstanding reviews.
+- Reconcile all maintained Markdown documentation with the 2.3.2/2.3.3 code and assets; add a detailed project status report with content inventory, build/test evidence and outstanding reviews.
 - Correct Android support, content paths, Room journal storage, connectivity, backup privacy, reminder defaults and expanded library coverage.
 - Preserve the original master plan and v0.2.6 implementation reference as explicit historical records.
 

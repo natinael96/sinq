@@ -53,10 +53,22 @@ import com.agpeya.app.ui.theme.Spacing
 @Composable
 fun ModesScreen(onBack: () -> Unit, onEditMode: (String) -> Unit, onOpenBatteryHelp: () -> Unit) {
     val context = LocalContext.current
-    val state by ModesRepository.state(context)
-        .collectAsState(initial = ModesState(ModesRepository.BUILT_IN_ID, emptyList()))
+    val stateLoad = com.agpeya.app.ui.common.rememberFlowLoad { ModesRepository.state(context) }
+    val action = com.agpeya.app.ui.common.rememberUserAction()
     val scope = rememberCoroutineScope()
     val s = com.agpeya.app.ui.strings.LocalStrings.current
+    if (com.agpeya.app.ui.common.contentLoadScreen(stateLoad, s.modesTitle, onBack)) return
+    val state = stateLoad.value ?: return
+    var notificationsEnabled by remember { mutableStateOf(androidx.core.app.NotificationManagerCompat.from(context).areNotificationsEnabled()) }
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME)
+                notificationsEnabled = androidx.core.app.NotificationManagerCompat.from(context).areNotificationsEnabled()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
     var deleteCandidate by remember { mutableStateOf<PrayerMode?>(null) }
 
     suspend fun reschedule() {
@@ -78,8 +90,6 @@ fun ModesScreen(onBack: () -> Unit, onEditMode: (String) -> Unit, onOpenBatteryH
             contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
         ) {
             // Re-read on each (re)composition, so returning from settings reflects a change.
-            val notificationsEnabled =
-                androidx.core.app.NotificationManagerCompat.from(context).areNotificationsEnabled()
             if (!notificationsEnabled) {
                 item {
                     NotificationsOffBanner(
@@ -95,7 +105,7 @@ fun ModesScreen(onBack: () -> Unit, onEditMode: (String) -> Unit, onOpenBatteryH
                     mode = mode,
                     isActive = mode.id == state.activeModeId,
                     onActivate = {
-                        scope.launch {
+                        action.run {
                             ModesRepository.setActiveMode(context, mode.id)
                             reschedule()
                         }
@@ -107,9 +117,9 @@ fun ModesScreen(onBack: () -> Unit, onEditMode: (String) -> Unit, onOpenBatteryH
             }
             item {
                 Spacer(Modifier.height(Spacing.xl))
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     TextButton(onClick = {
-                        scope.launch {
+                        action.run {
                             val source = state.modes.find { it.isBuiltIn }
                             val mode = ModesRepository.addMode(
                                 context,
@@ -120,7 +130,7 @@ fun ModesScreen(onBack: () -> Unit, onEditMode: (String) -> Unit, onOpenBatteryH
                         }
                     }) { Text(s.startFromAgpeya) }
                     TextButton(onClick = {
-                        scope.launch {
+                        action.run {
                             val mode = ModesRepository.addMode(context, name = s.newModeName)
                             onEditMode(mode.id)
                         }
@@ -148,7 +158,7 @@ fun ModesScreen(onBack: () -> Unit, onEditMode: (String) -> Unit, onOpenBatteryH
             text = { Text(s.deleteModeBody(mode.name, mode.entries.size)) },
             confirmButton = {
                 TextButton(onClick = {
-                    scope.launch {
+                    action.run {
                         ModesRepository.deleteMode(context, mode.id)
                         reschedule()
                         deleteCandidate = null
@@ -200,7 +210,6 @@ private fun ModeRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onOpen)
             .padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -221,6 +230,7 @@ private fun ModeRow(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        TextButton(onClick = onOpen) { Text(s.editPerson) }
         if (onDelete != null) {
             IconButton(onClick = onDelete) {
                 Icon(

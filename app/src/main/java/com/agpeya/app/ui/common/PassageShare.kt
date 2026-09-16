@@ -1,5 +1,8 @@
 package com.agpeya.app.ui.common
 
+import androidx.core.graphics.withSave
+import androidx.core.graphics.toColorInt
+import androidx.core.graphics.createBitmap
 import android.content.ClipData
 import android.content.ContentValues
 import android.content.Context
@@ -104,24 +107,24 @@ object PassageShare {
     )
 
     private val GREEN = Palette(
-        ground = Color.parseColor("#0B3129"),
-        card = Color.parseColor("#10382F"),
-        line = Color.parseColor("#1B4A3E"),
-        gold = Color.parseColor("#E4BC5A"),
-        ink = Color.parseColor("#F2EDDE"),
-        muted = Color.parseColor("#9DBBAD"),
+        ground = "#0B3129".toColorInt(),
+        card = "#10382F".toColorInt(),
+        line = "#1B4A3E".toColorInt(),
+        gold = "#E4BC5A".toColorInt(),
+        ink = "#F2EDDE".toColorInt(),
+        muted = "#9DBBAD".toColorInt(),
         glow = Color.argb(70, 228, 188, 90),
     )
 
     // The app's own light palette, so a card can sit on a white page the way
     // the reader does.
     private val IVORY_PALETTE = Palette(
-        ground = Color.parseColor("#E7E4D6"),
-        card = Color.parseColor("#EFEDE2"),
-        line = Color.parseColor("#D5D1BF"),
-        gold = Color.parseColor("#7E5F1E"),
-        ink = Color.parseColor("#1D2B24"),
-        muted = Color.parseColor("#5C6A5F"),
+        ground = "#E7E4D6".toColorInt(),
+        card = "#EFEDE2".toColorInt(),
+        line = "#D5D1BF".toColorInt(),
+        gold = "#7E5F1E".toColorInt(),
+        ink = "#1D2B24".toColorInt(),
+        muted = "#5C6A5F".toColorInt(),
         glow = Color.argb(46, 126, 95, 30),
     )
 
@@ -308,7 +311,7 @@ object PassageShare {
         // In a fixed frame the block sits in the middle of the space it has
         // rather than clinging to the top of a mostly empty card.
         val slack = ((h - fixed - bodyLayout.height) / 2f).coerceAtLeast(0f)
-        val bmp = Bitmap.createBitmap(W, h, Bitmap.Config.ARGB_8888)
+        val bmp = createBitmap(W, h, Bitmap.Config.ARGB_8888)
         val c = Canvas(bmp)
 
         // Ground + soft gold glow in the top corner, then the card.
@@ -375,9 +378,9 @@ object PassageShare {
     }
 
     private inline fun Canvas.withTranslation(x: Float, y: Float, block: Canvas.() -> Unit) {
-        save()
-        translate(x, y)
-        block()
-        restore()
+        withSave {
+            translate(x, y)
+            block()
+        }
     }
 }

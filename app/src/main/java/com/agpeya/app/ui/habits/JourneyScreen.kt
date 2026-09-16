@@ -253,7 +253,7 @@ fun JourneyScreen(
                 val (keptHabits, dueHabits) = HabitsRepository.keptOfDue(state, today)
                 SectionHeader(s.todayLabel) {
                     Text(
-                        "$doneHours/${hourItems.size}  ·  $keptHabits/$dueHabits",
+                        "${s.hoursHeader}: $doneHours/${hourItems.size}  ·  ${s.habitsHeader}: $keptHabits/$dueHabits",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -290,7 +290,7 @@ fun JourneyScreen(
             item {
                 Spacer(Modifier.height(Spacing.sm))
                 SectionHeader(s.yearJourneyHeader) {
-                    EthiopianYearSwitcher(displayedEcYear, today) { year ->
+                    EthiopianYearSwitcher(displayedEcYear, today, earliestYear = state.records.keys.mapNotNull { runCatching { EthiopianDate.from(LocalDate.parse(it)).year }.getOrNull() }.minOrNull()?.coerceAtMost(APP_EPOCH_EC.year) ?: APP_EPOCH_EC.year) { year ->
                         displayedEcYear = year
                         selectedEpochDay = null
                     }
@@ -361,9 +361,9 @@ private fun HourStrips(
     val haptics = LocalHapticFeedback.current
     Column(Modifier.fillMaxWidth()) {
         SinqDivider()
-        items.chunked(4).forEach { line ->
+        items.chunked(2).forEach { line ->
             Row(
-                modifier = Modifier.fillMaxWidth().heightIn(min = 28.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
@@ -379,10 +379,11 @@ private fun HourStrips(
                         text = name,
                         style = MaterialTheme.typography.labelMedium,
                         color = tint,
-                        maxLines = 1,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier
                             .weight(1f)
+                            .heightIn(min = 48.dp)
                             .clip(MaterialTheme.shapes.small)
                             .toggleable(
                                 value = kept,
@@ -396,7 +397,7 @@ private fun HourStrips(
                     )
                 }
                 // A short last line keeps its columns rather than spreading.
-                repeat(4 - line.size) { Spacer(Modifier.weight(1f)) }
+                repeat(2 - line.size) { Spacer(Modifier.weight(1f)) }
             }
             SinqDivider()
         }

@@ -104,6 +104,7 @@ fun GitsawePassageScreen(
     onOpenBook: () -> Unit,
     onOpenChapter: (Boolean) -> Unit,
 ) {
+    com.agpeya.app.ui.common.ReaderAwake()
     val context = LocalContext.current
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
@@ -202,7 +203,9 @@ fun GitsawePassageScreen(
                         sharePayload = {
                             passage?.let { p ->
                                 SharePayload(
-                                    body = p.verses.joinToString("\n") { "${geezNumeral(it.n)}  ${it.text}" },
+                                    body = p.verses.joinToString("\n") {
+                                        if (it.n > 0) "${geezNumeral(it.n)}  ${it.text}" else it.text
+                                    },
                                     kicker = role?.takeIf { it.isNotBlank() } ?: s.gitsaweKicker,
                                     title = "${p.bookName} ${p.refLine}",
                                 )
@@ -225,7 +228,13 @@ fun GitsawePassageScreen(
                 val verseGap = readingVerseGap(bodyFontSp)
                 ReadingColumn(innerPadding = innerPadding) {
                     item(key = "top") { Spacer(Modifier.height(Spacing.sm)) }
-                    items(passage.verses.size, key = { passage.verses[it].n }) { i ->
+                    items(
+                        passage.verses.size,
+                        key = { i ->
+                            val n = passage.verses[i].n
+                            if (n > 0) "v_${n}_$i" else "line_$i"
+                        },
+                    ) { i ->
                         val verse = passage.verses[i]
                         verse.header?.let { header ->
                             // A stanza heading (Psalm 118's acrostic letters),

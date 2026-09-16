@@ -2,6 +2,11 @@
 
 package com.agpeya.app.ui.settings
 
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.foundation.background
+
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
@@ -191,8 +196,7 @@ private fun ReadingFontPicker(
         FONT_CHOICES.forEach { (choice, name) ->
             val isSel = choice == selected
             androidx.compose.material3.Surface(
-                onClick = { onSelect(choice) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().selectable(selected = isSel, role = androidx.compose.ui.semantics.Role.RadioButton, onClick = { onSelect(choice) }),
                 shape = MaterialTheme.shapes.medium,
                 color = if (isSel) MaterialTheme.colorScheme.secondary.copy(alpha = 0.14f)
                 else MaterialTheme.colorScheme.surface,
@@ -262,10 +266,15 @@ internal fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
     // all-or-nothing: it can now carry money and the journal, and neither
     // should ride along unasked.
     var choosing by remember { mutableStateOf(false) }
-    var selection by remember { mutableStateOf(com.agpeya.app.data.BackupRepository.Selection()) }
+    var selection by androidx.compose.runtime.saveable.rememberSaveable(
+        stateSaver = androidx.compose.runtime.saveable.listSaver(
+            save = { listOf(it.habits, it.bookmarks, it.highlights, it.prayerList, it.setup, it.offerings, it.journal) },
+            restore = { com.agpeya.app.data.BackupRepository.Selection(it[0], it[1], it[2], it[3], it[4], it[5], it[6]) },
+        ),
+    ) { mutableStateOf(com.agpeya.app.data.BackupRepository.Selection()) }
     var askingPassphrase by remember { mutableStateOf(false) }
     val journalLocked by com.agpeya.app.data.JournalLock.isLocked(context)
-        .collectAsState(initial = false)
+        .collectAsState(initial = true)
 
     val createDoc = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/json"),
@@ -312,7 +321,7 @@ internal fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
             onDismissRequest = { preview = null; pending = null },
             title = { Text(s.restorePreviewTitle) },
             text = {
-                Column {
+                Column(Modifier.verticalScroll(rememberScrollState())) {
                     if (summary.created.isNotBlank()) {
                         Text(
                             s.backupCreated(summary.created),
@@ -323,11 +332,13 @@ internal fun BackupRows(s: com.agpeya.app.ui.strings.Strings) {
                     }
                     Text(s.backupContains(summary.days, summary.bookmarks, summary.highlights))
                     Spacer(Modifier.height(Spacing.sm))
-                    Text(
-                        if (summary.newDays == 0 && summary.newBookmarks == 0) s.restoreNothingNew
-                        else s.restoreWillAdd(summary.newDays, summary.newBookmarks),
-                        color = MaterialTheme.colorScheme.secondary,
-                    )
+                    Text("${s.exportSectionPrayerList}: ${summary.prayerPeople}")
+                    Text("${s.exportSectionJournal}: ${summary.journalEntries}")
+                    Text("${s.exportSectionOfferings}: ${summary.offeringEntries}")
+                    Text("${s.readingTitle}: ${summary.readChapters}")
+                    if (summary.hasSetup) Text(s.exportSectionSetup)
+                    Text(s.restoreWillAdd(summary.newDays, summary.newBookmarks),
+                        color = MaterialTheme.colorScheme.secondary)
                     Spacer(Modifier.height(Spacing.sm))
                     Text(
                         s.restoreMergeNote,
@@ -522,49 +533,6 @@ private fun StreakReminderTimeRow(s: com.agpeya.app.ui.strings.Strings) {
     }
 }
 
-@Composable
-private fun ReadingReminderTimeRow(s: com.agpeya.app.ui.strings.Strings) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val minute by SettingsRepository.readingReminderTime(context)
-        .collectAsState(initial = SettingsRepository.DEFAULT_READING_REMINDER_MIN)
-    var picking by remember { mutableStateOf(false) }
-
-    com.agpeya.app.ui.common.ListRow(
-        title = s.timeLabel,
-        subtitle = "%02d:%02d".format(minute / 60, minute % 60),
-        onClick = { picking = true },
-    )
-
-    if (picking) {
-        val timeState = androidx.compose.material3.rememberTimePickerState(
-            initialHour = minute / 60,
-            initialMinute = minute % 60,
-            is24Hour = true,
-        )
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { picking = false },
-            title = { Text(s.timeLabel) },
-            text = { androidx.compose.material3.TimePicker(state = timeState) },
-            confirmButton = {
-                TextButton(onClick = {
-                    picking = false
-                    scope.launch {
-                        SettingsRepository.setReadingReminderTime(
-                            context,
-                            timeState.hour * 60 + timeState.minute,
-                        )
-                        com.agpeya.app.reminders.ReadingReminderScheduler.sync(context, true)
-                    }
-                }) { Text(s.save) }
-            },
-            dismissButton = {
-                TextButton(onClick = { picking = false }) { Text(s.cancel) }
-            },
-        )
-    }
-}
-
 /**
  * A nightly window in which every reminder stays silent.
  *
@@ -598,15 +566,10 @@ private fun QuietHoursRow(s: com.agpeya.app.ui.strings.Strings) {
     val modes by com.agpeya.app.data.ModesRepository.state(context)
         .collectAsState(initial = null as com.agpeya.app.model.ModesState?)
 
-    val swallowed = if (!quiet.enabled) 0 else buildList {
-        if (streakOn) add(streakMinute)
-        val gitsaweTime = com.agpeya.app.reminders.GitsaweReminderScheduler.REMINDER_TIME
-        if (gitsaweOn) add(gitsaweTime.hour * 60 + gitsaweTime.minute)
-        (alms + repentance + tithe).filter { it.enabled }.forEach { add(it.minute) }
-        vows.filter { it.remindsStill }.forEach { add(it.minute) }
-        // Only the active mode arms alarms, so only its entries can be lost.
-        modes?.activeMode?.entries?.filter { it.enabled }?.forEach { add(it.hour * 60 + it.minute) }
-    }.count { quiet.covers(it) }
+    val today by com.agpeya.app.ui.common.rememberCurrentDate()
+    val schedule by remember(today) { com.agpeya.app.data.DaySchedule.observe(context, today) }
+        .collectAsState(initial = emptyList())
+    val swallowed = schedule.count { it.today && it.silenced }
 
     // The shared ToggleRow, not a hand-rolled Row+Switch: the whole width
     // toggles, and TalkBack announces one switch with its state instead of an
@@ -672,7 +635,7 @@ private fun QuietHoursRow(s: com.agpeya.app.ui.strings.Strings) {
 @Composable
 fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCopyFormat: () -> Unit) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
+    val action = com.agpeya.app.ui.common.rememberUserAction()
     val s = com.agpeya.app.ui.strings.LocalStrings.current
     val font by SettingsRepository.readingFont(context).collectAsState(initial = com.agpeya.app.data.ReadingFont.ABYSSINICA)
     val step by SettingsRepository.fontStep(context).collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
@@ -695,6 +658,15 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
         ) {
             item {
+                Text(
+                    if (s.isAmharic) "እነዚህ ቅንብሮች የንባብ ገጾችን ጽሑፍ ይቀይራሉ። የገጽ ማንሸራተት ምርጫው ለሰዓታት ጸሎትና ለዳዊት ንባብ ነው።"
+                    else "Text appearance applies across readers. Paged reading applies to prayer hours and the Psalter.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                TextButton(enabled = !action.busy, onClick = {
+                    action.run { SettingsRepository.resetReadingPresentation(context) }
+                }) { Text(if (s.isAmharic) "የንባብ ቅንብሮችን ወደ መጀመሪያው መልስ" else "Reset reader appearance") }
+                Spacer(Modifier.height(Spacing.sm))
                 Surface(
                     color = MaterialTheme.colorScheme.surface,
                     shape = MaterialTheme.shapes.large,
@@ -702,17 +674,7 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
                 ) {
                     Text(
                         "አቡነ ዘበሰማያት ስምከ ይትቀደስ።\nመንግሥትከ ትምጻእ።",
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontFamily = com.agpeya.app.ui.theme.readingFontFamily(font),
-                            fontSize = size.sp,
-                            lineHeight = (size * lineSpacing.multiplier).sp,
-                            textAlign = when (readingAlignment) {
-                                com.agpeya.app.data.ReadingAlignment.JUSTIFIED -> androidx.compose.ui.text.style.TextAlign.Justify
-                                com.agpeya.app.data.ReadingAlignment.LEFT -> androidx.compose.ui.text.style.TextAlign.Left
-                                com.agpeya.app.data.ReadingAlignment.RIGHT -> androidx.compose.ui.text.style.TextAlign.Right
-                                com.agpeya.app.data.ReadingAlignment.CENTER -> androidx.compose.ui.text.style.TextAlign.Center
-                            },
-                        ),
+                        style = com.agpeya.app.ui.theme.readingBodyStyle(size),
                         color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.padding(Spacing.lg),
                     )
@@ -722,12 +684,12 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
                 Text(s.fontSizeLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     TextButton(
-                        onClick = { scope.launch { SettingsRepository.setFontStep(context, step - 1) } },
+                        onClick = { action.run { SettingsRepository.setFontStep(context, step - 1) } },
                         enabled = step > 0,
                     ) { Text("A−") }
                     Text("${size}sp", modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
                     TextButton(
-                        onClick = { scope.launch { SettingsRepository.setFontStep(context, step + 1) } },
+                        onClick = { action.run { SettingsRepository.setFontStep(context, step + 1) } },
                         enabled = step < SettingsRepository.FONT_STEPS_SP.lastIndex,
                     ) { Text("A+") }
                 }
@@ -743,7 +705,7 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
                     choices.forEachIndexed { index, (choice, label) ->
                         SegmentedButton(
                             selected = lineSpacing == choice,
-                            onClick = { scope.launch { SettingsRepository.setReadingLineSpacing(context, choice) } },
+                            onClick = { action.run { SettingsRepository.setReadingLineSpacing(context, choice) } },
                             shape = androidx.compose.material3.SegmentedButtonDefaults.itemShape(index, choices.size),
                             icon = {
                                 if (lineSpacing == choice) Icon(Icons.Outlined.Check, contentDescription = null)
@@ -764,7 +726,7 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
                     choices.forEachIndexed { index, (choice, icon, description) ->
                         SegmentedButton(
                             selected = readingAlignment == choice,
-                            onClick = { scope.launch { SettingsRepository.setReadingAlignment(context, choice) } },
+                            onClick = { action.run { SettingsRepository.setReadingAlignment(context, choice) } },
                             shape = SegmentedButtonDefaults.itemShape(index, choices.size),
                             icon = {},
                         ) {
@@ -775,7 +737,7 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
                 ToggleRow(
                     s.keepScreenOn,
                     keepOn,
-                    { scope.launch { SettingsRepository.setKeepScreenOn(context, it) } },
+                    { action.run { SettingsRepository.setKeepScreenOn(context, it) } },
                     subtitle = s.keepScreenOnDesc,
                 )
                 // Both of these lived only inside a reader's ⋮ menu, so someone
@@ -788,7 +750,7 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
                     modes.forEachIndexed { index, (mode, label) ->
                         SegmentedButton(
                             selected = readingMode == mode,
-                            onClick = { scope.launch { SettingsRepository.setReadingMode(context, mode) } },
+                            onClick = { action.run { SettingsRepository.setReadingMode(context, mode) } },
                             shape = SegmentedButtonDefaults.itemShape(index, modes.size),
                             icon = {},
                         ) { Text(label, maxLines = 1) }
@@ -803,7 +765,7 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
                     langs.forEachIndexed { index, (lang, label) ->
                         SegmentedButton(
                             selected = misbak == lang,
-                            onClick = { scope.launch { SettingsRepository.setMisbakLanguage(context, lang) } },
+                            onClick = { action.run { SettingsRepository.setMisbakLanguage(context, lang) } },
                             shape = SegmentedButtonDefaults.itemShape(index, langs.size),
                             icon = {},
                         ) { Text(label, maxLines = 1) }
@@ -887,11 +849,14 @@ fun CopyFormatScreen(onBack: () -> Unit) {
             }
             items(com.agpeya.app.data.HighlightRepository.COLOR_KEYS.size) { i ->
                 val key = com.agpeya.app.data.HighlightRepository.COLOR_KEYS[i]
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                androidx.compose.foundation.layout.Box(Modifier.size(24.dp).background(com.agpeya.app.ui.theme.sinqColors.highlight(key), androidx.compose.foundation.shape.CircleShape))
                 NavRow(
                     title = names[key]?.takeIf { it.isNotBlank() } ?: s.highlightColor(key),
                     subtitle = s.highlightColor(key),
                     onClick = { editing = key },
                 )
+                }
             }
         }
     }
@@ -916,7 +881,10 @@ fun CopyFormatScreen(onBack: () -> Unit) {
                     editing = null
                 }) { Text(s.save) }
             },
-            dismissButton = { TextButton(onClick = { editing = null }) { Text(s.cancel) } },
+            dismissButton = { Row {
+                TextButton(onClick = { scope.launch { SettingsRepository.setHighlightName(context, editKey, ""); editing = null } }) { Text(s.resetLayout) }
+                TextButton(onClick = { editing = null }) { Text(s.cancel) }
+            } },
         )
     }
 }
@@ -938,7 +906,7 @@ fun PrayerSettingsScreen(onBack: () -> Unit, onOpenManageHours: () -> Unit, onOp
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
         ) {
             item {
-                NavRow(s.prayerLevelTitle, { levelSheetOpen = true }, subtitle = com.agpeya.app.ui.settings.prayerLevelLabel(level))
+                NavRow(s.prayerLevelTitle, { levelSheetOpen = true }, subtitle = com.agpeya.app.ui.settings.prayerLevelLabel(level, s))
                 NavRow(s.manageHours, onOpenManageHours)
                 // Its twin: the habits kept on ጉዞ are edited here, beside the hours.
                 NavRow(s.manageHabits, onOpenManageHabits)
@@ -947,14 +915,14 @@ fun PrayerSettingsScreen(onBack: () -> Unit, onOpenManageHours: () -> Unit, onOp
     }
     if (levelSheetOpen) {
         androidx.compose.material3.ModalBottomSheet(onDismissRequest = { levelSheetOpen = false }) {
-            Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 28.dp)) {
+            Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 28.dp)) {
                 Text(s.prayerLevelTitle, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
                 Spacer(Modifier.height(Spacing.sm))
                 Text(s.prayerLevelDescription, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(Spacing.md))
                 PrayerLevel.entries.forEach { choice ->
                     SettingsRadioRow(
-                        label = com.agpeya.app.ui.settings.prayerLevelLabel(choice),
+                        label = com.agpeya.app.ui.settings.prayerLevelLabel(choice, s),
                         selected = choice == level,
                         subtitle = com.agpeya.app.ui.settings.prayerLevelDetail(choice, s),
                     ) {
@@ -991,7 +959,7 @@ fun RemindersSettingsScreen(
     val snoozeMinutes by SettingsRepository.snoozeMinutes(context)
         .collectAsState(initial = SettingsRepository.DEFAULT_SNOOZE_MINUTES)
     var soundSheetOpen by remember { mutableStateOf(false) }
-    var permissionPulse by remember { mutableStateOf(0) }
+    var permissionPulse by remember { mutableIntStateOf(0) }
     val lifecycleOwner = context as? LifecycleOwner
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -1000,20 +968,14 @@ fun RemindersSettingsScreen(
         lifecycleOwner?.lifecycle?.addObserver(observer)
         onDispose { lifecycleOwner?.lifecycle?.removeObserver(observer) }
     }
-    val remindersOn = streak || gitsawe || breath || reading ||
+    val modes by com.agpeya.app.data.ModesRepository.state(context)
+        .collectAsState(initial = com.agpeya.app.model.ModesState("", emptyList()))
+    val armedHours = modes.activeMode?.entries?.count { it.enabled } ?: 0
+    val remindersOn = armedHours > 0 || streak || gitsawe || breath || reading ||
         almsEntries.any { it.enabled } || repentanceEntries.any { it.enabled } ||
         titheEntries.any { it.enabled } || vowEntries.any { it.remindsStill } ||
         penanceEntries.any { it.remindsStill }
     @Suppress("UNUSED_VARIABLE") val refreshPermissions = permissionPulse
-    // The count on this page has never included the prayer hours — it is built
-    // from the switches below and the ledgers — so a reader whose hours are all
-    // off was told reminders were on. Say it plainly instead.
-    val armedHours by androidx.compose.runtime.produceState(-1, permissionPulse) {
-        value = runCatching {
-            com.agpeya.app.data.ModesRepository.current(context).activeMode
-                ?.entries?.count { it.enabled } ?: 0
-        }.getOrDefault(-1)
-    }
     val batteryRestricted = remindersOn &&
         !(context.getSystemService(android.os.PowerManager::class.java)?.isIgnoringBatteryOptimizations(context.packageName) ?: true)
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
@@ -1136,7 +1098,6 @@ fun RemindersSettingsScreen(
                         com.agpeya.app.reminders.ReadingReminderScheduler.sync(context, on)
                     }
                 }, subtitle = s.settingsReadingReminderDesc)
-                if (reading) ReadingReminderTimeRow(s)
                 // ምጽዋት and ንስሐ are here because they ring; their ledgers — the
                 // money, the vows, the penance — are records, and records live
                 // under መዝገብ. This page had become the door to all three.
@@ -1188,7 +1149,18 @@ private fun ReminderSoundSheetContent(
     onSnooze: (Int) -> Unit,
 ) {
     val s = com.agpeya.app.ui.strings.LocalStrings.current
-    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 28.dp)) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var preview by remember { mutableStateOf<android.media.Ringtone?>(null) }
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner, sound, alert) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) { preview?.stop(); preview = null }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { preview?.stop(); preview = null; lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 28.dp)) {
         Text(s.alarmSection, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
         Spacer(Modifier.height(Spacing.md))
         listOf(
@@ -1205,6 +1177,22 @@ private fun ReminderSoundSheetContent(
                 com.agpeya.app.data.AlarmSound.RINGTONE to s.soundRingtone,
                 com.agpeya.app.data.AlarmSound.NOTIFICATION to s.soundNotification,
             ).forEach { (choice, label) -> SettingsRadioRow(label, choice == sound) { onSound(choice) } }
+            TextButton(onClick = {
+                if (preview != null) { preview?.stop(); preview = null }
+                else {
+                    val type = when (sound) {
+                        com.agpeya.app.data.AlarmSound.ALARM -> android.media.RingtoneManager.TYPE_ALARM
+                        com.agpeya.app.data.AlarmSound.RINGTONE -> android.media.RingtoneManager.TYPE_RINGTONE
+                        com.agpeya.app.data.AlarmSound.NOTIFICATION -> android.media.RingtoneManager.TYPE_NOTIFICATION
+                    }
+                    val ring = runCatching { android.media.RingtoneManager.getRingtone(context,
+                        android.media.RingtoneManager.getDefaultUri(type)) }.getOrNull()
+                    preview = ring
+                    runCatching { ring?.play() }
+                    scope.launch { kotlinx.coroutines.delay(5000); ring?.stop(); if (preview === ring) preview = null }
+                }
+            }) { Text(if (preview != null) s.stopSoundPreview else s.soundPreview) }
+
         }
         // How long አሳድር puts the hour off. It belongs beside the alarm's other
         // settings rather than on the reminders page, because it is only ever
@@ -1225,10 +1213,10 @@ private fun SettingsRadioRow(
     onClick: () -> Unit,
 ) {
     Row(
-        Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(MaterialTheme.shapes.small).clickable(onClick = onClick),
+        Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(MaterialTheme.shapes.small).selectable(selected = selected, role = androidx.compose.ui.semantics.Role.RadioButton, onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        androidx.compose.material3.RadioButton(selected = selected, onClick = onClick)
+        androidx.compose.material3.RadioButton(selected = selected, onClick = null)
         Spacer(Modifier.width(Spacing.sm))
         Column(Modifier.weight(1f).padding(vertical = Spacing.sm)) {
             Text(label, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
@@ -1249,7 +1237,7 @@ fun ReadingFontScreen(onBack: () -> Unit) {
         containerColor = MaterialTheme.colorScheme.background,
         topBar = { com.agpeya.app.ui.common.SinqTopBar(s.readingFontTitle, onBack) },
     ) { inner ->
-        Column(Modifier.fillMaxSize().padding(inner).padding(horizontal = 16.dp, vertical = 12.dp)) {
+        Column(Modifier.fillMaxSize().padding(inner).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 12.dp)) {
             ReadingFontPicker(selected) { scope.launch { SettingsRepository.setReadingFont(context, it) } }
         }
     }
@@ -1268,15 +1256,12 @@ fun ReadingFontScreen(onBack: () -> Unit) {
 private fun DayTimeline() {
     val context = LocalContext.current
     val s = com.agpeya.app.ui.strings.LocalStrings.current
-    val entries by androidx.compose.runtime.produceState(
-        emptyList<com.agpeya.app.data.DaySchedule.Entry>(),
-    ) {
-        value = runCatching { com.agpeya.app.data.DaySchedule.forDay(context) }
-            .getOrDefault(emptyList())
-    }
+    val today by com.agpeya.app.ui.common.rememberCurrentDate()
+    val entries by remember(today) { com.agpeya.app.data.DaySchedule.observe(context, today) }
+        .collectAsState(initial = emptyList())
     if (entries.isEmpty()) return
 
-    val silenced = entries.count { it.silenced }
+    val silenced = entries.count { it.today && it.silenced }
     // Folded shut by default. Read end to end it is the tallest thing on the
     // page — one row per reminder, the whole day — and it answers a question
     // ("what is set for today?") that is asked far less often than the switches

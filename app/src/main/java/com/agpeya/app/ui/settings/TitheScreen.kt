@@ -89,7 +89,7 @@ fun TitheScreen(onBack: () -> Unit, onOpenReminders: () -> Unit) {
     val reminders by SettingsRepository.titheReminders(context).collectAsState(initial = emptyList())
     val currency = storedCurrency.ifBlank { s.currencyDefault }
 
-    val today = remember { LocalDate.now() }
+    val today by com.agpeya.app.ui.common.rememberCurrentDate()
     val todayEth = remember(today) { EthiopianDate.from(today) }
     var period by remember { mutableStateOf(Period.MONTH) }
     // How many periods back from today we are looking; 0 is the current one.
@@ -125,6 +125,7 @@ fun TitheScreen(onBack: () -> Unit, onOpenReminders: () -> Unit) {
     var adding by remember { mutableStateOf<TitheEntryKind?>(null) }
     var editingPercent by remember { mutableStateOf(false) }
     var editingCurrency by remember { mutableStateOf(false) }
+    var editingEntry by remember { mutableStateOf<TitheEntry?>(null) }
     var deleting by remember { mutableStateOf<TitheEntry?>(null) }
 
     Scaffold(
@@ -264,6 +265,7 @@ fun TitheScreen(onBack: () -> Unit, onOpenReminders: () -> Unit) {
                     dateLabel = entry.localDate?.let { formatEthiopianShort(it, s) } ?: entry.date,
                     deleteDescription = s.delete,
                     onDelete = { deleting = entry },
+                    onEdit = { editingEntry = entry },
                 )
             }
 
@@ -295,6 +297,19 @@ fun TitheScreen(onBack: () -> Unit, onOpenReminders: () -> Unit) {
         )
     }
 
+    editingEntry?.let { entry ->
+        AmountEntryDialog(
+            title = s.editPerson, currency = currency, s = s,
+            initialAmount = entry.amount, initialDate = entry.localDate ?: today, initialNote = entry.note,
+            onDismiss = { editingEntry = null },
+            onSave = { amount, date, note ->
+                scope.launch {
+                    OfferingRepository.addTitheEntry(context, entry.copy(amount = amount, date = date.toString(), note = note))
+                    editingEntry = null
+                }
+            },
+        )
+    }
     if (editingPercent) {
         NumberEntryDialog(
             title = s.tithePercentLabel,
@@ -346,8 +361,10 @@ private fun LedgerRow(
     dateLabel: String,
     deleteDescription: String,
     onDelete: () -> Unit,
+    onEdit: () -> Unit,
 ) {
     Card(
+        onClick = onEdit,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xs),
     ) {

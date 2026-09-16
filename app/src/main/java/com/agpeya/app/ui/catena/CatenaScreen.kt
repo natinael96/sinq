@@ -1,5 +1,6 @@
 package com.agpeya.app.ui.catena
 
+import androidx.compose.runtime.mutableIntStateOf
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color as AndroidColor
@@ -64,7 +65,8 @@ private const val CATENA_HOST = "catenabible.com"
 fun CatenaScreen(url: String, reference: String, onBack: () -> Unit) {
     val s = LocalStrings.current
     val context = LocalContext.current
-    var progress by remember { mutableStateOf(0) }
+    var failed by remember(url) { mutableStateOf(false) }
+    var progress by remember { mutableIntStateOf(0) }
     var webView by remember { mutableStateOf<WebView?>(null) }
 
     // Before anything loads. Session-scoped would be lost between visits, so it
@@ -95,6 +97,14 @@ fun CatenaScreen(url: String, reference: String, onBack: () -> Unit) {
         },
     ) { inner ->
         Column(Modifier.fillMaxSize().padding(inner)) {
+            if (failed) {
+                com.agpeya.app.ui.common.StatePanel(
+                    title = s.contentUnavailable,
+                    body = if (s.isAmharic) "ይህ ማብራሪያ ከCatena ድረ ገጽ ይጫናል፤ የኢንተርኔት ግንኙነት ያስፈልጋል። እንደገና ይሞክሩ ወይም በአሳሽ ይክፈቱ።"
+                        else "This commentary loads from Catena and needs an internet connection. Retry or open it in your browser.",
+                    actionLabel = s.retryAction, onAction = { failed = false; progress = 0; webView?.reload() },
+                )
+            }
             if (progress in 1..99) {
                 LinearProgressIndicator(
                     progress = { progress / 100f },
@@ -102,16 +112,17 @@ fun CatenaScreen(url: String, reference: String, onBack: () -> Unit) {
                 )
             }
             AndroidView(
-                modifier = Modifier.fillMaxSize(),
+                modifier = if (failed) Modifier.size(androidx.compose.ui.unit.Dp(0f)) else Modifier.fillMaxSize(),
                 factory = { ctx ->
-                    buildWebView(ctx) { progress = it }.also { webView = it }
+                    buildWebView(ctx, onProgress = { progress = it }, onError = { failed = true }).also { webView = it }
                 },
+                onRelease = { view -> view.stopLoading(); view.destroy(); webView = null },
                 update = { view ->
                     if (view.url == null) view.loadUrl(url)
                 },
             )
         }
-        if (progress == 0) {
+        if (progress == 0 && !failed) {
             Column(
                 Modifier.fillMaxSize().padding(inner),
                 verticalArrangement = Arrangement.Center,
@@ -138,7 +149,7 @@ private fun setEarlyFathersCookie() {
 }
 
 @SuppressLint("SetJavaScriptEnabled")
-private fun buildWebView(context: Context, onProgress: (Int) -> Unit): WebView =
+private fun buildWebView(context: Context, onProgress: (Int) -> Unit, onError: () -> Unit): WebView =
     WebView(context).apply {
         layoutParams = ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
@@ -162,6 +173,12 @@ private fun buildWebView(context: Context, onProgress: (Int) -> Unit): WebView =
             }
         }
         webViewClient = object : WebViewClient() {
+            override fun onReceivedError(view: WebView, request: WebResourceRequest, error: android.webkit.WebResourceError) {
+                if (request.isForMainFrame) onError()
+            }
+            override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, response: android.webkit.WebResourceResponse) {
+                if (request.isForMainFrame) onError()
+            }
             // This screen is Catena's, and only Catena's. A link anywhere else —
             // the OrthodoxWiki pages behind each Father's name, their Facebook —
             // is somebody else's site and belongs in a real browser.

@@ -66,14 +66,16 @@ fun MahletSeasonScreen(onBack: () -> Unit, onOpen: (String) -> Unit) {
     val context = LocalContext.current
     val s = LocalStrings.current
 
-    val orders by produceState(emptyList<MahletOrder>()) {
+    val ordersLoad = com.agpeya.app.ui.common.rememberContentLoad {
         // The season spans መስከረም, ጥቅምት and ኅዳር; each month is read once.
-        value = (SEASON_MONTHS.flatMap { MahletRepository.month(context, it) })
+        (SEASON_MONTHS.flatMap { MahletRepository.month(context, it) })
             .filter { it.season == MahletSeason.TSIGE }
             .sortedWith(compareBy({ it.month ?: 99 }, { it.day ?: 99 }))
     }
 
-    val today = remember0()
+    val orders = ordersLoad.value.orEmpty()
+    if (com.agpeya.app.ui.common.contentLoadScreen(ordersLoad, s.mahletTitle, onBack, orders.isEmpty())) return
+    val today = EthiopianDate.from(com.agpeya.app.ui.common.rememberCurrentDate().value)
     // Which of the season's dates are Sundays in the current Ethiopian year.
     val sundays = androidx.compose.runtime.remember(orders, today) {
         orders.filter { o ->

@@ -1,7 +1,11 @@
 package com.agpeya.app.data
 
 import android.content.Context
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.mapLatest
 import com.agpeya.app.reminders.GitsaweReminderScheduler
+import com.agpeya.app.reminders.ReadingReminderScheduler
 import kotlinx.coroutines.flow.first
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -11,8 +15,8 @@ import java.time.LocalDate
  *
  * Six notification channels and two lists of custom reminders arm themselves
  * independently, each behind its own switch on its own row, and no screen has
- * ever shown the result. You could set the reading nudge for 05:00, have quiet
- * hours running to 06:00, and nothing anywhere would say the two disagree.
+ * ever shown the result. Quiet hours can cover a reminder slot, so this view
+ * shows which configured notifications will stay silent.
  *
  * This derives the day rather than storing it: nothing here arms, cancels or
  * changes an alarm, so it can be wrong about the future only in the way the
@@ -36,6 +40,20 @@ object DaySchedule {
         val today: Boolean = true,
     )
 
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    fun observe(context: Context, date: LocalDate): Flow<List<Entry>> {
+        val changes: List<Flow<Any>> = listOf(
+            SettingsRepository.quietHours(context), SettingsRepository.streakReminder(context),
+            SettingsRepository.streakReminderTime(context), SettingsRepository.gitsaweReminder(context),
+            SettingsRepository.breathReminder(context), SettingsRepository.readingReminder(context),
+            SettingsRepository.almsReminders(context), SettingsRepository.repentanceReminders(context),
+            SettingsRepository.titheReminders(context), OfferingRepository.vows(context),
+            PenanceRepository.penances(context), ReadingPlanRepository.state(context),
+            ModesRepository.state(context), HoursRepository.config(context),
+        )
+        return combine(changes) { Unit }.mapLatest { forDay(context, date) }
+    }
+
     suspend fun forDay(context: Context, date: LocalDate = LocalDate.now()): List<Entry> {
         val quiet = SettingsRepository.quietHours(context).first()
         fun silenced(minute: Int) = quiet.enabled && quiet.covers(minute)
@@ -48,7 +66,7 @@ object DaySchedule {
         val names = runCatching { HoursRepository.visibleHours(context).associate { it.id to it.name } }
             .getOrDefault(emptyMap())
         modes?.activeMode?.entries.orEmpty()
-            .filter { it.enabled }
+            .filter { it.enabled && it.hourId in names }
             .forEach { e ->
                 val minute = e.hour * 60 + e.minute
                 out += Entry(
@@ -67,12 +85,15 @@ object DaySchedule {
         }
 
         if (SettingsRepository.readingReminder(context).first()) {
-            val minute = SettingsRepository.readingReminderTime(context).first()
-            // It stays silent until a plan is begun, so say so rather than
-            // promising a notification that will not come.
-            val started = runCatching { ReadingPlanRepository.current(context).plansKept.isNotEmpty() }
-                .getOrDefault(false)
-            out += Entry(Kind.READING, "", minute, silenced(minute), today = started)
+            val pending = runCatching {
+                ReadingPlanRepository.unreadToday(
+                    ReadingPlanRepository.content(context), ReadingPlanRepository.current(context), date,
+                ).isNotEmpty()
+            }.getOrDefault(false)
+            ReadingReminderScheduler.REMINDER_TIMES.forEach { time ->
+                val minute = time.hour * 60 + time.minute
+                out += Entry(Kind.READING, "", minute, silenced(minute), today = pending)
+            }
         }
 
         if (SettingsRepository.streakReminder(context).first()) {
@@ -96,6 +117,14 @@ object DaySchedule {
                 silenced = silenced(r.minute),
                 today = r.schedule.isDueOn(date),
             )
+        }
+
+        OfferingRepository.vows(context).first().filter { it.remindsStill }.forEach { vow ->
+            out += Entry(Kind.GIVING, vow.label, vow.minute, silenced(vow.minute), vow.schedule.isDueOn(date))
+        }
+        PenanceRepository.penances(context).first().filter { it.remindsStill }.forEach { penance ->
+            // Private labels must not appear in a public schedule summary.
+            out += Entry(Kind.GIVING, "", penance.minute, silenced(penance.minute), penance.schedule.isDueOn(date))
         }
 
         // Clock order, with the breath prayer last: it has no appointment to keep.

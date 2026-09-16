@@ -14,7 +14,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -48,10 +52,26 @@ fun ReadingChooseScreen(onBack: () -> Unit, onStarted: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val s = LocalStrings.current
-    val today = remember { LocalDate.now() }
-    val content by produceState(ReadingPlanContent()) { value = ReadingPlanRepository.content(context) }
-    val state by ReadingPlanRepository.state(context).collectAsState(initial = ReadingPlanState())
+    val today by com.agpeya.app.ui.common.rememberCurrentDate()
+    val action = com.agpeya.app.ui.common.rememberUserAction()
+    var pending by remember { mutableStateOf<com.agpeya.app.model.ReadingPlan?>(null) }
+    val contentLoad = com.agpeya.app.ui.common.rememberContentLoad { ReadingPlanRepository.content(context) }
+    val content = contentLoad.value ?: ReadingPlanContent()
+    if (com.agpeya.app.ui.common.contentLoadScreen(contentLoad, s.readingChoose, onBack, content.plans.isEmpty())) return
+    val stateLoad = com.agpeya.app.ui.common.rememberFlowLoad { ReadingPlanRepository.state(context) }
+    if (com.agpeya.app.ui.common.contentLoadScreen(stateLoad, s.readingTitle, onBack)) return
+    val state = stateLoad.value ?: return
 
+    pending?.let { plan ->
+        StartDialog(plan, onDismiss = { pending = null }, onStart = {
+            pending = null
+            action.run {
+                ReadingPlanRepository.start(context, plan.id, today)
+                com.agpeya.app.reminders.ReadingReminderScheduler.sync(context, SettingsRepository.readingReminder(context).first())
+                onStarted()
+            }
+        })
+    }
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = { SinqTopBar(title = s.readingChoose, onBack = onBack) },
@@ -75,14 +95,7 @@ fun ReadingChooseScreen(onBack: () -> Unit, onStarted: () -> Unit) {
                 val blocker = ReadingPlanRepository.conflict(content, state, plan.id)
                     ?.let { id -> content.plans.firstOrNull { it.id == id }?.title }
                 PlanChoice(plan = plan, keeping = keeping, blockedBy = blocker) {
-                    scope.launch {
-                        ReadingPlanRepository.start(context, plan.id, today)
-                        com.agpeya.app.reminders.ReadingReminderScheduler.sync(
-                            context,
-                            SettingsRepository.readingReminder(context).first(),
-                        )
-                        onStarted()
-                    }
+                    if (!action.busy) pending = plan
                 }
             }
             item {

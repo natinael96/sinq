@@ -79,6 +79,11 @@ fun RecordsScreen(
                 // one page.
                 Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(s.settingsGroupData)
+                Text(
+                    if (s.isAmharic) "መረጃዎ በዚህ ስልክ ላይ ይቀመጣል። ለሌላ መሣሪያ ለማዛወር ምትኬ ይፍጠሩ። የማስታወሻ ምትኬ ፋይል በይለፍ ቃል አይጠበቅም፤ ቀኖና በምትኬ አይካተትም።"
+                    else "Your records stay on this phone. Create a backup to move them to another device. Exported journal files are not password-protected; penance records are excluded from backups.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
                 EditableRow(s.yourNameLabel, name, s.addName) {
                     scope.launch { com.agpeya.app.data.SettingsRepository.setProfileName(context, it) }
                 }

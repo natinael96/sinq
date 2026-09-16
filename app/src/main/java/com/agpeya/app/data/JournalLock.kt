@@ -27,12 +27,8 @@ private val Context.journalLockStore by preferencesDataStore(name = "journal_loc
  * That was a deliberate decision, taken to avoid shipping SQLCipher's native
  * libraries and the Room 3 dead end that comes with them.
  *
- * The export is the one place that trade would have been genuinely dangerous —
- * a backup file gets mailed to oneself, dropped in Drive, handed to a relative
- * — so an export carrying journal entries IS encrypted, under the passphrase
- * the person types at the time. Once that file leaves the device it is theirs
- * to look after; the app's part is making sure it is not readable by whoever
- * finds it.
+ * Backups are plaintext. Journal inclusion is opt-in and authenticated, and
+ * the export UI explains that the resulting file must be kept private.
  *
  * The passphrase itself is never stored. Only a salted PBKDF2 hash is kept, so
  * reading this DataStore tells an attacker nothing they can use.

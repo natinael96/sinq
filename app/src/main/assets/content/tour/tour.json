@@ -2,6 +2,97 @@
   "contentVersion": 1,
   "tours": [
     {
+      "versionCode": 74,
+      "version": "2.4.0",
+      "title": {
+        "am": "በዚህ እትም",
+        "en": "In this version"
+      },
+      "pages": [
+        {
+          "kicker": {
+            "am": "ሰዓታት",
+            "en": "Prayer clock"
+          },
+          "title": {
+            "am": "የጸሎት ሰዓት",
+            "en": "Prayer time on your home screen"
+          },
+          "body": {
+            "am": "የጸሎት ሰዓት ዊጄትን በስልክዎ መነሻ ገጽ ላይ ያክሉ። ሲጫኑት የአሁኑን ሰዓት ጸሎት ይከፍታል።",
+            "en": "Add the Prayer clock widget to your phone’s home screen. Tap it to open the current prayer hour."
+          }
+        },
+        {
+          "kicker": {
+            "am": "ንባብ",
+            "en": "Reading"
+          },
+          "title": {
+            "am": "የንባብ ማስታወሻዎች",
+            "en": "Reminders while reading is unfinished"
+          },
+          "body": {
+            "am": "የዕለቱ ንባብ ካልተጠናቀቀ ጠዋት፣ ከሰዓት እና ማታ ማስታወሻ ይደርሳል።",
+            "en": "Bible reminders run in the morning, afternoon and evening while today’s planned reading remains unfinished."
+          },
+          "route": "reading",
+          "actionLabel": {
+            "am": "ንባብ ክፈት",
+            "en": "Open reading"
+          }
+        },
+        {
+          "kicker": {
+            "am": "ንስሐ",
+            "en": "Confession"
+          },
+          "title": {
+            "am": "የግል ማስታወሻ",
+            "en": "A simple private note"
+          },
+          "body": {
+            "am": "የንስሐ ዝግጅት አሁን የራስዎን ማስታወሻ ለመጻፍ ብቻ ነው። ጽሑፉ በዝርዝር ውስጥ አይታይም።",
+            "en": "Confession preparation is now a simple note that saves as you write. Its text stays hidden in journal lists."
+          },
+          "route": "confessionPrep",
+          "actionLabel": {
+            "am": "ማስታወሻ ክፈት",
+            "en": "Open note"
+          }
+        }
+      ]
+    },
+    {
+      "versionCode": 73,
+      "version": "2.3.3",
+      "title": {
+        "am": "በዚህ እትም",
+        "en": "In this version"
+      },
+      "pages": [
+        {
+          "kicker": {
+            "am": "ግጻዌ",
+            "en": "ግጻዌ"
+          },
+          "title": {
+            "am": "የምስባክ ንባብ ተስተካክሏል",
+            "en": "Misbak reading fixed"
+          },
+          "body": {
+            "am": "በግጻዌ ውስጥ ምስባክን ሲጫኑ መተግበሪያው እንዳይዘጋ ተስተካክሏል። አሁን የምስባኩ ዜማ በቀጥታ ይከፈታል።",
+            "en": "Fixed an issue where tapping the ምስባክ in the ግጻዌ would close the app. The chant now opens directly."
+          },
+          "route": "gitsawe",
+          "actionLabel": {
+            "am": "የዕለቱን ግጻዌ ክፈት",
+            "en": "Open today’s Gitsawe"
+          }
+        }
+      ]
+    },
+    {
       "versionCode": 72,
       "version": "2.3.2",
       "title": {

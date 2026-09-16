@@ -53,7 +53,9 @@ fun BookShelfScreen(
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
-    val index by produceState(BookIndex()) { value = BookRepository.index(context) }
+    val indexLoad = com.agpeya.app.ui.common.rememberContentLoad { BookRepository.index(context) }
+    val index = indexLoad.value ?: BookIndex()
+    if (com.agpeya.app.ui.common.contentLoadScreen(indexLoad, s.booksTitle, onBack, index.shelves.isEmpty())) return
     val total = index.shelves.sumOf { it.books.size }
     val mahletOrders by produceState(0) {
         value = runCatching { com.agpeya.app.data.MahletRepository.months(context).sumOf { it.orders.size } }
@@ -108,9 +110,12 @@ fun BookShelfScreen(
 fun BookShelfPageScreen(shelfKey: String, onBack: () -> Unit, onOpen: (String) -> Unit) {
     val context = LocalContext.current
     val s = LocalStrings.current
-    val index by produceState(BookIndex()) { value = BookRepository.index(context) }
+    val indexLoad = com.agpeya.app.ui.common.rememberContentLoad { BookRepository.index(context) }
+    val index = indexLoad.value ?: BookIndex()
+    if (com.agpeya.app.ui.common.contentLoadScreen(indexLoad, s.booksTitle, onBack, index.shelves.isEmpty())) return
     val shelf = index.shelves.firstOrNull { it.key == shelfKey }
     val books = shelf?.books.orEmpty()
+    if (com.agpeya.app.ui.common.contentLoadScreen(indexLoad, s.booksTitle, onBack, shelf == null)) return
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,

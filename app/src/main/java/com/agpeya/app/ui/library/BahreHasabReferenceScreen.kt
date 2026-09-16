@@ -98,6 +98,12 @@ fun BahreHasabReferenceScreen(onBack: () -> Unit) {
                 SectionLabel(s.bahreHasabCycleValues)
                 Spacer(Modifier.height(Spacing.sm))
                 CycleValues(selected)
+                Text(
+                    if (s.isAmharic) "ዓመተ ዓለም፦ የኢትዮጵያ ዓመት + ፶፭፻። ወንጌላዊ፦ የአራት ዓመት ዙር። ወንበር፦ በ፲፱ ዓመት ዙር ውስጥ ያለው ቦታ። አበቅቴና መጥቅዕ፦ ከወንበር የሚሰሉ የቀን እሴቶች።"
+                    else "Amete Alem: the Ethiopian year plus 5,500. Evangelist: the four-year cycle. Wenber: the position used in the 19-year cycle. Abekte and Metqi: day values calculated from Wenber (×11 and ×19, respectively, with the remainder after division by 30).",
+                    Modifier.padding(horizontal = Spacing.screen, vertical = Spacing.md),
+                    style = MaterialTheme.typography.bodySmall,
+                )
                 Spacer(Modifier.height(Spacing.xl))
                 SectionLabel(s.bahreHasabMovableDates)
                 Spacer(Modifier.height(Spacing.sm))
@@ -180,12 +186,13 @@ private fun YearHero(year: BahreHasabYear, current: Boolean) {
 
 @Composable
 private fun CycleValues(year: BahreHasabYear) {
+    val s = LocalStrings.current
     val values = listOf(
-        "ዓመተ ዓለም" to geezNumeral(year.ameteAlem),
-        "ወንጌላዊ" to year.evangelist,
-        "ወንበር" to geezNumeral(year.wenber),
-        "አበቅቴ" to geezNumeral(year.abekte),
-        "መጥቅዕ" to geezNumeral(year.metqi),
+        (if (s.isAmharic) "ዓመተ ዓለም" else "Amete Alem · ዓመተ ዓለም") to geezNumeral(year.ameteAlem),
+        (if (s.isAmharic) "ወንጌላዊ" else "Evangelist · ወንጌላዊ") to year.evangelist,
+        (if (s.isAmharic) "ወንበር" else "Wenber · ወንበር") to geezNumeral(year.wenber),
+        (if (s.isAmharic) "አበቅቴ" else "Abekte · አበቅቴ") to geezNumeral(year.abekte),
+        (if (s.isAmharic) "መጥቅዕ" else "Metqi · መጥቅዕ") to geezNumeral(year.metqi),
     )
     Row(
         Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
@@ -207,11 +214,15 @@ private fun CycleValues(year: BahreHasabYear) {
 @Composable
 private fun ObservanceGrid(observances: List<Pair<String, LocalDate>>) {
     val s = LocalStrings.current
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    val window = androidx.compose.ui.platform.LocalWindowInfo.current
+    val width = with(density) { window.containerSize.width.toDp() }
+    val columns = if (width < 360.dp || density.fontScale > 1.2f) 1 else 2
     Column(
         Modifier.fillMaxWidth().padding(horizontal = Spacing.screen),
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
-        observances.chunked(2).forEach { pair ->
+        observances.chunked(columns).forEach { pair ->
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                 pair.forEach { (name, date) ->
                     Surface(
@@ -227,7 +238,7 @@ private fun ObservanceGrid(observances: List<Pair<String, LocalDate>>) {
                         }
                     }
                 }
-                if (pair.size == 1) Spacer(Modifier.weight(1f))
+                if (columns == 2 && pair.size == 1) Spacer(Modifier.weight(1f))
             }
         }
     }

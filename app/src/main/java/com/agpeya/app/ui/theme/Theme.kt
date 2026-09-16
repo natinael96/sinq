@@ -160,7 +160,7 @@ private val DarkSinq = SinqColors(
     onHeroGold = GoldDark,
     heroGlow = Color(0x4DE0BC65),
     success = Color(0xFF9EC7AB),
-    arke = Color(0xFFEF3B2E),
+    arke = Color(0xFFFF8277),
     // Over a dark green ground the same tints go muddy — they need to be lighter
     // and a touch more opaque to stay distinguishable from one another.
     highlightYellow = Color(0x59FFD980),

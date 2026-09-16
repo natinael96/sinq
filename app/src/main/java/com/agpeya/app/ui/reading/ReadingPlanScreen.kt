@@ -1,7 +1,10 @@
 package com.agpeya.app.ui.reading
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.border
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -105,21 +108,27 @@ fun ReadingPlanScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val action = com.agpeya.app.ui.common.rememberUserAction()
     val s = LocalStrings.current
-    val today = remember { LocalDate.now() }
+    val today by com.agpeya.app.ui.common.rememberCurrentDate()
 
-    val content by produceState(ReadingPlanContent()) { value = ReadingPlanRepository.content(context) }
+    val contentLoad = com.agpeya.app.ui.common.rememberContentLoad { ReadingPlanRepository.content(context) }
+    val content = contentLoad.value ?: ReadingPlanContent()
+    if (com.agpeya.app.ui.common.contentLoadScreen(contentLoad, s.readingTitle, onBack, content.plans.isEmpty())) return
     // The plan stores slugs; every screen that shows one uses the bundle's own name.
     val bookNames by produceState(emptyMap<String, String>()) {
         value = runCatching { com.agpeya.app.data.ScriptureRepository.bookNames(context) }.getOrDefault(emptyMap())
     }
-    val state by ReadingPlanRepository.state(context).collectAsState(initial = ReadingPlanState())
+    val stateLoad = com.agpeya.app.ui.common.rememberFlowLoad { ReadingPlanRepository.state(context) }
+    if (com.agpeya.app.ui.common.contentLoadScreen(stateLoad, s.readingTitle, onBack)) return
+    val state = stateLoad.value ?: return
     val habits by HabitsRepository.state(context).collectAsState(initial = HabitsState())
     val kept = state.plansKept.mapNotNull { a -> content.plans.firstOrNull { it.id == a.planId }?.let { a to it } }
 
-    val readings by produceState<DayReadings?>(null, today) {
-        value = runCatching { GitsaweRepository.readingsFor(context, today) }.getOrNull()
+    val readingsLoad = com.agpeya.app.ui.common.rememberContentLoad(today) {
+        GitsaweRepository.readingsFor(context, today)
     }
+    val readings = readingsLoad.value
 
     var stopping by remember { mutableStateOf<ReadingPlan?>(null) }
     var pending by remember { mutableStateOf<ReadingPlan?>(null) }
@@ -131,7 +140,7 @@ fun ReadingPlanScreen(
             onDismiss = { pending = null },
             onStart = {
                 pending = null
-                scope.launch {
+                action.run {
                     ReadingPlanRepository.start(context, choice.id, today)
                     // The nudge has had nothing to say until now.
                     com.agpeya.app.reminders.ReadingReminderScheduler.sync(
@@ -167,7 +176,9 @@ fun ReadingPlanScreen(
                 if (kept.any { it.second.withGitsawe }) {
                     item { SectionHeader(s.readingGitsaweHeader) }
                     item {
-                        GitsaweSummary(readings, onOpenGitsawe)
+                        if (readingsLoad.result?.isFailure == true) {
+                            NavRow(s.contentUnavailable, readingsLoad.retry, subtitle = s.retryAction)
+                        } else GitsaweSummary(readings, onOpenGitsawe, readingsLoad.result == null)
                         Spacer(Modifier.height(Spacing.md))
                     }
                 }
@@ -196,7 +207,7 @@ fun ReadingPlanScreen(
                                 plan = plan,
                                 days = plan.days,
                                 onRestart = {
-                                    scope.launch { ReadingPlanRepository.start(context, plan.id, today) }
+                                    action.run { ReadingPlanRepository.restart(context, plan.id, today) }
                                 },
                                 onOpenMap = onOpenMap,
                             )
@@ -221,7 +232,7 @@ fun ReadingPlanScreen(
                                 read = ReadingPlanRepository.chaptersOf(PlanDay(d = 0, r = listOf(r)))
                                     .all { it in state.readFor(plan.id) },
                                 onToggle = {
-                                    scope.launch {
+                                    action.run {
                                         ReadingPlanRepository.toggleReading(
                                             context,
                                             plan.id,
@@ -278,7 +289,7 @@ fun ReadingPlanScreen(
             confirmButton = {
                 TextButton(onClick = {
                     stopping = null
-                    scope.launch { ReadingPlanRepository.stop(context, plan.id) }
+                    action.run { ReadingPlanRepository.stop(context, plan.id) }
                 }) { Text(s.readingStop) }
             },
             dismissButton = { TextButton(onClick = { stopping = null }) { Text(s.cancel) } },
@@ -308,7 +319,7 @@ fun ReadingPlanScreen(
                         subtitle = s.readingCatchOldestDesc,
                         onClick = {
                             catching = null
-                            scope.launch { ReadingPlanRepository.rebaseTo(context, plan.id, oldest, today) }
+                            action.run { ReadingPlanRepository.rebaseTo(context, plan.id, oldest, today) }
                         },
                     )
                     ListRow(
@@ -316,7 +327,7 @@ fun ReadingPlanScreen(
                         subtitle = s.readingRedistributeDesc,
                         onClick = {
                             catching = null
-                            scope.launch {
+                            action.run {
                                 ReadingPlanRepository.redistributeFrom(context, plan.id, oldest, day)
                             }
                         },
@@ -421,7 +432,7 @@ private fun PassageRow(
     ) {
         Box(
             Modifier
-                .size(28.dp)
+                .size(48.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .background(if (read) gold else Color.Transparent)
                 .border(
@@ -429,7 +440,7 @@ private fun PassageRow(
                     color = if (read) gold else MaterialTheme.colorScheme.outlineVariant,
                     shape = RoundedCornerShape(8.dp),
                 )
-                .clickable(onClick = onToggle)
+                .toggleable(value = read, role = Role.Checkbox, onValueChange = { onToggle() })
                 .semantics {
                     role = Role.Checkbox
                     contentDescription = if (read) s.readingDone else s.readingMarkDone
@@ -500,10 +511,14 @@ private fun WeekRow(days: Int) {
 private fun MapStrip(state: ReadingPlanState, onOpenMap: () -> Unit) {
     val s = LocalStrings.current
     val context = LocalContext.current
-    val books by produceState(emptyList<ReadingMapBook>(), state.readChapters) {
-        value = readingMapBooks(context, state.readChapters)
+    val booksLoad = com.agpeya.app.ui.common.rememberContentLoad(state.readChapters) {
+        readingMapBooks(context, state.readChapters)
     }
-    if (books.isEmpty()) return
+    val books = booksLoad.value.orEmpty()
+    if (books.isEmpty()) {
+        NavRow(s.readingMapTitle, onOpenMap)
+        return
+    }
     Column(
         Modifier
             .fillMaxWidth()
@@ -609,13 +624,14 @@ private fun CompletePanel(
 
 /** Starting a plan: what it asks of a day, before it is asked for. */
 @Composable
-private fun StartDialog(plan: ReadingPlan, onDismiss: () -> Unit, onStart: () -> Unit) {
+internal fun StartDialog(plan: ReadingPlan, onDismiss: () -> Unit, onStart: () -> Unit) {
     val s = LocalStrings.current
+    val today by com.agpeya.app.ui.common.rememberCurrentDate()
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(plan.title) },
         text = {
-            Column {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
                 if (plan.subtitle.isNotBlank()) {
                     Text(plan.subtitle, style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(Spacing.sm))
@@ -632,7 +648,12 @@ private fun StartDialog(plan: ReadingPlan, onDismiss: () -> Unit, onStart: () ->
                 )
                 Spacer(Modifier.height(Spacing.sm))
                 Text(
-                    s.readingStartBody,
+                    "${com.agpeya.app.ui.common.formatEthiopian(today, s)} – ${com.agpeya.app.ui.common.formatEthiopian(today.plusDays((plan.days - 1).coerceAtLeast(0).toLong()), s)}",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Spacer(Modifier.height(Spacing.sm))
+                Text(
+                    "${s.readingStartBody}\n\n${s.settingsReadingReminderDesc}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -709,7 +730,7 @@ internal fun PlanChoice(
  * would bury the plan reading underneath it.
  */
 @Composable
-private fun GitsaweSummary(readings: DayReadings?, onOpen: () -> Unit) {
+private fun GitsaweSummary(readings: DayReadings?, onOpen: () -> Unit, loading: Boolean) {
     val s = LocalStrings.current
     val entry = readings?.daily
     // Liturgical names, not translated — the same literals GitsaweScreen uses.
@@ -723,7 +744,7 @@ private fun GitsaweSummary(readings: DayReadings?, onOpen: () -> Unit) {
     // The header above already says የዕለቱ ግጻዌ; a row that falls back to the same
     // words says it twice, which is what it did while the lectionary loaded.
     NavRow(
-        title = entry?.title?.takeIf { it.isNotBlank() } ?: s.loadingLabel,
+        title = entry?.title?.takeIf { it.isNotBlank() } ?: if (loading) s.loadingLabel else s.readingGitsaweHeader,
         onClick = onOpen,
         subtitle = parts.takeIf { it.isNotEmpty() }?.joinToString(" · "),
     )
@@ -753,9 +774,14 @@ internal fun bookName(slug: String, names: Map<String, String>): String =
  * catalogue for exactly that reason — so a ዳዊት day routed at the Bible reader
  * would land on a book it cannot find.
  */
-internal fun planReadingRoute(slug: String, chapter: Int): String =
-    if (slug == PSALMS_SLUG) "psalter?section=${chapter - 1}"
-    else "scripture/$slug/$chapter"
+internal fun planReadingRoute(slug: String, chapter: Int, planId: String? = null, day: Int? = null): String {
+    val route = if (slug == PSALMS_SLUG) "psalter?section=${chapter - 1}" else "scripture/$slug/$chapter"
+    // Psalter completion is available in the day list. Scripture carries the
+    // selected assignment so an older chapter never picks up today's controls.
+    if (slug == PSALMS_SLUG || planId == null || day == null) return route
+    val encoded = java.net.URLEncoder.encode(planId, "UTF-8")
+    return "$route?plan=$encoded&day=$day"
+}
 
 /**
  * What a day of the plan asks for, in the two units that are true.

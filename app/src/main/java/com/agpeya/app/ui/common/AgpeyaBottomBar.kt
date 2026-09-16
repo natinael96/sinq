@@ -1,5 +1,6 @@
 package com.agpeya.app.ui.common
 
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -165,83 +166,26 @@ private fun RowScope.TabSlot(
     selected: Boolean,
     onSelect: () -> Unit,
 ) {
-    val motion = LocalMotion.current
     val sinq = sinqColors
-    // One number drives the whole slot: its share of the width, the light
-    // behind it, the tint of the glyph, and how much of the name is shown.
-    val lit by animateFloatAsState(
-        targetValue = if (selected) 1f else 0f,
-        animationSpec = motion.spec(Motion.standard),
-        label = "tabLit",
-    )
-    val gold = sinq.onHeroGold
-    Box(
-        modifier = Modifier
-            .weight(1f + EXPANSION * lit)
-            .height(SLOT)
-            .clip(CircleShape)
-            .drawBehind {
-                if (lit <= 0f) return@drawBehind
-                // A lamp under the glass: the source sits below the lozenge's
-                // lower edge, so the light climbs the face and fades out
-                // before the top of it.
-                val corner = CornerRadius(size.height / 2f)
-                drawRoundRect(
-                    brush = Brush.radialGradient(
-                        0.00f to gold.copy(alpha = 0.58f * lit),
-                        0.34f to gold.copy(alpha = 0.26f * lit),
-                        0.62f to gold.copy(alpha = 0.08f * lit),
-                        1.00f to Color.Transparent,
-                        center = Offset(size.width / 2f, size.height * 1.16f),
-                        radius = size.height * 1.35f,
-                    ),
-                    cornerRadius = corner,
-                )
-                drawRoundRect(
-                    color = gold.copy(alpha = 0.34f * lit),
-                    cornerRadius = corner,
-                    style = Stroke(width = 1.dp.toPx()),
-                )
-            }
-            // Role.Tab tells a screen reader this is one of a set of tabs and
-            // reads its selected state; the name has to be given here because
-            // only the selected tab shows it on screen.
-            .selectable(
-                selected = selected,
-                role = Role.Tab,
-                onClick = { if (!selected) onSelect() },
-            )
-            .semantics { contentDescription = label },
-        contentAlignment = Alignment.Center,
+    androidx.compose.foundation.layout.Column(
+        modifier = Modifier.weight(1f).heightIn(min = 64.dp)
+            .clip(MaterialTheme.shapes.medium)
+            .selectable(selected = selected, role = Role.Tab, onClick = onSelect)
+            .padding(horizontal = 4.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = if (selected) tab.selectedIcon else tab.icon,
-                contentDescription = null,
-                tint = lerp(sinq.onHeroMuted, gold, lit),
-                modifier = Modifier.size(IconSize.medium),
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelLarge,
-                color = gold,
-                maxLines = 1,
-                softWrap = false,
-                overflow = TextOverflow.Clip,
-                modifier = Modifier
-                    .graphicsLayer { alpha = lit }
-                    // Measured at its full width and then shown a fraction of
-                    // it, so the name is uncovered as the lozenge opens rather
-                    // than being squeezed into whatever room there is.
-                    .layout { measurable, constraints ->
-                        val placeable = measurable.measure(
-                            constraints.copy(minWidth = 0, maxWidth = Constraints.Infinity),
-                        )
-                        val gap = Spacing.sm.roundToPx()
-                        val width = ((placeable.width + gap) * lit).roundToInt().coerceAtLeast(0)
-                        layout(width, placeable.height) { placeable.place(gap, 0) }
-                    },
-            )
-        }
+        Icon(
+            imageVector = if (selected) tab.selectedIcon else tab.icon,
+            contentDescription = null,
+            tint = if (selected) sinq.onHeroGold else sinq.onHeroMuted,
+            modifier = Modifier.size(IconSize.medium),
+        )
+        Text(
+            text = label, style = MaterialTheme.typography.labelMedium,
+            color = if (selected) sinq.onHeroGold else sinq.onHeroMuted,
+            maxLines = 2, overflow = TextOverflow.Ellipsis,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        )
     }
 }

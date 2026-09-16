@@ -78,11 +78,18 @@ fun SearchScreen(
     // holding nothing yet, said "nothing found". Read the corpora on arrival,
     // and say plainly when a query is still being answered.
     var searching by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf(false) }
+    var attempt by remember { androidx.compose.runtime.mutableIntStateOf(0) }
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
     LaunchedEffect(Unit) { runCatching { AmharicSearch.warm(context) } }
     // Groups the reader has asked to see in full; a new query starts them closed.
     var expanded by remember(query) { mutableStateOf(emptySet<AmharicSearch.Source>()) }
 
-    LaunchedEffect(query) {
+    LaunchedEffect(query, attempt, s) {
+        results = emptyList()
+        reference = null
+        failed = false
+        try {
         if (query.trim().length < 2) {
             results = emptyList()
             reference = null
@@ -114,10 +121,13 @@ fun SearchScreen(
             )
             searching = false
         }
+        } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+        catch (_: Exception) { failed = true; searching = false }
     }
 
     fun open(result: AmharicSearch.Result) {
         scope.launch { UserDataRepository.addRecentSearch(context, query) }
+        focusManager.clearFocus()
         onOpenResult(result)
     }
 
@@ -134,7 +144,7 @@ fun SearchScreen(
             Spacer(Modifier.height(Spacing.md))
             // The screen exists to be typed into, so the keyboard is up when it
             // opens; and a query can be cleared without holding backspace.
-            val focus = androidx.compose.ui.focus.FocusRequester()
+            val focus = remember { androidx.compose.ui.focus.FocusRequester() }
             androidx.compose.runtime.LaunchedEffect(Unit) {
                 runCatching { focus.requestFocus() }
             }
@@ -158,6 +168,7 @@ fun SearchScreen(
                 keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                     imeAction = ImeAction.Search,
                 ),
+                keyboardActions = androidx.compose.foundation.text.KeyboardActions(onSearch = { focusManager.clearFocus() }),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -200,8 +211,12 @@ fun SearchScreen(
                 }
                 // Only while there is nothing to show: typing on into a query
                 // that already has results keeps them rather than flashing.
-                query.trim().length >= 2 && searching && results.isEmpty() && reference == null -> {
+                query.trim().length >= 2 && searching -> {
                     LoadingPanel()
+                }
+                failed -> {
+                    StatePanel(icon = Icons.Outlined.Search, title = s.contentUnavailable)
+                    TextButton(onClick = { attempt++ }) { Text(s.retryAction) }
                 }
                 query.trim().length >= 2 && results.isEmpty() && reference == null -> {
                     StatePanel(icon = Icons.Outlined.Search, title = s.noResults)

@@ -1,5 +1,8 @@
 package com.agpeya.app.ui.journal
 
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -35,8 +38,8 @@ internal const val MIN_PASSPHRASE = 4
 /**
  * Stands in front of the journal until the passphrase is given.
  *
- * The unlock is per-visit and held only in composition — leaving the journal
- * re-locks it. Nothing about the unlocked state is persisted, because a
+ * The caller owns a foreground-only session; backgrounding the app
+ * re-locks every private route. Nothing about the unlocked state is persisted, because a
  * "remember me" flag would quietly turn the lock into decoration.
  */
 @Composable
@@ -45,9 +48,10 @@ fun JournalLockGate(s: Strings, onUnlocked: () -> Unit) {
     val scope = rememberCoroutineScope()
     var passphrase by remember { mutableStateOf("") }
     var wrong by remember { mutableStateOf(false) }
+    var verifying by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(Spacing.screen),
+        modifier = Modifier.fillMaxSize().imePadding().verticalScroll(rememberScrollState()).padding(Spacing.screen),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -73,10 +77,14 @@ fun JournalLockGate(s: Strings, onUnlocked: () -> Unit) {
         Button(
             onClick = {
                 scope.launch {
-                    if (JournalLock.verify(context, passphrase)) onUnlocked() else wrong = true
+                    verifying = true
+                    try { if (JournalLock.verify(context, passphrase)) onUnlocked() else wrong = true }
+                    catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+                    catch (_: Exception) { wrong = true }
+                    finally { verifying = false }
                 }
             },
-            enabled = passphrase.isNotEmpty(),
+            enabled = passphrase.isNotEmpty() && !verifying,
         ) { Text(s.unlockAction) }
     }
 }
@@ -104,7 +112,7 @@ fun PassphraseDialog(
         onDismissRequest = onDismiss,
         title = { Text(s.journalSetPassphrase) },
         text = {
-            Column {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
                 OutlinedTextField(
                     value = passphrase,
                     onValueChange = { passphrase = it },
@@ -157,12 +165,13 @@ fun PassphrasePrompt(
     val scope = rememberCoroutineScope()
     var passphrase by remember { mutableStateOf("") }
     var wrong by remember { mutableStateOf(false) }
+    var verifying by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {
-            Column {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
                 body?.let {
                     Text(it, style = MaterialTheme.typography.bodySmall)
                     Spacer(Modifier.height(Spacing.sm))
@@ -181,10 +190,14 @@ fun PassphrasePrompt(
         },
         confirmButton = {
             TextButton(
-                enabled = passphrase.isNotEmpty(),
+                enabled = passphrase.isNotEmpty() && !verifying,
                 onClick = {
                     scope.launch {
-                        if (JournalLock.verify(context, passphrase)) onVerified() else wrong = true
+                        verifying = true
+                        try { if (JournalLock.verify(context, passphrase)) onVerified() else wrong = true }
+                        catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+                        catch (_: Exception) { wrong = true }
+                        finally { verifying = false }
                     }
                 },
             ) { Text(s.continueAction) }

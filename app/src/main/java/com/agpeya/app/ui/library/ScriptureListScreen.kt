@@ -101,9 +101,9 @@ internal fun canonSectionKey(book: ScriptureBookMeta): String =
 fun ScriptureListScreen(testament: String, onBack: () -> Unit, onOpenBook: (String) -> Unit) {
     val context = LocalContext.current
     val s = LocalStrings.current
-    val books by produceState<List<ScriptureBookMeta>>(initialValue = emptyList()) {
-        value = ScriptureRepository.books(context)
-    }
+    val booksLoad = com.agpeya.app.ui.common.rememberContentLoad { ScriptureRepository.books(context) }
+    val books = booksLoad.value.orEmpty()
+    if (com.agpeya.app.ui.common.contentLoadScreen(booksLoad, s.scripturesTitle, onBack, books.isEmpty())) return
     // ብሉይ carries the deuterocanon with it — the books are part of this canon,
     // and tagged as their own testament they matched neither list and so had no
     // door at all. Books are already in canonical order, so the groups are too.
@@ -159,7 +159,7 @@ private fun BookRow(book: ScriptureBookMeta, unit: String, onClick: () -> Unit) 
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(book.nameAm, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
+        Text(book.nameAm, modifier = Modifier.weight(1f).padding(end = 12.dp), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 "${geezNumeral(book.chapters)} $unit",

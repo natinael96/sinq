@@ -72,12 +72,18 @@ object OfferingRepository {
 
     /** Add one line, newest first — the order the ledger is read in. */
     suspend fun addTitheEntry(context: Context, entry: TitheEntry) {
-        val current = titheEntries(context).first()
-        setTitheEntries(context, (listOf(entry) + current).sortedByDescending { it.date })
+        context.offeringDataStore.edit { prefs ->
+            val current = prefs[KEY_TITHE_ENTRIES]?.let { json.decodeFromString(titheSerializer, it) }.orEmpty()
+            prefs[KEY_TITHE_ENTRIES] = json.encodeToString(titheSerializer,
+                (listOf(entry) + current.filterNot { it.id == entry.id }).sortedByDescending { it.date })
+        }
     }
 
     suspend fun deleteTitheEntry(context: Context, id: String) {
-        setTitheEntries(context, titheEntries(context).first().filterNot { it.id == id })
+        context.offeringDataStore.edit { prefs ->
+            val current = prefs[KEY_TITHE_ENTRIES]?.let { json.decodeFromString(titheSerializer, it) }.orEmpty()
+            prefs[KEY_TITHE_ENTRIES] = json.encodeToString(titheSerializer, current.filterNot { it.id == id })
+        }
     }
 
     /** The fraction owed, as a percentage. */
@@ -144,7 +150,7 @@ object OfferingRepository {
         // Integer arithmetic throughout: the tenth of an odd number of santim
         // rounds down, which under-states what is owed rather than inventing a
         // debt of a fraction of a coin.
-        return Reckoning(income = income, due = income * percent / 100, given = given, percent = percent)
+        return Reckoning(income = income, due = (income / 100) * percent + (income % 100) * percent / 100, given = given, percent = percent)
     }
 
     /** The lines falling inside Ethiopian month [month] of year [year]. */

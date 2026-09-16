@@ -133,9 +133,11 @@ fun GitsaweScreen(
     var showPicker by rememberSaveable { mutableStateOf(false) }
     val currentDay by rememberCurrentDate()
     val date = LocalDate.ofEpochDay(epochDay)
-    val readings by produceState<DayReadings?>(initialValue = null, epochDay) {
-        value = GitsaweRepository.readingsFor(context, LocalDate.ofEpochDay(epochDay))
+    val readingsLoad = com.agpeya.app.ui.common.rememberContentLoad(epochDay) {
+        GitsaweRepository.readingsFor(context, LocalDate.ofEpochDay(epochDay))
     }
+    val readings = readingsLoad.value
+    if (com.agpeya.app.ui.common.contentLoadScreen(readingsLoad, s.gitsaweTitle, onBack)) return
 
     val data = readings
     // Keyed on the strings too, so the source labels re-localize on a language switch.

@@ -1,5 +1,10 @@
 package com.agpeya.app.ui.intro
 
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -94,21 +99,34 @@ fun IntroScreen(onDone: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val scope = rememberCoroutineScope()
 
-    var stage by remember { mutableStateOf(IntroStage.PAGES) }
-    var name by remember { mutableStateOf("") }
-    var christianName by remember { mutableStateOf("") }
+    var stage by rememberSaveable { mutableStateOf(IntroStage.PAGES) }
+    var name by rememberSaveable { mutableStateOf("") }
+    var christianName by rememberSaveable { mutableStateOf("") }
     // መጀመሪያ, not ሙሉ. The five levels have always existed and the app has always
     // opened on the longest without asking — two hours of reading a day, where
     // the same seven hours at መጀመሪያ are thirty-six minutes. Writing it here
     // rather than changing the stored default means only people who see this
     // question are answered by it; anyone already praying keeps what they had.
-    var level by remember { mutableStateOf(com.agpeya.app.data.PrayerLevel.BEGINNING) }
+    var level by rememberSaveable { mutableStateOf(com.agpeya.app.data.PrayerLevel.BEGINNING) }
 
-    fun saveAnswers() {
+    var saving by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf(false) }
+    if (failed) androidx.compose.material3.AlertDialog(
+        onDismissRequest = { failed = false }, title = { Text(s.entrySaveFailed) },
+        confirmButton = { TextButton(onClick = { failed = false }) { Text(s.retryAction) } },
+    )
+    fun saveAnswers(onSaved: () -> Unit) {
+        if (saving) return
+        saving = true
         scope.launch {
-            if (name.isNotBlank()) SettingsRepository.setProfileName(context, name)
-            if (christianName.isNotBlank()) SettingsRepository.setChristianName(context, christianName)
-            SettingsRepository.setPrayerLevel(context, level)
+            try {
+                if (name.isNotBlank()) SettingsRepository.setProfileName(context, name)
+                if (christianName.isNotBlank()) SettingsRepository.setChristianName(context, christianName)
+                SettingsRepository.setPrayerLevel(context, level)
+                onSaved()
+            } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+            catch (_: Exception) { failed = true }
+            finally { saving = false }
         }
     }
 
@@ -119,12 +137,13 @@ fun IntroScreen(onDone: () -> Unit) {
             val pagerState = rememberPagerState(pageCount = { pageCount })
             val isLast = pagerState.currentPage == pageCount - 1
             TourScaffold(
+                languageChoice = true,
                 pagerState = pagerState,
                 pageCount = pageCount,
                 isLast = isLast,
                 finishLabel = s.next, // name page → the tour question, not straight to Home
-                onSkip = { saveAnswers(); onDone() },
-                onFinish = { saveAnswers(); stage = IntroStage.ASK },
+                onSkip = { saveAnswers(onDone) },
+                onFinish = { saveAnswers { stage = IntroStage.ASK } },
             ) { page ->
                 when (page) {
                     in pages.indices -> IntroPageContent(pages[page])
@@ -160,7 +179,7 @@ fun IntroScreen(onDone: () -> Unit) {
 
 /** Replayable tour reached from Settings — feature pages only, no name form. */
 @Composable
-fun TutorialScreen(onDone: () -> Unit) {
+fun TutorialScreen(onDone: () -> Unit, onOpenRoute: ((String) -> Unit)? = null) {
     val s = LocalStrings.current
     val pages = tutorialPages(s)
     val pagerState = rememberPagerState(pageCount = { pages.size })
@@ -173,7 +192,12 @@ fun TutorialScreen(onDone: () -> Unit) {
         finishLabel = s.gotIt,
         onSkip = onDone,
         onFinish = onDone,
-    ) { page -> IntroPageContent(pages[page]) }
+    ) { page ->
+        val routes = listOf("gitsawe", "customize", "settings/reminders", "psalter", "reading", "journey", "journal", "tithe", "search")
+        IntroPageContent(pages[page], onOpen = onOpenRoute?.let { open ->
+            routes.getOrNull(page)?.let { route -> { open(route) } }
+        })
+    }
 }
 
 /** "Want a quick tour?" gate shown after the name — Show me / Skip. */
@@ -213,6 +237,7 @@ private fun TutorialAsk(onShow: () -> Unit, onSkip: () -> Unit) {
 /** Shared by the first-run tour and the what's-new tour; one pager, one shape. */
 @Composable
 internal fun TourScaffold(
+    languageChoice: Boolean = false,
     pagerState: androidx.compose.foundation.pager.PagerState,
     pageCount: Int,
     isLast: Boolean,
@@ -222,6 +247,7 @@ internal fun TourScaffold(
     page: @Composable (Int) -> Unit,
 ) {
     val s = LocalStrings.current
+    val context = androidx.compose.ui.platform.LocalContext.current
     val scope = rememberCoroutineScope()
     Scaffold(containerColor = MaterialTheme.colorScheme.background) { innerPadding ->
         Column(
@@ -230,12 +256,17 @@ internal fun TourScaffold(
                 .padding(innerPadding)
                 .padding(horizontal = 32.dp),
         ) {
-            Row(
+            androidx.compose.foundation.layout.FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.End,
             ) {
+                if (languageChoice) {
+                    TextButton(onClick = { scope.launch { SettingsRepository.setLanguage(context, com.agpeya.app.data.Language.AMHARIC) } }) { Text("አማርኛ") }
+                    TextButton(onClick = { scope.launch { SettingsRepository.setLanguage(context, com.agpeya.app.data.Language.ENGLISH) } }) { Text("English") }
+                    Spacer(Modifier.weight(1f))
+                }
                 TextButton(onClick = onSkip) { Text(s.skip) }
             }
 
@@ -278,9 +309,9 @@ internal fun TourScaffold(
 }
 
 @Composable
-private fun IntroPageContent(p: IntroPage) {
+private fun IntroPageContent(p: IntroPage, onOpen: (() -> Unit)? = null) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().imePadding().verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -316,6 +347,9 @@ private fun IntroPageContent(p: IntroPage) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
+        if (onOpen != null) TextButton(onClick = onOpen) {
+            Text(if (LocalStrings.current.isAmharic) "ክፈት" else "Open")
+        }
     }
 }
 
@@ -328,7 +362,7 @@ private fun NameForm(
 ) {
     val s = LocalStrings.current
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().imePadding().verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -381,7 +415,7 @@ private fun LevelForm(level: PrayerLevel, onLevel: (PrayerLevel) -> Unit) {
     val offered = listOf(PrayerLevel.BEGINNING, PrayerLevel.GROWTH, PrayerLevel.FULL)
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().imePadding().verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -410,13 +444,13 @@ private fun LevelForm(level: PrayerLevel, onLevel: (PrayerLevel) -> Unit) {
                         if (selected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f)
                         else androidx.compose.ui.graphics.Color.Transparent,
                     )
-                    .clickable { onLevel(choice) }
+                    .selectable(selected = selected, role = androidx.compose.ui.semantics.Role.RadioButton, onClick = { onLevel(choice) })
                     .padding(horizontal = Spacing.lg, vertical = Spacing.md),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        com.agpeya.app.ui.settings.prayerLevelLabel(choice),
+                        com.agpeya.app.ui.settings.prayerLevelLabel(choice, s),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onBackground,
                     )

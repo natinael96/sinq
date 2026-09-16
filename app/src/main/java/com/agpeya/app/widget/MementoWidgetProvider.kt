@@ -1,5 +1,6 @@
 package com.agpeya.app.widget
 
+import androidx.core.graphics.createBitmap
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
@@ -78,6 +79,8 @@ class MementoWidgetProvider : AppWidgetProvider() {
             lettering(context, gloss, sizeSp, (minWidth - 32).coerceAtLeast(80)),
         )
 
+        views.setContentDescription(R.id.memento_amharic, gloss)
+
         // Under about two cells there is room for the phrase and nothing else.
         val roomForLatin = minHeight >= 96
         views.setViewVisibility(R.id.memento_rule, if (roomForLatin) View.VISIBLE else View.GONE)
@@ -105,7 +108,7 @@ class MementoWidgetProvider : AppWidgetProvider() {
         }
         val metrics = paint.fontMetrics
         val height = (metrics.bottom - metrics.top).coerceAtLeast(1f)
-        val bitmap = Bitmap.createBitmap(
+        val bitmap = createBitmap(
             measured.roundToInt().coerceAtLeast(1),
             height.roundToInt(),
             Bitmap.Config.ARGB_8888,
@@ -133,6 +136,7 @@ class MementoWidgetProvider : AppWidgetProvider() {
         context,
         REQUEST_CODE,
         Intent(context, MainActivity::class.java).apply {
+            putExtra(MainActivity.EXTRA_SKIP_INTRO, true)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         },
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,

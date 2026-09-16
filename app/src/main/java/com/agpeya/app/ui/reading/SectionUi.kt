@@ -53,6 +53,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -453,7 +454,6 @@ internal fun SelectionBar(
                                 imageSheet = false
                                 val shaped = payload.copy(shape = shape, ground = ground)
                                 val save = saving
-                                onDismiss()
                                 if (!imageBusy.value) scope.launch {
                                     imageBusy.value = true
                                     try {
@@ -461,6 +461,7 @@ internal fun SelectionBar(
                                         else com.agpeya.app.ui.common.PassageShare.share(ctx, shaped, s)
                                     } finally {
                                         imageBusy.value = false
+                                        onDismiss()
                                     }
                                 }
                             },
@@ -564,7 +565,7 @@ private fun HighlightRow(
                 modifier = Modifier
                     .weight(1f)
                     .clip(MaterialTheme.shapes.small)
-                    .semantics { contentDescription = "${s.highlight}: $label" }
+                    .semantics { contentDescription = "${s.highlight}: $label"; this.selected = selected }
                     .clickable {
                         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         onPick(key)

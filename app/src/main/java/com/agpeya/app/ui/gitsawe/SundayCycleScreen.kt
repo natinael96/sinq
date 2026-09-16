@@ -53,9 +53,9 @@ fun SundayCycleScreen(
     val context = LocalContext.current
     val s = LocalStrings.current
     val date = LocalDate.ofEpochDay(epochDay)
-    val entries by produceState<List<SundayCycleEntry>?>(null, epochDay) {
-        value = GitsaweRepository.sundayCycleFor(context, date)
-    }
+    val entriesLoad = com.agpeya.app.ui.common.rememberContentLoad(epochDay) { GitsaweRepository.sundayCycleFor(context, date) }
+    val entries = entriesLoad.value
+    if (com.agpeya.app.ui.common.contentLoadScreen(entriesLoad, s.sundayCycleTitle, onBack)) return
     var selectedIndex by rememberSaveable { mutableStateOf<Int?>(null) }
     val selected = entries?.firstOrNull { it.index == selectedIndex }
     BackHandler(enabled = selected != null) { selectedIndex = null }
@@ -71,6 +71,7 @@ fun SundayCycleScreen(
     ) { padding ->
         val data = entries
         if (data == null) LoadingPanel(Modifier.padding(padding))
+        else if (data.isEmpty()) com.agpeya.app.ui.common.StatePanel(title = s.noGitsaweToday, modifier = Modifier.padding(padding))
         else if (selected == null) SundayOptions(data, Modifier.padding(padding)) { selectedIndex = it.index }
         else SundayReading(selected, Modifier.padding(padding), onOpenReading, onOpenBook)
     }

@@ -1,6 +1,6 @@
 # Sinq software design specification
 
-Reviewed **2026-09-16** for **2.3.2 / 72**. Companion to [SRS](SRS.md), [implementation reference](IMPLEMENTATION.md) and [project status](PROJECT_STATUS.md).
+Reviewed **2026-09-17** for **2.4.0 / 74**. Companion to [SRS](SRS.md), [implementation reference](IMPLEMENTATION.md) and [project status](PROJECT_STATUS.md).
 
 ## Architecture
 

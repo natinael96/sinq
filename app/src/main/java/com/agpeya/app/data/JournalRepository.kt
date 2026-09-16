@@ -58,6 +58,9 @@ object JournalRepository {
 
     suspend fun byId(context: Context, id: String): JournalEntry? = dao(context).byId(id)
 
+    suspend fun latestConfessionDraft(context: Context): JournalEntry? =
+        dao(context).latestConfessionDraft()
+
     // ── Writing ──────────────────────────────────────────────────────────────
 
     /**

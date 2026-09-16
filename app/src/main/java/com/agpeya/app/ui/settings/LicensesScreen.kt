@@ -17,6 +17,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.core.net.toUri
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.TextButton
+import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.ui.common.SinqTopBar
@@ -34,6 +46,10 @@ import com.agpeya.app.ui.theme.Spacing
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LicensesScreen(onBack: () -> Unit) {
+    val s = LocalStrings.current
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val headings = listOf("Scripture text", "Mahlet (ሥርዓተ ማኅሌት)", "Gitsawe (ግጻዌ)", "Synaxarium (ስንክሳር)", "Wudase Maryam (ውዳሴ ማርያም)", "Church books (ሌሎች መጻሕፍት)", "Fonts", "App code", "SIL Open Font License 1.1 — full text")
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -41,13 +57,25 @@ fun LicensesScreen(onBack: () -> Unit) {
         },
     ) { innerPadding ->
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
             contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
         ) {
             item {
+                Text(s.contents, style = MaterialTheme.typography.titleMedium)
+                headings.forEachIndexed { index, title ->
+                    com.agpeya.app.ui.common.ListRow(
+                        title = licenseHeading(title, s.isAmharic),
+                        onClick = { scope.launch { listState.animateScrollToItem(index + 1) } },
+                    )
+                }
+            }
+            item {
                 LicSection("Scripture text")
+                LicenseLink("80-weahadu", "https://github.com/EOTCOpenSource/80-weahadu")
+                LicenseLink("CC BY-NC-ND 4.0", "https://creativecommons.org/licenses/by-nc-nd/4.0/")
                 LicPara(
                     "All bundled scripture — the Bible books readable in the Library, the Psalter " +
                         "in Amharic and Ge'ez, and the psalms and gospels arranged into the hours " +
@@ -118,6 +146,7 @@ fun LicensesScreen(onBack: () -> Unit) {
             }
             item {
                 LicSection("Wudase Maryam (ውዳሴ ማርያም)")
+                LicenseLink("wudase-mariam", "https://github.com/tecleet/wudase-mariam")
                 LicPara(
                     "ውዳሴ ማርያም and ጸሎት ዘዘወትር are bundled from the digitisation at " +
                         "github.com/tecleet/wudase-mariam. The underlying prayer is centuries-old, " +
@@ -152,6 +181,7 @@ fun LicensesScreen(onBack: () -> Unit) {
             }
             item {
                 LicSection("Fonts")
+                LicenseLink("SIL Open Font License", "https://openfontlicense.org/")
                 LicPara(
                     "All bundled fonts are used under the SIL Open Font License, Version 1.1 " +
                         "(openfontlicense.org):",
@@ -169,6 +199,7 @@ fun LicensesScreen(onBack: () -> Unit) {
             }
             item {
                 LicSection("App code")
+                LicenseLink("Sinq · Apache License 2.0", "https://github.com/natinael96/sinq/blob/master/LICENSE")
                 LicPara(
                     "The Sinq application source code is licensed under the Apache License, " +
                         "Version 2.0 (see the LICENSE file in the source repository). The content " +
@@ -189,13 +220,15 @@ fun LicensesScreen(onBack: () -> Unit) {
 @Composable
 private fun LicSection(title: String) {
     Spacer(Modifier.height(Spacing.lg))
-    Text(title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+    Text(licenseHeading(title, LocalStrings.current.isAmharic), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.secondary)
     Spacer(Modifier.height(Spacing.xs))
 }
 
 @Composable
 private fun LicPara(text: String) {
-    Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground)
+    SelectionContainer {
+        Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground)
+    }
     Spacer(Modifier.height(Spacing.sm))
 }
 
@@ -213,6 +246,7 @@ private fun LicPara(text: String) {
  */
 @Composable
 private fun LicenseBlock(text: String) {
+    SelectionContainer {
     Row(
         Modifier
             .padding(vertical = Spacing.xs)
@@ -231,9 +265,42 @@ private fun LicenseBlock(text: String) {
             modifier = Modifier.padding(start = Spacing.md),
         )
     }
+    }
     Spacer(Modifier.height(Spacing.sm))
 }
 
+private fun licenseHeading(title: String, amharic: Boolean): String = if (!amharic) title else when (title) {
+    "Scripture text" -> "መጽሐፍ ቅዱስ"
+    "Mahlet (ሥርዓተ ማኅሌት)" -> "ሥርዓተ ማኅሌት"
+    "Gitsawe (ግጻዌ)" -> "ግጻዌ"
+    "Synaxarium (ስንክሳር)" -> "ስንክሳር"
+    "Wudase Maryam (ውዳሴ ማርያም)" -> "ውዳሴ ማርያም"
+    "Church books (ሌሎች መጻሕፍት)" -> "ሌሎች መጻሕፍት"
+    "Fonts" -> "የፊደል ቅርጾች"
+    "App code" -> "የመተግበሪያው ኮድ"
+    "SIL Open Font License 1.1 — full text" -> "SIL Open Font License 1.1 — ሙሉ ጽሑፍ"
+    else -> title
+}
+
+@Composable
+private fun LicenseLink(label: String, url: String) {
+    val context = LocalContext.current
+    val s = LocalStrings.current
+    var failed by remember(url) { mutableStateOf(false) }
+    Column {
+        TextButton(onClick = {
+            failed = runCatching {
+                context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, url.toUri()))
+            }.isFailure
+        }) { Text(label) }
+        SelectionContainer { Text(url, style = MaterialTheme.typography.bodySmall) }
+        if (failed) Text(
+            if (s.isAmharic) "አገናኙን መክፈት አልተቻለም። አድራሻውን ገልብጠው በአሳሽ ይክፈቱ።"
+            else "Could not open this link. Copy the address into a browser.",
+            color = MaterialTheme.colorScheme.error,
+        )
+    }
+}
 
 /**
  * The generic portion of the SIL Open Font License 1.1, verbatim from

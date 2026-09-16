@@ -1,17 +1,32 @@
 # Sinq project status
 
-Reviewed **2026-09-16**, against local commit **69ef0a7** and the checked-in assets, build files, workflows, and Kotlin implementation. This is a repository audit; it does not establish the state of Google Play, remote workflow runs, deployed websites, or a device installation.
+Reviewed **2026-09-17**, against the **v2.4.0 release source** and the checked-in assets, build files, workflows, and Kotlin implementation. This is a repository audit; it does not establish the state of Google Play, remote workflow runs, deployed websites, or a device installation.
+
+## UI/UX remediation code pass
+
+The [70-surface audit](UI_UX_PRODUCT_AUDIT.md) now has an [implementation tracker](UI_UX_FIX_PROGRESS.md). Current changes address journal access, exact reading destinations and completion, reminder summaries, loading/retry states, accessible controls, record correction and backup scope. These changes are included in v2.4.0. The tracker explicitly lists remaining engineering, product and device-verification work; the historical verification results below are not an all-clear for these new changes.
+
+The 17 September follow-up also addresses historical reading assignment context, consistent plan-start confirmation, saved-state loading/retry, guarded mutation failures, Save/Cancel reminder drafts, reader appearance reset and source-credit navigation. Follow-up validation results are recorded below.
+
+The final implementation pass adds the requested Prayer clock widget, penance Save/Cancel configuration, contextual tour actions, explanatory copy and additional reader note/share tools. Existing Home and Library structure is retained as an explicit product decision. Confession preparation is now a minimal private note editor with hidden list previews, and the dedicated communion-preparation route has been removed by user direction. Combined code/build verification results are recorded below.
+
+### Current remediation verification
+
+On 2026-09-17, `testDebugUnitTest lintDebug assembleDebug` completed successfully: **423 JVM tests passed**, with zero failures, errors or skips. Android lint reported **no issues (0 errors, warnings or hints)**, and the debug APK built successfully. Content validation passed with zero warnings; changed Markdown links and whitespace checks passed.
+
+The user selected **code/build checks only**. Visual, TalkBack, foreground/background lifecycle and notification-delivery checks remain unverified. These results do not close the remaining recommendations in the implementation tracker or establish release readiness.
 
 ## Current baseline
 
 | Item | Current repository state |
 |---|---|
 | Application | Sinq (ስንቅ), native Android, Amharic-first with English interface support |
-| Version | **2.3.2**, `versionCode 72`; latest changelog entry dated 2026-09-15 |
+| Version | **2.4.0**, `versionCode 74`; latest changelog entry dated 2026-09-17 |
 | Android identity | `applicationId com.sinq.app`; Kotlin namespace `com.agpeya.app` |
 | Android floor / target | API **23** (Android 6.0) / API **36**; compile SDK 36 |
 | Architecture | Single app module, Compose UI, repository-backed state, bundled JSON content |
 | Persistence | Preferences DataStore for settings and bounded user records; Room/SQLite for journal entries |
+| Home-screen widgets | Daily Gitsawe, Memento Mori and the new website-style Prayer clock; clock uses live digital time and a periodically drawn canonical-hour dial |
 | Navigation | Home, Journey, Library, Settings; search, marks, readers, and management screens are pushed destinations |
 | Product stage | Implemented application with a versioned release history and automated release workflow; original Phase 1/V1 plans are historical |
 | Distribution evidence | Local workflow builds signed APK and Play-upload AAB on `v*` tags; actual publication is not verified here |
@@ -29,13 +44,13 @@ Reviewed **2026-09-16**, against local commit **69ef0a7** and the checked-in ass
 | Church library | Curated shelf of 37 books and a dedicated Mahlet reader | `BookRepository`, `MahletRepository`, `ui/books`, `ui/mahlet` |
 | Mahlet | Month pager, feast-name search, distinct service targets, versions and alternatives, seasonal Tsige access, reader toolbar and contents | `MahletListScreen`, `MahletScreen`, `MahletSeasonScreen` |
 | Reading plans | Bundled plans, day readings, progress, book map, completion flow and reminder | `ReadingPlanRepository`, `ui/reading/ReadingPlan*` |
-| Personal records | Journey/habits, prayer list, tithe ledger, vows, penance, confession and communion preparation | Corresponding repositories and `ui/habits`, `ui/prayerlist`, `ui/nisiha`, `ui/settings` |
+| Personal records | Journey/habits, prayer list, tithe ledger, vows, penance, private confession notes | Corresponding repositories and `ui/habits`, `ui/prayerlist`, `ui/nisiha`, `ui/settings` |
 | Journal | Day/month browsing, passage-linked reflections, confession drafts, optional passphrase gate | `JournalDatabase`, `JournalRepository`, `JournalLock`, `ui/journal` |
 | Marks and search | Bookmarks, verse highlights, passage-linked journal entries; homophone-folded text search | `MarksRepository`, `MarksScreen`, `search/AmharicSearch.kt` |
 | Sharing | Text and image-card export, with gallery saving on supported Android versions | `ui/common/Sharing.kt`, `PassageShare.kt` |
 | Backup | Selectable local-file export/import with restore preview; optional journal inclusion | `BackupRepository`, `SettingsScreen` |
 | Reminders | Prayer alarms and snooze, nightly Journey, daily Gitsawe, reading, breath-prayer and special-habit nudges | `reminders/` |
-| Widgets | Daily Gitsawe and memento mori home-screen widgets | `widget/`, manifest receiver declarations |
+| Widgets | Daily Gitsawe, memento mori and canonical prayer-clock home-screen widgets | `widget/`, manifest receiver declarations |
 
 “Implemented” means present in the repository, not independently approved liturgical content or verified behavior on every supported device.
 
@@ -56,6 +71,10 @@ The counts below come from the bundled assets and `python3 tools/validate_conten
 
 Source Mahlet merge statistics are different from final app statistics; see [the comparison record](../sources/mahlet/COMPARISON.md). Inputs are under `sources/`; runtime content is under `app/src/main/assets/content/`. The Bible and some generators require external sibling source repositories. A normal Android build uses the committed assets and does not require regenerating them.
 
+## Reading-reminder update in 2.4.0
+
+The working tree now schedules Bible reading reminders automatically at **06:30, 14:00 and 20:00 local time**, once a plan is started. Follow-ups depend on unfinished passages across all kept plans, rather than `lastReadOn`. Quiet hours and the existing off switch remain; the time picker and automatic pause after unanswered nudges are removed. App launch, reboot and clock/timezone changes rebuild the schedule. Existing disabled reminders remain disabled. This is separate from the released baseline audited below. Verification: 394 JVM tests passed, including 11 reading-reminder regression tests covering partial/multiple-plan completion, quiet hours, slot rollover, late delivery and daylight-saving transitions. Debug lint and APK assembly also passed on a retry with one worker and a 1 GiB Gradle heap after the first daemon exited unexpectedly. No Android device/emulator was attached for delivery or visual checks.
+
 ## Recent changes
 
 - **2.3.2 / code 72:** centralizes notification IDs and separates fixed notifications from hashed hour/habit families. This fixes the reading-plan nudge overwriting the morning Gitsawe notification and related snooze/done collisions.
@@ -73,7 +92,7 @@ Core prayer, Scripture, calendar, personal records and bundled-library features 
 
 No account, cloud synchronization, advertising SDK or analytics SDK is configured in the inspected app. Android automatic backup is disabled. Users can deliberately export their own files.
 
-The journal passphrase is an interface gate, **not database encryption**. Journal entries are stored in SQLite. Backup export writes **plaintext JSON**, with journal inclusion off by default and confession drafts excluded. A stale comment in `JournalLock.kt` says exports are encrypted; `BackupRepository.writeTo` and the export UI establish the actual plaintext behavior. Correct that comment or implement a separately reviewed encryption change; do not advertise encryption from the comment alone.
+The journal passphrase is an interface gate, **not database encryption**. Journal entries are stored in SQLite. Backup export writes **plaintext JSON**, with journal inclusion off by default and confession drafts excluded. `JournalLock.kt`, `BackupRepository.writeTo` and the export UI now consistently describe the plaintext behavior.
 
 ## Build and automation
 
@@ -84,7 +103,7 @@ The journal passphrase is an interface gate, **not database encryption**. Journa
 - `release.yml` runs content validation, unit tests and release-vital lint before separate APK/AAB builds. The APK enables update notices; the AAB does not. Signing uses repository secrets in CI or local signing configuration.
 - `site.yml` regenerates the separate `gh-pages` checkout on release/manual runs and handles pushes to that branch; Vercel deployment depends on configured credentials.
 
-## Verification on 2026-09-16
+## Earlier documentation-baseline verification on 2026-09-16
 
 - **Content validator: PASS**, zero warnings. It checks stable IDs, manifests, nonempty content and text hygiene, with corpus-specific checks.
 - **Gradle unit-test task: PASS** (`./gradlew testDebugUnitTest --offline --no-daemon`). Gradle reused up-to-date test results: 58 suites, **389 tests**, zero failures/errors/skips. This was not a forced fresh execution of every test. The 58 Kotlin test source files cover content, calendars, reading plans, journal, backup format, search, reminders, rendering helpers and related logic.
@@ -99,7 +118,7 @@ The journal passphrase is an interface gate, **not database encryption**. Journa
 3. **Mahlet editorial review:** ambiguous dates, OR boundaries, undated held-out records and near-duplicate editions remain under `sources/mahlet/review/`. Do not merge alternatives into a compulsory chant sequence.
 4. **Source regeneration:** the editorial `scripts/merge_mahlet.py` command belongs to its original external workspace and is not included here. This repo provides `tools/build_mahlet.py` to build from the checked-in merge.
 5. **Device verification:** notification delivery across reboot, time changes, permission denial and vendor battery restrictions; Android 6 compatibility; large-font/TalkBack behavior; widget refresh; and restore behavior still need a recorded device matrix for a release-readiness claim.
-6. **Comment drift:** update-check comments still mention a daily throttle/settings opt-out; actual current code gates by build flag and checks on launch. The journal export encryption comment also conflicts with execution. These are reported here; application source was not changed in this Markdown-only task.
+6. **Comment drift:** update-check comments still mention a daily throttle/settings opt-out; actual current code gates by build flag and checks on launch. The misleading journal-export encryption comment was corrected during the subsequent UI/UX remediation.
 7. **Publication:** Play enrollment/testing/publication, release-signing secret readiness and live site state cannot be inferred from workflow configuration.
 
 ## Documentation map

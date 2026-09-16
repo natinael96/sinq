@@ -24,6 +24,8 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -71,11 +73,15 @@ fun MarksScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val s = LocalStrings.current
+    val snackbar = remember { androidx.compose.material3.SnackbarHostState() }
+    var query by rememberSaveable { mutableStateOf("") }
+    var colorFilter by rememberSaveable { mutableStateOf<String?>(null) }
     var tab by rememberSaveable { mutableIntStateOf(0) }
 
     val bookmarks by UserDataRepository.bookmarks(context).collectAsState(initial = emptyList())
     val highlightMap by HighlightRepository.highlights(context).collectAsState(initial = emptyMap())
-    val notes by JournalRepository.fromPassages(context).collectAsState(initial = emptyList())
+    var exportTab by rememberSaveable { mutableIntStateOf(0) }
+    var exportResult by remember { mutableStateOf<Boolean?>(null) }
     val names by SettingsRepository.highlightNames(context).collectAsState(initial = emptyMap())
     val highlights by produceState(emptyList<MarksRepository.Mark>(), highlightMap, s) {
         value = MarksRepository.highlights(context, highlightMap, s.psalmName, s.psalterTitle)
@@ -86,22 +92,30 @@ fun MarksScreen(
     ) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
         scope.launch {
-            val text = marksExportText(bookmarks, highlights, notes, names, s)
-            runCatching {
-                context.contentResolver.openOutputStream(uri)?.use { it.write(text.toByteArray()) }
-            }
+            val text = marksExportText(
+                if (exportTab == 0) bookmarks else emptyList(),
+                if (exportTab == 1) highlights else emptyList(), emptyList(), names, s,
+            )
+            exportResult = runCatching {
+                val stream = context.contentResolver.openOutputStream(uri) ?: error("Cannot open export")
+                stream.use { it.write(text.toByteArray()) }
+            }.isSuccess
         }
     }
 
     Scaffold(
+        snackbarHost = { androidx.compose.material3.SnackbarHost(snackbar) },
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             SinqTopBar(
                 title = s.marksTitle,
                 onBack = onBack,
                 actions = {
-                    TextButton(onClick = { exporter.launch("marks-${java.time.LocalDate.now()}.txt") }) {
-                        Text(s.marksExport, style = MaterialTheme.typography.labelLarge)
+                    TextButton(onClick = {
+                        if (tab == 2) onOpenRoute("settings/records")
+                        else { exportTab = tab; exporter.launch("marks-${java.time.LocalDate.now()}.txt") }
+                    }) {
+                        Text(if (tab == 2) s.backupExport else s.marksExport, style = MaterialTheme.typography.labelLarge)
                     }
                 },
             )
@@ -118,16 +132,51 @@ fun MarksScreen(
                         )
                     }
             }
+            if (tab == 2) {
+                com.agpeya.app.ui.journal.JournalAccess(onBack) {
+                    val notes by JournalRepository.fromPassages(context).collectAsState(initial = emptyList())
+                    var noteQuery by remember { mutableStateOf("") }
+                    Column {
+                    androidx.compose.material3.OutlinedTextField(value = noteQuery, onValueChange = { noteQuery = it },
+                        label = { Text(s.tabSearch) }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.screen))
+                    LazyColumn(contentPadding = PaddingValues(Spacing.screen)) {
+                        item { Text(s.exportJournalWarning, style = MaterialTheme.typography.bodySmall) }
+                        if (notes.isEmpty()) item { StatePanel(title = s.journalEmpty) }
+                        noteTab(notes.filter { it.body.contains(noteQuery, ignoreCase = true) || it.anchorLabel.orEmpty().contains(noteQuery, ignoreCase = true) }, onOpenRoute)
+                    }
+                    }
+                }
+                return@Column
+            }
+            androidx.compose.material3.OutlinedTextField(value = query, onValueChange = { query = it },
+                label = { Text(s.tabSearch) }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.screen))
+            if (tab == 1) androidx.compose.foundation.lazy.LazyRow(
+                contentPadding = PaddingValues(horizontal = Spacing.screen), horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                item { androidx.compose.material3.FilterChip(selected = colorFilter == null,
+                    onClick = { colorFilter = null }, label = { Text(s.filterAll) }) }
+                items(HighlightRepository.COLOR_KEYS.size) { index ->
+                    val color = HighlightRepository.COLOR_KEYS[index]
+                    androidx.compose.material3.FilterChip(selected = colorFilter == color,
+                        onClick = { colorFilter = if (colorFilter == color) null else color },
+                        label = { Text(names[color]?.takeIf { it.isNotBlank() } ?: s.highlightColor(color)) })
+                }
+            }
+            val shownBookmarks = bookmarks.filter { it.title.contains(query, ignoreCase = true) || it.hourName.contains(query, ignoreCase = true) }
+            val shownHighlights = highlights.filter {
+                (colorFilter == null || it.colorKey == colorFilter) &&
+                    (it.citation.contains(query, ignoreCase = true) || it.snippet.contains(query, ignoreCase = true))
+            }
             val empty = when (tab) {
-                0 -> bookmarks.isEmpty()
-                1 -> highlights.isEmpty()
-                else -> notes.isEmpty()
+                0 -> shownBookmarks.isEmpty()
+                1 -> shownHighlights.isEmpty()
+                else -> true
             }
             if (empty) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     StatePanel(
                         icon = Icons.Outlined.BookmarkBorder,
-                        title = s.noMarksTitle,
+                        title = if (query.isNotBlank() || colorFilter != null) s.noResults else if (tab == 0) s.marksTabBookmarks else s.marksTabHighlights,
                         body = s.noMarksBody,
                     )
                 }
@@ -138,17 +187,32 @@ fun MarksScreen(
                 contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.md),
             ) {
                 when (tab) {
-                    0 -> bookmarkTab(bookmarks, s, onOpen, onOpenRoute) { bm ->
-                        scope.launch { UserDataRepository.removeBookmark(context, bm.hourId, bm.sectionId) }
+                    0 -> bookmarkTab(shownBookmarks, s, onOpen, onOpenRoute) { bm ->
+                        scope.launch {
+                            UserDataRepository.removeBookmark(context, bm.hourId, bm.sectionId)
+                            if (snackbar.showSnackbar(s.remove, s.undoAction) == androidx.compose.material3.SnackbarResult.ActionPerformed)
+                                UserDataRepository.mergeBookmarks(context, listOf(bm))
+                        }
                     }
-                    1 -> markTab(highlights, names, s, onOpenRoute) { mark ->
-                        scope.launch { HighlightRepository.setHighlights(context, mark.keys, null) }
+                    1 -> markTab(shownHighlights, names, s, onOpenRoute) { mark ->
+                        scope.launch {
+                            HighlightRepository.setHighlights(context, mark.keys, null)
+                            if (snackbar.showSnackbar(s.remove, s.undoAction) == androidx.compose.material3.SnackbarResult.ActionPerformed)
+                                HighlightRepository.setHighlights(context, mark.keys, mark.colorKey)
+                        }
                     }
-                    else -> noteTab(notes, onOpenRoute)
+
                 }
                 item { Spacer(Modifier.height(Spacing.xxl)) }
             }
         }
+    }
+    exportResult?.let { ok ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { exportResult = null },
+            title = { Text(if (ok) s.backupSaved else s.backupFailed) },
+            confirmButton = { TextButton(onClick = { exportResult = null }) { Text(s.ok) } },
+        )
     }
 }
 
@@ -225,7 +289,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.noteTab(
         ListRow(
             title = entry.anchorLabel.orEmpty().ifBlank { entry.preview },
             subtitle = entry.preview.takeIf { it.isNotBlank() },
-            onClick = { entry.anchorRoute?.let(onOpenRoute) },
+            onClick = { onOpenRoute("journal/entry?id=${android.net.Uri.encode(entry.id)}") },
         )
     }
 }

@@ -131,6 +131,20 @@ object UserDataRepository {
         context.userDataStore.edit { it.remove(KEY_RECENT_SEARCHES) }
     }
 
+    @kotlinx.serialization.Serializable
+    data class ReaderPosition(val sectionId: String, val index: Int, val offset: Int = 0)
+
+    private val KEY_READER_POSITIONS = stringPreferencesKey("reader_positions_json")
+
+    suspend fun readerPosition(context: Context, hourId: String): ReaderPosition? {
+        val raw = context.userDataStore.data.first()[KEY_READER_POSITIONS] ?: return null
+        return runCatching { json.decodeFromString<Map<String, ReaderPosition>>(raw)[hourId] }.getOrNull()
+    }
+
+    internal fun resolvePosition(position: ReaderPosition?, sectionIds: List<String>, fallback: Int): Int =
+        position?.sectionId?.let { sectionIds.indexOf(it).takeIf { index -> index >= 0 } }
+            ?: fallback.coerceIn(0, (sectionIds.size - 1).coerceAtLeast(0))
+
     // ---- Scroll memory (hourId -> section index) ----
 
     suspend fun savedPosition(context: Context, hourId: String): Int {
@@ -140,8 +154,15 @@ object UserDataRepository {
         return map[hourId] ?: 0
     }
 
-    suspend fun savePosition(context: Context, hourId: String, index: Int) {
+    suspend fun savePosition(context: Context, hourId: String, index: Int, sectionId: String? = null, offset: Int = 0) {
         context.userDataStore.edit { prefs ->
+            if (sectionId != null) {
+                val positions = runCatching {
+                    json.decodeFromString<Map<String, ReaderPosition>>(prefs[KEY_READER_POSITIONS] ?: "{}")
+                }.getOrDefault(emptyMap())
+                prefs[KEY_READER_POSITIONS] = json.encodeToString(positions +
+                    (hourId to ReaderPosition(sectionId, index, offset.coerceAtLeast(0))))
+            }
             val map = prefs[KEY_PROGRESS]?.let {
                 runCatching { json.decodeFromString<Map<String, Int>>(it) }.getOrNull()
             } ?: emptyMap()

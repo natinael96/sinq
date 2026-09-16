@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -69,15 +70,10 @@ fun SettingsScreen(
     val tithe by SettingsRepository.titheReminders(context).collectAsState(initial = emptyList())
     val vows by com.agpeya.app.data.OfferingRepository.vows(context).collectAsState(initial = emptyList())
     val lastBackupAt by SettingsRepository.lastBackupAt(context).collectAsState(initial = 0L)
-    val enabledCount = listOf(
-        night,
-        gitsawe,
-        breath,
-        alms.any { it.enabled },
-        repentance.any { it.enabled },
-        tithe.any { it.enabled },
-        vows.any { it.remindsStill },
-    ).count { it }
+    val today by com.agpeya.app.ui.common.rememberCurrentDate()
+    val schedule by remember(today) { com.agpeya.app.data.DaySchedule.observe(context, today) }
+        .collectAsState(initial = emptyList())
+    val enabledCount = schedule.count { it.today }
     val size = SettingsRepository.FONT_STEPS_SP[fontStep.coerceIn(0, SettingsRepository.FONT_STEPS_SP.lastIndex)]
 
     Scaffold(
@@ -112,8 +108,8 @@ fun SettingsScreen(
                 Spacer(Modifier.height(Spacing.md))
                 SectionHeader(s.settingsGroupPrayer)
                 NavRow(s.settingsGroupReading, onOpenReading, subtitle = "${fontLabel(font)} · ${size}sp")
-                NavRow(s.prayerSettingsTitle, onOpenPrayer, subtitle = prayerLevelLabel(prayerLevel))
-                NavRow(s.remindersSettingsTitle, onOpenReminders, subtitle = if (enabledCount == 0) s.remindersOff else s.remindersOn(enabledCount))
+                NavRow(s.prayerSettingsTitle, onOpenPrayer, subtitle = prayerLevelLabel(prayerLevel, s))
+                NavRow(s.remindersSettingsTitle, onOpenReminders, subtitle = "${s.todayLabel}: $enabledCount")
                 Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(s.settingsGroupRecords)
                 // One row, not two: መረጃ's own page opened with this page's
@@ -228,7 +224,13 @@ internal fun fontLabel(font: ReadingFont): String = when (font) {
     ReadingFont.ZEMENAY -> "Zemenay"
 }
 
-internal fun prayerLevelLabel(level: PrayerLevel): String = when (level) {
+internal fun prayerLevelLabel(level: PrayerLevel, s: com.agpeya.app.ui.strings.Strings): String = if (s === com.agpeya.app.ui.strings.EnglishStrings) when (level) {
+    PrayerLevel.PSALM_50 -> "Psalm 50"
+    PrayerLevel.BEGINNING -> "Beginning"
+    PrayerLevel.GROWTH -> "Growth"
+    PrayerLevel.STEADFAST -> "Steadfast"
+    PrayerLevel.FULL -> "Full"
+} else when (level) {
     PrayerLevel.PSALM_50 -> "መዝሙር ፶"
     PrayerLevel.BEGINNING -> "መጀመሪያ"
     PrayerLevel.GROWTH -> "እድገት"

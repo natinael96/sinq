@@ -94,9 +94,12 @@ fun MahletListScreen(
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
 
-    val index by produceState(MahletIndex()) { value = MahletRepository.index(context) }
-    val today by produceState(emptyList<MahletOrder>()) {
-        value = MahletRepository.ordersOn(context, LocalDate.now())
+    val indexLoad = com.agpeya.app.ui.common.rememberContentLoad { MahletRepository.index(context) }
+    val index = indexLoad.value ?: MahletIndex()
+    if (com.agpeya.app.ui.common.contentLoadScreen(indexLoad, s.mahletTitle, onBack, index.months.isEmpty())) return
+    val currentDate by com.agpeya.app.ui.common.rememberCurrentDate()
+    val today by produceState(emptyList<MahletOrder>(), currentDate) {
+        value = MahletRepository.ordersOn(context, currentDate)
     }
     var query by rememberSaveable { mutableStateOf("") }
 

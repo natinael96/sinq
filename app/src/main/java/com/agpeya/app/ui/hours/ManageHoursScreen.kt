@@ -101,6 +101,17 @@ fun ManageHoursScreen(
     val hours = remember(builtIn, config) { HoursRepository.merge(builtIn, config, includeHidden = true) }
     val active = modes.activeMode
 
+    var deleting by remember { mutableStateOf<Hour?>(null) }
+    var notificationDenied by remember { mutableStateOf(false) }
+    val permission = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
+    ) { granted -> notificationDenied = !granted }
+    fun requestPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= 33 &&
+            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            permission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
     var renaming by remember { mutableStateOf<Hour?>(null) }
     var creating by remember { mutableStateOf(false) }
     var editingTime by remember { mutableStateOf<Pair<Hour, ReminderEntry>?>(null) }
@@ -125,6 +136,7 @@ fun ManageHoursScreen(
             )
 
     fun save(entry: ReminderEntry) {
+        if (entry.enabled) requestPermission()
         val modeId = active?.id ?: return
         scope.launch {
             ModesRepository.upsertEntry(context, modeId, entry)
@@ -175,15 +187,26 @@ fun ManageHoursScreen(
             items(hours.size, key = { hours[it].id }) { index ->
                 val hour = hours[index]
                 val hidden = hour.id in config.hidden
-                val entry = active?.entries?.firstOrNull { it.hourId == hour.id }
+                val entries = active?.entries.orEmpty().filter { it.hourId == hour.id }
+                val entry = entries.firstOrNull()
                 HourRow(
                     hour = hour,
                     hidden = hidden,
                     entry = entry,
+                    entries = entries,
                     isCustom = hour.id.startsWith("custom_"),
-                    onOpenTime = { editingTime = hour to entryFor(hour) },
+                    onOpenTime = { if (entries.size > 1) onOpenModes() else editingTime = hour to entryFor(hour) },
                     onOpenSections = { onEditHour(hour.id) },
-                    onToggleRing = { on -> save(entryFor(hour).copy(enabled = on)) },
+                    onToggleRing = { on ->
+                        if (on) requestPermission()
+                        val modeId = active?.id
+                        if (modeId != null) scope.launch {
+                            entries.ifEmpty { listOf(entryFor(hour)) }.forEach {
+                                ModesRepository.upsertEntry(context, modeId, it.copy(enabled = on))
+                            }
+                            reschedule()
+                        }
+                    },
                     onToggleHidden = {
                         scope.launch {
                             HoursRepository.setHidden(context, hour.id, !hidden)
@@ -191,12 +214,7 @@ fun ManageHoursScreen(
                         }
                     },
                     onRename = { renaming = hour },
-                    onDelete = {
-                        scope.launch {
-                            HoursRepository.deleteCustomHour(context, hour.id)
-                            reschedule()
-                        }
-                    },
+                    onDelete = { deleting = hour },
                     onMoveUp = { move(index, index - 1) }.takeIf { index > 0 },
                     onMoveDown = { move(index, index + 1) }.takeIf { index < hours.size - 1 },
                 )
@@ -210,6 +228,22 @@ fun ManageHoursScreen(
         }
     }
 
+    if (notificationDenied) AlertDialog(
+        onDismissRequest = { notificationDenied = false },
+        title = { Text(s.notifDisabledTitle) },
+        confirmButton = { TextButton(onClick = {
+            notificationDenied = false
+            com.agpeya.app.ui.common.openNotificationSettings(context)
+        }) { Text(s.settingsTitle) } },
+    )
+    deleting?.let { hour -> AlertDialog(
+        onDismissRequest = { deleting = null }, title = { Text(s.remove) }, text = { Text(hour.name) },
+        confirmButton = { TextButton(onClick = { scope.launch {
+            HoursRepository.deleteCustomHour(context, hour.id)
+            reschedule(); deleting = null
+        } }) { Text(s.remove) } },
+        dismissButton = { TextButton(onClick = { deleting = null }) { Text(s.cancel) } },
+    ) }
     editingTime?.let { (hour, entry) ->
         ModalBottomSheet(onDismissRequest = { editingTime = null }) {
             Text(
@@ -225,7 +259,7 @@ fun ManageHoursScreen(
                 // would let a row edit some other row's time.
                 canPickHour = false,
                 canDelete = false,
-                onSave = { save(it.copy(enabled = true)); editingTime = null },
+                onSave = { save(it); editingTime = null },
                 onDelete = { editingTime = null },
             )
         }
@@ -275,6 +309,7 @@ private fun HourRow(
     hour: Hour,
     hidden: Boolean,
     entry: ReminderEntry?,
+    entries: List<ReminderEntry>,
     isCustom: Boolean,
     onOpenTime: () -> Unit,
     onOpenSections: () -> Unit,
@@ -319,6 +354,7 @@ private fun HourRow(
             Text(
                 when {
                     hidden -> s.hiddenHourNote
+                    entries.size > 1 -> entries.joinToString(" · ") { "%02d:%02d".format(it.hour, it.minute) }
                     entry == null -> s.daysSummaryDaily
                     else -> daysSummary(entry.days, s.dayLabels, s.daysSummaryDaily, s.noDaySelected)
                 },
@@ -327,7 +363,7 @@ private fun HourRow(
             )
         }
         Switch(
-            checked = !hidden && entry?.enabled == true,
+            checked = !hidden && entries.any { it.enabled },
             onCheckedChange = onToggleRing,
             enabled = !hidden,
         )

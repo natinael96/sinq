@@ -96,7 +96,9 @@ private val FONT_STEPS_SP = com.agpeya.app.data.SettingsRepository.FONT_STEPS_SP
 @Composable
 fun ScriptureReaderScreen(
     bookKey: String,
-    initialChapter: Int = 1,
+    selectedPlanId: String = "",
+    selectedPlanDay: Int = 0,
+    initialChapter: Int = 0,
     initialStart: Int = -1,
     initialEnd: Int = -1,
     onBack: () -> Unit,
@@ -105,6 +107,7 @@ fun ScriptureReaderScreen(
     /** Follows today's ንባብ into the next book when the day crosses one. */
     onOpenRoute: (route: String) -> Unit = {},
 ) {
+    com.agpeya.app.ui.common.ReaderAwake()
     val context = LocalContext.current
     val s = LocalStrings.current
     val scope = androidx.compose.runtime.rememberCoroutineScope()
@@ -169,16 +172,10 @@ fun ScriptureReaderScreen(
     // Every plan being kept, with the day it is on. A psalm can belong to
     // today in two plans at once — the year reaches it, and የዳዊት ንባብ is on it —
     // and each wants its own tick.
-    val planDays = remember(planContent, planState, today) {
-        planState.plansKept.mapNotNull { kept ->
-            val plan = planContent.plans.firstOrNull { it.id == kept.planId } ?: return@mapNotNull null
-            val n = com.agpeya.app.data.ReadingPlanRepository.dayOn(kept.startedOn, today, plan.days)
-            val day = com.agpeya.app.data.ReadingPlanRepository.effectiveDays(plan, planState)
-                .firstOrNull { it.d == n } ?: return@mapNotNull null
-            plan to day
-        }
+    val planDays = remember(planContent, planState, today, selectedPlanId, selectedPlanDay) {
+        com.agpeya.app.ui.reading.readerPlanDays(planContent, planState, today, selectedPlanId, selectedPlanDay)
     }
-    val lastChapters by SettingsRepository.lastChapters(context).collectAsState(initial = emptyMap())
+    val lastChapters by SettingsRepository.lastChapters(context).collectAsState(initial = null)
     var chaptersOpen by remember { mutableStateOf(false) }
     var chapter by rememberSaveable(bookKey) {
         mutableIntStateOf(initialChapter.coerceIn(1, b.chapters.size))
@@ -187,11 +184,12 @@ fun ScriptureReaderScreen(
     // that names one — a ግጻዌ citation, a bookmark — always wins over the memory.
     var restoredChapter by rememberSaveable(bookKey) { mutableStateOf(false) }
     androidx.compose.runtime.LaunchedEffect(bookKey, lastChapters) {
-        if (restoredChapter || initialChapter > 1) {
+        if (restoredChapter || initialChapter > 0) {
             restoredChapter = true
             return@LaunchedEffect
         }
-        lastChapters[bookKey]?.takeIf { it in 1..b.chapters.size }?.let { chapter = it }
+        val stored = lastChapters ?: return@LaunchedEffect
+        stored[bookKey]?.takeIf { it in 1..b.chapters.size }?.let { chapter = it }
         restoredChapter = true
     }
     androidx.compose.runtime.LaunchedEffect(bookKey, chapter, restoredChapter) {
@@ -457,40 +455,38 @@ fun ScriptureReaderScreen(
                     val dayChapters = day.r.flatMap { r -> r.chapters.map { r.b to it } }
                     val here = dayChapters.indexOf(bookKey to chapter)
                     if (here < 0) return@forEach
-                    val read = com.agpeya.app.data.ReadingPlanRepository.isRead(planState, plan.id, day)
+                    val chapterKey = com.agpeya.app.data.ReadingPlanRepository.chapterKey(bookKey, chapter)
+                    val read = chapterKey in planState.readFor(plan.id)
                     ListRow(
-                        title = s.readingChapterOfDay(here + 1, dayChapters.size),
+                        title = if (read) s.readingDone else s.readingMarkChapterDone,
                         // Which plan, when more than one is being kept; the
                         // action otherwise, since there is nothing to tell apart.
-                        subtitle = if (planDays.size > 1) plan.title
-                        else if (read) s.readingDone else s.readingMarkDone,
+                        subtitle = "${plan.title} · ${s.readingDayLabel(com.agpeya.app.ui.reading.geezNumeral(day.d))} · ${s.readingChapterOfDay(here + 1, dayChapters.size)}",
                         leadingIcon = if (read) Icons.Outlined.Check else Icons.AutoMirrored.Outlined.MenuBook,
                         leadingTint = if (read) MaterialTheme.colorScheme.secondary else null,
                         onClick = {
                             scope.launch {
-                                if (read) {
-                                    com.agpeya.app.data.ReadingPlanRepository.unmarkDay(context, plan, day)
-                                } else {
-                                    com.agpeya.app.data.ReadingPlanRepository.markDay(context, plan.id, day, today)
-                                }
+                                com.agpeya.app.data.ReadingPlanRepository.toggleReading(
+                                    context, plan.id, listOf(chapterKey), today,
+                                )
                             }
                         },
                     )
-                    dayChapters.getOrNull(here + 1)?.let { (nextBook, nextChapter) ->
+                    dayChapters.getOrNull(here + 1)?.takeUnless { it.first == bookKey && it.second == chapter + 1 }?.let { (nextBook, nextChapter) ->
                         if (nextBook == bookKey) {
                             com.agpeya.app.ui.common.ChapterStepper(
                                 previousLabel = null,
                                 nextLabel = "${s.chapterUnit} ${com.agpeya.app.ui.reading.geezNumeral(nextChapter)}",
                                 onPrevious = null,
-                                onNext = { chapter = nextChapter },
+                                onNext = { chapter = nextChapter; scope.launch { listState.scrollToItem(0) } },
                             )
                         } else {
                             ListRow(
                                 title = s.nextChapter,
-                                subtitle = nextBook,
+                                subtitle = bookNames[nextBook] ?: nextBook,
                                 onClick = {
                                     onOpenRoute(
-                                        com.agpeya.app.ui.reading.planReadingRoute(nextBook, nextChapter),
+                                        com.agpeya.app.ui.reading.planReadingRoute(nextBook, nextChapter, selectedPlanId.takeIf { it.isNotBlank() }, day.d),
                                     )
                                 },
                             )
@@ -500,8 +496,8 @@ fun ScriptureReaderScreen(
                 com.agpeya.app.ui.common.ChapterStepper(
                     previousLabel = "${s.chapterUnit} ${com.agpeya.app.ui.reading.geezNumeral(chapter - 1)}",
                     nextLabel = "${s.chapterUnit} ${com.agpeya.app.ui.reading.geezNumeral(chapter + 1)}",
-                    onPrevious = { chapter -= 1 }.takeIf { chapter > 1 },
-                    onNext = { chapter += 1 }.takeIf { chapter < b.chapters.size },
+                    onPrevious = { chapter -= 1; scope.launch { listState.scrollToItem(0) }; Unit }.takeIf { chapter > 1 },
+                    onNext = { chapter += 1; scope.launch { listState.scrollToItem(0) }; Unit }.takeIf { chapter < b.chapters.size },
                 )
                 Spacer(Modifier.height(Spacing.huge))
             }
@@ -510,7 +506,7 @@ fun ScriptureReaderScreen(
             com.agpeya.app.ui.common.ChapterSheet(
                 count = b.chapters.size,
                 current = chapter - 1,
-                onPick = { chaptersOpen = false; chapter = it + 1 },
+                onPick = { chaptersOpen = false; chapter = it + 1; scope.launch { listState.scrollToItem(0) }; Unit },
                 onDismiss = { chaptersOpen = false },
             )
         }

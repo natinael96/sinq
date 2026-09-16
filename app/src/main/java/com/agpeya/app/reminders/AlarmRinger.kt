@@ -1,5 +1,6 @@
 package com.agpeya.app.reminders
 
+import androidx.core.net.toUri
 import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.Notification
@@ -79,7 +80,7 @@ object AlarmRinger {
             requestCode,
             Intent(app, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                data = Uri.parse("agpeya://alarm/open/$hourId")
+                data = "agpeya://alarm/open/$hourId".toUri()
                 putExtra(ReminderScheduler.EXTRA_HOUR_ID, hourId)
             },
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
@@ -90,7 +91,7 @@ object AlarmRinger {
             requestCode,
             Intent(app, AlarmActionReceiver::class.java).apply {
                 this.action = action
-                data = Uri.parse("agpeya://alarm/${action.substringAfterLast('.')}/$hourId")
+                data = "agpeya://alarm/${action.substringAfterLast('.')}/$hourId".toUri()
                 putExtra(ReminderScheduler.EXTRA_HOUR_ID, hourId)
                 putExtra(ReminderScheduler.EXTRA_HOUR_NAME, hourName)
                 putExtra(ReminderScheduler.EXTRA_SNOOZE_COUNT, snoozeCount + 1)

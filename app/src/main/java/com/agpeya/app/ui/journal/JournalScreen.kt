@@ -27,6 +27,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -46,6 +48,7 @@ import com.agpeya.app.model.JournalKind
 import com.agpeya.app.ui.common.EthiopianDate
 import com.agpeya.app.ui.common.SinqCard
 import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.common.formatEthiopian
 import com.agpeya.app.ui.common.formatEthiopianShort
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.strings.Strings
@@ -77,7 +80,7 @@ import androidx.compose.ui.unit.dp
  */
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-fun JournalScreen(
+private fun JournalScreenContent(
     onBack: () -> Unit,
     onOpenEntry: (String) -> Unit,
     onNewEntry: (kind: JournalKind) -> Unit,
@@ -91,10 +94,10 @@ fun JournalScreen(
     // No screenshots, and nothing in the recents thumbnail.
     SecureScreen()
 
-    val locked by JournalLock.isLocked(context).collectAsState(initial = false)
-    var unlocked by remember { mutableStateOf(false) }
+    val locked by JournalLock.isLocked(context).collectAsState(initial = true)
+    val unlocked = true
 
-    val today = remember { LocalDate.now() }
+    val today by com.agpeya.app.ui.common.rememberCurrentDate()
     val todayEth = remember(today) { EthiopianDate.from(today) }
     // Months back from the current one; 0 is now.
     var offset by remember { mutableIntStateOf(0) }
@@ -156,12 +159,7 @@ fun JournalScreen(
             }
         },
     ) { inner ->
-        if (locked && !unlocked) {
-            Column(Modifier.fillMaxSize().padding(inner)) {
-                JournalLockGate(s) { unlocked = true }
-            }
-            return@Scaffold
-        }
+
 
         LazyColumn(
             state = listState,
@@ -216,7 +214,7 @@ fun JournalScreen(
                 com.agpeya.app.ui.common.NavRow(
                     title = s.confessionPrepTitle,
                     onClick = onStartConfessionPrep,
-                    subtitle = "${s.confessionPrepDesc} · ${s.comingSoon}",
+                    subtitle = s.confessionPrepDesc,
                 )
             }
 
@@ -240,10 +238,12 @@ fun JournalScreen(
             confirmButton = {
                 TextButton(onClick = {
                     confessing = false
-                    scope.launch { JournalRepository.dischargeDrafts(context) }
+                    scope.launch {
+                        JournalRepository.dischargeDrafts(context)
+                        penancePrompt = true
+                    }
                     // The one moment a ቀኖና is fresh in hand is on the way home
                     // from confessing, so it is offered here and nowhere else.
-                    penancePrompt = true
                 }) { Text(s.confessedAction) }
             },
             dismissButton = { TextButton(onClick = { confessing = false }) { Text(s.cancel) } },
@@ -341,7 +341,8 @@ private fun MonthStrip(
             val isToday = todayEth.year == year && todayEth.month == month && todayEth.day == day
             Box(
                 modifier = Modifier
-                    .size(13.dp)
+                    .size(48.dp)
+                    .semantics(mergeDescendants = true) { contentDescription = formatEthiopian(EthiopianDate(year, month, day).toGregorian(), s) }
                     .clip(RoundedCornerShape(2.dp))
                     .background(
                         when {
@@ -352,15 +353,16 @@ private fun MonthStrip(
                     )
                     .then(if (isToday) Modifier.border(1.dp, gold, RoundedCornerShape(2.dp)) else Modifier)
                     .clickable(enabled = isWritten, onClickLabel = s.journalTitle) { onDay(day) },
-            )
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(day.toString(), color = if (isWritten) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurface)
+            }
         }
     }
 }
 
 /**
- * One entry in the month list: the day it belongs to, its first line, and — for
- * a ንስሐ draft — an unmistakable mark, since that is the one kind whose handling
- * differs.
+ * A dated list entry. Confession rows show a fixed label instead of note text.
  */
 @Composable
 private fun EntryRow(entry: JournalEntry, s: Strings, onClick: () -> Unit) {
@@ -382,7 +384,7 @@ private fun EntryRow(entry: JournalEntry, s: Strings, onClick: () -> Unit) {
         }
         Spacer(Modifier.height(Spacing.xs))
         Text(
-            entry.preview,
+            if (entry.isDraft) s.journalKindConfession else entry.preview,
             style = MaterialTheme.typography.bodyLarge,
             maxLines = 2,
             overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
@@ -402,5 +404,12 @@ private fun EntryRow(entry: JournalEntry, s: Strings, onClick: () -> Unit) {
                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
             )
         }
+    }
+}
+
+@Composable
+fun JournalScreen(onBack: () -> Unit, onOpenEntry: (String) -> Unit, onNewEntry: (JournalKind) -> Unit, onStartConfessionPrep: () -> Unit, onOpenPenance: () -> Unit) {
+    com.agpeya.app.ui.journal.JournalAccess(onBack) {
+        JournalScreenContent(onBack, onOpenEntry, onNewEntry, onStartConfessionPrep, onOpenPenance)
     }
 }

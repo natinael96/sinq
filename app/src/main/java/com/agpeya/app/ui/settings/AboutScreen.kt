@@ -36,9 +36,7 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScreen(onBack: () -> Unit, onOpenLicenses: () -> Unit = {}) {
-    // This page stays English regardless of the app language: the source attribution and
-    // licence terms it carries are legal notices, and they should read exactly as worded.
-    val s = com.agpeya.app.ui.strings.EnglishStrings
+    val s = com.agpeya.app.ui.strings.LocalStrings.current
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {

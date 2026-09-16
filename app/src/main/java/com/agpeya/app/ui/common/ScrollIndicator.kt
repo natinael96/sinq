@@ -1,5 +1,6 @@
 package com.agpeya.app.ui.common
 
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -71,9 +72,12 @@ fun ScrollIndicator(
     modifier: Modifier = Modifier,
     label: ((Int) -> String)? = null,
 ) {
-    val info = state.layoutInfo
-    val total = info.totalItemsCount
-    val visible = info.visibleItemsInfo.size
+    // Layout offsets change on every pixel; only invalidate composition when
+    // the item counts or the item-based thumb position actually change.
+    val counts by remember(state) { derivedStateOf {
+        state.layoutInfo.let { it.totalItemsCount to it.visibleItemsInfo.size }
+    } }
+    val (total, visible) = counts
     // Nothing to say when everything already fits on the screen.
     if (total == 0 || visible == 0 || visible >= total) return
 
@@ -86,8 +90,10 @@ fun ScrollIndicator(
     var dragFraction by remember { mutableFloatStateOf(0f) }
 
     val last = (total - visible).coerceAtLeast(1)
-    val fraction = if (dragging) dragFraction
-    else (state.firstVisibleItemIndex.toFloat() / last).coerceIn(0f, 1f)
+    val listFraction by remember(state, last) { derivedStateOf {
+        (state.firstVisibleItemIndex.toFloat() / last).coerceIn(0f, 1f)
+    } }
+    val fraction = if (dragging) dragFraction else listFraction
 
     val alpha by animateFloatAsState(
         targetValue = when {

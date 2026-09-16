@@ -26,9 +26,8 @@ import com.agpeya.app.ui.theme.Spacing
  * Longer than the changelog on purpose: a release note says what changed, this
  * says what the thing is for and where it lives.
  *
- * It offers no way into the features it describes, deliberately: a button that
- * opened one would have to close the tour to do it, and the pages after it
- * would never be read.
+ * Optional page actions open the feature immediately. The tour remains replayable
+ * from Settings when the reader wants to return to the remaining pages.
  *
  * Skipping and finishing are the same outcome: both mark the version seen, so
  * it is asked once and never nags.
@@ -37,6 +36,7 @@ import com.agpeya.app.ui.theme.Spacing
 fun WhatsNewTour(
     tour: Tour,
     onDone: () -> Unit,
+    onOpenRoute: ((String) -> Unit)? = null,
 ) {
     val s = LocalStrings.current
     val pages = tour.pages
@@ -55,12 +55,12 @@ fun WhatsNewTour(
         onSkip = onDone,
         onFinish = onDone,
     ) { i ->
-        TourPageContent(page = pages[i], amharic = s.isAmharic)
+        TourPageContent(page = pages[i], amharic = s.isAmharic, onOpenRoute = onOpenRoute)
     }
 }
 
 @Composable
-private fun TourPageContent(page: TourPage, amharic: Boolean) {
+private fun TourPageContent(page: TourPage, amharic: Boolean, onOpenRoute: ((String) -> Unit)?) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -91,5 +91,11 @@ private fun TourPageContent(page: TourPage, amharic: Boolean) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
+        if (page.route != null && onOpenRoute != null && !page.actionLabel.isBlank) {
+            Spacer(Modifier.height(Spacing.md))
+            androidx.compose.material3.TextButton(onClick = { onOpenRoute(page.route) }) {
+                Text(page.actionLabel.pick(amharic))
+            }
+        }
     }
 }

@@ -25,6 +25,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -54,10 +56,10 @@ private val COL = 16.dp // CELL + 2*GAP
 internal val APP_EPOCH_EC = EthiopianDate(2018, 11, 1)
 
 /** Days in [ecYear] for which this installation can possibly hold records. */
-internal fun journeyYearSelectableRange(ecYear: Int, today: LocalDate): ClosedRange<LocalDate>? {
+internal fun journeyYearSelectableRange(ecYear: Int, today: LocalDate, earliest: LocalDate = APP_EPOCH_EC.toGregorian()): ClosedRange<LocalDate>? {
     val yearStart = EthiopianDate(ecYear, 1, 1).toGregorian()
     val yearEnd = EthiopianDate(ecYear + 1, 1, 1).toGregorian().minusDays(1)
-    val first = maxOf(yearStart, APP_EPOCH_EC.toGregorian())
+    val first = maxOf(yearStart, earliest)
     val last = minOf(yearEnd, today)
     return if (first <= last) first..last else null
 }
@@ -67,19 +69,19 @@ internal fun journeyYearSelectableRange(ecYear: Int, today: LocalDate): ClosedRa
  * a row of its own under the legend was 52 dp spent on two arrows and a number.
  */
 @Composable
-fun EthiopianYearSwitcher(ecYear: Int, today: LocalDate, onYearChange: (Int) -> Unit) {
+fun EthiopianYearSwitcher(ecYear: Int, today: LocalDate, earliestYear: Int = APP_EPOCH_EC.year, onYearChange: (Int) -> Unit) {
     val s = LocalStrings.current
     val currentEc = remember(today) { EthiopianDate.from(today).year }
     Row(verticalAlignment = Alignment.CenterVertically) {
         IconButton(
             onClick = { onYearChange(ecYear - 1) },
-            enabled = ecYear > APP_EPOCH_EC.year,
-            modifier = Modifier.size(32.dp),
+            enabled = ecYear > earliestYear,
+            modifier = Modifier.size(48.dp),
         ) {
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                 contentDescription = s.previousYear,
-                tint = if (ecYear > APP_EPOCH_EC.year) MaterialTheme.colorScheme.onSurface
+                tint = if (ecYear > earliestYear) MaterialTheme.colorScheme.onSurface
                 else MaterialTheme.colorScheme.surfaceVariant,
             )
         }
@@ -91,7 +93,7 @@ fun EthiopianYearSwitcher(ecYear: Int, today: LocalDate, onYearChange: (Int) -> 
         IconButton(
             onClick = { onYearChange(ecYear + 1) },
             enabled = ecYear < currentEc,
-            modifier = Modifier.size(32.dp),
+            modifier = Modifier.size(48.dp),
         ) {
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowRight,
@@ -119,13 +121,28 @@ fun EthiopianYearHeatmap(
     onDaySelect: (LocalDate) -> Unit,
 ) {
     val s = LocalStrings.current
+    val earliest = remember(records) {
+        minOf(APP_EPOCH_EC.toGregorian(), records.keys.mapNotNull { runCatching { LocalDate.parse(it) }.getOrNull() }.minOrNull() ?: today)
+    }
+    var pickingDate by remember { mutableStateOf(false) }
+    if (pickingDate) com.agpeya.app.ui.common.EthiopianDatePickerDialog(
+        initial = selectedDay ?: today,
+        onDismiss = { pickingDate = false },
+        onSelect = { date ->
+            val bounded = date.coerceIn(earliest, today)
+            onYearChange(EthiopianDate.from(bounded).year)
+            onDaySelect(bounded)
+            pickingDate = false
+        },
+    )
+    androidx.compose.material3.TextButton(onClick = { pickingDate = true }) { Text(s.dateLabel) }
     val currentEc = remember(today) { EthiopianDate.from(today).year }
 
     // The whole Ethiopian year, መስከረም 1 → ጳጉሜን end. Future days render as
     // faint placeholders so the year's shape is always visible.
     val start = remember(ecYear) { EthiopianDate(ecYear, 1, 1).toGregorian() }
     val end = remember(ecYear) { EthiopianDate(ecYear + 1, 1, 1).toGregorian().minusDays(1) }
-    val selectableRange = remember(ecYear, today) { journeyYearSelectableRange(ecYear, today) }
+    val selectableRange = remember(ecYear, today, earliest) { journeyYearSelectableRange(ecYear, today, earliest) }
 
     // Week columns, Monday-aligned, covering [start..end].
     val weeks = remember(start, end) {

@@ -81,6 +81,10 @@ fun FastingScreen(onBack: () -> Unit) {
             item {
                 Spacer(Modifier.height(Spacing.sm))
                 TodayCard(activeFast, weeklyFast, today, s)
+                fasts.filter { it.start.isAfter(today) }.minByOrNull { it.start }?.let { next ->
+                    Text("${s.fastingUpcoming}: ${next.nameAm} · ${formatEthiopianShortSafe(next.start, s)}",
+                        modifier = Modifier.padding(vertical = Spacing.sm), style = MaterialTheme.typography.bodyMedium)
+                }
                 Spacer(Modifier.height(Spacing.xxl))
                 Text(
                     s.fastingYearHeader(ethYear),
@@ -176,6 +180,8 @@ private fun FastRow(fast: FastingCalendar.Fast, today: LocalDate, s: Strings) {
         )
         Spacer(Modifier.width(Spacing.lg))
         Column(Modifier.weight(1f)) {
+            Text(if (active) s.currentHourBadge else if (past) s.fastingPast else s.fastingUpcoming,
+                style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
             Text(
                 fast.nameAm,
                 style = MaterialTheme.typography.titleMedium,

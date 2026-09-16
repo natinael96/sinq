@@ -98,9 +98,9 @@ data class JournalEntry(
     val exportable: Boolean get() = kind != JournalKind.CONFESSION_DRAFT
 
     /**
-     * The first line, for a list row. Falls back to nothing rather than to a
-     * placeholder — an untitled entry is a normal thing, not an error.
+     * Safe list preview. Confession text is only displayed inside its editor;
+     * never return it to list rows or their accessibility semantics.
      */
     val preview: String
-        get() = body.lineSequence().firstOrNull { it.isNotBlank() }?.trim().orEmpty()
+        get() = if (isDraft) "" else body.lineSequence().firstOrNull { it.isNotBlank() }?.trim().orEmpty()
 }
