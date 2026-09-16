@@ -30,11 +30,8 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
     </a>
     <div class="nav-links">
       <a href="install.html"><span>Install</span></a>
+      <a href="about.html"><span>About</span></a>
       <a href="changelog.html"><span>Changes</span></a>
-      <a href="credits.html"><span>Sources</span></a>
-      <a href="privacy-policy.html"><span>Privacy</span></a>
-      <a href="feedback.html"><span>Feedback</span></a>
-      <a href="https://github.com/natinael96/sinq">GitHub</a>
     </div>
     <button class="theme" id="theme-btn" type="button" aria-label="Theme: system">
       <svg class="ic-system" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg>
@@ -112,194 +109,19 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   </div>
 </header>
 
-<main id="main">
-
-<section>
-  <h2><span>What it is</span></h2>
-  <p class="lede">
-    <span>An app for praying the hours, not for reading about them.</span>
-  </p>
-  <p>
-    <span>Sinq holds the prayers a day is built from, ጸሎተ ነግህ at dawn through መንፈቀ ሌሊት at night, and opens on whichever one the hour suggests. Around them sit the readings that place the day in the Church's year: the ግጻዌ appointed for the date, the ስንክሳር commemoration with its አርኬ, and whichever fast is in effect.</span>
-  </p>
-  <p>
-    <span>The interface is Amharic first and English if you prefer it. Everything is set in Ethiopic type chosen for reading at length, on a deep liturgical green with gold marking what matters.</span>
-  </p>
-</section>
-
+<main id="main" class="home-more" tabindex="-1">
+  <a href="about.html">Explore Sinq <span aria-hidden="true">→</span></a>
 </main>
 
-<div class="band">
-  <div class="band-in">
-    <h2><span>Offline by construction</span></h2>
-    <p>
-      <span><strong>Everything you pray is already on the phone.</strong> Every psalm, every reading, all 366 days of the lectionary are inside the file before you install it — nothing is fetched, and none of it needs a signal. The app reaches the network twice and only twice: a once-a-day check for a new version, which you can switch off, and the Catena page when you tap it on a verse. Neither carries anything about you.</span>
-    </p>
-    <p>
-      <span>It works on a phone with no SIM, in a basement, on a plane, on a bundle that ran out. Nothing you mark, write or highlight leaves the device, and Android's automatic cloud backup is deliberately switched off for this app, so your prayer records don't reach Google either.</span>
-    </p>
-    <p><a href="privacy-policy.html"><span>Read the privacy policy →</span></a></p>
-  </div>
-</div>
-
-<main>
-
-<section>
-  <h2><span>Inside the app</span></h2>
-
-  <div class="group">
-    <h3 class="ethi">ጸሎት <span class="sub">Prayer</span></h3>
-    <ul>
-      <li>
-        <b>The seven hours</b>
-        <span>ጸሎተ ነግህ, ሠለስት, ቀትር, ተሰዓት, ሰርክ, ንዋም and መንፈቀ ሌሊት with its three watches, plus the Veil prayer. The home screen suggests the hour the time of day calls for.</span>
-      </li>
-      <li>
-        <b>ውዳሴ ማርያም and ጸሎት ዘዘወትር</b>
-        <span>A portion for each weekday, with ይወድስዋ መላእክት and አንቀጸ ብርሃን, in Amharic, with a Ge'ez toggle.</span>
-      </li>
-      <li>
-        <b>Hours you shape yourself</b>
-        <span>Build a custom hour from the psalms and passages you actually pray, and keep a prayer list of your own.</span>
-      </li>
-    </ul>
-  </div>
-
-  <div class="group">
-    <h3 class="ethi">የቀን መቁጠሪያ <span class="sub">Calendar and lectionary</span></h3>
-    <ul>
-      <li>
-        <b>ግጻዌ, the complete lectionary</b>
-        <span>All 366 fixed dates, the movable weekday seasons and the Sunday and mezmur cycle, resolved for the year through the ባሕረ ሓሳብ. Every citation opens in the reader.</span>
-      </li>
-      <li>
-        <b>ስንክሳር</b>
-        <span>The day's commemorations in Amharic or in Ge'ez, with its አርኬ hymn and the fixed closing prayer.</span>
-      </li>
-      <li>
-        <b>አጽዋማት</b>
-        <span>What fast is in effect today, and every fast of the Ethiopian year.</span>
-      </li>
-      <li>
-        <b>The ባሕረ ሓሳብ table</b>
-        <span>The printed 2001–2015 EC annual table, from the Library.</span>
-      </li>
-    </ul>
-  </div>
-
-  <div class="group">
-    <h3 class="ethi">ንባብ <span class="sub">Reading</span></h3>
-    <ul>
-      <li>
-        <b>The whole Bible, bundled</b>
-        <span>The Amharic 1980 Ethiopian Orthodox canon, Old and New Testament, with no connection needed.</span>
-      </li>
-      <li>
-        <b>All 150 psalms</b>
-        <span>Amharic by default with a Ge'ez 1980 switch in the reader, numbered as the Ge'ez Psalter numbers them.</span>
-      </li>
-      <li>
-        <b>ሌሎች መጻሕፍት, 37 books of the Church</b>
-        <span>The books outside the 81, scanned from printed copies and filed the way the Church files them: 32 መልክእ hymns from መልክዐ ጉባኤ, መጽሐፈ ሰዓታት, ማኅሌተ ጽጌ, ሰቆቃወ ድንግል and ጸሎት ነቢያት. On a መልክእ the salutation opening each stanza and the Name of God are in red, as the printed books set them.</span>
-      </li>
-      <li>
-        <b>ሥርዓተ ማኅሌት, the whole year</b>
-        <span>190 orders of service — the scanned book with the Telegram editions of each order beside it — on the day they are sung and in the Library the rest of the year. A movement named after a hymn opens that hymn on the shelf, at the stanza being sung.</span>
-      </li>
-      <li>
-        <b>Reading plans</b>
-        <span>Read the Bible through, or the Psalter one psalm a day, at a pace you set — with a daily nudge that names the passage and stops asking if it is not helping.</span>
-      </li>
-      <li>
-        <b>Type that suits your eyes</b>
-        <span>Scroll or turn page by page; five text sizes, four Ethiopic faces, three line spacings and four alignments, matched across every reading surface. The screen can stay awake while you pray, and each hour remembers where you stopped.</span>
-      </li>
-    </ul>
-  </div>
-
-  <div class="group">
-    <h3 class="ethi">የግል <span class="sub">Yours</span></h3>
-    <ul>
-      <li>
-        <b>ማስታወሻ, a journal that knows the day</b>
-        <span>Write the day down, browsed a ግእዝ month at a time. Each entry keeps the Church's day it was written on (the feast, the fast, that day's ግጻዌ), so an old entry reads as more than a date. Entries can be locked behind a passphrase, and the journal never appears in screenshots or the app switcher.</span>
-      </li>
-      <li>
-        <b>አስራት and ስዕለት</b>
-        <span>A ledger for the tithe: record what you receive and the tenth is worked out, record what you give and it shows what is still owed. Vows are tied to the feast they were promised on, setting what was promised against what has been kept.</span>
-      </li>
-      <li>
-        <b>ጉዞ, a record without punishment</b>
-        <span>Track daily prayer and your own habits. There is no broken-streak language here; a missed day is a missed day.</span>
-      </li>
-      <li>
-        <b>Reminders that respect the night</b>
-        <span>Prayer-time notifications with per-mode settings, a nightly nudge, a morning ግጻዌ reading, and quiet hours that silence all of them.</span>
-      </li>
-      <li>
-        <b>Search that forgives spelling</b>
-        <span>Amharic search treating ሀ/ሐ/ኀ, ሰ/ሠ and ጸ/ፀ as equal, across the prayers, the Psalter, the whole Bible, the 37 books of the shelf, ስንክሳር and ውዳሴ ማርያም.</span>
-      </li>
-      <li>
-        <b>Bookmarks, highlights, sharing</b>
-        <span>Colour any verse in one of four colours and it stays coloured everywhere it appears. Copy or share a verse, a reading or a chapter as text or as paginated image cards, and save them to the gallery.</span>
-      </li>
-      <li>
-        <b>Backup you choose the contents of</b>
-        <span>Export is a checklist, not all-or-nothing. The journal is off by default and asks for your passphrase before it can be included; confession drafts are never exportable at all.</span>
-      </li>
-      <li>
-        <b>A home-screen widget</b>
-        <span>The day's readings without opening anything — one to five of them depending on the size you give the widget, with the ቅዳሴ sung and the fast in effect.</span>
-      </li>
-    </ul>
-  </div>
-</section>
-
-<section>
-  <h2><span>Where to go next</span></h2>
-  <div class="cards">
-    <div class="card">
-      <h3><span>Install it</span></h3>
-      <p><span>Sinq is distributed as a signed APK. Three steps, plus a way to get updates automatically.</span></p>
-      <p><a href="install.html"><span>Install guide →</span></a></p>
-    </div>
-    <div class="card">
-      <h3><span>Where the text comes from</span></h3>
-      <p><span>Every source, its licence, and who transcribed it. The prayer text and the code are under different terms.</span></p>
-      <p><a href="credits.html"><span>Sources and licences →</span></a></p>
-    </div>
-    <div class="card">
-      <h3><span>What changed</span></h3>
-      <p><span>Release notes for recent versions, written for the people using the app.</span></p>
-      <p><a href="changelog.html"><span>Recent releases →</span></a></p>
-    </div>
-  </div>
-</section>
-
-<section>
-  <h2><span>Corrections</span></h2>
-  <p>
-    <span>If a reading is mapped to the wrong day, a translation reads wrongly, or a commemoration is missing, that is worth reporting. Corrections to the prayer text mapping and the Amharic are the most useful contribution anyone can make. <a href="feedback.html">Send it here</a>, or open an issue on <a href="https://github.com/natinael96/sinq/issues">GitHub</a> if you have an account there.</span>
-  </p>
-</section>
-
-</main>
-
-<footer>
+<footer class="home-footer">
   <div class="foot-in">
     <ul class="foot-links">
+      <li><a href="credits.html">Sources</a></li>
+      <li><a href="privacy-policy.html">Privacy</a></li>
+      <li><a href="feedback.html">Feedback</a></li>
       <li><a href="https://github.com/natinael96/sinq">GitHub</a></li>
-      <li><a href="https://github.com/natinael96/sinq/releases"><span>Releases</span></a></li>
-      <li><a href="install.html"><span>Install</span></a></li>
-      <li><a href="credits.html"><span>Sources and licences</span></a></li>
-      <li><a href="privacy-policy.html"><span>Privacy policy</span></a></li>
-      <li><a href="feedback.html"><span>Send feedback</span></a></li>
     </ul>
-    <p>
-      <span>Sinq is non-commercial and will remain so: no ads, no in-app purchases, no subscriptions. The source code is Apache-2.0; the bundled prayer and Scripture text is not. See <a href="credits.html">sources and licences</a>.</span>
-    </p>
-    <p class="fine"><span>Built by Natinael. ስንቅ, provisions for the journey.</span></p>
+    <p class="fine">Built by Natinael · ስንቅ</p>
   </div>
 </footer>
 

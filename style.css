@@ -820,3 +820,10 @@ footer .fine { color: #8FA99C; font: 400 12.5px/1.7 var(--mono); }
 .facts .star:hover, .facts .star:focus-visible {
   color: var(--gold-lit); border-color: rgba(228,188,90,.5);
 }
+
+/* The home page keeps the hero, followed by one quiet path to the details. */
+main.home-more { max-width: 1040px; padding: 28px 20px; }
+.home-more a { display: inline-flex; align-items: center; gap: 16px; min-height: 44px; }
+footer.home-footer { padding: 24px 20px; }
+.home-footer .foot-links { margin-bottom: 14px; }
+.home-footer .fine { margin: 0; }
