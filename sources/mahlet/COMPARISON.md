@@ -1,5 +1,7 @@
 # Book-first Mahlet comparison
 
+> Checked 2026-09-16 against `comparison.json`. The counts below describe the **source editorial merge**, not the final Android asset inventory. The app builder combines this merge with Tsige and Gitsawe sources; current output has 190 orders, 3,128 parts and 196 editions. See [project status](../../docs/PROJECT_STATUS.md#content-inventory) and [build instructions](README.md).
+
 This is a conservative editorial edition, not a claim of liturgical approval.
 
 - Book: 61 observances, 100 orders; all 4071 paragraphs retained.

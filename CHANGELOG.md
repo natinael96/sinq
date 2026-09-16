@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [Unreleased]
+
+### Documentation
+- Reconcile all maintained Markdown documentation with the 2.3.2 code and assets; add a detailed project status report with content inventory, build/test evidence and outstanding reviews.
+- Correct Android support, content paths, Room journal storage, connectivity, backup privacy, reminder defaults and expanded library coverage.
+- Preserve the original master plan and v0.2.6 implementation reference as explicit historical records.
+
 ## [2.3.2] — 2026-09-15
 
 _versionCode 72 · The morning ግጻዌ comes back_

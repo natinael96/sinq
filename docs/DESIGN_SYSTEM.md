@@ -1,5 +1,7 @@
 # Sinq design system
 
+> Reviewed 2026-09-16 for 2.3.2 / 72 against the Compose theme/components. This is implementation guidance; device accessibility and visual QA are recorded separately in [project status](PROJECT_STATUS.md). Paths below are relative to `app/src/main/java/com/agpeya/app/`.
+
 Sinq's look was not redesigned — it was made consistent. This file records the
 rules that hold it together, so the next screen doesn't invent a fifth card.
 
@@ -63,7 +65,7 @@ in the dark scheme, because the same tints go muddy over green.
 
 ## Typography
 
-All fifteen Material roles are defined in Ethiopic. Three things are
+All fifteen Material roles have a bundled Ethiopic baseline. English legal/about prose can use the explicit `inLatin()` helper with the platform sans face; do not apply Ethiopic tracking assumptions to those passages. Three things are
 non-negotiable for this script:
 
 - the **bundled** face, never the device's;
@@ -75,7 +77,7 @@ non-negotiable for this script:
 Reader text goes through `readingBodyStyle()` / `inReadingFont()`, which apply the
 per-face optical correction (`opticalScale`) so 19sp looks like 19sp in Abay Light
 and in Zemenay. Verse separation uses `readingVerseGap(fontSp)` — a fixed 4dp gap
-vanishes at the 29sp step. Lines are capped at `ReadingMaxWidth` (640dp) so a
+vanishes at the largest size. Current reader steps are **16, 18, 20, 22, 25 and 28sp**, with 18sp the default. The four selectable faces are Abyssinica, Abay Light, Bela Bereka and Zemenay; Waldba is a separately bundled specialist face. Lines are capped at `ReadingMaxWidth` (640dp) so a
 tablet reads like a book rather than a spreadsheet.
 
 ## Motion
@@ -108,6 +110,5 @@ drift). No parallax, no bounce, no scaling.
 ## Accessibility
 
 State is never carried by colour alone — pair it with a filled glyph, a label, or
-a semantics role. Interactive rows use `toggleable`/`selectable` so the state is
-announced, not just the tap. Everything is sized in `sp`/`dp` and wraps, so system
-font scaling and long Amharic labels both survive.
+a semantics role. Interactive rows should use `toggleable`/`selectable` so the state is
+announced, not just the tap. Use `sp`/`dp` and wrapping to support system font scaling and long Amharic labels. Verify both on devices; the shared tokens alone do not prove every screen passes.

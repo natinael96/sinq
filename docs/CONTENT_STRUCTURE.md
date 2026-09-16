@@ -1,110 +1,59 @@
-# Agpeya Content Structure — Working Document
-Phase 1 deliverable. This defines every hour and its sections. The psalm/gospel
-identities are left as slots to be copied **verbatim from your approved source
-edition** — do not fill them from memory or the internet.
+# Sinq content structure
 
-> ⚠️ **First decision (blocks everything):** Ethiopian practice has two related
-> traditions — the **Agpeya** structure (as in the Coptic book of hours, widely
-> available in Amharic translation) and the Ethiopian **መጽሐፈ ሰዓታት (Metsihafe
-> Se'atat)**, which differs in places. Your source edition decides which
-> structure this file follows. Everything below uses the common Agpeya
-> structure; adjust after the source is chosen. Record the choice in
-> [CONTENT_RIGHTS.md](CONTENT_RIGHTS.md).
+Reviewed **2026-09-16** against the bundled assets for **2.3.2 / 72**. This replaces the pre-implementation section skeleton. For provenance see [sources](../sources/README.md) and [rights](CONTENT_RIGHTS.md).
 
-## Section ID conventions
-- Hour IDs: `morning`, `terce`, `sext`, `none`, `vespers`, `compline`, `midnight`, `veil`
-- Section IDs: `<hourId>_<slug>` e.g. `morning_ps62`, `terce_gospel`, `midnight_w1_ps118`
-- IDs are permanent once content ships — never rename, only add.
+## Source and runtime boundaries
 
-## Shared opening block (appears in every hour — confirm per hour against source)
-| Order | Type | Section | Notes |
-|---|---|---|---|
-| 1 | opening | Introduction / መቅድም | "In the name of the Father…", Thanksgiving prayer |
-| 2 | opening | The Lord's Prayer / አቡነ ዘበሰማያት | |
-| 3 | opening | Prayer of Thanksgiving / ጸሎተ አኰቴት | |
-| 4 | opening | Psalm 50 / መዝሙር ፶ | "Have mercy on me, O God…" |
+- `sources/`: source transcriptions, mappings, editorial merges and generated intermediates; not loaded by the Android app.
+- `tools/`: corpus-specific extraction, merging, normalization and validation.
+- `app/src/main/assets/content/`: runtime JSON assets consumed by repositories.
+- `tools/section-ids.json`: compatibility snapshot for permanent core section IDs.
+- `docs/CONTENT_TRACKER.csv`: historical manual-entry skeleton; it is not a current completeness report.
 
-## Shared closing block (confirm per hour — some hours vary)
-| Order | Type | Section | Notes |
-|---|---|---|---|
-| n−3 | creed | Trisagion / ቅዱስ እግዚአብሔር | |
-| n−2 | creed | Hail Mary + Creed block | per edition |
-| n−1 | closing | Lord have mercy ×41 / ኪርያላይሶን ፵፩ | rubric: said 41 times |
-| n | absolution + closing | Absolution of the hour + concluding prayer | each hour has its own |
+The built-in hours retain the Agpeya psalm/gospel mapping. The fuller Ethiopian መጽሐፈ ሰዓታት is a separate library book; its presence does not mean all its prayers have been inserted into the eight built-in hours.
 
----
+## Hours and Psalter
 
-## Hour 1 — Morning / ጸሎተ ነግህ (`morning`)
-The longest hour. Structure: opening block → psalms (≈19 in common editions —
-**confirm count and list from source**) → Gospel → doxologies/litanies →
-creed block → closing block.
+`manifest.json` declares `contentVersion` and eight `{id, file}` entries. Each hour file contains metadata and ordered sections with stable IDs and verse text. Exact field contracts are in `model/Models.kt` and the generated JSON.
 
-Psalm slots (fill title + body from source):
-`morning_ps_01` … `morning_ps_19` — replace `_NN` with the actual psalm number
-once known (e.g. `morning_ps62`), then record in the tracker.
+| Hour ID | Bundled name | Sections | Verse entries |
+|---|---|---:|---:|
+| `morning` | ጸሎተ ነግህ | 21 | 223 |
+| `terce` | ጸሎተ ሠለስት | 15 | 166 |
+| `sext` | ጸሎተ ቀትር | 14 | 154 |
+| `none` | ጸሎተ ተሰዓት | 14 | 154 |
+| `vespers` | ጸሎተ ሰርክ | 14 | 120 |
+| `compline` | ጸሎተ ንዋም | 14 | 126 |
+| `midnight` | ጸሎተ መንፈቀ ሌሊት | 56 | 481 |
+| `veil` | ሌሊት 9 ሰዓት | 33 | 328 |
 
-Other named sections to expect (per common editions — confirm):
-- `morning_gospel` — Gospel of the hour
-- `morning_doxology` — morning doxology/praise (ግብረ ሐዋርያት? per edition)
-- `morning_litany` — litanies of the hour
-- `morning_absolution`, `morning_closing`
+There are **181 hour sections** plus **150 Psalter sections**, totaling **331 permanent section IDs** across nine core files. Verse-entry totals count appearances inside each hour, including repeated passages; they are not counts of unique Bible verses.
 
-## Hour 2 — Third Hour / ጸሎተ ሠለስት (`terce`)
-Commemorates the descent of the Holy Spirit. ≈12 psalms in common editions.
-Slots: `terce_ps_01`…`terce_ps_12`, `terce_gospel`, `terce_litany`,
-`terce_absolution`, `terce_closing`.
+Examples of actual IDs include `morning_ps1`, `terce_ps50`, `midnight_watch1_ps3` and `veil_ps4`. Use the snapshot and actual assets rather than inventing names from the old manual-entry template. Midnight watch labels and Psalm 118 stanza boundaries are generated; Psalm 118 contains 22 eight-verse stanzas.
 
-## Hour 3 — Sixth Hour / ጸሎተ ቀትር (`sext`)
-Commemorates the Crucifixion. ≈12 psalms.
-Slots: `sext_ps_01`…`sext_ps_12`, `sext_gospel`, `sext_litany`,
-`sext_absolution`, `sext_closing`.
+`tools/extract_content.py` reads `sources/hours/hour_mapping.json` and the sibling `80-weahadu/data/am` corpus. The separate Scripture generator uses newer edition directories. Preserve this distinction when reproducing the hours.
 
-## Hour 4 — Ninth Hour / ጸሎተ ተሰዓት (`none`)
-Commemorates the death of Christ. ≈12 psalms.
-Slots: `none_ps_01`…`none_ps_12`, `none_gospel`, `none_litany`,
-`none_absolution`, `none_closing`.
+## Other runtime collections
 
-## Hour 5 — Vespers / ጸሎተ ሰርክ (`vespers`)
-Evening thanksgiving. ≈12 psalms.
-Slots: `vespers_ps_01`…`vespers_ps_12`, `vespers_gospel`, `vespers_litany`,
-`vespers_absolution`, `vespers_closing`.
+| Asset area | Structure and consumer |
+|---|---|
+| `bible/` | Catalog/canon plus edition book data; `ScriptureRepository`. Full `am-1980`, Psalms-only `gez-1980`. Source metadata, headings and noninteger verse identifiers are preserved. |
+| `gitsawe/` | Fixed daily offices, movable weekdays, seasonal/monthly records, Sunday cycle and reference data; `GitsaweRepository`. Calendar selectors and provenance are distinct from reading text. |
+| `sinksar/` | Amharic and Ge'ez editions, 366 dates each; `SynaxariumRepository`. Day entries retain hymns and any source readings. |
+| `wudase/` | Daily opening, weekday portions and appended prayers in Amharic/Ge'ez; `WudaseRepository`. |
+| `books/` | Curated shelf index and books with chapters/blocks; `BookRepository`. |
+| `mahlet/` | Index plus `m0.json` through `m13.json`; orders, parts and alternative editions; `MahletRepository`. Month 0 is undated material. |
+| `reading/` | Generated reading plans and chapter assignments; `ReadingPlanRepository`. User progress is stored separately. |
+| `nisiha/`, other devotional assets | Preparation and supporting reference data; consult the corresponding Kotlin models/repositories. |
 
-## Hour 6 — Compline / ጸሎተ ንዋም (`compline`)
-Before sleep. ≈12 psalms.
-Slots: `compline_ps_01`…`compline_ps_12`, `compline_gospel`,
-`compline_litany`, `compline_absolution`, `compline_closing`.
+See [project status](PROJECT_STATUS.md#content-inventory) for measured corpus counts. Source-book, canonical-book, feast, order and edition counts describe different units and must not be interchanged.
 
-## Hour 7 — Midnight / ጸሎተ መንፈቀ ሌሊት (`midnight`)
-**One hour, three watches** (decision D2). Each watch has its own psalms,
-gospel, and litanies. In the app: three top-level collapsible parts.
-- Watch 1: `midnight_w1_ps_*`, `midnight_w1_gospel`, `midnight_w1_litany`
-  (commonly includes the long Psalm 118/119 — confirm)
-- Watch 2: `midnight_w2_ps_*`, `midnight_w2_gospel`, `midnight_w2_litany`
-- Watch 3: `midnight_w3_ps_*`, `midnight_w3_gospel`, `midnight_w3_litany`
-- Shared: `midnight_absolution`, `midnight_closing`
+## Editing and validation rules
 
-## Hour 8 — Prayer of the Veil / ጸሎተ ሥውር (`veil`)
-Included (decision D1) with an intro note on its monastic/clerical tradition.
-≈12 psalms. Slots: `veil_note` (rubric intro), `veil_ps_01`…`veil_ps_12`,
-`veil_gospel`, `veil_litany`, `veil_absolution`, `veil_closing`.
-
----
-
-## Per-section fields to capture during entry
-| Field | Required | Example |
-|---|---|---|
-| id | yes | `morning_ps62` |
-| hourId | yes | `morning` |
-| orderIndex | yes | 7 |
-| type | yes | `psalm` |
-| titleAmharic | yes | መዝሙር ፷፪ |
-| subtitle | no | የዳዊት መዝሙር |
-| rubric | no | ሦስት ጊዜ ይባላል ("said three times") |
-| bodyText | yes | full Amharic text, paragraphs preserved |
-| reference | no | Ps 62 (63) |
-
-## Numerals & punctuation conventions (decision D3 area — set once, follow everywhere)
-- [ ] Psalm numbers: Ge'ez numerals (፷፪) or Arabic (62)? → follow source: ______
-- [ ] Psalm numbering tradition: Septuagint (62) vs Hebrew (63) → follow source: ______
-- [ ] Ethiopic punctuation ። ፣ ፤ used as in source; no Latin punctuation inside Amharic text
-- [ ] UTF-8, no BOM issues; check homophone characters are typed as the source spells them
+1. Identify the source and generator for the corpus before changing text.
+2. Preserve original source snapshots and document explicit corrections in transformation logic. Editable mapping/configuration files are distinct from verbatim source transcriptions.
+3. Keep unknown dates/forms unset and alternatives separate; do not infer sacred text or calendar rules to fill a gap.
+4. Regenerate only the affected assets with the required source dependencies available.
+5. Run `python3 tools/validate_content.py` and relevant Kotlin content/selection tests.
+6. Review the generated diff, source references and stable IDs. An intentional compatibility change needs migration handling, not simply a new ID snapshot.
+7. Record human liturgical approval separately in [LITURGICAL_REVIEW.md](LITURGICAL_REVIEW.md).

@@ -1,5 +1,7 @@
 # Sinq (ስንቅ) Android App — Historical Master Plan
 
+> **Reconciled 2026-09-16:** current build is **2.3.2 / 72**. Use [PROJECT_STATUS.md](docs/PROJECT_STATUS.md) for detailed current status and remaining work. The plan below retains historical names, paths, estimates, licensing assumptions and “future” scope; it is not an active checklist.
+
 > **Status:** archived planning record. This document describes the original V1 scope and
 > architecture and is no longer the current product contract. For shipped behavior use
 > `README.md`, `docs/IMPLEMENTATION.md`, and the source/tests. Items marked “future” below may

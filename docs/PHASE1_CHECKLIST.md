@@ -1,36 +1,29 @@
-# Phase 1 Checklist — Week 0
-Phase 1 is done when every box is checked. Items marked 👤 only you can do.
+# Foundation checklist — reconciled project status
 
-> **SCOPE CHANGE (2026-06-12):** content = **psalms + gospel reading per hour only**,
-> extracted from the open-source [80-weahadu](https://github.com/EOTCOpenSource/80-weahadu)
-> Amharic Bible (cloned at `..\80-weahadu`). No litanies/absolutions/creed blocks in V1.
-> Manual content entry is eliminated; CONTENT_TRACKER.csv is superseded by
-> [content/hour_mapping.json](../content/hour_mapping.json).
+Reviewed **2026-09-16**, current build **2.3.2 / 72**. The original “Week 0” checklist is superseded: the app is implemented and has a release history. See [detailed project status](PROJECT_STATUS.md) for the current baseline and [historical plan](../PLAN.md) for the learning/release plan as originally written.
 
-## A. Content foundation (blocking — do first)
-- [x] Source chosen: 80-weahadu Amharic Bible (psalms + gospels)
-- [x] Hour → psalms/gospel mapping captured → [content/hour_mapping.json](../content/hour_mapping.json) (from agpeya.org, 2026-06-12)
-- [ ] 👤 **License**: 80-weahadu has NO LICENSE file — open a GitHub issue / contact EOTCOpenSource asking them to add one or grant permission; record outcome in [CONTENT_RIGHTS.md](CONTENT_RIGHTS.md)
-- [ ] 👤 Recruit the fluent reviewer → confirm (a) the translation matches church usage, (b) the hour→psalm mapping, (c) spot-check extracted text
-- [ ] 👤 Confirm which Amharic translation 80-weahadu contains (old/1954-style orthography visible in text, e.g. ኹ/ኸ forms — reviewer should approve readability)
-- [ ] Verify Psalm 118 stanza splitting (22 stanzas × 8 verses) renders correctly for Midnight watch 1 / Veil
+## Completed in the repository
 
-## B. Product definition (done — review them once)
-- [x] Hour list + section skeleton → CONTENT_STRUCTURE.md
-- [x] Wireframes for all screens incl. Prayer Modes → [WIREFRAMES.md](WIREFRAMES.md)
-- [x] Design decisions D1–D13 resolved with market evidence → PLAN.md §13, §15
-- [ ] 👤 Read PLAN.md §13 decisions and veto/confirm each (they're yours, not mine)
+- [x] Product identity: **Sinq (ስንቅ)**, permanent application ID `com.sinq.app`, source namespace `com.agpeya.app`.
+- [x] Hour mapping captured in [sources/hours/hour_mapping.json](../sources/hours/hour_mapping.json).
+- [x] Eight built-in hours and 150 Psalter sections generated and bundled; manual entry is no longer the workflow.
+- [x] CC BY-NC-ND 4.0 source terms recorded in [NOTICE](../NOTICE) and [CONTENT_RIGHTS.md](CONTENT_RIGHTS.md); underlying provenance questions remain separate below.
+- [x] Psalm 118 stanza extraction implemented and core section IDs guarded by the validator.
+- [x] Reader, search, marks, personalization, reminders, Journey, library, calendars and expanded content implemented.
+- [x] Gradle build, content validator, unit tests and release automation present.
+- [x] Requirements/design/content documentation reconciled to the current code.
 
-## C. Logistics (start the slow clocks)
-- [ ] 👤 Create Google Play Console account ($25 — identity verification can take days)
-- [ ] 👤 Check app name availability on Play ("Agpeya — አግፔያ" or your pick)
-- [ ] 👤 Choose package name (permanent): com.________.agpeya
-- [ ] 👤 Start a list of 15–20 closed-test volunteers (need 12+ for 14 days at week 9)
-- [ ] Install Android Studio (start of Week 3 prep; can wait)
+## Human review still needed or unverified
 
-## D. Phase 1 exit gate
-- [ ] Rights recorded in writing
-- [ ] Tracker expanded to full per-psalm rows for at least Morning
-- [ ] Morning Prayer entry started
-- [ ] Play account created
-→ then begin Week 1: Kotlin (PLAN.md §5.1) in parallel with daily content entry
+- [ ] Record the fluent liturgical reviewer's name, role, reviewed edition and scope of approval.
+- [ ] Confirm the prayer-hour mapping and extracted text against approved church usage.
+- [ ] Close the underlying translation provenance and transcription/font questions in the rights record.
+- [ ] Record device review of Psalm 118, each reading font, large text, TalkBack and both themes.
+- [ ] Record reminder/reboot/permission/widget checks across the supported Android range.
+- [ ] Record Play account, testing-track and publication status if Play distribution is intended; these cannot be established from the local workflow.
+
+## Release gate now
+
+Run content validation, unit tests, appropriate lint and builds; inspect the generated release artifacts and conduct device/content review. Preserve version, signing and stable-ID compatibility. The tag workflow produces a hand-installable APK and a separate Play-upload AAB.
+
+The old manual tracker, app-name placeholder, missing-license statement and “start Kotlin learning” exit gate no longer describe project work. See [project status](PROJECT_STATUS.md#verification-on-2026-09-16) for this audit's verification results.

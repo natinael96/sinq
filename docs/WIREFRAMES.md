@@ -1,173 +1,84 @@
-# Wireframes — V1 (low-fi, text form)
-Phase 1 deliverable. Layout intent only; spacing/colors come from §3.8 of PLAN.md.
-Amharic labels shown where they are the real UI text; English in (parens) is annotation.
+# Sinq screen structure and flows
 
----
+Reviewed **2026-09-16** for **2.3.2 / 72** from `MainActivity.kt` and the Compose screens. These are structural wireframes, not pixel-accurate screenshots or a device visual-QA report. The original V1 Home/Search/Bookmarks/Streak/Settings tab layout is superseded.
 
-## 1. Home
-```
-┌──────────────────────────────────┐
-│  አግፔያ                        ⚙  │  ← app name; settings shortcut
-│                                  │
-│  ┌────────────────────────────┐  │
-│  │ 🕖 አሁን ጊዜው የነግህ ጸሎት ነው │  │  ← "Now" hero card (time-band logic)
-│  │     ጸሎተ ነግህ  →            │  │     one tap → reading screen
-│  └────────────────────────────┘  │
-│                                  │
-│  ቀጥል (Continue):                │  ← recents row, hide if empty
-│  [ሰርክ] [ንዋም]                   │
-│                                  │
-│  ┌──────────┐  ┌──────────┐      │
-│  │ ጸሎተ ነግህ │  │ ጸሎተ ሠለስት│      │  ← all 8 hours, canonical order
-│  └──────────┘  └──────────┘      │     card: name + small time hint
-│  ┌──────────┐  ┌──────────┐      │
-│  │ ጸሎተ ቀትር │  │ ጸሎተ ተሰዓት│      │
-│  └──────────┘  └──────────┘      │
-│  …(ሰርክ ንዋም መንፈቀ ሌሊት ሥውር)   │
-│                                  │
-│  ┌────────────────────────────┐  │
-│  │ ⏰ ማንቂያ: አግፔያ (Classic) → │  │  ← active-mode card → Modes list
-│  └────────────────────────────┘  │
-├──────────────────────────────────┤
-│  🏠 ቤት   🔍 ፈልግ   🔖 ምልክት  ⚙ │  ← bottom nav (4)
-└──────────────────────────────────┘
+## Application shell
+
+```text
+First launch → intro / setup → application shell
+
+┌──────────────────────────────────────────────────────┐
+│ Current screen: date, title, actions and content      │
+│                                                      │
+│ Reader / sheet / detail screens open from this shell │
+├──────────────────────────────────────────────────────┤
+│ Home          Journey          Library      Settings │
+└──────────────────────────────────────────────────────┘
 ```
 
-## 2. Prayer Reading (the core screen)
-```
-┌──────────────────────────────────┐
-│ ←  ጸሎተ ነግህ            ☰  A−A+ │  ← top bar auto-hides on scroll down
-│                                  │     ☰ = section contents sheet
-│  ── መዝሙር ፷፪ ──────────────    │  ← section header (title+subtitle)
-│     የዳዊት መዝሙር          🔖    │     bookmark toggle per section
-│                                  │
-│  አምላኪየ አምላኪየ ለከ እገኝ…        │  ← body: reading font, 1.6–1.8 line
-│  (full prayer text, generous     │     height, paragraph spacing
-│   line height, no clutter)       │
-│                                  │
-│  ⟪ rubric: ሦስት ጊዜ ይባላል ⟫     │  ← rubric style: smaller, accent
-│                                  │
-│  ── ወንጌል ──────────────────    │
-│  …                               │
-└──────────────────────────────────┘
-   ☰ opens bottom sheet:
-   ┌──────────────────────────┐
-   │ ይዘት (Contents)          │
-   │  መግቢያ ▸                 │
-   │  መዝሙራት ▸ ፷፪ ፷፮ ፷፱ …  │   ← grouped; tap scrolls to section
-   │  ወንጌል ▸                 │
-   │  ሊጣንያ ▸  መዝጊያ ▸       │
-   └──────────────────────────┘
+Search and marks are pushed destinations. `bookmarks` remains the route for the combined marks surface, preserving older navigation entry points.
+
+## Home and Journey
+
+Home presents today's context and prayer entry points, with access to the current hour and daily readings. Journey presents prayer/habit history, progress and management entry points. Supporting flows include reading plans, the prayer list, journal and preparation/record screens.
+
+```text
+Home → hour reader → contents / verse actions / reading preferences
+     → Gitsawe → office or citation → Scripture passage
+     → search → matching content
+
+Journey → habits / history
+        → reading plan → current day / book map / completion
+        → personal record and preparation destinations
 ```
 
-## 3. Search
-```
-┌──────────────────────────────────┐
-│  🔍 [ ፈልግ…              ]  ✕   │  ← autofocus; debounced as-you-type
-│                                  │
-│  ጸሎተ ነግህ › መዝሙር ፷፪          │  ← result: hour › section
-│  …አምላኪየ **አምላኪየ** ለከ…       │     snippet with match highlighted
-│  ─────────────────────────────   │
-│  ጸሎተ ሰርክ › ሊጣንያ              │
-│  …**አምላክ**ን እንለምን…           │
-│                                  │
-│  (homophone-folded: ሰ=ሠ ሀ=ሐ=ኀ  │
-│   አ=ዐ ጸ=ፀ — finds either form)  │
-├──────────────────────────────────┤
-│  🏠   🔍   🔖   ⚙               │
-└──────────────────────────────────┘
+Exact card placement is defined in the Compose source; this map describes supported destinations rather than prescribing a second layout.
+
+## Library
+
+```text
+Library
+  ├─ Scripture hub → testament → book → chapter
+  ├─ Psalter → Psalm → optional Ge'ez edition
+  ├─ Wudase → daily / weekday pages → Amharic or Ge'ez
+  ├─ Synaxarium → Ethiopian date → Amharic or Ge'ez
+  ├─ Gitsawe / Sunday cycle / Bahre Hasab reference
+  ├─ Church books → shelf/book → chapters and blocks
+  └─ Mahlet → month pager / feast search / Tsige season
+             → selected service → contents / source edition
 ```
 
-## 4. Bookmarks
-```
-┌──────────────────────────────────┐
-│  ምልክቶች (Bookmarks)             │
-│                                  │
-│  ጸሎተ ነግህ                       │  ← grouped by hour, canonical order
-│   ┌────────────────────────────┐ │
-│   │ መዝሙር ፷፪ — አምላኪየ…    🗑 │ │  ← tap = jump; swipe/icon = remove
-│   └────────────────────────────┘ │     (undo snackbar)
-│  ጸሎተ ንዋም                       │
-│   ┌────────────────────────────┐ │
-│   │ ፍትሐት — …               🗑 │ │
-│   └────────────────────────────┘ │
-│                                  │
-│  (empty state: "በንባብ ገጽ ላይ 🔖   │
-│   በመንካት ያስቀምጡ")              │
-└──────────────────────────────────┘
+Mahlet service chips open their own service, rather than always taking the first order. The Tsige route also includes relevant undated month-0 orders. Alternatives and editions remain visibly separate.
+
+## Shared reading surface
+
+```text
+Back        Reading title / reference         Actions
+──────────────────────────────────────────────────────
+Section heading / rubric
+Verse numeral   Reading text
+Verse numeral   Reading text
+
+Contents • type size/font • bookmark/verse actions
+Copy/share → text or image cards
+Citation → linked Scripture
+Commentary → external Catena WebView (online)
 ```
 
-## 5. Prayer Modes — list
-```
-┌──────────────────────────────────┐
-│  ← የጸሎት ማንቂያ ሁነታዎች (Modes)  │
-│                                  │
-│  ┌────────────────────────────┐  │
-│  │ ◉ አግፔያ (Classic)  [በነባር] │  │  ← built-in badge; ◉ = active
-│  │   7 ማንቂያዎች · በየቀኑ      → │  │     radio = exactly one active
-│  └────────────────────────────┘  │
-│  ┌────────────────────────────┐  │
-│  │ ○ የጾም ቀናት            ⋮ → │  │  ← custom; ⋮ = rename/duplicate/
-│  │   3 ማንቂያዎች · ረቡዕ፣ ዓርብ  │  │       delete (confirm)
-│  └────────────────────────────┘  │
-│                                  │
-│  [＋ ከአግፔያ ጀምር]  [＋ ባዶ ጀምር] │  ← duplicate-Agpeya is primary CTA
-│                                  │
-│  ❓ ማንቂያ አይሰራም? →             │  ← battery-manager help (§8.6)
-└──────────────────────────────────┘
-```
+Not every action applies to every corpus. Reader settings share six size steps, four selectable fonts, line-spacing/alignment preferences and keep-screen-on. Scroll/paged mode applies where implemented; do not assume every book uses the prayer-hour pager.
 
-## 6. Prayer Modes — editor
-```
-┌──────────────────────────────────┐
-│  ←  የጾም ቀናት            [✎ ስም] │  ← name editable (custom only;
-│  ድምፅ: [ደወል ▾]                  │     built-in: "Reset times" action)
-│                                  │
-│  06:00  ጸሎተ ነግህ          [ON]  │  ← sorted by time
-│         ረቡዕ ዓርብ                │     day chips under each entry
-│  12:00  ጸሎተ ቀትር          [ON]  │
-│         በየቀኑ                    │
-│  21:00  ጸሎተ ንዋም          [OFF] │
-│         ረቡዕ ዓርብ                │
-│                                  │
-│  [＋ ማንቂያ ጨምር]                │
-└──────────────────────────────────┘
-   Entry editor (bottom sheet):
-   ┌──────────────────────────┐
-   │ ጸሎት:  [ጸሎተ ነግህ ▾]     │  ← hour picker (sections = V1.1)
-   │ ሰዓት:  [ 06 : 00 ]       │  ← defaults to traditional time
-   │ ቀናት:  (በየቀኑ) ሰ ማ ረ ሐ  │  ← every-day toggle or weekday chips
-   │         ዓ ቅ እ            │
-   │        [ሰርዝ]  [አስቀምጥ]  │
-   └──────────────────────────┘
-```
+## Marks, journal and records
 
-## 7. Settings
-```
-┌──────────────────────────────────┐
-│  ቅንብሮች (Settings)              │
-│  ገጽታ: ስርዓት / ብርሃን / ጨለማ      │
-│  የንባብ ፊደል: Sans / Serif        │
-│  የፊደል መጠን: A− ──●── A+        │
-│  ማያ እንዳይጠፋ: [ON]              │
-│  የጸሎት ማንቂያ ሁነታዎች →          │
-│  ──────────────────────────      │
-│  ስለ መተግበሪያው → (version,       │
-│   source & reviewer credits,     │
-│   content version, privacy,      │
-│   feedback mailto, licenses)     │
-└──────────────────────────────────┘
-```
+The marks surface combines bookmarks, highlights and passage-linked journal reflections. The journal can be browsed by day/month and optionally gated by a passphrase. Confession drafts have their own preparation flow and are excluded from backup.
 
-## 8. First-launch intro (2 screens, skippable)
-```
-[1] አግፔያ — brief: what the app is, fully offline, no data collected
-[2] ማንቂያ — "Want prayer reminders?" → [አዘጋጅ] opens Modes / [በኋላ] skip
-    (notification permission asked only when first reminder enabled)
-```
+Backup uses a selection dialog, optional journal passphrase check, system document picker and restore preview. The exported JSON is plaintext; the gate protects access to the action, not the resulting file.
 
-## Flow notes
-- Notification tap deep-links to its hour's reading screen; back → Home.
-- Search/bookmark taps open reading screen pre-scrolled to the section.
-- Switching active mode shows snackbar: "ወደ ___ ተቀይሯል".
-- Deleting active custom mode → Agpeya mode becomes active (snackbar).
+## Settings and reminders
+
+Settings is an overview with reading, fonts/copy, prayer, reminders and records destinations, plus help/about/licenses/changelog. The schedule editor and reminder modes share the configured prayer timing.
+
+A fresh built-in mode enables the six daytime hours; Midnight and Veil start disabled. Alarm notifications offer actions including snooze. Availability and delivery depend on Android permissions/settings; device QA must exercise denied permissions and vendor battery restrictions.
+
+## Accessibility and verification
+
+Use shared [design-system](DESIGN_SYSTEM.md) components, selectable semantics for month/service controls and labeled icon actions. Check long Amharic titles, both themes, large system text and reduced motion on a device. Source inspection alone does not establish visual quality or screen-reader usability.

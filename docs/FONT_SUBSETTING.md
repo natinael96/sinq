@@ -1,11 +1,12 @@
 # Font subsetting
 
-Measured, not yet applied — `tools/subset_fonts.py` requires `fontTools`, which
-was not available on the machine where this was analysed.
+> Reviewed 2026-09-16. The dry run still stops because `fontTools` is unavailable in this environment; no font assets were changed. See [project status](PROJECT_STATUS.md) for verification scope.
+
+`tools/subset_fonts.py` is available for optional font-size optimization. It requires `fontTools` and processes every `.ttf` in `app/src/main/res/font/`, including the newer Waldba font. No subsetting was performed during this documentation audit.
 
 ## What the fonts actually carry
 
-Glyph counts from each font's `cmap`, against what Sinq can render:
+The following glyph counts are retained from the original analysis; they were not remeasured in this audit. File sizes still match those original five assets approximately:
 
 | Font | Size | Glyphs | Needed | Droppable |
 |---|---:|---:|---:|---:|
@@ -18,6 +19,8 @@ Glyph counts from each font's `cmap`, against what Sinq can render:
 Zemenay is the outlier: it carries 432 Latin-Extended glyphs, 176 IPA, and
 ~1,470 further symbols that no Sinq screen will ever show. Bela Bereka is
 already tight and would not benefit.
+
+Waldba is also bundled: **628,580 bytes (about 614 KiB)**. It was not part of the original glyph-count analysis, so no droppable-glyph count is asserted for it. Review it as well before applying the tool. Licenses and reader-font roles are recorded in [CONTENT_RIGHTS.md](CONTENT_RIGHTS.md).
 
 ## The rule that matters
 

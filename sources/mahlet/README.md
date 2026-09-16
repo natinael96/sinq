@@ -1,5 +1,7 @@
 # Merged Mahlet — book-first editorial edition
 
+> Source record reconciled 2026-09-16. This editorial merge is now consumed by the app; its counts and scope differ from the final 190-order runtime corpus. See [project status](../../docs/PROJECT_STATUS.md#content-inventory).
+
 Start with `months/`: 13 readable monthly JSON files. The EOTC book is the default order; Telegram supplies separately identified versions and missing services/feasts. Nothing is appended to the middle of a book service merely because it mentions the same saint.
 
 ## Simple structure
@@ -25,7 +27,7 @@ Book alternatives have `alternative_to`, pointing to the preceding chant, and `s
 
 ## Calendar and provenance
 
-`month_number` is the Ethiopian month number, not the book chapter number. The book omits Yekatit. Movable/seasonal material stays in its book chapter’s month file for navigation only, with `day: null`. This is not a calendar engine; Gitsawe integration has not been implemented.
+`month_number` is the Ethiopian month number, not the book chapter number. The book omits Yekatit. Movable/seasonal material stays in its book chapter’s month file for navigation only, with `day: null`. The editorial merge itself is not a calendar engine. The app now adds calendar selection through `MahletComputus` and builds the merged corpus alongside Tsige and Gitsawe sources using `tools/build_mahlet.py`. Preserve null/ambiguous dates in this source layer.
 
 Book source pointers use zero-based `chapter` and `[start, end)` block ranges. Each chant’s `source_blocks` points into `sources/book.json`; the title is the range’s first block. Each original block is accounted for once, including monthly headings. The raw snapshot preserves spelling, paragraph boundaries, and ambiguous headings exactly even where display structure has been extracted.
 
@@ -41,4 +43,14 @@ Book source pointers use zero-based `chapter` and `[start, end)` block ranges. E
 
 This is a lossless, auditable editorial merge with conservative structured parsing, not a fully human-reviewed liturgical publication. In particular, source prose may remain grouped under the preceding form; use raw block references when reviewing chant/rubric boundaries.
 
-Rebuild from the parent workspace with `python3 scripts/merge_mahlet.py`; test with `python3 -m unittest discover -s scripts -p 'test_merge_mahlet.py'`. Original sources and the existing website are untouched. This folder has not been published.
+The original editorial merge was produced in an external workspace with `scripts/merge_mahlet.py` and `scripts/test_merge_mahlet.py`; **neither script is in this repository**. Those commands are historical provenance, not runnable local instructions.
+
+To rebuild the app-facing corpus from the checked-in sources, run from the repository root:
+
+```bash
+python3 tools/build_mahlet.py
+python3 tools/validate_content.py
+./gradlew testDebugUnitTest --no-daemon
+```
+
+The output is `app/src/main/assets/content/mahlet/`. The app now exposes these orders through month paging, feast search, seasonal access and service/edition selection. Publication of any separate original website is not established by this source record. Terms and provenance are recorded in [NOTICE](../../NOTICE).
