@@ -30,7 +30,7 @@ _versionCode 74 · Prayer clock and a more dependable daily experience_
 - Correct reminder summaries and bypass launch overlays for explicit reminder/widget actions.
 - Preserve backup category choices, introduce scoped format-3 offering preferences and expand restore previews.
 - Add ledger editing, exact amount validation and correction of vow/penance progress.
-- Full scope and remaining work: [audit implementation tracker](docs/UI_UX_FIX_PROGRESS.md). Device checks remain unverified.
+- Full scope and remaining work: [audit implementation tracker](https://github.com/natinael96/sinq/blob/master/docs/UI_UX_FIX_PROGRESS.md). Device checks remain unverified.
 
 ### Changed
 - Bible reading reminders run automatically at 06:30, 14:00 and 20:00 local time after a plan is started; no reminder-time setup is needed. Quiet hours and the off switch remain available.
