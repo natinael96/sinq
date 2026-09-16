@@ -31,6 +31,25 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "2.4.0",
+        title = "Prayer clock and private notes",
+        titleAm = "የጸሎት ሰዓት እና የግል ማስታወሻ",
+        changes = listOf(
+            "Add the Prayer clock widget to your home screen; tap it to open the current prayer hour.",
+            "Bible reminders run at 06:30, 14:00 and 20:00 local time while today's planned reading remains unfinished.",
+            "Confession preparation is a simple autosaving note. Its text is hidden in journal lists and excluded from backups. The dedicated communion-preparation page has been removed.",
+            "Improved journal locking, reading progress, chapter navigation, reminder settings, backup choices and record editing.",
+            "Clearer loading and retry feedback, larger controls, and more reader note and sharing actions.",
+        ),
+        changesAm = listOf(
+            "የጸሎት ሰዓት ዊጄትን በስልክዎ መነሻ ገጽ ላይ ያክሉ፤ ሲጫኑት የአሁኑን ሰዓት ጸሎት ይከፍታል።",
+            "የዕለቱ ንባብ ካልተጠናቀቀ ጠዋት፣ ከሰዓት እና ማታ ማስታወሻ ይደርሳል።",
+            "የንስሐ ዝግጅት ቀላል ማስታወሻ ሆኗል፤ ሲጽፉ በራሱ ይቀመጣል። ጽሑፉ በዝርዝር ውስጥ አይታይም፤ ወደ ምትኬም አይገባም። የቁርባን ዝግጅት ገጽ ተወግዷል።",
+            "የማስታወሻ መቆለፊያ፣ የንባብ ሂደት፣ የምዕራፍ መሸጋገሪያ፣ ማስታወሻዎች እና ምትኬ ተሻሽለዋል።",
+            "ግልጽ የመጫንና ዳግም የመሞከር መልዕክቶች፣ ትልልቅ መቆጣጠሪያዎች እና ተጨማሪ የማስታወሻና የማጋራት አማራጮች።",
+        ),
+    ),
+    ReleaseNote(
         version = "2.3.3",
         title = "Opening the ምስባክ in ግጻዌ",
         titleAm = "የግጻዌ ምስባክ ንባብ",
