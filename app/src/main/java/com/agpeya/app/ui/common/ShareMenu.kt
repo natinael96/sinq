@@ -119,6 +119,7 @@ fun ReaderToolsMenu(
     /** Opens a journal entry anchored to what is being read. */
     onWriteNote: (() -> Unit)? = null,
     onToggleReadingMode: (() -> Unit)? = null,
+    readingMode: com.agpeya.app.data.ReadingMode? = null,
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
@@ -184,7 +185,13 @@ fun ReaderToolsMenu(
             }
             if (onToggleReadingMode != null) {
                 DropdownMenuItem(
-                    text = { Text(s.readingModeToggle) },
+                    text = {
+                        Text(when (readingMode) {
+                            com.agpeya.app.data.ReadingMode.VERTICAL -> s.readingModeVertical
+                            com.agpeya.app.data.ReadingMode.HORIZONTAL -> s.readingModeHorizontal
+                            null -> s.readingModeToggle
+                        })
+                    },
                     onClick = {
                         open = false
                         onToggleReadingMode()

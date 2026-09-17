@@ -4,11 +4,7 @@ import android.view.WindowManager
 import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
-import com.agpeya.app.data.HabitsRepository
 import com.agpeya.app.data.SettingsRepository
-import com.agpeya.app.model.HabitsState
-import com.agpeya.app.ui.strings.LocalStrings
-import kotlinx.coroutines.launch
 
 private val awakeOwners = java.util.WeakHashMap<android.view.Window, Int>()
 
@@ -33,17 +29,4 @@ fun ReaderAwake() {
             }
         }
     }
-}
-
-/** Viewing text never records completion. Only the reader can make that claim. */
-@Composable
-fun ReadingCompletion(habitId: String, label: String) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val today by rememberCurrentDate()
-    val state by HabitsRepository.state(context).collectAsState(initial = HabitsState())
-    val checked = habitId in state.records[today.toString()].orEmpty()
-    ToggleRow(title = label, checked = checked, onCheckedChange = {
-        scope.launch { HabitsRepository.toggle(context, today.toString(), habitId) }
-    })
 }

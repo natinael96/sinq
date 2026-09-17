@@ -216,10 +216,6 @@ fun WudaseMaryamScreen(
         }
 
         val section = sections.getOrNull(selected)
-        // Live stanza selection: tap anchors, next tap moves the end; -1 = none.
-        var selA by rememberSaveable(selected, geez) { mutableIntStateOf(-1) }
-        var selB by rememberSaveable(selected, geez) { mutableIntStateOf(-1) }
-        val selRange = com.agpeya.app.ui.reading.flatSelectionRange(selA, selB)
         Box(Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.TopCenter) {
         androidx.compose.foundation.pager.HorizontalPager(
             state = pager,
@@ -260,11 +256,7 @@ fun WudaseMaryamScreen(
             }
             val stanzas = if (geez) pageSection.ge else pageSection.am
             items(stanzas.size, key = { "st_$it" }) { i ->
-                // The highlight belongs to the portion being read, not to the
-                // one sliding past it under the finger.
-                val lit = page == selected && i in selRange
-                // Long-press still gives native character selection; a tap
-                // anchors/extends the stanza run for the share bar below.
+                // Prayer stays plain; long press retains native text copying.
                 androidx.compose.foundation.text.selection.SelectionContainer {
                     Text(
                         text = stanzas[i],
@@ -272,17 +264,6 @@ fun WudaseMaryamScreen(
                         color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(
-                                if (lit) MaterialTheme.colorScheme.secondary.copy(alpha = 0.22f)
-                                else androidx.compose.ui.graphics.Color.Transparent
-                            )
-                            .semantics { this.selected = lit }
-                            .clickable {
-                                val (a, bSel) = com.agpeya.app.ui.reading.advanceFlatSelection(selA, i)
-                                selA = a
-                                selB = bSel
-                            }
                             .padding(bottom = 16.dp),
                     )
                 }
@@ -330,28 +311,10 @@ fun WudaseMaryamScreen(
             item { Spacer(Modifier.height(Spacing.huge)) }
         }
         }
-        val stanzasNow = if (section == null) emptyList() else (if (geez) section.ge else section.am)
-        val selBody = if (selRange.isEmpty()) null
-        else stanzasNow.filterIndexed { i, _ -> i in selRange }.joinToString("\n\n").ifBlank { null }
-        val sectionTitle = section?.let { if (geez) it.titleGe else it.titleAm }
-        com.agpeya.app.ui.reading.SelectionBar(
-            visible = selA >= 0,
-            onDismiss = { selA = -1; selB = -1 },
-            // A paragraph reader: no verse numbers to print, and no colour row.
-            passage = selBody?.let {
-                com.agpeya.app.ui.common.Passage(
-                    verses = listOf(null to it),
-                    citation = listOfNotNull(s.wudaseMariam, sectionTitle).joinToString("  ·  "),
-                )
-            },
-            imageKicker = s.wudaseMariam,
-            modifier = Modifier.align(Alignment.BottomCenter),
-        )
+
         }
     }
 }
-
-
 
 /**
  * The portions, as a strip: ጸሎት ዘዘወትር, the seven days, አንቀጸ ብርሃን, ይወድስዋ መላእክት,

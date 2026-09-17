@@ -39,4 +39,24 @@ class ReadingProgressAuditTest {
         assertFalse(restarted.completedDays.containsKey("annual"))
         assertEquals(today.toString(), restarted.plansKept.first { it.planId == "annual" }.startedOn)
     }
+    @Test fun `automatic chapter completion is idempotent and does not finish the whole assignment`() {
+        val first = ReadingPlanRepository.markedChapter(ReadingPlanState(), "genesis:1", listOf("annual"), today)
+        val second = ReadingPlanRepository.markedChapter(first, "genesis:1", listOf("annual"), today)
+        assertEquals(first, second)
+        assertFalse(ReadingPlanRepository.isRead(second, "annual", day))
+        assertEquals(setOf("genesis:1"), second.readChapters)
+        assertEquals(today.toString(), second.lastReadOn)
+    }
+    @Test fun `automatic completion updates matching plans and preserves unrelated plans`() {
+        val before = ReadingPlanState(read = mapOf("other" to setOf("psalms:1")))
+        val after = ReadingPlanRepository.markedChapter(before, "genesis:1", listOf("annual", "short", "annual"), today)
+        assertEquals(setOf("genesis:1"), after.readFor("annual"))
+        assertEquals(setOf("genesis:1"), after.readFor("short"))
+        assertEquals(before.readFor("other"), after.readFor("other"))
+    }
+    @Test fun `unplanned reading records lifetime progress without inventing a plan`() {
+        val after = ReadingPlanRepository.markedChapter(ReadingPlanState(), "genesis:1", emptyList(), today)
+        assertTrue(after.read.isEmpty())
+        assertEquals(setOf("genesis:1"), after.readChapters)
+    }
 }

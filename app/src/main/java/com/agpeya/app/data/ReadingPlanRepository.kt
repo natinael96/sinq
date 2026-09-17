@@ -217,6 +217,26 @@ object ReadingPlanRepository {
         }
     }
 
+    /** Halfway reading records one chapter and never toggles existing completion off. */
+    suspend fun markChapter(
+        context: Context, book: String, chapter: Int, planIds: List<String>,
+        today: LocalDate = LocalDate.now(),
+    ) {
+        update(context) { state ->
+            val keptIds = state.plansKept.map { it.planId }.toSet()
+            markedChapter(state, chapterKey(book, chapter), planIds.filter { it in keptIds }, today)
+        }
+        HabitsRepository.markDone(context, today.toString(), BIBLE_HABIT)
+    }
+
+    internal fun markedChapter(
+        state: ReadingPlanState, chapter: String, planIds: List<String>, today: LocalDate,
+    ): ReadingPlanState = state.copy(
+        read = state.read + planIds.distinct().associateWith { state.readFor(it) + chapter },
+        readChapters = state.readChapters + chapter,
+        lastReadOn = today.toString(),
+    )
+
     internal fun toggledChapters(
         st: ReadingPlanState, planId: String, chapters: List<String>, today: LocalDate,
     ): ReadingPlanState {

@@ -680,7 +680,6 @@ private fun AgpeyaNavHost(
         }
         composable("scriptures") {
             com.agpeya.app.ui.library.ScriptureHubScreen(
-                onResume = { key -> navController.navigate("scripture/$key/0") { launchSingleTop = true } },
                 onSearch = { navController.navigate("search") { launchSingleTop = true } },
                 onBack = { navController.popBackStack() },
                 onOpenOldTestament = { navController.navigate("scripture/books/old") { launchSingleTop = true } },

@@ -163,11 +163,13 @@ fun ScriptureReaderScreen(
     // Today's ንባብ, so a chapter that belongs to it can say so and be marked
     // from where it is read. Opening a passage from the plan and then having to
     // go back to the plan to tick it was the plan's own ledger asking twice.
-    val planContent by androidx.compose.runtime.produceState(com.agpeya.app.model.ReadingPlanContent()) {
+    val loadedPlanContent by androidx.compose.runtime.produceState<com.agpeya.app.model.ReadingPlanContent?>(null) {
         value = com.agpeya.app.data.ReadingPlanRepository.content(context)
     }
-    val planState by com.agpeya.app.data.ReadingPlanRepository.state(context)
-        .collectAsState(initial = com.agpeya.app.model.ReadingPlanState())
+    val loadedPlanState by com.agpeya.app.data.ReadingPlanRepository.state(context)
+        .collectAsState(initial = null)
+    val planContent = loadedPlanContent ?: com.agpeya.app.model.ReadingPlanContent()
+    val planState = loadedPlanState ?: com.agpeya.app.model.ReadingPlanState()
     val today = com.agpeya.app.ui.common.rememberCurrentDate().value
     // Every plan being kept, with the day it is on. A psalm can belong to
     // today in two plans at once — the year reaches it, and የዳዊት ንባብ is on it —
@@ -175,25 +177,9 @@ fun ScriptureReaderScreen(
     val planDays = remember(planContent, planState, today, selectedPlanId, selectedPlanDay) {
         com.agpeya.app.ui.reading.readerPlanDays(planContent, planState, today, selectedPlanId, selectedPlanDay)
     }
-    val lastChapters by SettingsRepository.lastChapters(context).collectAsState(initial = null)
     var chaptersOpen by remember { mutableStateOf(false) }
     var chapter by rememberSaveable(bookKey) {
         mutableIntStateOf(initialChapter.coerceIn(1, b.chapters.size))
-    }
-    // Opening a book with no chapter named carries on where it was left. A link
-    // that names one — a ግጻዌ citation, a bookmark — always wins over the memory.
-    var restoredChapter by rememberSaveable(bookKey) { mutableStateOf(false) }
-    androidx.compose.runtime.LaunchedEffect(bookKey, lastChapters) {
-        if (restoredChapter || initialChapter > 0) {
-            restoredChapter = true
-            return@LaunchedEffect
-        }
-        val stored = lastChapters ?: return@LaunchedEffect
-        stored[bookKey]?.takeIf { it in 1..b.chapters.size }?.let { chapter = it }
-        restoredChapter = true
-    }
-    androidx.compose.runtime.LaunchedEffect(bookKey, chapter, restoredChapter) {
-        if (restoredChapter) SettingsRepository.setLastChapter(context, bookKey, chapter)
     }
     // Live verse selection (tap anchors, next tap moves the end); -1 = none.
     var selA by rememberSaveable(bookKey, chapter) { mutableIntStateOf(-1) }
@@ -237,6 +223,16 @@ fun ScriptureReaderScreen(
         value = runCatching { ScriptureRepository.bookNames(context) }.getOrDefault(emptyMap())
     }
     val listState = rememberLazyListState()
+    val progressKey = "bible:$bookKey:$chapter:$today"
+    val readingWeights = remember(rows) { rows.map { row -> row.sumOf { it.text.length } } }
+    val recordRead = com.agpeya.app.ui.common.rememberHalfwayRead(progressKey) {
+        val matchingPlans = planDays.filter { (_, day) ->
+            day.r.any { it.b == bookKey && chapter in it.chapters }
+        }.map { it.first.id }
+        com.agpeya.app.data.ReadingPlanRepository.markChapter(context, bookKey, chapter, matchingPlans, today)
+    }
+    com.agpeya.app.ui.common.ObserveReadingProgress(listState, progressKey, readingWeights,
+        enabled = loadedPlanContent != null && loadedPlanState != null, onProgress = recordRead)
     val verseGap = readingVerseGap(bodyFontSp)
     val selRange = com.agpeya.app.ui.reading.flatSelectionRange(selA, selB)
     val sinq = sinqColors
@@ -458,19 +454,12 @@ fun ScriptureReaderScreen(
                     val chapterKey = com.agpeya.app.data.ReadingPlanRepository.chapterKey(bookKey, chapter)
                     val read = chapterKey in planState.readFor(plan.id)
                     ListRow(
-                        title = if (read) s.readingDone else s.readingMarkChapterDone,
+                        title = plan.title,
                         // Which plan, when more than one is being kept; the
                         // action otherwise, since there is nothing to tell apart.
-                        subtitle = "${plan.title} · ${s.readingDayLabel(com.agpeya.app.ui.reading.geezNumeral(day.d))} · ${s.readingChapterOfDay(here + 1, dayChapters.size)}",
+                        subtitle = "${if (read) s.readingDone + " · " else ""}${s.readingDayLabel(com.agpeya.app.ui.reading.geezNumeral(day.d))} · ${s.readingChapterOfDay(here + 1, dayChapters.size)}",
                         leadingIcon = if (read) Icons.Outlined.Check else Icons.AutoMirrored.Outlined.MenuBook,
                         leadingTint = if (read) MaterialTheme.colorScheme.secondary else null,
-                        onClick = {
-                            scope.launch {
-                                com.agpeya.app.data.ReadingPlanRepository.toggleReading(
-                                    context, plan.id, listOf(chapterKey), today,
-                                )
-                            }
-                        },
                     )
                     dayChapters.getOrNull(here + 1)?.takeUnless { it.first == bookKey && it.second == chapter + 1 }?.let { (nextBook, nextChapter) ->
                         if (nextBook == bookKey) {
@@ -520,4 +509,3 @@ fun ScriptureReaderScreen(
  * top and finding it in the strip. Every other reader in the app steps from
  * where the reading ends; this one did not.
  */
-

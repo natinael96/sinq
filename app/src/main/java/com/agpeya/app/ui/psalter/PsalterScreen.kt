@@ -56,7 +56,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.ContentRepository
-import com.agpeya.app.data.HighlightRepository
 import com.agpeya.app.data.ReadingMode
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.data.ScriptureRepository
@@ -130,15 +129,9 @@ fun PsalterScreen(
     val bookmarkedIds = remember(bookmarks) {
         bookmarks.filter { it.hourId == PSALTER_BOOKMARK_ID }.map { it.sectionId }.toSet()
     }
-    val highlights by HighlightRepository.highlights(context).collectAsState(initial = emptyMap())
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
 
     // A ግጻዌ psalm link carries the cited verse range; tint just that psalm's verses.
-    val citedPsalmNumber = if (initialPsalmIndex >= 0 && initialStartVerse > 0) initialPsalmIndex + 1 else -1
-    val citedRange = if (initialStartVerse > 0)
-        initialStartVerse..(if (initialEndVerse > 0) initialEndVerse else initialStartVerse)
-    else IntRange.EMPTY
-
     // Opened from a bookmark: show the whole psalter so the target psalm exists.
     var daily by rememberSaveable { mutableStateOf(initialPsalmIndex < 0) }
     val today by rememberCurrentDate()
@@ -156,11 +149,6 @@ fun PsalterScreen(
     fun headerCount() = if (daily && range != null) 1 else 0
 
     var showContents by remember { mutableStateOf(false) }
-    // Verse currently chosen for highlighting (shows the colour palette); null = none.
-    // Live verse selection: first tap anchors, later taps in the same psalm
-    // extend the run (see ReadingScreen — the same two-key model).
-    var selStart by remember { mutableStateOf<String?>(null) }
-    var selEnd by remember { mutableStateOf<String?>(null) }
     val listState = rememberLazyListState()
     val pagerState = rememberPagerState(pageCount = { shown.size })
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -206,8 +194,7 @@ fun PsalterScreen(
                 onBack = onBack,
                 actions = {
                     com.agpeya.app.ui.common.EditionToggle(geez = geez) {
-                        selStart = null
-                        selEnd = null
+
                         geez = !geez
                     }
                     com.agpeya.app.ui.common.ReaderToolsMenu(
@@ -229,11 +216,11 @@ fun PsalterScreen(
                         },
                         secondaryActionLabel = if (daily) s.wholePsalter else s.dailyPsalms,
                         onSecondaryAction = {
-                            selStart = null
-                            selEnd = null
+
                             daily = !daily
                             anchor = -1
                         },
+                        readingMode = readingMode,
                         onToggleReadingMode = {
                             // Preserve the visible Psalm when changing layout.
                             anchor = if (readingMode == ReadingMode.VERTICAL) {
@@ -260,71 +247,9 @@ fun PsalterScreen(
                 },
             )
         },
-        bottomBar = {
-            val selectedPsalm = shown.firstOrNull { it.id == selStart?.substringBeforeLast(':') }
-            com.agpeya.app.ui.reading.SelectionBar(
-                visible = selStart != null,
-                onDismiss = { selStart = null; selEnd = null },
-                // The Psalter is the one shelf with two editions, so its
-                // citation names the one being read — a ግዕዝ verse copied out
-                // should not arrive claiming to be the Amharic.
-                passage = com.agpeya.app.ui.reading.versePassage(
-                    sections = shown,
-                    verseKey = selStart,
-                    endKey = selEnd,
-                    edition = if (geez) s.geezEdition else s.amharicEdition,
-                ) { section, range ->
-                    section.number?.let {
-                        com.agpeya.app.data.Citation.of(s.psalmName, it, range.first, range.last)
-                    } ?: section.title
-                },
-                currentColor = com.agpeya.app.ui.reading.selectionKeys(shown, selStart, null) {
-                    if (geez) HighlightRepository.GEEZ_PSALTER_NAMESPACE
-                    else HighlightRepository.AMHARIC_PSALTER_NAMESPACE
-                }.firstOrNull()?.let { highlights[it] },
-                onPick = { colorKey ->
-                    val keys = com.agpeya.app.ui.reading.selectionKeys(shown, selStart, selEnd) {
-                        if (geez) HighlightRepository.GEEZ_PSALTER_NAMESPACE
-                        else HighlightRepository.AMHARIC_PSALTER_NAMESPACE
-                    }
-                    selStart = null; selEnd = null
-                    if (keys.isNotEmpty()) scope.launch {
-                        HighlightRepository.setHighlights(context, keys, colorKey)
-                    }
-                },
-                imageKicker = s.psalterTitle,
-                // Without this the bar's Catena action would call the default
-                // no-op: the Psalter has no cross references, so it had never
-                // needed to hand the bar a route before.
-                onOpenRef = { route -> selStart = null; selEnd = null; onOpenRoute(route) },
-                // The Fathers on the selected verse. This is the book where the
-                // link is easiest to get wrong: the Psalter is numbered as the
-                // Church numbers it and Catena numbers it as the Masoretic text
-                // does, so መዝሙር ፳፪ is Psalm 23 there. CatenaLink carries the
-                // translation; both editions here use the same numbering.
-                commentaryUrl = selectedPsalm?.number?.let { psalm ->
-                    selStart?.substringAfterLast(':')?.toIntOrNull()?.let { verse ->
-                        com.agpeya.app.data.CatenaLink.url("psalms", psalm, verse)
-                    }
-                },
-                onBookmark = selectedPsalm?.let { section -> { toggleBookmark(section) } },
-                onWriteNote = selectedPsalm?.let { section ->
-                    {
-                        onWriteNote(
-                            "psalter?section=${(section.number ?: 1) - 1}&lang=${if (geez) "gez" else "am"}",
-                            section.title,
-                        )
-                    }
-                },
-            )
-        },
+
     ) { innerPadding ->
         Box(Modifier.fillMaxSize()) {
-            val onVerseTap: (String) -> Unit = { key ->
-                val (a, b) = com.agpeya.app.ui.reading.advanceSelection(selStart, key)
-                selStart = a
-                selEnd = b
-            }
             if (daily && range == null) {
                 // No division of the Psalter is appointed for Sunday, and this
                 // used to say so and stop. But the printed ዳዊት does not stop:
@@ -356,12 +281,7 @@ fun PsalterScreen(
                                 bodyFontSp = bodyFontSp,
                                 isBookmarked = section.id in bookmarkedIds,
                                 onToggleBookmark = { toggleBookmark(section) },
-                                highlights = highlights,
-                                onVerseTap = onVerseTap,
-                                highlightNamespace = if (geez) HighlightRepository.GEEZ_PSALTER_NAMESPACE
-                                else HighlightRepository.AMHARIC_PSALTER_NAMESPACE,
-                                citedRange = if (section.number == citedPsalmNumber) citedRange else IntRange.EMPTY,
-                                selectedRange = com.agpeya.app.ui.reading.selectionRangeFor(section, selStart, selEnd),
+
                             )
                         }
                         item { Spacer(Modifier.height(Spacing.huge)) }
@@ -388,12 +308,7 @@ fun PsalterScreen(
                                         bodyFontSp = bodyFontSp,
                                         isBookmarked = section.id in bookmarkedIds,
                                         onToggleBookmark = { toggleBookmark(section) },
-                                        highlights = highlights,
-                                        onVerseTap = onVerseTap,
-                                        highlightNamespace = if (geez) HighlightRepository.GEEZ_PSALTER_NAMESPACE
-                                        else HighlightRepository.AMHARIC_PSALTER_NAMESPACE,
-                                        citedRange = if (section.number == citedPsalmNumber) citedRange else IntRange.EMPTY,
-                                        selectedRange = com.agpeya.app.ui.reading.selectionRangeFor(section, selStart, selEnd),
+
                                     )
                                     Spacer(Modifier.height(Spacing.huge))
                                 }
@@ -420,8 +335,7 @@ fun PsalterScreen(
             PsalterContents(
                 psalms = shown,
                 onSelect = { index ->
-                    selStart = null
-                    selEnd = null
+
                     scope.launch {
                         sheetState.hide()
                         showContents = false
@@ -487,12 +401,10 @@ private fun PsalterContents(psalms: List<Section>, onSelect: (Int) -> Unit) {
     }
 }
 
-
-
 /**
  * Sunday's reading: the twenty chapters of ጸሎት ነቢያት, in the edition the Psalter
  * is being read in. The chapters open in the book reader rather than inline,
- * so a canticle bookmarks, highlights and shares the way every other book does.
+ * so a canticle uses the same quiet prayer layout and bookmark controls.
  */
 @Composable
 private fun SundayCanticles(

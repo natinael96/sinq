@@ -99,11 +99,6 @@ internal fun SectionView(
     bodyFontSp: Int,
     isBookmarked: Boolean,
     onToggleBookmark: () -> Unit,
-    highlights: Map<String, String>,
-    onVerseTap: (String) -> Unit,
-    highlightNamespace: String? = null,
-    citedRange: IntRange = IntRange.EMPTY,
-    selectedRange: IntRange = IntRange.EMPTY,
 ) {
     val s = LocalStrings.current
     val haptics = LocalHapticFeedback.current
@@ -166,138 +161,37 @@ internal fun SectionView(
         VerseText(
             section = section,
             bodyFontSp = bodyFontSp,
-            highlights = highlights,
-            onVerseTap = onVerseTap,
-            highlightNamespace = highlightNamespace,
-            citedRange = citedRange,
-            selectedRange = selectedRange,
         )
     }
 }
 
+/** Prayer text has no saved colours or tap-to-select overlay. Long press still copies text. */
 @Composable
-internal fun VerseText(
-    section: Section,
-    bodyFontSp: Int,
-    highlights: Map<String, String>,
-    onVerseTap: (String) -> Unit,
-    highlightNamespace: String? = null,
-    citedRange: IntRange = IntRange.EMPTY,
-    /** The user's live verse selection in THIS section (tap start, tap end);
-     *  tinted stronger than a saved highlight so the pending run is unmissable. */
-    selectedRange: IntRange = IntRange.EMPTY,
-) {
-    val markerColor = MaterialTheme.colorScheme.secondary
+internal fun VerseText(section: Section, bodyFontSp: Int) {
     val style = readingBodyStyle(bodyFontSp)
-    // The numeral sits in a gutter now rather than superscript inside the line,
-    // so it no longer has to be tiny to stay out of the way — it has its own
-    // column to be out of the way in. 0.72 keeps it subordinate to the verse
-    // while staying legible as ፻፳፯ rather than a smudge.
+    val markerColor = MaterialTheme.colorScheme.secondary
     val markerSize = scaledReadingSp(bodyFontSp) * 0.72f
-    // Wide enough for three Ge'ez glyphs at the current size: the Psalter runs
-    // to ፻፶ and a fixed dp would clip it at the larger font steps.
     val gutterWidth = (bodyFontSp * 1.65f).dp
-    val citedShape = RoundedCornerShape(10.dp)
-    val sinq = sinqColors
-    // Verses have to stay visibly apart at 29sp as well as at 17sp, so the gap
-    // scales with the text instead of being a fixed 4dp.
     val verseGap = readingVerseGap(bodyFontSp)
-
-    // A ግጻዌ citation covers a contiguous run of verses, so it's drawn as ONE
-    // tinted, bordered block rather than a separate box per verse. Verses are
-    // still individual Texts inside it, keeping their own tap target and any
-    // user highlight. (No SelectionContainer — it would swallow the verse taps.)
-    @Composable
-    fun verseLine(verseNumber: Int, verse: String, insideCitation: Boolean) {
-        val verseKey = HighlightRepository.verseKey(section.id, verseNumber, highlightNamespace)
-        val own = sinq.highlight(highlights[verseKey])
-        val bg = when {
-            // The live selection wins over a saved highlight: what the share
-            // will carry has to be readable at a glance while picking.
-            verseNumber in selectedRange -> markerColor.copy(alpha = 0.28f)
-            own != Color.Transparent -> own
-            insideCitation -> Color.Transparent          // the block behind it carries the tint
-            else -> Color.Transparent
-        }
-        // Numeral in a gutter, verse flush beside it — the arrangement a printed
-        // Psalter uses, and the one Ge'ez numerals need: as a 58% superscript
-        // inside the line, ፳፬ read as debris between words rather than as an
-        // index. The row is one tap target and one highlight, exactly as the
-        // single Text was.
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = verseGap / 2)
-                .clip(RoundedCornerShape(8.dp))
-                .background(bg)
-                .pointerInput(verseKey) {
-                    detectTapGestures(onTap = { onVerseTap(verseKey) })
+    androidx.compose.foundation.text.selection.SelectionContainer {
+        Column(Modifier.fillMaxWidth()) {
+            section.verses.forEachIndexed { index, verse ->
+                val number = section.firstVerse + index
+                section.verseHeaders[number]?.let { header ->
+                    Text(header, style = MaterialTheme.typography.titleSmall.inReadingFont(),
+                        color = markerColor, textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(top = if (index == 0) 0.dp else Spacing.xl, bottom = Spacing.sm))
                 }
-                .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
-        ) {
-            Text(
-                text = geezNumeral(verseNumber),
-                // style.copy, not a fresh style: it keeps the body's lineHeight,
-                // so the numeral's first line box matches the verse's and the
-                // two sit on the same baseline at every font step.
-                style = style.copy(fontSize = markerSize),
-                color = markerColor,
-                textAlign = TextAlign.End,
-                maxLines = 1,
-                modifier = Modifier.width(gutterWidth),
-            )
-            Spacer(Modifier.width(Spacing.sm))
-            Text(
-                text = verse,
-                style = style,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.weight(1f),
-            )
-        }
-    }
-
-    Column(Modifier.fillMaxWidth()) {
-        var i = 0
-        while (i < section.verses.size) {
-            val verseNumber = section.firstVerse + i
-            val header = section.verseHeaders[verseNumber]
-            if (header != null) {
-                Text(
-                    text = header,
-                    style = MaterialTheme.typography.titleSmall.inReadingFont(),
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = if (i == 0) 0.dp else Spacing.xl, bottom = Spacing.sm),
-                    textAlign = TextAlign.Center,
-                )
-            }
-            if (verseNumber in citedRange) {
-                // Take the whole cited run — stopping at a stanza header, which
-                // has to break out of the block to stay centred on its own.
-                val start = i
-                var end = i
-                while (end + 1 < section.verses.size &&
-                    (section.firstVerse + end + 1) in citedRange &&
-                    section.verseHeaders[section.firstVerse + end + 1] == null
-                ) end++
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = Spacing.xxs)
-                        .clip(citedShape)
-                        .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.22f))
-                        .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.75f), citedShape)
-                        .padding(vertical = Spacing.xs),
-                ) {
-                    for (k in start..end) {
-                        verseLine(section.firstVerse + k, section.verses[k], insideCitation = true)
-                    }
+                Row(Modifier.fillMaxWidth().padding(vertical = verseGap / 2)
+                    .padding(horizontal = Spacing.sm, vertical = Spacing.xs)) {
+                    Text(geezNumeral(number), style = style.copy(fontSize = markerSize),
+                        color = markerColor, textAlign = TextAlign.End, maxLines = 1,
+                        modifier = Modifier.width(gutterWidth))
+                    Spacer(Modifier.width(Spacing.sm))
+                    Text(verse, style = style, color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.weight(1f))
                 }
-                i = end + 1
-            } else {
-                verseLine(verseNumber, section.verses[i], insideCitation = false)
-                i++
             }
         }
     }
@@ -321,11 +215,8 @@ fun FontSizeActions(fontStep: Int, maxStep: Int, onChange: (Int) -> Unit) {
 /**
  * The bar that appears when a unit of text is selected.
  *
- * One bar for every reader — the lesson YouVersion teaches best. Tap a verse in
- * the Bible, a psalm in ዳዊት, a verse inside ጸሎተ ነግህ, a paragraph of ስንክሳር, and
- * the same actions appear in the same order, so nobody has to learn which
- * reader they are standing in. Readers whose unit is a paragraph simply have no
- * colour row; everything below it is identical.
+ * Used by study readers and non-prayer passages. Prayer readers intentionally
+ * omit this tap-triggered bar. Paragraph readers have no colour row.
  *
  * It slides up from the bottom edge — the shortest possible distance — and
  * every action closes it, so it is never something to dismiss twice.

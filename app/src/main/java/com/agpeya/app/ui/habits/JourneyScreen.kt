@@ -65,6 +65,8 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
@@ -253,7 +255,10 @@ fun JourneyScreen(
                 val (keptHabits, dueHabits) = HabitsRepository.keptOfDue(state, today)
                 SectionHeader(s.todayLabel) {
                     Text(
-                        "${s.hoursHeader}: $doneHours/${hourItems.size}  ·  ${s.habitsHeader}: $keptHabits/$dueHabits",
+                        "$doneHours/${hourItems.size}  ·  $keptHabits/$dueHabits",
+                        modifier = Modifier.clearAndSetSemantics {
+                            contentDescription = "${s.hoursHeader}: $doneHours/${hourItems.size} · ${s.habitsHeader}: $keptHabits/$dueHabits"
+                        },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -361,9 +366,9 @@ private fun HourStrips(
     val haptics = LocalHapticFeedback.current
     Column(Modifier.fillMaxWidth()) {
         SinqDivider()
-        items.chunked(2).forEach { line ->
+        items.chunked(4).forEach { line ->
             Row(
-                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 28.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
@@ -379,11 +384,10 @@ private fun HourStrips(
                         text = name,
                         style = MaterialTheme.typography.labelMedium,
                         color = tint,
-                        maxLines = 2,
+                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier
                             .weight(1f)
-                            .heightIn(min = 48.dp)
                             .clip(MaterialTheme.shapes.small)
                             .toggleable(
                                 value = kept,
@@ -397,7 +401,7 @@ private fun HourStrips(
                     )
                 }
                 // A short last line keeps its columns rather than spreading.
-                repeat(2 - line.size) { Spacer(Modifier.weight(1f)) }
+                repeat(4 - line.size) { Spacer(Modifier.weight(1f)) }
             }
             SinqDivider()
         }

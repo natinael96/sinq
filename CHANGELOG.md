@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases (PATCH for fixes, MINOR for
 features; `versionCode` increments on every release).
 
+## [Unreleased]
+
+## [2.4.1] — 2026-09-17
+
+_versionCode 75 · Quieter readers with effortless progress_
+
+### Changed
+- Restyle the Ethiopian date picker with weekday headings, aligned weeks, month/year menus and Today navigation.
+- Keep Psalter and daily/hourly prayer text free of saved highlights and tap-triggered selection bars; retain long-press copying and reader-menu sharing.
+- Automatically record prayer hours, Bible chapters and today’s Synaxarium after scrolling/swiping at least halfway through their content; remove reader completion buttons. Opening or restoring a reader alone does not count.
+- Add ሌሊት ፱ ሰዓት at 03:00 to the prayer clock widget, independently of reminder settings.
+- Move Library search into the top-right three-dot menu.
+- Restore Journey’s compact Today tally and four-column prayer-hour strips between hairline dividers.
+- Rename the reader choices to Scroll mode and Swipe mode, and show the active choice in the reader menu.
+- Remove recent-book and saved-chapter resume behavior from Scripture and scanned church books. Ordinary entry starts at chapter 1; explicit chapter and citation links still open their target. Prayer-hour reading keeps its saved position.
+
 ## [2.4.0] — 2026-09-17
 
 _versionCode 74 · Prayer clock and a more dependable daily experience_

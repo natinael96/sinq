@@ -82,7 +82,6 @@ import com.agpeya.app.ui.theme.readingBodyStyle
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import androidx.compose.runtime.LaunchedEffect
-import com.agpeya.app.data.HabitsRepository
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -180,6 +179,27 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: Str
         target?.let { listState.scrollToItem(it) }
         landed = true
     }
+
+    val today by com.agpeya.app.ui.common.rememberCurrentDate()
+    val progressKey = "sinksar:$epochDay:$edition:$today"
+    val readingWeights = remember(day) {
+        buildList {
+            add(0) // Edition controls.
+            day?.let { content ->
+                content.entries.forEach { entry -> add(entry.text.length + entry.arke.orEmpty().length) }
+                if (content.feasts.isNotEmpty() || content.monthly.isNotEmpty()) {
+                    add(content.feasts.sumOf { it.length } + content.monthly.sumOf { it.length })
+                }
+                content.reading?.let { add(it.text.length) }
+                add(SYNAXARIUM_CLOSING_STANZAS.sumOf { it.geez.length } + SYNAXARIUM_CLOSING_CODA.length)
+            }
+        }
+    }
+    val recordRead = com.agpeya.app.ui.common.rememberHalfwayRead(progressKey) {
+        com.agpeya.app.data.HabitsRepository.markDone(context, today.toString(), "sinksar")
+    }
+    com.agpeya.app.ui.common.ObserveReadingProgress(listState, progressKey, readingWeights,
+        enabled = date == today && day != null, onProgress = recordRead)
 
     fun tapAt(key: Int) {
         val (a, b) = com.agpeya.app.ui.reading.advanceFlatSelection(selA, key)
@@ -385,10 +405,6 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: Str
                 }
 
                 item { ClosingPrayer(bodyFontSp) }
-                item {
-                    val today by com.agpeya.app.ui.common.rememberCurrentDate()
-                    if (date == today) com.agpeya.app.ui.common.ReadingCompletion("sinksar", s.synaxariumFinished)
-                }
                 item { Spacer(Modifier.height(Spacing.huge)) }
             }
         }

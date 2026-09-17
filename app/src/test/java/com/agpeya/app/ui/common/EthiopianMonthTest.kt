@@ -41,4 +41,37 @@ class EthiopianMonthTest {
         assertEquals(EthiopianDate(2018, 13, 2), EthiopianDate.from(d))
         assertEquals(d, LocalDate.ofEpochDay(d.toEpochDay()))
     }
+    @Test
+    fun `Meskerem starts in its actual weekday column`() {
+        assertEquals(LocalDate.of(2026, 9, 11), EthiopianDate(2019, 1, 1).toGregorian())
+        assertEquals(listOf(null, null, null, null, 1, 2, 3), ethiopianMonthCells(2019, 1).take(7))
+    }
+
+    @Test
+    fun `leap Pagume includes day six in the next week when needed`() {
+        val cells = ethiopianMonthCells(2015, 13)
+        assertEquals(listOf(null, null, 1, 2, 3, 4, 5, 6, null, null, null, null, null, null), cells)
+        assertEquals((1..5).toList(), ethiopianMonthCells(2018, 13).filterNotNull())
+    }
+
+    @Test
+    fun `month navigation wraps through the thirteenth month`() {
+        assertEquals(2019 to 1, shiftedEthiopianMonth(2018, 13, 1))
+        assertEquals(2018 to 13, shiftedEthiopianMonth(2019, 1, -1))
+        assertEquals(2019 to 13, shiftedEthiopianMonth(2018, 13, 13))
+    }
+
+    @Test
+    fun `every selectable day occupies the correct weekday across common and leap years`() {
+        for (year in 2015..2025) for (month in 1..13) {
+            val cells = ethiopianMonthCells(year, month)
+            assertEquals(0, cells.size % 7)
+            assertEquals((1..monthLength(year, month)).toList(), cells.filterNotNull())
+            cells.forEachIndexed { index, day ->
+                if (day != null) assertEquals(
+                    EthiopianDate(year, month, day).toGregorian().dayOfWeek.value - 1, index % 7)
+            }
+        }
+    }
+
 }

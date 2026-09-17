@@ -62,7 +62,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.ContentRepository
-import com.agpeya.app.data.HighlightRepository
 import com.agpeya.app.data.LayoutRepository
 import com.agpeya.app.data.PrayerLayout
 import com.agpeya.app.data.PrayerLevelRepository
@@ -91,7 +90,6 @@ import com.agpeya.app.ui.theme.inReadingFont
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.snapshotFlow
-import com.agpeya.app.data.HabitsRepository
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 
@@ -146,13 +144,7 @@ fun ReadingScreen(
         bookmarks.filter { it.hourId == hourId }.map { it.sectionId }.toSet()
     }
     val layout by LayoutRepository.layout(context, hourId).collectAsState(initial = HourLayout())
-    val highlights by HighlightRepository.highlights(context).collectAsState(initial = emptyMap())
     var showContents by remember { mutableStateOf(false) }
-    // The live verse selection: [selStart] anchors on the first tap, [selEnd]
-    // follows later taps in the same section, so a run of verses can be
-    // highlighted or shared together. Both null = no bar.
-    var selStart by remember(hourId) { mutableStateOf<String?>(null) }
-    var selEnd by remember(hourId) { mutableStateOf<String?>(null) }
     // Apply the user's per-hour customization (show/hide, reorder, added psalms).
     val sectionLoad = com.agpeya.app.ui.common.rememberContentLoad(hour, layout, effectivePrayerLevel) {
         val h = hour
@@ -178,15 +170,23 @@ fun ReadingScreen(
             else pagerState.currentPage
         }
     }
+    val today by com.agpeya.app.ui.common.rememberCurrentDate()
+    val progressKey = "prayer:$hourId:$today:${sections.map { it.id }}"
+    val weights = remember(sections) { sections.map { section -> section.verses.sumOf { it.length } } }
+    val recordRead = com.agpeya.app.ui.common.rememberHalfwayRead(progressKey) {
+        com.agpeya.app.data.HabitsRepository.markDone(context, today.toString(),
+            com.agpeya.app.data.HabitsRepository.hourHabitId(hourId))
+    }
+    if (readingMode == ReadingMode.VERTICAL) {
+        com.agpeya.app.ui.common.ObserveReadingProgress(listState, progressKey, weights, onProgress = recordRead)
+    }
+    val pageWasSwiped = com.agpeya.app.ui.common.rememberReadingGesture(pagerState.interactionSource, progressKey)
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
     val s = com.agpeya.app.ui.strings.LocalStrings.current
     val motion = LocalMotion.current
-    val highlightNamespaceFor: (Section) -> String? = { section ->
-        if (section.id.startsWith("ps_")) HighlightRepository.AMHARIC_PSALTER_NAMESPACE else null
-    }
 
     // The section we want kept in view; shared across both readers so the
     // position survives a mode switch.
@@ -335,6 +335,7 @@ fun ReadingScreen(
                                 )
                             }
                         },
+                        readingMode = readingMode,
                         onToggleReadingMode = {
                             // Preserve the visible passage when changing layout.
                             anchor = if (readingMode == ReadingMode.VERTICAL) {
@@ -361,43 +362,6 @@ fun ReadingScreen(
                 },
             )
         },
-        bottomBar = {
-            if (selStart == null && sections.isNotEmpty()) {
-                com.agpeya.app.ui.common.ReadingCompletion(
-                    HabitsRepository.hourHabitId(hourId), s.prayerFinished,
-                )
-            }
-            val selectedSection = sections.firstOrNull { it.id == selStart?.substringBeforeLast(':') }
-            SelectionBar(
-                visible = selStart != null,
-                onDismiss = { selStart = null; selEnd = null },
-                passage = versePassage(sections, selStart, selEnd),
-                currentColor = selectionKeys(sections, selStart, null, highlightNamespaceFor)
-                    .firstOrNull()?.let { highlights[it] },
-                onPick = { colorKey ->
-                    val keys = selectionKeys(sections, selStart, selEnd, highlightNamespaceFor)
-                    selStart = null; selEnd = null
-                    if (keys.isNotEmpty()) scope.launch {
-                        HighlightRepository.setHighlights(context, keys, colorKey)
-                    }
-                },
-                imageKicker = hour?.name,
-                onBookmark = selectedSection?.let { section ->
-                    { toggleBookmark(section, sections.indexOf(section)) }
-                },
-                onWriteNote = selectedSection?.let { section ->
-                    {
-                        val h = hour
-                        if (h != null) {
-                            onWriteNote(
-                                "reading/${h.id}?sectionId=${android.net.Uri.encode(section.id)}",
-                                "${h.name} · ${section.title}",
-                            )
-                        }
-                    }
-                },
-            )
-        },
         containerColor = MaterialTheme.colorScheme.background,
     ) { innerPadding ->
         Box(Modifier.fillMaxSize()) {
@@ -409,24 +373,16 @@ fun ReadingScreen(
                 visible = sections.isNotEmpty(),
                 enter = fadeIn(tween(motion.millis(300))),
             ) {
-                val onVerseTap: (String) -> Unit = { key ->
-                    val (a, b) = advanceSelection(selStart, key)
-                    selStart = a
-                    selEnd = b
-                }
-                val selectionFor: (Section) -> IntRange = { sec -> selectionRangeFor(sec, selStart, selEnd) }
                 when (readingMode) {
                     ReadingMode.VERTICAL -> VerticalReader(
                         sections, listState, bodyFontSp, innerPadding, bookmarkedIds,
-                        ::toggleBookmark, highlights, onVerseTap, selectionFor,
-                        highlightNamespaceFor,
+                        ::toggleBookmark,
                         prevHour?.let { h -> { onSwitchHour(h.id) } },
                         nextHour?.let { h -> { onSwitchHour(h.id) } },
                     )
                     ReadingMode.HORIZONTAL -> PagedReader(
                         sections, pagerState, bodyFontSp, innerPadding, bookmarkedIds,
-                        ::toggleBookmark, highlights, onVerseTap, selectionFor,
-                        highlightNamespaceFor,
+                        ::toggleBookmark, progressKey, weights, pageWasSwiped, recordRead,
                     )
                 }
             }
@@ -467,10 +423,6 @@ private fun VerticalReader(
     innerPadding: PaddingValues,
     bookmarkedIds: Set<String>,
     onToggleBookmark: (Section, Int) -> Unit,
-    highlights: Map<String, String>,
-    onVerseTap: (String) -> Unit,
-    selectionFor: (Section) -> IntRange,
-    highlightNamespaceFor: (Section) -> String?,
     onPrevious: (() -> Unit)?,
     onNext: (() -> Unit)?,
 ) {
@@ -488,10 +440,7 @@ private fun VerticalReader(
                 bodyFontSp = bodyFontSp,
                 isBookmarked = section.id in bookmarkedIds,
                 onToggleBookmark = { onToggleBookmark(section, index) },
-                highlights = highlights,
-                onVerseTap = onVerseTap,
-                highlightNamespace = highlightNamespaceFor(section),
-                selectedRange = selectionFor(section),
+
             )
         }
         item {
@@ -509,10 +458,10 @@ private fun PagedReader(
     innerPadding: PaddingValues,
     bookmarkedIds: Set<String>,
     onToggleBookmark: (Section, Int) -> Unit,
-    highlights: Map<String, String>,
-    onVerseTap: (String) -> Unit,
-    selectionFor: (Section) -> IntRange,
-    highlightNamespaceFor: (Section) -> String?,
+    progressKey: String,
+    weights: List<Int>,
+    pageWasSwiped: Boolean,
+    onProgress: (Double) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -529,9 +478,13 @@ private fun PagedReader(
             key = { sections.getOrNull(it)?.id ?: it },
         ) { page ->
             val section = sections.getOrNull(page) ?: return@HorizontalPager
-            // LazyColumn (not Column+verticalScroll) so verse taps register inside
-            // the pager — the scroll Column was consuming them.
-            ReadingColumn(innerPadding = PaddingValues(0.dp)) {
+            val pageList = rememberLazyListState()
+            com.agpeya.app.ui.common.ObserveReadingProgress(
+                pageList, "$progressKey:$page", listOf(weights.getOrElse(page) { 0 }),
+                enabled = pagerState.settledPage == page,
+                pageWasSwiped = pageWasSwiped,
+            ) { fraction -> onProgress(com.agpeya.app.ui.common.pageReadingFraction(weights, page, fraction)) }
+            ReadingColumn(state = pageList, innerPadding = PaddingValues(0.dp)) {
                 item {
                     section.part?.let { part ->
                         Spacer(Modifier.height(Spacing.md))
@@ -548,10 +501,7 @@ private fun PagedReader(
                         bodyFontSp = bodyFontSp,
                         isBookmarked = section.id in bookmarkedIds,
                         onToggleBookmark = { onToggleBookmark(section, page) },
-                        highlights = highlights,
-                        onVerseTap = onVerseTap,
-                        highlightNamespace = highlightNamespaceFor(section),
-                        selectedRange = selectionFor(section),
+
                     )
                     Spacer(Modifier.height(Spacing.huge))
                 }

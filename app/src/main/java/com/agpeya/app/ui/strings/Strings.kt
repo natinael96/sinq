@@ -543,6 +543,8 @@ interface Strings {
     val dayLabels: List<String>
 
     /** Full weekday names, Monday..Sunday (ISO order). */
+    val previousMonth: String
+    val nextMonth: String
     val weekdayNames: List<String>
 
     /** Ethiopian month names, መስከረም..ጳጉሜን (1..13). */
@@ -1438,6 +1440,8 @@ object AmharicStrings : Strings {
     override val remindersNotFiringTitle = "ማስታወሻ አይሰራም?"
 
     override val dayLabels = listOf("ሰ", "ማ", "ረ", "ሐ", "ዓ", "ቅ", "እ")
+    override val previousMonth = "ያለፈው ወር"
+    override val nextMonth = "የሚቀጥለው ወር"
     override val weekdayNames = listOf("ሰኞ", "ማክሰኞ", "ረቡዕ", "ሐሙስ", "ዓርብ", "ቅዳሜ", "እሑድ")
     override val ethMonths = listOf(
         "መስከረም", "ጥቅምት", "ኅዳር", "ታኅሣሥ", "ጥር", "የካቲት",
@@ -1998,8 +2002,8 @@ object EnglishStrings : Strings {
     override val booksBilingual = "with translation"
     override fun booksOtherRecension(title: String) = "Other recension: $title"
     override val booksFullHymn = "Open the whole hymn"
-    override val readingModeVertical = "Scroll"
-    override val readingModeHorizontal = "Page by page"
+    override val readingModeVertical = "Scroll mode"
+    override val readingModeHorizontal = "Swipe mode"
     override val imageShapeCard = "Card"
     override val imageShapeSquare = "Square"
     override val imageShapeStory = "Story"
@@ -2322,6 +2326,8 @@ object EnglishStrings : Strings {
     override val remindersNotFiringTitle = "Reminders not firing?"
 
     override val dayLabels = listOf("M", "T", "W", "T", "F", "S", "S")
+    override val previousMonth = "Previous month"
+    override val nextMonth = "Next month"
     override val weekdayNames = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
     override val ethMonths = listOf(
         "Meskerem", "Tikimt", "Hidar", "Tahsas", "Tir", "Yekatit",

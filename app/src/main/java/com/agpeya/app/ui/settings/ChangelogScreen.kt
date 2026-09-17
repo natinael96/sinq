@@ -31,6 +31,25 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "2.4.1",
+        title = "Quieter readers with effortless progress",
+        titleAm = "ጸጥ ያለ ንባብ እና ራስ-ሰር ሂደት",
+        changes = listOf(
+            "Prayer hours, Bible chapters and today's Synaxarium are recorded after you read at least halfway; finish buttons are no longer needed.",
+            "Prayer text stays uncluttered: saved colours and tap-selection bars are absent, while long-press copying and sharing remain available.",
+            "Reading choices are now named Scroll mode and Swipe mode, and the reader menu always shows the active choice.",
+            "Scripture and scanned books start at chapter 1 unless a link names a chapter or citation. Prayer-hour reading still remembers its position.",
+            "The Ethiopian date picker, Library search and Journey layout are clearer, and the Prayer clock now includes ሌሊት ፱ ሰዓት at 03:00.",
+        ),
+        changesAm = listOf(
+            "የሰዓታት ጸሎት፣ የመጽሐፍ ቅዱስ ምዕራፍ እና የዛሬው ስንክሳር ግማሽ ሲነበብ በራሳቸው እንደተነበቡ ይመዘገባሉ፤ የማጠናቀቂያ አዝራር አያስፈልግም።",
+            "የጸሎት ጽሑፍ ጸጥ ብሎ ይቀራል፤ የቀለም ምልክትና በመንካት የሚከፈት ምርጫ የለም። በረጅሙ ተጭነው መገልበጥና ማጋራት ይችላሉ።",
+            "የንባብ አማራጮቹ «ማንሸራተቻ» እና «ገጽ በገጽ» ተብለው ይታያሉ፤ ምናሌውም የተመረጠውን ያሳያል።",
+            "መጽሐፍ ቅዱስና የቤተ ክርስቲያን መጻሕፍት ልዩ ምዕራፍ ካልተጠቀሰ ከመጀመሪያው ምዕራፍ ይከፈታሉ። የሰዓታት ንባብ ግን ቦታውን ያስታውሳል።",
+            "የኢትዮጵያ ቀን መምረጫ፣ የመጻሕፍት ፍለጋና የጉዞ አቀማመጥ ይበልጥ ግልጽ ሆነዋል፤ የጸሎት ሰዓቱም ሌሊት ፱ ሰዓትን በ03:00 ያካትታል።",
+        ),
+    ),
+    ReleaseNote(
         version = "2.4.0",
         title = "Prayer clock and private notes",
         titleAm = "የጸሎት ሰዓት እና የግል ማስታወሻ",

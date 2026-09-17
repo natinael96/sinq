@@ -82,7 +82,7 @@ import com.agpeya.app.ui.theme.sinqColors
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 fun BookScreen(
     bookId: String,
-    /** 1-based explicit chapter; 0 resumes the saved chapter. */
+    /** 1-based explicit chapter; 0 opens the first chapter. */
     openAtChapter: Int = 0,
     /**
      * Stanza within that chapter to land on; -1 lands at the top. Set when a
@@ -112,17 +112,6 @@ fun BookScreen(
 
     var chapter by rememberSaveable(bookId) {
         mutableIntStateOf((openAtChapter - 1).coerceAtLeast(0))
-    }
-    val savedChapters by SettingsRepository.lastChapters(context).collectAsState(initial = null)
-    var restored by rememberSaveable(bookId) { mutableStateOf(false) }
-    LaunchedEffect(bookId, savedChapters) {
-        if (!restored && (openAtChapter > 0 || savedChapters != null)) {
-            if (openAtChapter <= 0) chapter = ((savedChapters?.get("book:$bookId") ?: 1) - 1).coerceIn(0, chapters.lastIndex)
-            restored = true
-        }
-    }
-    LaunchedEffect(bookId, chapter, restored) {
-        if (restored) SettingsRepository.setLastChapter(context, "book:$bookId", chapter + 1)
     }
     val shown = chapters.getOrNull(chapter.coerceIn(0, (chapters.size - 1).coerceAtLeast(0)))
     val blocks = shown?.blocks.orEmpty()
@@ -361,4 +350,3 @@ private fun BookBlockRow(
         )
     }
 }
-

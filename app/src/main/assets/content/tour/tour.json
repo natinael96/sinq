@@ -2,6 +2,68 @@
   "contentVersion": 1,
   "tours": [
     {
+      "versionCode": 75,
+      "version": "2.4.1",
+      "title": {
+        "am": "በዚህ እትም",
+        "en": "In this version"
+      },
+      "pages": [
+        {
+          "kicker": {
+            "am": "ንባብ",
+            "en": "Reading"
+          },
+          "title": {
+            "am": "ሲያነቡ ሂደቱ ይመዘገባል",
+            "en": "Progress follows your reading"
+          },
+          "body": {
+            "am": "የሰዓታት ጸሎት፣ የመጽሐፍ ቅዱስ ምዕራፍ ወይም የዛሬው ስንክሳር ግማሽ ሲነበብ በራሱ ይመዘገባል። የማጠናቀቂያ አዝራር አያስፈልግም።",
+            "en": "Read at least halfway through a prayer hour, Bible chapter or today’s Synaxarium and Sinq records it automatically. There is no finish button to remember."
+          },
+          "route": "reading",
+          "actionLabel": {
+            "am": "ንባብ ክፈት",
+            "en": "Open reading"
+          }
+        },
+        {
+          "kicker": {
+            "am": "ጸሎት",
+            "en": "Prayer"
+          },
+          "title": {
+            "am": "ጸጥ ያለ የጸሎት ገጽ",
+            "en": "A quieter prayer page"
+          },
+          "body": {
+            "am": "የጸሎት ጽሑፍ ያለ የቀለም ምልክትና የመንካት አሞሌ ይታያል። በረጅሙ ተጭነው መገልበጥና ማጋራት አሁንም ይችላሉ። የንባብ ምናሌውም ማንሸራተቻ ወይም ገጽ በገጽ መሆኑን ያሳያል።",
+            "en": "Prayer text is free of saved colours and tap-selection bars. Long-press copying and sharing remain, and the menu clearly shows Scroll mode or Swipe mode."
+          }
+        },
+        {
+          "kicker": {
+            "am": "ግልጽነት",
+            "en": "Clarity"
+          },
+          "title": {
+            "am": "ቀን፣ መጻሕፍት እና የጸሎት ሰዓት",
+            "en": "Dates, books and the prayer clock"
+          },
+          "body": {
+            "am": "የኢትዮጵያ ቀን መምረጫው የሳምንቱን ቀናት በትክክል ያሰለፋል። መጻሕፍት ከመጀመሪያው ምዕራፍ ይከፈታሉ፤ የጸሎት ሰዓቱም ሌሊት ፱ ሰዓትን ጨምሯል።",
+            "en": "The Ethiopian date picker aligns real weekdays and makes month and year changes easier. Books open predictably at chapter 1, and the Prayer clock now includes the 03:00 Night ninth hour."
+          },
+          "route": "scriptures",
+          "actionLabel": {
+            "am": "መጽሐፍ ቅዱስን ክፈት",
+            "en": "Open Scripture"
+          }
+        }
+      ]
+    },
+    {
       "versionCode": 74,
       "version": "2.4.0",
       "title": {

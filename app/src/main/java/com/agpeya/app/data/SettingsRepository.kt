@@ -117,8 +117,6 @@ object SettingsRepository {
     private val KEY_COPY_REFERENCE = booleanPreferencesKey("copy_reference")
     private val KEY_COPY_EDITION = booleanPreferencesKey("copy_edition")
     private val KEY_HIGHLIGHT_NAMES = stringPreferencesKey("highlight_names")
-    // Where the reader was in each book, so a book reopens where it was left.
-    private val KEY_LAST_CHAPTERS = stringPreferencesKey("last_chapters")
     private val KEY_ONBOARDED = booleanPreferencesKey("onboarded")
     private val KEY_NAME = stringPreferencesKey("profile_name")
     private val KEY_CHRISTIAN_NAME = stringPreferencesKey("profile_christian_name")
@@ -438,31 +436,6 @@ object SettingsRepository {
             }.getOrDefault(emptyMap())
             val next = if (name.isBlank()) current - key else current + (key to name.trim())
             prefs[KEY_HIGHLIGHT_NAMES] = highlightNameJson.encodeToString(next)
-        }
-    }
-
-    /**
-     * The chapter last read in each book, so opening ኦሪት ዘፍጥረት a second time
-     * carries on rather than starting again at ፩. Keyed by the book's slug.
-     */
-    fun lastChapters(context: Context): Flow<Map<String, Int>> =
-        context.settingsDataStore.data.map { prefs ->
-            val raw = prefs[KEY_LAST_CHAPTERS] ?: return@map emptyMap()
-            runCatching {
-                highlightNameJson.decodeFromString<Map<String, Int>>(raw)
-            }.getOrDefault(emptyMap())
-        }
-
-    fun lastScriptureBook(context: Context): Flow<String?> =
-        context.settingsDataStore.data.map { it[stringPreferencesKey("last_scripture_book")] }
-
-    suspend fun setLastChapter(context: Context, bookKey: String, chapter: Int) {
-        context.settingsDataStore.edit { prefs ->
-            if (!bookKey.startsWith("book:")) prefs[stringPreferencesKey("last_scripture_book")] = bookKey
-            val current = runCatching {
-                highlightNameJson.decodeFromString<Map<String, Int>>(prefs[KEY_LAST_CHAPTERS] ?: "{}")
-            }.getOrDefault(emptyMap())
-            prefs[KEY_LAST_CHAPTERS] = highlightNameJson.encodeToString(current + (bookKey to chapter))
         }
     }
 

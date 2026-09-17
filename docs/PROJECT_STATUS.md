@@ -1,6 +1,6 @@
 # Sinq project status
 
-Reviewed **2026-09-17**, against the **v2.4.0 release source** and the checked-in assets, build files, workflows, and Kotlin implementation. This is a repository audit; it does not establish the state of Google Play, remote workflow runs, deployed websites, or a device installation.
+Reviewed **2026-09-17**, against the **v2.4.1 release source** and the checked-in assets, build files, workflows, and Kotlin implementation. This is a repository audit; it does not establish the state of Google Play, remote workflow runs, deployed websites, or a device installation.
 
 ## UI/UX remediation code pass
 
@@ -22,12 +22,20 @@ On 2026-09-17, `testDebugUnitTest lintDebug assembleDebug` completed successfull
 
 The user selected **code/build checks only**. Visual, TalkBack, foreground/background lifecycle and notification-delivery checks remain unverified. These results do not close the remaining recommendations in the implementation tracker or establish release readiness.
 
+## Refinements in 2.4.1
+
+The working tree adds Library overflow search, Journey’s compact Today hairlines, a weekday-aligned Ethiopian date-picker popup, and distraction-free Psalter/daily/hourly prayer text. Hourly prayers, Bible chapters and today’s Synaxarium automatically record completion after a reading gesture reaches at least half the content, replacing reader completion buttons. Bible tracking remains chapter-specific and preserves independent plans; opening or restoring alone does not count. The prayer clock includes ሌሊት ፱ ሰዓት at 03:00 independently of reminder settings.
+
+Scripture and scanned church books now start at chapter 1 unless an explicit chapter or citation is requested; only prayer-hour reading retains its saved position. Reader choices are named Scroll mode and Swipe mode and the active choice appears in the reader menu. See the [2.4.1 implementation notes](UI_UX_FIX_PROGRESS.md#user-directed-refinements-in-241) for verification.
+
+Release verification passed locally: bundled-content validation reported zero warnings; **436 JVM tests passed** with no failures, errors or skips; release-vital lint and debug APK assembly completed successfully. Device checks remain unverified.
+
 ## Current baseline
 
 | Item | Current repository state |
 |---|---|
 | Application | Sinq (ስንቅ), native Android, Amharic-first with English interface support |
-| Version | **2.4.0**, `versionCode 74`; latest changelog entry dated 2026-09-17 |
+| Version | **2.4.1**, `versionCode 75`; latest changelog entry dated 2026-09-17 |
 | Android identity | `applicationId com.sinq.app`; Kotlin namespace `com.agpeya.app` |
 | Android floor / target | API **23** (Android 6.0) / API **36**; compile SDK 36 |
 | Architecture | Single app module, Compose UI, repository-backed state, bundled JSON content |
