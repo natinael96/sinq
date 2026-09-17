@@ -12,7 +12,7 @@ The final implementation pass adds the requested Prayer clock widget, penance Sa
 
 ### Release publication
 
-[v2.4.0](https://github.com/natinael96/sinq/releases/tag/v2.4.0) is published from app commit `e090405` (versionCode 74). The [release workflow](https://github.com/natinael96/sinq/actions/runs/35158837082) passed content validation, unit tests and release-vital lint, then built and attached the signed APK and Play-upload AAB. The in-app changelog and bilingual What's New tour include this version.
+[v2.4.1](https://github.com/natinael96/sinq/releases/tag/v2.4.1) is published from app commit `f2e00a2` (versionCode 75). The [release workflow](https://github.com/natinael96/sinq/actions/runs/35195352842) passed content validation, unit tests and release-vital lint, then built and attached the signed installable APK and Play-upload AAB. The in-app changelog and bilingual What's New tour include this version. The [release-triggered website workflow](https://github.com/natinael96/sinq/actions/runs/35195352758) also completed successfully.
 
 The [website](https://sinq.natinael96.tech/) is deployed with the original hero, a minimal lower homepage, a separate [About page](https://sinq.natinael96.tech/about.html), consistent Install/About/Changes header links and “powered by 2ቡና” in every footer. Browser checks passed at 320, 390 and 1440 pixels in light/dark themes; all eight live pages were checked for the shared navigation and attribution. These website checks do not replace Android device testing.
 
