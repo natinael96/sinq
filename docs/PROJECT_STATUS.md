@@ -1,6 +1,6 @@
 # Sinq project status
 
-Reviewed **2026-09-18**, against the **v2.5.1 release candidate** and the checked-in assets, build files, workflows, and Kotlin implementation. This is a repository audit plus recorded publication evidence for v2.5.0; it does not establish the state of Google Play or a device installation.
+Reviewed **2026-09-18**, against the published **v2.5.1** release and the checked-in assets, build files, workflows, and Kotlin implementation. This is a repository audit plus recorded GitHub and website publication evidence; it does not establish the state of Google Play or a device installation.
 
 ## UI/UX remediation code pass
 
@@ -12,7 +12,7 @@ The final implementation pass adds the requested Prayer clock widget, penance Sa
 
 ### Release publication
 
-[v2.5.0](https://github.com/natinael96/sinq/releases/tag/v2.5.0) is published from app commit `57bf69d` (versionCode 76). The [release workflow](https://github.com/natinael96/sinq/actions/runs/35323178625) passed content validation, 439 JVM tests and release-vital lint, then built and attached the signed installable APK and Play-upload AAB. The in-app changelog and bilingual What's New tour include this version. The [release-triggered website workflow](https://github.com/natinael96/sinq/actions/runs/35323178615) also completed successfully, and the live homepage and changelog report 2.5.0.
+[v2.5.1](https://github.com/natinael96/sinq/releases/tag/v2.5.1) is published from app commit `559511a` (versionCode 77). The [release workflow](https://github.com/natinael96/sinq/actions/runs/35332935818) passed content validation, 441 JVM tests and release-vital lint, then built and attached the signed installable APK and Play-upload AAB. The in-app changelog and bilingual What's New tour include this version. The [release-triggered website workflow](https://github.com/natinael96/sinq/actions/runs/35332936045) and GitHub Pages deployment completed successfully, and the live homepage and changelog report 2.5.1.
 
 The [website](https://sinq.natinael96.tech/) is deployed with the original hero, a minimal lower homepage, a separate [About page](https://sinq.natinael96.tech/about.html), consistent Install/About/Changes header links and “powered by 2ቡና” in every footer. Browser checks passed at 320, 390 and 1440 pixels in light/dark themes; all eight live pages were checked for the shared navigation and attribution. These website checks do not replace Android device testing.
 
@@ -44,7 +44,7 @@ Compact windows retain the bottom navigation bar. At 600dp and wider the app use
 
 The Ethiopian-year heatmap scales with the system font size and uses a border for selection; completed prayer hours include a checkmark instead of relying on color alone. The reader scroll grip has a larger acquisition target and cancels stale drag work before beginning a new gesture.
 
-Local release verification passed on 2026-09-18: **441 JVM tests passed** with zero failures, errors or skips; debug and release-vital lint passed; the debug APK assembled; and `git diff --check` was clean. Signed release artifacts remain subject to the tag workflow. No Android device or emulator was attached, so TalkBack, large-screen rendering and performance remain unverified on hardware.
+Local release verification passed on 2026-09-18: **441 JVM tests passed** with zero failures, errors or skips; debug and release-vital lint passed; the debug APK assembled; and `git diff --check` was clean. The tag workflow repeated the release gates and published both signed artifacts; remote website publication is verified above. No Android device or emulator was attached, so TalkBack, large-screen rendering and performance remain unverified on hardware.
 
 ## Current baseline
 
@@ -59,7 +59,7 @@ Local release verification passed on 2026-09-18: **441 JVM tests passed** with z
 | Home-screen widgets | Daily Gitsawe, Memento Mori and the new website-style Prayer clock; clock uses live digital time and a periodically drawn canonical-hour dial |
 | Navigation | Home, Journey, Library, Settings; search, marks, readers, and management screens are pushed destinations |
 | Product stage | Implemented application with a versioned release history and automated release workflow; original Phase 1/V1 plans are historical |
-| Distribution evidence | GitHub v2.5.0 release published with a signed installable APK and Play-upload AAB; live website reports 2.5.0 |
+| Distribution evidence | GitHub v2.5.1 release published with a signed installable APK and Play-upload AAB; live website reports 2.5.1 |
 
 ## Implemented features
 
@@ -149,7 +149,7 @@ The journal passphrase is an interface gate, **not database encryption**. Journa
 4. **Source regeneration:** the editorial `scripts/merge_mahlet.py` command belongs to its original external workspace and is not included here. This repo provides `tools/build_mahlet.py` to build from the checked-in merge.
 5. **Device verification:** notification delivery across reboot, time changes, permission denial and vendor battery restrictions; Android 6 compatibility; large-font/TalkBack behavior; widget refresh; and restore behavior still need a recorded device matrix for a release-readiness claim.
 6. **Comment drift:** update-check comments still mention a daily throttle/settings opt-out; actual current code gates by build flag and checks on launch. The misleading journal-export encryption comment was corrected during the subsequent UI/UX remediation.
-7. **Publication:** GitHub release signing and the live site are verified for 2.5.0; Play enrollment, testing and store publication remain unverified.
+7. **Publication:** GitHub release signing and the live site are verified for 2.5.1; Play enrollment, testing and store publication remain unverified.
 
 ## Documentation map
 
