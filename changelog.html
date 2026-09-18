@@ -51,6 +51,28 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
 <!-- releases:start -->
 <article class="release">
   <header>
+    <h2>2.5.0 <span class="date">18 September 2026</span></h2>
+    <p class="motto"><span>Reminders that arrive by design</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span>Show first-time users a compact Home setup prompt for notification permission and battery restrictions. The live checklist disappears when both are resolved and “Not now” dismisses it permanently.</span></li>
+    <li><span>Let each person choose the daily Gitsawe reminder time. The selected time is backed up, restored, shown in the day timeline and applied to the pending alarm immediately.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span>Serialize reminder delivery and cancellation so disabling or retiming a reminder cannot leak a stale notification or re-arm an obsolete schedule.</span></li>
+    <li><span>Atomically claim the once-daily breath prayer, preventing overlapping broadcasts from posting it twice.</span></li>
+    <li><span>Rebuild prayer schedules from current mode and hour state under a mutex; concurrent mode edits now update DataStore atomically instead of overwriting one another.</span></li>
+    <li><span>Give each ringing prayer alarm a session identity so only one of Snooze, Dismiss, Open, swipe-away or timeout can end it and produce its follow-up.</span></li>
+    <li><span>Remove visible notifications when their reminder is disabled, and recheck quiet hours and current settings immediately before every gentle reminder is posted.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
     <h2>2.4.1 <span class="date">17 September 2026</span></h2>
     <p class="motto"><span>Quieter readers with effortless progress</span></p>
   </header>
@@ -218,6 +240,9 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   </div>
 </article>
 
+<details class="more-releases">
+  <summary><span>61 earlier releases, 2.2.0 back to 0.1.0</span></summary>
+  <div class="more-body">
 <article class="release">
   <header>
     <h2>2.2.0 <span class="date">11 September 2026</span></h2>
@@ -248,9 +273,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   </div>
 </article>
 
-<details class="more-releases">
-  <summary><span>60 earlier releases, 2.1.0 back to 0.1.0</span></summary>
-  <div class="more-body">
 <article class="release">
   <header>
     <h2>2.1.0 <span class="date">10 September 2026</span></h2>
