@@ -31,6 +31,25 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "2.7.1",
+        title = "The editor, in every window",
+        titleAm = "አርታዒው በየትኛውም መስኮት",
+        changes = listOf(
+            "The card editor was unusable with the phone turned sideways — the controls were there but had no room. It now puts the card and the controls side by side when the window is short.",
+            "The preview now describes itself to TalkBack, so the card is no longer the one thing on the screen a screen reader could not reach.",
+            "Every chip in the editor is easier to hit, and they are no longer crowded against each other.",
+            "The tab names no longer get cut off when you use a larger text size.",
+            "Smaller things: the size slider no longer jumps as it opens, and sharing reports itself on the screen rather than behind it.",
+        ),
+        changesAm = listOf(
+            "ስልኩ ወደ ጎን ሲዞር የካርዱ አርታዒ አይሠራም ነበር — መቆጣጠሪያዎቹ ነበሩ፣ ቦታ ግን አልነበራቸውም። አሁን መስኮቱ ሲያጥር ካርዱንና መቆጣጠሪያዎቹን ጎን ለጎን ያስቀምጣል።",
+            "ቅድመ ዕይታው አሁን ራሱን ለTalkBack ይገልጻል፤ ካርዱ በስክሪን አንባቢ የማይደረስበት ብቸኛ ነገር መሆኑ ቀርቷል።",
+            "በአርታዒው ውስጥ ያለ እያንዳንዱ ቁልፍ ለመንካት ቀለል ብሏል፤ እርስ በርሳቸውም አልተጣበቁም።",
+            "ትልቅ የጽሑፍ መጠን ሲጠቀሙ የትሮቹ ስም መቆረጡ ቀርቷል።",
+            "ጥቃቅን ነገሮች፦ የመጠን መንሸራተቻው ሲከፈት አይዘልም፤ ማጋራትም ከበስተጀርባ ሳይሆን በስክሪኑ ላይ ራሱን ይናገራል።",
+        ),
+    ),
+    ReleaseNote(
         version = "2.7.0",
         title = "See the card before you send it",
         titleAm = "ካርዱን ከመላክዎ በፊት ይዩት",

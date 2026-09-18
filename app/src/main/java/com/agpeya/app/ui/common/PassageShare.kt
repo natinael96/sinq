@@ -3,7 +3,6 @@ package com.agpeya.app.ui.common
 import androidx.core.graphics.withSave
 import androidx.core.graphics.toColorInt
 import androidx.core.graphics.createBitmap
-import androidx.core.graphics.scale
 import android.content.ClipData
 import android.content.ContentValues
 import android.content.Context
@@ -445,11 +444,18 @@ object PassageShare {
     ): Preview? = withContext(Dispatchers.Default) {
         runCatching {
             val fit = fit(context, payload, spec)
-            val full = render(context, payload, spec, fit, fit.pages.first(), 1, fit.pages.size)
-            val scale = (maxWidthPx.toFloat() / full.width).coerceIn(0.1f, 1f)
-            val small = full.scale((full.width * scale).toInt(), (full.height * scale).toInt())
-            if (small !== full) full.recycle()
-            Preview(small, fit.pages.size, fit.bodySize)
+            // Drawn small, not drawn large and shrunk. A story rendered at full
+            // width is 1080 x 1920 x 4 bytes — eight megabytes allocated and
+            // discarded for a thumbnail, on an app whose floor is Android 6.
+            val scale = (maxWidthPx.toFloat() / W).coerceIn(0.1f, 1f)
+            Preview(
+                bitmap = render(
+                    context, payload, spec, fit, fit.pages.first(), 1, fit.pages.size,
+                    renderScale = scale,
+                ),
+                pages = fit.pages.size,
+                bodySize = fit.bodySize,
+            )
         }.onFailure { Log.e(TAG, "preview failed", it) }.getOrNull()
     }
 
@@ -586,6 +592,14 @@ object PassageShare {
         body: String,
         page: Int,
         pageCount: Int,
+        /**
+         * Rasterise at this fraction of 1080 px.
+         *
+         * Everything below is written in 1080-space and the canvas is scaled
+         * once, so the preview is the export drawn smaller rather than the
+         * export drawn large and thrown away. At 1 it is the export.
+         */
+        renderScale: Float = 1f,
     ): Bitmap {
         val face = ethiopic(context)
         val k = fit.chrome
@@ -631,8 +645,13 @@ object PassageShare {
             BlockPosition.CENTER -> spare / 2f
             BlockPosition.BOTTOM -> spare
         }
-        val bmp = createBitmap(W, h, Bitmap.Config.ARGB_8888)
+        val bmp = createBitmap(
+            (W * renderScale).toInt().coerceAtLeast(1),
+            (h * renderScale).toInt().coerceAtLeast(1),
+            Bitmap.Config.ARGB_8888,
+        )
         val c = Canvas(bmp)
+        if (renderScale != 1f) c.scale(renderScale, renderScale)
 
         // Ground + soft gold glow in the top corner, then the card.
         c.drawColor(pal.ground)

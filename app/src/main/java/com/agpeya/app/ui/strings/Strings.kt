@@ -971,6 +971,8 @@ interface Strings {
     val editorShowColophon: String
     /** "3 pages" under the preview when a passage does not fit on one. */
     fun editorPages(count: Int): String
+    /** What the preview shows, for a reader who cannot see it. */
+    fun editorPreviewOf(frame: String, ground: String, pages: Int): String
     /** About row when the check is off, or nothing has been found yet. */
 
     // ── ቁርባን ዝግጅት (communion preparation) ──────────────────────────────────
@@ -1886,6 +1888,8 @@ object AmharicStrings : Strings {
     override val editorShowDate = "ዕለቱን አሳይ"
     override val editorShowColophon = "የስንቅ ምልክት"
     override fun editorPages(count: Int) = "$count ገጾች"
+    override fun editorPreviewOf(frame: String, ground: String, pages: Int) =
+        "የካርዱ ቅድመ ዕይታ፦ $frame፣ $ground መደብ" + if (pages > 1) "፣ $pages ገጾች" else ""
 
     // ── ቁርባን ዝግጅት ──────────────────────────────────────────────────────────
 
@@ -2803,6 +2807,8 @@ object EnglishStrings : Strings {
     override val editorShowDate = "Show the date"
     override val editorShowColophon = "Sinq mark"
     override fun editorPages(count: Int) = if (count == 1) "1 page" else "$count pages"
+    override fun editorPreviewOf(frame: String, ground: String, pages: Int) =
+        "Card preview: $frame, $ground ground" + if (pages > 1) ", $pages pages" else ""
 
     // ── Communion preparation ────────────────────────────────────────────────
 

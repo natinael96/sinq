@@ -8,6 +8,46 @@ features; `versionCode` increments on every release).
 
 ## [Unreleased]
 
+## [2.7.1] — 2026-09-19
+
+_versionCode 80 · The editor, in every window_
+
+### Fixed
+- **The card editor was unusable in landscape.** It sized the preview from the
+  screen rather than from its own window, so on a landscape phone the fixed
+  parts — bar, preview, frame chips, tabs — consumed all 360 dp and left the
+  sheet fourteen. Presets, sizes, grounds and marks were all present and all
+  unreachable, with nothing on screen suggesting a rotation. It measures its own
+  window now, and below 480 dp of height it turns side by side: the card and its
+  frames on one half, the sheet at full height on the other. The same rule fixes
+  split-screen and a folded inner display, which are the same problem said
+  differently.
+- **The preview was invisible to a screen reader.** The card is the whole
+  subject of the screen and carried no description, so a reader on TalkBack
+  could work every control and never learn what any of them did. It now says
+  what it is: the frame, the ground and the page count.
+- **Every chip in the editor was below the minimum touch target.** Material
+  chips are 32 dp and the toolkit does not grow their target for you; these were
+  also spaced 4 dp apart where the guideline asks for 8. All twenty are now 48 dp
+  targets, still drawn at 32.
+- The tab row could truncate its labels mid-word at a raised system font size;
+  it scrolls now rather than dividing a phone's width five ways.
+- The size slider started at the floor and jumped to the real value when the
+  first preview resolved.
+- A preset stayed marked as chosen after the air or the margin had been changed,
+  and unmarked after the size had been — the same chip meaning two things.
+
+### Changed
+- The preview is rasterised at the size it is displayed rather than at the
+  export's 1080 px and scaled down. On the low-density devices this app's floor
+  exists to reach that is roughly an eighth of the memory it was asking for.
+- Feedback while sharing is a snackbar and a spinner on the button itself,
+  rather than a toast behind the dialog.
+- The editor asks for its own window insets instead of inheriting a default that
+  disagreed with the activity's edge-to-edge layout.
+- Sliders and the chip groups now say what they are to a screen reader, and the
+  value that read as a disabled button reads as a value.
+
 ## [2.7.0] — 2026-09-18
 
 _versionCode 79 · See the card before you send it_
