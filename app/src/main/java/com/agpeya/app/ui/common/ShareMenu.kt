@@ -48,7 +48,9 @@ fun ShareMenuAction(
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
     var open by remember { mutableStateOf(false) }
-    var imageBusy by remember { mutableStateOf(false) }
+    // The passage being edited, and the whole of the editor's state here: the
+    // dialog is the screen, so nothing else has to know it exists.
+    var editing by remember { mutableStateOf<SharePayload?>(null) }
     // The same format the selection bar and the reader menu use. This one was
     // still building its own text, so a passage shared from here ignored
     // ቅዳና አጋራ while the very same passage shared from the bar obeyed it.
@@ -80,25 +82,12 @@ fun ShareMenuAction(
                 open = false
                 payload()?.let { Sharing.share(context, textOf(it), it.title ?: it.kicker, s) }
             }
-            MenuItem(s.shareAsImage, Icons.Outlined.Image, enabled = !imageBusy) {
+            MenuItem(s.shareAsImage, Icons.Outlined.Image) {
                 open = false
-                payload()?.let { value -> scope.launch {
-                    imageBusy = true
-                    Toast.makeText(context, s.imagePreparing, Toast.LENGTH_SHORT).show()
-                    try { PassageShare.share(context, value, s) } finally { imageBusy = false }
-                } }
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                MenuItem(s.saveImage, Icons.Outlined.SaveAlt, enabled = !imageBusy) {
-                    open = false
-                    payload()?.let { value -> scope.launch {
-                        imageBusy = true
-                        Toast.makeText(context, s.imagePreparing, Toast.LENGTH_SHORT).show()
-                        try { PassageShare.save(context, value, s) } finally { imageBusy = false }
-                    } }
-                }
+                editing = payload()
             }
         }
+        editing?.let { ImageEditorDialog(payload = it, onDismiss = { editing = null }) }
     }
 }
 
@@ -125,7 +114,7 @@ fun ReaderToolsMenu(
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
     var open by remember { mutableStateOf(false) }
-    var imageBusy by remember { mutableStateOf(false) }
+    var editing by remember { mutableStateOf<SharePayload?>(null) }
     // The same format the selection bar uses. The menu built its own text, so
     // one passage left the app in two different shapes depending on which
     // control the reader reached for.
@@ -221,33 +210,15 @@ fun ReaderToolsMenu(
                 DropdownMenuItem(
                     text = { Text(s.shareAsImage) },
                     leadingIcon = { Icon(Icons.Outlined.Image, contentDescription = null) },
-                    enabled = shareEnabled && !imageBusy,
+                    enabled = shareEnabled,
                     onClick = {
                         open = false
-                        sharePayload()?.let { payload -> scope.launch {
-                            imageBusy = true
-                            Toast.makeText(context, s.imagePreparing, Toast.LENGTH_SHORT).show()
-                            try { PassageShare.share(context, payload, s) } finally { imageBusy = false }
-                        } }
+                        editing = sharePayload()
                     },
                 )
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    DropdownMenuItem(
-                        text = { Text(s.saveImage) },
-                        leadingIcon = { Icon(Icons.Outlined.SaveAlt, contentDescription = null) },
-                        enabled = shareEnabled && !imageBusy,
-                        onClick = {
-                            open = false
-                            sharePayload()?.let { payload -> scope.launch {
-                                imageBusy = true
-                                Toast.makeText(context, s.imagePreparing, Toast.LENGTH_SHORT).show()
-                                try { PassageShare.save(context, payload, s) } finally { imageBusy = false }
-                            } }
-                        },
-                    )
-                }
             }
         }
+        editing?.let { ImageEditorDialog(payload = it, onDismiss = { editing = null }) }
     }
 }
 

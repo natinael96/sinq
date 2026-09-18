@@ -329,33 +329,17 @@ internal fun SelectionBar(
                             onOpen = { route -> refsOpen = false; onDismiss(); onOpenRef(route) },
                         )
                     }
-                    val imageBusy = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
-                    // The shape and ground are chosen when the image is asked
-                    // for, not before: it is a decision about where it is going.
+                    // The shape and the ground used to be chosen from a list
+                    // of names, before the card existed, and the first sight of
+                    // the result was in the share sheet. They are chosen in
+                    // front of the card now, along with everything else.
                     var imageSheet by androidx.compose.runtime.saveable.rememberSaveable {
                         androidx.compose.runtime.mutableStateOf(false)
                     }
-                    var saving by androidx.compose.runtime.saveable.rememberSaveable {
-                        androidx.compose.runtime.mutableStateOf(false)
-                    }
                     if (imageSheet) {
-                        ImageOptionsDialog(
-                            onDismiss = { imageSheet = false },
-                            onChoose = { shape, ground ->
-                                imageSheet = false
-                                val shaped = payload.copy(shape = shape, ground = ground)
-                                val save = saving
-                                if (!imageBusy.value) scope.launch {
-                                    imageBusy.value = true
-                                    try {
-                                        if (save) com.agpeya.app.ui.common.PassageShare.save(ctx, shaped, s)
-                                        else com.agpeya.app.ui.common.PassageShare.share(ctx, shaped, s)
-                                    } finally {
-                                        imageBusy.value = false
-                                        onDismiss()
-                                    }
-                                }
-                            },
+                        com.agpeya.app.ui.common.ImageEditorDialog(
+                            payload = payload,
+                            onDismiss = { imageSheet = false; onDismiss() },
                         )
                     }
                     SelectionActions(
@@ -406,20 +390,14 @@ internal fun SelectionBar(
                                     onDismiss()
                                 },
                             )
+                            // One entry, because share and save are both inside
+                            // the editor now and choosing between them before
+                            // seeing the card was the wrong order to ask in.
                             add(
                                 SelectionAct(s.shareAsImage, Icons.Outlined.Image) {
-                                    saving = false
                                     imageSheet = true
                                 },
                             )
-                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                                add(
-                                    SelectionAct(s.saveImage, Icons.Outlined.SaveAlt) {
-                                        saving = true
-                                        imageSheet = true
-                                    },
-                                )
-                            }
                         },
                     )
                 }
@@ -501,84 +479,6 @@ private fun HighlightRow(
             )
         }
     }
-}
-
-/**
- * Three shapes and two grounds, asked for at the moment the image is.
- *
- * Square is what Telegram and Instagram previews crop to; story is what people
- * post. The typography and the colophon do not change with either — the card is
- * still ስንቅ in all three.
- */
-@Composable
-private fun ImageOptionsDialog(
-    onDismiss: () -> Unit,
-    onChoose: (com.agpeya.app.ui.common.ImageShape, com.agpeya.app.ui.common.ImageGround) -> Unit,
-) {
-    val s = LocalStrings.current
-    var ground by androidx.compose.runtime.saveable.rememberSaveable {
-        androidx.compose.runtime.mutableStateOf(com.agpeya.app.ui.common.ImageGround.GREEN)
-    }
-    androidx.compose.material3.AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(s.shareAsImage) },
-        text = {
-            Column {
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                ) {
-                    // Each chip carries the ground it stands for. Selected and
-                    // unselected FilterChips differ too little to tell apart at
-                    // a glance, so the two read as one choice made twice — and
-                    // the picker looked broken rather than merely quiet.
-                    listOf(
-                        Triple(
-                            com.agpeya.app.ui.common.ImageGround.GREEN,
-                            s.imageGroundGreen,
-                            androidx.compose.ui.graphics.Color(0xFF0B3129),
-                        ),
-                        Triple(
-                            com.agpeya.app.ui.common.ImageGround.IVORY,
-                            s.imageGroundIvory,
-                            androidx.compose.ui.graphics.Color(0xFFE7E4D6),
-                        ),
-                    ).forEach { (value, label, swatch) ->
-                        androidx.compose.material3.FilterChip(
-                            selected = ground == value,
-                            onClick = { ground = value },
-                            label = { Text(label, maxLines = 1) },
-                            leadingIcon = {
-                                androidx.compose.foundation.layout.Box(
-                                    Modifier
-                                        .size(16.dp)
-                                        .clip(androidx.compose.foundation.shape.CircleShape)
-                                        .background(swatch)
-                                        .border(
-                                            1.dp,
-                                            MaterialTheme.colorScheme.outline,
-                                            androidx.compose.foundation.shape.CircleShape,
-                                        ),
-                                )
-                            },
-                        )
-                    }
-                }
-                Spacer(Modifier.height(Spacing.sm))
-                listOf(
-                    com.agpeya.app.ui.common.ImageShape.CARD to s.imageShapeCard,
-                    com.agpeya.app.ui.common.ImageShape.SQUARE to s.imageShapeSquare,
-                    com.agpeya.app.ui.common.ImageShape.STORY to s.imageShapeStory,
-                ).forEach { (shape, label) ->
-                    com.agpeya.app.ui.common.ListRow(title = label, onClick = { onChoose(shape, ground) })
-                }
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            androidx.compose.material3.TextButton(onClick = onDismiss) { Text(s.cancel) }
-        },
-    )
 }
 
 /**

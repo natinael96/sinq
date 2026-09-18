@@ -939,6 +939,38 @@ interface Strings {
     /** Play has downloaded the new build and only the restart is left. */
     val updateReady: String
     val updateRestart: String
+
+    // ── The image editor ─────────────────────────────────────────────────────
+    val editorTitle: String
+    val editorStyle: String
+    val editorGround: String
+    val editorType: String
+    val editorLayout: String
+    val editorMark: String
+    val presetVerse: String
+    val presetPassage: String
+    val presetStory: String
+    val presetFeast: String
+    val presetPlain: String
+    val frameCard: String
+    val frameSquare: String
+    val frameStory: String
+    val editorSize: String
+    val editorSizeAuto: String
+    val editorAir: String
+    val groundGreen: String
+    val groundIvory: String
+    val groundNight: String
+    val positionTop: String
+    val positionCenter: String
+    val positionBottom: String
+    val marginTight: String
+    val marginNormal: String
+    val marginGenerous: String
+    val editorShowDate: String
+    val editorShowColophon: String
+    /** "3 pages" under the preview when a passage does not fit on one. */
+    fun editorPages(count: Int): String
     /** About row when the check is off, or nothing has been found yet. */
 
     // ── ቁርባን ዝግጅት (communion preparation) ──────────────────────────────────
@@ -1823,6 +1855,37 @@ object AmharicStrings : Strings {
     override val updateDismiss = "ዝጋ"
     override val updateReady = "አዲሱ እትም ተዘጋጅቷል"
     override val updateRestart = "እንደገና ክፈት"
+
+    // ── የምስል አርታዒ ───────────────────────────────────────────────────────────
+    override val editorTitle = "ምስል"
+    override val editorStyle = "ዘይቤ"
+    override val editorGround = "መደብ"
+    override val editorType = "ፊደል"
+    override val editorLayout = "አቀማመጥ"
+    override val editorMark = "ምልክት"
+    override val presetVerse = "ኀይለ ቃል"
+    override val presetPassage = "ምንባብ"
+    override val presetStory = "ስቶሪ"
+    override val presetFeast = "በዓል"
+    override val presetPlain = "ቀላል"
+    override val frameCard = "ካርድ"
+    override val frameSquare = "ካሬ"
+    override val frameStory = "ቁመት"
+    override val editorSize = "መጠን"
+    override val editorSizeAuto = "ራሱ"
+    override val editorAir = "ክፍተት"
+    override val groundGreen = "አረንጓዴ"
+    override val groundIvory = "የዝሆን ጥርስ"
+    override val groundNight = "ሌሊት"
+    override val positionTop = "ላይ"
+    override val positionCenter = "መሀል"
+    override val positionBottom = "ታች"
+    override val marginTight = "ጠባብ"
+    override val marginNormal = "መካከለኛ"
+    override val marginGenerous = "ሰፊ"
+    override val editorShowDate = "ዕለቱን አሳይ"
+    override val editorShowColophon = "የስንቅ ምልክት"
+    override fun editorPages(count: Int) = "$count ገጾች"
 
     // ── ቁርባን ዝግጅት ──────────────────────────────────────────────────────────
 
@@ -2709,6 +2772,37 @@ object EnglishStrings : Strings {
     override val updateDismiss = "Dismiss"
     override val updateReady = "Update ready"
     override val updateRestart = "Restart"
+
+    // ── The image editor ─────────────────────────────────────────────────────
+    override val editorTitle = "Image"
+    override val editorStyle = "Style"
+    override val editorGround = "Ground"
+    override val editorType = "Type"
+    override val editorLayout = "Layout"
+    override val editorMark = "Mark"
+    override val presetVerse = "Verse"
+    override val presetPassage = "Passage"
+    override val presetStory = "Story"
+    override val presetFeast = "Feast"
+    override val presetPlain = "Plain"
+    override val frameCard = "Card"
+    override val frameSquare = "Square"
+    override val frameStory = "Story"
+    override val editorSize = "Size"
+    override val editorSizeAuto = "Auto"
+    override val editorAir = "Air"
+    override val groundGreen = "Green"
+    override val groundIvory = "Ivory"
+    override val groundNight = "Night"
+    override val positionTop = "Top"
+    override val positionCenter = "Centre"
+    override val positionBottom = "Bottom"
+    override val marginTight = "Tight"
+    override val marginNormal = "Normal"
+    override val marginGenerous = "Generous"
+    override val editorShowDate = "Show the date"
+    override val editorShowColophon = "Sinq mark"
+    override fun editorPages(count: Int) = if (count == 1) "1 page" else "$count pages"
 
     // ── Communion preparation ────────────────────────────────────────────────
 

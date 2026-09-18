@@ -3,6 +3,7 @@ package com.agpeya.app.ui.common
 import androidx.core.graphics.withSave
 import androidx.core.graphics.toColorInt
 import androidx.core.graphics.createBitmap
+import androidx.core.graphics.scale
 import android.content.ClipData
 import android.content.ContentValues
 import android.content.Context
@@ -47,8 +48,90 @@ import java.util.ArrayList
  */
 enum class ImageShape { CARD, SQUARE, STORY }
 
-/** The two grounds: the app's own green, and its ivory. */
-enum class ImageGround { GREEN, IVORY }
+/** The grounds: the app's own green, its ivory, and a near-black for the night. */
+enum class ImageGround { GREEN, IVORY, NIGHT }
+
+/** How the passage sits in its column. */
+enum class CardAlign { START, CENTER, JUSTIFY }
+
+/** Where the whole block sits in a frame taller than it needs. */
+enum class BlockPosition { TOP, CENTER, BOTTOM }
+
+/** The inset from the card edge to the text, as three steps rather than a number. */
+enum class CardMargin(val pad: Float) { TIGHT(52f), NORMAL(72f), GENEROUS(96f) }
+
+/**
+ * The named starting points.
+ *
+ * A preset is not a style on top of the card — it *is* a whole [CardSpec]. The
+ * person reaching for this is sharing a verse, not designing, so the useful
+ * unit is "the one that looks right for a verse", not eleven controls they have
+ * to get right themselves.
+ */
+enum class CardPreset { VERSE, PASSAGE, STORY, FEAST, PLAIN }
+
+/**
+ * Everything about how a card is drawn, in one value.
+ *
+ * The editor mutates this, the preview renders it small and the export renders
+ * the identical function large. There is exactly one function that knows how to
+ * draw a card, so what the reader saw and what they sent cannot drift apart.
+ */
+data class CardSpec(
+    val preset: CardPreset = CardPreset.PASSAGE,
+    val shape: ImageShape = ImageShape.CARD,
+    val ground: ImageGround = ImageGround.GREEN,
+    /** null means the size is chosen from the passage; a number overrides it. */
+    val sizeOverride: Float? = null,
+    val spacing: Float = BODY_SPACING,
+    val align: CardAlign = CardAlign.START,
+    val position: BlockPosition = BlockPosition.CENTER,
+    val margin: CardMargin = CardMargin.NORMAL,
+    val showDate: Boolean = true,
+    val showColophon: Boolean = true,
+) {
+    companion object {
+        /** What the quick share has always produced, for a payload's own choices. */
+        fun from(payload: SharePayload): CardSpec =
+            CardSpec(shape = payload.shape, ground = payload.ground)
+
+        /** The spec a preset stands for. */
+        fun of(preset: CardPreset, base: CardSpec = CardSpec()): CardSpec = when (preset) {
+            // A verse is the image: square, centred, generous, nothing above it
+            // competing for the eye.
+            CardPreset.VERSE -> base.copy(
+                preset = preset, shape = ImageShape.SQUARE, align = CardAlign.CENTER,
+                position = BlockPosition.CENTER, margin = CardMargin.GENEROUS,
+                spacing = 1.72f, showDate = false,
+            )
+            // A reading, set to be read: the card that grows to its text.
+            CardPreset.PASSAGE -> base.copy(
+                preset = preset, shape = ImageShape.CARD, align = CardAlign.START,
+                position = BlockPosition.TOP, margin = CardMargin.NORMAL,
+                spacing = BODY_SPACING, showDate = true,
+            )
+            // For a status: the tall frame, centred so it clears the platform's
+            // own chrome at the top and bottom.
+            CardPreset.STORY -> base.copy(
+                preset = preset, shape = ImageShape.STORY, align = CardAlign.CENTER,
+                position = BlockPosition.CENTER, margin = CardMargin.GENEROUS,
+                spacing = 1.8f, showDate = false,
+            )
+            // A feast keeps its date: that is the whole point of sharing it.
+            CardPreset.FEAST -> base.copy(
+                preset = preset, shape = ImageShape.SQUARE, align = CardAlign.CENTER,
+                position = BlockPosition.CENTER, margin = CardMargin.NORMAL,
+                spacing = 1.72f, showDate = true,
+            )
+            // Everything off that can be off.
+            CardPreset.PLAIN -> base.copy(
+                preset = preset, align = CardAlign.START, position = BlockPosition.CENTER,
+                margin = CardMargin.NORMAL, spacing = BODY_SPACING,
+                showDate = false, showColophon = false,
+            )
+        }
+    }
+}
 
 data class SharePayload(
     val body: String,
@@ -68,6 +151,49 @@ data class SharePayload(
         }
         append(body.trimEnd())
     }
+}
+
+/**
+ * Line spacing for the passage. Ethiopic wants more air than Latin does; this
+ * is the floor of what reads comfortably in Abyssinica.
+ */
+internal const val BODY_SPACING = 1.5f
+
+/**
+ * The band the passage is typeset in.
+ *
+ * [BODY_MIN] is the important half. Below it the Ethiopic stops being
+ * comfortable at the size a phone actually displays a shared image, and a card
+ * nobody can read is worse than a card that says "1 / 3" — so a passage that
+ * will not fit at the floor is paginated rather than shrunk any further.
+ */
+internal const val BODY_MAX = 78f
+internal const val BODY_MIN = 40f
+internal const val BODY_STEP = 2f
+
+/**
+ * The body size a passage of [chars] characters wants, before it is measured.
+ *
+ * One size shrunk until the text fits would give a wall of small type for a
+ * reading and a lonely line adrift in a story frame for a single verse. The
+ * length is what decides the register: a verse is the image and is set as
+ * display type; a reading is set to be read.
+ *
+ * This is only what the length *wants*. [BODY_MIN] is not applied here on
+ * purpose: the frame decides whether the wanted size survives, and a story with
+ * room for 44 px should not be handed 40 px merely because the passage is long.
+ * The floor is enforced where the measuring happens.
+ *
+ * Top-level rather than a member of [PassageShare], so it can be tested on the
+ * JVM: reaching into the object at all runs its palette initialisers, and those
+ * need a real android.graphics.Color.
+ */
+internal fun sizeForLength(chars: Int): Float = when {
+    chars <= 90 -> BODY_MAX     // one verse: the verse is the image
+    chars <= 180 -> 62f
+    chars <= 260 -> 54f
+    chars <= 450 -> 48f
+    else -> 44f                 // a reading, set to be read
 }
 
 /**
@@ -94,6 +220,55 @@ object PassageShare {
     /** Card inset from the bitmap edge, and text inset from the card edge. */
     private const val EDGE = 56f
     private const val PAD = 72f
+
+    // ── The chrome ───────────────────────────────────────────────────────────
+    // Everything that is not the passage. Named rather than written inline,
+    // because the fit has to add them up before the renderer draws them and the
+    // two agreeing by coincidence is what went wrong here before.
+    private const val BRAND_BASELINE = 140f
+    private const val BRAND_RULE_GAP = 44f
+    private const val KICKER_GAP = 90f
+    private const val NO_KICKER_GAP = 56f
+    private const val TITLE_GAP = 28f
+    private const val BODY_RULE_GAP = 28f
+    private const val BODY_RULE_DROP = 16f
+    private const val FOOTER_BLOCK = 150f
+    private const val SIG_BASELINE = 56f
+
+    private const val BRAND_SIZE = 58f
+    private const val TITLE_SIZE = 58f
+    private const val KICKER_SIZE = 34f
+    private const val DATE_SIZE = 32f
+    private const val SIG_SIZE = 34f
+
+    /** No frame gives the passage less than this, whatever the chrome wants. */
+    private const val MIN_BODY_BAND = 180f
+
+    /**
+     * The chrome costs the same pixels on a 1080-tall square as on a 1920-tall
+     * story, which on the square left barely a third of the frame for the text
+     * the card exists to present. On the tight frame it is drawn smaller so the
+     * passage keeps the room.
+     */
+    private fun chromeScale(shape: ImageShape): Float =
+        if (shape == ImageShape.SQUARE) 0.78f else 1f
+
+    /**
+     * How the body will be typeset, decided once and used by everything after.
+     *
+     * The bug this replaces: the paginator split pages against a 1920 px budget
+     * whatever frame had been chosen, and the renderer then laid that page into
+     * the frame the reader actually picked and ellipsized the remainder. On a
+     * square, nine lines in fifteen were thrown away without a word. There is
+     * one budget now and both halves read it from here.
+     */
+    private data class Fit(
+        val bodySize: Float,
+        val pages: List<String>,
+        val fixed: Float,
+        val frame: Int,
+        val chrome: Float,
+    )
 
     /** One palette per ground; the typography and the colophon do not change. */
     private data class Palette(
@@ -128,11 +303,31 @@ object PassageShare {
         glow = Color.argb(46, 126, 95, 30),
     )
 
-    private fun palette(ground: ImageGround): Palette =
-        if (ground == ImageGround.IVORY) IVORY_PALETTE else GREEN
+    // Near-black with the gold kept bright: a card posted to a status at night
+    // sitting on a screen that is already dark.
+    private val NIGHT = Palette(
+        ground = "#07100D".toColorInt(),
+        card = "#0C1714".toColorInt(),
+        line = "#1C2E27".toColorInt(),
+        gold = "#E4BC5A".toColorInt(),
+        ink = "#ECE7DA".toColorInt(),
+        muted = "#8A9A92".toColorInt(),
+        glow = Color.argb(54, 228, 188, 90),
+    )
 
-    suspend fun share(context: Context, payload: SharePayload, strings: Strings? = null): Boolean = try {
-        val files = withContext(Dispatchers.Default) { renderToCache(context, payload) }
+    private fun palette(ground: ImageGround): Palette = when (ground) {
+        ImageGround.IVORY -> IVORY_PALETTE
+        ImageGround.NIGHT -> NIGHT
+        ImageGround.GREEN -> GREEN
+    }
+
+    suspend fun share(
+        context: Context,
+        payload: SharePayload,
+        strings: Strings? = null,
+        spec: CardSpec = CardSpec.from(payload),
+    ): Boolean = try {
+        val files = withContext(Dispatchers.Default) { renderToCache(context, payload, spec) }
         val uris = ArrayList(files.map {
             FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", it)
         })
@@ -167,9 +362,14 @@ object PassageShare {
     }
 
     /** Save every rendered page into the user's Pictures/Sinq collection. */
-    suspend fun save(context: Context, payload: SharePayload, strings: Strings? = null): Boolean = try {
+    suspend fun save(
+        context: Context,
+        payload: SharePayload,
+        strings: Strings? = null,
+        spec: CardSpec = CardSpec.from(payload),
+    ): Boolean = try {
         check(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { "Gallery save requires Android 10+" }
-        val files = withContext(Dispatchers.Default) { renderToCache(context, payload) }
+        val files = withContext(Dispatchers.Default) { renderToCache(context, payload, spec) }
         withContext(Dispatchers.IO) {
             files.forEachIndexed { index, file -> saveToPictures(context, file, index, files.size) }
         }
@@ -183,14 +383,14 @@ object PassageShare {
         false
     }
 
-    private fun renderToCache(context: Context, payload: SharePayload): List<File> {
+    private fun renderToCache(context: Context, payload: SharePayload, spec: CardSpec): List<File> {
         val dir = File(context.cacheDir, "images")
         check(dir.exists() || dir.mkdirs()) { "Could not create image cache" }
         val staleBefore = System.currentTimeMillis() - 24 * 60 * 60 * 1000L
         dir.listFiles()?.filter { it.lastModified() < staleBefore }?.forEach { it.delete() }
-        val bodies = paginateBodies(context, payload)
-        return bodies.mapIndexed { index, body ->
-            val bitmap = render(context, payload, body, index + 1, bodies.size)
+        val fit = fit(context, payload, spec)
+        return fit.pages.mapIndexed { index, body ->
+            val bitmap = render(context, payload, spec, fit, body, index + 1, fit.pages.size)
             val file = File.createTempFile("passage-${index + 1}-", ".png", dir)
             try {
                 val written = file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
@@ -228,89 +428,209 @@ object PassageShare {
         }
     }
 
-    private fun paginateBodies(context: Context, payload: SharePayload): List<String> {
-        val ethiopic = ResourcesCompat.getFont(context, R.font.abyssinica_sil) ?: Typeface.SERIF
-        val bodyPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 44f; typeface = ethiopic }
+    /**
+     * The first page as a bitmap for the editor to show, and how many pages
+     * there are in all.
+     *
+     * The same [fit] and the same [render] the export uses, scaled down
+     * afterwards rather than drawn differently — a preview that composed itself
+     * would be a second renderer, and a second renderer is a promise the export
+     * can quietly break.
+     */
+    suspend fun preview(
+        context: Context,
+        payload: SharePayload,
+        spec: CardSpec,
+        maxWidthPx: Int,
+    ): Preview? = withContext(Dispatchers.Default) {
+        runCatching {
+            val fit = fit(context, payload, spec)
+            val full = render(context, payload, spec, fit, fit.pages.first(), 1, fit.pages.size)
+            val scale = (maxWidthPx.toFloat() / full.width).coerceIn(0.1f, 1f)
+            val small = full.scale((full.width * scale).toInt(), (full.height * scale).toInt())
+            if (small !== full) full.recycle()
+            Preview(small, fit.pages.size, fit.bodySize)
+        }.onFailure { Log.e(TAG, "preview failed", it) }.getOrNull()
+    }
+
+    /** What the editor needs to draw itself: the picture, and what it cost. */
+    data class Preview(val bitmap: Bitmap, val pages: Int, val bodySize: Float)
+
+    private fun ethiopic(context: Context): Typeface =
+        ResourcesCompat.getFont(context, R.font.abyssinica_sil) ?: Typeface.SERIF
+
+    private fun textWidth(pad: Float): Int = (W - 2 * EDGE - 2 * pad).toInt()
+
+    private fun alignmentOf(align: CardAlign): Layout.Alignment =
+        if (align == CardAlign.CENTER) Layout.Alignment.ALIGN_CENTER
+        else Layout.Alignment.ALIGN_NORMAL
+
+    private fun bodyLayout(
+        text: String,
+        paint: TextPaint,
+        spec: CardSpec,
+        maxLines: Int = Int.MAX_VALUE,
+    ): StaticLayout =
+        StaticLayout.Builder.obtain(text, 0, text.length, paint, textWidth(spec.margin.pad))
+            .setLineSpacing(0f, spec.spacing)
+            .setAlignment(alignmentOf(spec.align))
+            .setMaxLines(maxLines)
+            .apply {
+                // Inter-word justification arrived in Oreo and only makes sense
+                // on a column wide enough not to open rivers between words.
+                if (spec.align == CardAlign.JUSTIFY &&
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                ) {
+                    setJustificationMode(Layout.JUSTIFICATION_MODE_INTER_WORD)
+                }
+            }
+            .build()
+
+    /**
+     * Decide the body size and the pages together, against the one height
+     * budget the renderer will actually draw into.
+     *
+     * Three steps, in this order: start from what the length wants, shrink by
+     * [BODY_STEP] while the whole passage is still too tall, and stop at
+     * [BODY_MIN]. Whatever is over at the floor becomes another page — never a
+     * smaller font and never an ellipsis.
+     */
+    private fun fit(context: Context, payload: SharePayload, spec: CardSpec): Fit {
+        val face = ethiopic(context)
+        val k = chromeScale(spec.shape)
+        val body = payload.body.trim()
+
         val titlePaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
-            textSize = 58f; typeface = Typeface.create(ethiopic, Typeface.BOLD)
+            textSize = TITLE_SIZE * k
+            typeface = Typeface.create(face, Typeface.BOLD)
         }
-        val textWidth = (W - 2 * EDGE - 2 * PAD).toInt()
         val titleHeight = payload.title?.takeIf { it.isNotBlank() }?.let {
-            StaticLayout.Builder.obtain(it, 0, it.length, titlePaint, textWidth).setLineSpacing(0f, 1.2f).setMaxLines(4).build().height
+            StaticLayout.Builder.obtain(it, 0, it.length, titlePaint, textWidth(spec.margin.pad))
+                .setLineSpacing(0f, 1.2f).setMaxLines(4).build().height
         } ?: 0
-        val fixed = EDGE + 184f + (if (payload.kicker != null) 90f else 56f) +
-            (if (titleHeight > 0) titleHeight + 28f else 0f) + 44f + 150f + EDGE
-        val maxLines = ((MAX_H - fixed) / (bodyPaint.fontSpacing * 1.5f)).toInt().coerceAtLeast(4)
+
+        val brandBlock = (BRAND_BASELINE + BRAND_RULE_GAP) * k
+        val kickerBlock = (if (payload.kicker != null) KICKER_GAP else NO_KICKER_GAP) * k
+        val titleBlock = if (titleHeight > 0) titleHeight + TITLE_GAP * k else 0f
+        val ruleBlock = (BODY_RULE_GAP + BODY_RULE_DROP) * k
+        val footerBlock = if (spec.showColophon) FOOTER_BLOCK * k else NO_KICKER_GAP * k
+        val fixed = EDGE + brandBlock + kickerBlock + titleBlock + ruleBlock + footerBlock + EDGE
+
+        val frame = when (spec.shape) {
+            ImageShape.SQUARE -> W
+            ImageShape.STORY -> MAX_H
+            ImageShape.CARD -> CARD_MAX_H
+        }
+        val available = (frame - fixed).coerceAtLeast(MIN_BODY_BAND)
+
+        val paint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply { typeface = face }
+        // An override is the reader's decision and is obeyed exactly; without
+        // one the length proposes a size and the frame shrinks it until it fits.
+        var size = spec.sizeOverride ?: sizeForLength(body.length)
+        if (spec.sizeOverride == null) {
+            while (size > BODY_MIN) {
+                paint.textSize = size
+                if (bodyLayout(body, paint, spec).height <= available) break
+                size -= BODY_STEP
+            }
+        }
+        size = size.coerceIn(BODY_MIN, BODY_MAX)
+        paint.textSize = size
+
+        return Fit(
+            bodySize = size,
+            pages = paginate(body, paint, spec, available),
+            fixed = fixed,
+            frame = frame,
+            chrome = k,
+        )
+    }
+
+    /**
+     * Cut [body] into pages that each fit [available] at the paint's own size.
+     *
+     * Every page is measured against the same budget the renderer draws into,
+     * so a page can never arrive at the canvas too tall to be drawn. The guard
+     * on `end` is for the pathological case of a single line taller than the
+     * whole band: without it the loop would take zero characters and spin.
+     */
+    private fun paginate(
+        body: String,
+        paint: TextPaint,
+        spec: CardSpec,
+        available: Float,
+    ): List<String> {
+        if (body.isEmpty()) return listOf("")
+        val lineHeight = paint.fontSpacing * spec.spacing
+        val perPage = (available / lineHeight).toInt().coerceAtLeast(1)
         val pages = mutableListOf<String>()
-        var remaining = payload.body.trim()
+        var remaining = body
         while (remaining.isNotEmpty()) {
-            val full = StaticLayout.Builder.obtain(remaining, 0, remaining.length, bodyPaint, textWidth)
-                .setLineSpacing(0f, 1.5f).build()
-            val takeLines = minOf(maxLines, full.lineCount)
-            val end = full.getLineEnd(takeLines - 1).coerceAtLeast(1)
+            val full = bodyLayout(remaining, paint, spec)
+            if (full.lineCount <= perPage) {
+                pages += remaining
+                break
+            }
+            val end = full.getLineEnd(perPage - 1).coerceAtLeast(1)
             pages += remaining.substring(0, end).trimEnd()
             remaining = remaining.substring(end).trimStart()
         }
         return pages.ifEmpty { listOf("") }
     }
 
-    private fun render(context: Context, payload: SharePayload, body: String, page: Int, pageCount: Int): Bitmap {
-        val ethiopic = ResourcesCompat.getFont(context, R.font.abyssinica_sil) ?: Typeface.SERIF
+    private fun render(
+        context: Context,
+        payload: SharePayload,
+        spec: CardSpec,
+        fit: Fit,
+        body: String,
+        page: Int,
+        pageCount: Int,
+    ): Bitmap {
+        val face = ethiopic(context)
+        val k = fit.chrome
         fun paint(size: Float, color: Int, bold: Boolean = false) = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             textSize = size
             this.color = color
-            typeface = if (bold) Typeface.create(ethiopic, Typeface.BOLD) else ethiopic
+            typeface = if (bold) Typeface.create(face, Typeface.BOLD) else face
         }
 
-        val textWidth = (W - 2 * EDGE - 2 * PAD).toInt()
+        val pad = spec.margin.pad
+        val width = textWidth(pad)
         fun layout(text: String, p: TextPaint, spacing: Float, maxLines: Int = Int.MAX_VALUE): StaticLayout =
-            StaticLayout.Builder.obtain(text, 0, text.length, p, textWidth)
+            StaticLayout.Builder.obtain(text, 0, text.length, p, width)
                 .setLineSpacing(0f, spacing)
-                .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+                .setAlignment(alignmentOf(spec.align))
                 .setMaxLines(maxLines)
                 .setEllipsize(if (maxLines == Int.MAX_VALUE) null else TextUtils.TruncateAt.END)
                 .build()
 
-        val pal = palette(payload.ground)
-        val kickerPaint = paint(34f, pal.gold)
-        val titlePaint = paint(58f, pal.ink, bold = true)
-        val bodyPaint = paint(44f, pal.ink)
+        val pal = palette(spec.ground)
+        val brandPaint = paint(BRAND_SIZE * k, pal.gold, bold = true)
+        val kickerPaint = paint(KICKER_SIZE * k, pal.gold)
+        val titlePaint = paint(TITLE_SIZE * k, pal.ink, bold = true)
+        val bodyPaint = paint(fit.bodySize, pal.ink)
 
         val titleLayout = payload.title
             ?.takeIf { it.isNotBlank() }
             ?.let { layout(it, titlePaint, 1.2f, maxLines = 4) }
 
-        // Everything above and below the body is fixed; whatever height budget
-        // remains under MAX_H decides how many body lines fit before ellipsis.
-        val brandBlock = 140f + 44f            // brand baseline + rule below it
-        val kickerBlock = if (payload.kicker != null) 90f else 56f
-        val titleBlock = (titleLayout?.height?.plus(28f)) ?: 0f
-        val ruleBlock = 44f                    // the short gold rule above the body
-        val footerBlock = 150f                 // signature + bottom padding
-        val fixed = EDGE + brandBlock + kickerBlock + titleBlock + ruleBlock + footerBlock + EDGE
+        // No maxLines and no ellipsize: fit() already cut this page to something
+        // that fits the band, so anything the renderer had to trim here would be
+        // text quietly thrown away — which is the whole bug this replaced.
+        val bodyLayout = bodyLayout(body, bodyPaint, spec)
 
-        // A square or a story is a fixed frame the text has to live inside; the
-        // card grows to whatever the passage needs, as it always has.
-        // Three frames that are actually three. A story is the full 9:16; a card
-        // grows to its text but stops well short of it, so the two are told
-        // apart at a glance. They used to share MAX_H, which made the third
-        // option identical to the first for any passage long enough to fill it.
-        val frame = when (payload.shape) {
-            ImageShape.SQUARE -> W
-            ImageShape.STORY -> MAX_H
-            ImageShape.CARD -> CARD_MAX_H
+        val h = when (spec.shape) {
+            ImageShape.CARD -> (fit.fixed + bodyLayout.height).toInt().coerceIn(640, CARD_MAX_H)
+            else -> fit.frame
         }
-        val bodyLineHeight = bodyPaint.fontSpacing * 1.5f
-        val maxBodyLines = ((frame - fixed) / bodyLineHeight).toInt().coerceAtLeast(4)
-        val bodyLayout = layout(body, bodyPaint, 1.5f, maxLines = maxBodyLines)
-
-        val h = when (payload.shape) {
-            ImageShape.CARD -> (fixed + bodyLayout.height).toInt().coerceIn(640, CARD_MAX_H)
-            else -> frame
+        // Where the block sits in whatever space the frame has left over.
+        val spare = (h - fit.fixed - bodyLayout.height).coerceAtLeast(0f)
+        val slack = when (spec.position) {
+            BlockPosition.TOP -> 0f
+            BlockPosition.CENTER -> spare / 2f
+            BlockPosition.BOTTOM -> spare
         }
-        // In a fixed frame the block sits in the middle of the space it has
-        // rather than clinging to the top of a mostly empty card.
-        val slack = ((h - fixed - bodyLayout.height) / 2f).coerceAtLeast(0f)
         val bmp = createBitmap(W, h, Bitmap.Config.ARGB_8888)
         val c = Canvas(bmp)
 
@@ -334,45 +654,53 @@ object PassageShare {
             },
         )
 
-        val left = card.left + PAD
-        val right = card.right - PAD
-        var y = card.top + 140f + slack
+        val left = card.left + pad
+        val right = card.right - pad
+        var y = card.top + BRAND_BASELINE * k + slack
 
         // Brand row: ስንቅ left, the date right, then a hairline rule.
-        c.drawText("ስንቅ", left, y, paint(58f, pal.gold, bold = true))
-        payload.dateLabel?.let {
-            val p = paint(32f, pal.muted)
-            val available = (right - left - paint(58f, pal.gold, bold = true).measureText("ስንቅ") - 40f).coerceAtLeast(120f)
+        c.drawText("ስንቅ", left, y, brandPaint)
+        payload.dateLabel?.takeIf { spec.showDate }?.let {
+            val p = paint(DATE_SIZE * k, pal.muted)
+            val available = (right - left - brandPaint.measureText("ስንቅ") - 40f).coerceAtLeast(120f)
             val line = TextUtils.ellipsize(it, p, available, TextUtils.TruncateAt.END).toString()
             c.drawText(line, right - p.measureText(line), y, p)
         }
-        y += 44f
+        y += BRAND_RULE_GAP * k
         c.drawRect(left, y, right, y + 2f, Paint().apply { color = pal.line })
 
         payload.kicker?.let {
-            y += 90f
+            y += KICKER_GAP * k
             val line = TextUtils.ellipsize(it, kickerPaint, right - left, TextUtils.TruncateAt.END).toString()
             c.drawText(line, left, y, kickerPaint)
-        } ?: run { y += 56f }
+        } ?: run { y += NO_KICKER_GAP * k }
 
         titleLayout?.let {
-            y += 28f
+            y += TITLE_GAP * k
             c.withTranslation(left, y) { it.draw(this) }
             y += it.height.toFloat()
         }
 
         // A short gold rule between the heading block and the passage.
-        y += 28f
+        y += BODY_RULE_GAP * k
         c.drawRect(left, y, left + 56f, y + 3f, Paint().apply { color = pal.gold })
-        y += 16f
+        y += BODY_RULE_DROP * k
 
         c.withTranslation(left, y) { bodyLayout.draw(this) }
 
         // Footnote: the app's name in Ge'ez script, centred at the foot of the
         // card like a colophon, so every shared passage says where it came from.
-        val sigPaint = paint(34f, pal.gold)
-        val sig = if (pageCount > 1) "— ስንቅ —  $page/$pageCount" else "— ስንቅ —"
-        c.drawText(sig, (W - sigPaint.measureText(sig)) / 2f, card.bottom - 56f, sigPaint)
+        // A page count is drawn even with the colophon off — "2 / 3" is not
+        // decoration, it is the only thing saying the passage continues.
+        if (spec.showColophon || pageCount > 1) {
+            val sigPaint = paint(SIG_SIZE * k, pal.gold)
+            val sig = when {
+                spec.showColophon && pageCount > 1 -> "— ስንቅ —  $page/$pageCount"
+                spec.showColophon -> "— ስንቅ —"
+                else -> "$page/$pageCount"
+            }
+            c.drawText(sig, (W - sigPaint.measureText(sig)) / 2f, card.bottom - SIG_BASELINE * k, sigPaint)
+        }
 
         return bmp
     }
