@@ -8,6 +8,40 @@ features; `versionCode` increments on every release).
 
 ## [Unreleased]
 
+## [2.6.0] — 2026-09-18
+
+_versionCode 78 · Updates that come from the store they came from_
+
+### Added
+- **The Play build can update itself.** It never could: the in-app update notice
+  is compiled out of the Play bundle on purpose, because an app pointing people
+  at a page of APKs outside the store is what the store forbids. So a Play
+  install had no update path in the app at all. It now uses Play's own In-App
+  Updates, which is the sanctioned way to say the same thing.
+- The flow is the **flexible** one, never the blocking full-screen one. The hour
+  is now, the whole app works without a signal, and an update can wait as long
+  as the reader likes — so the download runs in the background while they pray
+  and the only thing ስንቅ ever asks for is the restart at the end, once, on a
+  line that can be waved away.
+- A download that finishes while the app is in the background is picked up when
+  it returns. Play does not announce it a second time, so without that the new
+  build would sit on the device with the restart never offered.
+
+### Changed
+- The update strip on ቤት is built like the reminder-permissions strip above it —
+  the same row, the same leading icon, the same rule beneath — because two
+  treatments for two notices in one slot read as two different kinds of thing
+  when they are the same kind of thing. It carries a little more weight than
+  that one: a missed permission is a state you can leave alone, a waiting update
+  is an errand with an end, and as a grey dot and grey text it was genuinely
+  easy to scroll past.
+
+### Fixed
+- Raised the `androidx.fragment` version Play's update library drags in. It still
+  declares 1.1.0, whose `FragmentActivity` never calls
+  `super.onRequestPermissionsResult`, and that alone makes every use of the
+  ActivityResult APIs unsafe — including the update consent dialog.
+
 ## [2.5.1] — 2026-09-18
 
 _versionCode 77 · Navigation that fits, controls that welcome every touch_

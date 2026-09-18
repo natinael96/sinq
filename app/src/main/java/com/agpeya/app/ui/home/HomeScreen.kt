@@ -213,6 +213,10 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val update by com.agpeya.app.data.UpdateRepository.available(context)
         .collectAsState(initial = null)
+    // The Play half of the same sentence. Only one of the two is ever live in a
+    // given build, so these can never both draw — see PlayUpdateRepository.
+    val playUpdate by com.agpeya.app.data.PlayUpdateRepository.stage
+        .collectAsState()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -228,7 +232,8 @@ fun HomeScreen(
         // itself has no business indenting the date beneath it.
         update?.let { found ->
             com.agpeya.app.ui.common.UpdateLine(
-                version = found.version,
+                text = strings.updateAvailable(found.version),
+                action = strings.updateDownload,
                 onOpen = {
                     runCatching {
                         context.startActivity(
@@ -244,6 +249,17 @@ fun HomeScreen(
                         com.agpeya.app.data.UpdateRepository.dismiss(context, found.version)
                     }
                 },
+            )
+        }
+        // Play has the new build on the device already; all that is left is the
+        // restart, which only the app can ask for.
+        playUpdate?.let {
+            val activity = context as? android.app.Activity
+            com.agpeya.app.ui.common.UpdateLine(
+                text = strings.updateReady,
+                action = strings.updateRestart,
+                onOpen = { activity?.let(com.agpeya.app.data.PlayUpdateRepository::install) },
+                onDismiss = { com.agpeya.app.data.PlayUpdateRepository.dismiss() },
             )
         }
         BoxWithConstraints(Modifier.fillMaxWidth().weight(1f)) {

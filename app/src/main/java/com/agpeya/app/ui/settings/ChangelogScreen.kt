@@ -31,6 +31,23 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "2.6.0",
+        title = "Updates that come from the store they came from",
+        titleAm = "ከመጡበት መደብር የሚመጡ እድሳቶች",
+        changes = listOf(
+            "Installed from Play? The app can now update itself through Play, which it never could before.",
+            "The download runs quietly in the background while you pray. Nothing blocks the app, and all it asks for at the end is a restart — once, on a line you can dismiss.",
+            "A download that finishes while the app is closed is picked up when you come back.",
+            "The update line on the home page is easier to see, and now looks like the reminder line above it.",
+        ),
+        changesAm = listOf(
+            "ከPlay ጭነውታል? መተግበሪያው አሁን በPlay በኩል ራሱን ማደስ ይችላል፤ ከዚህ በፊት አይችልም ነበር።",
+            "ማውረዱ እርስዎ ሲጸልዩ በጸጥታ ከበስተጀርባ ይሠራል። መተግበሪያውን የሚዘጋው ነገር የለም፤ በመጨረሻም የሚጠይቀው እንደገና መክፈትን ብቻ ነው — አንዴ፣ በሚዘጋ መስመር ላይ።",
+            "መተግበሪያው ተዘግቶ ሳለ ያለቀ ማውረድ፣ ሲመለሱ ይነሣል።",
+            "በመነሻ ገጹ ላይ ያለው የእድሳት መስመር ይበልጥ ይታያል፤ ከላዩ ካለው የማስታወሻ መስመርም ጋር ይመሳሰላል።",
+        ),
+    ),
+    ReleaseNote(
         version = "2.5.1",
         title = "Navigation that fits every screen",
         titleAm = "ለእያንዳንዱ ማያ የሚስማማ አሰሳ",

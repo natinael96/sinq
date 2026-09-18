@@ -40,8 +40,8 @@ android {
         // Versioning policy (semver-style):
         //   MINOR for features, PATCH for fixes/small tweaks.
         //   versionCode increments by 1 on EVERY update, no exceptions.
-        versionCode = 77
-        versionName = "2.5.1"
+        versionCode = 78
+        versionName = "2.6.0"
 
         // ስንቅ ships two ways, and only one of them may mention GitHub.
         //
@@ -122,6 +122,23 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.datastore.preferences)
+    // Play In-App Updates. Inert in the hand-installed build, which is not
+    // owned by Play and gets its own notice instead — see PlayUpdateRepository.
+    implementation(libs.play.app.update.ktx)
+
+    // app-update-ktx still declares androidx.fragment 1.1.0, and 1.1.0's
+    // FragmentActivity never calls super.onRequestPermissionsResult — which is
+    // why lintVitalRelease refuses any use of the ActivityResult APIs while it
+    // is on the classpath, and the update consent dialog is exactly that.
+    //
+    // A constraint rather than a dependency: ስንቅ is Compose throughout and uses
+    // no fragment at all, so this raises the version Play drags in without
+    // putting an API on the app's own surface for someone to reach for later.
+    constraints {
+        implementation(libs.androidx.fragment) {
+            because("app-update-ktx pulls fragment 1.1.0; ActivityResult needs 1.3.0+")
+        }
+    }
     debugImplementation(libs.androidx.ui.tooling)
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)

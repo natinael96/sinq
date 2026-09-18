@@ -4,7 +4,11 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.enableEdgeToEdge
+import androidx.lifecycle.lifecycleScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -70,8 +74,18 @@ class MainActivity : ComponentActivity() {
     private val pendingOpenReading = mutableStateOf(false)
     private val pendingGitsaweEpochDay = mutableStateOf<Long?>(null)
 
+    // Play's own consent dialog for an update. Registered unconditionally —
+    // registerForActivityResult must run before the activity is started — but
+    // only ever launched by PlayUpdateRepository, which is dark in the
+    // hand-installed build. A declined or cancelled dialog needs no handling:
+    // nothing was downloaded, and the next launch will ask again.
+    private lateinit var updateConsent: ActivityResultLauncher<IntentSenderRequest>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        updateConsent = registerForActivityResult(
+            ActivityResultContracts.StartIntentSenderForResult(),
+        ) { /* declined, cancelled or failed: ask again next launch */ }
         enableEdgeToEdge()
         consumeDeepLink(intent)
         setContent {
@@ -125,6 +139,19 @@ class MainActivity : ComponentActivity() {
                     // the moment it can matter.
                     LaunchedEffect(Unit) {
                         com.agpeya.app.data.UpdateRepository.check(this@MainActivity)
+                        // Its Play counterpart. Only one of the two does
+                        // anything in a given build.
+                        com.agpeya.app.data.PlayUpdateRepository.check(
+                            this@MainActivity,
+                        ) { manager, info ->
+                            runCatching {
+                                manager.startUpdateFlowForResult(
+                                    info,
+                                    updateConsent,
+                                    com.agpeya.app.data.PlayUpdateRepository.flexibleOptions(),
+                                )
+                            }
+                        }
                     }
 
                     Box(Modifier.fillMaxSize()) {
@@ -191,6 +218,32 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         consumeDeepLink(intent)
+    }
+
+    /**
+     * A flexible download can finish while ስንቅ is in the background, and Play
+     * does not announce it again when the app comes back. Without this the
+     * update would sit on the device with the restart never offered.
+     */
+    override fun onResume() {
+        super.onResume()
+        if (!com.agpeya.app.data.PlayUpdateRepository.handlesUpdates) return
+        lifecycleScope.launch {
+            com.agpeya.app.data.PlayUpdateRepository.check(this@MainActivity) { manager, info ->
+                runCatching {
+                    manager.startUpdateFlowForResult(
+                        info,
+                        updateConsent,
+                        com.agpeya.app.data.PlayUpdateRepository.flexibleOptions(),
+                    )
+                }
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        com.agpeya.app.data.PlayUpdateRepository.release()
+        super.onDestroy()
     }
 
     /** Read the notification extras and strip them, so a rotation can't replay them. */

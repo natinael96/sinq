@@ -936,6 +936,9 @@ interface Strings {
     val whatsNewTour: String
     val updateDownload: String
     val updateDismiss: String
+    /** Play has downloaded the new build and only the restart is left. */
+    val updateReady: String
+    val updateRestart: String
     /** About row when the check is off, or nothing has been found yet. */
 
     // ── ቁርባን ዝግጅት (communion preparation) ──────────────────────────────────
@@ -1818,6 +1821,8 @@ object AmharicStrings : Strings {
     override val whatsNewTour = "የአዲሱ እትም ጉብኝት"
     override val updateDownload = "አውርድ"
     override val updateDismiss = "ዝጋ"
+    override val updateReady = "አዲሱ እትም ተዘጋጅቷል"
+    override val updateRestart = "እንደገና ክፈት"
 
     // ── ቁርባን ዝግጅት ──────────────────────────────────────────────────────────
 
@@ -2702,6 +2707,8 @@ object EnglishStrings : Strings {
     override val whatsNewTour = "What's new in this version"
     override val updateDownload = "Get it"
     override val updateDismiss = "Dismiss"
+    override val updateReady = "Update ready"
+    override val updateRestart = "Restart"
 
     // ── Communion preparation ────────────────────────────────────────────────
 

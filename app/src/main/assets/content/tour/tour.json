@@ -2,6 +2,30 @@
   "contentVersion": 1,
   "tours": [
     {
+      "versionCode": 78,
+      "version": "2.6.0",
+      "title": {
+        "am": "በዚህ እትም",
+        "en": "In this version"
+      },
+      "pages": [
+        {
+          "kicker": {
+            "am": "እድሳት",
+            "en": "Updates"
+          },
+          "title": {
+            "am": "ራሱን ማደስ ይችላል",
+            "en": "It can update itself now"
+          },
+          "body": {
+            "am": "ከPlay የጫኑት ከሆነ፣ ስንቅ አሁን በPlay በኩል ራሱን ያድሳል። ማውረዱ እርስዎ ሲጸልዩ ከበስተጀርባ በጸጥታ ይሠራል፤ የሚያግድዎት ምንም የለም። በመጨረሻም የሚጠይቀው እንደገና መክፈትን ብቻ ነው — አንዴ፣ በሚዘጋ መስመር ላይ።",
+            "en": "If you installed from Play, ስንቅ can now update itself through Play. The download runs quietly in the background while you pray — nothing blocks you — and all it asks for at the end is a restart, once, on a line you can dismiss."
+          }
+        }
+      ]
+    },
+    {
       "versionCode": 77,
       "version": "2.5.1",
       "title": {
