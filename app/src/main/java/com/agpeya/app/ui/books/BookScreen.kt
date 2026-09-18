@@ -216,7 +216,10 @@ fun BookScreen(
                                         color = MaterialTheme.colorScheme.secondary,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
-                                        modifier = Modifier.clickable { onOpenBook(other.id) },
+                                        modifier = Modifier
+                                            .heightIn(min = 48.dp)
+                                            .clickable { onOpenBook(other.id) }
+                                            .padding(horizontal = Spacing.xs, vertical = Spacing.xs),
                                     )
                                 }
                             }

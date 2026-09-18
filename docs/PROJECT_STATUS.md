@@ -1,6 +1,6 @@
 # Sinq project status
 
-Reviewed **2026-09-18**, against the published **v2.5.0** release and the checked-in assets, build files, workflows, and Kotlin implementation. This is a repository audit plus recorded GitHub and website publication evidence; it does not establish the state of Google Play or a device installation.
+Reviewed **2026-09-18**, against the **v2.5.1 release candidate** and the checked-in assets, build files, workflows, and Kotlin implementation. This is a repository audit plus recorded publication evidence for v2.5.0; it does not establish the state of Google Play or a device installation.
 
 ## UI/UX remediation code pass
 
@@ -38,12 +38,20 @@ Reminder delivery and cancellation now share a serialized final-state gate. The 
 
 Local release gates passed on 2026-09-18: bundled-content validation reported zero warnings; the website parser selected 2.5.0 as the latest of 68 releases; **439 JVM tests passed**; release-vital lint passed; and the debug APK assembled successfully. Remote release and website publication are verified above; device delivery checks remain unverified.
 
+## Adaptive navigation and accessibility in 2.5.1
+
+Compact windows retain the bottom navigation bar. At 600dp and wider the app uses a Material navigation rail, while root content is centered within an 840dp maximum width. Shared and screen-specific controls across readers, Library, Journey, Mahlet and Settings now meet consistent touch-target sizing.
+
+The Ethiopian-year heatmap scales with the system font size and uses a border for selection; completed prayer hours include a checkmark instead of relying on color alone. The reader scroll grip has a larger acquisition target and cancels stale drag work before beginning a new gesture.
+
+Local release verification passed on 2026-09-18: **441 JVM tests passed** with zero failures, errors or skips; debug and release-vital lint passed; the debug APK assembled; and `git diff --check` was clean. Signed release artifacts remain subject to the tag workflow. No Android device or emulator was attached, so TalkBack, large-screen rendering and performance remain unverified on hardware.
+
 ## Current baseline
 
 | Item | Current repository state |
 |---|---|
 | Application | Sinq (ስንቅ), native Android, Amharic-first with English interface support |
-| Version | **2.5.0**, `versionCode 76`; latest changelog entry dated 2026-09-18 |
+| Version | **2.5.1**, `versionCode 77`; latest changelog entry dated 2026-09-18 |
 | Android identity | `applicationId com.sinq.app`; Kotlin namespace `com.agpeya.app` |
 | Android floor / target | API **23** (Android 6.0) / API **36**; compile SDK 36 |
 | Architecture | Single app module, Compose UI, repository-backed state, bundled JSON content |

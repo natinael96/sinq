@@ -419,7 +419,7 @@ private fun FeastRow(group: List<MahletOrderMeta>, onOpen: (String) -> Unit) {
         Modifier
             .fillMaxWidth()
             .heightIn(min = 54.dp)
-            .clickable { onOpen(first.id) }
+            .then(if (group.size == 1) Modifier.clickable { onOpen(first.id) } else Modifier)
             .padding(vertical = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -460,8 +460,9 @@ private fun FeastRow(group: List<MahletOrderMeta>, onOpen: (String) -> Unit) {
                         modifier = if (group.size > 1) {
                             Modifier
                                 .clip(MaterialTheme.shapes.small)
+                                .heightIn(min = 48.dp)
                                 .clickable { onOpen(o.id) }
-                                .padding(horizontal = Spacing.xs, vertical = 2.dp)
+                                .padding(horizontal = Spacing.sm, vertical = Spacing.xs)
                         } else Modifier,
                     )
                 }

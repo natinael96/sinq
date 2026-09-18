@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -404,6 +405,7 @@ fun ScriptureReaderScreen(
                                 ).takeUnless { it == Color.Transparent } ?: Color.Transparent
                             })
                             .semantics { selected = verse.n in selRange }
+                            .heightIn(min = 48.dp)
                             .clickable {
                                 val (a, bSel) = com.agpeya.app.ui.reading.advanceFlatSelection(selA, verse.n)
                                 selA = a

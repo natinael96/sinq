@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -270,7 +271,7 @@ private fun BookCell(book: ReadingMapBook, onClick: () -> Unit) {
         Modifier
             .fillMaxWidth(0.5f)
             .padding(end = Spacing.xxs)
-            .heightIn(min = 34.dp)
+            .heightIn(min = 48.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .clickable(onClick = onClick),
@@ -278,7 +279,7 @@ private fun BookCell(book: ReadingMapBook, onClick: () -> Unit) {
         Box(
             Modifier
                 .fillMaxWidth(fraction.coerceIn(0f, 1f))
-                .height(34.dp)
+                .fillMaxHeight()
                 .background(if (whole) gold else gold.copy(alpha = 0.42f)),
         )
         Text(

@@ -522,6 +522,7 @@ fun EditionToggle(geez: Boolean, onToggle: () -> Unit) {
                 onClickLabel = s.psalterEditionSwitch(other),
                 onClick = onToggle,
             )
+            .heightIn(min = 48.dp)
             .padding(horizontal = Spacing.md, vertical = Spacing.xs),
         contentAlignment = Alignment.Center,
     ) {

@@ -373,6 +373,7 @@ private fun SectionStrip(
                 modifier = Modifier
                     .clip(CircleShape)
                     .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
+                    .heightIn(min = 48.dp)
                     .clickable { onOpenBook(id) }
                     .semantics { role = Role.Button }
                     .padding(horizontal = 16.dp, vertical = 9.dp),

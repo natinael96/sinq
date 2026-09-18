@@ -8,6 +8,16 @@ features; `versionCode` increments on every release).
 
 ## [Unreleased]
 
+## [2.5.1] — 2026-09-18
+
+_versionCode 77 · Navigation that fits, controls that welcome every touch_
+
+### Changed
+- Use the compact bottom bar on phones and a Material navigation rail on wider windows, with expanded content centered to a readable maximum width.
+- Give reader, library, Journey, Mahlet and Settings controls consistent accessible touch targets without making the interface visually heavy.
+- Scale the Ethiopian-year heatmap with the system font size, make selected days visible without relying on color alone and give completed prayer hours a checkmark cue.
+- Make the reader scroll grip easier to acquire and prevent an older drag animation from fighting a new one.
+
 ## [2.5.0] — 2026-09-18
 
 _versionCode 76 · Reminders that arrive by design_

@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +29,9 @@ import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,6 +54,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.IconSize
@@ -66,6 +72,9 @@ enum class Tab(val route: String, val icon: ImageVector, val selectedIcon: Image
     LIBRARY("library", Icons.AutoMirrored.Outlined.MenuBook, Icons.AutoMirrored.Filled.MenuBook),
     SETTINGS("settings", Icons.Outlined.Settings, Icons.Filled.Settings),
 }
+
+/** Material's compact-to-rail breakpoint, evaluated from the current window width. */
+internal fun usesNavigationRail(width: Dp): Boolean = width >= 600.dp
 
 /** How much wider the tab you are on is than the three you are not. */
 private const val EXPANSION = 2.4f
@@ -155,6 +164,59 @@ fun AgpeyaBottomBar(current: Tab, onSelect: (Tab) -> Unit) {
                     )
                 }
             }
+        }
+    }
+}
+
+/** Material's expanded-width counterpart to [AgpeyaBottomBar]. */
+@Composable
+fun AgpeyaNavigationRail(current: Tab, onSelect: (Tab) -> Unit) {
+    val s = LocalStrings.current
+    val sinq = sinqColors
+    val label: (Tab) -> String = {
+        when (it) {
+            Tab.HOME -> s.tabHome
+            Tab.JOURNEY -> s.tabJourney
+            Tab.LIBRARY -> s.tabLibrary
+            Tab.SETTINGS -> s.tabSettings
+        }
+    }
+    NavigationRail(
+        modifier = Modifier
+            .fillMaxHeight()
+            .statusBarsPadding()
+            .navigationBarsPadding(),
+        containerColor = MaterialTheme.colorScheme.background,
+        header = { SinqWordmark(Modifier.padding(vertical = Spacing.lg)) },
+    ) {
+        Tab.entries.forEach { tab ->
+            NavigationRailItem(
+                selected = tab == current,
+                onClick = { onSelect(tab) },
+                icon = {
+                    Icon(
+                        imageVector = if (tab == current) tab.selectedIcon else tab.icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(IconSize.medium),
+                    )
+                },
+                label = {
+                    Text(
+                        label(tab),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    )
+                },
+                alwaysShowLabel = true,
+                colors = NavigationRailItemDefaults.colors(
+                    selectedIconColor = sinq.onHeroGold,
+                    selectedTextColor = MaterialTheme.colorScheme.secondary,
+                    indicatorColor = sinq.hero,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
+            )
         }
     }
 }

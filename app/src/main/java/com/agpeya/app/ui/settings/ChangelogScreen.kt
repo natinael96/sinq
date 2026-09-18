@@ -31,6 +31,23 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "2.5.1",
+        title = "Navigation that fits every screen",
+        titleAm = "ለእያንዳንዱ ማያ የሚስማማ አሰሳ",
+        changes = listOf(
+            "Phones keep the compact bottom bar, while wider windows use a navigation rail and a centered, readable content width.",
+            "Reader, Library, Journey, Mahlet and Settings controls now have consistent accessible touch targets.",
+            "The Ethiopian-year heatmap follows the system text size, and selected days and completed prayer hours no longer rely on color alone.",
+            "The reader scroll grip is easier to hold and a new drag cleanly replaces an older one.",
+        ),
+        changesAm = listOf(
+            "ስልኮች የታችኛውን የአሰሳ አሞሌ ይጠቀማሉ፤ ሰፊ ማያዎች ግን የጎን አሰሳና መሃል የተያዘ ለንባብ ምቹ ስፋት ያገኛሉ።",
+            "በአንባቢ፣ መጻሕፍት፣ ጉዞ፣ ማኅሌትና ቅንብር ያሉ መቆጣጠሪያዎች ለመንካት ቀላል የሆነ ወጥ መጠን አላቸው።",
+            "የኢትዮጵያ ዓመት ሙቀት ካርታ ከስርዓቱ የጽሑፍ መጠን ጋር ይለካል፤ የተመረጡ ቀናትና የተጠናቀቁ የጸሎት ሰዓታትም በቀለም ብቻ አይለዩም።",
+            "የንባብ ማሸብለያውን መያዝ ቀላል ሆኗል፤ አዲስ መጎተትም የቀድሞውን እንቅስቃሴ በንጽሕና ይተካል።",
+        ),
+    ),
+    ReleaseNote(
         version = "2.5.0",
         title = "Reminders that arrive by design",
         titleAm = "በታቀደው ጊዜ የሚደርሱ ማስታወሻዎች",

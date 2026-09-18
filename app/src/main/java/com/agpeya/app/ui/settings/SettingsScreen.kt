@@ -1318,6 +1318,7 @@ private fun DayTimeline() {
         Row(
             Modifier
                 .fillMaxWidth()
+                .heightIn(min = 48.dp)
                 .clip(MaterialTheme.shapes.small)
                 .clickable { open = !open }
                 .padding(vertical = Spacing.xs),

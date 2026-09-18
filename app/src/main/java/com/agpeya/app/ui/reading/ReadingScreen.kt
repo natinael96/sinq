@@ -279,6 +279,7 @@ fun ReadingScreen(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .heightIn(min = 48.dp)
                                 .clip(MaterialTheme.shapes.small)
                                 .clickable(role = Role.DropdownList) { hourMenu = true }
                                 .padding(horizontal = Spacing.xs),
@@ -590,7 +591,7 @@ private fun ContentsSheet(sections: List<Section>, currentIndex: Int, onSelect: 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 44.dp)
+                    .heightIn(min = 48.dp)
                     .clip(MaterialTheme.shapes.small)
                     .selectable(selected = isCurrent, onClick = { onSelect(index) })
                     .padding(vertical = Spacing.sm),

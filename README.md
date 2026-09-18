@@ -1,6 +1,6 @@
 # Sinq (ስንቅ)
 
-> **Current baseline:** 2.5.0 (versionCode 76), reviewed 2026-09-18. See [detailed project status](docs/PROJECT_STATUS.md) for implemented features, content counts, verification results and outstanding work.
+> **Current baseline:** 2.5.1 (versionCode 77), reviewed 2026-09-18. See [detailed project status](docs/PROJECT_STATUS.md) for implemented features, content counts, verification results and outstanding work.
 
 **The Ethiopian Orthodox Tewahedo Book of Hours (ሰዓታት) for Android — Amharic-first, with prayer and Scripture available offline.**
 

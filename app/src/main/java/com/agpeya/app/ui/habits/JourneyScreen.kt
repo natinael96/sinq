@@ -349,12 +349,8 @@ fun JourneyScreen(
 /**
  * The seven hours, four to a line, on hairlines.
  *
- * Colour is the whole of the state: a prayed hour is gold, an unprayed one
- * muted. There is no box to tick because there is no room for one at this
- * size, and none is needed — the names are the only thing on the line.
- *
- * A 28 dp line is under the 48 dp tap floor, so each name carries an invisible
- * target taller than the text it sits on.
+ * Kept hours add a check as well as gold, so completion never depends on colour.
+ * Each compact column still carries the platform's full 48 dp touch height.
  */
 @Composable
 private fun HourStrips(
@@ -368,7 +364,7 @@ private fun HourStrips(
         SinqDivider()
         items.chunked(4).forEach { line ->
             Row(
-                modifier = Modifier.fillMaxWidth().heightIn(min = 28.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
@@ -380,14 +376,10 @@ private fun HourStrips(
                         animationSpec = motion.spec(Motion.standard),
                         label = "hourTint",
                     )
-                    Text(
-                        text = name,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = tint,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                    Row(
                         modifier = Modifier
                             .weight(1f)
+                            .heightIn(min = 48.dp)
                             .clip(MaterialTheme.shapes.small)
                             .toggleable(
                                 value = kept,
@@ -397,8 +389,27 @@ private fun HourStrips(
                                     onToggle(id)
                                 },
                             )
-                            .padding(vertical = Spacing.sm, horizontal = Spacing.xxs),
-                    )
+                            .padding(horizontal = Spacing.xxs),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
+                    ) {
+                        if (kept) {
+                            Icon(
+                                Icons.Filled.Check,
+                                contentDescription = null,
+                                tint = tint,
+                                modifier = Modifier.size(14.dp),
+                            )
+                        }
+                        Text(
+                            text = name,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = tint,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
                 }
                 // A short last line keeps its columns rather than spreading.
                 repeat(4 - line.size) { Spacer(Modifier.weight(1f)) }
@@ -412,10 +423,8 @@ private fun HourStrips(
  * One habit: a small hollow ring that fills with a check when it is kept, the
  * name, and how many days of the last thirty it has been kept.
  *
- * The ring is 20 dp and the row 44 dp, because the list has to take a habit
- * more without pushing the year off the page — a tile grid or a row of large
- * rings does not scale past the four that ship with the app. The whole row is
- * the target, so the small ring is a mark and not a hit area.
+ * The ring is a mark rather than a hit area; the whole row meets the 48 dp
+ * platform target floor.
  */
 @Composable
 private fun HabitRow(
@@ -435,7 +444,7 @@ private fun HabitRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 44.dp)
+            .heightIn(min = 48.dp)
             .clip(MaterialTheme.shapes.small)
             .toggleable(
                 value = done,
@@ -510,4 +519,3 @@ private fun habitDetail(
 
 private fun daysBetweenInclusive(start: LocalDate, end: LocalDate): Int =
     (end.toEpochDay() - start.toEpochDay()).toInt() + 1
-

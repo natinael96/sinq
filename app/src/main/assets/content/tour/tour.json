@@ -2,6 +2,58 @@
   "contentVersion": 1,
   "tours": [
     {
+      "versionCode": 77,
+      "version": "2.5.1",
+      "title": {
+        "am": "በዚህ እትም",
+        "en": "In this version"
+      },
+      "pages": [
+        {
+          "kicker": {
+            "am": "አሰሳ",
+            "en": "Navigation"
+          },
+          "title": {
+            "am": "ለማያዎ የሚስማማ",
+            "en": "Made for your screen"
+          },
+          "body": {
+            "am": "ስልክ ላይ የታችኛው አሰሳ እንዳለ ይቆያል። ሰፊ ማያ ላይ ግን አሰሳው ወደ ጎን ይሄዳል፤ ይዘቱም ለማንበብ በሚመች ስፋት መሃል ይቀመጣል።",
+            "en": "Phones keep the familiar bottom bar. On wider screens, navigation moves to the side and content stays centered at a comfortable reading width."
+          }
+        },
+        {
+          "kicker": {
+            "am": "ተደራሽነት",
+            "en": "Accessibility"
+          },
+          "title": {
+            "am": "ለመንካት ቀላል፣ ለማየት ግልጽ",
+            "en": "Easier to touch and see"
+          },
+          "body": {
+            "am": "በአንባቢዎችና በዋና ገጾች ያሉ መቆጣጠሪያዎች የተሻለ የመንካት መጠን አላቸው። የተመረጡ ቀናትና የተጠናቀቁ የጸሎት ሰዓታት በቀለም ብቻ አይታወቁም።",
+            "en": "Controls across readers and key screens have more dependable touch targets. Selected days and completed prayer hours also have cues beyond color."
+          }
+        },
+        {
+          "kicker": {
+            "am": "ንባብ",
+            "en": "Reading"
+          },
+          "title": {
+            "am": "ለመያዝ የቀለለ ማሸብለያ",
+            "en": "A steadier scroll grip"
+          },
+          "body": {
+            "am": "የንባብ ማሸብለያው ለመያዝ ቀላል ሆኗል፤ አዲስ መጎተትም ከቀድሞ እንቅስቃሴ ጋር አይጋጭም።",
+            "en": "The reader scroll grip is easier to acquire, and a new drag no longer competes with an older scrolling animation."
+          }
+        }
+      ]
+    },
+    {
       "versionCode": 76,
       "version": "2.5.0",
       "title": {

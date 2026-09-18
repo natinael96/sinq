@@ -74,6 +74,7 @@ fun ReaderTitleBar(
                         .padding(top = Spacing.xxs)
                         .clip(RoundedCornerShape(50))
                         .then(if (pickable) Modifier.clickable(onClick = onPick) else Modifier)
+                        .then(if (pickable) Modifier.heightIn(min = 48.dp) else Modifier)
                         .padding(horizontal = if (pickable) Spacing.sm else 0.dp, vertical = 1.dp),
                 ) {
                     Text(

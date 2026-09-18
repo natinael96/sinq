@@ -396,8 +396,9 @@ private fun MahletReferences(references: List<MahletReference>, heading: String)
             Row(
                 Modifier
                     .fillMaxWidth()
+                    .heightIn(min = 48.dp)
                     .clickable { uriHandler.openUri(r.url) }
-                    .padding(vertical = 2.dp),
+                    .padding(vertical = Spacing.xs),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
@@ -566,9 +567,12 @@ private fun MahletPartRow(
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.secondary,
                         maxLines = 1,
-                        modifier = Modifier.clickable {
-                            onOpenBook(location.book.id, location.chapter, location.block)
-                        },
+                        modifier = Modifier
+                            .heightIn(min = 48.dp)
+                            .clickable {
+                                onOpenBook(location.book.id, location.chapter, location.block)
+                            }
+                            .padding(vertical = Spacing.xs),
                     )
                 }
             }

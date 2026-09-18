@@ -1,7 +1,7 @@
 package com.agpeya.app.ui.habits
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,13 +33,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.agpeya.app.data.FastingCalendar
 import com.agpeya.app.data.HabitsRepository
 import com.agpeya.app.ui.common.EthiopianDate
@@ -48,9 +44,9 @@ import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.sinqColors
 import java.time.LocalDate
 
-private val CELL = 13.dp
-private val GAP = 1.5.dp
-private val COL = 16.dp // CELL + 2*GAP
+private val CELL = 16.dp
+private val GAP = 2.dp
+private val COL = 20.dp // CELL + 2*GAP
 
 /** Nothing can be logged before Hamle 1, 2018 EC — the app's first day. */
 internal val APP_EPOCH_EC = EthiopianDate(2018, 11, 1)
@@ -211,6 +207,10 @@ fun EthiopianYearHeatmap(
     }
 
     val scroll = rememberScrollState()
+    val fontScale = LocalDensity.current.fontScale.coerceAtLeast(1f)
+    val cell = CELL * fontScale
+    val gap = GAP * fontScale
+    val columnWidth = COL * fontScale
     LaunchedEffect(weeks.size, ecYear) {
         if (ecYear == currentEc && weeks.isNotEmpty()) {
             // Scroll so today's column is in view (the year now extends past today).
@@ -226,12 +226,12 @@ fun EthiopianYearHeatmap(
     Column(modifier) {
         Row {
             // Weekday labels (fixed), offset below the month-label row.
-            Column(Modifier.padding(top = 16.dp)) {
+            Column(Modifier.padding(top = columnWidth)) {
                 s.dayLabels.forEach { d ->
-                    Box(Modifier.height(COL).width(16.dp), contentAlignment = Alignment.Center) {
+                    Box(Modifier.height(columnWidth).width(columnWidth), contentAlignment = Alignment.Center) {
                         Text(
                             d,
-                            style = MaterialTheme.typography.labelMedium.copy(fontSize = 8.sp),
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
@@ -240,16 +240,16 @@ fun EthiopianYearHeatmap(
             Spacer(Modifier.width(Spacing.xs))
             Column(Modifier.horizontalScroll(scroll)) {
                 // Month labels
-                Row(Modifier.height(16.dp)) {
+                Row(Modifier.height(columnWidth)) {
                     monthSpans.forEach { (m, cols) ->
                         Text(
                             text = if (m in 1..13) s.ethMonths[m - 1] else "",
-                            style = MaterialTheme.typography.labelMedium.copy(fontSize = 8.5.sp),
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Clip,
                             softWrap = false,
-                            modifier = Modifier.width(COL * cols),
+                            modifier = Modifier.width(columnWidth * cols),
                         )
                     }
                 }
@@ -259,23 +259,19 @@ fun EthiopianYearHeatmap(
                         Column {
                             week.forEach { date ->
                                 val inRange = selectableRange?.contains(date) == true
-                                val description = if (inRange) dayDescription(date) else null
+                                val shape = RoundedCornerShape(3.dp)
                                 Spacer(
                                     Modifier
-                                        .padding(GAP)
-                                        .size(CELL)
-                                        .clip(RoundedCornerShape(2.dp))
+                                        .padding(gap)
+                                        .size(cell)
+                                        .clip(shape)
                                         .background(cellColor(date))
                                         .then(
-                                            if (inRange) Modifier
-                                                .semantics {
-                                                    contentDescription = description.orEmpty()
-                                                    selected = date == selectedDay
-                                                }
-                                                .clickable(
-                                                    role = Role.Button,
-                                                    onClickLabel = description,
-                                                ) { onDaySelect(date) }
+                                            if (inRange && date == selectedDay) Modifier.border(
+                                                1.dp,
+                                                MaterialTheme.colorScheme.onSurface,
+                                                shape,
+                                            )
                                             else Modifier
                                         ),
                                 )
@@ -294,11 +290,11 @@ fun EthiopianYearHeatmap(
         ) {
             Text(s.less, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             listOf(empty, gold.copy(alpha = 0.30f), gold.copy(alpha = 0.50f), gold.copy(alpha = 0.75f), gold).forEach { c ->
-                Spacer(Modifier.padding(GAP).size(CELL).clip(RoundedCornerShape(2.dp)).background(c))
+                Spacer(Modifier.padding(gap).size(cell).clip(RoundedCornerShape(3.dp)).background(c))
             }
             Text(s.more, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.width(Spacing.sm))
-            Spacer(Modifier.padding(GAP).size(CELL).clip(RoundedCornerShape(2.dp)).background(fastWash))
+            Spacer(Modifier.padding(gap).size(cell).clip(RoundedCornerShape(3.dp)).background(fastWash))
             Text(s.fastLegendLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 

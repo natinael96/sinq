@@ -166,3 +166,11 @@ Dark red contrast was calculated from sRGB relative luminance. The change does n
 - Made prayer-mode mutations atomic and schedule rebuilds mutually exclusive. Chain re-arming resolves current mode/hour state rather than trusting a stale receiver entry.
 - Added per-ring session arbitration so competing snooze, dismiss, open, removal and timeout actions have exactly one winner, including a multithreaded regression test.
 - Release verification: content validation passed with zero warnings; the website changelog parser selected 2.5.0; 439 JVM tests passed; release-vital lint and debug APK assembly completed successfully. [v2.5.0](https://github.com/natinael96/sinq/releases/tag/v2.5.0) was published from commit `57bf69d`; its remote workflow passed and attached the signed APK and Play-upload AAB. The release-triggered website workflow passed, and the live homepage and changelog report 2.5.0. Device checks remain unverified.
+
+### Adaptive navigation and accessibility in 2.5.1
+
+- Added a 600dp adaptive-navigation breakpoint: compact windows retain the bottom bar; wider windows use a Material navigation rail. Root destinations are centered within an 840dp maximum width.
+- Normalized accessible touch targets across shared reader controls, Library, Journey, Mahlet and Settings while preserving the existing visual density.
+- Made the Ethiopian-year heatmap respect system font scaling, removed undersized day targets and added a non-color selected border. Completed prayer hours now carry a checkmark cue as well as color.
+- Enlarged the reader scroll grip and its minimum thumb size, and cancel stale drag jobs when a new gesture begins.
+- Added boundary tests for the adaptive navigation rule. Local verification passed: 441 JVM tests, debug lint with no issues, release-vital lint, debug APK assembly and whitespace checks. Device, TalkBack, tablet and performance checks remain unverified.

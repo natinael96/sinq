@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -20,6 +21,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import com.agpeya.app.data.Language
 import com.agpeya.app.ui.strings.AmharicStrings
@@ -466,67 +468,93 @@ private fun AgpeyaNavHost(
             // follows it. They used to be four destinations, and the only way
             // between them was a tap.
             val page = Tab.entries[tabPager.targetPage]
-            androidx.compose.material3.Scaffold(
-                containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background,
-                // Every page is a Scaffold of its own and insets for the status
-                // bar, and the tab bar carries its own navigation-bar padding.
-                // This one contributes nothing, or both would be applied twice.
-                contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0),
-                bottomBar = {
-                    com.agpeya.app.ui.common.AgpeyaBottomBar(current = page, onSelect = goToTab)
-                },
-            ) { inner ->
-                androidx.compose.foundation.pager.HorizontalPager(
-                    state = tabPager,
-                    modifier = Modifier.fillMaxSize().padding(inner),
-                    // The next page is composed before it is reached, so a swipe
-                    // uncovers a page rather than a blank that fills in late.
-                    beyondViewportPageCount = 1,
-                    key = { it },
-                ) { index ->
-                    when (Tab.entries[index]) {
-                        Tab.HOME ->
-                            HomeScreen(
-                                onOpenReading = { navController.navigate("reading") { launchSingleTop = true } },
-                                onManageHours = { navController.navigate("customize") { launchSingleTop = true } },
-                                onOpenHour = { hourId -> navController.navigate("reading/$hourId") { launchSingleTop = true } },
-                                onOpenSearch = { navController.navigate("search") { launchSingleTop = true } },
-                                onOpenFasting = { navController.navigate("fasting") { launchSingleTop = true } },
-                                onOpenBookmarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
-                                onOpenPrayerList = { navController.navigate("prayerlist") { launchSingleTop = true } },
-                                onOpenPsalter = { navController.navigate("psalter") { launchSingleTop = true } },
-                                onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
-                                onOpenGitsawe = { navController.navigate("gitsawe") { launchSingleTop = true } },
-                                onOpenBatteryHelp = { navController.navigate("battery") { launchSingleTop = true } },
-                                onSelectTab = goToTab,
+            androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize()) {
+                val expanded = com.agpeya.app.ui.common.usesNavigationRail(maxWidth)
+                androidx.compose.material3.Scaffold(
+                    containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background,
+                    // Every page is a Scaffold of its own and insets for the status
+                    // bar. Compact navigation carries the bottom inset; the expanded
+                    // rail carries both system-bar insets itself.
+                    contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0),
+                    bottomBar = {
+                        if (!expanded) {
+                            com.agpeya.app.ui.common.AgpeyaBottomBar(current = page, onSelect = goToTab)
+                        }
+                    },
+                ) { inner ->
+                    androidx.compose.foundation.layout.Row(
+                        Modifier.fillMaxSize().padding(inner),
+                    ) {
+                        if (expanded) {
+                            com.agpeya.app.ui.common.AgpeyaNavigationRail(
+                                current = page,
+                                onSelect = goToTab,
                             )
-                        Tab.JOURNEY ->
-                            com.agpeya.app.ui.habits.JourneyScreen(
-                                onOpenJournal = { navController.navigate("journal") { launchSingleTop = true } },
-                            )
-                        Tab.LIBRARY ->
-                            com.agpeya.app.ui.library.LibraryScreen(
-                                onSearch = { navController.navigate("search") { launchSingleTop = true } },
-                                onOpenScriptures = { navController.navigate("scriptures") { launchSingleTop = true } },
-                                onOpenWudase = { navController.navigate("wudase") { launchSingleTop = true } },
-                                onOpenBahreHasab = { navController.navigate("bahreHasabReference") { launchSingleTop = true } },
-                                onOpenBooks = { navController.navigate("books") { launchSingleTop = true } },
-                                onOpenSynaxarium = {
-                                    navController.navigate("synaxarium/${java.time.LocalDate.now().toEpochDay()}") { launchSingleTop = true }
-                                },
-                                onOpenReading = { navController.navigate("reading") { launchSingleTop = true } },
-                                onOpenMarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
-                            )
-                        Tab.SETTINGS ->
-                            SettingsScreen(
-                                onOpenReading = { navController.navigate("settings/reading") { launchSingleTop = true } },
-                                onOpenPrayer = { navController.navigate("settings/prayer") { launchSingleTop = true } },
-                                onOpenReminders = { navController.navigate("settings/reminders") { launchSingleTop = true } },
-                                onOpenRecords = { navController.navigate("settings/records") { launchSingleTop = true } },
-                                onOpenTutorial = { navController.navigate("tutorial") { launchSingleTop = true } },
-                                onOpenChangelog = { navController.navigate("changelog") { launchSingleTop = true } },
-                                onOpenAbout = { navController.navigate("about") { launchSingleTop = true } },
-                            )
+                        }
+                        androidx.compose.foundation.pager.HorizontalPager(
+                            state = tabPager,
+                            modifier = Modifier.fillMaxSize().weight(1f),
+                            // The next page is composed before it is reached, so a swipe
+                            // uncovers a page rather than a blank that fills in late.
+                            beyondViewportPageCount = 1,
+                            key = { it },
+                        ) { index ->
+                            Box(
+                                Modifier.fillMaxSize(),
+                                contentAlignment = androidx.compose.ui.Alignment.TopCenter,
+                            ) {
+                                Box(
+                                    Modifier
+                                        .fillMaxSize()
+                                        .then(if (expanded) Modifier.widthIn(max = 840.dp) else Modifier),
+                                ) {
+                                    when (Tab.entries[index]) {
+                                        Tab.HOME ->
+                                            HomeScreen(
+                                                onOpenReading = { navController.navigate("reading") { launchSingleTop = true } },
+                                                onManageHours = { navController.navigate("customize") { launchSingleTop = true } },
+                                                onOpenHour = { hourId -> navController.navigate("reading/$hourId") { launchSingleTop = true } },
+                                                onOpenSearch = { navController.navigate("search") { launchSingleTop = true } },
+                                                onOpenFasting = { navController.navigate("fasting") { launchSingleTop = true } },
+                                                onOpenBookmarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
+                                                onOpenPrayerList = { navController.navigate("prayerlist") { launchSingleTop = true } },
+                                                onOpenPsalter = { navController.navigate("psalter") { launchSingleTop = true } },
+                                                onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
+                                                onOpenGitsawe = { navController.navigate("gitsawe") { launchSingleTop = true } },
+                                                onOpenBatteryHelp = { navController.navigate("battery") { launchSingleTop = true } },
+                                                onSelectTab = goToTab,
+                                            )
+                                        Tab.JOURNEY ->
+                                            com.agpeya.app.ui.habits.JourneyScreen(
+                                                onOpenJournal = { navController.navigate("journal") { launchSingleTop = true } },
+                                            )
+                                        Tab.LIBRARY ->
+                                            com.agpeya.app.ui.library.LibraryScreen(
+                                                onSearch = { navController.navigate("search") { launchSingleTop = true } },
+                                                onOpenScriptures = { navController.navigate("scriptures") { launchSingleTop = true } },
+                                                onOpenWudase = { navController.navigate("wudase") { launchSingleTop = true } },
+                                                onOpenBahreHasab = { navController.navigate("bahreHasabReference") { launchSingleTop = true } },
+                                                onOpenBooks = { navController.navigate("books") { launchSingleTop = true } },
+                                                onOpenSynaxarium = {
+                                                    navController.navigate("synaxarium/${java.time.LocalDate.now().toEpochDay()}") { launchSingleTop = true }
+                                                },
+                                                onOpenReading = { navController.navigate("reading") { launchSingleTop = true } },
+                                                onOpenMarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
+                                            )
+                                        Tab.SETTINGS ->
+                                            SettingsScreen(
+                                                onOpenReading = { navController.navigate("settings/reading") { launchSingleTop = true } },
+                                                onOpenPrayer = { navController.navigate("settings/prayer") { launchSingleTop = true } },
+                                                onOpenReminders = { navController.navigate("settings/reminders") { launchSingleTop = true } },
+                                                onOpenRecords = { navController.navigate("settings/records") { launchSingleTop = true } },
+                                                onOpenTutorial = { navController.navigate("tutorial") { launchSingleTop = true } },
+                                                onOpenChangelog = { navController.navigate("changelog") { launchSingleTop = true } },
+                                                onOpenAbout = { navController.navigate("about") { launchSingleTop = true } },
+                                            )
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
