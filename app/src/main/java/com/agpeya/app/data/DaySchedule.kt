@@ -4,7 +4,6 @@ import android.content.Context
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapLatest
-import com.agpeya.app.reminders.GitsaweReminderScheduler
 import com.agpeya.app.reminders.ReadingReminderScheduler
 import kotlinx.coroutines.flow.first
 import java.time.DayOfWeek
@@ -45,6 +44,7 @@ object DaySchedule {
         val changes: List<Flow<Any>> = listOf(
             SettingsRepository.quietHours(context), SettingsRepository.streakReminder(context),
             SettingsRepository.streakReminderTime(context), SettingsRepository.gitsaweReminder(context),
+            SettingsRepository.gitsaweReminderTime(context),
             SettingsRepository.breathReminder(context), SettingsRepository.readingReminder(context),
             SettingsRepository.almsReminders(context), SettingsRepository.repentanceReminders(context),
             SettingsRepository.titheReminders(context), OfferingRepository.vows(context),
@@ -79,8 +79,7 @@ object DaySchedule {
             }
 
         if (SettingsRepository.gitsaweReminder(context).first()) {
-            val minute = GitsaweReminderScheduler.REMINDER_TIME.hour * 60 +
-                GitsaweReminderScheduler.REMINDER_TIME.minute
+            val minute = SettingsRepository.gitsaweReminderTime(context).first()
             out += Entry(Kind.GITSAWE, "", minute, silenced(minute))
         }
 

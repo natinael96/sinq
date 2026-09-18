@@ -2,6 +2,68 @@
   "contentVersion": 1,
   "tours": [
     {
+      "versionCode": 76,
+      "version": "2.5.0",
+      "title": {
+        "am": "በዚህ እትም",
+        "en": "In this version"
+      },
+      "pages": [
+        {
+          "kicker": {
+            "am": "ማስታወሻዎች",
+            "en": "Reminders"
+          },
+          "title": {
+            "am": "ዝግጅቱን ከቤት ያጠናቅቁ",
+            "en": "Finish setup from Home"
+          },
+          "body": {
+            "am": "አዲስ ተጠቃሚዎች የማሳወቂያ ፈቃድና የባትሪ ገደብን በቤት ገጽ ላይ ያረጋግጣሉ። የተጠናቀቀው ደረጃ በራሱ ይጠፋል፤ «አሁን አይደለም» የሚለውም ጥያቄውን ያስወግዳል።",
+            "en": "New users get a small Home checklist for notification permission and battery restrictions. Completed steps disappear automatically, and Not now removes the prompt."
+          },
+          "route": "settings/reminders",
+          "actionLabel": {
+            "am": "ማስታወሻዎችን ክፈት",
+            "en": "Open reminders"
+          }
+        },
+        {
+          "kicker": {
+            "am": "ግጻዌ",
+            "en": "Gitsawe"
+          },
+          "title": {
+            "am": "የግጻዌውን ሰዓት ይምረጡ",
+            "en": "Choose the Gitsawe time"
+          },
+          "body": {
+            "am": "የዕለቱ ግጻዌ ማስታወሻ በመረጡት ሰዓት ይደርሳል። ሰዓቱን ሲቀይሩ የተያዘው ማንቂያ ወዲያውኑ ይተካል፤ ምርጫውም በምትኬ ይቀመጣል።",
+            "en": "The daily Gitsawe reminder can arrive at the time you choose. Saving replaces the pending alarm immediately, and the setting travels with your backup."
+          },
+          "route": "settings/reminders",
+          "actionLabel": {
+            "am": "ሰዓቱን ምረጥ",
+            "en": "Choose a time"
+          }
+        },
+        {
+          "kicker": {
+            "am": "አስተማማኝነት",
+            "en": "Reliability"
+          },
+          "title": {
+            "am": "አንድ ጥሪ፣ አንድ ውጤት",
+            "en": "One reminder, one outcome"
+          },
+          "body": {
+            "am": "ማስታወሻን ሲያጠፉ የቆየ ማሳወቂያ አይደርስም። የመሃል ጸሎት በቀን አንዴ ብቻ ይመጣል፤ የሰዓታት ማንቂያም በአንድ የመጨረሻ እርምጃ ይዘጋል።",
+            "en": "Turning a reminder off no longer lets a stale notification through. The breath prayer arrives once per day, and a ringing prayer alarm accepts only one final action."
+          }
+        }
+      ]
+    },
+    {
       "versionCode": 75,
       "version": "2.4.1",
       "title": {

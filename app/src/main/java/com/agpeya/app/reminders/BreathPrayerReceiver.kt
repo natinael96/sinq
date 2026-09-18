@@ -35,13 +35,18 @@ class BreathPrayerReceiver : BroadcastReceiver() {
                 runBlocking {
                     if (!SettingsRepository.breathReminder(context).first()) return@runBlocking
                     val today = LocalDate.now().toString()
-                    // Once a day, however many times the schedule was recomputed.
-                    if (SettingsRepository.breathLastFiredDayBlocking(context) == today) return@runBlocking
+                    // One atomic DataStore edit decides the winner when two
+                    // broadcasts overlap. A separate read followed by a write
+                    // allowed both threads to post on the same day.
+                    if (!SettingsRepository.claimBreathReminderDay(context, today)) return@runBlocking
                     // If custom quiet hours overlap the selected moment, treat
                     // today as handled and move directly to tomorrow's window.
                     if (SettingsRepository.inQuietHoursNow(context)) {
-                        SettingsRepository.setBreathLastFiredDay(context, today)
-                        BreathPrayerScheduler.schedule(context)
+                        ReminderDispatchGate.locked {
+                            if (SettingsRepository.breathReminderBlocking(context)) {
+                                BreathPrayerScheduler.schedule(context)
+                            }
+                        }
                         return@runBlocking
                     }
 
@@ -65,10 +70,15 @@ class BreathPrayerReceiver : BroadcastReceiver() {
                         .setAutoCancel(true)
                         .setContentIntent(tap)
                         .build()
-                    context.getSystemService(NotificationManager::class.java)
-                        .notify(NotificationIds.BREATH, notification)
-                    SettingsRepository.setBreathLastFiredDay(context, today)
-                    BreathPrayerScheduler.schedule(context)
+                    ReminderDispatchGate.locked {
+                        if (SettingsRepository.breathReminderBlocking(context)) {
+                            if (!SettingsRepository.inQuietHoursNow(context)) {
+                                context.getSystemService(NotificationManager::class.java)
+                                    .notify(NotificationIds.BREATH, notification)
+                            }
+                            BreathPrayerScheduler.schedule(context)
+                        }
+                    }
                 }
             } finally {
                 pending.finish()

@@ -212,9 +212,14 @@ class MainActivity : ComponentActivity() {
         intent.getStringExtra(ReminderScheduler.EXTRA_HOUR_ID)?.let {
             // Opening a ringing reminder is also an answer: end the alarm (and
             // let it ask "done?") before navigating to the requested hour.
-            com.agpeya.app.reminders.AlarmRinger.answered(this, it)
+            com.agpeya.app.reminders.AlarmRinger.answered(
+                this,
+                it,
+                intent.getStringExtra(com.agpeya.app.reminders.AlarmRinger.EXTRA_ALARM_SESSION),
+            )
             pendingDeepLinkHourId.value = it
             intent.removeExtra(ReminderScheduler.EXTRA_HOUR_ID)
+            intent.removeExtra(com.agpeya.app.reminders.AlarmRinger.EXTRA_ALARM_SESSION)
         }
         if (intent.getBooleanExtra(
                 com.agpeya.app.reminders.ReadingReminderScheduler.EXTRA_OPEN_READING, false,
@@ -492,6 +497,7 @@ private fun AgpeyaNavHost(
                                 onOpenPsalter = { navController.navigate("psalter") { launchSingleTop = true } },
                                 onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
                                 onOpenGitsawe = { navController.navigate("gitsawe") { launchSingleTop = true } },
+                                onOpenBatteryHelp = { navController.navigate("battery") { launchSingleTop = true } },
                                 onSelectTab = goToTab,
                             )
                         Tab.JOURNEY ->

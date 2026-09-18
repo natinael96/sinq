@@ -61,8 +61,8 @@ object BreathPrayerScheduler {
         if (enabled) schedule(context) else cancel(context)
     }
 
-    fun schedule(context: Context) {
-        if (!SettingsRepository.breathReminderBlocking(context)) return cancel(context)
+    fun schedule(context: Context) = ReminderDispatchGate.locked {
+        if (!SettingsRepository.breathReminderBlocking(context)) return@locked cancel(context)
         val now = LocalDateTime.now()
         val firedToday = SettingsRepository.breathLastFiredDayBlocking(context) ==
             now.toLocalDate().toString()
@@ -82,8 +82,10 @@ object BreathPrayerScheduler {
         am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent(context))
     }
 
-    fun cancel(context: Context) {
+    fun cancel(context: Context) = ReminderDispatchGate.locked {
         context.getSystemService(AlarmManager::class.java).cancel(pendingIntent(context))
+        context.getSystemService(android.app.NotificationManager::class.java)
+            .cancel(NotificationIds.BREATH)
     }
 
     // Dispatchers.IO: schedule() is reached from the main thread (launch-time

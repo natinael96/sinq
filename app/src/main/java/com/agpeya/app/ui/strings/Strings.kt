@@ -538,6 +538,14 @@ interface Strings {
     val batteryStepAutostartBody: String
     val openSettings: String
     val remindersNotFiringTitle: String
+    val reminderSetupTitle: String
+    val reminderSetupBody: String
+    val reminderSetupNotifications: String
+    val reminderSetupNotificationsBody: String
+    val reminderSetupBattery: String
+    val reminderSetupBatteryBody: String
+    val enableAction: String
+    val notNow: String
 
     /** Day-of-week short labels, Monday..Sunday (ISO order). */
     val dayLabels: List<String>
@@ -1183,7 +1191,7 @@ object AmharicStrings : Strings {
     override val gitsaweReminderBody = "የዛሬን ምንባብ ይመልከቱ"
     override val gitsaweChannelName = "የዕለቱ ግጻዌ ማስታወሻ"
     override val settingsGitsaweReminder = "የዕለቱ ግጻዌ ማስታወሻ"
-    override val settingsGitsaweReminderDesc = "በየቀኑ ጠዋት የዕለቱን የግጻዌ ምንባብ ያስታውስዎታል"
+    override val settingsGitsaweReminderDesc = "በመረጡት ሰዓት የዕለቱን የግጻዌ ምንባብ ያስታውስዎታል"
     override val settingsNightReminder = "የሌሊት ማስታወሻ"
     override val settingsNightReminderDesc = "ጸሎት ቢመዘገብም በየሌሊቱ ስንክሳርን፣ ቤተ ክርስቲያንንና ስግደትን ያስታውስዎታል"
     override val notifDisabledTitle = "ማሳወቂያዎች ጠፍተዋል"
@@ -1438,6 +1446,14 @@ object AmharicStrings : Strings {
     override val batteryStepAutostartBody = "Xiaomi/Samsung ላሉ ስልኮች Autostart ይፍቀዱ፤ ከ«የሚተኙ መተግበሪያዎች» ያስወግዱ።"
     override val openSettings = "ቅንብሮችን ክፈት"
     override val remindersNotFiringTitle = "ማስታወሻ አይሰራም?"
+    override val reminderSetupTitle = "የማስታወሻ ቅንብርን ያጠናቅቁ"
+    override val reminderSetupBody = "ማስታወሻዎች በሰዓቱ እንዲደርሱ ሁለት ቅንብሮችን ያረጋግጡ።"
+    override val reminderSetupNotifications = "ማሳወቂያዎች"
+    override val reminderSetupNotificationsBody = "የጸሎትና የንባብ ማስታወሻዎች እንዲታዩ ይፍቀዱ።"
+    override val reminderSetupBattery = "የጀርባ እንቅስቃሴ"
+    override val reminderSetupBatteryBody = "ማስታወሻዎች በሰዓቱ እንዲደርሱ የባትሪ ገደቡን ይመልከቱ።"
+    override val enableAction = "ፍቀድ"
+    override val notNow = "አሁን አይደለም"
 
     override val dayLabels = listOf("ሰ", "ማ", "ረ", "ሐ", "ዓ", "ቅ", "እ")
     override val previousMonth = "ያለፈው ወር"
@@ -2051,7 +2067,7 @@ object EnglishStrings : Strings {
     override val gitsaweReminderBody = "See today's reading"
     override val gitsaweChannelName = "Daily Gitsawe reminder"
     override val settingsGitsaweReminder = "Daily Gitsawe reminder"
-    override val settingsGitsaweReminderDesc = "Reminds you of today's Gitsawe reading each morning"
+    override val settingsGitsaweReminderDesc = "Reminds you of today's Gitsawe reading at the time you choose"
     override val settingsNightReminder = "Nightly reminder"
     override val settingsNightReminderDesc = "Reminds you each evening — even after prayer is marked — of the Synaxarium, church, and prostrations"
     override val notifDisabledTitle = "Notifications are off"
@@ -2324,6 +2340,14 @@ object EnglishStrings : Strings {
     override val batteryStepAutostartBody = "On Xiaomi/Samsung, enable Autostart and remove the app from \"Sleeping apps\"."
     override val openSettings = "Open settings"
     override val remindersNotFiringTitle = "Reminders not firing?"
+    override val reminderSetupTitle = "Finish reminder setup"
+    override val reminderSetupBody = "Check two settings so reminders can arrive on time."
+    override val reminderSetupNotifications = "Notifications"
+    override val reminderSetupNotificationsBody = "Allow prayer and reading reminders to appear."
+    override val reminderSetupBattery = "Background activity"
+    override val reminderSetupBatteryBody = "Review battery limits for more reliable reminders."
+    override val enableAction = "Enable"
+    override val notNow = "Not now"
 
     override val dayLabels = listOf("M", "T", "W", "T", "F", "S", "S")
     override val previousMonth = "Previous month"

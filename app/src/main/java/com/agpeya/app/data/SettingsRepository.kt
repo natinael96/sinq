@@ -82,6 +82,7 @@ object SettingsRepository {
         val journeyReminder: Boolean = true,
         val journeyReminderMinute: Int = DEFAULT_STREAK_REMINDER_MIN,
         val gitsaweReminder: Boolean = true,
+        val gitsaweReminderMinute: Int = DEFAULT_GITSAWE_REMINDER_MIN,
         val breathReminder: Boolean = true,
         val quietEnabled: Boolean = false,
         val quietStart: Int = 22 * 60,
@@ -118,6 +119,9 @@ object SettingsRepository {
     private val KEY_COPY_EDITION = booleanPreferencesKey("copy_edition")
     private val KEY_HIGHLIGHT_NAMES = stringPreferencesKey("highlight_names")
     private val KEY_ONBOARDED = booleanPreferencesKey("onboarded")
+    // Set only when first-launch onboarding finishes. Existing installs should
+    // not suddenly receive a setup prompt merely because the app was updated.
+    private val KEY_SHOW_HOME_REMINDER_SETUP = booleanPreferencesKey("show_home_reminder_setup")
     private val KEY_NAME = stringPreferencesKey("profile_name")
     private val KEY_CHRISTIAN_NAME = stringPreferencesKey("profile_christian_name")
     private val KEY_STREAK_REMINDER = booleanPreferencesKey("streak_reminder")
@@ -127,6 +131,10 @@ object SettingsRepository {
     const val DEFAULT_STREAK_REMINDER_MIN = 21 * 60 + 30
 
     private val KEY_GITSAWE_REMINDER = booleanPreferencesKey("gitsawe_reminder")
+    private val KEY_GITSAWE_REMINDER_TIME = intPreferencesKey("gitsawe_reminder_min")
+
+    /** 06:00 — the old fixed Gitsawe time, now the editable default. */
+    const val DEFAULT_GITSAWE_REMINDER_MIN = 6 * 60
     // Legacy single-reminder keys — read only, to migrate the one old alms /
     // repentance reminder into the first entry of the new lists below.
     private val KEY_ALMS_REMINDER = booleanPreferencesKey("alms_reminder")
@@ -210,6 +218,7 @@ object SettingsRepository {
             journeyReminder = prefs[KEY_STREAK_REMINDER] ?: true,
             journeyReminderMinute = prefs[KEY_STREAK_REMINDER_TIME] ?: DEFAULT_STREAK_REMINDER_MIN,
             gitsaweReminder = prefs[KEY_GITSAWE_REMINDER] ?: true,
+            gitsaweReminderMinute = prefs[KEY_GITSAWE_REMINDER_TIME] ?: DEFAULT_GITSAWE_REMINDER_MIN,
             breathReminder = prefs[KEY_BREATH_REMINDER] ?: true,
             quietEnabled = prefs[KEY_QUIET_ENABLED] ?: false,
             quietStart = prefs[KEY_QUIET_START] ?: 22 * 60,
@@ -252,6 +261,7 @@ object SettingsRepository {
             prefs[KEY_STREAK_REMINDER] = value.journeyReminder
             prefs[KEY_STREAK_REMINDER_TIME] = value.journeyReminderMinute.coerceIn(0, 1439)
             prefs[KEY_GITSAWE_REMINDER] = value.gitsaweReminder
+            prefs[KEY_GITSAWE_REMINDER_TIME] = value.gitsaweReminderMinute.coerceIn(0, 1439)
             prefs[KEY_BREATH_REMINDER] = value.breathReminder
             prefs[KEY_QUIET_ENABLED] = value.quietEnabled
             prefs[KEY_QUIET_START] = value.quietStart.coerceIn(0, 1439)
@@ -369,6 +379,13 @@ object SettingsRepository {
     suspend fun setReadingReminder(context: Context, enabled: Boolean) {
         context.settingsDataStore.edit { it[KEY_READING_REMINDER] = enabled }
     }
+
+    fun readingReminderBlocking(context: Context): Boolean =
+        runCatching {
+            kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) {
+                readingReminder(context).first()
+            }
+        }.getOrDefault(true)
 
     fun synaxariumEdition(context: Context): Flow<String> =
         context.settingsDataStore.data.map {
@@ -569,6 +586,13 @@ object SettingsRepository {
         context.settingsDataStore.edit { it[KEY_STREAK_REMINDER] = value }
     }
 
+    fun streakReminderBlocking(context: Context): Boolean =
+        runCatching {
+            kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) {
+                streakReminder(context).first()
+            }
+        }.getOrDefault(true)
+
     /** When the nightly streak nudge fires, as minutes into the day. */
     fun streakReminderTime(context: Context): Flow<Int> =
         context.settingsDataStore.data.map { it[KEY_STREAK_REMINDER_TIME] ?: DEFAULT_STREAK_REMINDER_MIN }
@@ -593,6 +617,31 @@ object SettingsRepository {
     suspend fun setGitsaweReminder(context: Context, value: Boolean) {
         context.settingsDataStore.edit { it[KEY_GITSAWE_REMINDER] = value }
     }
+
+    fun gitsaweReminderBlocking(context: Context): Boolean =
+        runCatching {
+            kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) {
+                gitsaweReminder(context).first()
+            }
+        }.getOrDefault(true)
+
+    fun gitsaweReminderTime(context: Context): Flow<Int> =
+        context.settingsDataStore.data.map {
+            it[KEY_GITSAWE_REMINDER_TIME] ?: DEFAULT_GITSAWE_REMINDER_MIN
+        }
+
+    suspend fun setGitsaweReminderTime(context: Context, minuteOfDay: Int) {
+        context.settingsDataStore.edit {
+            it[KEY_GITSAWE_REMINDER_TIME] = minuteOfDay.coerceIn(0, 24 * 60 - 1)
+        }
+    }
+
+    fun gitsaweReminderTimeBlocking(context: Context): Int =
+        runCatching {
+            kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) {
+                gitsaweReminderTime(context).first()
+            }
+        }.getOrDefault(DEFAULT_GITSAWE_REMINDER_MIN)
 
     // ---- የመሃል ጸሎት — the in-between breath prayer -----------------------------
     //
@@ -620,6 +669,21 @@ object SettingsRepository {
                 context.settingsDataStore.data.map { it[KEY_BREATH_LAST_FIRED] ?: "" }.first()
             }
         }.getOrDefault("")
+
+    /**
+     * Atomically reserve today's one-per-day breath reminder delivery.
+     * DataStore serializes edits, so overlapping broadcasts cannot both win.
+     */
+    suspend fun claimBreathReminderDay(context: Context, day: String): Boolean {
+        var claimed = false
+        context.settingsDataStore.edit { prefs ->
+            if ((prefs[KEY_BREATH_LAST_FIRED] ?: "") != day) {
+                prefs[KEY_BREATH_LAST_FIRED] = day
+                claimed = true
+            }
+        }
+        return claimed
+    }
 
     suspend fun setBreathLastFiredDay(context: Context, day: String) {
         context.settingsDataStore.edit { it[KEY_BREATH_LAST_FIRED] = day }
@@ -842,6 +906,16 @@ object SettingsRepository {
         context.settingsDataStore.data.map { it[KEY_ONBOARDED] ?: false }
 
     suspend fun setOnboarded(context: Context) {
-        context.settingsDataStore.edit { it[KEY_ONBOARDED] = true }
+        context.settingsDataStore.edit {
+            it[KEY_ONBOARDED] = true
+            it[KEY_SHOW_HOME_REMINDER_SETUP] = true
+        }
+    }
+
+    fun showHomeReminderSetup(context: Context): Flow<Boolean> =
+        context.settingsDataStore.data.map { it[KEY_SHOW_HOME_REMINDER_SETUP] ?: false }
+
+    suspend fun dismissHomeReminderSetup(context: Context) {
+        context.settingsDataStore.edit { it[KEY_SHOW_HOME_REMINDER_SETUP] = false }
     }
 }

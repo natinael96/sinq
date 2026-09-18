@@ -8,6 +8,8 @@ import android.content.Intent
 import com.agpeya.app.MainActivity
 import com.agpeya.app.data.ModesRepository
 import com.agpeya.app.model.ReminderEntry
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.time.LocalDateTime
 import java.time.ZoneId
 
@@ -19,6 +21,8 @@ import java.time.ZoneId
  * API 32, auto-granted there) on 12/12L.
  */
 object ReminderScheduler {
+
+    private val scheduleMutex = Mutex()
 
     const val EXTRA_ENTRY_ID = "entryId"
     const val EXTRA_HOUR_ID = "hourId"
@@ -75,7 +79,8 @@ object ReminderScheduler {
     }
 
     /** Cancel everything previously scheduled, then schedule the active mode's enabled entries. */
-    suspend fun rescheduleAll(context: Context, hourNames: Map<String, String>) {
+    suspend fun rescheduleAll(context: Context, hourNames: Map<String, String>) =
+        scheduleMutex.withLock {
         val app = context.applicationContext
         val alarmManager = app.getSystemService(AlarmManager::class.java)
 
@@ -131,10 +136,21 @@ object ReminderScheduler {
     }
 
     /** Schedule one entry's next occurrence — used by the chain after a fire. */
-    fun scheduleNext(context: Context, entry: ReminderEntry, hourName: String) {
-        val at = nextOccurrence(entry, LocalDateTime.now()) ?: return
+    suspend fun scheduleNext(context: Context, entry: ReminderEntry, hourName: String): Boolean =
+        scheduleMutex.withLock {
+        // A mode switch, toggle, retime or hidden-hour edit may have completed
+        // while this broadcast was waiting. Schedule from current state, never
+        // from the stale entry carried by the receiver.
+        val current = ModesRepository.current(context).activeMode
+            ?.entries?.firstOrNull { it.id == entry.id && it.enabled }
+            ?: return@withLock false
+        val visible = com.agpeya.app.data.HoursRepository.visibleHours(context)
+            .any { it.id == current.hourId }
+        if (!visible) return@withLock false
+        val at = nextOccurrence(current, LocalDateTime.now()) ?: return@withLock false
         val alarmManager = context.getSystemService(AlarmManager::class.java)
-        scheduleAt(context, alarmManager, entry, hourName, at)
+        scheduleAt(context, alarmManager, current, hourName, at)
+        true
     }
 
     private fun scheduleAt(

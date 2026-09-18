@@ -4,6 +4,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import com.agpeya.app.data.SettingsRepository
 import java.time.ZonedDateTime
 import java.time.LocalTime
 
@@ -31,7 +32,8 @@ object ReadingReminderScheduler {
             REMINDER_TIMES.map { time -> now.toLocalDate().plusDays(offset).atTime(time).atZone(now.zone) }
         }.first { it.isAfter(now) }
 
-    fun schedule(context: Context) {
+    fun schedule(context: Context) = ReminderDispatchGate.locked {
+        if (!SettingsRepository.readingReminderBlocking(context)) return@locked cancel(context)
         val triggerAt = nextReminder(ZonedDateTime.now()).toInstant().toEpochMilli()
         // Doze-exempt, like the nightly nudge. Android may still delay delivery;
         // the receiver always schedules the next future slot, not a catch-up burst.
@@ -39,8 +41,10 @@ object ReadingReminderScheduler {
             .setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent(context))
     }
 
-    fun cancel(context: Context) {
+    fun cancel(context: Context) = ReminderDispatchGate.locked {
         context.getSystemService(AlarmManager::class.java).cancel(pendingIntent(context))
+        context.getSystemService(android.app.NotificationManager::class.java)
+            .cancel(NotificationIds.READING)
     }
 
     private fun pendingIntent(context: Context): PendingIntent {

@@ -74,8 +74,14 @@ class StreakReminderReceiver : BroadcastReceiver() {
                         .setAutoCancel(true)
                         .setContentIntent(tap)
                         .build()
-                    context.getSystemService(NotificationManager::class.java)
-                        .notify(NotificationIds.STREAK, notification)
+                    ReminderDispatchGate.locked {
+                        if (SettingsRepository.streakReminderBlocking(context) &&
+                            !SettingsRepository.inQuietHoursNow(context)
+                        ) {
+                            context.getSystemService(NotificationManager::class.java)
+                                .notify(NotificationIds.STREAK, notification)
+                        }
+                    }
                 }
             } finally {
                 pending.finish()

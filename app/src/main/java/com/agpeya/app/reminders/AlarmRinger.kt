@@ -56,6 +56,7 @@ object AlarmRinger {
     const val ACTION_DISMISS = "com.agpeya.app.ALARM_DISMISS"
     const val ACTION_REMOVED = "com.agpeya.app.ALARM_REMOVED"
     const val ACTION_TIMEOUT = "com.agpeya.app.ALARM_TIMEOUT"
+    const val EXTRA_ALARM_SESSION = "alarmSession"
 
     /**
      * Post the ringing notification. Call from a background thread — it reads
@@ -65,6 +66,8 @@ object AlarmRinger {
      */
     fun ring(context: Context, hourId: String, hourName: String, snoozeCount: Int = 0) {
         val app = context.applicationContext
+        val session = java.util.UUID.randomUUID().toString()
+        AlarmEndSessions.begin(session)
         val alert = SettingsRepository.alarmAlertBlocking(app)
         val sound = SettingsRepository.alarmSoundBlocking(app)
         val language = runCatching {
@@ -82,6 +85,7 @@ object AlarmRinger {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                 data = "agpeya://alarm/open/$hourId".toUri()
                 putExtra(ReminderScheduler.EXTRA_HOUR_ID, hourId)
+                putExtra(EXTRA_ALARM_SESSION, session)
             },
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
@@ -95,6 +99,7 @@ object AlarmRinger {
                 putExtra(ReminderScheduler.EXTRA_HOUR_ID, hourId)
                 putExtra(ReminderScheduler.EXTRA_HOUR_NAME, hourName)
                 putExtra(ReminderScheduler.EXTRA_SNOOZE_COUNT, snoozeCount + 1)
+                putExtra(EXTRA_ALARM_SESSION, session)
             },
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
@@ -129,15 +134,15 @@ object AlarmRinger {
         nm.notify(NotificationIds.ALARM, notification)
         // setTimeoutAfter removes the notification but tells us nothing, so the
         // unanswered alarm still has to ask "done?" — that needs our own alarm.
-        scheduleTimeout(app, hourId)
+        scheduleTimeout(app, hourId, session)
     }
 
     /** Fires [ACTION_TIMEOUT] once the alarm has rung itself out unanswered. */
     @SuppressLint("MissingPermission") // Guarded by canScheduleExactAlarms.
-    private fun scheduleTimeout(context: Context, hourId: String) {
+    private fun scheduleTimeout(context: Context, hourId: String, session: String) {
         val alarm = context.getSystemService(AlarmManager::class.java)
         val at = System.currentTimeMillis() + TIMEOUT_MS
-        val pi = timeoutIntent(context, hourId)
+        val pi = timeoutIntent(context, hourId, session)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarm.canScheduleExactAlarms()) {
             alarm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi)
         } else {
@@ -163,7 +168,7 @@ object AlarmRinger {
         pending.cancel()
     }
 
-    private fun timeoutIntent(context: Context, hourId: String): PendingIntent =
+    private fun timeoutIntent(context: Context, hourId: String, session: String): PendingIntent =
         PendingIntent.getBroadcast(
             context,
             TIMEOUT_REQUEST_CODE,
@@ -172,6 +177,7 @@ object AlarmRinger {
                 // Outside the match criteria (extras are ignored there) but
                 // carried so the receiver knows which hour rang.
                 putExtra(ReminderScheduler.EXTRA_HOUR_ID, hourId)
+                putExtra(EXTRA_ALARM_SESSION, session)
             },
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
@@ -190,11 +196,12 @@ object AlarmRinger {
      * The alarm was answered from inside the app (the user tapped Open). Routed
      * through the receiver so the settings read stays off the main thread.
      */
-    fun answered(context: Context, hourId: String) {
+    fun answered(context: Context, hourId: String, session: String?) {
         context.sendBroadcast(
             Intent(context, AlarmActionReceiver::class.java).apply {
                 action = ACTION_DISMISS
                 putExtra(ReminderScheduler.EXTRA_HOUR_ID, hourId)
+                session?.let { putExtra(EXTRA_ALARM_SESSION, it) }
             },
         )
     }

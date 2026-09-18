@@ -59,7 +59,7 @@ object SpecialHabitReminderScheduler {
     const val EXTRA_ENTRY_ID = "specialEntryId"
 
     /** Re-arm every enabled entry and cancel any that were removed or disabled. */
-    fun sync(context: Context, habit: SpecialHabit) {
+    fun sync(context: Context, habit: SpecialHabit) = ReminderDispatchGate.locked {
         val app = context.applicationContext
         val am = app.getSystemService(AlarmManager::class.java)
         val list = remindersOf(app, habit)
@@ -85,6 +85,13 @@ object SpecialHabitReminderScheduler {
             am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
             armed += entry.id
         }
+        // Removing or disabling an entry also withdraws a notification that
+        // may already be visible. This shares the delivery gate with the
+        // receiver, so whichever side wins the race leaves the final UI right.
+        (previous - armed).forEach { id ->
+            app.getSystemService(android.app.NotificationManager::class.java)
+                .cancel(notificationId(habit, id))
+        }
         SettingsRepository.setScheduledIds(app, idsKey, armed)
     }
 
@@ -101,13 +108,24 @@ object SpecialHabitReminderScheduler {
     }
 
     /** Re-arm one entry for its next due day — used by the chain after a fire. */
-    fun scheduleNext(context: Context, habit: SpecialHabit, entry: ScheduledReminder) {
-        val at = nextOccurrence(entry, LocalDateTime.now()) ?: return
+    fun scheduleNext(context: Context, habit: SpecialHabit, entry: ScheduledReminder) =
+        ReminderDispatchGate.locked {
+        val current = remindersOf(context, habit).firstOrNull { it.id == entry.id }
+            ?.takeIf { it.armable() } ?: return@locked
+        val at = nextOccurrence(current, LocalDateTime.now()) ?: return@locked
         val triggerAt = at.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         val am = context.getSystemService(AlarmManager::class.java)
-        val pi = pendingIntent(context, habit, entry.id)
+        val pi = pendingIntent(context, habit, current.id)
         am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
     }
+
+    /** Final receiver check after notification content was prepared. */
+    fun isCurrentArmable(
+        context: Context,
+        habit: SpecialHabit,
+        expected: ScheduledReminder,
+    ): Boolean = remindersOf(context, habit).firstOrNull { it.id == expected.id }
+        ?.let { it == expected && it.armable() } == true
 
     /** Next due day whose firing time is still ahead of [now], or null. */
     fun nextOccurrence(entry: ScheduledReminder, now: LocalDateTime): LocalDateTime? {
@@ -142,6 +160,9 @@ object SpecialHabitReminderScheduler {
 
     private fun requestCode(habit: SpecialHabit, entryId: String): Int =
         "${habit.action}:$entryId".hashCode()
+
+    fun notificationId(habit: SpecialHabit, entryId: String): Int =
+        NotificationIds.inFamily(NotificationIds.HABIT_BASE, "${habit.action}:$entryId")
 
     private fun pendingIntent(context: Context, habit: SpecialHabit, entryId: String): PendingIntent {
         val intent = Intent(context, SpecialHabitReminderReceiver::class.java)

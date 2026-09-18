@@ -70,11 +70,23 @@ object ModesRepository {
         modes = listOf(builtInMode()),
     )
 
+    private fun decode(raw: String?): ModesState = raw
+        ?.let { runCatching { json.decodeFromString<ModesState>(it) }.getOrNull() }
+        ?: defaultState()
+
+    /** Atomic read-modify-write; concurrent toggle/time edits cannot overwrite each other. */
+    private suspend fun update(context: Context, transform: (ModesState) -> ModesState) {
+        context.modesDataStore.edit { prefs ->
+            prefs[KEY_STATE] = json.encodeToString(
+                ModesState.serializer(),
+                transform(decode(prefs[KEY_STATE])),
+            )
+        }
+    }
+
     fun state(context: Context): Flow<ModesState> =
         context.modesDataStore.data.map { prefs ->
-            val decoded = prefs[KEY_STATE]
-                ?.let { runCatching { json.decodeFromString<ModesState>(it) }.getOrNull() }
-                ?: defaultState()
+            val decoded = decode(prefs[KEY_STATE])
             // Force the built-in mode's display name to the current value, so any
             // older persisted name (e.g. "አግፔያ") is replaced.
             decoded.copy(
@@ -95,28 +107,28 @@ object ModesRepository {
                 it.copy(hour = it.hour.coerceIn(0, 23), minute = it.minute.coerceIn(0, 59))
             })
         }
-        val current = current(context)
-        if (current == defaultState()) {
-            val valid = safeModes.ifEmpty { listOf(builtInMode()) }
-            val active = restored.activeModeId.takeIf { id -> valid.any { it.id == id } } ?: BUILT_IN_ID
-            write(context, ModesState(activeModeId = active, modes = valid))
-            return
+        update(context) { current ->
+            if (current == defaultState()) {
+                val valid = safeModes.ifEmpty { listOf(builtInMode()) }
+                val active = restored.activeModeId
+                    .takeIf { id -> valid.any { it.id == id } } ?: BUILT_IN_ID
+                ModesState(activeModeId = active, modes = valid)
+            } else {
+                val have = current.modes.mapTo(mutableSetOf()) { it.id }
+                current.copy(
+                    modes = current.modes + safeModes.filterNot { it.id in have || it.isBuiltIn },
+                )
+            }
         }
-        val have = current.modes.mapTo(mutableSetOf()) { it.id }
-        write(context, current.copy(modes = current.modes + safeModes.filterNot { it.id in have || it.isBuiltIn }))
-    }
-
-    private suspend fun write(context: Context, state: ModesState) {
-        context.modesDataStore.edit { it[KEY_STATE] = json.encodeToString(ModesState.serializer(), state) }
     }
 
     suspend fun setActiveMode(context: Context, modeId: String) {
-        val s = current(context)
-        if (s.modes.any { it.id == modeId }) write(context, s.copy(activeModeId = modeId))
+        update(context) { state ->
+            if (state.modes.any { it.id == modeId }) state.copy(activeModeId = modeId) else state
+        }
     }
 
     suspend fun addMode(context: Context, name: String, copyFrom: PrayerMode? = null): PrayerMode {
-        val s = current(context)
         val mode = PrayerMode(
             id = UUID.randomUUID().toString(),
             name = name,
@@ -124,7 +136,7 @@ object ModesRepository {
                 it.copy(id = UUID.randomUUID().toString())
             } ?: emptyList(),
         )
-        write(context, s.copy(modes = s.modes + mode))
+        update(context) { it.copy(modes = it.modes + mode) }
         return mode
     }
 
@@ -134,12 +146,15 @@ object ModesRepository {
 
     /** Deleting the active mode falls back to the built-in Agpeya mode. */
     suspend fun deleteMode(context: Context, modeId: String) {
-        val s = current(context)
-        val mode = s.modes.find { it.id == modeId } ?: return
-        if (mode.isBuiltIn) return
-        val remaining = s.modes.filter { it.id != modeId }
-        val active = if (s.activeModeId == modeId) BUILT_IN_ID else s.activeModeId
-        write(context, ModesState(activeModeId = active, modes = remaining))
+        update(context) { state ->
+            val mode = state.modes.find { it.id == modeId }
+            if (mode == null || mode.isBuiltIn) state
+            else {
+                val remaining = state.modes.filter { it.id != modeId }
+                val active = if (state.activeModeId == modeId) BUILT_IN_ID else state.activeModeId
+                ModesState(activeModeId = active, modes = remaining)
+            }
+        }
     }
 
     suspend fun resetBuiltIn(context: Context) {
@@ -174,8 +189,9 @@ object ModesRepository {
     }
 
     private suspend fun updateMode(context: Context, modeId: String, transform: (PrayerMode) -> PrayerMode) {
-        val s = current(context)
-        write(context, s.copy(modes = s.modes.map { if (it.id == modeId) transform(it) else it }))
+        update(context) { state ->
+            state.copy(modes = state.modes.map { if (it.id == modeId) transform(it) else it })
+        }
     }
 
     // Bookkeeping of which entry ids currently have alarms, so reschedule can cancel stale ones.
@@ -184,5 +200,11 @@ object ModesRepository {
 
     suspend fun setScheduledIds(context: Context, ids: Set<String>) {
         context.modesDataStore.edit { it[KEY_SCHEDULED] = ids }
+    }
+
+    suspend fun removeScheduledId(context: Context, id: String) {
+        context.modesDataStore.edit { prefs ->
+            prefs[KEY_SCHEDULED] = (prefs[KEY_SCHEDULED] ?: emptySet()) - id
+        }
     }
 }

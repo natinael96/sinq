@@ -29,7 +29,10 @@ object StreakReminderScheduler {
         if (enabled) schedule(context) else cancel(context)
     }
 
-    fun schedule(context: Context) {
+    fun schedule(context: Context) = ReminderDispatchGate.locked {
+        if (!com.agpeya.app.data.SettingsRepository.streakReminderBlocking(context)) {
+            return@locked cancel(context)
+        }
         val minute = com.agpeya.app.data.SettingsRepository.streakReminderTimeBlocking(context)
         val now = LocalDateTime.now()
         var next = now.toLocalDate().atTime(LocalTime.of(minute / 60, minute % 60))
@@ -46,8 +49,10 @@ object StreakReminderScheduler {
         am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
     }
 
-    fun cancel(context: Context) {
+    fun cancel(context: Context) = ReminderDispatchGate.locked {
         context.getSystemService(AlarmManager::class.java).cancel(pendingIntent(context))
+        context.getSystemService(android.app.NotificationManager::class.java)
+            .cancel(NotificationIds.STREAK)
     }
 
     private fun pendingIntent(context: Context): PendingIntent {

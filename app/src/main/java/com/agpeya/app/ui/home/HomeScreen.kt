@@ -1,5 +1,11 @@
 package com.agpeya.app.ui.home
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.PowerManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.background
@@ -22,6 +28,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -29,24 +36,32 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Bookmarks
+import androidx.compose.material.icons.outlined.BatterySaver
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.VolunteerActivism
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -92,6 +107,11 @@ import java.time.LocalDateTime
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 
 private const val PRAYER_AGGREGATE_ID = "prayer"
 
@@ -109,6 +129,7 @@ fun HomeScreen(
     onOpenPsalter: () -> Unit,
     onOpenZewotr: () -> Unit,
     onOpenGitsawe: () -> Unit,
+    onOpenBatteryHelp: () -> Unit,
     onSelectTab: (Tab) -> Unit,
 ) {
     val context = LocalContext.current
@@ -153,6 +174,39 @@ fun HomeScreen(
             )
     }
     var showHours by remember { mutableStateOf(false) }
+    var showReminderSetup by remember { mutableStateOf(false) }
+
+    // Android owns both settings, so refresh them whenever the app resumes
+    // after a permission dialog or a visit to system settings.
+    var permissionPulse by remember { mutableIntStateOf(0) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) permissionPulse++
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    @Suppress("UNUSED_VARIABLE") val refreshSystemState = permissionPulse
+    val notificationsReady = NotificationManagerCompat.from(context).areNotificationsEnabled() &&
+        (Build.VERSION.SDK_INT < 33 || ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.POST_NOTIFICATIONS,
+        ) == PackageManager.PERMISSION_GRANTED)
+    val batteryReady = context.getSystemService(PowerManager::class.java)
+        ?.isIgnoringBatteryOptimizations(context.packageName) ?: true
+    val offerReminderSetup by com.agpeya.app.data.SettingsRepository.showHomeReminderSetup(context)
+        .collectAsState(initial = false)
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { permissionPulse++ }
+
+    LaunchedEffect(offerReminderSetup, notificationsReady, batteryReady) {
+        if (offerReminderSetup && notificationsReady && batteryReady) {
+            com.agpeya.app.data.SettingsRepository.dismissHomeReminderSetup(context)
+            showReminderSetup = false
+        }
+    }
 
     // The only network-facing thing on this screen, and it draws nothing unless
     // the check is on AND a newer release was found AND it wasn't waved away.
@@ -167,6 +221,9 @@ fun HomeScreen(
         contentWindowInsets = WindowInsets.statusBars,
     ) { innerPadding ->
       Column(Modifier.fillMaxSize().padding(innerPadding)) {
+        if (offerReminderSetup && (!notificationsReady || !batteryReady)) {
+            ReminderSetupLine(onOpen = { showReminderSetup = true })
+        }
         // Above the day, outside the screen margin: a notice about the app
         // itself has no business indenting the date beneath it.
         update?.let { found ->
@@ -241,6 +298,167 @@ fun HomeScreen(
             AllHoursSheet(hours, currentHourId) {
                 showHours = false
                 onOpenHour(it)
+            }
+        }
+    }
+    if (showReminderSetup) {
+        ReminderSetupSheet(
+            notificationsReady = notificationsReady,
+            batteryReady = batteryReady,
+            onEnableNotifications = {
+                if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS,
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                } else {
+                    com.agpeya.app.ui.common.openNotificationSettings(context)
+                }
+            },
+            onReviewBattery = {
+                showReminderSetup = false
+                onOpenBatteryHelp()
+            },
+            onNotNow = {
+                showReminderSetup = false
+                scope.launch {
+                    com.agpeya.app.data.SettingsRepository.dismissHomeReminderSetup(context)
+                }
+            },
+            onDismiss = { showReminderSetup = false },
+        )
+    }
+}
+
+/** A single quiet line above the dashboard; details stay in the sheet. */
+@Composable
+private fun ReminderSetupLine(onOpen: () -> Unit) {
+    val s = LocalStrings.current
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 48.dp)
+                .clickable(onClick = onOpen)
+                .padding(horizontal = Spacing.screen),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            Icon(
+                Icons.Outlined.Notifications,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.size(IconSize.small),
+            )
+            Text(
+                s.reminderSetupTitle,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                s.enableAction,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.secondary,
+            )
+        }
+        SinqDivider()
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ReminderSetupSheet(
+    notificationsReady: Boolean,
+    batteryReady: Boolean,
+    onEnableNotifications: () -> Unit,
+    onReviewBattery: () -> Unit,
+    onNotNow: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val s = LocalStrings.current
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = Spacing.screen)
+                .padding(bottom = Spacing.lg),
+        ) {
+            Text(
+                s.reminderSetupTitle,
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Spacer(Modifier.height(Spacing.xs))
+            Text(
+                s.reminderSetupBody,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(Spacing.lg))
+            ReminderSetupRow(
+                icon = Icons.Outlined.Notifications,
+                title = s.reminderSetupNotifications,
+                body = s.reminderSetupNotificationsBody,
+                complete = notificationsReady,
+                action = s.enableAction,
+                onAction = onEnableNotifications,
+            )
+            Spacer(Modifier.height(Spacing.sm))
+            ReminderSetupRow(
+                icon = Icons.Outlined.BatterySaver,
+                title = s.reminderSetupBattery,
+                body = s.reminderSetupBatteryBody,
+                complete = batteryReady,
+                action = s.allowBackground,
+                onAction = onReviewBattery,
+            )
+            Spacer(Modifier.height(Spacing.md))
+            TextButton(onClick = onNotNow, modifier = Modifier.align(Alignment.End)) {
+                Text(s.notNow)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReminderSetupRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    body: String,
+    complete: Boolean,
+    action: String,
+    onAction: () -> Unit,
+) {
+    val s = LocalStrings.current
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            Modifier.padding(Spacing.md),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+        ) {
+            Icon(
+                if (complete) Icons.Outlined.CheckCircle else icon,
+                contentDescription = null,
+                tint = if (complete) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.size(IconSize.medium),
+            )
+            Column(Modifier.weight(1f)) {
+                Text(title, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
+                Text(body, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            if (complete) {
+                Text(s.doneLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+            } else {
+                FilledTonalButton(onClick = onAction) { Text(action) }
             }
         }
     }

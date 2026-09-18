@@ -46,7 +46,14 @@ class ReadingReminderReceiver : BroadcastReceiver() {
                         return@runBlocking
                     }
                     val s = stringsFor(SettingsRepository.language(context).first())
-                    notify(context, s.readingReminderTitle, body(context, unread, s), s)
+                    val body = body(context, unread, s)
+                    ReminderDispatchGate.locked {
+                        if (SettingsRepository.readingReminderBlocking(context) &&
+                            !SettingsRepository.inQuietHoursNow(context)
+                        ) {
+                            notify(context, s.readingReminderTitle, body, s)
+                        }
+                    }
                 }
             } finally {
                 pending.finish()

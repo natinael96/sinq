@@ -157,3 +157,12 @@ Dark red contrast was calculated from sRGB relative luminance. The change does n
 - Progress uses measured visible-item geometry and text lengths to weight longer sections. The clock widget now includes ሌሊት ፱ ሰዓት at 03:00, even when its reminder is disabled; its tap destination is the Veil reader.
 - Reader choices are named Scroll mode and Swipe mode and the reader menu reflects the active choice. Scripture and scanned church books no longer expose recent-book shortcuts or restore saved chapters; ordinary entry starts at chapter 1 while explicit chapter/citation links still win. Prayer-hour reading retains position restoration.
 - Release verification: content validation passed with zero warnings; 436 JVM tests passed with no failures, errors or skips; release-vital lint and debug APK assembly completed successfully. [v2.4.1](https://github.com/natinael96/sinq/releases/tag/v2.4.1) was published from commit `f2e00a2`; its remote workflow passed and attached the signed APK and Play-upload AAB. The release-triggered website workflow passed. Device checks remain unverified.
+
+### Reminder setup and concurrency hardening in 2.5.0
+
+- Added a first-run Home reminder-setup line and bottom sheet with live notification and battery status, explicit actions, automatic completion and a persistent Not now choice. Existing installs are not retroactively interrupted by the prompt.
+- Made the daily Gitsawe reminder time editable, persisted and backup-safe; the timeline and scheduler consume the same setting and saving replaces the pending alarm immediately.
+- Serialized final reminder delivery/cancellation, added final current-state checks, atomically claimed the once-daily breath prayer and canceled visible notifications when their source reminder is disabled.
+- Made prayer-mode mutations atomic and schedule rebuilds mutually exclusive. Chain re-arming resolves current mode/hour state rather than trusting a stale receiver entry.
+- Added per-ring session arbitration so competing snooze, dismiss, open, removal and timeout actions have exactly one winner, including a multithreaded regression test.
+- Local release verification: content validation passed with zero warnings; the website changelog parser selected 2.5.0; 439 JVM tests passed; release-vital lint and debug APK assembly completed successfully. Device checks remain unverified.

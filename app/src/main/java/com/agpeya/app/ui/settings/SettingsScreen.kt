@@ -1084,6 +1084,7 @@ fun RemindersSettingsScreen(
                         com.agpeya.app.reminders.GitsaweReminderScheduler.sync(context, on)
                     }
                 }, subtitle = s.settingsGitsaweReminderDesc)
+                if (gitsawe) GitsaweReminderTimeRow(s)
                 ToggleRow(s.settingsBreathReminder, breath, { on ->
                     if (on) requestNotifications()
                     scope.launch {
@@ -1120,6 +1121,51 @@ fun RemindersSettingsScreen(
                 onSnooze = { scope.launch { SettingsRepository.setSnoozeMinutes(context, it) } },
             )
         }
+    }
+}
+
+/** The daily Gitsawe nudge time; saving immediately replaces the pending alarm. */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun GitsaweReminderTimeRow(s: com.agpeya.app.ui.strings.Strings) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val minute by SettingsRepository.gitsaweReminderTime(context)
+        .collectAsState(initial = SettingsRepository.DEFAULT_GITSAWE_REMINDER_MIN)
+    var picking by remember { mutableStateOf(false) }
+
+    com.agpeya.app.ui.common.ListRow(
+        title = s.timeLabel,
+        subtitle = "%02d:%02d".format(minute / 60, minute % 60),
+        onClick = { picking = true },
+    )
+
+    if (picking) {
+        val timeState = androidx.compose.material3.rememberTimePickerState(
+            initialHour = minute / 60,
+            initialMinute = minute % 60,
+            is24Hour = true,
+        )
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { picking = false },
+            title = { Text(s.settingsGitsaweReminder) },
+            text = { androidx.compose.material3.TimePicker(state = timeState) },
+            confirmButton = {
+                TextButton(onClick = {
+                    picking = false
+                    scope.launch {
+                        SettingsRepository.setGitsaweReminderTime(
+                            context,
+                            timeState.hour * 60 + timeState.minute,
+                        )
+                        com.agpeya.app.reminders.GitsaweReminderScheduler.sync(context, true)
+                    }
+                }) { Text(s.save) }
+            },
+            dismissButton = {
+                TextButton(onClick = { picking = false }) { Text(s.cancel) }
+            },
+        )
     }
 }
 

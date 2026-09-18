@@ -59,8 +59,18 @@ class GitsaweReminderReceiver : BroadcastReceiver() {
                         .setAutoCancel(true)
                         .setContentIntent(tap)
                         .build()
-                    context.getSystemService(NotificationManager::class.java)
-                        .notify(NotificationIds.GITSAWE, notification)
+                    ReminderDispatchGate.locked {
+                        // The switch may have changed while content was being
+                        // loaded. This final check and sync(false)'s cancel run
+                        // under the same gate, so a disabled reminder cannot
+                        // leak one last notification.
+                        if (SettingsRepository.gitsaweReminderBlocking(context) &&
+                            !SettingsRepository.inQuietHoursNow(context)
+                        ) {
+                            context.getSystemService(NotificationManager::class.java)
+                                .notify(NotificationIds.GITSAWE, notification)
+                        }
+                    }
                 }
             } finally {
                 pending.finish()

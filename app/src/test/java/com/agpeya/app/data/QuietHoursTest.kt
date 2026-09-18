@@ -44,10 +44,9 @@ class QuietHoursTest {
         // quietly turns several reminders off. 06:00 in particular is the exact
         // boundary: the ግጻዌ nudge survives only because the end is exclusive.
         val q = QuietHours(enabled = true, startMinute = at(22), endMinute = at(6))
-        val gitsawe = com.agpeya.app.reminders.GitsaweReminderScheduler.REMINDER_TIME
         assertFalse(
             "the morning ግጻዌ reminder sits on the boundary",
-            q.covers(gitsawe.hour * 60 + gitsawe.minute),
+            q.covers(SettingsRepository.DEFAULT_GITSAWE_REMINDER_MIN),
         )
         assertFalse(
             "the nightly nudge",

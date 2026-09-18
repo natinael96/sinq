@@ -31,6 +31,25 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "2.5.0",
+        title = "Reminders that arrive by design",
+        titleAm = "በታቀደው ጊዜ የሚደርሱ ማስታወሻዎች",
+        changes = listOf(
+            "New users can finish notification and battery setup from a small checklist on Home; completed steps disappear automatically.",
+            "The daily Gitsawe reminder now has a time picker. Changing the time immediately replaces the pending alarm and the choice is included in backups.",
+            "Disabling or retiming a reminder can no longer leak a stale notification or restore an obsolete schedule.",
+            "Overlapping breath-prayer broadcasts produce only one daily notification, and concurrent prayer-mode edits no longer overwrite each other.",
+            "Only one of Snooze, Dismiss, Open, swipe-away or timeout can end a ringing prayer alarm and create its follow-up.",
+        ),
+        changesAm = listOf(
+            "አዲስ ተጠቃሚዎች የማሳወቂያ ፈቃድና የባትሪ ገደብን ከቤት ገጽ ላይ ማስተካከል ይችላሉ፤ የተጠናቀቀው ደረጃ በራሱ ይጠፋል።",
+            "የዕለቱ ግጻዌ ማስታወሻ አሁን የራስዎ ሰዓት አለው። ሰዓቱን ሲቀይሩ የተያዘው ማንቂያ ወዲያውኑ ይተካል፤ ምርጫውም በምትኬ ይቀመጣል።",
+            "ማስታወሻን ማጥፋት ወይም ሰዓቱን መቀየር ከእንግዲህ የቆየ ማሳወቂያ አያስወጣም፤ የቀድሞ መርሐ ግብርም አይመለስም።",
+            "በአንድ ጊዜ የደረሱ የመሃል ጸሎት ጥሪዎች በቀን አንድ ማሳወቂያ ብቻ ያሳያሉ፤ በአንድ ጊዜ የተደረጉ የጸሎት ሁነታ ለውጦችም እርስ በርስ አይጠፉም።",
+            "የጸሎት ማንቂያን ማሳደር፣ ማጥፋት፣ መክፈት፣ ማንሸራተት ወይም ጊዜው ማለቅ መካከል አንዱ ብቻ የመጨረሻ እርምጃ ይሆናል።",
+        ),
+    ),
+    ReleaseNote(
         version = "2.4.1",
         title = "Quieter readers with effortless progress",
         titleAm = "ጸጥ ያለ ንባብ እና ራስ-ሰር ሂደት",

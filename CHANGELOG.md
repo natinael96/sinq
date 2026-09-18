@@ -8,6 +8,21 @@ features; `versionCode` increments on every release).
 
 ## [Unreleased]
 
+## [2.5.0] — 2026-09-18
+
+_versionCode 76 · Reminders that arrive by design_
+
+### Added
+- Show first-time users a compact Home setup prompt for notification permission and battery restrictions. The live checklist disappears when both are resolved and “Not now” dismisses it permanently.
+- Let each person choose the daily Gitsawe reminder time. The selected time is backed up, restored, shown in the day timeline and applied to the pending alarm immediately.
+
+### Fixed
+- Serialize reminder delivery and cancellation so disabling or retiming a reminder cannot leak a stale notification or re-arm an obsolete schedule.
+- Atomically claim the once-daily breath prayer, preventing overlapping broadcasts from posting it twice.
+- Rebuild prayer schedules from current mode and hour state under a mutex; concurrent mode edits now update DataStore atomically instead of overwriting one another.
+- Give each ringing prayer alarm a session identity so only one of Snooze, Dismiss, Open, swipe-away or timeout can end it and produce its follow-up.
+- Remove visible notifications when their reminder is disabled, and recheck quiet hours and current settings immediately before every gentle reminder is posted.
+
 ## [2.4.1] — 2026-09-17
 
 _versionCode 75 · Quieter readers with effortless progress_

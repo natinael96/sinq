@@ -115,14 +115,20 @@ class SpecialHabitReminderReceiver : BroadcastReceiver() {
                         .setAutoCancel(true)
                         .setContentIntent(tap)
                         .build()
-                    context.getSystemService(NotificationManager::class.java)
-                        .notify(
-                        NotificationIds.inFamily(
-                            NotificationIds.HABIT_BASE,
-                            "${habit.action}:$entryId",
-                        ),
-                        notification,
-                    )
+                    ReminderDispatchGate.locked {
+                        if (SpecialHabitReminderScheduler.isCurrentArmable(
+                                context,
+                                habit,
+                                entry,
+                            ) && !SettingsRepository.inQuietHoursNow(context)
+                        ) {
+                            context.getSystemService(NotificationManager::class.java)
+                                .notify(
+                                    SpecialHabitReminderScheduler.notificationId(habit, entryId),
+                                    notification,
+                                )
+                        }
+                    }
                 }
             } finally {
                 pending.finish()

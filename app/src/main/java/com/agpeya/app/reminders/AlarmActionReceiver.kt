@@ -20,7 +20,18 @@ class AlarmActionReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val hourId = intent.getStringExtra(ReminderScheduler.EXTRA_HOUR_ID)
             ?.takeIf { it.isNotBlank() } ?: return
-        when (intent.action) {
+        val action = intent.action
+        if (action != AlarmRinger.ACTION_SNOOZE &&
+            action != AlarmRinger.ACTION_DISMISS &&
+            action != AlarmRinger.ACTION_TIMEOUT &&
+            action != AlarmRinger.ACTION_REMOVED
+        ) return
+        val session = intent.getStringExtra(AlarmRinger.EXTRA_ALARM_SESSION)
+            ?: "legacy:$hourId"
+        // Snooze, dismiss, swipe, open and timeout can arrive on different
+        // threads. Exactly one terminal action is allowed for this ring.
+        if (!AlarmEndSessions.claim(session)) return
+        when (action) {
             AlarmRinger.ACTION_SNOOZE -> {
                 val hourName = intent.getStringExtra(ReminderScheduler.EXTRA_HOUR_NAME) ?: hourId
                 val count = intent.getIntExtra(ReminderScheduler.EXTRA_SNOOZE_COUNT, 1)

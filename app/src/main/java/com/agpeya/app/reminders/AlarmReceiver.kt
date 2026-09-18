@@ -37,18 +37,22 @@ class AlarmReceiver : BroadcastReceiver() {
                     if (entry != null) {
                         // Always re-arm, even when silenced: the chain must keep
                         // running or tomorrow's alarm is lost too.
-                        ReminderScheduler.scheduleNext(context, entry, hourName)
-                        !com.agpeya.app.data.SettingsRepository.inQuietHoursNow(context)
+                        ReminderScheduler.scheduleNext(context, entry, hourName) &&
+                            !com.agpeya.app.data.SettingsRepository.inQuietHoursNow(context)
                     } else {
-                        ModesRepository.setScheduledIds(
-                            context,
-                            ModesRepository.scheduledIds(context) - entryId,
-                        )
+                        ModesRepository.removeScheduledId(context, entryId)
                         false
                     }
                 }
                 if (stillActive) {
-                    AlarmRinger.ring(context, hourId, hourName)
+                    // Re-check after scheduling: a toggle or active-mode switch
+                    // may have completed while this receiver waited on I/O.
+                    val mayRing = runBlocking {
+                        ModesRepository.current(context).activeMode
+                            ?.entries?.any { it.id == entryId && it.enabled } == true &&
+                            !com.agpeya.app.data.SettingsRepository.inQuietHoursNow(context)
+                    }
+                    if (mayRing) AlarmRinger.ring(context, hourId, hourName)
                 }
             } finally {
                 pending.finish()

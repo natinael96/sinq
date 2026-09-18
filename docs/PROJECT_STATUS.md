@@ -1,6 +1,6 @@
 # Sinq project status
 
-Reviewed **2026-09-17**, against the **v2.4.1 release source** and the checked-in assets, build files, workflows, and Kotlin implementation. This is a repository audit; it does not establish the state of Google Play, remote workflow runs, deployed websites, or a device installation.
+Reviewed **2026-09-18**, against the **v2.5.0 release candidate** and the checked-in assets, build files, workflows, and Kotlin implementation. This is a repository audit; it does not establish the state of Google Play, remote workflow runs, deployed websites, or a device installation.
 
 ## UI/UX remediation code pass
 
@@ -30,12 +30,20 @@ Scripture and scanned church books now start at chapter 1 unless an explicit cha
 
 Release verification passed locally: bundled-content validation reported zero warnings; **436 JVM tests passed** with no failures, errors or skips; release-vital lint and debug APK assembly completed successfully. Device checks remain unverified.
 
+## Reminder setup and reliability in 2.5.0
+
+First-time users receive a compact Home checklist for notification permission and battery restrictions; existing installs are not interrupted. The daily Gitsawe reminder time is editable, shown in the daily schedule, applied immediately and included in backup/restore.
+
+Reminder delivery and cancellation now share a serialized final-state gate. The once-daily breath prayer uses an atomic DataStore claim, prayer-mode mutations are atomic, prayer schedule rebuilds are mutually exclusive and ringing alarms carry a per-ring session so competing terminal actions have one winner. Receivers re-read current state rather than delivering from stale configuration.
+
+Local release gates passed on 2026-09-18: bundled-content validation reported zero warnings; the website parser selected 2.5.0 as the latest of 68 releases; **439 JVM tests passed**; release-vital lint passed; and the debug APK assembled successfully. Device delivery checks and remote publication remain unverified until the tag workflows complete.
+
 ## Current baseline
 
 | Item | Current repository state |
 |---|---|
 | Application | Sinq (ስንቅ), native Android, Amharic-first with English interface support |
-| Version | **2.4.1**, `versionCode 75`; latest changelog entry dated 2026-09-17 |
+| Version | **2.5.0**, `versionCode 76`; latest changelog entry dated 2026-09-18 |
 | Android identity | `applicationId com.sinq.app`; Kotlin namespace `com.agpeya.app` |
 | Android floor / target | API **23** (Android 6.0) / API **36**; compile SDK 36 |
 | Architecture | Single app module, Compose UI, repository-backed state, bundled JSON content |
@@ -63,7 +71,7 @@ Release verification passed locally: bundled-content validation reported zero wa
 | Marks and search | Bookmarks, verse highlights, passage-linked journal entries; homophone-folded text search | `MarksRepository`, `MarksScreen`, `search/AmharicSearch.kt` |
 | Sharing | Text and image-card export, with gallery saving on supported Android versions | `ui/common/Sharing.kt`, `PassageShare.kt` |
 | Backup | Selectable local-file export/import with restore preview; optional journal inclusion | `BackupRepository`, `SettingsScreen` |
-| Reminders | Prayer alarms and snooze, nightly Journey, daily Gitsawe, reading, breath-prayer and special-habit nudges | `reminders/` |
+| Reminders | Prayer alarms and snooze, nightly Journey, configurable-time Gitsawe, reading, breath-prayer and special-habit nudges; first-run permission/battery setup on Home | `reminders/`, `HomeScreen` |
 | Widgets | Daily Gitsawe, memento mori and canonical prayer-clock home-screen widgets | `widget/`, manifest receiver declarations |
 
 “Implemented” means present in the repository, not independently approved liturgical content or verified behavior on every supported device.
