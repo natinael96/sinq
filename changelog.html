@@ -51,6 +51,29 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
 <!-- releases:start -->
 <article class="release">
   <header>
+    <h2>2.6.0 <span class="date">18 September 2026</span></h2>
+    <p class="motto"><span>Updates that come from the store they came from</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>The Play build can update itself.</b> It never could: the in-app update notice is compiled out of the Play bundle on purpose, because an app pointing people at a page of APKs outside the store is what the store forbids. So a Play install had no update path in the app at all. It now uses Play&#x27;s own In-App Updates, which is the sanctioned way to say the same thing.</span></li>
+    <li><span>The flow is the <b>flexible</b> one, never the blocking full-screen one. The hour is now, the whole app works without a signal, and an update can wait as long as the reader likes — so the download runs in the background while they pray and the only thing ስንቅ ever asks for is the restart at the end, once, on a line that can be waved away.</span></li>
+    <li><span>A download that finishes while the app is in the background is picked up when it returns. Play does not announce it a second time, so without that the new build would sit on the device with the restart never offered.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span>The update strip on ቤት is built like the reminder-permissions strip above it — the same row, the same leading icon, the same rule beneath — because two treatments for two notices in one slot read as two different kinds of thing when they are the same kind of thing. It carries a little more weight than that one: a missed permission is a state you can leave alone, a waiting update is an errand with an end, and as a grey dot and grey text it was genuinely easy to scroll past.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span>Raised the <code>androidx.fragment</code> version Play&#x27;s update library drags in. It still declares 1.1.0, whose <code>FragmentActivity</code> never calls <code>super.onRequestPermissionsResult</code>, and that alone makes every use of the ActivityResult APIs unsafe — including the update consent dialog.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
     <h2>2.5.1 <span class="date">18 September 2026</span></h2>
     <p class="motto"><span>Navigation that fits, controls that welcome every touch</span></p>
   </header>
@@ -180,6 +203,9 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   </div>
 </article>
 
+<details class="more-releases">
+  <summary><span>63 earlier releases, 2.3.1 back to 0.1.0</span></summary>
+  <div class="more-body">
 <article class="release">
   <header>
     <h2>2.3.1 <span class="date">12 September 2026</span></h2>
@@ -208,9 +234,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   </div>
 </article>
 
-<details class="more-releases">
-  <summary><span>62 earlier releases, 2.3.0 back to 0.1.0</span></summary>
-  <div class="more-body">
 <article class="release">
   <header>
     <h2>2.3.0 <span class="date">12 September 2026</span></h2>
