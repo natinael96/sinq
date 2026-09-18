@@ -2,6 +2,44 @@
   "contentVersion": 1,
   "tours": [
     {
+      "versionCode": 79,
+      "version": "2.7.0",
+      "title": {
+        "am": "በዚህ እትም",
+        "en": "In this version"
+      },
+      "pages": [
+        {
+          "kicker": {
+            "am": "ምስል",
+            "en": "Images"
+          },
+          "title": {
+            "am": "ካርዱን ከመላክዎ በፊት ይዩት",
+            "en": "See the card before you send it"
+          },
+          "body": {
+            "am": "ኀይለ ቃልን በምስል ሲያጋሩ አሁን አርታዒ ይከፈታል። ካርዱን እያዩ ቅርጹን፣ መደቡንና ዘይቤውን ይመርጣሉ፤ ለውጡም ወዲያው በካርዱ ላይ ይታያል። አምስት በአንድ ጠቅታ የሚመረጡ ዘይቤዎችና ሌሊት ለሚላክ ካርድ አዲስ የሌሊት መደብ አሉ።",
+            "en": "Sharing a verse as an image now opens an editor. Choose the frame, the ground and the look while looking at the card, and every change appears on it as you make it. Five one-tap styles, and a new night ground for a card posted late."
+          }
+        },
+        {
+          "kicker": {
+            "am": "ጽሑፍ",
+            "en": "Text"
+          },
+          "title": {
+            "am": "ምንም አይቆረጥም",
+            "en": "Nothing gets cut"
+          },
+          "body": {
+            "am": "ረዥም ምንባብ በካሬ ሲጋራ አብዛኛው ጽሑፉ ያለ ማስታወቂያ ይጠፋ ነበር። ተስተካክሏል። ጽሑፉም ራሱን ከምንባቡ ጋር ያመጣጥናል፦ አንድ ኀይለ ቃል ትልቅ ሆኖ ይወጣል፣ ረዥም ምንባብ ደግሞ ተነባቢ ሆኖ ወደ ሁለተኛ ካርድ ይሻገራል።",
+            "en": "A long passage shared as a square used to lose most of its text without a word. That is fixed. The text also sizes itself to the passage now: a single verse comes out large, and a long reading stays readable and carries on to a second card."
+          }
+        }
+      ]
+    },
+    {
       "versionCode": 78,
       "version": "2.6.0",
       "title": {

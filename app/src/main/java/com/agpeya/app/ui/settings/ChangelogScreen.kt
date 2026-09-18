@@ -31,6 +31,23 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "2.7.0",
+        title = "See the card before you send it",
+        titleAm = "ካርዱን ከመላክዎ በፊት ይዩት",
+        changes = listOf(
+            "Sharing a verse as an image now opens an editor: choose the frame and the ground while looking at the card, not from a list of names before it exists.",
+            "Five one-tap styles — ኀይለ ቃል, ምንባብ, ስቶሪ, በዓል, ቀላል — and a new night ground for a card posted late.",
+            "The text sizes itself to the passage. A single verse comes out large; a reading is set to be read.",
+            "Fixed: a long passage shared as a square lost most of its text without a word. Nothing is cut now — it carries on to a second card.",
+        ),
+        changesAm = listOf(
+            "ኀይለ ቃልን በምስል ማጋራት አሁን አርታዒ ይከፍታል፤ ካርዱን እያዩ ቅርጹንና መደቡን ይመርጣሉ እንጂ ካርዱ ሳይኖር ከስም ዝርዝር አይደለም።",
+            "አምስት በአንድ ጠቅታ የሚመረጡ ዘይቤዎች — ኀይለ ቃል፣ ምንባብ፣ ስቶሪ፣ በዓል፣ ቀላል — እና ሌሊት ለሚላክ ካርድ አዲስ የሌሊት መደብ።",
+            "ጽሑፉ ራሱን ከምንባቡ ጋር ያመጣጥናል። አንድ ኀይለ ቃል ትልቅ ሆኖ ይወጣል፤ ምንባብ ደግሞ ለንባብ ተመጥኖ ይቀመጣል።",
+            "ተስተካክሏል፦ ረዥም ምንባብ በካሬ ሲጋራ አብዛኛው ጽሑፉ ያለ ማስታወቂያ ይጠፋ ነበር። አሁን ምንም አይቆረጥም — ወደ ሁለተኛ ካርድ ይሻገራል።",
+        ),
+    ),
+    ReleaseNote(
         version = "2.6.0",
         title = "Updates that come from the store they came from",
         titleAm = "ከመጡበት መደብር የሚመጡ እድሳቶች",

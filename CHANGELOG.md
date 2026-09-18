@@ -8,6 +8,45 @@ features; `versionCode` increments on every release).
 
 ## [Unreleased]
 
+## [2.7.0] — 2026-09-18
+
+_versionCode 79 · See the card before you send it_
+
+### Added
+- **An editor for the share card.** The frame and the ground were chosen from a
+  list of names before the card existed, and the first sight of the result was
+  in the share sheet. They are chosen in front of the card now, with everything
+  else: a preview, the frame on the card's own edge, and five presets — ኀይለ ቃል,
+  ምንባብ, ስቶሪ, በዓል, ቀላል — each a whole card under a name rather than a setting to
+  get right. Ground, type, layout and the marks sit behind tabs for the one time
+  in ten a preset is nearly right.
+- **A night ground**, near-black with the gold kept bright, for a card posted to
+  a status at night.
+- The preview is the export drawn small, not a second renderer, so what you see
+  and what you send cannot drift apart.
+
+### Fixed
+- **Sharing a long passage as a square threw most of it away.** The paginator
+  split pages against a 1920 px budget whatever frame had been chosen, and the
+  renderer laid that page into the frame actually picked and ellipsized the
+  rest — nine lines in fifteen on a square, sixty per cent of the text, with
+  nothing said about it. Only a story came out whole, because its frame happened
+  to equal the paginator's constant. There is one budget now and both halves
+  read it; no code path is left that can drop a line.
+
+### Changed
+- **The type size answers to the passage.** A single verse is the image and is
+  set large; a reading is set to be read. The frame shrinks it until it fits and
+  stops at a floor — below that the Ethiopic is not comfortable at the size a
+  phone shows a shared image, so what is over becomes another page rather than
+  smaller type. A card nobody can read is worse than a card that says 1/3.
+- On a square the heading and the colophon are drawn smaller. They cost the same
+  pixels on a 1080-tall frame as on a 1920-tall one, which left the square barely
+  a third of itself for the text it exists to present.
+- Both share menus lose a row. "Share as image" and "save image" each produced a
+  card that had never been seen; one row opens the editor and both actions live
+  inside it.
+
 ## [2.6.0] — 2026-09-18
 
 _versionCode 78 · Updates that come from the store they came from_
