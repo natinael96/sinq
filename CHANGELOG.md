@@ -8,6 +8,33 @@ features; `versionCode` increments on every release).
 
 ## [Unreleased]
 
+## [2.8.1] — 2026-09-19
+
+_versionCode 82 · Pages that change when you change the day_
+
+### Fixed
+- **Screens kept showing the previous thing after you asked for a new one.**
+  The ግጻዌ page was the one anyone would notice: swipe to the next day and the
+  date relabelled itself while the readings stayed on the day before. The label
+  is drawn from the page's own state, so it moved; the readings came from a
+  loader that was never asked again.
+
+  The loader wrapped its work in `key(*keys, attempt)`. `key` is a compiler
+  intrinsic and has to read its arguments where they are written; a `vararg`
+  spread is not something it can enumerate, so the compiler dropped the spread
+  and keyed the group on `attempt` alone. The bytecode says so plainly —
+  `startMovableGroup(…, Integer.valueOf(attempt))`, with the real key nowhere
+  in it. Nothing changing the key could ever restart the load.
+
+  The keys now go to `produceState`, which compares them at runtime and handles
+  a spread correctly, and a restart drops the previous answer before loading so
+  the screen shows that it is working rather than the day before's readings.
+
+- **Every screen with the same shape is fixed with it**, not just ግጻዌ: the
+  Sunday cycle's day, the Psalter's ግእዝ/አማርኛ switch, the reading screen's
+  layout and prayer level, and the reading map and plan's progress. Anything
+  whose choice changes without leaving the page was stale in the same way.
+
 ## [2.8.0] — 2026-09-19
 
 _versionCode 81 · The widget turns to tomorrow in the evening_

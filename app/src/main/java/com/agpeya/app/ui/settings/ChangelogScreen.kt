@@ -31,6 +31,21 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "2.8.1",
+        title = "Pages that change when you change the day",
+        titleAm = "ቀኑን ሲቀይሩ የሚለወጡ ገጾች",
+        changes = listOf(
+            "The ግጻዌ page showed the previous day's readings after you swiped to the next one — the date changed, the readings did not. Fixed.",
+            "The same fault was in every page whose choice changes without leaving it: the Sunday cycle's day, the Psalter's ግእዝ and አማርኛ switch, the reading screen's layout, and the reading map and plan.",
+            "A page now says it is loading while it fetches, instead of leaving the old content sitting under a new label.",
+        ),
+        changesAm = listOf(
+            "ወደ ቀጣዩ ቀን ሲያንሸራትቱ የግጻዌ ገጹ የቀደመውን ቀን ምንባቦች ያሳይ ነበር — ቀኑ ይለወጣል፣ ምንባቦቹ ግን አይለወጡም። ተስተካክሏል።",
+            "ይኸው ችግር ገጹን ሳይለቁ ምርጫቸው በሚለወጥ በሁሉም ገጾች ላይ ነበር፦ የሰንበታት ዑደቱ ቀን፣ የመዝሙረ ዳዊቱ የግእዝና የአማርኛ መቀየሪያ፣ የንባብ ገጹ አቀማመጥ፣ እንዲሁም የንባብ ካርታውና መርሐ ግብሩ።",
+            "ገጽ አሁን ሲጭን እየጫነ መሆኑን ይናገራል፤ አሮጌውን ይዘት ከአዲስ ስም በታች አያስቀምጥም።",
+        ),
+    ),
+    ReleaseNote(
         version = "2.8.0",
         title = "The widget turns to tomorrow in the evening",
         titleAm = "ዊጀቱ ማታ ወደ ነገ ይለወጣል",
