@@ -8,6 +8,33 @@ features; `versionCode` increments on every release).
 
 ## [Unreleased]
 
+## [2.8.0] — 2026-09-19
+
+_versionCode 81 · The widget turns to tomorrow in the evening_
+
+### Added
+- **The ግጻዌ widget moves to the next day at 20:00.** The Church's day turns
+  before midnight does — ዋዜማ is sung the night before the feast it belongs to —
+  and someone reading the widget after supper is looking at what they will pray
+  at dawn, not back at a morning that is over.
+- **The hour is yours to set**, in ቅንብሮች › ንባብ, with a switch beside it for
+  anyone who would rather the card simply followed the calendar. Changing either
+  re-renders the widgets on the home screen at once and re-arms their refresh,
+  rather than waiting for the old hour to come round a last time.
+
+### Fixed
+- Tapping the widget while it had nothing to show opened today even when the
+  card was reading tomorrow.
+
+### Notes
+- This existed once. 1.3.1 shipped it at 19:00 and 1.5.0 removed it while
+  rewriting the widget off a collection service — dropped with the rewrite
+  rather than judged wrong. It is back with an hour you can choose.
+- The card deliberately does **not** change at midnight. At 23:00 it already
+  reads tomorrow; at 00:30 it reads the same date, now as today. The refresh
+  alarm is armed for the rollover and not for midnight, because waking then
+  would redraw an identical card.
+
 ## [2.7.1] — 2026-09-19
 
 _versionCode 80 · The editor, in every window_

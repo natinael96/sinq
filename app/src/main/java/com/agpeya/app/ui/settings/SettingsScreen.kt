@@ -648,6 +648,9 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
         .collectAsState(initial = com.agpeya.app.data.ReadingMode.VERTICAL)
     val misbak by SettingsRepository.misbakLanguage(context)
         .collectAsState(initial = com.agpeya.app.data.MisbakLanguage.GEEZ)
+    val rollover by SettingsRepository.widgetRollover(context).collectAsState(initial = true)
+    val rolloverMinute by SettingsRepository.widgetRolloverTime(context)
+        .collectAsState(initial = com.agpeya.app.widget.DEFAULT_WIDGET_ROLLOVER_MIN)
     val size = SettingsRepository.FONT_STEPS_SP[step.coerceIn(0, SettingsRepository.FONT_STEPS_SP.lastIndex)]
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -777,8 +780,67 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
                     subtitle = s.copyFormatSubtitle,
                     onClick = onOpenCopyFormat,
                 )
+                // The widget is a reading surface too, and this decides which
+                // day it reads. It sits with ምስባክ's language rather than with
+                // the alarms: nothing here rings.
+                Spacer(Modifier.height(Spacing.sm))
+                ToggleRow(
+                    s.widgetRolloverTitle,
+                    rollover,
+                    { action.run { SettingsRepository.setWidgetRollover(context, it) } },
+                    subtitle = if (rollover) s.widgetRolloverBody else s.widgetRolloverOff,
+                )
+                if (rollover) WidgetRolloverTimeRow(s, rolloverMinute)
             }
         }
+    }
+}
+
+/**
+ * The hour the ግጻዌ widget turns to the next day.
+ *
+ * Saving re-renders every placed widget and re-arms its refresh, so the new
+ * hour takes effect on the home screen at once rather than after the old one
+ * has come round a last time.
+ */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun WidgetRolloverTimeRow(s: com.agpeya.app.ui.strings.Strings, minute: Int) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var picking by remember { mutableStateOf(false) }
+
+    com.agpeya.app.ui.common.ListRow(
+        title = s.widgetRolloverTimeTitle,
+        subtitle = "%02d:%02d".format(minute / 60, minute % 60),
+        onClick = { picking = true },
+    )
+
+    if (picking) {
+        val timeState = androidx.compose.material3.rememberTimePickerState(
+            initialHour = minute / 60,
+            initialMinute = minute % 60,
+            is24Hour = true,
+        )
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { picking = false },
+            title = { Text(s.widgetRolloverTimeTitle) },
+            text = { androidx.compose.material3.TimePicker(state = timeState) },
+            confirmButton = {
+                TextButton(onClick = {
+                    picking = false
+                    scope.launch {
+                        SettingsRepository.setWidgetRolloverTime(
+                            context,
+                            timeState.hour * 60 + timeState.minute,
+                        )
+                    }
+                }) { Text(s.save) }
+            },
+            dismissButton = {
+                TextButton(onClick = { picking = false }) { Text(s.cancel) }
+            },
+        )
     }
 }
 

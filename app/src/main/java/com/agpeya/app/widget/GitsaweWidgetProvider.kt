@@ -103,7 +103,13 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
 
     private fun buildCard(context: Context): Card = runBlocking {
         val s = stringsFor(SettingsRepository.language(context).first())
-        val date = LocalDate.now()
+        // Not always today: from the chosen hour the card looks to tomorrow,
+        // because the Church's day turns in the evening and a reader checking
+        // the widget after supper is looking at what they will pray at dawn.
+        val date = widgetDayFor(
+            java.time.LocalDateTime.now(),
+            SettingsRepository.widgetRolloverMinuteBlocking(context),
+        )
         val readings = GitsaweRepository.readingsFor(context, date)
         // Prefer the ቅዳሴ (liturgy) service, falling back to ነግህ (matins).
         val entry = readings.daily
@@ -156,7 +162,19 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
             views.setViewVisibility(R.id.widget_empty, View.GONE)
             views.setViewVisibility(R.id.widget_status_rule, View.GONE)
             views.setViewVisibility(R.id.widget_status, View.GONE)
-            views.setOnClickPendingIntent(R.id.widget_root, openGitsawe(context, LocalDate.now().toEpochDay()))
+            // The day the card is showing, not today: with the evening
+            // rollover those are different, and tapping a card that reads
+            // tomorrow should not open this morning.
+            views.setOnClickPendingIntent(
+                R.id.widget_root,
+                openGitsawe(
+                    context,
+                    widgetDayFor(
+                        java.time.LocalDateTime.now(),
+                        SettingsRepository.widgetRolloverMinuteBlocking(context),
+                    ).toEpochDay(),
+                ),
+            )
             return views
         }
 
@@ -273,10 +291,20 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
     )
 
-    /** Refresh just past midnight, when today's readings change. */
+    /**
+     * Refresh when the card next says something different.
+     *
+     * With a rollover that is the rollover itself and not midnight — between
+     * one evening and the next the card reads the same date throughout, and
+     * waking at midnight would redraw an identical card. See
+     * [nextWidgetRefresh].
+     */
     @SuppressLint("MissingPermission") // Guarded by canScheduleExactAlarms; otherwise uses an inexact alarm.
     private fun scheduleDayRefresh(context: Context) {
-        val next = LocalDate.now().plusDays(1).atStartOfDay().plusMinutes(1)
+        val next = nextWidgetRefresh(
+            java.time.LocalDateTime.now(),
+            SettingsRepository.widgetRolloverMinuteBlocking(context),
+        )
         val alarm = context.getSystemService(AlarmManager::class.java)
         val triggerAt = next.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         val intent = dayRefreshIntent(context)

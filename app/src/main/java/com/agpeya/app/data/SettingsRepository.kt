@@ -131,6 +131,8 @@ object SettingsRepository {
     const val DEFAULT_STREAK_REMINDER_MIN = 21 * 60 + 30
 
     private val KEY_GITSAWE_REMINDER = booleanPreferencesKey("gitsawe_reminder")
+    private val KEY_WIDGET_ROLLOVER = booleanPreferencesKey("widget_evening_rollover")
+    private val KEY_WIDGET_ROLLOVER_TIME = intPreferencesKey("widget_evening_rollover_time")
     private val KEY_GITSAWE_REMINDER_TIME = intPreferencesKey("gitsawe_reminder_min")
 
     /** 06:00 — the old fixed Gitsawe time, now the editable default. */
@@ -617,6 +619,43 @@ object SettingsRepository {
     suspend fun setGitsaweReminder(context: Context, value: Boolean) {
         context.settingsDataStore.edit { it[KEY_GITSAWE_REMINDER] = value }
     }
+
+    /**
+     * Whether the ግጻዌ widget moves to the next day in the evening.
+     *
+     * On by default, because the Church's day turns before midnight does and
+     * someone reading the widget after supper is looking at what they will pray
+     * at dawn. Off leaves the card following the calendar.
+     *
+     * Blocking reads, because the only caller is a widget provider running in a
+     * broadcast receiver with no coroutine scope of its own.
+     */
+    fun widgetRollover(context: Context): Flow<Boolean> =
+        context.settingsDataStore.data.map { it[KEY_WIDGET_ROLLOVER] ?: true }
+
+    suspend fun setWidgetRollover(context: Context, value: Boolean) {
+        context.settingsDataStore.edit { it[KEY_WIDGET_ROLLOVER] = value }
+        com.agpeya.app.widget.GitsaweWidgetProvider.refreshAll(context)
+    }
+
+    fun widgetRolloverTime(context: Context): Flow<Int> =
+        context.settingsDataStore.data.map {
+            it[KEY_WIDGET_ROLLOVER_TIME] ?: com.agpeya.app.widget.DEFAULT_WIDGET_ROLLOVER_MIN
+        }
+
+    suspend fun setWidgetRolloverTime(context: Context, minuteOfDay: Int) {
+        context.settingsDataStore.edit {
+            it[KEY_WIDGET_ROLLOVER_TIME] = minuteOfDay.coerceIn(0, 1439)
+        }
+        com.agpeya.app.widget.GitsaweWidgetProvider.refreshAll(context)
+    }
+
+    /** The rollover as the widget wants it: the minute, or null when it is off. */
+    fun widgetRolloverMinuteBlocking(context: Context): Int? = runCatching {
+        kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) {
+            if (widgetRollover(context).first()) widgetRolloverTime(context).first() else null
+        }
+    }.getOrDefault(com.agpeya.app.widget.DEFAULT_WIDGET_ROLLOVER_MIN)
 
     fun gitsaweReminderBlocking(context: Context): Boolean =
         runCatching {

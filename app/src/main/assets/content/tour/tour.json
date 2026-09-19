@@ -2,6 +2,30 @@
   "contentVersion": 1,
   "tours": [
     {
+      "versionCode": 81,
+      "version": "2.8.0",
+      "title": {
+        "am": "በዚህ እትም",
+        "en": "In this version"
+      },
+      "pages": [
+        {
+          "kicker": {
+            "am": "ዊጀት",
+            "en": "Widget"
+          },
+          "title": {
+            "am": "ማታ ወደ ነገ ይለወጣል",
+            "en": "It turns to tomorrow in the evening"
+          },
+          "body": {
+            "am": "ከምሽቱ ሁለት ሰዓት ጀምሮ የግጻዌ ዊጀቱ የነገውን ምንባቦች ያሳያል። የቤተ ክርስቲያን ቀን የሚለወጠው ከእኩለ ሌሊት በፊት ስለሆነ ነው፤ ማታ ዊጀቱን የሚያዩም አብዛኛውን ጊዜ ጠዋት የሚጸልዩትን ለማየት ነው። ሰዓቱን በቅንብሮች › ንባብ ውስጥ መቀየር ወይም ማጥፋት ይችላሉ።",
+            "en": "From 8 in the evening the ግጻዌ widget shows the next day's readings. The Church's day turns before midnight does, and someone checking the widget after supper is usually looking at what they will pray at dawn. The hour is yours to change, or switch off, in Settings › ንባብ."
+          }
+        }
+      ]
+    },
+    {
       "versionCode": 79,
       "version": "2.7.0",
       "title": {

@@ -31,6 +31,21 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "2.8.0",
+        title = "The widget turns to tomorrow in the evening",
+        titleAm = "ዊጀቱ ማታ ወደ ነገ ይለወጣል",
+        changes = listOf(
+            "From 8 in the evening the ግጻዌ widget shows the next day's readings — the Church's day turns before midnight does.",
+            "You can set the hour yourself, or switch it off and have the widget always show today, in Settings › ንባብ.",
+            "The card does not change again at midnight: what it showed last night is what it shows this morning.",
+        ),
+        changesAm = listOf(
+            "ከምሽቱ ሁለት ሰዓት ጀምሮ የግጻዌ ዊጀቱ የነገውን ምንባቦች ያሳያል — የቤተ ክርስቲያን ቀን የሚለወጠው ከእኩለ ሌሊት በፊት ነውና።",
+            "ሰዓቱን ራስዎ መወሰን ይችላሉ፤ ወይም አጥፍተው ዊጀቱ ሁልጊዜ የዕለቱን እንዲያሳይ ማድረግ ይችላሉ — በቅንብሮች › ንባብ ውስጥ።",
+            "ካርዱ በእኩለ ሌሊት ዳግመኛ አይለወጥም፦ ትናንት ማታ ያሳየው ዛሬ ጠዋትም የሚያሳየው ነው።",
+        ),
+    ),
+    ReleaseNote(
         version = "2.7.1",
         title = "The editor, in every window",
         titleAm = "አርታዒው በየትኛውም መስኮት",

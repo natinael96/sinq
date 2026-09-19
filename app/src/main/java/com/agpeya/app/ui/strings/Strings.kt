@@ -973,6 +973,13 @@ interface Strings {
     fun editorPages(count: Int): String
     /** What the preview shows, for a reader who cannot see it. */
     fun editorPreviewOf(frame: String, ground: String, pages: Int): String
+
+    // ── The ግጻዌ widget's evening rollover ────────────────────────────────────
+    val widgetRolloverTitle: String
+    val widgetRolloverBody: String
+    val widgetRolloverTimeTitle: String
+    /** The subtitle when it is off: the card just follows the calendar. */
+    val widgetRolloverOff: String
     /** About row when the check is off, or nothing has been found yet. */
 
     // ── ቁርባን ዝግጅት (communion preparation) ──────────────────────────────────
@@ -1890,6 +1897,12 @@ object AmharicStrings : Strings {
     override fun editorPages(count: Int) = "$count ገጾች"
     override fun editorPreviewOf(frame: String, ground: String, pages: Int) =
         "የካርዱ ቅድመ ዕይታ፦ $frame፣ $ground መደብ" + if (pages > 1) "፣ $pages ገጾች" else ""
+
+    override val widgetRolloverTitle = "ማታ ወደ ነገ ይለወጥ"
+    override val widgetRolloverBody =
+        "የግጻዌ ዊጀቱ ከመረጡት ሰዓት ጀምሮ የነገውን ግጻዌ ያሳያል። የቤተ ክርስቲያን ቀን የሚለወጠው ከእኩለ ሌሊት በፊት ስለሆነ ነው።"
+    override val widgetRolloverTimeTitle = "የሚለወጥበት ሰዓት"
+    override val widgetRolloverOff = "ዊጀቱ ሁልጊዜ የዕለቱን ያሳያል"
 
     // ── ቁርባን ዝግጅት ──────────────────────────────────────────────────────────
 
@@ -2809,6 +2822,12 @@ object EnglishStrings : Strings {
     override fun editorPages(count: Int) = if (count == 1) "1 page" else "$count pages"
     override fun editorPreviewOf(frame: String, ground: String, pages: Int) =
         "Card preview: $frame, $ground ground" + if (pages > 1) ", $pages pages" else ""
+
+    override val widgetRolloverTitle = "Turn to tomorrow in the evening"
+    override val widgetRolloverBody =
+        "From the hour you choose, the ግጻዌ widget shows the next day's readings — the Church's day turns before midnight does."
+    override val widgetRolloverTimeTitle = "Turns at"
+    override val widgetRolloverOff = "The widget always shows today"
 
     // ── Communion preparation ────────────────────────────────────────────────
 
