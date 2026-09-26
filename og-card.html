@@ -1,0 +1,39 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:"Abyssinica";src:url("abyssinica-ethiopic.woff2") format("woff2");font-display:block}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1200px;height:630px;overflow:hidden}
+body{
+  background:#0B3129;
+  color:#F2EFE6;
+  font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:0 92px;position:relative;
+}
+/* a faint rubric rule, the one ornament */
+body::after{content:"";position:absolute;left:0;right:0;bottom:0;height:10px;background:#8C2B20}
+.mark{position:absolute;top:50%;right:96px;transform:translateY(-50%);width:248px;height:248px;opacity:.28}
+.ethi{font-family:"Abyssinica","Noto Serif Ethiopic",serif}
+h1{font-size:118px;line-height:1;letter-spacing:.01em;color:#E4BC5A;font-weight:400}
+.latin{font-size:40px;letter-spacing:.34em;text-transform:uppercase;color:#C9D3CC;margin-top:26px}
+p.tag{font-size:40px;line-height:1.5;margin-top:38px;max-width:830px;color:#EDE9DD}
+.strip{margin-top:40px;font-size:29px;letter-spacing:.02em;color:#9FB3A7}
+.strip b{color:#E4BC5A;font-weight:400}
+</style></head><body>
+
+<svg class="mark" viewBox="0 0 108 108" aria-hidden="true">
+  <g fill="#E4BC5A">
+    <path d="M51.2,26 h5.6 v8 h9.2 v5.6 h-9.2 v12.4 h-5.6 v-12.4 h-9.2 v-5.6 h9.2 Z"/>
+    <path d="M43.5,66 A10.5,10.5 0 0 1 64.5,66 Z"/>
+  </g>
+  <g fill="none" stroke="#E4BC5A" stroke-width="2.5" stroke-linecap="round">
+    <path d="M29,66 L79,66"/>
+    <path d="M60.3,52.4 L62.9,47 M65.5,56.4 L70.1,52.5 M68.5,62.1 L74.3,60.6 M47.7,52.4 L45.1,47 M42.5,56.4 L37.9,52.5 M39.5,62.1 L33.7,60.6"/>
+  </g>
+</svg>
+
+<h1 class="ethi">ስንቅ</h1>
+<div class="latin">Sinq</div>
+<p class="tag ethi">ሰዓታት · ግጻዌ · ስንክሳር · ማኅሌት · መዝሙረ ዳዊት</p>
+<div class="strip">The Ethiopian Orthodox Tewahedo prayer book for Android &nbsp;·&nbsp; <b>offline</b></div>
+
+</body></html>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" role="img" aria-label="Sinq">
+  <rect width="108" height="108" rx="24" fill="#0E3B31"/>
+  <g fill="#E8C46B"><path d="M51.2,26 h5.6 v8 h9.2 v5.6 h-9.2 v12.4 h-5.6 v-12.4 h-9.2 v-5.6 h9.2 Z"/><path d="M43.5,66 A10.5,10.5 0 0 1 64.5,66 Z"/></g>
+  <g fill="none" stroke="#E8C46B" stroke-width="2.5" stroke-linecap="round"><path d="M29,66 L79,66"/><path d="M60.3,52.4 L62.9,47 M65.5,56.4 L70.1,52.5 M68.5,62.1 L74.3,60.6 M47.7,52.4 L45.1,47 M42.5,56.4 L37.9,52.5 M39.5,62.1 L33.7,60.6"/></g>
+</svg>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Installing ስንቅ · Sinq</title>
+<meta name="description" content="How to install Sinq (ስንቅ) on Android from the signed APK, the permissions it asks for, and what to do if the install fails.">
+<meta name="color-scheme" content="light dark">
+<script>/* the reader's theme, applied before first paint */
+(function(){try{var t=localStorage.getItem('sinq-theme');
+if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ስንቅ · Sinq">
+<meta property="og:locale" content="am_ET">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:title" content="Installing ስንቅ · Sinq">
+<meta property="og:description" content="How to install Sinq (ስንቅ) on Android from the signed APK, the permissions it asks for, and what to do if the install fails.">
+<meta property="og:url" content="https://sinq.natinael96.tech/install.html">
+<meta property="og:image" content="https://sinq.natinael96.tech/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:alt" content="ስንቅ — the Ethiopian Orthodox Tewahedo prayer book for Android">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Installing ስንቅ · Sinq">
+<meta name="twitter:description" content="How to install Sinq (ስንቅ) on Android from the signed APK, the permissions it asks for, and what to do if the install fails.">
+<meta name="twitter:image" content="https://sinq.natinael96.tech/og-image.png">
+<link rel="canonical" href="https://sinq.natinael96.tech/install.html">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+<script src="site.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main"><span>Skip to content</span></a>
+
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html">
+      <svg viewBox="0 0 108 108" aria-hidden="true"><rect width="108" height="108" rx="24" fill="#0E3B31"/><g fill="#E8C46B"><path d="M51.2,26 h5.6 v8 h9.2 v5.6 h-9.2 v12.4 h-5.6 v-12.4 h-9.2 v-5.6 h9.2 Z"/><path d="M43.5,66 A10.5,10.5 0 0 1 64.5,66 Z"/></g><g fill="none" stroke="#E8C46B" stroke-width="2.5" stroke-linecap="round"><path d="M29,66 L79,66"/><path d="M60.3,52.4 L62.9,47 M65.5,56.4 L70.1,52.5 M68.5,62.1 L74.3,60.6 M47.7,52.4 L45.1,47 M42.5,56.4 L37.9,52.5 M39.5,62.1 L33.7,60.6"/></g></svg>
+      <span class="name ethi">ስንቅ</span>
+    </a>
+    <div class="nav-links">
+      <a href="install.html" aria-current="page"><span>Install</span></a>
+      <a href="about.html"><span>About</span></a>
+      <a href="changelog.html"><span>Changes</span></a>
+    </div>
+    <button class="theme" id="theme-btn" type="button" aria-label="Theme: system">
+      <svg class="ic-system" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg>
+      <svg class="ic-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M4.2 4.2l1.5 1.5M18.3 18.3l1.5 1.5M2 12h2M20 12h2M4.2 19.8l1.5-1.5M18.3 5.7l1.5-1.5"/></svg>
+      <svg class="ic-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.5 8.5 0 1 1 9.8 4a7 7 0 0 0 10.2 10.2z"/></svg>
+      <span class="lbl">System</span>
+    </button>
+  </div>
+</nav>
+
+<main id="main">
+
+<div class="page-head">
+  <p class="page-eyebrow">Install</p>
+  <h1><span>Installing Sinq</span></h1>
+  <p>
+    <span>Sinq is distributed as a signed APK from its releases page, not through an app store. Installing it takes three steps the first time, and none after that.</span>
+  </p>
+</div>
+
+<section>
+  <h2><span>Before you start</span></h2>
+  <ul class="plain">
+    <li><span><b>Android 6.0 (Marshmallow) or newer.</b> Older versions cannot install it. Sinq needed Android 8.0 until 1.7.0.</span></li>
+    <li><span><b>About 60–90 MB of free space.</b> The whole Bible, the lectionary and four Ethiopic typefaces ship inside the file.</span></li>
+    <li><span><b>No account, and no connection after the download.</b> Nothing needs to be set up.</span></li>
+  </ul>
+</section>
+
+<section>
+  <h2><span>The three steps</span></h2>
+  <ol class="steps">
+    <li>
+      <h3><span>Download the APK</span></h3>
+      <p><span>Open the releases page and download the file named <code>Sinq-v1.0.0.apk</code> (or whatever the newest version number is) from the assets list.</span></p>
+      <p><a class="btn btn-primary btn-sm" href="https://github.com/natinael96/sinq/releases/latest"><span>Go to the latest release</span></a></p>
+    </li>
+    <li>
+      <h3><span>Allow your browser to install apps</span></h3>
+      <p><span>Android blocks installs from outside the Play Store until you permit them, per app. When you open the downloaded file, Android will offer the setting directly, or find it yourself under <b>Settings → Apps → Special app access → Install unknown apps</b>, and turn it on for the browser or file manager you downloaded with.</span></p>
+    </li>
+    <li>
+      <h3><span>Open the file and install</span></h3>
+      <p><span>Tap the downloaded APK and confirm. Sinq opens with an introduction; the first thing worth doing is choosing your interface language and text size in Settings.</span></p>
+    </li>
+  </ol>
+</section>
+
+
+<section>
+  <h2><span>Permissions it will ask for</span></h2>
+  <p><span>Only when you turn on a feature that needs them, and never for anything else:</span></p>
+  <dl class="terms">
+    <dt><span>Notifications</span></dt>
+    <dd><span>To show the prayer reminders you set. Asked the first time you enable one.</span></dd>
+    <dt><span>Exact alarms</span></dt>
+    <dd><span>So a prayer alarm rings at the hour you chose rather than whenever Android gets around to it.</span></dd>
+    <dt><span>Run at startup, and vibration</span></dt>
+    <dd><span>To re-arm your reminders after the phone restarts, and for the alarm's vibration.</span></dd>
+  </dl>
+  <p>
+    <span>There is no internet, location, camera, microphone, contacts or storage-scanning permission. The app does not have them to ask for. <a href="privacy-policy.html">Full privacy policy</a>.</span>
+  </p>
+</section>
+
+<section>
+  <h2><span>If something goes wrong</span></h2>
+  <dl class="terms">
+    <dt><span>“App not installed”</span></dt>
+    <dd><span>On Android 7 or older this used to be the whole story: Sinq needed Android 8.0 until version 1.7.0, and the phone had no way to say so. If that was your phone, <a href="https://github.com/natinael96/sinq/releases/latest">the current release</a> installs on Android 6.0 and up.</span></dd>
+    <dd><span>Otherwise, in the order worth trying. <b>Play Protect</b> blocks most apps installed from outside the Play Store, and on some phones says only “App not installed” rather than explaining itself — open Play Store → profile → Play Protect and turn off scanning while you install, or choose “Install anyway” if offered. <b>Storage</b>: the APK is 8&nbsp;MB but needs about 40&nbsp;MB free to unpack. <b>A partial download</b> produces a file that looks complete and is not; download it again on a steady connection. And if a copy of Sinq built from source is already on the phone, uninstall it first — export a backup from Settings → Data before you do, because your journal and records live in that copy.</span></dd>
+    <dt><span>“There was a problem parsing the package”</span></dt>
+    <dd><span>The download did not finish, or the file is not the APK. Only the file ending in <code>.apk</code> installs on a phone. Download it again, on a stable connection.</span></dd>
+    <dt><span>Play Protect warns about an unknown app</span></dt>
+    <dd><span>Expected. Google shows this for anything installed from outside the Play Store, whatever it contains. You can install anyway, or verify for yourself: the <a href="https://github.com/natinael96/sinq">source is public</a> and every release is built in the open by GitHub Actions from a tagged commit.</span></dd>
+    <dt><span>Reminders never arrive</span></dt>
+    <dd><span>Check that notifications and exact alarms are permitted for Sinq, that battery optimisation is not restricting it, and that the reminder is not scheduled inside your quiet hours. Sinq warns about that last one in Settings.</span></dd>
+  </dl>
+  <p><span>Anything else: <a href="https://github.com/natinael96/sinq/issues">open an issue</a>.</span></p>
+</section>
+
+<section>
+  <h2><span>Building it yourself</span></h2>
+  <p><span>You need JDK 17 and the Android SDK (compileSdk 36). The content is bundled in the repository, so no content pipeline needs to run for a normal build.</span></p>
+  <pre><code>git clone https://github.com/natinael96/sinq.git
+cd sinq
+./gradlew assembleDebug</code></pre>
+  <p><span>The APK lands in <code>app/build/outputs/apk/debug/</code>. A build of your own is signed with your own key, so it will not install over a release copy and cannot be updated by one.</span></p>
+</section>
+
+</main>
+
+<footer>
+  <div class="foot-in">
+    <ul class="foot-links">
+      <li><a href="index.html"><span>Home</span></a></li>
+      <li><a href="https://github.com/natinael96/sinq">GitHub</a></li>
+      <li><a href="https://github.com/natinael96/sinq/releases"><span>Releases</span></a></li>
+      <li><a href="credits.html"><span>Sources and licences</span></a></li>
+      <li><a href="privacy-policy.html"><span>Privacy policy</span></a></li>
+    </ul>
+    <p class="fine"><span>ስንቅ, provisions for the journey.</span></p>
+    <p class="powered-by">powered by <a href="https://t.me/buna_builds" target="_blank" rel="noopener noreferrer"><span class="ethi" lang="am">2ቡና</span></a></p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+# ስንቅ · Sinq
+User-agent: *
+Allow: /
+# The source of the link-preview card, not a page anyone should land on.
+Disallow: /og-card.html
+
+Sitemap: https://sinq.natinael96.tech/sitemap.xml
