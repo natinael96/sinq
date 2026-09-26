@@ -1,0 +1,248 @@
+<title>What Rings, and What Does Not</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@300;400;600&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+Ethiopic:wght@400;600&display=swap">
+<style>
+:root{--paper:#F7F6F2;--card:#FFF;--ink:#17201C;--muted:#6E6A62;--hero:#0E3B31;
+ --arke:#B23A2E;--gold:#9A7C33;--rule:#DEDAD0;--sunk:#EFEDE6;
+ --shadow:0 1px 2px rgba(23,32,28,.06),0 8px 22px rgba(23,32,28,.07)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+ --paper:#11140F;--card:#191D17;--ink:#E7E4DA;--muted:#9A968B;--hero:#123F34;
+ --arke:#F0776A;--gold:#C9A857;--rule:#2A2F27;--sunk:#20251E;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.35)}}
+:root[data-theme="dark"]{--paper:#11140F;--card:#191D17;--ink:#E7E4DA;--muted:#9A968B;
+ --hero:#123F34;--arke:#F0776A;--gold:#C9A857;--rule:#2A2F27;--sunk:#20251E;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.35)}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font:400 16px/1.62 "Spectral",Georgia,serif}
+.wrap{max-width:1000px;margin:0 auto;padding:40px 24px 68px}
+.am{font-family:"Noto Sans Ethiopic","Spectral",serif}
+code{font-family:"IBM Plex Sans",ui-monospace,monospace;font-size:12.5px;
+ background:var(--sunk);padding:1px 5px;border-radius:4px}
+
+header{border-bottom:2px solid var(--hero);padding-bottom:20px;margin-bottom:8px}
+.eyebrow{font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:11px;font-weight:600;
+ letter-spacing:.16em;text-transform:uppercase;color:var(--arke);margin:0 0 9px}
+h1{font-size:clamp(27px,4vw,38px);font-weight:300;margin:0 0 11px;line-height:1.15;
+ letter-spacing:-.015em;text-wrap:balance}
+h1 b{font-weight:600}
+.lede{max-width:62ch;color:var(--muted);margin:0;font-size:16.5px}
+
+.alarm{background:var(--card);border:1px solid var(--arke);border-left-width:4px;
+ border-radius:12px;padding:20px 22px;margin:26px 0 0;box-shadow:var(--shadow)}
+.alarm h3{margin:0 0 7px;font-size:18px;font-weight:600;color:var(--arke)}
+.alarm p{margin:0 0 8px;max-width:70ch}
+.alarm p:last-child{margin-bottom:0}
+
+h2{font-size:20px;font-weight:600;margin:52px 0 6px;display:flex;align-items:baseline;gap:10px}
+h2 .n{font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:12px;color:var(--arke);font-weight:700}
+h2 + .sub{color:var(--muted);margin:0 0 18px;max-width:68ch;font-size:15px}
+
+.board{background:var(--card);border:1px solid var(--rule);border-radius:14px;
+ padding:22px;box-shadow:var(--shadow);overflow-x:auto}
+.board svg{display:block;min-width:680px;width:100%;height:auto}
+
+.scroller{overflow-x:auto;border:1px solid var(--rule);border-radius:12px;
+ background:var(--card);box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:620px}
+th{text-align:left;font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:10px;
+ font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+ padding:12px 14px 9px;border-bottom:1px solid var(--rule);white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid var(--rule);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap;font-family:"IBM Plex Sans",sans-serif}
+.bad{color:var(--arke);font-weight:600}
+.ok{color:var(--hero);font-weight:600}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ok{color:var(--gold)}}
+:root[data-theme="dark"] .ok{color:var(--gold)}
+.done{font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:10px;font-weight:700;
+ letter-spacing:.07em;text-transform:uppercase;border:1px solid currentColor;
+ border-radius:4px;padding:1px 5px;margin-left:7px;vertical-align:2px;color:var(--hero)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .done{color:var(--gold)}}
+:root[data-theme="dark"] .done{color:var(--gold)}
+ol.plan{max-width:70ch;padding-left:22px}
+ol.plan li{margin-bottom:13px}
+ol.plan b{display:block;margin-bottom:1px}
+.note{border-left:3px solid var(--arke);padding:2px 0 2px 15px;margin:22px 0 0;
+ color:var(--muted);max-width:70ch}
+.note b{color:var(--ink)}
+.foot{margin-top:46px;padding-top:16px;border-top:1px solid var(--rule);
+ font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:12.5px;color:var(--muted)}
+</style>
+
+<div class="wrap">
+<header>
+ <p class="eyebrow">ስንቅ · reminders audit</p>
+ <h1>What rings, <b>and what does not</b></h1>
+ <p class="lede">An audit of the prayer reminder modes, ሰዓታት አስተካክል and ልማዶች አስተካክል,
+ read from the source. Everything below has a file and a line behind it. The first
+ finding is the one that matters most.</p>
+</header>
+
+<div class="alarm">
+ <h3>A fresh install rings for no prayer hour at all</h3>
+ <p>The built-in mode ships eight entries, one per hour, at 06:00, 09:00, 12:00, 15:00,
+ 18:00, 21:00, 00:00 and 22:00. Every one of them is off. <code>ReminderEntry.enabled</code>
+ defaults to <code>false</code> and <code>builtInMode()</code> never overrides it, so the
+ eight exist as rows in an editor and nothing else. Nothing in onboarding turns any on.</p>
+ <p>Someone installing ስንቅ to be called to prayer was not called, and the app never said so.
+ The Settings page reported reminders as on, because that count is built from the four
+ daily switches and the ledgers, and it contains no prayer hour at all.</p>
+ <p><b>Fixed.</b> The six day hours now ring from first launch. ንዋም at midnight and
+ ሌሊት ፱ ሰዓት at ten do not — those are taken up, not assumed, and an app that wakes a
+ stranger at midnight on the day they install it has misread what it was asked for.
+ Because a changed default cannot reach anyone already installed, the page now says
+ outright when no hour will ring, with a way straight to the switches.</p>
+ <p><b>And one of the eight could not be turned on where it stood.</b> ሌሊት ፱ ሰዓት shipped hidden —
+ <code>HoursConfig(hidden = setOf("veil"))</code> — and a hidden hour is filtered out of the
+ mode editor and out of the scheduler. Its 22:00 entry was stored, counted, and unreachable
+ until the reader found ሰዓታት አስተካክል, two screens away under a different heading. It no
+ longer ships hidden.</p>
+</div>
+
+<h2><span class="n">1</span>How a reminder actually travels</h2>
+<p class="sub">One alarm is armed at a time per entry. When it fires it re-arms the next one
+before deciding whether to ring — that chain is what keeps tomorrow alive, and it is also
+where the losses hide.</p>
+
+<div class="board">
+<svg viewBox="0 0 900 340" role="img" aria-label="The lifecycle of a prayer reminder from scheduling through firing to the done prompt, with the points where it can be silently lost">
+ <defs>
+  <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+   <path d="M0 0 L10 5 L0 10 z" fill="var(--muted)"/>
+  </marker>
+  <marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+   <path d="M0 0 L10 5 L0 10 z" fill="var(--arke)"/>
+  </marker>
+ </defs>
+ <g font-family="IBM Plex Sans, sans-serif" font-size="12">
+  <rect x="16" y="56" width="150" height="52" rx="8" fill="var(--hero)"/>
+  <text x="91" y="79" fill="var(--on-hero, #EFEDE6)" text-anchor="middle" font-weight="600">rescheduleAll</text>
+  <text x="91" y="96" fill="#BFD6CC" text-anchor="middle" font-size="10.5">launch · boot · mode switch</text>
+
+  <rect x="216" y="56" width="132" height="52" rx="8" fill="var(--sunk)" stroke="var(--rule)"/>
+  <text x="282" y="79" fill="var(--ink)" text-anchor="middle" font-weight="600">setAlarmClock</text>
+  <text x="282" y="96" fill="var(--muted)" text-anchor="middle" font-size="10.5">one per entry</text>
+
+  <rect x="398" y="56" width="132" height="52" rx="8" fill="var(--sunk)" stroke="var(--rule)"/>
+  <text x="464" y="79" fill="var(--ink)" text-anchor="middle" font-weight="600">AlarmReceiver</text>
+  <text x="464" y="96" fill="var(--muted)" text-anchor="middle" font-size="10.5">the hour arrives</text>
+
+  <rect x="580" y="56" width="122" height="52" rx="8" fill="var(--sunk)" stroke="var(--rule)"/>
+  <text x="641" y="79" fill="var(--ink)" text-anchor="middle" font-weight="600">ring</text>
+  <text x="641" y="96" fill="var(--muted)" text-anchor="middle" font-size="10.5">2 min, insistent</text>
+
+  <rect x="752" y="56" width="132" height="52" rx="8" fill="var(--sunk)" stroke="var(--rule)"/>
+  <text x="818" y="79" fill="var(--ink)" text-anchor="middle" font-weight="600">done?</text>
+  <text x="818" y="96" fill="var(--muted)" text-anchor="middle" font-size="10.5">writes the habit</text>
+
+  <line x1="166" y1="82" x2="210" y2="82" stroke="var(--muted)" marker-end="url(#a)"/>
+  <line x1="348" y1="82" x2="392" y2="82" stroke="var(--muted)" marker-end="url(#a)"/>
+  <line x1="530" y1="82" x2="574" y2="82" stroke="var(--muted)" marker-end="url(#a)"/>
+  <line x1="702" y1="82" x2="746" y2="82" stroke="var(--muted)" marker-end="url(#a)"/>
+
+  <path d="M464 108 L464 140 L282 140 L282 114" fill="none" stroke="var(--hero)" stroke-width="1.6" marker-end="url(#a)"/>
+  <text x="373" y="155" fill="var(--hero)" text-anchor="middle" font-size="11" font-weight="600">the chain re-arms tomorrow, first</text>
+
+  <text x="16" y="196" fill="var(--arke)" font-size="10.5" font-weight="700" letter-spacing="1.3">WHERE IT IS LOST, SILENTLY</text>
+
+  <line x1="91" y1="204" x2="91" y2="228" stroke="var(--arke)" stroke-dasharray="3 3" marker-end="url(#r)"/>
+  <text x="16" y="244" fill="var(--muted)" font-size="11">hours fail to load →</text>
+  <text x="16" y="259" fill="var(--muted)" font-size="11">every alarm cancelled,</text>
+  <text x="16" y="274" fill="var(--muted)" font-size="11">none armed, no signal</text>
+
+  <line x1="282" y1="204" x2="282" y2="228" stroke="var(--arke)" stroke-dasharray="3 3" marker-end="url(#r)"/>
+  <text x="216" y="244" fill="var(--muted)" font-size="11">no permission →</text>
+  <text x="216" y="259" fill="var(--muted)" font-size="11">quietly downgraded</text>
+  <text x="216" y="274" fill="var(--muted)" font-size="11">to an inexact alarm</text>
+
+  <line x1="464" y1="204" x2="464" y2="228" stroke="var(--arke)" stroke-dasharray="3 3" marker-end="url(#r)"/>
+  <text x="398" y="244" fill="var(--muted)" font-size="11">hour hidden or gone →</text>
+  <text x="398" y="259" fill="var(--muted)" font-size="11">chain ends for good;</text>
+  <text x="398" y="274" fill="var(--muted)" font-size="11">only a relaunch revives</text>
+
+  <line x1="641" y1="204" x2="641" y2="228" stroke="var(--arke)" stroke-dasharray="3 3" marker-end="url(#r)"/>
+  <text x="580" y="244" fill="var(--muted)" font-size="11">quiet hours →</text>
+  <text x="580" y="259" fill="var(--muted)" font-size="11">suppressed, and no</text>
+  <text x="580" y="274" fill="var(--muted)" font-size="11">"done?" is ever asked</text>
+
+  <line x1="818" y1="204" x2="818" y2="228" stroke="var(--arke)" stroke-dasharray="3 3" marker-end="url(#r)"/>
+  <text x="752" y="244" fill="var(--muted)" font-size="11">snooze pending →</text>
+  <text x="752" y="259" fill="var(--muted)" font-size="11">outlives mode switch</text>
+  <text x="752" y="274" fill="var(--muted)" font-size="11">and entry deletion</text>
+
+  <text x="16" y="312" fill="var(--muted)" font-size="10.5">A suppressed alarm still re-arms, so the chain survives quiet hours. Nothing else on this row does.</text>
+ </g>
+</svg>
+</div>
+
+<h2><span class="n">2</span>Three screens, three stores, one look</h2>
+<p class="sub">ሰዓታት አስተካክል, ልማዶች አስተካክል and the per-hour editor draw the same row: an eye,
+a name, a pencil, arrows, a red cross, and a "＋ New" at the foot. They edit three unrelated
+things, and only one of them changes whether the phone makes a sound.</p>
+
+<div class="scroller">
+<table>
+ <thead><tr><th>Screen</th><th>Edits</th><th>Affects an alarm?</th><th>Depth from Settings</th></tr></thead>
+ <tbody>
+  <tr><td class="am">ሰዓታት አስተካክል</td><td>which hours exist and are visible</td><td class="ok">yes, it gates them</td><td class="num">4 taps</td></tr>
+  <tr><td class="am">the hour's own page</td><td>which psalms and sections are in an hour</td><td class="bad">no</td><td class="num">5 taps</td></tr>
+  <tr><td class="am">ልማዶች አስተካክል</td><td>habits and their cadence</td><td class="bad">no, nothing schedules a habit</td><td class="num">3 taps</td></tr>
+  <tr><td class="am">የጸሎት ማንቂያ ሁነታዎች</td><td>the times themselves</td><td class="ok">yes, this is the alarm</td><td class="num">3 taps, other branch</td></tr>
+ </tbody>
+</table>
+</div>
+
+<p class="note"><b>The two that matter are in different branches of Settings.</b> Making an hour
+exist is under ጸሎት. Setting the time it rings is under ማንቂያዎች, beneath a heading about sound.
+Four taps apart, with no link between them.</p>
+
+<h2><span class="n">3</span>Controls that change nothing</h2>
+
+<div class="scroller">
+<table>
+ <thead><tr><th>Control</th><th>What happens when you use it</th></tr></thead>
+ <tbody>
+  <tr><td>Cadence on ንባብ and on any habit you add</td><td>Stored and never read. The nightly note consults three habits only: ስንክሳር, ቤተ ክርስቲያን and ስግደት.</td></tr>
+  <tr><td>Reminders inside a mode that is not active</td><td>Editable, counted on the card as "N on", and unable to ring.</td></tr>
+  <tr><td>Reordering hours<span class="done">fixed</span></td><td>The page promised it, the repository implemented it, and nothing called it. Order could only change by restoring a backup.</td></tr>
+  <tr><td>A reminder pointing at a hidden hour</td><td>Invisible in the editor, still stored, still counted.</td></tr>
+  <tr><td>Deleting a custom hour or habit</td><td>No confirmation, and the records and reminders that referenced it are orphaned rather than removed. Deleting a mode does ask.</td></tr>
+ </tbody>
+</table>
+</div>
+
+<h2><span class="n">4</span>What I changed today</h2>
+<div class="scroller">
+<table>
+ <thead><tr><th>Change</th><th>Why</th></tr></thead>
+ <tbody>
+  <tr><td class="am">ድምፅና ጸጥታ moved to the top of ማንቂያዎች</td><td>It governs every reminder on the page, and it had been last, below the fold on any phone.</td></tr>
+  <tr><td class="am">የዛሬው ቀን folds shut</td><td>The tallest block on the page, answering a question asked far less often than the switches under it. Shut, its header still says how many times the phone will speak today.</td></tr>
+  <tr><td class="am">ሰዓታት አስተካክል re-arms what it changes</td><td>Hiding an hour left its alarm armed until the next app launch. Deleting one left it ringing with a name that no longer existed.</td></tr>
+  <tr><td class="am">ሰዓታት አስተካክል can reorder</td><td>It had said so since it shipped.</td></tr>
+  <tr><td>The six day hours ring from first launch</td><td>An app installed to call you to prayer called you to none.</td></tr>
+  <tr><td class="am">ማንቂያዎች says when no hour will ring</td><td>A changed default cannot reach anyone already installed.</td></tr>
+  <tr><td class="am">ሌሊት ፱ ሰዓት no longer ships hidden</td><td>Its reminder could not be switched on from the page that listed it.</td></tr>
+  <tr><td>A pending snooze is cancelled on reschedule</td><td>It outlived both a mode switch and the deletion of its own entry.</td></tr>
+  <tr><td>The dead hours editor is deleted</td><td>The route and the package both pointed at a screen with no callers.</td></tr>
+ </tbody>
+</table>
+</div>
+
+<h2><span class="n">5</span>What I would do next, in order</h2>
+<ol class="plan">
+ <li><b>Put the hours and their times together.</b> One screen: the hour, whether it is shown, and what time it rings. Today, making an hour exist lives under ጸሎት and setting the time it rings lives under ማንቂያዎች, four taps apart under unrelated headings. This is the deepest confusion left here and the one real design change still outstanding.</li>
+ <li><b>Either wire up habit cadence or stop offering it.</b> Setting a schedule for ንባብ, or for any habit you add yourself, does nothing. Only ስንክሳር, ቤተ ክርስቲያን and ስግደት ever reach the nightly note.</li>
+ <li><b>Stop counting reminders that cannot ring.</b> An inactive mode still reports "N reminders on", and a reminder pointing at a hidden hour is still counted though the editor will not show it.</li>
+ <li><b>Ask before deleting a custom hour or habit.</b> Deleting a mode asks. These two do not, and both orphan the records and reminders that referenced them.</li>
+ <li><b>Leave a trace when quiet hours swallow a prayer.</b> The alarm is suppressed and the "done?" prompt never appears, so the hour is invisible in every record, indistinguishable from one that was never set.</li>
+</ol>
+
+<div class="foot">
+ Read from source: ModesRepository, ReminderScheduler, AlarmReceiver, AlarmRinger,
+ AlarmActionReceiver, SystemEventsReceiver, HoursRepository, LayoutRepository,
+ HabitsRepository, HabitSchedule, and the manage-hours, manage-habits, modes and
+ mode-editor screens. Every claim above was checked against the code rather than inferred,
+ and the four marked as changed are committed with content validation, unit tests and
+ release lint passing.
+</div>
+</div>

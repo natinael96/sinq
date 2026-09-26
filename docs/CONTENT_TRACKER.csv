@@ -1,0 +1,105 @@
+hour_id,section_id,order,type,title_amharic,status,entered_by,checked_by,notes
+morning,morning_intro,1,opening,መቅድም,empty,,,
+morning,morning_lords_prayer,2,opening,አቡነ ዘበሰማያት,empty,,,
+morning,morning_thanksgiving,3,opening,ጸሎተ አኰቴት,empty,,,
+morning,morning_ps50,4,psalm,መዝሙር ፶,empty,,,
+morning,morning_PSALMS_BLOCK,5,psalm,(expand: one row per psalm ~19),empty,,,EXPAND once source list confirmed
+morning,morning_gospel,6,gospel,ወንጌል,empty,,,
+morning,morning_doxology,7,litany,ምስጋና/ዶክሶሎጂ,empty,,,confirm presence per edition
+morning,morning_litany,8,litany,ሊጣንያ,empty,,,
+morning,morning_trisagion,9,creed,ቅዱስ እግዚአብሔር,empty,,,
+morning,morning_creed,10,creed,ጸሎተ ሃይማኖት,empty,,,
+morning,morning_kyrie41,11,closing,ኪርያላይሶን ፵፩,empty,,,rubric: 41x
+morning,morning_absolution,12,absolution,ፍትሐት,empty,,,
+morning,morning_closing,13,closing,የመጨረሻ ጸሎት,empty,,,
+terce,terce_intro,1,opening,መቅድም,empty,,,
+terce,terce_lords_prayer,2,opening,አቡነ ዘበሰማያት,empty,,,
+terce,terce_thanksgiving,3,opening,ጸሎተ አኰቴት,empty,,,
+terce,terce_ps50,4,psalm,መዝሙር ፶,empty,,,
+terce,terce_PSALMS_BLOCK,5,psalm,(expand: one row per psalm ~12),empty,,,EXPAND once source list confirmed
+terce,terce_gospel,6,gospel,ወንጌል,empty,,,
+terce,terce_litany,7,litany,ሊጣንያ,empty,,,
+terce,terce_trisagion,8,creed,ቅዱስ እግዚአብሔር,empty,,,
+terce,terce_creed,9,creed,ጸሎተ ሃይማኖት,empty,,,
+terce,terce_kyrie41,10,closing,ኪርያላይሶን ፵፩,empty,,,rubric: 41x
+terce,terce_absolution,11,absolution,ፍትሐት,empty,,,
+terce,terce_closing,12,closing,የመጨረሻ ጸሎት,empty,,,
+sext,sext_intro,1,opening,መቅድም,empty,,,
+sext,sext_lords_prayer,2,opening,አቡነ ዘበሰማያት,empty,,,
+sext,sext_thanksgiving,3,opening,ጸሎተ አኰቴት,empty,,,
+sext,sext_ps50,4,psalm,መዝሙር ፶,empty,,,
+sext,sext_PSALMS_BLOCK,5,psalm,(expand: one row per psalm ~12),empty,,,EXPAND once source list confirmed
+sext,sext_gospel,6,gospel,ወንጌል,empty,,,
+sext,sext_litany,7,litany,ሊጣንያ,empty,,,
+sext,sext_trisagion,8,creed,ቅዱስ እግዚአብሔር,empty,,,
+sext,sext_creed,9,creed,ጸሎተ ሃይማኖት,empty,,,
+sext,sext_kyrie41,10,closing,ኪርያላይሶን ፵፩,empty,,,rubric: 41x
+sext,sext_absolution,11,absolution,ፍትሐት,empty,,,
+sext,sext_closing,12,closing,የመጨረሻ ጸሎት,empty,,,
+none,none_intro,1,opening,መቅድም,empty,,,
+none,none_lords_prayer,2,opening,አቡነ ዘበሰማያት,empty,,,
+none,none_thanksgiving,3,opening,ጸሎተ አኰቴት,empty,,,
+none,none_ps50,4,psalm,መዝሙር ፶,empty,,,
+none,none_PSALMS_BLOCK,5,psalm,(expand: one row per psalm ~12),empty,,,EXPAND once source list confirmed
+none,none_gospel,6,gospel,ወንጌል,empty,,,
+none,none_litany,7,litany,ሊጣንያ,empty,,,
+none,none_trisagion,8,creed,ቅዱስ እግዚአብሔር,empty,,,
+none,none_creed,9,creed,ጸሎተ ሃይማኖት,empty,,,
+none,none_kyrie41,10,closing,ኪርያላይሶን ፵፩,empty,,,rubric: 41x
+none,none_absolution,11,absolution,ፍትሐት,empty,,,
+none,none_closing,12,closing,የመጨረሻ ጸሎት,empty,,,
+vespers,vespers_intro,1,opening,መቅድም,empty,,,
+vespers,vespers_lords_prayer,2,opening,አቡነ ዘበሰማያት,empty,,,
+vespers,vespers_thanksgiving,3,opening,ጸሎተ አኰቴት,empty,,,
+vespers,vespers_ps50,4,psalm,መዝሙር ፶,empty,,,
+vespers,vespers_PSALMS_BLOCK,5,psalm,(expand: one row per psalm ~12),empty,,,EXPAND once source list confirmed
+vespers,vespers_gospel,6,gospel,ወንጌል,empty,,,
+vespers,vespers_litany,7,litany,ሊጣንያ,empty,,,
+vespers,vespers_trisagion,8,creed,ቅዱስ እግዚአብሔር,empty,,,
+vespers,vespers_creed,9,creed,ጸሎተ ሃይማኖት,empty,,,
+vespers,vespers_kyrie41,10,closing,ኪርያላይሶን ፵፩,empty,,,rubric: 41x
+vespers,vespers_absolution,11,absolution,ፍትሐት,empty,,,
+vespers,vespers_closing,12,closing,የመጨረሻ ጸሎት,empty,,,
+compline,compline_intro,1,opening,መቅድም,empty,,,
+compline,compline_lords_prayer,2,opening,አቡነ ዘበሰማያት,empty,,,
+compline,compline_thanksgiving,3,opening,ጸሎተ አኰቴት,empty,,,
+compline,compline_ps50,4,psalm,መዝሙር ፶,empty,,,
+compline,compline_PSALMS_BLOCK,5,psalm,(expand: one row per psalm ~12),empty,,,EXPAND once source list confirmed
+compline,compline_gospel,6,gospel,ወንጌል,empty,,,
+compline,compline_litany,7,litany,ሊጣንያ,empty,,,
+compline,compline_trisagion,8,creed,ቅዱስ እግዚአብሔር,empty,,,
+compline,compline_creed,9,creed,ጸሎተ ሃይማኖት,empty,,,
+compline,compline_kyrie41,10,closing,ኪርያላይሶን ፵፩,empty,,,rubric: 41x
+compline,compline_absolution,11,absolution,ፍትሐት,empty,,,
+compline,compline_closing,12,closing,የመጨረሻ ጸሎት,empty,,,
+midnight,midnight_intro,1,opening,መቅድም,empty,,,
+midnight,midnight_lords_prayer,2,opening,አቡነ ዘበሰማያት,empty,,,
+midnight,midnight_thanksgiving,3,opening,ጸሎተ አኰቴት,empty,,,
+midnight,midnight_ps50,4,psalm,መዝሙር ፶,empty,,,
+midnight,midnight_w1_PSALMS_BLOCK,5,psalm,ክፍል ፩ (expand per psalm),empty,,,Watch 1 — confirm Ps118/119 placement
+midnight,midnight_w1_gospel,6,gospel,ወንጌል ክፍል ፩,empty,,,
+midnight,midnight_w1_litany,7,litany,ሊጣንያ ክፍል ፩,empty,,,
+midnight,midnight_w2_PSALMS_BLOCK,8,psalm,ክፍል ፪ (expand per psalm),empty,,,Watch 2
+midnight,midnight_w2_gospel,9,gospel,ወንጌል ክፍል ፪,empty,,,
+midnight,midnight_w2_litany,10,litany,ሊጣንያ ክፍል ፪,empty,,,
+midnight,midnight_w3_PSALMS_BLOCK,11,psalm,ክፍል ፫ (expand per psalm),empty,,,Watch 3
+midnight,midnight_w3_gospel,12,gospel,ወንጌል ክፍል ፫,empty,,,
+midnight,midnight_w3_litany,13,litany,ሊጣንያ ክፍል ፫,empty,,,
+midnight,midnight_trisagion,14,creed,ቅዱስ እግዚአብሔር,empty,,,
+midnight,midnight_creed,15,creed,ጸሎተ ሃይማኖት,empty,,,
+midnight,midnight_kyrie41,16,closing,ኪርያላይሶን ፵፩,empty,,,rubric: 41x
+midnight,midnight_absolution,17,absolution,ፍትሐት,empty,,,
+midnight,midnight_closing,18,closing,የመጨረሻ ጸሎት,empty,,,
+veil,veil_note,1,opening,ማስታወሻ,empty,,,intro rubric on monastic tradition (D1)
+veil,veil_intro,2,opening,መቅድም,empty,,,
+veil,veil_lords_prayer,3,opening,አቡነ ዘበሰማያት,empty,,,
+veil,veil_thanksgiving,4,opening,ጸሎተ አኰቴት,empty,,,
+veil,veil_ps50,5,psalm,መዝሙር ፶,empty,,,
+veil,veil_PSALMS_BLOCK,6,psalm,(expand: one row per psalm ~12),empty,,,EXPAND once source list confirmed
+veil,veil_gospel,7,gospel,ወንጌል,empty,,,
+veil,veil_litany,8,litany,ሊጣንያ,empty,,,
+veil,veil_trisagion,9,creed,ቅዱስ እግዚአብሔር,empty,,,
+veil,veil_creed,10,creed,ጸሎተ ሃይማኖት,empty,,,
+veil,veil_kyrie41,11,closing,ኪርያላይሶን ፵፩,empty,,,rubric: 41x
+veil,veil_absolution,12,absolution,ፍትሐት,empty,,,
+veil,veil_closing,13,closing,የመጨረሻ ጸሎት,empty,,,

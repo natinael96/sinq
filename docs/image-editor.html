@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sinq Image Editor</title>
+<style>
+:root{
+  --bg:#FAF7F0; --surface:#FFFFFF; --surface-2:#F3EFE4;
+  --fg:#16130C; --muted:#6C6455; --rule:#E3DCCB; --rule-strong:#CEC4AC;
+  --accent:#8A6A15; --accent-fill:#C9A143; --on-accent:#1C1607; --accent-wash:#F2E9D2;
+  --green:#0B3129; --green-2:#10382F; --green-line:#1B4A3E;
+  --gold:#E4BC5A; --ink-on-green:#F2EDDE; --muted-on-green:#9DBBAD;
+  --bad:#9A3324; --bad-wash:#F6E7E3;
+  --good:#1F6B4A;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --serif:"Abyssinica SIL",Georgia,"Times New Roman",serif;
+  --eth:"Abyssinica SIL","Noto Sans Ethiopic",Nyala,serif;
+  --r:12px; --r-sm:8px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --bg:#0D1110; --surface:#141917; --surface-2:#191F1C;
+  --fg:#EDE8DA; --muted:#97A09A; --rule:#242C28; --rule-strong:#3A443E;
+  --accent:#D9B355; --accent-wash:#1E2119;
+  --bad:#D98070; --bad-wash:#241A17; --good:#6FBF9B;
+  color-scheme:dark;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:400 16px/1.62 var(--serif);-webkit-font-smoothing:antialiased}
+.am{font-family:var(--eth)}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+code{font:500 .88em var(--mono);background:var(--surface-2);padding:2px 6px;
+  border-radius:5px;border:1px solid var(--rule)}
+
+header{padding:48px 0 28px;border-bottom:1px solid var(--rule)}
+.eyebrow{font:600 12px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 14px;display:flex;align-items:center;gap:12px}
+.eyebrow::before{content:"";width:26px;height:2px;background:var(--accent);
+  border-radius:2px;flex:none}
+h1{font-size:clamp(30px,5vw,46px);line-height:1.05;font-weight:400;margin:0 0 14px;
+  letter-spacing:-.03em;text-wrap:balance}
+h1 em{font-style:italic;color:var(--accent)}
+.lede{color:var(--muted);font-size:18px;max-width:58ch;margin:0}
+
+section{padding:54px 0;border-top:1px solid var(--rule)}
+section:first-of-type{border-top:0}
+h2{font-size:clamp(23px,3.2vw,31px);font-weight:400;margin:0 0 10px;letter-spacing:-.022em}
+h3{font-size:18px;font-weight:600;margin:28px 0 8px}
+p{max-width:64ch}
+.muted{color:var(--muted)}
+
+/* finding callout */
+.finding{border:1px solid var(--rule);border-left:3px solid var(--bad);
+  background:var(--bad-wash);border-radius:0 var(--r) var(--r) 0;
+  padding:20px 22px;margin:22px 0}
+.finding h3{margin:0 0 8px;color:var(--bad)}
+.finding p{margin:0 0 10px}
+.finding p:last-child{margin:0}
+
+table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14.5px;
+  border:1px solid var(--rule);border-radius:var(--r);overflow:hidden}
+.scroll{overflow-x:auto}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--rule)}
+th{font:600 11.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);background:var(--surface-2)}
+tr:last-child td{border-bottom:0}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tag{display:inline-block;font:600 10.5px/1 var(--mono);letter-spacing:.06em;
+  text-transform:uppercase;padding:4px 8px;border-radius:999px;
+  border:1px solid var(--rule);color:var(--muted);white-space:nowrap}
+.tag.v1{color:var(--good);border-color:color-mix(in srgb,var(--good) 40%,var(--rule));
+  background:color-mix(in srgb,var(--good) 8%,transparent)}
+.tag.later{opacity:.75}
+
+.grid{display:grid;gap:1px;background:var(--rule);border:1px solid var(--rule);
+  border-radius:var(--r);overflow:hidden;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.cell{background:var(--surface);padding:20px}
+.cell h4{margin:0 0 6px;font-size:16px;font-weight:600}
+.cell p{margin:0;color:var(--muted);font-size:14.5px;line-height:1.6}
+
+/* ── the editor mockup ─────────────────────────────────────────── */
+.mockrow{display:grid;grid-template-columns:300px 1fr;gap:32px;align-items:start;
+  margin-top:26px}
+@media (max-width:820px){.mockrow{grid-template-columns:1fr}}
+.phone{width:300px;max-width:100%;margin-inline:auto;
+  border:1px solid var(--rule-strong);border-radius:30px;overflow:hidden;
+  background:var(--surface);box-shadow:0 12px 40px rgba(0,0,0,.14)}
+.phone .bar{display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px;border-bottom:1px solid var(--rule);
+  font:600 11px/1 var(--mono);letter-spacing:.06em;color:var(--muted)}
+.phone .bar .go{color:var(--on-accent);background:var(--accent-fill);
+  padding:7px 12px;border-radius:999px;letter-spacing:.08em}
+.stage{background:var(--surface-2);padding:18px 16px;display:grid;
+  place-items:center;min-height:250px}
+
+/* the card being previewed */
+.card{width:190px;background:var(--green);border-radius:10px;padding:9px;
+  box-shadow:0 6px 20px rgba(0,0,0,.28);position:relative;overflow:hidden}
+.card::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(120px 90px at 86% 8%,rgba(228,188,90,.22),transparent 70%)}
+.card .inner{border:1px solid var(--green-line);background:var(--green-2);
+  border-radius:7px;padding:13px 12px;position:relative;z-index:1}
+.card .brandrow{display:flex;align-items:baseline;justify-content:space-between;
+  border-bottom:1px solid var(--green-line);padding-bottom:7px;margin-bottom:9px}
+.card .brand{font-family:var(--eth);color:var(--gold);font-size:13px;font-weight:700}
+.card .date{font:500 7px/1 var(--mono);color:var(--muted-on-green)}
+.card .kick{font-family:var(--eth);color:var(--gold);font-size:8px;margin-bottom:5px}
+.card .ttl{font-family:var(--eth);color:var(--ink-on-green);font-size:11px;
+  font-weight:700;line-height:1.3;margin-bottom:7px}
+.card .rule{width:22px;height:2px;background:var(--gold);margin-bottom:8px}
+.card .body{font-family:var(--eth);color:var(--ink-on-green);font-size:9px;
+  line-height:1.72;margin:0}
+.card .sig{text-align:center;color:var(--gold);font-family:var(--eth);
+  font-size:8px;margin-top:11px}
+.card.ivory{background:#E7E4D6}
+.card.ivory .inner{background:#EFEDE2;border-color:#D5D1BF}
+.card.ivory .brand,.card.ivory .kick,.card.ivory .rule,.card.ivory .sig{color:#7E5F1E}
+.card.ivory .rule{background:#7E5F1E}
+.card.ivory .ttl,.card.ivory .body{color:#1D2B24}
+.card.ivory .date{color:#5C6A5F}
+.card.ivory .brandrow{border-color:#D5D1BF}
+.card.sq{aspect-ratio:1;display:flex}
+.card.sq .inner{flex:1;display:flex;flex-direction:column;justify-content:center}
+.card.story{aspect-ratio:9/16;display:flex}
+.card.story .inner{flex:1;display:flex;flex-direction:column;justify-content:center}
+
+/* frame chips + the sheet */
+.frames{display:flex;gap:6px;justify-content:center;padding:12px 10px;
+  border-top:1px solid var(--rule);background:var(--surface)}
+.frames span{font:600 9.5px/1 var(--mono);letter-spacing:.05em;padding:6px 9px;
+  border-radius:999px;border:1px solid var(--rule);color:var(--muted)}
+.frames span.on{background:var(--accent-wash);color:var(--accent);
+  border-color:color-mix(in srgb,var(--accent) 40%,var(--rule))}
+.sheet{border-top:1px solid var(--rule);background:var(--surface)}
+.sheet .grab{width:34px;height:4px;border-radius:2px;background:var(--rule-strong);
+  margin:9px auto 4px}
+.tabs{display:flex;gap:2px;padding:4px 10px 0;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs span{font:600 10px/1 var(--mono);letter-spacing:.05em;padding:9px 10px;
+  color:var(--muted);white-space:nowrap;border-bottom:2px solid transparent}
+.tabs span.on{color:var(--fg);border-color:var(--accent-fill)}
+.panel{padding:12px 14px 18px;border-top:1px solid var(--rule)}
+.preset{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.preset::-webkit-scrollbar{display:none}
+.preset i{font-style:normal;flex:none;width:52px;height:60px;border-radius:7px;
+  border:1px solid var(--rule);display:grid;place-items:center;
+  font:600 8.5px/1.3 var(--mono);color:var(--muted);text-align:center;padding:4px}
+.preset i.on{border-color:var(--accent-fill);background:var(--accent-wash);
+  color:var(--accent)}
+.ctl{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:11px 0;border-bottom:1px solid var(--rule);
+  font:500 11px/1 var(--mono);color:var(--muted)}
+.ctl:last-child{border-bottom:0}
+.ctl b{color:var(--fg);font-weight:600}
+.track{flex:1;height:3px;background:var(--rule);border-radius:2px;position:relative;
+  max-width:110px}
+.track::after{content:"";position:absolute;left:0;top:-4px;width:62%;height:3px;
+  background:var(--accent-fill);border-radius:2px;top:0}
+.track::before{content:"";position:absolute;left:62%;top:-4.5px;width:12px;height:12px;
+  border-radius:50%;background:var(--surface);border:2px solid var(--accent-fill);
+  margin-left:-6px}
+
+.note{border:1px solid var(--rule);border-left:3px solid var(--accent-fill);
+  background:var(--surface-2);border-radius:0 var(--r) var(--r) 0;
+  padding:18px 20px;margin:22px 0;font-size:15px}
+.note p{margin:0 0 10px}.note p:last-child{margin:0}
+
+.samples{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;margin-top:22px}
+.sample{text-align:center}
+.sample .lbl{font:600 10.5px/1 var(--mono);letter-spacing:.07em;color:var(--muted);
+  margin-top:9px;text-transform:uppercase}
+
+footer{padding:34px 0 64px;border-top:1px solid var(--rule);color:var(--muted);
+  font:400 12.5px/1.7 var(--mono)}
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <p class="eyebrow">Sinq · design note</p>
+  <h1>An image editor that <em>fits the text</em>.</h1>
+  <p class="lede">What a share-card editor for <span class="am">ስንቅ</span> has to do,
+    what it must not do, and what the screen looks like. Researched against the renderer
+    that ships today.</p>
+</header>
+
+<main>
+
+<section class="wrap">
+  <h2>What ships today</h2>
+  <p><code>PassageShare.kt</code> is a good renderer and not an editor. It draws a 1080 px
+    card in the green-and-gold identity, with three frames and two grounds. Every type size
+    in it is a constant: kicker 34, title 58, body 44, colophon 34, line spacing 1.5. The
+    reader chooses a shape and a ground and nothing else.</p>
+
+  <div class="finding">
+    <h3>It is also losing text, silently</h3>
+    <p>The paginator splits a long passage into pages sized against <code>MAX_H</code>
+      (1920 px) no matter which frame was chosen. The renderer then lays that page into the
+      frame the reader actually picked and ellipsizes whatever will not fit. The two never
+      agree except on a story.</p>
+    <div class="scroll"><table>
+      <tr><th>Frame</th><th>Height</th><th>Paginator packs</th><th>Renderer draws</th><th>Result</th></tr>
+      <tr><td>Story 9:16</td><td class="num">1920</td><td class="num">15 lines</td><td class="num">15 lines</td><td>Intact</td></tr>
+      <tr><td>Card</td><td class="num">1440</td><td class="num">15 lines</td><td class="num">10 lines</td><td>5 lines dropped per page</td></tr>
+      <tr><td>Square 1:1</td><td class="num">1080</td><td class="num">15 lines</td><td class="num">6 lines</td><td>9 of 15 dropped — 60%</td></tr>
+    </table></div>
+    <p>Nothing warns anyone. A reader shares a square of a long ምስባክ and posts a passage
+      with most of it replaced by an ellipsis. This is the case for the editor in one
+      sentence: <b>the type size has to answer to the text, not the other way round.</b></p>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>Research: what this app's editor actually needs</h2>
+
+  <h3>1. Ethiopic sets the typography, and it is not Latin</h3>
+  <p>Abyssinica SIL has tall ascenders and deep descenders, so a line spacing that looks
+    generous in Latin looks cramped in <span class="am">ግዕዝ</span>. The site already sets
+    Ethiopic at 1.85; the renderer uses 1.5 and it is tight. More consequentially,
+    <b>Ethiopic has no letter case.</b> Every hierarchy trick that leans on caps — small
+    caps, uppercase eyebrows, all-caps labels — is simply unavailable. Hierarchy has to
+    come from size, weight, colour and space alone, which is why the editor should expose
+    those four and nothing decorative.</p>
+  <p>Two more that are specific to this corpus: verse numbers belong in
+    <b>Ge'ez numerals</b> (<span class="am">፩ ፪ ፫</span>), not Arabic; and the printed
+    books set the salutation opening each <span class="am">መልክእ</span> stanza and the Name
+    of God <b>in red</b>. The app already honours that in the reader. A card that flattens
+    it to one colour is losing something the books consider part of the text.</p>
+
+  <h3>2. Auto-size means fit, not shrink</h3>
+  <p>The naive reading of "decide the text size" is one number that shrinks until the text
+    fits. That produces a 14 px wall of type for a long reading and a lonely line adrift in
+    a story frame for a short one. What the card actually wants is a
+    <b>size chosen from the length of the passage</b>, clamped at both ends, with overflow
+    going to a second page rather than to a smaller font:</p>
+  <div class="scroll"><table>
+    <tr><th>Passage</th><th>Body size @1080</th><th>Feels like</th><th>Overflow</th></tr>
+    <tr><td>Up to ~90 chars — one verse</td><td class="num">72–84 px</td><td>Display. The verse is the image.</td><td>—</td></tr>
+    <tr><td>~90–260 chars — a few verses</td><td class="num">52–64 px</td><td>Quotation</td><td>—</td></tr>
+    <tr><td>~260–700 chars — a reading</td><td class="num">40–48 px</td><td>Reading</td><td>Page 2</td></tr>
+    <tr><td>Beyond that</td><td class="num">40 px floor</td><td>Reading</td><td>Paginate, never shrink further</td></tr>
+  </table></div>
+  <p>The floor is the important half. Below roughly 40 px at 1080 the Ethiopic stops being
+    comfortable at the size a phone actually shows a shared image, and a card nobody can
+    read is worse than a card that says "1 of 3".</p>
+
+  <h3>3. The frames that matter here are not the generic set</h3>
+  <p>This app's passages travel through Telegram and WhatsApp Status in Ethiopian and
+    diaspora circles — that is how the <span class="am">ማኅሌት</span> corpus in the app
+    reached it in the first place. Story is not an afterthought; for this audience it may
+    be the main one, and it is the only frame with platform chrome to design around.</p>
+  <div class="scroll"><table>
+    <tr><th>Frame</th><th>Pixels</th><th>Where it goes</th><th>Note</th></tr>
+    <tr><td>Square 1:1</td><td class="num">1080 × 1080</td><td>Telegram, feeds</td><td>Safest default</td></tr>
+    <tr><td>Portrait 4:5</td><td class="num">1080 × 1350</td><td>Feeds</td><td>Most feed height available</td></tr>
+    <tr><td>Story 9:16</td><td class="num">1080 × 1920</td><td>Status, Stories</td><td>Keep content out of the top 250 px and bottom 320 px</td></tr>
+    <tr><td>Card (auto)</td><td class="num">1080 × fits</td><td>Chat, forwards</td><td>Height follows the text</td></tr>
+    <tr><td>Wide 1.91:1</td><td class="num">1200 × 628</td><td>Link previews</td><td><span class="tag later">Later</span></td></tr>
+  </table></div>
+
+  <h3>4. Presets, not a design tool</h3>
+  <p>The person reaching for this is sharing a verse, not designing. A full editor — every
+    size, colour and offset on a slider — is the wrong instrument and would take longer
+    than the sharing it serves. The shape that works is <b>four or five named presets that
+    set everything at once</b>, with a short drawer of the few adjustments worth having.
+    Most people will never open the drawer, and that is the design working.</p>
+</section>
+
+<section class="wrap">
+  <h2>The architecture</h2>
+  <p>One immutable <code>CardSpec</code>, one pure renderer, two consumers. The editor
+    mutates the spec; the preview renders it at 540 px for speed; export renders the
+    identical function at 1080 or 2160. Nothing about the card can drift between what the
+    reader saw and what they sent, because there is only one function that knows how to
+    draw it.</p>
+  <div class="grid">
+    <div class="cell"><h4>CardSpec</h4>
+      <p>frame, ground, preset, body size, line spacing, alignment, block position,
+        margins, what the colophon shows. Serialisable, so the last card can be remembered.</p></div>
+    <div class="cell"><h4>fit()</h4>
+      <p>Chooses the body size from the passage length, then measures with
+        <code>StaticLayout</code> and paginates whatever is still over. Pure, and testable
+        without a device.</p></div>
+    <div class="cell"><h4>render(spec, scale)</h4>
+      <p>The existing <code>PassageShare</code> drawing, with every constant read from the
+        spec instead of the file. One code path for preview and export.</p></div>
+    <div class="cell"><h4>Editor screen</h4>
+      <p>Holds a spec in state, redraws the preview on change, and hands the final spec to
+        share or save — the two functions that already exist.</p></div>
+  </div>
+  <div class="note">
+    <p><b>The first commit should be the fit, not the editor.</b> Replacing the ellipsis
+      with a real fit-and-paginate fixes text loss for everyone immediately, including
+      readers who never open an editor. The editor is then a way to override a decision
+      that is already correct by default.</p>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>The screen</h2>
+  <p>Preview above, controls below, nothing else. The card is the subject of the screen and
+    holds the top two thirds; the sheet is where the hands go.</p>
+
+  <div class="mockrow">
+    <div class="phone">
+      <div class="bar"><span>✕</span><span>ምስል</span><span class="go">አጋራ</span></div>
+      <div class="stage">
+        <div class="card">
+          <div class="inner">
+            <div class="brandrow"><span class="brand am">ስንቅ</span><span class="date">መስከረም ፰</span></div>
+            <div class="kick am">ምስባክ</div>
+            <div class="ttl am">መዝሙረ ዳዊት ፻፲፰</div>
+            <div class="rule"></div>
+            <p class="body am">ሕግከ ብርሃን ለእገርየ ወብርሃን ለመጽያሕትየ። መሐልኩ ወአጽናዕኩ ከመ እዕቀብ ኵነኔ ጽድቅከ።</p>
+            <div class="sig am">— ስንቅ —</div>
+          </div>
+        </div>
+      </div>
+      <div class="frames">
+        <span>Card</span><span class="on">1:1</span><span>4:5</span><span>9:16</span>
+      </div>
+      <div class="sheet">
+        <div class="grab"></div>
+        <div class="tabs">
+          <span class="on">Style</span><span>Ground</span><span>Type</span>
+          <span>Layout</span><span>Mark</span>
+        </div>
+        <div class="panel">
+          <div class="preset">
+            <i class="on">Verse</i><i>Passage</i><i>Story</i><i>Feast</i><i>Plain</i>
+          </div>
+          <div class="ctl"><b>Size</b><span>Auto · 68</span><span class="track"></span></div>
+          <div class="ctl"><b>Air</b><span>1.72</span><span class="track"></span></div>
+          <div class="ctl"><b>Ge'ez</b><span>ግእዝ / አማርኛ</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>Why this shape</h3>
+      <p><b>The preview never moves.</b> It stays the same size on the stage whichever frame
+        is chosen, so switching from square to story is a change in the card and not a jump
+        in the layout. Controls that move their own target under the finger are the usual
+        failure of editors like this.</p>
+      <p><b>Frames sit between the card and the sheet</b>, because the frame is the one
+        decision that changes everything below it. Choosing it first is the natural order,
+        and putting it on the card's own edge says so without a label.</p>
+      <p><b>Five tabs, and the first one is usually the last one.</b> Style carries the
+        presets and the two adjustments most likely to be wanted — size and air. Ground,
+        Type, Layout and Mark exist for the person who wants them and cost nothing to the
+        person who does not.</p>
+      <p><b>Size reads "Auto · 68" rather than a bare number.</b> It says the app already
+        chose, and shows what it chose. Dragging the track takes it off auto; a tap on the
+        word puts it back. That is the whole of the relationship between the automatic
+        decision and the manual one.</p>
+      <p class="muted"><b>Ge'ez sits under Style, not Type.</b> Switching
+        <span class="am">ግእዝ</span>/<span class="am">አማርኛ</span> changes the words, not
+        the typography — and it changes the length, which is what the size is chosen from.
+        It belongs beside the thing it moves.</p>
+    </div>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>What it does</h2>
+  <div class="scroll"><table>
+    <tr><th>Tab</th><th>Control</th><th>What it does</th><th></th></tr>
+
+    <tr><td rowspan="4"><b>Style</b></td><td>Preset</td>
+      <td>Verse · Passage · Story · Feast · Plain. Sets frame, size, spacing, ground and colophon in one tap.</td><td><span class="tag v1">v1</span></td></tr>
+    <tr><td>Size</td><td>Auto from passage length; a track to override, a tap to go back to auto.</td><td><span class="tag v1">v1</span></td></tr>
+    <tr><td>Air</td><td>Line spacing, 1.5–2.0. Ethiopic wants the upper half of that.</td><td><span class="tag v1">v1</span></td></tr>
+    <tr><td>Language</td><td><span class="am">ግእዝ</span> / <span class="am">አማርኛ</span> where both exist. Re-fits, because the length changes.</td><td><span class="tag v1">v1</span></td></tr>
+
+    <tr><td rowspan="4"><b>Ground</b></td><td>Green / Ivory</td><td>The two identities that ship today.</td><td><span class="tag v1">v1</span></td></tr>
+    <tr><td>Night</td><td>A third, near-black with gold — for a status posted at night.</td><td><span class="tag v1">v1</span></td></tr>
+    <tr><td><span class="am">ሐረግ</span> border</td><td>The interlace the books use, drawn at the card edge rather than as a texture behind the text.</td><td><span class="tag later">Later</span></td></tr>
+    <tr><td>Photo</td><td>From the gallery, with an automatic scrim heavy enough to keep the text at contrast. Forces JPEG export.</td><td><span class="tag later">Later</span></td></tr>
+
+    <tr><td rowspan="3"><b>Type</b></td><td>Alignment</td><td>Start, centre, justified. Justified only above a width where it will not open rivers.</td><td><span class="tag v1">v1</span></td></tr>
+    <tr><td>Verse numbers</td><td>On or off, in Ge'ez numerals.</td><td><span class="tag v1">v1</span></td></tr>
+    <tr><td>Red letters</td><td>Keeps the salutation and the Name of God in red as the printed books set them.</td><td><span class="tag v1">v1</span></td></tr>
+
+    <tr><td rowspan="3"><b>Layout</b></td><td>Block position</td><td>Top, centre, bottom within the frame.</td><td><span class="tag v1">v1</span></td></tr>
+    <tr><td>Margins</td><td>Tight / normal / generous, as three steps rather than a number.</td><td><span class="tag v1">v1</span></td></tr>
+    <tr><td>Story safe area</td><td>Shows the platform chrome bands on 9:16 so nothing important is posted under them.</td><td><span class="tag v1">v1</span></td></tr>
+
+    <tr><td rowspan="3"><b>Mark</b></td><td>Reference</td><td>Book, chapter and verse, Ge'ez or Arabic numerals.</td><td><span class="tag v1">v1</span></td></tr>
+    <tr><td>Date</td><td>The Ethiopian date the passage belongs to.</td><td><span class="tag v1">v1</span></td></tr>
+    <tr><td>Colophon</td><td><span class="am">— ስንቅ —</span> and the page count. On by default.</td><td><span class="tag v1">v1</span></td></tr>
+
+    <tr><td rowspan="3"><b>Export</b></td><td>Resolution</td><td>1080 standard, 2160 for print or a large screen.</td><td><span class="tag v1">v1</span></td></tr>
+    <tr><td>Pages</td><td>Long passages become numbered cards, shared as a set.</td><td><span class="tag v1">v1</span></td></tr>
+    <tr><td>Remember</td><td>The last spec is the next card's starting point.</td><td><span class="tag v1">v1</span></td></tr>
+  </table></div>
+</section>
+
+<section class="wrap">
+  <h2>The presets, drawn</h2>
+  <p>Same passage, same renderer, three specs.</p>
+  <div class="samples">
+    <div class="sample">
+      <div class="card sq" style="width:150px">
+        <div class="inner">
+          <div class="rule" style="margin-inline:auto"></div>
+          <p class="body am" style="font-size:12px;text-align:center;line-height:1.75">ሕግከ ብርሃን ለእገርየ ወብርሃን ለመጽያሕትየ።</p>
+          <div class="sig am" style="margin-top:8px">መዝ. ፻፲፰ · ስንቅ</div>
+        </div>
+      </div>
+      <div class="lbl">Verse · 1:1</div>
+    </div>
+
+    <div class="sample">
+      <div class="card" style="width:150px">
+        <div class="inner">
+          <div class="brandrow"><span class="brand am">ስንቅ</span><span class="date">መስከረም ፰</span></div>
+          <div class="kick am">ምስባክ</div>
+          <div class="ttl am">መዝሙረ ዳዊት ፻፲፰</div>
+          <div class="rule"></div>
+          <p class="body am" style="font-size:7.5px">ሕግከ ብርሃን ለእገርየ ወብርሃን ለመጽያሕትየ። መሐልኩ ወአጽናዕኩ ከመ እዕቀብ ኵነኔ ጽድቅከ። ተኀሠሥኩ ገጸከ በኵሉ ልብየ፤ ተሣሀለኒ በከመ ቃልከ።</p>
+          <div class="sig am">— ስንቅ — 1/2</div>
+        </div>
+      </div>
+      <div class="lbl">Passage · auto</div>
+    </div>
+
+    <div class="sample">
+      <div class="card story ivory" style="width:118px">
+        <div class="inner">
+          <div class="kick am" style="text-align:center">ምስባክ</div>
+          <div class="rule" style="margin-inline:auto"></div>
+          <p class="body am" style="font-size:10px;text-align:center;line-height:1.8">ሕግከ ብርሃን ለእገርየ ወብርሃን ለመጽያሕትየ።</p>
+          <div class="sig am" style="margin-top:10px">መዝ. ፻፲፰</div>
+        </div>
+      </div>
+      <div class="lbl">Story · 9:16</div>
+    </div>
+  </div>
+  <p class="muted" style="margin-top:20px;font-size:14.5px">Drawn in CSS to show proportion
+    and hierarchy, not to be pixel-exact — the real ones come out of the Android renderer at
+    1080 px in Abyssinica SIL.</p>
+</section>
+
+<section class="wrap">
+  <h2>What I would not build</h2>
+  <div class="grid">
+    <div class="cell"><h4>Free text placement</h4>
+      <p>Dragging the block anywhere turns every card into a different card. Three positions
+        keep the family recognisable, which is the point of a template.</p></div>
+    <div class="cell"><h4>Arbitrary colours</h4>
+      <p>The green and the gold are the app's identity and the reason a forwarded card is
+        recognisable. A colour wheel dissolves that in an afternoon.</p></div>
+    <div class="cell"><h4>Stickers and frames</h4>
+      <p>Wrong register for the material. The text is <span class="am">ቅዱስ</span>; the
+        decoration should stay at the edge and stay quiet.</p></div>
+    <div class="cell"><h4>Editing the passage</h4>
+      <p>The words come from the bundled text and should stay exactly as the sources set
+        them. An editable field is a way to put words in the Church's mouth.</p></div>
+  </div>
+</section>
+
+</main>
+
+<footer class="wrap">
+  <span class="am">ስንቅ</span> — design note, image editor. Local file, not published.
+</footer>
+
+</body>
+</html>

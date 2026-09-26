@@ -1,0 +1,147 @@
+package com.agpeya.app.ui.reading
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.platform.LocalContext
+import com.agpeya.app.data.ReadingPlanRepository
+import com.agpeya.app.model.ReadingPlanContent
+import com.agpeya.app.model.ReadingPlanState
+import com.agpeya.app.ui.common.ListRow
+import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.theme.Spacing
+import java.time.LocalDate
+
+/**
+ * Every day of the plan, read or not.
+ *
+ * Deliberately a plain list rather than a progress chart: the honest picture of
+ * a year's reading is which days were kept, not a percentage of a book. Days
+ * ahead are openable too — nothing here is locked behind yesterday.
+ */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+fun ReadingPlanDaysScreen(planId: String, onBack: () -> Unit, onOpenRoute: (String) -> Unit) {
+    val context = LocalContext.current
+    val s = LocalStrings.current
+    val action = com.agpeya.app.ui.common.rememberUserAction()
+    val today by com.agpeya.app.ui.common.rememberCurrentDate()
+
+    val contentLoad = com.agpeya.app.ui.common.rememberContentLoad { ReadingPlanRepository.content(context) }
+    val content = contentLoad.value ?: ReadingPlanContent()
+    if (com.agpeya.app.ui.common.contentLoadScreen(contentLoad, s.readingTitle, onBack, content.plans.isEmpty())) return
+    val bookNames by produceState(emptyMap<String, String>()) {
+        value = runCatching { com.agpeya.app.data.ScriptureRepository.bookNames(context) }.getOrDefault(emptyMap())
+    }
+    val stateLoad = com.agpeya.app.ui.common.rememberFlowLoad { ReadingPlanRepository.state(context) }
+    if (com.agpeya.app.ui.common.contentLoadScreen(stateLoad, s.readingTitle, onBack)) return
+    val state = stateLoad.value ?: return
+    val kept = state.kept(planId)
+    val plan = content.plans.firstOrNull { it.id == planId }
+    val listState = rememberLazyListState()
+
+    val currentDay = plan?.let { ReadingPlanRepository.dayOn(kept?.startedOn.orEmpty(), today, it.days) } ?: 1
+    // Open where the person actually is, not at day 1 of a year.
+    LaunchedEffect(plan?.id, currentDay) {
+        if (plan != null) listState.scrollToItem((currentDay - 1).coerceAtLeast(0))
+    }
+
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            SinqTopBar(
+                title = s.readingAllDays,
+                accentLine = plan?.title,
+                onBack = onBack,
+            )
+        },
+    ) { inner ->
+        if (plan == null) {
+            Text(
+                s.readingNoPlan,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(inner).padding(Spacing.screen),
+            )
+            return@Scaffold
+        }
+        // The days as they now stand: repacked from the day the reader chose to
+        // finish on time, and the bundled days before it.
+        val days = ReadingPlanRepository.effectiveDays(plan, state)
+        val read = ReadingPlanRepository.readDayNumbers(state, plan.id, days)
+        LazyColumn(
+            Modifier.fillMaxSize().padding(inner),
+            state = listState,
+            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.md),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
+        ) {
+            items(days.size) { i ->
+                val day = days[i]
+                val passages = day.r.joinToString(" · ") { r ->
+                    val name = bookName(r.b, bookNames)
+                    if (r.to > r.c) "$name ${geezNumeral(r.c)}–${geezNumeral(r.to)}"
+                    else "$name ${geezNumeral(r.c)}"
+                }
+                ListRow(
+                    // Ge'ez, like the passages beside it: "ቀን 120" over
+                    // "ኢሳይያስ ፩–፫" was two numbering systems in one row.
+                    title = s.readingDayLabel(geezNumeral(day.d)),
+                    subtitle = passages,
+                    onClick = null,
+                    trailing = {
+                        if (day.d in read) {
+                            Icon(
+                                Icons.Outlined.Check,
+                                contentDescription = s.readingDone,
+                                tint = MaterialTheme.colorScheme.secondary,
+                            )
+                        }
+                    },
+                )
+                day.r.forEach { reading ->
+                    reading.chapters.forEach { chapter ->
+                        val chapterKey = ReadingPlanRepository.chapterKey(reading.b, chapter)
+                        val chapterRead = chapterKey in state.readFor(plan.id)
+                        ListRow(
+                            title = "${bookName(reading.b, bookNames)} ${geezNumeral(chapter)}",
+                            trailing = {
+                                if (kept != null) androidx.compose.material3.Checkbox(
+                                    checked = chapterRead,
+                                    enabled = !action.busy,
+                                    onCheckedChange = {
+                                        action.run { ReadingPlanRepository.toggleReading(context, plan.id, listOf(chapterKey), today) }
+                                    },
+                                    modifier = Modifier.semantics {
+                                        contentDescription = "${bookName(reading.b, bookNames)} ${geezNumeral(chapter)} · ${s.readingMarkChapterDone}"
+                                    },
+                                )
+                            },
+                            onClick = { onOpenRoute(planReadingRoute(reading.b, chapter, plan.id, day.d)) },
+                        )
+                    }
+                }
+            }
+            item { Spacer(Modifier.height(Spacing.huge)) }
+        }
+    }
+}

@@ -1,0 +1,168 @@
+package com.agpeya.app.ui.settings
+
+import android.content.Intent
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.ui.res.painterResource
+import androidx.core.net.toUri
+import com.agpeya.app.R
+import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.theme.Spacing
+import com.agpeya.app.ui.theme.inLatin
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AboutScreen(onBack: () -> Unit, onOpenLicenses: () -> Unit = {}) {
+    val s = com.agpeya.app.ui.strings.LocalStrings.current
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            SinqTopBar(title = s.about, onBack = onBack)
+        },
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp),
+        ) {
+            Spacer(Modifier.height(Spacing.sm))
+            Para("ስንቅ", MaterialTheme.typography.headlineMedium)
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val version = remember {
+                runCatching {
+                    context.packageManager.getPackageInfo(context.packageName, 0).versionName
+                }.getOrNull() ?: ""
+            }
+            if (version.isNotBlank()) {
+                Text(
+                    "v$version",
+                    style = MaterialTheme.typography.labelMedium.inLatin(),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(Spacing.sm))
+            }
+            Para(s.aboutTagline, MaterialTheme.typography.bodyMedium.inLatin())
+            Section(s.aboutSourceTitle)
+            Para(s.aboutSourceBody, MaterialTheme.typography.bodyMedium.inLatin())
+            Section(s.aboutFontTitle)
+            Para(s.aboutFontBody, MaterialTheme.typography.bodyMedium.inLatin())
+            Section(s.aboutPrivacyTitle)
+            Para(s.aboutPrivacyBody, MaterialTheme.typography.bodyMedium.inLatin())
+            com.agpeya.app.ui.common.NavRow(
+                title = s.aboutPrivacyLink,
+                onClick = { com.agpeya.app.ui.common.openUrl(context, com.agpeya.app.ui.common.PRIVACY_URL) },
+            )
+            Section(s.aboutLicenceTitle)
+            Para(s.aboutLicenceBody, MaterialTheme.typography.bodyMedium.inLatin())
+
+            Spacer(Modifier.height(Spacing.sm))
+            Surface(
+                onClick = {
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = "mailto:natinael.96@gmail.com".toUri()
+                        putExtra(Intent.EXTRA_SUBJECT, "Sinq Feedback")
+                    }
+                    runCatching { context.startActivity(intent) }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
+                color = MaterialTheme.colorScheme.surfaceContainer,
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.md),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Email,
+                        contentDescription = "Email",
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.size(24.dp),
+                    )
+                    Spacer(Modifier.size(Spacing.md))
+                    Column {
+                        Text(
+                            text = s.supportEmailTitle,
+                            style = MaterialTheme.typography.titleSmall.inLatin(),
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
+                            text = "natinael.96@gmail.com",
+                            style = MaterialTheme.typography.bodySmall.inLatin(),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(Spacing.xxl))
+            // A small truth, thinly set.
+            Text(
+                text = "powered by 2ቡና",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.Light,
+                    fontStyle = FontStyle.Italic,
+                    letterSpacing = 1.5.sp,
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        com.agpeya.app.ui.common.openUrl(context, "https://t.me/buna_builds")
+                    },
+            )
+            // ፈቃዶች እና ምንጮች was a row of its own in ቅንብሮች, directly under this
+            // page. It is a section of what this page says, so it opens here.
+            Spacer(Modifier.height(Spacing.lg))
+            com.agpeya.app.ui.common.NavRow(s.licensesTitle, onOpenLicenses)
+            Spacer(Modifier.height(Spacing.screen))
+        }
+    }
+}
+
+@Composable
+private fun Section(title: String) {
+    Spacer(Modifier.height(Spacing.lg))
+    Text(
+        title,
+        style = MaterialTheme.typography.labelMedium.inLatin(0.5.sp),
+        color = MaterialTheme.colorScheme.secondary,
+    )
+    Spacer(Modifier.height(Spacing.xs))
+}
+
+@Composable
+private fun Para(
+    text: String,
+    style: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.bodyLarge,
+) {
+    Text(text, style = style, color = MaterialTheme.colorScheme.onBackground)
+    Spacer(Modifier.height(Spacing.sm))
+}

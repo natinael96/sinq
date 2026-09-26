@@ -1,0 +1,238 @@
+package com.agpeya.app.ui.habits
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import com.agpeya.app.data.HabitsRepository
+import com.agpeya.app.model.HabitsState
+import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.strings.LocalStrings
+import kotlinx.coroutines.launch
+import com.agpeya.app.ui.theme.Spacing
+import com.agpeya.app.ui.theme.IconSize
+import androidx.compose.foundation.clickable
+import com.agpeya.app.model.HabitSchedule
+import com.agpeya.app.ui.settings.ScheduleEditorDialog
+import com.agpeya.app.ui.settings.scheduleSummary
+
+/** No schedule means every day; the picker opens showing exactly that. */
+private val DAILY_SCHEDULE = HabitSchedule(kind = HabitSchedule.Kind.WEEKLY, days = (1..7).toSet())
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ManageHabitsScreen(onBack: () -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val s = LocalStrings.current
+    val state by HabitsRepository.state(context).collectAsState(initial = HabitsState())
+    val ids = HabitsRepository.orderedHabitIds(state, includeHidden = true)
+
+    var renamingId by remember { mutableStateOf<String?>(null) }
+    var schedulingId by remember { mutableStateOf<String?>(null) }
+    var deletingId by remember { mutableStateOf<String?>(null) }
+    var creating by remember { mutableStateOf(false) }
+
+    fun move(from: Int, to: Int) {
+        val list = ids.toMutableList().apply { add(to, removeAt(from)) }
+        scope.launch { HabitsRepository.setOrder(context, list) }
+    }
+
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            SinqTopBar(title = s.manageHabits, onBack = onBack)
+        },
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        ) {
+            item {
+                Text(
+                    s.manageHabitsIntro,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                )
+                Spacer(Modifier.height(Spacing.sm))
+            }
+            items(ids.size, key = { ids[it] }) { index ->
+                val id = ids[index]
+                val hidden = id in state.hidden
+                val isCustom = id.startsWith("custom_")
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    IconButton(onClick = { scope.launch { HabitsRepository.setHidden(context, id, id !in state.hidden) } }) {
+                        Icon(
+                            imageVector = if (hidden) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
+                            contentDescription = if (hidden) s.showSection else s.hideSection,
+                            tint = if (hidden) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                    // Name, and under it the cadence — tapping either opens the
+                    // picker, so "how often" is set where the habit lives
+                    // rather than on a page of its own.
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable(onClickLabel = s.scheduleLabel) { schedulingId = id }
+                            .padding(vertical = 10.dp),
+                    ) {
+                        Text(
+                            text = habitName(id, state, s),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = if (hidden) MaterialTheme.colorScheme.onSurfaceVariant
+                            else MaterialTheme.colorScheme.onBackground,
+                        )
+                        Text(
+                            text = state.schedules[id]
+                                ?.let { scheduleSummary(it, s, context) }
+                                ?: s.daysSummaryDaily,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    var menuOpen by remember(id) { mutableStateOf(false) }
+                    Box {
+                        IconButton(onClick = { menuOpen = true }) {
+                            Icon(Icons.Outlined.MoreVert, contentDescription = s.moreActions)
+                        }
+                        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                            DropdownMenuItem(text = { Text(s.rename) }, onClick = { menuOpen = false; renamingId = id })
+                            DropdownMenuItem(text = { Text(s.moveUp) }, enabled = index > 0,
+                                onClick = { menuOpen = false; move(index, index - 1) })
+                            DropdownMenuItem(text = { Text(s.moveDown) }, enabled = index < ids.lastIndex,
+                                onClick = { menuOpen = false; move(index, index + 1) })
+                            if (isCustom) DropdownMenuItem(text = { Text(s.remove) },
+                                onClick = { menuOpen = false; deletingId = id })
+                        }
+                    }
+                }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            }
+            item {
+                Spacer(Modifier.height(Spacing.md))
+                TextButton(onClick = { creating = true }) { Text("＋ ${s.newHabit}") }
+            }
+        }
+    }
+
+    deletingId?.let { id ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { deletingId = null },
+            title = { Text(s.remove) },
+            text = { Text(habitName(id, state, s)) },
+            confirmButton = { TextButton(onClick = {
+                scope.launch { HabitsRepository.deleteCustomHabit(context, id) }
+                deletingId = null
+            }) { Text(s.remove) } },
+            dismissButton = { TextButton(onClick = { deletingId = null }) { Text(s.cancel) } },
+        )
+    }
+    val editingId = renamingId
+    if (editingId != null) {
+        HabitNameDialog(
+            title = s.rename,
+            initial = habitName(editingId, state, s),
+            onConfirm = { name ->
+                scope.launch { HabitsRepository.renameHabit(context, editingId, name) }
+                renamingId = null
+            },
+            onDismiss = { renamingId = null },
+        )
+    }
+    val cadenceId = schedulingId
+    if (cadenceId != null) {
+        ScheduleEditorDialog(
+            s = s,
+            initial = state.schedules[cadenceId] ?: DAILY_SCHEDULE,
+            onDismiss = { schedulingId = null },
+            onSave = { schedule ->
+                schedulingId = null
+                // Every weekday chosen is the same as no schedule at all, and
+                // storing nothing keeps an untouched habit untouched.
+                val next = schedule.takeUnless {
+                    it.kind == HabitSchedule.Kind.WEEKLY && it.days.size == 7
+                }
+                scope.launch { HabitsRepository.setSchedule(context, cadenceId, next) }
+            },
+        )
+    }
+    if (creating) {
+        HabitNameDialog(
+            title = s.newHabit,
+            initial = "",
+            onConfirm = { name ->
+                scope.launch { HabitsRepository.addCustomHabit(context, name) }
+                creating = false
+            },
+            onDismiss = { creating = false },
+        )
+    }
+}
+
+@Composable
+private fun HabitNameDialog(title: String, initial: String, onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
+    val s = LocalStrings.current
+    var text by remember { mutableStateOf(initial) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                singleLine = true,
+                label = { Text(s.habitNameLabel) },
+            )
+        },
+        confirmButton = { TextButton(enabled = text.isNotBlank(), onClick = { onConfirm(text.trim()) }) { Text(s.save) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
+    )
+}

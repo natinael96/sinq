@@ -1,0 +1,110 @@
+name: Release
+
+# Pushing a tag like v0.2.2 validates, tests, then builds a signed release APK
+# + AAB and attaches them to a GitHub Release. Signing comes from repo secrets
+# (see README): KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD
+#
+# The gates run BEFORE any artifact is built: a failing content check or unit
+# test stops the release, so a broken build can never reach the releases page.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # --- Gate 1: the bundled content is intact -------------------------
+      # Section ids are permanent contracts (bookmarks and highlights point at
+      # them), so a regeneration that renames one must never ship.
+      - name: Validate bundled content
+        run: python3 tools/validate_content.py
+
+      # --- Gate 2: the test suite passes ---------------------------------
+      - name: Unit tests
+        run: |
+          chmod +x gradlew
+          ./gradlew testDebugUnitTest --no-daemon
+
+      - name: Lint (release-blocking issues only)
+        run: ./gradlew lintVitalRelease --no-daemon
+
+      # --- Only now do we produce artifacts ------------------------------
+      - name: Decode signing keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > sinq-upload.jks
+
+      # Two runs, because the two artifacts are for two stores and only one of
+      # them may carry the update notice. -PupdateNotice compiles the GitHub
+      # line into the APK; the .aab is built without it, since a Play build that
+      # points at a page of APKs is a policy breach. Do not merge these back
+      # into one invocation — the flag applies to everything a run produces.
+      - name: Build signed release APK (hand-installed, with update notice)
+        env:
+          SINQ_KEYSTORE_FILE: sinq-upload.jks
+          SINQ_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          SINQ_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          SINQ_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew assembleRelease -PupdateNotice --no-daemon
+
+      - name: Build signed release AAB (Play upload, no update notice)
+        env:
+          SINQ_KEYSTORE_FILE: sinq-upload.jks
+          SINQ_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          SINQ_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          SINQ_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew bundleRelease --no-daemon
+
+      - name: Rename artifacts
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk "Sinq-${GITHUB_REF_NAME}.apk"
+          # Named for what it is FOR, not for the app: the .aab sits beside the
+          # .apk on the release page, and a phone cannot install it. This name
+          # is the only thing standing between a hurried tap and "there was a
+          # problem parsing the package".
+          cp app/build/outputs/bundle/release/app-release.aab "Sinq-${GITHUB_REF_NAME}-play-upload.aab"
+
+      # Both go up. The APK is what a phone installs; the .aab is for a Play
+      # upload and cannot be installed by tapping it. The body says so before
+      # the asset list, because that list is where the mistake happens.
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            Sinq-*.apk
+            Sinq-*-play-upload.aab
+          body: |
+            **Download `Sinq-${{ github.ref_name }}.apk`** — that is the file a phone installs.
+
+            The `.aab` beside it is for uploading to Google Play. A phone cannot
+            install it; tapping it gives "there was a problem parsing the package".
+
+            Requires Android 6.0 or newer.
+          append_body: true
+          generate_release_notes: true
+
+      - name: Keep AAB as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sinq-${{ github.ref_name }}-aab
+          path: Sinq-*-play-upload.aab
+
+      # Keep the signing key out of the runner's workspace afterwards.
+      - name: Remove keystore
+        if: always()
+        run: rm -f sinq-upload.jks

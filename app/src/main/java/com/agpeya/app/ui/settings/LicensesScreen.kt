@@ -1,0 +1,395 @@
+package com.agpeya.app.ui.settings
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.core.net.toUri
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.TextButton
+import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.launch
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.theme.inLatin
+import com.agpeya.app.ui.theme.Spacing
+
+/**
+ * In-app attribution and licence notices for everything the app bundles.
+ *
+ * Like AboutScreen, the body stays English regardless of the app language:
+ * these are legal notices, and they should read exactly as worded — a
+ * translation could drift from the licence terms it is meant to state.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LicensesScreen(onBack: () -> Unit) {
+    val s = LocalStrings.current
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val headings = listOf("Scripture text", "Mahlet (ሥርዓተ ማኅሌት)", "Gitsawe (ግጻዌ)", "Synaxarium (ስንክሳር)", "Wudase Maryam (ውዳሴ ማርያም)", "Church books (ሌሎች መጻሕፍት)", "Fonts", "App code", "SIL Open Font License 1.1 — full text")
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            SinqTopBar(title = LocalStrings.current.licensesTitle, onBack = onBack)
+        },
+    ) { innerPadding ->
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+        ) {
+            item {
+                Text(s.contents, style = MaterialTheme.typography.titleMedium)
+                headings.forEachIndexed { index, title ->
+                    com.agpeya.app.ui.common.ListRow(
+                        title = licenseHeading(title, s.isAmharic),
+                        onClick = { scope.launch { listState.animateScrollToItem(index + 1) } },
+                    )
+                }
+            }
+            item {
+                LicSection("Scripture text")
+                LicenseLink("80-weahadu", "https://github.com/EOTCOpenSource/80-weahadu")
+                LicenseLink("CC BY-NC-ND 4.0", "https://creativecommons.org/licenses/by-nc-nd/4.0/")
+                LicPara(
+                    "All bundled scripture — the Bible books readable in the Library, the Psalter " +
+                        "in Amharic and Ge'ez, and the psalms and gospels arranged into the hours " +
+                        "of prayer — is drawn from 80-weahadu, the open-source Ethiopian Orthodox " +
+                        "Tewahedo Bible published by the EOTCOpenSource community " +
+                        "(github.com/EOTCOpenSource/80-weahadu), used under the Creative Commons " +
+                        "Attribution-NonCommercial-NoDerivatives 4.0 International licence " +
+                        "(creativecommons.org/licenses/by-nc-nd/4.0).",
+                )
+                LicPara(
+                    "The verse text is reproduced unchanged, with two disclosed exceptions: the " +
+                        "acrostic letters of Psalm 118, which the source encodes at the end of " +
+                        "stanza-final verses, are shown as stanza headings; and psalm chapter " +
+                        "labels follow the Ge'ez (LXX) numbering used by the Ethiopian tradition. " +
+                        "Provided as-is, without warranties. A copy of the licence is bundled with " +
+                        "the app at content/bible/LICENSE.",
+                )
+            }
+            item {
+                LicSection("Mahlet (ሥርዓተ ማኅሌት)")
+                LicPara(
+                    "The orders of service are merged from three books. The spine is " +
+                        "ሥርዓተ ማኅሌት ዘዓበይት በዓላት together with the ዘመነ ጽጌ አቋቋም volumes, " +
+                        "scanned from available PDF scans of the printed books by the Sinq " +
+                        "maintainer and released as open content under the Creative Commons " +
+                        "Attribution-NonCommercial-NoDerivatives 4.0 International licence. " +
+                        "The six orders those books do not carry come from the ግጻዌ credited " +
+                        "below, and each is labelled with it where it appears.",
+                )
+            }
+            item {
+                LicSection("Gitsawe (ግጻዌ)")
+                LicPara(
+                    "The ግጻዌ lectionary — the fixed 366-day cycle together with the movable, " +
+                        "Sunday, ማኅሌት, and Bahre Hasab collections — was scanned and " +
+                        "transcribed from the printed ግጻዌ by the Sinq maintainer, and is released " +
+                        "as open content under the Creative Commons " +
+                        "Attribution-NonCommercial-NoDerivatives 4.0 International licence, the " +
+                        "same terms as the bundled scripture. The underlying lectionary is " +
+                        "traditional Ethiopian Orthodox liturgical material. Scripture citations " +
+                        "inside the readings open the bundled scripture credited above.",
+                )
+            }
+            item {
+                LicSection("Synaxarium (ስንክሳር)")
+                LicPara(
+                    "Both editions — መጽሐፈ ስንክሳር በአማርኛ and መጽሐፈ ስንክሳር በግእዝ, 366 days " +
+                        "each — were scanned from available PDF scans of the printed books " +
+                        "by the Sinq maintainer, and are released as open content under the " +
+                        "Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 " +
+                        "International licence, the same terms as the bundled scripture. The " +
+                        "underlying commemorations are traditional Ethiopian Orthodox " +
+                        "liturgical content.",
+                )
+                LicPara(
+                    "The text is reproduced as the scans carry it, with three disclosed " +
+                        "exceptions. Each paragraph's number is written twice in the source, " +
+                        "once in Arabic and once in Ge'ez, and only the Ge'ez is kept. " +
+                        "Editorial dingbats and stray markup are removed. And two Ge'ez days " +
+                        "that carry no heading block are given one naming their date.",
+                )
+                LicPara(
+                    "Earlier releases bundled the Amharic synaxarium from the " +
+                        "gitsaweandsinksarbot project by hailemariam-eyayu and the " +
+                        "Nexuss0781/synaxarium dataset on the Hugging Face Hub. Neither is " +
+                        "bundled any longer.",
+                )
+            }
+            item {
+                LicSection("Wudase Maryam (ውዳሴ ማርያም)")
+                LicenseLink("wudase-mariam", "https://github.com/tecleet/wudase-mariam")
+                LicPara(
+                    "ውዳሴ ማርያም and ጸሎት ዘዘወትር are bundled from the digitisation at " +
+                        "github.com/tecleet/wudase-mariam. The underlying prayer is centuries-old, " +
+                        "traditional Ethiopian Orthodox liturgical text; this particular " +
+                        "digitisation is credited to that repository.",
+                )
+            }
+            item {
+                LicSection("Church books (ሌሎች መጻሕፍት)")
+                LicPara(
+                    "The eighty-seven books on the ሌሎች መጻሕፍት shelf — the መልክእ hymns, the " +
+                        "ድርሳናት, the ገድላት, መጽሐፈ ሰዓታት, ሥርዓተ ቅዳሴ and the chant books of " +
+                        "ቅዱስ ያሬድ — were scanned from available PDF scans of the printed " +
+                        "books by the Sinq maintainer, and are released as open content under " +
+                        "the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 " +
+                        "International licence, the same terms as the bundled scripture. The " +
+                        "underlying texts are traditional Ethiopian Orthodox Tewahedo " +
+                        "liturgical material.",
+                )
+                LicPara(
+                    "The text is reproduced as the scans carry it, with three disclosed " +
+                        "exceptions. The printer's tier marks ፪ማ፡ and ማ፡, which mark where a " +
+                        "line of a stanza breaks, are shown as those line breaks rather than " +
+                        "as characters. And መጽሐፈ ሰዓታት is merged from three scanned copies: " +
+                        "the bilingual copy is the spine, the Ge'ez-only copy restores the " +
+                        "lines its scan dropped, and the offices carried only by the ደብረ ዓባይ " +
+                        "recension are labelled with that name where they appear. And " +
+                        "ጸሎት ነቢያት በአማርኛ has twenty chapters where its scan has fifteen: the " +
+                        "five it lacked, መኃልየ መኃልይ in the Ge'ez copy's five readings, are the " +
+                        "Song of Songs from the bundled Bible rather than a scan.",
+                )
+            }
+            item {
+                LicSection("Fonts")
+                LicenseLink("SIL Open Font License", "https://openfontlicense.org/")
+                LicPara(
+                    "All bundled fonts are used under the SIL Open Font License, Version 1.1 " +
+                        "(openfontlicense.org):",
+                )
+                LicPara(
+                    "• Abyssinica SIL — Copyright (c) SIL Global, with Reserved Font Names " +
+                        "“Abyssinica” and “SIL”; Modern Gurage glyphs " +
+                        "Copyright (c) The Ge'ez Frontier Foundation\n" +
+                        "• Noto Sans Ethiopic — Copyright (c) Google\n" +
+                        "• Ethiopic Abay Light — abass alamnehe, via the Font.et open font library\n" +
+                        "• Bela Bereka — Abel Daniel, via the Font.et open font library\n" +
+                        "• Zemenay — Abel Yeshewalem, via the Font.et open font library\n" +
+                        "• ዋልድባ (ይገዙ ብሥራት ጎፈር) — Abass Alamnehe, via the Font.et open font library (font.et)",
+                )
+            }
+            item {
+                LicSection("App code")
+                LicenseLink("Sinq · Apache License 2.0", "https://github.com/natinael96/sinq/blob/master/LICENSE")
+                LicPara(
+                    "The Sinq application source code is licensed under the Apache License, " +
+                        "Version 2.0 (see the LICENSE file in the source repository). The content " +
+                        "licences above do not inherit from it: forking the source code does not " +
+                        "grant Apache-2.0 rights over the bundled scripture, lectionary, " +
+                        "synaxarium, or prayers.",
+                )
+            }
+            item {
+                LicSection("SIL Open Font License 1.1 — full text")
+                LicenseBlock(OFL_1_1_TEXT)
+                Spacer(Modifier.height(Spacing.screen))
+            }
+        }
+    }
+}
+
+@Composable
+private fun LicSection(title: String) {
+    Spacer(Modifier.height(Spacing.lg))
+    Text(licenseHeading(title, LocalStrings.current.isAmharic), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.secondary)
+    Spacer(Modifier.height(Spacing.xs))
+}
+
+@Composable
+private fun LicPara(text: String) {
+    SelectionContainer {
+        Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground)
+    }
+    Spacer(Modifier.height(Spacing.sm))
+}
+
+/**
+ * The licence, verbatim.
+ *
+ * It was 11sp monospace, which is a size and a face for code and neither for
+ * four thousand characters of prose: it read as something pasted in by
+ * accident. It is the page's own small size now, in the platform sans because
+ * the text is pure ASCII, and it is marked as quoted by a rule down its left
+ * rather than by pretending to be a terminal.
+ *
+ * The surrounding paragraphs are NOT Latin: they name ግጻዌ and ሥርዓተ ማኅሌት
+ * mid-sentence, so they stay on the bundled Ethiopic face.
+ */
+@Composable
+private fun LicenseBlock(text: String) {
+    SelectionContainer {
+    Row(
+        Modifier
+            .padding(vertical = Spacing.xs)
+            .height(IntrinsicSize.Min),
+    ) {
+        Box(
+            Modifier
+                .width(2.dp)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.outlineVariant),
+        )
+        Text(
+            text,
+            style = MaterialTheme.typography.bodySmall.inLatin(),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = Spacing.md),
+        )
+    }
+    }
+    Spacer(Modifier.height(Spacing.sm))
+}
+
+private fun licenseHeading(title: String, amharic: Boolean): String = if (!amharic) title else when (title) {
+    "Scripture text" -> "መጽሐፍ ቅዱስ"
+    "Mahlet (ሥርዓተ ማኅሌት)" -> "ሥርዓተ ማኅሌት"
+    "Gitsawe (ግጻዌ)" -> "ግጻዌ"
+    "Synaxarium (ስንክሳር)" -> "ስንክሳር"
+    "Wudase Maryam (ውዳሴ ማርያም)" -> "ውዳሴ ማርያም"
+    "Church books (ሌሎች መጻሕፍት)" -> "ሌሎች መጻሕፍት"
+    "Fonts" -> "የፊደል ቅርጾች"
+    "App code" -> "የመተግበሪያው ኮድ"
+    "SIL Open Font License 1.1 — full text" -> "SIL Open Font License 1.1 — ሙሉ ጽሑፍ"
+    else -> title
+}
+
+@Composable
+private fun LicenseLink(label: String, url: String) {
+    val context = LocalContext.current
+    val s = LocalStrings.current
+    var failed by remember(url) { mutableStateOf(false) }
+    Column {
+        TextButton(onClick = {
+            failed = runCatching {
+                context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, url.toUri()))
+            }.isFailure
+        }) { Text(label) }
+        SelectionContainer { Text(url, style = MaterialTheme.typography.bodySmall) }
+        if (failed) Text(
+            if (s.isAmharic) "አገናኙን መክፈት አልተቻለም። አድራሻውን ገልብጠው በአሳሽ ይክፈቱ።"
+            else "Could not open this link. Copy the address into a browser.",
+            color = MaterialTheme.colorScheme.error,
+        )
+    }
+}
+
+/**
+ * The generic portion of the SIL Open Font License 1.1, verbatim from
+ * docs/AbyssinicaSIL-OFL.txt (the per-font copyright lines appear in the
+ * font list above).
+ */
+private val OFL_1_1_TEXT = """
+SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
+
+PREAMBLE
+The goals of the Open Font License (OFL) are to stimulate worldwide
+development of collaborative font projects, to support the font creation
+efforts of academic and linguistic communities, and to provide a free and
+open framework in which fonts may be shared and improved in partnership
+with others.
+
+The OFL allows the licensed fonts to be used, studied, modified and
+redistributed freely as long as they are not sold by themselves. The
+fonts, including any derivative works, can be bundled, embedded,
+redistributed and/or sold with any software provided that any reserved
+names are not used by derivative works. The fonts and derivatives,
+however, cannot be released under any other type of license. The
+requirement for fonts to remain under this license does not apply
+to any document created using the fonts or their derivatives.
+
+DEFINITIONS
+"Font Software" refers to the set of files released by the Copyright
+Holder(s) under this license and clearly marked as such. This may
+include source files, build scripts and documentation.
+
+"Reserved Font Name" refers to any names specified as such after the
+copyright statement(s).
+
+"Original Version" refers to the collection of Font Software components as
+distributed by the Copyright Holder(s).
+
+"Modified Version" refers to any derivative made by adding to, deleting,
+or substituting -- in part or in whole -- any of the components of the
+Original Version, by changing formats or by porting the Font Software to a
+new environment.
+
+"Author" refers to any designer, engineer, programmer, technical
+writer or other person who contributed to the Font Software.
+
+PERMISSION & CONDITIONS
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of the Font Software, to use, study, copy, merge, embed, modify,
+redistribute, and sell modified and unmodified copies of the Font
+Software, subject to the following conditions:
+
+1) Neither the Font Software nor any of its individual components,
+in Original or Modified Versions, may be sold by itself.
+
+2) Original or Modified Versions of the Font Software may be bundled,
+redistributed and/or sold with any software, provided that each copy
+contains the above copyright notice and this license. These can be
+included either as stand-alone text files, human-readable headers or
+in the appropriate machine-readable metadata fields within text or
+binary files as long as those fields can be easily viewed by the user.
+
+3) No Modified Version of the Font Software may use the Reserved Font
+Name(s) unless explicit written permission is granted by the corresponding
+Copyright Holder. This restriction only applies to the primary font name as
+presented to the users.
+
+4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font
+Software shall not be used to promote, endorse or advertise any
+Modified Version, except to acknowledge the contribution(s) of the
+Copyright Holder(s) and the Author(s) or with their explicit written
+permission.
+
+5) The Font Software, modified or unmodified, in part or in whole,
+must be distributed entirely under this license, and must not be
+distributed under any other license. The requirement for fonts to
+remain under this license does not apply to any document created
+using the Font Software.
+
+TERMINATION
+This license becomes null and void if any of the above conditions are
+not met.
+
+DISCLAIMER
+THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
+DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
+OTHER DEALINGS IN THE FONT SOFTWARE.
+""".trimIndent()

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" role="img" aria-label="Sinq — The Gondarine Roundel">
+<title>Sinq — The Gondarine Roundel</title>
+<defs><mask id="m_concept-7-gondarine-roundel" maskUnits="userSpaceOnUse" x="0" y="0" width="108" height="108">
+<rect width="108" height="108" fill="#000"/>
+<g fill="#fff"><circle cx="54.00" cy="54.00" r="25.00"/><path d="M 54.00 23.50 L 61.18 38.59 L 46.82 38.59 Z"/><path d="M 30.15 34.98 L 46.43 38.78 L 37.47 50.01 Z"/><path d="M 24.26 60.79 L 37.38 50.42 L 40.58 64.43 Z"/><path d="M 40.77 81.48 L 40.84 64.76 L 53.79 71.00 Z"/><path d="M 67.23 81.48 L 54.21 71.00 L 67.16 64.76 Z"/><path d="M 83.74 60.79 L 67.42 64.43 L 70.62 50.42 Z"/><path d="M 77.85 34.98 L 70.53 50.01 L 61.57 38.78 Z"/></g>
+<g fill="#000"><path d="M 54.00 33.00 L 50.10 45.89 L 37.58 40.91 L 45.23 52.00 L 33.53 58.67 L 46.96 59.61 L 44.89 72.92 L 54.00 63.00 L 63.11 72.92 L 61.04 59.61 L 74.47 58.67 L 62.77 52.00 L 70.42 40.91 L 57.90 45.89 Z"/></g>
+</mask></defs>
+<g id="background"><rect width="108" height="108" fill="#0E3B31"/></g>
+<g id="foreground"><rect width="108" height="108" fill="#E8C46B" mask="url(#m_concept-7-gondarine-roundel)"/></g>
+</svg>

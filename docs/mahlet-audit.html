@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ማኅሌት, as a Reader Meets It</title>
+<style>
+:root{--paper:#F7F6F2;--card:#FFF;--ink:#17201C;--muted:#6E6A62;--hero:#0E3B31;
+ --arke:#B23A2E;--gold:#9A7C33;--rule:#DEDAD0;--sunk:#EFEDE6;
+ --shadow:0 1px 2px rgba(23,32,28,.06),0 8px 22px rgba(23,32,28,.07)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+ --paper:#11140F;--card:#191D17;--ink:#E7E4DA;--muted:#9A968B;--hero:#123F34;
+ --arke:#F0776A;--gold:#C9A857;--rule:#2A2F27;--sunk:#20251E;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.35)}}
+:root[data-theme="dark"]{--paper:#11140F;--card:#191D17;--ink:#E7E4DA;--muted:#9A968B;
+ --hero:#123F34;--arke:#F0776A;--gold:#C9A857;--rule:#2A2F27;--sunk:#20251E;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.35)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+ font:400 16px/1.62 Georgia,"Times New Roman",serif}
+.wrap{max-width:1000px;margin:0 auto;padding:40px 24px 68px}
+.am{font-family:"Abyssinica SIL","Noto Sans Ethiopic",Nyala,serif}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+ background:var(--sunk);padding:1px 5px;border-radius:4px}
+
+header{border-bottom:2px solid var(--hero);padding-bottom:20px;margin-bottom:8px}
+.eyebrow{font:600 11px/1 system-ui,sans-serif;letter-spacing:.16em;
+ text-transform:uppercase;color:var(--arke);margin:0 0 10px}
+h1{font-size:clamp(27px,4vw,38px);font-weight:300;margin:0 0 11px;line-height:1.15;
+ letter-spacing:-.015em}
+h1 b{font-weight:600}
+.lede{max-width:62ch;color:var(--muted);margin:0;font-size:16.5px}
+.tally{display:flex;flex-wrap:wrap;gap:26px;margin-top:22px}
+.tally div{display:flex;flex-direction:column;gap:1px}
+.tally .n{font:600 24px/1.2 system-ui,sans-serif;font-variant-numeric:tabular-nums;color:var(--arke)}
+.tally .k{font:500 11px/1.4 system-ui,sans-serif;letter-spacing:.08em;
+ text-transform:uppercase;color:var(--muted)}
+
+.alarm{background:var(--card);border:1px solid var(--arke);border-left-width:4px;
+ border-radius:12px;padding:20px 22px;margin:26px 0 0;box-shadow:var(--shadow)}
+.alarm h3{margin:0 0 7px;font-size:18px;font-weight:600;color:var(--arke)}
+.alarm p{margin:0 0 9px;max-width:72ch}.alarm p:last-child{margin-bottom:0}
+
+h2{font-size:20px;font-weight:600;margin:52px 0 6px}
+h2 .n{font:700 12px/1 system-ui,sans-serif;color:var(--arke);margin-right:10px}
+h2 + .sub{color:var(--muted);margin:0 0 18px;max-width:70ch;font-size:15px}
+
+.scroller{overflow-x:auto;border:1px solid var(--rule);border-radius:12px;
+ background:var(--card);box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;font:400 14px/1.5 system-ui,sans-serif;min-width:600px}
+th{text-align:left;font:600 10px/1.4 system-ui,sans-serif;letter-spacing:.09em;
+ text-transform:uppercase;color:var(--muted);padding:12px 14px 9px;
+ border-bottom:1px solid var(--rule);white-space:nowrap}
+th.r,td.r{text-align:right}
+td{padding:10px 14px;border-bottom:1px solid var(--rule);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.bad{color:var(--arke);font-weight:600}
+.ok{color:var(--hero);font-weight:600}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ok{color:var(--gold)}}
+:root[data-theme="dark"] .ok{color:var(--gold)}
+ol.plan{max-width:72ch;padding-left:22px}
+ol.plan li{margin-bottom:14px}
+ol.plan b{display:block;margin-bottom:1px}
+.note{border-left:3px solid var(--arke);padding:2px 0 2px 15px;margin:22px 0 0;
+ color:var(--muted);max-width:72ch}
+.note b{color:var(--ink)}
+.foot{margin-top:46px;padding-top:16px;border-top:1px solid var(--rule);
+ font:400 12.5px/1.6 system-ui,sans-serif;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+ <p class="eyebrow">ስንቅ · ማኅሌት audit</p>
+ <h1>ማኅሌት, <b>as a reader meets it</b></h1>
+ <p class="lede">Three screens, 190 orders, 7,070 parts of chant. Read from the
+ source, with a file and a line behind every claim. The corpus is the best
+ content in the app and the screens are the least finished.</p>
+ <div class="tally">
+  <div><span class="n">190</span><span class="k">orders</span></div>
+  <div><span class="n">94</span><span class="k">rows they collapse to</span></div>
+  <div><span class="n">95</span><span class="k">with alternative texts</span></div>
+  <div><span class="n">3</span><span class="k">reachable by no route</span></div>
+  <div><span class="n">0</span><span class="k">searchable</span></div>
+ </div>
+</header>
+
+<div class="alarm">
+ <h3>Three orders cannot be opened at all</h3>
+ <p>Month 0 — the bucket for orders with no fixed day — holds five orders. Three of
+ them carry <code>season = "tsige"</code>: the seven-year ማኅሌተ ጽጌ አቋቋም, and the
+ ጥቅምት and ኅዳር ones. Forty-seven parts of chant.</p>
+ <p>The list screen filters <code>season != TSIGE</code> out of its dated months
+ <em>and</em> out of its ቀን ያልተወሰነላቸው section, on the reasoning that ጽጌ has a door
+ of its own. That door, the season screen, reads only months 1, 2 and 3. Month 0
+ is in neither. There is no path to these three from anywhere in the app.</p>
+ <p>The same split shows on the surface as a number that disagrees with itself:
+ the ዘመነ ጽጌ row counts all 41 ጽጌ orders in the index, and the screen it opens
+ says ፴፰. One tap apart, same object, two counts, and the difference is exactly
+ the three that cannot be reached.</p>
+</div>
+
+<h2><span class="n">1</span>What a reader can and cannot do with the text</h2>
+<p class="sub">ማኅሌት is the longest continuous reading in the app — a median order
+runs about five screenfuls and the longest, መድኃኔዓለም, runs twelve. It is also the
+least equipped reader in the app.</p>
+
+<div class="scroller">
+<table>
+ <thead><tr><th>Capability</th><th>ማኅሌት</th><th>Bible reader</th><th class="am">ስንክሳር</th></tr></thead>
+ <tbody>
+  <tr><td>Copy, share, share as image</td><td class="ok">yes</td><td class="ok">yes</td><td class="ok">yes</td></tr>
+  <tr><td>Change the text size</td><td class="bad">no</td><td class="ok">yes</td><td class="ok">yes</td></tr>
+  <tr><td>Jump within a long reading</td><td class="bad">no</td><td class="ok">chapter sheet</td><td class="ok">contents menu</td></tr>
+  <tr><td>Know where you are in it</td><td class="bad">no</td><td class="ok">chapter in the bar</td><td>—</td></tr>
+  <tr><td>Highlight</td><td class="bad">no</td><td class="ok">yes</td><td>no</td></tr>
+  <tr><td>Bookmark</td><td class="bad">no</td><td class="ok">yes</td><td>no</td></tr>
+  <tr><td>Write a note</td><td class="bad">no</td><td class="ok">yes</td><td>no</td></tr>
+ </tbody>
+</table>
+</div>
+
+<p class="note"><b>The font case is the sharp one.</b> The order screen reads the
+reader's chosen text size and applies it to the chant, but offers no way to change
+it. To make ማኅሌት bigger you must leave, open the Bible or ስንክሳር, change it there,
+and come back. It is the only long-form reader in the app that takes the setting
+without offering the control.</p>
+
+<h2><span class="n">2</span>Half the corpus has an alternative, and the screen barely says so</h2>
+<p class="sub">An edition is a whole other text of the same order, read
+<em>instead of</em> the book's, never after it. That distinction is the reason the
+merged corpus exists.</p>
+
+<div class="scroller">
+<table>
+ <thead><tr><th>How many editions</th><th class="r">Orders</th></tr></thead>
+ <tbody>
+  <tr><td>none</td><td class="r num">95</td></tr>
+  <tr><td>one</td><td class="r num">37</td></tr>
+  <tr><td>two</td><td class="r num">29</td></tr>
+  <tr><td>three</td><td class="r num">20</td></tr>
+  <tr><td>four to six</td><td class="r num">9</td></tr>
+ </tbody>
+</table>
+</div>
+
+<p class="note"><b>What the screen offers is a strip of pills.</b> Tapping one swaps
+the whole text. Nothing anywhere says these are the same order in different
+recensions rather than different parts of it, there is no way to compare two, and
+switching loses your place and your selection. The first pill is labelled from
+whichever of three different things the order happens to carry, so it reads
+<span class="am">እትም 0</span>, <span class="am">ቴሌግራም</span> or
+<span class="am">ማኅሌተ ጽጌ አቋቋም</span> depending. And <span class="am">እትም 0</span>
+uses an ASCII zero while every sibling uses Ge'ez numerals, which have no zero.</p>
+
+<h2><span class="n">3</span>Finding anything</h2>
+
+<div class="scroller">
+<table>
+ <thead><tr><th>Way in</th><th>State</th></tr></thead>
+ <tbody>
+  <tr><td>Search</td><td class="bad">None. ማኅሌት is absent from the app's search entirely, so 190 feast names and 7,070 parts cannot be found by typing.</td></tr>
+  <tr><td>Entry point</td><td>One. The first row of ሌሎች መጻሕፍት. Nothing on ቤት or elsewhere reaches it.</td></tr>
+  <tr><td>Month strip</td><td class="bad">Scrolls to a month, but never shows which month you are in — every pill is hardcoded unselected, which screen readers also announce.</td></tr>
+  <tr><td>Jump to today</td><td class="bad">A today card appears when one is appointed, but there is no way back to it once scrolled past.</td></tr>
+  <tr><td>Filter by kind</td><td class="bad">None, though every order is already typed as ዋዜማ, ማኅሌት or አንገርጋሪ.</td></tr>
+  <tr><td>A day with nothing</td><td class="bad">Silence. Only 83 days of the year carry an order, so on roughly three days in four the screen opens on a month header and says nothing. The string written for exactly this case is never used.</td></tr>
+ </tbody>
+</table>
+</div>
+
+<h2><span class="n">4</span>Faults worth fixing on the rows themselves</h2>
+<div class="scroller">
+<table>
+ <thead><tr><th>Where</th><th>What happens</th></tr></thead>
+ <tbody>
+  <tr><td>Feast rows</td><td>The ዋዜማ and ነግሥ chips look tappable and are not. The row always opens the ዋዜማ, so on the 50 feasts that have both, a reader wanting the morning service always lands on last night's and must find the tab.</td></tr>
+  <tr><td>Feast rows</td><td>The chip line cannot wrap or ellipsize. On 19 groups it runs past the edge of a narrow phone and is cut mid-word.</td></tr>
+  <tr><td>Season screen</td><td>Thirty-three rows in a run, each titled with the <em>month</em> and subtitled with a part count. The feast name is never drawn, so they read identically and are told apart only by a numeral.</td></tr>
+  <tr><td>Order screen</td><td>Telegram reference rows are 22 dp tall, under half the minimum tap target, and leave the app without warning.</td></tr>
+  <tr><td>Order screen</td><td>The gold line under the title carries raw Telegram post titles, up to 64 characters with inconsistent spelling, truncated to about 38.</td></tr>
+  <tr><td>Order screen</td><td>An unknown order id renders a blank title and the words " ክፍል" with a leading space, because the Ge'ez numeral for zero is empty.</td></tr>
+  <tr><td>All three</td><td>No empty state anywhere. A failed load draws a blank screen.</td></tr>
+  <tr><td>List screen</td><td>Alone among these screens it uses a bare scrolling column, so it has no scroll indicator and no maximum width — on a tablet it stretches edge to edge.</td></tr>
+ </tbody>
+</table>
+</div>
+
+<h2><span class="n">5</span>What I would do, in order</h2>
+<ol class="plan">
+ <li><b>Give the three stranded orders a route.</b> Either let the season screen read month 0, or stop filtering season orders out of the undated section. Either fixes the count mismatch at the same time, because both are the same bug seen from two sides.</li>
+ <li><b>Put ማኅሌት in search.</b> It is the only large corpus in the app you cannot type your way into, and feast names are exactly what a reader knows.</li>
+ <li><b>Give the order screen the reader's toolbar.</b> Font sizing above all, since it already obeys the setting, plus a contents sheet — twelve screenfuls with no way to jump is the single worst reading experience in the app.</li>
+ <li><b>Say what an edition is.</b> One line above the pills naming them as alternative texts of the same order would do most of the work, and the first pill needs one honest label rather than three.</li>
+ <li><b>Make the feast chips real.</b> If a row shows ዋዜማ and ነግሥ, tapping either should open that one.</li>
+ <li><b>Say when a day has nothing.</b> The string already exists.</li>
+ <li><b>Show the feast name on the season rows.</b> Thirty-three identical rows is not a list, it is a wall.</li>
+</ol>
+
+<div class="foot">
+ Read from source: the three ማኅሌት screens, MahletRepository, MahletComputus,
+ MahletOrder, the routes in MainActivity, the strings, and the shipped content under
+ assets/content/mahlet. Counts were measured from the data rather than quoted:
+ 190 orders over 14 month buckets, 179 dated and 11 not, a median of 16 parts and
+ 1,778 characters per order, 95 orders carrying alternative versions, and 41 ጽጌ
+ orders of which 38 are listed. Nothing in this document has been changed in the app.
+</div>
+
+</div>
+</body>
+</html>

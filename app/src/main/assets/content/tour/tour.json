@@ -1,0 +1,43 @@
+{
+  "contentVersion": 1,
+  "tours": [
+    {
+      "versionCode": 90,
+      "version": "1.0.0",
+      "title": {
+        "am": "እንኳን ወደ ስንቅ በደህና መጡ",
+        "en": "Welcome to Sinq"
+      },
+      "pages": [
+        {
+          "kicker": {
+            "am": "የጸሎት መጻሕፍት",
+            "en": "Liturgical Prayers"
+          },
+          "title": {
+            "am": "የተሟላ የጸሎትና የምስጋና ሥርዓት",
+            "en": "Complete Liturgical Corpus"
+          },
+          "body": {
+            "am": "፴፪ቱ መልክአ መልክዕ፣ ፳፭ቱ የሰዓታት ቢጋር ከአንባቢና መላሽ ድምፅ ጋር፣ እንዲሁም ፩፻፹፩ የበዓላት ማኅሌት ሥርዓት በባህላዊ ቀይ ቀለም አጻጻፍ ተዘጋጅተዋል።",
+            "en": "32 canonical Melkea strophic hymns, unified 25-office Seatat (Horologium) with speaker roles, and 181 Mahlet feast orders with traditional rubrication."
+          }
+        },
+        {
+          "kicker": {
+            "am": "ቅዱሳት መጻሕፍት",
+            "en": "Holy Scriptures"
+          },
+          "title": {
+            "am": "፹፩ዱ መጽሐፍ ቅዱስ እና መዝሙረ ዳዊት",
+            "en": "81-Book Bible & Complete Psalter"
+          },
+          "body": {
+            "am": "የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተክርስቲያን ፹፩ዱ ቅዱሳት መጻሕፍት፣ ሙሉ መዝሙረ ዳዊት እና ዓመታዊው የንባብ ግጻዌ ከመስመር ውጭ ዝግጁ ናቸው።",
+            "en": "The complete 81-book Ethiopian Orthodox Canon, the full 150 Psalms with praise of Mary, and the complete lectionary (Gitsawé), fully offline."
+          }
+        }
+      ]
+    }
+  ]
+}

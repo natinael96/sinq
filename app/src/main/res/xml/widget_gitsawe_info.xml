@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  የዕለቱ ግጻዌ widget. updatePeriodMillis is only a safety net (the system clamps it
+  to ≥30 min and won't wake the device for it) — the real refresh is driven by
+  the provider's own just-past-midnight alarm plus the date/time/locale filters
+  in the manifest, so the card always shows today.
+
+  The provider chooses how many readings to show from the granted height: two at
+  this 4×2 default, up to five when resized taller, one on a slim strip. The
+  declared minimum below is the size the tiers are tuned against — raise it and
+  the smallest tier stops being reachable.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="250dp"
+    android:minHeight="110dp"
+    android:minResizeWidth="140dp"
+    android:minResizeHeight="60dp"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="21600000"
+    android:initialLayout="@layout/widget_gitsawe"
+    android:initialKeyguardLayout="@layout/widget_gitsawe"
+    android:description="@string/widget_gitsawe_description"
+    android:widgetCategory="home_screen|keyguard" />

@@ -1,0 +1,1203 @@
+package com.agpeya.app
+
+import android.content.Intent
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.enableEdgeToEdge
+import androidx.lifecycle.lifecycleScope
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
+import com.agpeya.app.data.Language
+import com.agpeya.app.ui.strings.AmharicStrings
+import com.agpeya.app.ui.strings.EnglishStrings
+import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.strings.Strings
+import java.util.Locale
+import androidx.navigation.NavController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.agpeya.app.data.SettingsRepository
+import com.agpeya.app.data.ThemeChoice
+import com.agpeya.app.reminders.ReminderScheduler
+import com.agpeya.app.reminders.StreakReminderScheduler
+import kotlinx.coroutines.flow.first
+import com.agpeya.app.ui.marks.MarksScreen
+import com.agpeya.app.ui.common.Tab
+import com.agpeya.app.ui.customize.CustomizeHourScreen
+import com.agpeya.app.ui.home.HomeScreen
+import com.agpeya.app.ui.modes.ModeEditorScreen
+import com.agpeya.app.ui.modes.ModesScreen
+import com.agpeya.app.ui.reading.ReadingScreen
+import com.agpeya.app.ui.search.SearchScreen
+import com.agpeya.app.ui.settings.AboutScreen
+import com.agpeya.app.ui.settings.ChangelogScreen
+import com.agpeya.app.ui.settings.SettingsScreen
+import com.agpeya.app.ui.theme.AgpeyaTheme
+import com.agpeya.app.ui.theme.Motion
+
+class MainActivity : ComponentActivity() {
+
+    // The hour to deep-link to from a fired alarm. Observable so a warm launch
+    // (onNewIntent, singleTask reuses this instance) reaches the NavHost too.
+    private val pendingDeepLinkHourId = mutableStateOf<String?>(null)
+
+    // Set when opened from the nightly reminder notification.
+    private val pendingOpenJourney = mutableStateOf(false)
+
+    // Set when opened from the morning ግጻዌ-reminder notification.
+    private val pendingOpenOffering = mutableStateOf<String?>(null)
+    private val pendingOpenGitsawe = mutableStateOf(false)
+    private val bypassLaunchOverlays = mutableStateOf(false)
+    private val pendingOpenReading = mutableStateOf(false)
+    private val pendingGitsaweEpochDay = mutableStateOf<Long?>(null)
+
+    // Play's own consent dialog for an update. Registered unconditionally —
+    // registerForActivityResult must run before the activity is started — but
+    // only ever launched by PlayUpdateRepository, which is dark in the
+    // hand-installed build. A declined or cancelled dialog needs no handling:
+    // nothing was downloaded, and the next launch will ask again.
+    private lateinit var updateConsent: ActivityResultLauncher<IntentSenderRequest>
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        updateConsent = registerForActivityResult(
+            ActivityResultContracts.StartIntentSenderForResult(),
+        ) { /* declined, cancelled or failed: ask again next launch */ }
+        enableEdgeToEdge()
+        consumeDeepLink(intent)
+        setContent {
+            val themeChoice by SettingsRepository.theme(this).collectAsState(initial = ThemeChoice.SYSTEM)
+            val language by SettingsRepository.language(this).collectAsState(initial = SettingsRepository.DEFAULT_LANGUAGE)
+            val readingFont by SettingsRepository.readingFont(this)
+                .collectAsState(initial = com.agpeya.app.data.ReadingFont.ABYSSINICA)
+            val readingLineSpacing by SettingsRepository.readingLineSpacing(this)
+                .collectAsState(initial = com.agpeya.app.data.ReadingLineSpacing.NORMAL)
+            val readingAlignment by SettingsRepository.readingAlignment(this)
+                .collectAsState(initial = com.agpeya.app.data.ReadingAlignment.JUSTIFIED)
+            AgpeyaTheme(themeChoice = themeChoice) {
+                CompositionLocalProvider(
+                    LocalStrings provides stringsFor(language),
+                    com.agpeya.app.ui.theme.LocalReadingFont provides
+                        com.agpeya.app.ui.theme.readingFontFamily(readingFont),
+                    com.agpeya.app.ui.theme.LocalReadingLineSpacing provides readingLineSpacing.multiplier,
+                    com.agpeya.app.ui.theme.LocalReadingTextAlign provides when (readingAlignment) {
+                        com.agpeya.app.data.ReadingAlignment.JUSTIFIED -> androidx.compose.ui.text.style.TextAlign.Justify
+                        com.agpeya.app.data.ReadingAlignment.LEFT -> androidx.compose.ui.text.style.TextAlign.Left
+                        com.agpeya.app.data.ReadingAlignment.RIGHT -> androidx.compose.ui.text.style.TextAlign.Right
+                        com.agpeya.app.data.ReadingAlignment.CENTER -> androidx.compose.ui.text.style.TextAlign.Center
+                    },
+                ) {
+                    // The opening reminder sits over the graph rather than inside
+                    // it: the start destination already flips once onboarding
+                    // resolves, and a third destination in that race would be
+                    // fragile. Once per activity launch. The Box is what makes it
+                    // an overlay — without it the two are merely siblings.
+                    var opened by rememberSaveable { mutableStateOf(false) }
+                    // The tour sits in the same overlay, behind Memento Mori:
+                    // the opening page finishes, then what is new is explained,
+                    // then the app. Resolved here rather than as a destination
+                    // for the same reason the Box exists at all.
+                    val tourContent by produceState(
+                        com.agpeya.app.model.TourContent(),
+                    ) { value = com.agpeya.app.data.TourRepository.content(this@MainActivity) }
+                    val lastTour by SettingsRepository.lastTourVersion(this@MainActivity)
+                        .collectAsState(initial = -1)
+                    val installedCode = remember {
+                        com.agpeya.app.data.TourRepository.installedVersionCode(this@MainActivity)
+                    }
+                    // -1 is "not loaded yet"; only decide once the store answers.
+                    val tour = if (lastTour == -1) null else com.agpeya.app.data.TourRepository
+                        .pending(tourContent.tours, lastTour, installedCode)
+                    val tourScope = rememberCoroutineScope()
+                    var tourRoute by rememberSaveable { mutableStateOf<String?>(null) }
+                    val tourAction = com.agpeya.app.ui.common.rememberUserAction()
+                    // Asked once per launch, while the opening page is drawing:
+                    // the notice is only ever read with the app open, so this is
+                    // the moment it can matter.
+                    LaunchedEffect(Unit) {
+                        com.agpeya.app.data.UpdateRepository.check(this@MainActivity)
+                        // Its Play counterpart. Only one of the two does
+                        // anything in a given build.
+                        com.agpeya.app.data.PlayUpdateRepository.check(
+                            this@MainActivity,
+                        ) { manager, info ->
+                            runCatching {
+                                manager.startUpdateFlowForResult(
+                                    info,
+                                    updateConsent,
+                                    com.agpeya.app.data.PlayUpdateRepository.flexibleOptions(),
+                                )
+                            }
+                        }
+                    }
+
+                    Box(Modifier.fillMaxSize()) {
+                        AgpeyaNavHost(
+                            tourRoute = tourRoute,
+                            onTourRouteHandled = { tourRoute = null },
+                            deepLinkHourId = pendingDeepLinkHourId.value,
+                            onDeepLinkHandled = { pendingDeepLinkHourId.value = null },
+                            openJourney = pendingOpenJourney.value,
+                            onJourneyHandled = { pendingOpenJourney.value = false },
+                            openOffering = pendingOpenOffering.value,
+                            onOfferingHandled = { pendingOpenOffering.value = null },
+                            openReading = pendingOpenReading.value,
+                            onReadingHandled = { pendingOpenReading.value = false },
+                            openGitsawe = pendingOpenGitsawe.value,
+                            gitsaweEpochDay = pendingGitsaweEpochDay.value,
+                            onGitsaweHandled = {
+                                pendingOpenGitsawe.value = false
+                                pendingGitsaweEpochDay.value = null
+                            },
+                        )
+                        if (opened && tour != null && !bypassLaunchOverlays.value) {
+                            com.agpeya.app.ui.intro.WhatsNewTour(
+                                tour = tour,
+                                onOpenRoute = { route ->
+                                    tourAction.run {
+                                        SettingsRepository.setLastTourVersion(this@MainActivity, installedCode)
+                                        tourRoute = route
+                                    }
+                                },
+                                onDone = {
+                                    tourScope.launch {
+                                        SettingsRepository.setLastTourVersion(
+                                            this@MainActivity, installedCode,
+                                        )
+                                    }
+                                },
+                            )
+                        }
+                        if (!opened && !bypassLaunchOverlays.value) {
+                            com.agpeya.app.ui.intro.MementoMoriScreen(onDone = { opened = true })
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    companion object {
+        /**
+         * Which offering page a fired አስራት / ስዕለት reminder wants opened —
+         * the [com.agpeya.app.reminders.SpecialHabit] name.
+         */
+        const val EXTRA_SKIP_INTRO = "skipIntro"
+        const val EXTRA_OPEN_OFFERING = "openOffering"
+    }
+
+    override fun onStop() {
+        com.agpeya.app.ui.journal.JournalSession.lock()
+        super.onStop()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        consumeDeepLink(intent)
+    }
+
+    /**
+     * A flexible download can finish while ስንቅ is in the background, and Play
+     * does not announce it again when the app comes back. Without this the
+     * update would sit on the device with the restart never offered.
+     */
+    override fun onResume() {
+        super.onResume()
+        if (!com.agpeya.app.data.PlayUpdateRepository.handlesUpdates) return
+        lifecycleScope.launch {
+            com.agpeya.app.data.PlayUpdateRepository.check(this@MainActivity) { manager, info ->
+                runCatching {
+                    manager.startUpdateFlowForResult(
+                        info,
+                        updateConsent,
+                        com.agpeya.app.data.PlayUpdateRepository.flexibleOptions(),
+                    )
+                }
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        com.agpeya.app.data.PlayUpdateRepository.release()
+        super.onDestroy()
+    }
+
+    /** Read the notification extras and strip them, so a rotation can't replay them. */
+    private fun consumeDeepLink(intent: Intent?) {
+        intent ?: return
+        if (intent.getBooleanExtra(EXTRA_SKIP_INTRO, false) ||
+            intent.hasExtra(ReminderScheduler.EXTRA_HOUR_ID) ||
+            intent.getBooleanExtra(com.agpeya.app.reminders.ReadingReminderScheduler.EXTRA_OPEN_READING, false) ||
+            intent.getBooleanExtra(StreakReminderScheduler.EXTRA_OPEN_STREAK, false) ||
+            intent.hasExtra(EXTRA_OPEN_OFFERING) ||
+            intent.getBooleanExtra(com.agpeya.app.reminders.GitsaweReminderScheduler.EXTRA_OPEN_GITSAWE, false)) {
+            bypassLaunchOverlays.value = true
+            // Persist the launch intent marker across activity recreation.
+            intent.putExtra(EXTRA_SKIP_INTRO, true)
+        }
+        if (intent.getBooleanExtra(com.agpeya.app.widget.PrayerClockWidgetProvider.EXTRA_OPEN_CLOCK, false)) {
+            // Resolve at tap time, even if the launcher delayed refreshing the dial.
+            pendingDeepLinkHourId.value = com.agpeya.app.widget.PrayerClock.current(java.time.LocalTime.now()).id
+            intent.removeExtra(com.agpeya.app.widget.PrayerClockWidgetProvider.EXTRA_OPEN_CLOCK)
+        }
+        intent.getStringExtra(ReminderScheduler.EXTRA_HOUR_ID)?.let {
+            // Opening a ringing reminder is also an answer: end the alarm (and
+            // let it ask "done?") before navigating to the requested hour.
+            com.agpeya.app.reminders.AlarmRinger.answered(
+                this,
+                it,
+                intent.getStringExtra(com.agpeya.app.reminders.AlarmRinger.EXTRA_ALARM_SESSION),
+            )
+            pendingDeepLinkHourId.value = it
+            intent.removeExtra(ReminderScheduler.EXTRA_HOUR_ID)
+            intent.removeExtra(com.agpeya.app.reminders.AlarmRinger.EXTRA_ALARM_SESSION)
+        }
+        if (intent.getBooleanExtra(
+                com.agpeya.app.reminders.ReadingReminderScheduler.EXTRA_OPEN_READING, false,
+            )
+        ) {
+            pendingOpenReading.value = true
+            intent.removeExtra(com.agpeya.app.reminders.ReadingReminderScheduler.EXTRA_OPEN_READING)
+        }
+        if (intent.getBooleanExtra(StreakReminderScheduler.EXTRA_OPEN_STREAK, false)) {
+            pendingOpenJourney.value = true
+            intent.removeExtra(StreakReminderScheduler.EXTRA_OPEN_STREAK)
+        }
+        intent.getStringExtra(EXTRA_OPEN_OFFERING)?.let {
+            pendingOpenOffering.value = it
+            intent.removeExtra(EXTRA_OPEN_OFFERING)
+        }
+        if (intent.getBooleanExtra(com.agpeya.app.reminders.GitsaweReminderScheduler.EXTRA_OPEN_GITSAWE, false)) {
+            pendingOpenGitsawe.value = true
+            pendingGitsaweEpochDay.value = intent
+                .takeIf { it.hasExtra(com.agpeya.app.widget.GitsaweWidgetProvider.EXTRA_GITSAWE_EPOCH_DAY) }
+                ?.getLongExtra(com.agpeya.app.widget.GitsaweWidgetProvider.EXTRA_GITSAWE_EPOCH_DAY, 0L)
+            intent.removeExtra(com.agpeya.app.reminders.GitsaweReminderScheduler.EXTRA_OPEN_GITSAWE)
+            intent.removeExtra(com.agpeya.app.widget.GitsaweWidgetProvider.EXTRA_GITSAWE_EPOCH_DAY)
+        }
+    }
+}
+
+fun stringsFor(language: Language): Strings = when (language) {
+    Language.AMHARIC -> AmharicStrings
+    Language.ENGLISH -> EnglishStrings
+    Language.SYSTEM -> if (Locale.getDefault().language == "am") AmharicStrings else EnglishStrings
+}
+
+/** Switch bottom-nav tabs preserving each tab's state. */
+/**
+ * Bring the tab host to the front, whatever page is showing over it.
+ *
+ * The four tabs stopped being four destinations when they became four pages of
+ * one pager, so switching between them is a scroll rather than a navigation —
+ * see the [Tab.HOME] destination below. This only handles the other half: a
+ * reminder that wants ጉዞ while the reader is open has to close the reader
+ * first.
+ */
+private fun NavController.showTabs() {
+    if (currentDestination?.route != Tab.HOME.route) {
+        popBackStack(Tab.HOME.route, inclusive = false)
+    }
+}
+
+@Composable
+private fun AgpeyaNavHost(
+    tourRoute: String?,
+    onTourRouteHandled: () -> Unit,
+    deepLinkHourId: String?,
+    onDeepLinkHandled: () -> Unit,
+    openJourney: Boolean,
+    onJourneyHandled: () -> Unit,
+    openOffering: String?,
+    onOfferingHandled: () -> Unit,
+    openReading: Boolean,
+    onReadingHandled: () -> Unit,
+    openGitsawe: Boolean,
+    gitsaweEpochDay: Long?,
+    onGitsaweHandled: () -> Unit,
+) {
+    val navController = rememberNavController()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val scope = rememberCoroutineScope()
+    // Wait until we know whether onboarding is done so the start destination is
+    // correct from the first frame (no flash of Home before the intro).
+    val onboarded by SettingsRepository.onboarded(context).collectAsState(initial = null as Boolean?)
+
+    val ready = onboarded ?: return
+    // The four tabs live side by side in one pager, so a swipe carries the page
+    // under the finger and the bar's light follows it. Selecting a tab is the
+    // same movement, asked for from the other end.
+    val tabPager = androidx.compose.foundation.pager.rememberPagerState(
+        pageCount = { Tab.entries.size },
+    )
+    val goToTab: (Tab) -> Unit = { tab ->
+        navController.showTabs()
+        scope.launch { tabPager.animateScrollToPage(tab.ordinal) }
+    }
+
+    // Self-heal the alarm schedule on every launch. Alarm chains are otherwise
+    // only re-armed on boot/update/time-change or a mode edit, so an OEM
+    // battery manager force-stopping the app (which cancels all pending alarms)
+    // would silence prayer reminders for days until the next reboot. Rearming
+    // here is idempotent — rescheduleAll cancels and re-adds; the nightly nudge
+    // reuses its single alarm — so opening the app restores anything dropped.
+    LaunchedEffect(ready) {
+        if (ready) {
+            runCatching {
+                com.agpeya.app.data.HighlightRepository.migrateLegacyPsalterKeys(context)
+            }
+            // Fold the plan's old day-number ledger into chapters, and drop a
+            // repacking a new bundle has renumbered. Before any screen reads it.
+            runCatching {
+                val plans = com.agpeya.app.data.ReadingPlanRepository.content(context)
+                com.agpeya.app.data.ReadingPlanRepository.reconcile(context, plans)
+            }
+            runCatching {
+                val names = com.agpeya.app.data.HoursRepository
+                    .visibleHours(context).associate { it.id to it.name }
+                ReminderScheduler.rescheduleAll(context, names)
+            }
+            runCatching {
+                StreakReminderScheduler.sync(
+                    context,
+                    SettingsRepository.streakReminder(context).first(),
+                )
+            }
+            runCatching {
+                com.agpeya.app.reminders.GitsaweReminderScheduler.sync(
+                    context,
+                    SettingsRepository.gitsaweReminder(context).first(),
+                )
+            }
+            runCatching {
+                com.agpeya.app.reminders.ReadingReminderScheduler.sync(
+                    context,
+                    SettingsRepository.readingReminder(context).first(),
+                )
+            }
+            runCatching {
+                com.agpeya.app.reminders.BreathPrayerScheduler.sync(
+                    context,
+                    SettingsRepository.breathReminder(context).first(),
+                )
+            }
+            // ምጽዋት, ንስሐ, አስራት and ስዕለት together — one call, so adding a
+            // fifth intention never means remembering to re-arm it here.
+            runCatching {
+                com.agpeya.app.reminders.SpecialHabitReminderScheduler.syncAll(context)
+            }
+        }
+    }
+
+    // Deep link from a fired alarm. Gated on `ready` so it never runs before the
+    // NavHost graph below is composed (navigating earlier crashes the app).
+    // Consume it once so it isn't re-navigated on the next recomposition.
+    LaunchedEffect(ready, tourRoute) {
+        if (ready && tourRoute != null) {
+            if (tourRoute == Tab.JOURNEY.route) goToTab(Tab.JOURNEY)
+            else navController.navigate(tourRoute) { launchSingleTop = true }
+            onTourRouteHandled()
+        }
+    }
+    LaunchedEffect(ready, deepLinkHourId) {
+        if (ready && deepLinkHourId != null) {
+            navController.navigate("reading/$deepLinkHourId") { launchSingleTop = true }
+            onDeepLinkHandled()
+        }
+    }
+
+    // Opened from the nightly reminder notification → jump to the Journey tab.
+    LaunchedEffect(ready, openJourney) {
+        if (ready && openJourney) {
+            goToTab(Tab.JOURNEY)
+            onJourneyHandled()
+        }
+    }
+
+
+    // Opened from an አስራት, ስዕለት or ቀኖና reminder → the page that records it.
+    LaunchedEffect(ready, openOffering) {
+        if (ready && openOffering != null) {
+            val route = when (openOffering) {
+                com.agpeya.app.reminders.SpecialHabit.VOW.name -> "vows"
+                com.agpeya.app.reminders.SpecialHabit.PENANCE.name -> "penance"
+                else -> "tithe"
+            }
+            runCatching { navController.navigate(route) { launchSingleTop = true } }
+            onOfferingHandled()
+        }
+    }
+
+    // Opened from the reading-plan nudge → open the plan, where the day it
+    // named is the first thing on the screen.
+    LaunchedEffect(ready, openReading) {
+        if (ready && openReading) {
+            navController.navigate("reading") { launchSingleTop = true }
+            onReadingHandled()
+        }
+    }
+
+    // Opened from the morning ግጻዌ-reminder notification → open the ግጻዌ screen.
+    LaunchedEffect(ready, openGitsawe, gitsaweEpochDay) {
+        if (ready && openGitsawe) {
+            val route = gitsaweEpochDay?.let { "gitsawe?epochDay=$it" } ?: "gitsawe"
+            navController.navigate(route) { launchSingleTop = true }
+            onGitsaweHandled()
+        }
+    }
+
+    // Freeze the start destination at the first resolved value. Finishing
+    // onboarding writes the flag asynchronously; when that emits, `ready` flips
+    // and an expression here would re-anchor the graph under the user — who may
+    // by then have navigated somewhere else. The intro navigates on explicitly.
+    // A note started from a reading carries the route back to it and a label
+    // naming the passage, so the entry still says what it was about later.
+    fun writeNoteRoute(route: String, label: String): String =
+        "journal/entry?kind=${com.agpeya.app.model.JournalKind.PASSAGE.name}" +
+            "&route=${android.net.Uri.encode(route)}&label=${android.net.Uri.encode(label)}"
+
+    val startDestination = rememberSaveable { if (ready) Tab.HOME.route else "intro" }
+
+
+    // One motion for the whole graph: the page fades and drifts a fraction of a
+    // screen in the direction of travel. Short (220ms) and small (a twelfth of
+    // the width) — enough to say "this came from there" and not enough to make
+    // anyone wait for it. At zero animation scale every duration below collapses
+    // to nothing, so the system's reduce-motion setting is honoured rather than
+    // approximated.
+    val motion = com.agpeya.app.ui.theme.LocalMotion.current
+    val fadeIn = androidx.compose.animation.fadeIn(motion.spec(Motion.standard))
+    val fadeOut = androidx.compose.animation.fadeOut(motion.spec(Motion.fast))
+
+    NavHost(
+        navController = navController,
+        startDestination = startDestination,
+        enterTransition = {
+            fadeIn + androidx.compose.animation.slideInHorizontally(motion.spec(Motion.standard)) { it / 12 }
+        },
+        exitTransition = { fadeOut },
+        popEnterTransition = { fadeIn },
+        popExitTransition = {
+            fadeOut + androidx.compose.animation.slideOutHorizontally(motion.spec(Motion.fast)) { it / 12 }
+        },
+    ) {
+        composable("intro") {
+            com.agpeya.app.ui.intro.IntroScreen(
+                onDone = {
+                    scope.launch { SettingsRepository.setOnboarded(context) }
+                    navController.navigate(Tab.HOME.route) {
+                        popUpTo("intro") { inclusive = true }
+                    }
+                },
+            )
+        }
+        composable(Tab.HOME.route) {
+            // The four tabs are one destination now, laid side by side, so a
+            // swipe carries the page under the finger and the bar's light
+            // follows it. They used to be four destinations, and the only way
+            // between them was a tap.
+            val page = Tab.entries[tabPager.targetPage]
+            androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize()) {
+                val expanded = com.agpeya.app.ui.common.usesNavigationRail(maxWidth)
+                androidx.compose.material3.Scaffold(
+                    containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background,
+                    // Every page is a Scaffold of its own and insets for the status
+                    // bar. Compact navigation carries the bottom inset; the expanded
+                    // rail carries both system-bar insets itself.
+                    contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0),
+                    bottomBar = {
+                        if (!expanded) {
+                            com.agpeya.app.ui.common.AgpeyaBottomBar(current = page, onSelect = goToTab)
+                        }
+                    },
+                ) { inner ->
+                    androidx.compose.foundation.layout.Row(
+                        Modifier.fillMaxSize().padding(inner),
+                    ) {
+                        if (expanded) {
+                            com.agpeya.app.ui.common.AgpeyaNavigationRail(
+                                current = page,
+                                onSelect = goToTab,
+                            )
+                        }
+                        androidx.compose.foundation.pager.HorizontalPager(
+                            state = tabPager,
+                            modifier = Modifier.fillMaxSize().weight(1f),
+                            // The next page is composed before it is reached, so a swipe
+                            // uncovers a page rather than a blank that fills in late.
+                            beyondViewportPageCount = 1,
+                            key = { it },
+                        ) { index ->
+                            Box(
+                                Modifier.fillMaxSize(),
+                                contentAlignment = androidx.compose.ui.Alignment.TopCenter,
+                            ) {
+                                Box(
+                                    Modifier
+                                        .fillMaxSize()
+                                        .then(if (expanded) Modifier.widthIn(max = 840.dp) else Modifier),
+                                ) {
+                                    when (Tab.entries[index]) {
+                                        Tab.HOME ->
+                                            HomeScreen(
+                                                onOpenReading = { navController.navigate("reading") { launchSingleTop = true } },
+                                                onManageHours = { navController.navigate("customize") { launchSingleTop = true } },
+                                                onOpenHour = { hourId -> navController.navigate("reading/$hourId") { launchSingleTop = true } },
+                                                onOpenSearch = { navController.navigate("search") { launchSingleTop = true } },
+                                                onOpenFasting = { navController.navigate("fasting") { launchSingleTop = true } },
+                                                onOpenBookmarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
+                                                onOpenPrayerList = { navController.navigate("prayerlist") { launchSingleTop = true } },
+                                                onOpenPsalter = { navController.navigate("psalter") { launchSingleTop = true } },
+                                                onOpenZewotr = { navController.navigate("wudase?sec=daily") { launchSingleTop = true } },
+                                                onOpenGitsawe = { navController.navigate("gitsawe") { launchSingleTop = true } },
+                                                onOpenBatteryHelp = { navController.navigate("battery") { launchSingleTop = true } },
+                                                onSelectTab = goToTab,
+                                            )
+                                        Tab.JOURNEY ->
+                                            com.agpeya.app.ui.habits.JourneyScreen(
+                                                onOpenJournal = { navController.navigate("journal") { launchSingleTop = true } },
+                                            )
+                                        Tab.LIBRARY ->
+                                            com.agpeya.app.ui.library.LibraryScreen(
+                                                onSearch = { navController.navigate("search") { launchSingleTop = true } },
+                                                onOpenScriptures = { navController.navigate("scriptures") { launchSingleTop = true } },
+                                                onOpenWudase = { navController.navigate("wudase") { launchSingleTop = true } },
+                                                onOpenBahreHasab = { navController.navigate("bahreHasabReference") { launchSingleTop = true } },
+                                                onOpenBooks = { navController.navigate("books") { launchSingleTop = true } },
+                                                onOpenSynaxarium = {
+                                                    navController.navigate("synaxarium/${java.time.LocalDate.now().toEpochDay()}") { launchSingleTop = true }
+                                                },
+                                                onOpenReading = { navController.navigate("reading") { launchSingleTop = true } },
+                                                onOpenMarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
+                                            )
+                                        Tab.SETTINGS ->
+                                            SettingsScreen(
+                                                onOpenReading = { navController.navigate("settings/reading") { launchSingleTop = true } },
+                                                onOpenPrayer = { navController.navigate("settings/prayer") { launchSingleTop = true } },
+                                                onOpenReminders = { navController.navigate("settings/reminders") { launchSingleTop = true } },
+                                                onOpenRecords = { navController.navigate("settings/records") { launchSingleTop = true } },
+                                                onOpenTutorial = { navController.navigate("tutorial") { launchSingleTop = true } },
+                                                onOpenChangelog = { navController.navigate("changelog") { launchSingleTop = true } },
+                                                onOpenAbout = { navController.navigate("about") { launchSingleTop = true } },
+                                            )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            // Back from any other tab returns to ቤት before it leaves the app,
+            // which is what four separate destinations used to do for free.
+            androidx.activity.compose.BackHandler(enabled = tabPager.currentPage != 0) {
+                scope.launch { tabPager.animateScrollToPage(0) }
+            }
+        }
+        composable("prayerlist") {
+            com.agpeya.app.ui.prayerlist.PrayerListScreen(onBack = { navController.popBackStack() })
+        }
+        composable("fasting") {
+            com.agpeya.app.ui.fasting.FastingScreen(onBack = { navController.popBackStack() })
+        }
+        composable("search") {
+            SearchScreen(
+                onBack = { navController.popBackStack() },
+                onOpenResult = { result ->
+                    // Newer corpora carry their own route; the original two are
+                    // still addressed by (targetId, targetIndex).
+                    val route = result.route ?: when (result.source) {
+                        com.agpeya.app.search.AmharicSearch.Source.PSALTER ->
+                            "psalter?section=${result.targetIndex}"
+                        else ->
+                            "reading/${result.targetId}?section=${result.targetIndex}"
+                    }
+                    runCatching { navController.navigate(route) { launchSingleTop = true } }
+                },
+            )
+        }
+        composable("bookmarks") {
+            MarksScreen(
+                onBack = { navController.popBackStack() },
+                onOpen = { hourId, index, sectionId ->
+                    // Psalter bookmarks live under a pseudo hour id and open the
+                    // Psalter screen, not the hour reader.
+                    if (hourId == com.agpeya.app.ui.psalter.PSALTER_BOOKMARK_ID) {
+                        navController.navigate("psalter?section=$index") { launchSingleTop = true }
+                    } else {
+                        // Open by section id — a stored index goes stale the moment
+                        // the user reorders or hides sections in that hour.
+                        navController.navigate(
+                            "reading/$hourId?section=$index&sectionId=${android.net.Uri.encode(sectionId)}",
+                        ) { launchSingleTop = true }
+                    }
+                },
+                // Persisted bookmark routes are raw strings replayed verbatim; if a
+                // future version renames a route, an old bookmark must not crash.
+                onOpenRoute = { route ->
+                    runCatching { navController.navigate(route) { launchSingleTop = true } }
+                },
+            )
+        }
+        // Catena's page for a verse, shown in a WebView rather than a Custom
+        // Tab so the app can ask for the early fathers alone — see CatenaScreen.
+        composable(
+            route = "catena?url={url}&ref={ref}",
+            arguments = listOf(
+                navArgument("url") { type = NavType.StringType },
+                navArgument("ref") { type = NavType.StringType; defaultValue = "" },
+            ),
+        ) { backStackEntry ->
+            com.agpeya.app.ui.catena.CatenaScreen(
+                url = backStackEntry.arguments?.getString("url").orEmpty(),
+                reference = backStackEntry.arguments?.getString("ref").orEmpty(),
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable("bahreHasabReference") {
+            com.agpeya.app.ui.library.BahreHasabReferenceScreen(onBack = { navController.popBackStack() })
+        }
+        composable(
+            route = "psalter?section={section}&start={start}&end={end}&lang={lang}",
+            arguments = listOf(
+                navArgument("section") { type = NavType.IntType; defaultValue = -1 },
+                navArgument("start") { type = NavType.IntType; defaultValue = -1 },
+                navArgument("end") { type = NavType.IntType; defaultValue = -1 },
+                navArgument("lang") { type = NavType.StringType; defaultValue = "am" },
+            ),
+        ) { backStackEntry ->
+            com.agpeya.app.ui.psalter.PsalterScreen(
+                initialPsalmIndex = backStackEntry.arguments?.getInt("section") ?: -1,
+                initialStartVerse = backStackEntry.arguments?.getInt("start") ?: -1,
+                initialEndVerse = backStackEntry.arguments?.getInt("end") ?: -1,
+                initialGeez = backStackEntry.arguments?.getString("lang") in setOf("gez", "geez"),
+                onBack = { navController.popBackStack() },
+                onOpenRoute = { route -> navController.navigate(route) { launchSingleTop = true } },
+                // Without this the Psalter's "ስለዚህ ጻፍ" item showed and did nothing:
+                // the screen's default is a no-op, and only the ግጻዌ passage page
+                // was ever wired to the journal.
+                onWriteNote = { route, label ->
+                    navController.navigate(writeNoteRoute(route, label)) { launchSingleTop = true }
+                },
+                // Sunday has no division of the Psalter; it has the canticles.
+                onOpenBook = { id, chapter ->
+                    navController.navigate("book/$id?ch=$chapter") { launchSingleTop = true }
+                },
+            )
+        }
+        composable("journal") {
+            com.agpeya.app.ui.journal.JournalScreen(
+                onBack = { navController.popBackStack() },
+                onOpenEntry = { id ->
+                    navController.navigate("journal/entry?id=$id") { launchSingleTop = true }
+                },
+                onNewEntry = { kind ->
+                    navController.navigate("journal/entry?kind=${kind.name}") { launchSingleTop = true }
+                },
+                onStartConfessionPrep = {
+                    navController.navigate("confessionPrep") { launchSingleTop = true }
+                },
+                onOpenPenance = { navController.navigate("penance") { launchSingleTop = true } },
+            )
+        }
+        composable(
+            route = "journal/entry?id={id}&kind={kind}&route={route}&label={label}",
+            arguments = listOf(
+                navArgument("id") { type = NavType.StringType; nullable = true; defaultValue = null },
+                navArgument("kind") { type = NavType.StringType; nullable = true; defaultValue = null },
+                navArgument("route") { type = NavType.StringType; nullable = true; defaultValue = null },
+                navArgument("label") { type = NavType.StringType; nullable = true; defaultValue = null },
+            ),
+        ) { backStackEntry ->
+            val args = backStackEntry.arguments
+            com.agpeya.app.ui.journal.JournalEntryScreen(
+                entryId = args?.getString("id"),
+                initialKind = runCatching {
+                    com.agpeya.app.model.JournalKind.valueOf(args?.getString("kind") ?: "")
+                }.getOrDefault(com.agpeya.app.model.JournalKind.REFLECTION),
+                anchorRoute = args?.getString("route"),
+                anchorLabel = args?.getString("label"),
+                onBack = { navController.popBackStack() },
+                onOpenAnchor = { route ->
+                    runCatching { navController.navigate(route) { launchSingleTop = true } }
+                },
+            )
+        }
+        composable("habits") {
+            com.agpeya.app.ui.habits.ManageHabitsScreen(onBack = { navController.popBackStack() })
+        }
+        composable(
+            route = "wudase?sec={sec}&lang={lang}",
+            arguments = listOf(
+                navArgument("sec") { type = NavType.StringType; nullable = true; defaultValue = null },
+                navArgument("lang") { type = NavType.StringType; defaultValue = "am" },
+            ),
+        ) { backStackEntry ->
+            com.agpeya.app.ui.library.WudaseMaryamScreen(
+                onBack = { navController.popBackStack() },
+                initialSectionId = backStackEntry.arguments?.getString("sec"),
+                initialGeez = backStackEntry.arguments?.getString("lang") == "gez",
+                onWriteNote = { route, label -> navController.navigate(writeNoteRoute(route, label)) },
+                onOpenBook = { id -> navController.navigate("book/$id") { launchSingleTop = true } },
+                onOpenPrayerList = { navController.navigate("prayerlist") { launchSingleTop = true } },
+            )
+        }
+        composable("scriptures") {
+            com.agpeya.app.ui.library.ScriptureHubScreen(
+                onSearch = { navController.navigate("search") { launchSingleTop = true } },
+                onBack = { navController.popBackStack() },
+                onOpenOldTestament = { navController.navigate("scripture/books/old") { launchSingleTop = true } },
+                onOpenNewTestament = { navController.navigate("scripture/books/new") { launchSingleTop = true } },
+                onOpenPsalms = { navController.navigate("psalter") { launchSingleTop = true } },
+            )
+        }
+        composable("scripture/books/{testament}") { backStackEntry ->
+            com.agpeya.app.ui.library.ScriptureListScreen(
+                testament = backStackEntry.arguments?.getString("testament") ?: "new",
+                onBack = { navController.popBackStack() },
+                onOpenBook = { key -> navController.navigate("scripture/$key/0") { launchSingleTop = true } },
+            )
+        }
+        composable(
+            route = "scripture/{book}/{chapter}?start={start}&end={end}&plan={plan}&day={day}",
+            arguments = listOf(
+                navArgument("plan") { type = NavType.StringType; defaultValue = "" },
+                navArgument("day") { type = NavType.IntType; defaultValue = 0 },
+                navArgument("book") { type = NavType.StringType },
+                navArgument("chapter") { type = NavType.IntType; defaultValue = 1 },
+                navArgument("start") { type = NavType.IntType; defaultValue = -1 },
+                navArgument("end") { type = NavType.IntType; defaultValue = -1 },
+            ),
+        ) { backStackEntry ->
+            com.agpeya.app.ui.library.ScriptureReaderScreen(
+                bookKey = backStackEntry.arguments?.getString("book") ?: "matthew",
+                selectedPlanId = backStackEntry.arguments?.getString("plan").orEmpty(),
+                selectedPlanDay = backStackEntry.arguments?.getInt("day") ?: 0,
+                initialChapter = backStackEntry.arguments?.getInt("chapter") ?: 1,
+                onWriteNote = { route, label ->
+                    navController.navigate(writeNoteRoute(route, label)) { launchSingleTop = true }
+                },
+                initialStart = backStackEntry.arguments?.getInt("start") ?: -1,
+                initialEnd = backStackEntry.arguments?.getInt("end") ?: -1,
+                onBack = { navController.popBackStack() },
+                onOpenRoute = { route ->
+                    runCatching { navController.navigate(route) { launchSingleTop = true } }
+                },
+            )
+        }
+        composable(
+            route = "gitsawe?epochDay={epochDay}",
+            arguments = listOf(
+                navArgument("epochDay") { type = NavType.LongType; defaultValue = Long.MIN_VALUE },
+            ),
+        ) { backStackEntry ->
+            val epochDay = backStackEntry.arguments?.getLong("epochDay")
+                ?.takeUnless { it == Long.MIN_VALUE }
+            com.agpeya.app.ui.gitsawe.GitsaweScreen(
+                initialEpochDay = epochDay,
+                onBack = { navController.popBackStack() },
+                // A section opens its own focused passage page; the full reader
+                // is reached from there ("open the book / chapter"), not here.
+                onOpenReading = { target, role, reading ->
+                    navController.navigate(
+                        com.agpeya.app.data.GitsaweLinks.passageRoute(
+                            target, role, reading.text?.geez, reading.text?.amharic,
+                        ),
+                    ) { launchSingleTop = true }
+                },
+                onOpenSynaxarium = { epochDay -> navController.navigate("synaxarium/$epochDay") { launchSingleTop = true } },
+                onOpenMahlet = { id -> navController.navigate("mahlet/$id") { launchSingleTop = true } },
+                onOpenSundayCycle = { day -> navController.navigate("sundayGitsawe/$day") { launchSingleTop = true } },
+            )
+        }
+        composable("sundayGitsawe/{epochDay}") { backStackEntry ->
+            com.agpeya.app.ui.gitsawe.SundayCycleScreen(
+                epochDay = backStackEntry.arguments?.getString("epochDay")?.toLongOrNull()
+                    ?: java.time.LocalDate.now().toEpochDay(),
+                onBack = { navController.popBackStack() },
+                onOpenReading = { target, role, reading ->
+                    navController.navigate(
+                        com.agpeya.app.data.GitsaweLinks.passageRoute(
+                            target, role, reading.text?.geez, reading.text?.amharic,
+                        ),
+                    ) { launchSingleTop = true }
+                },
+                onOpenBook = { id, chapter ->
+                    navController.navigate("book/$id?ch=$chapter") { launchSingleTop = true }
+                },
+            )
+        }
+        composable(
+            route = "gitsawePassage?psalm={psalm}&book={book}&chapter={chapter}&start={start}&end={end}" +
+                "&role={role}&chant={chant}&chantAm={chantAm}",
+            arguments = listOf(
+                navArgument("psalm") { type = NavType.IntType; defaultValue = -1 },
+                navArgument("book") { type = NavType.StringType; nullable = true; defaultValue = null },
+                navArgument("chapter") { type = NavType.IntType; defaultValue = 1 },
+                navArgument("start") { type = NavType.IntType; defaultValue = -1 },
+                navArgument("end") { type = NavType.IntType; defaultValue = -1 },
+                navArgument("role") { type = NavType.StringType; nullable = true; defaultValue = null },
+                navArgument("chant") { type = NavType.StringType; nullable = true; defaultValue = null },
+                navArgument("chantAm") { type = NavType.StringType; nullable = true; defaultValue = null },
+            ),
+        ) { backStackEntry ->
+            val args = backStackEntry.arguments
+            val psalm = args?.getInt("psalm") ?: -1
+            val bookKey = args?.getString("book")
+            val chapter = args?.getInt("chapter") ?: 1
+            val start = args?.getInt("start") ?: -1
+            val end = args?.getInt("end") ?: -1
+            // Rebuild the target once; both doors out derive their routes from
+            // it, so section, book and chapter can never drift apart.
+            val target = if (psalm >= 1) {
+                com.agpeya.app.data.ReadingTarget.Psalm(
+                    number = psalm,
+                    sectionIndex = psalm - 1,
+                    startVerse = start.takeIf { it >= 1 },
+                    endVerse = end.takeIf { it >= 1 },
+                )
+            } else {
+                com.agpeya.app.data.ReadingTarget.NtPassage(
+                    bookKey = bookKey ?: "matthew",
+                    chapter = chapter,
+                    start = start.takeIf { it >= 1 },
+                    end = end.takeIf { it >= 1 },
+                )
+            }
+            com.agpeya.app.ui.gitsawe.GitsawePassageScreen(
+                onWriteNote = { route, label ->
+                    navController.navigate(writeNoteRoute(route, label)) { launchSingleTop = true }
+                },
+                psalm = psalm,
+                bookKey = bookKey,
+                chapter = chapter,
+                start = start,
+                end = end,
+                role = args?.getString("role"),
+                onOpenCatena = { route -> navController.navigate(route) { launchSingleTop = true } },
+                chant = args?.getString("chant"),
+                chantAmharic = args?.getString("chantAm"),
+                onBack = { navController.popBackStack() },
+                onOpenBook = {
+                    navController.navigate(com.agpeya.app.data.GitsaweLinks.bookRoute(target)) { launchSingleTop = true }
+                },
+                onOpenChapter = { geez ->
+                    val route = com.agpeya.app.data.GitsaweLinks.chapterRoute(target) +
+                        if (target is com.agpeya.app.data.ReadingTarget.Psalm && geez) "&lang=gez" else ""
+                    navController.navigate(route) { launchSingleTop = true }
+                },
+            )
+        }
+        composable(
+            route = "synaxarium/{epochDay}?entry={entry}&section={section}",
+            arguments = listOf(
+                navArgument("section") { type = NavType.StringType; nullable = true; defaultValue = null },
+                navArgument("epochDay") { type = NavType.LongType },
+                navArgument("entry") { type = NavType.IntType; defaultValue = -1 },
+            ),
+        ) { backStackEntry ->
+            com.agpeya.app.ui.gitsawe.SynaxariumScreen(
+                epochDay = backStackEntry.arguments?.getLong("epochDay") ?: 0L,
+                initialEntry = backStackEntry.arguments?.getInt("entry") ?: -1,
+                initialSection = backStackEntry.arguments?.getString("section"),
+                onWriteNote = { route, label -> navController.navigate(writeNoteRoute(route, label)) },
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable("settings/reading") {
+            com.agpeya.app.ui.settings.ReadingSettingsScreen(
+                onBack = { navController.popBackStack() },
+                onOpenFonts = { navController.navigate("settings/reading/fonts") { launchSingleTop = true } },
+                onOpenCopyFormat = { navController.navigate("settings/reading/copy") { launchSingleTop = true } },
+            )
+        }
+        composable("settings/reading/fonts") {
+            com.agpeya.app.ui.settings.ReadingFontScreen(onBack = { navController.popBackStack() })
+        }
+        composable("settings/reading/copy") {
+            com.agpeya.app.ui.settings.CopyFormatScreen(onBack = { navController.popBackStack() })
+        }
+        composable("settings/prayer") {
+            com.agpeya.app.ui.settings.PrayerSettingsScreen(
+                onBack = { navController.popBackStack() },
+                onOpenManageHours = { navController.navigate("customize") { launchSingleTop = true } },
+                onOpenManageHabits = { navController.navigate("habits") { launchSingleTop = true } },
+            )
+        }
+        composable("settings/reminders") {
+            com.agpeya.app.ui.settings.RemindersSettingsScreen(
+                onBack = { navController.popBackStack() },
+                onOpenModes = { navController.navigate("modes") { launchSingleTop = true } },
+                onOpenHours = { navController.navigate("customize") { launchSingleTop = true } },
+                onOpenSpecialHabit = { habit ->
+                    navController.navigate("intention/${habit.name.lowercase()}") { launchSingleTop = true }
+                },
+            )
+        }
+        composable("books") {
+            com.agpeya.app.ui.books.BookShelfScreen(
+                onBack = { navController.popBackStack() },
+                onOpenShelf = { key -> navController.navigate("books/$key") { launchSingleTop = true } },
+                onOpenMahlets = { navController.navigate("mahlets") { launchSingleTop = true } },
+            )
+        }
+        // The shelf keys are ASCII slugs from the content index ("zema",
+        // "melkie", …), so they need no encoding to ride in the route.
+        composable(
+            route = "books/{shelf}",
+            arguments = listOf(navArgument("shelf") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            com.agpeya.app.ui.books.BookShelfPageScreen(
+                shelfKey = backStackEntry.arguments?.getString("shelf").orEmpty(),
+                onBack = { navController.popBackStack() },
+                onOpen = { id -> navController.navigate("book/$id") { launchSingleTop = true } },
+            )
+        }
+        composable(
+            // ?ch is how a search hit lands on the chapter that matched rather
+            // than on the head of a book that can run to twenty-three of them.
+            route = "book/{bookId}?ch={ch}&blk={blk}",
+            arguments = listOf(
+                navArgument("bookId") { type = NavType.StringType },
+                navArgument("ch") { type = NavType.IntType; defaultValue = 0 },
+                navArgument("blk") { type = NavType.IntType; defaultValue = -1 },
+            ),
+        ) { backStackEntry ->
+            com.agpeya.app.ui.books.BookScreen(
+                bookId = backStackEntry.arguments?.getString("bookId").orEmpty(),
+                openAtChapter = backStackEntry.arguments?.getInt("ch") ?: 0,
+                openAtBlock = backStackEntry.arguments?.getInt("blk") ?: -1,
+                onWriteNote = { route, label -> navController.navigate(writeNoteRoute(route, label)) { launchSingleTop = true } },
+                onBack = { navController.popBackStack() },
+                onOpenBook = { id -> navController.navigate("book/$id") { launchSingleTop = true } },
+            )
+        }
+        composable("mahlets") {
+            com.agpeya.app.ui.mahlet.MahletListScreen(
+                onBack = { navController.popBackStack() },
+                onOpen = { id -> navController.navigate("mahlet/$id") { launchSingleTop = true } },
+                onOpenSeason = { navController.navigate("mahlet/season") { launchSingleTop = true } },
+            )
+        }
+        composable("mahlet/season") {
+            com.agpeya.app.ui.mahlet.MahletSeasonScreen(
+                onBack = { navController.popBackStack() },
+                onOpen = { id -> navController.navigate("mahlet/$id") { launchSingleTop = true } },
+            )
+        }
+        composable(
+            route = "mahlet/{orderId}",
+            arguments = listOf(navArgument("orderId") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            com.agpeya.app.ui.mahlet.MahletScreen(
+                orderId = backStackEntry.arguments?.getString("orderId").orEmpty(),
+                onWriteNote = { route, label -> navController.navigate(writeNoteRoute(route, label)) },
+                onBack = { navController.popBackStack() },
+                // Straight to the stanza being sung, not the head of a hymn
+                // forty stanzas long.
+                onOpenBook = { id, ch, blk ->
+                    navController.navigate("book/$id?ch=$ch&blk=$blk") { launchSingleTop = true }
+                },
+            )
+        }
+        composable("settings/records") {
+            com.agpeya.app.ui.settings.RecordsScreen(
+                onBack = { navController.popBackStack() },
+                onOpenTithe = { navController.navigate("tithe") { launchSingleTop = true } },
+                onOpenVows = { navController.navigate("vows") { launchSingleTop = true } },
+                onOpenPenance = { navController.navigate("penance") { launchSingleTop = true } },
+                onOpenMarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
+                onOpenPrayerList = { navController.navigate("prayerlist") { launchSingleTop = true } },
+                onOpenFasting = { navController.navigate("fasting") { launchSingleTop = true } },
+            )
+        }
+        composable(
+            route = "intention/{habit}",
+            arguments = listOf(navArgument("habit") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val habit = when (backStackEntry.arguments?.getString("habit")) {
+                "repentance" -> com.agpeya.app.reminders.SpecialHabit.REPENTANCE
+                "tithe" -> com.agpeya.app.reminders.SpecialHabit.TITHE
+                else -> com.agpeya.app.reminders.SpecialHabit.ALMS
+            }
+            com.agpeya.app.ui.settings.SpecialHabitScreen(
+                habit = habit,
+                onBack = { navController.popBackStack() },
+                onOpenConfessionPrep = {
+                    navController.navigate("confessionPrep") { launchSingleTop = true }
+                },
+                onOpenPenance = { navController.navigate("penance") { launchSingleTop = true } },
+            )
+        }
+        composable("tithe") {
+            com.agpeya.app.ui.settings.TitheScreen(
+                onBack = { navController.popBackStack() },
+                onOpenReminders = {
+                    navController.navigate("intention/tithe") { launchSingleTop = true }
+                },
+            )
+        }
+        composable("vows") {
+            com.agpeya.app.ui.settings.VowScreen(onBack = { navController.popBackStack() })
+        }
+        composable("penance") {
+            com.agpeya.app.ui.nisiha.PenanceScreen(onBack = { navController.popBackStack() })
+        }
+        composable("confessionPrep") {
+            com.agpeya.app.ui.nisiha.ConfessionPrepScreen(
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable("reading") {
+            com.agpeya.app.ui.reading.ReadingPlanScreen(
+                onBack = { navController.popBackStack() },
+                onOpenRoute = { route -> navController.navigate(route) { launchSingleTop = true } },
+                onOpenGitsawe = { navController.navigate("gitsawe") { launchSingleTop = true } },
+                onOpenAllDays = { planId ->
+                    navController.navigate("reading/days/$planId") { launchSingleTop = true }
+                },
+                onOpenMap = { navController.navigate("reading/map") { launchSingleTop = true } },
+            )
+        }
+        composable("reading/choose") {
+            com.agpeya.app.ui.reading.ReadingChooseScreen(
+                onBack = { navController.popBackStack() },
+                onStarted = { navController.popBackStack() },
+            )
+        }
+        composable("reading/map") {
+            com.agpeya.app.ui.reading.ReadingMapScreen(
+                onBack = { navController.popBackStack() },
+                onOpenRoute = { route -> navController.navigate(route) { launchSingleTop = true } },
+            )
+        }
+        composable(
+            route = "reading/days/{planId}",
+            arguments = listOf(navArgument("planId") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            com.agpeya.app.ui.reading.ReadingPlanDaysScreen(
+                planId = backStackEntry.arguments?.getString("planId").orEmpty(),
+                onBack = { navController.popBackStack() },
+                onOpenRoute = { route -> navController.navigate(route) { launchSingleTop = true } },
+            )
+        }
+        composable(
+            route = "reading/{hourId}?section={section}&sectionId={sectionId}",
+            arguments = listOf(
+                navArgument("hourId") { type = NavType.StringType },
+                navArgument("section") { type = NavType.IntType; defaultValue = -1 },
+                navArgument("sectionId") { type = NavType.StringType; nullable = true; defaultValue = null },
+            ),
+        ) { backStackEntry ->
+            ReadingScreen(
+                hourId = backStackEntry.arguments?.getString("hourId") ?: "morning",
+                initialSectionIndex = backStackEntry.arguments?.getInt("section") ?: -1,
+                initialSectionId = backStackEntry.arguments?.getString("sectionId"),
+                onBack = { navController.popBackStack() },
+                onSwitchHour = { id ->
+                    navController.navigate("reading/$id") {
+                        popUpTo("reading/{hourId}?section={section}&sectionId={sectionId}") { inclusive = true }
+                    }
+                },
+                onWriteNote = { route, label ->
+                    navController.navigate(writeNoteRoute(route, label)) { launchSingleTop = true }
+                },
+            )
+        }
+        composable("modes") {
+            ModesScreen(
+                onBack = { navController.popBackStack() },
+                onEditMode = { modeId -> navController.navigate("mode/$modeId") { launchSingleTop = true } },
+                onOpenBatteryHelp = { navController.navigate("battery") { launchSingleTop = true } },
+            )
+        }
+        composable("battery") {
+            com.agpeya.app.ui.settings.BatteryHelpScreen(onBack = { navController.popBackStack() })
+        }
+        composable("mode/{modeId}") { backStackEntry ->
+            val modeId = backStackEntry.arguments?.getString("modeId") ?: return@composable
+            ModeEditorScreen(modeId = modeId, onBack = { navController.popBackStack() })
+        }
+        composable("customize") {
+            com.agpeya.app.ui.hours.ManageHoursScreen(
+                onBack = { navController.popBackStack() },
+                onEditHour = { hourId -> navController.navigate("customize/$hourId") { launchSingleTop = true } },
+                onOpenModes = { navController.navigate("modes") { launchSingleTop = true } },
+            )
+        }
+        composable("customize/{hourId}") { backStackEntry ->
+            val hourId = backStackEntry.arguments?.getString("hourId") ?: return@composable
+            CustomizeHourScreen(hourId = hourId, onBack = { navController.popBackStack() })
+        }
+        composable("whatsNew") {
+            // Replays the newest tour whatever the stored version says, so
+            // skipping it on launch is never a decision you cannot undo.
+            val context = androidx.compose.ui.platform.LocalContext.current
+            // Nullable while the asset loads. Reading the empty default as "no
+            // tour" popped the screen on its first frame, which is why this row
+            // appeared to do nothing at all.
+            val content by androidx.compose.runtime.produceState<com.agpeya.app.model.TourContent?>(null) {
+                value = com.agpeya.app.data.TourRepository.content(context)
+            }
+            val loaded = content
+            val newest = loaded?.tours?.filter { it.pages.isNotEmpty() }?.maxByOrNull { it.versionCode }
+            when {
+                loaded == null -> com.agpeya.app.ui.common.LoadingPanel()
+                newest == null -> LaunchedEffect(Unit) { navController.popBackStack() }
+                else -> com.agpeya.app.ui.intro.WhatsNewTour(
+                    tour = newest,
+                    onOpenRoute = { route ->
+                        navController.popBackStack()
+                        navController.navigate(route) { launchSingleTop = true }
+                    },
+                    onDone = { navController.popBackStack() },
+                )
+            }
+        }
+        composable("tutorial") {
+            com.agpeya.app.ui.intro.TutorialScreen(onDone = { navController.popBackStack() }, onOpenRoute = { route ->
+                navController.popBackStack()
+                if (route == Tab.JOURNEY.route) goToTab(Tab.JOURNEY)
+                else navController.navigate(route) { launchSingleTop = true }
+            })
+        }
+        composable("changelog") {
+            ChangelogScreen(
+                onBack = { navController.popBackStack() },
+                onOpenTour = { navController.navigate("whatsNew") { launchSingleTop = true } },
+            )
+        }
+        composable("about") {
+            AboutScreen(
+                onBack = { navController.popBackStack() },
+                onOpenLicenses = { navController.navigate("licenses") { launchSingleTop = true } },
+            )
+        }
+        composable("licenses") {
+            com.agpeya.app.ui.settings.LicensesScreen(onBack = { navController.popBackStack() })
+        }
+    }
+}

@@ -1,0 +1,279 @@
+package com.agpeya.app.ui.customize
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import com.agpeya.app.ui.common.SinqTopBar
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import com.agpeya.app.data.ContentRepository
+import com.agpeya.app.data.LayoutRepository
+import com.agpeya.app.data.PrayerLayout
+import com.agpeya.app.model.Hour
+import com.agpeya.app.model.HourLayout
+import com.agpeya.app.model.Section
+import kotlinx.coroutines.launch
+import com.agpeya.app.ui.theme.Spacing
+import com.agpeya.app.ui.theme.IconSize
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CustomizeHourScreen(hourId: String, onBack: () -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val hour by produceState<Hour?>(initialValue = null, hourId) {
+        value = com.agpeya.app.data.HoursRepository.hourById(context, hourId)
+    }
+    val layout by LayoutRepository.layout(context, hourId).collectAsState(initial = HourLayout())
+    val ordered by produceState(emptyList<Section>(), hour, layout) {
+        val h = hour
+        value = if (h == null) emptyList()
+        else {
+            val extras = layout.added.mapNotNull { ContentRepository.psalm(context, it) }
+            PrayerLayout.ordered(h.sections, extras, layout)
+        }
+    }
+    val s = com.agpeya.app.ui.strings.LocalStrings.current
+    var resetting by remember { mutableStateOf(false) }
+    var removing by remember { mutableStateOf<Int?>(null) }
+    var showPicker by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
+
+    fun persistOrder(list: List<Section>) {
+        scope.launch { LayoutRepository.setOrder(context, hourId, list.map { it.id }) }
+    }
+
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            SinqTopBar(
+                title = hour?.name ?: "",
+                onBack = onBack,
+                actions = {
+                    TextButton(onClick = { resetting = true }) {
+                        Text(s.resetLayout, style = MaterialTheme.typography.labelLarge)
+                    }
+                },
+            )
+        },
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        ) {
+            items(ordered.size, key = { ordered[it].id }) { index ->
+                val section = ordered[index]
+                val hidden = section.id in layout.hidden
+                val added = section.number != null && section.number in layout.added
+                SectionEditRow(
+                    section = section,
+                    hidden = hidden,
+                    canMoveUp = index > 0,
+                    canMoveDown = index < ordered.size - 1,
+                    onToggleHidden = {
+                        scope.launch { LayoutRepository.toggleHidden(context, hourId, section.id) }
+                    },
+                    onMoveUp = {
+                        val list = ordered.toMutableList().apply { add(index - 1, removeAt(index)) }
+                        persistOrder(list)
+                    },
+                    onMoveDown = {
+                        val list = ordered.toMutableList().apply { add(index + 1, removeAt(index)) }
+                        persistOrder(list)
+                    },
+                    onRemove = if (added) {
+                        { removing = section.number }
+                    } else null,
+                )
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            }
+            item {
+                Spacer(Modifier.height(Spacing.md))
+                TextButton(onClick = { showPicker = true }) { Text("＋ ${s.addPsalm}") }
+            }
+        }
+    }
+
+    if (resetting || removing != null) androidx.compose.material3.AlertDialog(
+        onDismissRequest = { resetting = false; removing = null },
+        title = { Text(if (resetting) s.resetLayout else s.remove) },
+        text = { Text(if (resetting) s.resetLayout else "${s.psalterTitle} ${removing}") },
+        confirmButton = { TextButton(onClick = { scope.launch {
+            if (resetting) LayoutRepository.reset(context, hourId)
+            else removing?.let { LayoutRepository.removePsalm(context, hourId, it) }
+            resetting = false; removing = null
+        } }) { Text(s.ok) } },
+        dismissButton = { TextButton(onClick = { resetting = false; removing = null }) { Text(s.cancel) } },
+    )
+    if (showPicker) {
+        ModalBottomSheet(onDismissRequest = { showPicker = false }, sheetState = sheetState) {
+            PsalmPicker(
+                title = s.choosePsalm,
+                existing = ordered.mapNotNull { it.number }.toSet(),
+                onPick = { number ->
+                    scope.launch {
+                        LayoutRepository.addPsalm(context, hourId, number)
+                        sheetState.hide()
+                        showPicker = false
+                    }
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun PsalmPicker(title: String, existing: Set<Int>, onPick: (Int) -> Unit) {
+    val context = LocalContext.current
+    val psalms by produceState(emptyList<Section>()) { value = ContentRepository.psalter(context) }
+    var query by remember { mutableStateOf("") }
+    val digits = query.filter { it.isDigit() }
+    val filtered = if (digits.isEmpty()) psalms
+    else psalms.filter { it.number.toString().startsWith(digits) }
+
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
+        Text(title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.height(Spacing.sm))
+        OutlinedTextField(
+            value = query,
+            onValueChange = { query = it },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            placeholder = { Text("1 – 150") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        )
+        Spacer(Modifier.height(Spacing.sm))
+        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+            items(filtered.size, key = { filtered[it].id }) { i ->
+                val p = filtered[i]
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(enabled = p.number !in existing) { p.number?.let(onPick) }
+                        .padding(vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(p.title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
+                        p.subtitle?.let {
+                            Text(
+                                it,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                            )
+                        }
+                    }
+                    Text(
+                        text = p.number?.toString().orEmpty() + if (p.number in existing) " ✓" else "",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            }
+            item { Spacer(Modifier.height(Spacing.xxl)) }
+        }
+    }
+}
+
+@Composable
+private fun SectionEditRow(
+    section: Section,
+    hidden: Boolean,
+    canMoveUp: Boolean,
+    canMoveDown: Boolean,
+    onToggleHidden: () -> Unit,
+    onMoveUp: () -> Unit,
+    onMoveDown: () -> Unit,
+    onRemove: (() -> Unit)? = null,
+) {
+    val s = com.agpeya.app.ui.strings.LocalStrings.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(onClick = onToggleHidden) {
+            Icon(
+                imageVector = if (hidden) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
+                contentDescription = if (hidden) s.showSection else s.hideSection,
+                tint = if (hidden) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
+            )
+        }
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = section.title,
+                style = MaterialTheme.typography.titleMedium,
+                color = if (hidden) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.graphicsLayer(alpha = if (hidden) 0.5f else 1f),
+            )
+            section.subtitle?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.graphicsLayer(alpha = if (hidden) 0.5f else 1f),
+                )
+            }
+        }
+        var open by remember { mutableStateOf(false) }
+        androidx.compose.foundation.layout.Box {
+            IconButton(onClick = { open = true }) { Icon(Icons.Outlined.MoreVert, contentDescription = s.moreActions) }
+            androidx.compose.material3.DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+                androidx.compose.material3.DropdownMenuItem(text = { Text(s.moveUp) }, enabled = canMoveUp,
+                    onClick = { open = false; onMoveUp() })
+                androidx.compose.material3.DropdownMenuItem(text = { Text(s.moveDown) }, enabled = canMoveDown,
+                    onClick = { open = false; onMoveDown() })
+                if (onRemove != null) androidx.compose.material3.DropdownMenuItem(text = { Text(s.remove) },
+                    onClick = { open = false; onRemove() })
+            }
+        }
+    }
+}

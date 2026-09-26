@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" role="img" aria-label="Sinq launcher mark — extra thin lines">
+<title>Sinq launcher mark — extra thin</title>
+<g id="background"><rect width="108" height="108" fill="#0E3B31"/></g>
+<g id="mark" fill="none">
+  <path fill="#E8C46B" d="M52.3,26 h3.4 v9.1 h10.3 v3.4 h-10.3 v13.5 h-3.4 v-13.5 h-10.3 v-3.4 h10.3 Z"/>
+  <path fill="#E8C46B" d="M43.5,66 A10.5,10.5 0 0 1 64.5,66 Z"/>
+  <path stroke="#E8C46B" stroke-width="1.3" stroke-linecap="round" d="M29,66 L79,66"/>
+  <path stroke="#E8C46B" stroke-width="1.3" stroke-linecap="round" d="M60.3,52.4 L62.9,47 M65.5,56.4 L70.1,52.5 M68.5,62.1 L74.3,60.6 M47.7,52.4 L45.1,47 M42.5,56.4 L37.9,52.5 M39.5,62.1 L33.7,60.6"/>
+</g>
+</svg>

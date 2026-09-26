@@ -1,0 +1,75 @@
+{
+  "_comment": "Hour -> psalms + gospel mapping. Psalm numbers are LXX/Geez numbering, matching chapter numbers in 80-weahadu data/am/28-psalms.json directly (verified: ch62 = morning psalm 'O God my God I seek you'). Source of lists: agpeya.org per-hour pages, fetched 2026-06-12. MUST be confirmed by the fluent reviewer before release. Psalm 118 stanzas: 22 stanzas of 8 verses each (verses 1-176).",
+  "mappingVersion": 1,
+  "books": {
+    "psalms": "28-psalms.json",
+    "matthew": "55-matthew.json",
+    "luke": "57-luke.json",
+    "john": "58-john.json"
+  },
+  "hours": [
+    {
+      "id": "morning",
+      "psalms": [1, 2, 3, 4, 5, 6, 8, 11, 12, 14, 15, 18, 24, 26, 50, 62, 66, 69, 112, 142],
+      "gospel": [{ "book": "john", "chapter": 1, "fromVerse": 1, "toVerse": 17 }]
+    },
+    {
+      "id": "terce",
+      "psalms": [50, 19, 22, 23, 25, 28, 29, 33, 40, 42, 44, 45, 46],
+      "gospel": [
+        { "book": "john", "chapter": 14, "fromVerse": 26, "toVerse": 31 },
+        { "book": "john", "chapter": 15, "fromVerse": 1, "toVerse": 4 }
+      ]
+    },
+    {
+      "id": "sext",
+      "psalms": [50, 53, 56, 60, 62, 66, 69, 83, 84, 85, 86, 90, 92],
+      "gospel": [{ "book": "matthew", "chapter": 5, "fromVerse": 1, "toVerse": 16 }]
+    },
+    {
+      "id": "none",
+      "psalms": [50, 95, 96, 97, 98, 99, 100, 109, 110, 111, 112, 114, 115],
+      "gospel": [{ "book": "luke", "chapter": 9, "fromVerse": 10, "toVerse": 17 }]
+    },
+    {
+      "id": "vespers",
+      "psalms": [50, 116, 117, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128],
+      "gospel": [{ "book": "luke", "chapter": 4, "fromVerse": 38, "toVerse": 41 }]
+    },
+    {
+      "id": "compline",
+      "psalms": [50, 129, 130, 131, 132, 133, 136, 137, 140, 141, 145, 146, 147],
+      "gospel": [{ "book": "luke", "chapter": 2, "fromVerse": 25, "toVerse": 32 }]
+    },
+    {
+      "id": "midnight",
+      "watches": [
+        {
+          "name": "watch1",
+          "psalms": [3, 6, 12, 69, 85, 90, 116, 117],
+          "psalm118Stanzas": { "from": 1, "to": 22 },
+          "gospel": [{ "book": "matthew", "chapter": 25, "fromVerse": 1, "toVerse": 13 }]
+        },
+        {
+          "name": "watch2",
+          "psalms": [119, 120, 121, 122, 123, 124, 125, 126, 127, 128],
+          "gospel": [{ "book": "luke", "chapter": 7, "fromVerse": 36, "toVerse": 50 }]
+        },
+        {
+          "name": "watch3",
+          "psalms": [129, 130, 131, 132, 133, 136, 137, 140, 141, 145, 146, 147],
+          "gospel": [
+            { "book": "luke", "chapter": 12, "fromVerse": 32, "toVerse": 46 },
+            { "book": "luke", "chapter": 2, "fromVerse": 29, "toVerse": 32 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "veil",
+      "psalms": [4, 6, 8, 12, 15, 24, 26, 66, 69, 22, 29, 42, 56, 85, 90, 96, 109, 114, 115, 120, 128, 129, 130, 131, 132, 133, 136, 140, 145],
+      "psalm118Stanzas": { "from": 20, "to": 22 },
+      "gospel": [{ "book": "john", "chapter": 6, "fromVerse": 15, "toVerse": 23 }]
+    }
+  ]
+}

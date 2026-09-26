@@ -1,0 +1,190 @@
+Sinq (ስንቅ)
+Copyright 2026 Natinael
+
+This product includes software developed by the Sinq project.
+The SOURCE CODE is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+--------------------------------------------------------------------------------
+IMPORTANT: THE BUNDLED CONTENT IS NOT UNDER THE APACHE LICENSE
+--------------------------------------------------------------------------------
+
+Everything under app/src/main/assets/content/ is third-party content carrying
+its own terms. Forking this repository does NOT grant Apache-2.0 rights over it.
+Redistributors must satisfy each source's licence independently.
+
+These notices are also shown inside the app: Settings -> Licenses & sources
+(app/src/main/java/com/agpeya/app/ui/settings/LicensesScreen.kt), which carries
+the full SIL OFL 1.1 and MIT licence texts.
+
+1. PRAYER AND SCRIPTURE TEXT
+   80-weahadu Amharic Bible — EOTCOpenSource
+   https://github.com/EOTCOpenSource/80-weahadu
+   Licence: Creative Commons Attribution-NonCommercial-NoDerivatives 4.0
+            International (CC BY-NC-ND 4.0)
+            https://creativecommons.org/licenses/by-nc-nd/4.0/
+
+   This covers ALL bundled scripture: the Bible books readable in the Library,
+   the Psalter (Amharic and Ge'ez), and the psalms and gospels arranged into
+   the hours of prayer. The verse text is reproduced unchanged, except that
+   the acrostic letters of Psalm 118 are rendered as stanza headings and psalm
+   chapter labels follow the Ge'ez (LXX) numbering.
+
+   CONSEQUENCE: this content may NOT be used commercially and may NOT be
+   redistributed in modified form — by this project or by anyone forking it.
+   Sinq is and will remain non-commercial: no ads, no in-app purchases, no
+   subscriptions.
+
+2. ውዳሴ ማርያም (WUDASE MARYAM) AND ጸሎት ዘዘወትር
+   Source: https://github.com/tecleet/wudase-mariam (no licence stated)
+   The underlying prayer is centuries-old, public-domain Ethiopian Orthodox
+   liturgical text; this particular digitisation is credited to that repository
+   and reshaped into stanzas by tools/build_wudase.py. If you hold rights to
+   that transcription and want it removed or re-credited, please open an issue.
+
+3. ስንክሳር (SYNAXARIUM)
+   Both editions — መጽሐፈ ስንክሳር በአማርኛ and መጽሐፈ ስንክሳር በግእዝ, 366 days each —
+   were scanned from available PDF scans of the printed books by the Sinq
+   maintainer, who releases them as open content under CC BY-NC-ND 4.0, the
+   same terms as the bundled Bible text. Built by tools/build_sinksar.py.
+   The underlying commemorations are traditional Ethiopian Orthodox
+   liturgical content.
+
+   The text is reproduced as the scans carry it, with three disclosed
+   exceptions: each paragraph's number is written twice in the source, once
+   in Arabic and once in Ge'ez, and only the Ge'ez is kept (all 18,764 of
+   them agree, which the generator re-proves on every run); editorial
+   dingbats and stray markup are removed; and two Ge'ez days that carry no
+   heading block are given one naming their date.
+
+   Earlier releases of Sinq bundled the Amharic synaxarium from the
+   gitsaweandsinksarbot project by hailemariam-eyayu
+   (https://github.com/hailemariam-eyayu/gitsaweandsinksarbot) and the
+   Nexuss0781/synaxarium dataset on the Hugging Face Hub
+   (https://huggingface.co/datasets/Nexuss0781/synaxarium). Neither is
+   bundled any longer.
+
+4. ሥርዓተ ማኅሌት (MAHLET)
+   The orders of service are merged from three sources. The spine is a
+   book-first editorial edition (sources/mahlet/) of ሥርዓተ ማኅሌት ዘዓበይት በዓላት,
+   scanned from an available PDF scan of the printed book by the Sinq
+   maintainer, set beside the editions of the same orders posted on the
+   EOTC Mahlet Telegram channel (https://t.me/EOTCmahlet); each edition keeps
+   the link to the post it came from, and where the book has no order and the
+   channel does, the order says so. The ዘመነ ጽጌ አቋቋም volumes, likewise scanned
+   by the maintainer, give the season its dated orders; the two orders nothing
+   else carries come from the ግጻዌ credited below and are labelled with it.
+   Released as open content under CC BY-NC-ND 4.0. Built by
+   tools/build_mahlet.py; the merge's own rules and review files are in
+   sources/mahlet/README.md.
+
+5. ግጻዌ (GITSAWE)
+   The lectionary (the fixed 366-day cycle plus the movable, Sunday,
+   Athanasius, and Bahre Hasab collections) was scanned and transcribed from
+   the printed ግጻዌ by the Sinq maintainer, who releases it as open content
+   under CC BY-NC-ND 4.0 — the same terms as the bundled Bible text. The
+   underlying lectionary is traditional Ethiopian Orthodox liturgical
+   material.
+
+--------------------------------------------------------------------------------
+CHURCH BOOKS (ሌሎች መጻሕፍት)
+--------------------------------------------------------------------------------
+
+The thirty-seven books on the ሌሎች መጻሕፍት shelf — the መልክእ hymns, all of them
+scanned out of the printed collection መልክዐ ጉባኤ, together with መጽሐፈ ሰዓታት,
+ማኅሌተ ጽጌ, ሰቆቃወ ድንግል and ጸሎት ነቢያት — were scanned from
+available PDF scans of the printed books by the Sinq maintainer, and are
+released as open content under the Creative Commons
+Attribution-NonCommercial-NoDerivatives 4.0 International licence
+(https://creativecommons.org/licenses/by-nc-nd/4.0), the same terms as the
+bundled scripture. The underlying texts are traditional Ethiopian Orthodox
+Tewahedo liturgical material.
+
+The text is reproduced as the scans carry it, with three disclosed exceptions:
+
+  * The printer's tier marks ፪ማ፡ and ማ፡, which mark where a line of a stanza
+    breaks, are rendered as those line breaks rather than as characters.
+  * መጽሐፈ ሰዓታት is merged from three scanned copies of the printed book the
+    Ethiopian Orthodox Tewahedo Church publishes on its own site,
+    https://www.ethiopianorthodox.org/amharic/holybooks/Metsehafeseatat.pdf.
+    The bilingual copy is the spine; the Ge'ez-only copy restores the lines its
+    scan dropped; the offices carried only by the ደብረ ዓባይ recension are
+    labelled with that name.
+  * ጸሎት ነቢያት በአማርኛ has twenty chapters where its scan has fifteen. The five
+    it lacked — መኃልየ መኃልይ in the five readings the Ge'ez copy divides it
+    into — are the Song of Songs from the bundled Bible (80-weahadu, above),
+    not a scan. The Ge'ez copy is missing 2:1–7 at the seam between its first
+    two readings; the Amharic is built from a complete text and does not
+    reproduce that gap.
+
+  ማኅሌተ ጽጌ is shipped with its Amharic set against the Ge'ez verse by verse.
+  ሰቆቃወ ድንግል's Amharic is one verse short of its Ge'ez and nothing in the text
+  says which is missing, so it is appended whole under its own heading rather
+  than interleaved — a positional pairing would be wrong after the gap.
+
+  Built by tools/build_books.py, tools/merge_seatat.py and tools/merge_tsige.py.
+
+--------------------------------------------------------------------------------
+PATRISTIC COMMENTARY (CATENA BIBLE)
+--------------------------------------------------------------------------------
+
+A selected verse offers a link to catenabible.com, where the commentary of the
+Church Fathers on that verse is collected. No commentary text is bundled with
+the app, none is copied out of the site, and nothing about the reader is sent
+when the page is opened.
+
+The page opens in a WebView inside the app rather than in the browser, for one
+reason: Catena groups its commentators by tradition and will serve a single
+group if asked, and the ask is a cookie its server reads. Sinq sets that cookie
+to Early Fathers — in Catena's own words, "all fathers venerated in all churches
+in communion with the Church of Alexandria" — so the page arrives without the
+later Western and Byzantine writers. A Custom Tab could not do this: its cookies
+are the browser's own, and no app may write to them.
+
+The cookie lives in this app's WebView store alone. It does not touch the
+browser, and it does not change what the reader has chosen for themselves on the
+site. The page is still plainly Catena's: its address is in the bar, links away
+from it open in a real browser, and an action in the corner hands the same URL
+to one.
+
+Catena carries 76 books. Sinq carries 93, so seventeen have no page there and
+are given no link — the Ethiopian deuterocanon the site does not reach (ሄኖክ,
+ኩፋሌ, ፫ መቃብያን, ዕዝራ ካልእ, and the Daniel and Esther fragments) and the nine
+broader-canon books. That is 19.5% of the app's verses.
+
+The Psalter's chapter number is translated on the way out. Sinq numbers its
+psalms as the Church does, following the Septuagint; Catena numbers them as the
+Masoretic text does, so መዝሙር ፳፪ is Psalm 23 there. The table is read out of the
+bundled Psalter, whose headings carry the other number in parentheses, and is
+held to it by CatenaLinkTest. Every other book is linked unchanged.
+
+--------------------------------------------------------------------------------
+FONTS
+--------------------------------------------------------------------------------
+
+All bundled fonts are under the SIL Open Font License 1.1
+(https://openfontlicense.org). The OFL permits bundling, embedding and
+redistribution with software, provided the fonts are not sold on their own and
+reserved names are not used by derivative works.
+
+  * Abyssinica SIL — SIL International
+    https://software.sil.org/abyssinica/  (see docs/AbyssinicaSIL-OFL.txt)
+  * Noto Sans Ethiopic — Google
+  * Ethiopic Abay Light — abass alamnehe (via Font.et)
+  * Bela Bereka — Abel Daniel (via Font.et)
+  * Zemenay — Abel Yeshewalem (via Font.et)
+  * ዋልድባ (Waldba, Yigezu Bisrat Goffer) — Abass Alamnehe (via Font.et)
+
+  Per-font notices are in docs/fonts/.
+
+  All four Font.et faces are obtained from the Font.et open font library
+  (https://font.et), which distributes them under the SIL OFL. (Zemenay's
+  embedded metadata also names an "ETHL" licence; per the maintainer, the
+  Font.et open-library terms are the ones this app relies on.)
+
+--------------------------------------------------------------------------------
+THIRD-PARTY LIBRARIES
+--------------------------------------------------------------------------------
+
+  * Jetpack Compose, Material 3, Navigation, DataStore — The Android Open
+    Source Project, Apache License 2.0
+  * kotlinx.serialization, Kotlin stdlib — JetBrains, Apache License 2.0

@@ -1,0 +1,674 @@
+package com.agpeya.app.ui.reading
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.TextButton
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.SaveAlt
+import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.FormatColorReset
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.BaselineShift
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
+import com.agpeya.app.data.HighlightRepository
+import com.agpeya.app.model.Section
+import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.theme.IconSize
+import com.agpeya.app.ui.theme.LocalMotion
+import com.agpeya.app.ui.theme.Motion
+import com.agpeya.app.ui.theme.Spacing
+import com.agpeya.app.ui.theme.readingVerseGap
+import com.agpeya.app.ui.theme.scaledReadingSp
+import com.agpeya.app.ui.theme.inReadingFont
+import com.agpeya.app.ui.theme.readingBodyStyle
+import com.agpeya.app.ui.theme.sinqColors
+import kotlinx.coroutines.launch
+import com.agpeya.app.ui.common.Passage
+import androidx.compose.material.icons.outlined.EditNote
+import androidx.compose.material.icons.outlined.HistoryEdu
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
+
+/**
+ * Section rendering shared by the hour reader, the Psalter and the scripture
+ * readers — one reading language across all of them.
+ *
+ * The layout follows what praying actually looks like: the title sits alone and
+ * genuinely centred, and the text runs uninterrupted beneath it to the end of
+ * the section. Bookmarking is the only control, and it stays at the head, muted
+ * until it is set — nothing sits between the title and the first verse, and
+ * nothing waits at the foot asking to be tapped.
+ */
+@Composable
+internal fun SectionView(
+    section: Section,
+    bodyFontSp: Int,
+    isBookmarked: Boolean,
+    onToggleBookmark: () -> Unit,
+) {
+    val s = LocalStrings.current
+    val haptics = LocalHapticFeedback.current
+    val motion = LocalMotion.current
+    val bookmarkTint by animateColorAsState(
+        // Muted, but not below the 3:1 an icon control needs against the page.
+        targetValue = if (isBookmarked) MaterialTheme.colorScheme.secondary
+        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+        animationSpec = motion.spec(Motion.standard),
+        label = "bookmarkTint",
+    )
+
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Spacer(Modifier.height(Spacing.huge))
+        Box(Modifier.fillMaxWidth()) {
+            Column(
+                // Room for the bookmark on either side, so the title is centred
+                // on the page rather than on "the title plus its buttons".
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 44.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = section.title,
+                    style = MaterialTheme.typography.titleLarge.inReadingFont(),
+                    color = MaterialTheme.colorScheme.secondary,
+                    textAlign = TextAlign.Center,
+                )
+                section.subtitle?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyMedium.inReadingFont(),
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
+            IconButton(
+                onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onToggleBookmark()
+                },
+                modifier = Modifier.align(Alignment.TopEnd),
+            ) {
+                Icon(
+                    imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                    contentDescription = if (isBookmarked) s.removeAction else s.bookmarkAction,
+                    tint = bookmarkTint,
+                    modifier = Modifier.size(IconSize.medium),
+                )
+            }
+        }
+        Spacer(Modifier.height(Spacing.sm))
+        HorizontalDivider(
+            modifier = Modifier.width(32.dp),
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.55f),
+        )
+        Spacer(Modifier.height(Spacing.lg))
+        VerseText(
+            section = section,
+            bodyFontSp = bodyFontSp,
+        )
+    }
+}
+
+/** Prayer text has no saved colours or tap-to-select overlay. Long press still copies text. */
+@Composable
+internal fun VerseText(section: Section, bodyFontSp: Int) {
+    val style = readingBodyStyle(bodyFontSp)
+    val markerColor = MaterialTheme.colorScheme.secondary
+    val markerSize = scaledReadingSp(bodyFontSp) * 0.72f
+    val gutterWidth = (bodyFontSp * 1.65f).dp
+    val verseGap = readingVerseGap(bodyFontSp)
+    androidx.compose.foundation.text.selection.SelectionContainer {
+        Column(Modifier.fillMaxWidth()) {
+            section.verses.forEachIndexed { index, verse ->
+                val number = section.firstVerse + index
+                section.verseHeaders[number]?.let { header ->
+                    Text(header, style = MaterialTheme.typography.titleSmall.inReadingFont(),
+                        color = markerColor, textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(top = if (index == 0) 0.dp else Spacing.xl, bottom = Spacing.sm))
+                }
+                Row(Modifier.fillMaxWidth().padding(vertical = verseGap / 2)
+                    .padding(horizontal = Spacing.sm, vertical = Spacing.xs)) {
+                    Text(geezNumeral(number), style = style.copy(fontSize = markerSize),
+                        color = markerColor, textAlign = TextAlign.End, maxLines = 1,
+                        modifier = Modifier.width(gutterWidth))
+                    Spacer(Modifier.width(Spacing.sm))
+                    // GENERAL: psalmody and the hours are prose and prayer, not
+                    // a saint's office, so the Name reddens and the people the
+                    // Psalms name — ዳዊት, ሙሴ, ያዕቆብ — stay in ink.
+                    Text(
+                        com.agpeya.app.ui.common.rubricated(
+                            verse,
+                            com.agpeya.app.ui.books.Rubrication.Scope.GENERAL,
+                        ),
+                        style = style, color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+/**
+ * The bar that appears when a unit of text is selected.
+ *
+ * Used by study readers and non-prayer passages. Prayer readers intentionally
+ * omit this tap-triggered bar. Paragraph readers have no colour row.
+ *
+ * It slides up from the bottom edge — the shortest possible distance — and
+ * every action closes it, so it is never something to dismiss twice.
+ *
+ * The citation sits at the top, where it does two jobs: it says what is
+ * selected, and it shows where a run stops, since a selection cannot cross a
+ * section boundary.
+ */
+@Composable
+internal fun SelectionBar(
+    visible: Boolean,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    /** The selection itself; null leaves the bar with nothing to act on. */
+    passage: com.agpeya.app.ui.common.Passage? = null,
+    /** Null hides the colour row — the paragraph readers. */
+    currentColor: String? = null,
+    onPick: ((String?) -> Unit)? = null,
+    /** Names the source on the image card: the hour, the Psalter, መጽሐፍ ቅዱስ. */
+    imageKicker: String? = null,
+    onBookmark: (() -> Unit)? = null,
+    onWriteNote: (() -> Unit)? = null,
+    /** The edition's cross references for the selection; empty hides the action. */
+    crossRefs: List<com.agpeya.app.data.CrossReference.Ref> = emptyList(),
+    onOpenRef: (String) -> Unit = {},
+    /**
+     * The Fathers on this verse, at catenabible.com. Null hides the action —
+     * seventeen of the books the app carries have no page there.
+     */
+    commentaryUrl: String? = null,
+) {
+    val motion = LocalMotion.current
+    AnimatedVisibility(
+        visible = visible,
+        modifier = modifier,
+        enter = slideInVertically(motion.spec(Motion.standard)) { it } + fadeIn(motion.spec(Motion.fast)),
+        exit = slideOutVertically(motion.spec(Motion.fast)) { it } + fadeOut(motion.spec(Motion.fast)),
+    ) {
+        val s = LocalStrings.current
+        val ctx = androidx.compose.ui.platform.LocalContext.current
+        val scope = androidx.compose.runtime.rememberCoroutineScope()
+        // Read here rather than in the click handler: sinqColors is a composable
+        // getter and a lambda is not a composition.
+        val tabToolbar = sinqColors.hero
+        val tabOnToolbar = sinqColors.onHero
+        val format by com.agpeya.app.data.SettingsRepository.copyFormat(ctx)
+            .collectAsState(initial = com.agpeya.app.ui.common.CopyFormat())
+        val names by com.agpeya.app.data.SettingsRepository.highlightNames(ctx)
+            .collectAsState(initial = emptyMap())
+        Surface(
+            modifier = Modifier.navigationBarsPadding(),
+            shadowElevation = 8.dp,
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+            ) {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = passage?.let { com.agpeya.app.ui.common.PassageFormat.heading(it) }.orEmpty(),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.secondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
+                    )
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            Icons.Outlined.Close,
+                            contentDescription = s.dismiss,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(IconSize.medium),
+                        )
+                    }
+                }
+                if (onPick != null) {
+                    HighlightRow(
+                        currentColor = currentColor,
+                        names = names,
+                        onPick = onPick,
+                    )
+                }
+                if (passage != null) {
+                    val text = com.agpeya.app.ui.common.PassageFormat.text(passage, format)
+                    val payload = com.agpeya.app.ui.common.SharePayload(
+                        body = com.agpeya.app.ui.common.PassageFormat.body(
+                            passage,
+                            // The card is a picture of the text, so it keeps its
+                            // verse numbers whatever the copy format says.
+                            format.copy(verseNumbers = true),
+                        ),
+                        kicker = imageKicker,
+                        title = com.agpeya.app.ui.common.PassageFormat.heading(passage),
+                    )
+                    // The references live behind their own action rather than
+                    // under every verse. 22,905 verses carry them, so a marker
+                    // on each would be a second text running beside the first —
+                    // which is why no phone Bible has done it that way since
+                    // YouVersion moved them behind a tap.
+                    var refsOpen by androidx.compose.runtime.saveable.rememberSaveable {
+                        androidx.compose.runtime.mutableStateOf(false)
+                    }
+                    if (refsOpen && crossRefs.isNotEmpty()) {
+                        CrossRefSheet(
+                            refs = crossRefs,
+                            onDismiss = { refsOpen = false },
+                            onOpen = { route -> refsOpen = false; onDismiss(); onOpenRef(route) },
+                        )
+                    }
+                    // The shape and the ground used to be chosen from a list
+                    // of names, before the card existed, and the first sight of
+                    // the result was in the share sheet. They are chosen in
+                    // front of the card now, along with everything else.
+                    var imageSheet by androidx.compose.runtime.saveable.rememberSaveable {
+                        androidx.compose.runtime.mutableStateOf(false)
+                    }
+                    if (imageSheet) {
+                        com.agpeya.app.ui.common.ImageEditorDialog(
+                            payload = payload,
+                            onDismiss = { imageSheet = false; onDismiss() },
+                        )
+                    }
+                    SelectionActions(
+                        buildList {
+                            onBookmark?.let {
+                                add(SelectionAct(s.markAction, Icons.Outlined.BookmarkBorder) { onDismiss(); it() })
+                            }
+                            onWriteNote?.let {
+                                add(SelectionAct(s.noteAction, Icons.Outlined.EditNote) { onDismiss(); it() })
+                            }
+                            if (crossRefs.isNotEmpty()) {
+                                add(
+                                    SelectionAct(
+                                        s.crossRefsAction(crossRefs.size),
+                                        Icons.AutoMirrored.Outlined.MenuBook,
+                                    ) { refsOpen = true },
+                                )
+                            }
+                            // Beside the cross references, because both answer
+                            // "what else is there about this verse" — one inside
+                            // the book, one outside it.
+                            commentaryUrl?.let { url ->
+                                add(
+                                    SelectionAct(s.commentaryAction, Icons.Outlined.HistoryEdu) {
+                                        // Opened inside the app rather than
+                                        // handed to a browser, so Catena can be
+                                        // asked for the early fathers alone.
+                                        // The ask is a cookie, and a Custom
+                                        // Tab's cookies belong to Chrome.
+                                        onDismiss()
+                                        onOpenRef(
+                                            com.agpeya.app.data.CatenaLink.route(
+                                                url, passage?.citation.orEmpty(),
+                                            ),
+                                        )
+                                    },
+                                )
+                            }
+                            add(
+                                SelectionAct(s.copyAction, Icons.Outlined.ContentCopy) {
+                                    com.agpeya.app.ui.common.Sharing.copy(ctx, text, s)
+                                    onDismiss()
+                                },
+                            )
+                            add(
+                                SelectionAct(s.shareAction, Icons.Outlined.Share) {
+                                    com.agpeya.app.ui.common.Sharing.share(ctx, text, strings = s)
+                                    onDismiss()
+                                },
+                            )
+                            // One entry, because share and save are both inside
+                            // the editor now and choosing between them before
+                            // seeing the card was the wrong order to ask in.
+                            add(
+                                SelectionAct(s.shareAsImage, Icons.Outlined.Image) {
+                                    imageSheet = true
+                                },
+                            )
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * The four colours, each under the name the reader gave it.
+ *
+ * Olive Tree's lesson: a colour is only worth having if it means something, and
+ * what it means is the reader's to decide. Unnamed, a swatch keeps the colour's
+ * own name, which is at least honest.
+ */
+@Composable
+private fun HighlightRow(
+    currentColor: String?,
+    names: Map<String, String>,
+    onPick: (String?) -> Unit,
+) {
+    val s = LocalStrings.current
+    val haptics = LocalHapticFeedback.current
+    val sinq = sinqColors
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = Spacing.xxs),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+        verticalAlignment = Alignment.Top,
+    ) {
+        HighlightRepository.COLOR_KEYS.forEach { key ->
+            val selected = key == currentColor
+            val label = names[key]?.takeIf { it.isNotBlank() } ?: s.highlightColor(key)
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(MaterialTheme.shapes.small)
+                    .semantics { contentDescription = "${s.highlight}: $label"; this.selected = selected }
+                    .clickable {
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onPick(key)
+                    }
+                    .padding(vertical = Spacing.xs),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Box(
+                    Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(highlightSwatch(key, sinq.highlight(key)))
+                        .then(
+                            if (selected) Modifier.border(2.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
+                            else Modifier
+                        ),
+                )
+                Spacer(Modifier.height(Spacing.xxs))
+                Text(
+                    label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (selected) MaterialTheme.colorScheme.onSurface
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+        Column(
+            modifier = Modifier
+                .width(48.dp)
+                .clip(MaterialTheme.shapes.small)
+                .clickable { onPick(null) }
+                .padding(vertical = Spacing.xs),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Icon(
+                Icons.Outlined.FormatColorReset,
+                contentDescription = s.removeHighlight,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(32.dp),
+            )
+        }
+    }
+}
+
+/**
+ * The swatch shown in the picker. Opaque, unlike the tint it applies: a 35%
+ * yellow drawn on the sheet would read as "off" rather than as a colour choice.
+ */
+private fun highlightSwatch(key: String?, tint: androidx.compose.ui.graphics.Color): androidx.compose.ui.graphics.Color =
+    if (tint == androidx.compose.ui.graphics.Color.Transparent) androidx.compose.ui.graphics.Color.Gray
+    else tint.copy(alpha = 1f)
+
+/**
+ * The verse's cross references, as chips that open where they point.
+ *
+ * Citations only, in the Church's own numerals — the target's text is a second
+ * tap, not a preview, so the sheet stays short enough to leave the verse it
+ * came from on screen.
+ */
+@Composable
+private fun CrossRefSheet(
+    refs: List<com.agpeya.app.data.CrossReference.Ref>,
+    onDismiss: () -> Unit,
+    onOpen: (String) -> Unit,
+) {
+    val s = LocalStrings.current
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(s.crossRefsTitle) },
+        text = {
+            androidx.compose.foundation.layout.FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+            ) {
+                refs.forEach { ref ->
+                    androidx.compose.material3.SuggestionChip(
+                        onClick = { onOpen(ref.route) },
+                        label = {
+                            Text(
+                                com.agpeya.app.data.Citation.of(ref.bookName, ref.chapter, ref.verse, ref.verse),
+                                maxLines = 1,
+                            )
+                        },
+                    )
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            androidx.compose.material3.TextButton(onClick = onDismiss) { Text(s.dismiss) }
+        },
+    )
+}
+
+/** One action in the bar. */
+private data class SelectionAct(
+    val label: String,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val onClick: () -> Unit,
+)
+
+@Composable
+private fun ColumnScope.SelectionActions(actions: List<SelectionAct>) {
+    if (actions.isEmpty()) return
+    // Five across is the most a phone holds at a 56 dp target; beyond that they
+    // split into two balanced rows rather than shrinking.
+    val perRow = if (actions.size <= 5) actions.size else (actions.size + 1) / 2
+    actions.chunked(perRow).forEach { row ->
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
+            row.forEach { act ->
+                SelectionAction(act.label, act.icon, act.onClick, Modifier.weight(1f))
+            }
+            // A short last row keeps its buttons the width of the row above.
+            repeat(perRow - row.size) { Spacer(Modifier.weight(1f)) }
+        }
+    }
+}
+
+@Composable
+private fun SelectionAction(
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .heightIn(min = 56.dp)
+            .clip(MaterialTheme.shapes.small)
+            .clickable(onClick = onClick)
+            .padding(horizontal = Spacing.xs, vertical = Spacing.xs),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(IconSize.medium),
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+/** The int-pair selection used by paragraph/verse readers without section ids:
+ *  -1 anchors nothing; a tap anchors, later taps move the end. Order-free. */
+internal fun advanceFlatSelection(anchor: Int, tapped: Int): Pair<Int, Int> =
+    if (anchor < 0) tapped to -1 else anchor to tapped
+
+internal fun flatSelectionRange(anchor: Int, end: Int): IntRange =
+    if (anchor < 0) IntRange.EMPTY
+    else minOf(anchor, if (end < 0) anchor else end)..maxOf(anchor, if (end < 0) anchor else end)
+
+/**
+ * The selection as a [Passage] — the verses with their own numbers, and the
+ * Church's name for them.
+ *
+ * [citationFor] lets a reader that knows its book and chapter name the exact
+ * range ("የሉቃስ ወንጌል ፲፥፴፰–፵፪"); the hours cannot, since a section there is a
+ * passage the prayer book chose, and its own reference is already the answer.
+ */
+internal fun versePassage(
+    sections: List<Section>,
+    verseKey: String?,
+    endKey: String? = null,
+    edition: String? = null,
+    citationFor: (Section, IntRange) -> String? = { section, _ -> shareHeading(section) },
+): Passage? {
+    val (section, range) = resolveSelection(sections, verseKey, endKey) ?: return null
+    val verses = range.mapNotNull { n ->
+        section.verses.getOrNull(n - section.firstVerse)?.let { n to it }
+    }
+    if (verses.isEmpty()) return null
+    return Passage(
+        verses = verses.map { (n, text) -> n as Int? to text },
+        citation = citationFor(section, range),
+        edition = edition,
+    )
+}
+
+/** The verse-key pair after a tap: same section extends the run to the tapped
+ *  verse ("moving the cursor"); anywhere else starts over at the tap. */
+internal fun advanceSelection(start: String?, tapped: String): Pair<String, String?> =
+    if (start != null && start.substringBeforeLast(':') == tapped.substringBeforeLast(':'))
+        start to tapped
+    else tapped to null
+
+/** The selected verse numbers within [section], or empty when the selection
+ *  lives elsewhere. Order-free: an end tapped above the anchor still selects. */
+internal fun selectionRangeFor(section: Section, startKey: String?, endKey: String?): IntRange {
+    if (startKey == null || startKey.substringBeforeLast(':') != section.id) return IntRange.EMPTY
+    val a = startKey.substringAfterLast(':').toIntOrNull() ?: return IntRange.EMPTY
+    val b = endKey?.takeIf { it.substringBeforeLast(':') == section.id }
+        ?.substringAfterLast(':')?.toIntOrNull() ?: a
+    return minOf(a, b)..maxOf(a, b)
+}
+
+/** Every verse key in the selection, for applying a highlight to the run. */
+internal fun selectionKeys(
+    sections: List<Section>,
+    startKey: String?,
+    endKey: String?,
+    namespaceFor: (Section) -> String? = { null },
+): List<String> {
+    val (section, range) = resolveSelection(sections, startKey, endKey) ?: return emptyList()
+    return range.mapNotNull { n ->
+        if (section.verses.getOrNull(n - section.firstVerse) != null)
+            HighlightRepository.verseKey(section.id, n, namespaceFor(section))
+        else null
+    }
+}
+
+private fun resolveSelection(
+    sections: List<Section>,
+    startKey: String?,
+    endKey: String?,
+): Pair<Section, IntRange>? {
+    if (startKey == null) return null
+    val section = sections.firstOrNull { it.id == startKey.substringBeforeLast(':') } ?: return null
+    val range = selectionRangeFor(section, startKey, endKey)
+    if (range.isEmpty()) return null
+    return section to range
+}
+
+
+/** Title and reference, unless the reference only repeats the title — a psalm
+ *  is named "መዝሙር ፩" in both, and "መዝሙር ፩ — መዝሙር ፩" is not a heading. */
+private fun shareHeading(section: Section): String =
+    listOfNotNull(
+        section.title,
+        section.reference?.takeIf { it.isNotBlank() && it != section.title },
+    ).joinToString(" — ")
+
+

@@ -1,0 +1,49 @@
+name: CI
+
+# PAUSED. This ran the release's gates on every push and pull request, which was
+# spending more Actions minutes than the traffic on this repo justifies. Releases
+# still gate themselves — release.yml runs content validation and the unit tests
+# before it builds anything — so a tag cannot ship a broken build while this is off.
+#
+# It is manual-only for now: run it from the Actions tab when a change is worth
+# checking before tagging. To turn automatic runs back on, restore:
+#
+#   push:
+#     branches: [master]
+#   pull_request:
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate bundled content
+        run: python3 tools/validate_content.py
+
+      - name: Unit tests
+        run: |
+          chmod +x gradlew
+          ./gradlew testDebugUnitTest --no-daemon
+
+      - name: Lint
+        run: ./gradlew lintDebug --no-daemon
+
+      - name: Assemble debug
+        run: ./gradlew assembleDebug --no-daemon

@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  የዕለቱ ግጻዌ widget: one flat surface showing today's readings, rendered directly
+  by GitsaweWidgetProvider (no collection service). The provider shows or hides
+  rows and the status line to fit the size the launcher grants.
+
+  The vertical budget is the design constraint. A 4×2 card is ~110dp, and every
+  ornament is a reading that does not fit: there is no wordmark row (the
+  launcher already names the widget), no box around a row, no chip behind a
+  role, and no "read it" line — the whole card has always been tappable. What is
+  left is a caption, a title, one hairline, and readings.
+
+  RemoteViews constraint: plain LinearLayout/TextView/ImageView only — this
+  inflates in the launcher's process. Default texts double as the picker
+  preview; runtime always overwrites them.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_background"
+    android:paddingStart="15dp"
+    android:paddingEnd="15dp"
+    android:paddingTop="12dp"
+    android:paddingBottom="11dp">
+
+    <!-- The day, on its own line. It used to share a row with the wordmark and
+         lose: the runtime string is weekday, day, month and year, and it was
+         ellipsized against a 21dp logo on a 4-cell card. -->
+    <TextView
+        android:id="@+id/widget_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/widget_preview_date"
+        android:textColor="#A9C1B6"
+        android:textSize="11sp"
+        android:letterSpacing="0.04"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <!-- The day's heading. One line on purpose: a wrapped title costs a reading,
+         and the full name is one tap away. -->
+    <TextView
+        android:id="@+id/widget_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="@string/widget_preview_title"
+        android:textColor="#F2EDDE"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <!-- The one rule on the card. An ImageView, not a bare View: RemoteViews
+         only inflates a fixed set of widget classes. -->
+    <ImageView
+        android:id="@+id/widget_rule"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="7dp"
+        android:contentDescription="@null"
+        android:background="#5C72532F" />
+
+    <!-- Five readings, bound in the order the liturgy reads them. The role
+         column is 74dp because ግብረ ሐዋርያት is the longest label there is; the
+         provider hides the column outright on a narrow card. -->
+    <LinearLayout
+        android:id="@+id/widget_row_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:baselineAligned="true">
+        <TextView
+            android:id="@+id/widget_role_1"
+            android:layout_width="74dp"
+            android:layout_height="wrap_content"
+            android:textColor="#E4BC5A"
+            android:text="@string/widget_preview_msbak"
+            android:textSize="11sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+        <TextView
+            android:id="@+id/widget_ref_1"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:textColor="#F2EDDE"
+            android:text="@string/widget_preview_msbak_ref"
+            android:textSize="13sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/widget_row_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal"
+        android:baselineAligned="true">
+        <TextView
+            android:id="@+id/widget_role_2"
+            android:layout_width="74dp"
+            android:layout_height="wrap_content"
+            android:textColor="#E4BC5A"
+            android:text="@string/widget_preview_wengel"
+            android:textSize="11sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+        <TextView
+            android:id="@+id/widget_ref_2"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:textColor="#F2EDDE"
+            android:text="@string/widget_preview_wengel_ref"
+            android:textSize="13sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/widget_row_3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal"
+        android:baselineAligned="true"
+        android:visibility="gone">
+        <TextView
+            android:id="@+id/widget_role_3"
+            android:layout_width="74dp"
+            android:layout_height="wrap_content"
+            android:textColor="#E4BC5A"
+            android:textSize="11sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+        <TextView
+            android:id="@+id/widget_ref_3"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:textColor="#F2EDDE"
+            android:textSize="13sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/widget_row_4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal"
+        android:baselineAligned="true"
+        android:visibility="gone">
+        <TextView
+            android:id="@+id/widget_role_4"
+            android:layout_width="74dp"
+            android:layout_height="wrap_content"
+            android:textColor="#E4BC5A"
+            android:textSize="11sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+        <TextView
+            android:id="@+id/widget_ref_4"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:textColor="#F2EDDE"
+            android:textSize="13sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/widget_row_5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal"
+        android:baselineAligned="true"
+        android:visibility="gone">
+        <TextView
+            android:id="@+id/widget_role_5"
+            android:layout_width="74dp"
+            android:layout_height="wrap_content"
+            android:textColor="#E4BC5A"
+            android:textSize="11sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+        <TextView
+            android:id="@+id/widget_ref_5"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:textColor="#F2EDDE"
+            android:textSize="13sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+    </LinearLayout>
+
+    <!-- Shown instead of the rows when the day has no bundled reading -->
+    <TextView
+        android:id="@+id/widget_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#9DBBAD"
+        android:textSize="13sp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:visibility="gone" />
+
+    <!-- What kind of day it is: the anaphora sung at the ቅዳሴ, and the fast in
+         effect. One line, under its own hairline, only when the height allows. -->
+    <ImageView
+        android:id="@+id/widget_status_rule"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="6dp"
+        android:contentDescription="@null"
+        android:background="#5C72532F"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/widget_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#9DBBAD"
+        android:textSize="11sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:visibility="gone" />
+</LinearLayout>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- English-system launchers see these in the widget picker. app_name stays
+     ስንቅ everywhere — it is the brand, not a translatable label. -->
+<resources>
+    <string name="widget_gitsawe_label">Today\'s Gitsawe</string>
+    <string name="widget_gitsawe_description">See today\'s misbak and gospel reading on your home screen.</string>
+    <string name="widget_memento_label">Remember death</string>
+    <string name="widget_memento_description">Memento mori, on your home screen.</string>
+    <string name="widget_prayer_clock_label">Prayer clock</string>
+    <string name="widget_prayer_clock_description">Seven prayer hours around the day. Tap to open the current prayer.</string>
+    <string name="widget_prayer_clock_caption">Canonical hours</string>
+    <string name="external_link_unavailable">Could not open this link. Check that a browser or compatible app is installed and enabled.</string>
+</resources>

@@ -1,0 +1,69 @@
+package com.agpeya.app.reminders
+
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import com.agpeya.app.data.ModesRepository
+import kotlinx.coroutines.runBlocking
+
+/**
+ * Fires when a reminder alarm goes off: rings via [AlarmRinger] (an insistent
+ * alarm-channel notification — no foreground service), then schedules the
+ * entry's next occurrence (chain pattern). Skips silently if the entry was
+ * meanwhile disabled, deleted, or its mode deactivated.
+ */
+class AlarmReceiver : BroadcastReceiver() {
+
+    override fun onReceive(context: Context, intent: Intent) {
+        val entryId = intent.getStringExtra(ReminderScheduler.EXTRA_ENTRY_ID) ?: return
+        val hourId = intent.getStringExtra(ReminderScheduler.EXTRA_HOUR_ID) ?: return
+        val hourName = intent.getStringExtra(ReminderScheduler.EXTRA_HOUR_NAME) ?: hourId
+        val isSnooze = intent.getBooleanExtra(ReminderScheduler.EXTRA_SNOOZE, false)
+        val snoozeCount = intent.getIntExtra(ReminderScheduler.EXTRA_SNOOZE_COUNT, 0)
+
+        // DataStore reads off the main thread; goAsync keeps the receiver alive for them.
+        val pending = goAsync()
+        Thread {
+            try {
+                // A snoozed alarm fires once — no active-entry check, no
+                // chaining — but quiet hours bind it like any other. Snoozing
+                // at ten to ten with silence from ten is not an exception the
+                // reader made; it used to ring straight through. Dropped
+                // rather than pushed further out, which is what the ordinary
+                // path does with a ring it may not make.
+                if (isSnooze) {
+                    val silenced = runBlocking {
+                        com.agpeya.app.data.SettingsRepository.inQuietHoursNow(context)
+                    }
+                    if (!silenced) AlarmRinger.ring(context, hourId, hourName, snoozeCount)
+                    return@Thread
+                }
+                val stillActive = runBlocking {
+                    val entry = ModesRepository.current(context).activeMode
+                        ?.entries?.find { it.id == entryId && it.enabled }
+                    if (entry != null) {
+                        // Always re-arm, even when silenced: the chain must keep
+                        // running or tomorrow's alarm is lost too.
+                        ReminderScheduler.scheduleNext(context, entry, hourName) &&
+                            !com.agpeya.app.data.SettingsRepository.inQuietHoursNow(context)
+                    } else {
+                        ModesRepository.removeScheduledId(context, entryId)
+                        false
+                    }
+                }
+                if (stillActive) {
+                    // Re-check after scheduling: a toggle or active-mode switch
+                    // may have completed while this receiver waited on I/O.
+                    val mayRing = runBlocking {
+                        ModesRepository.current(context).activeMode
+                            ?.entries?.any { it.id == entryId && it.enabled } == true &&
+                            !com.agpeya.app.data.SettingsRepository.inQuietHoursNow(context)
+                    }
+                    if (mayRing) AlarmRinger.ring(context, hourId, hourName)
+                }
+            } finally {
+                pending.finish()
+            }
+        }.start()
+    }
+}

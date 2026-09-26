@@ -1,0 +1,280 @@
+#!/usr/bin/env python3
+"""Regenerate the marketing site's changed-log page and version strings.
+
+The site says of itself: "No network, no tracking: the same principle as the
+app." So the version it shows is baked in at build time rather than fetched
+from GitHub in the browser — the page stays a static file that works offline
+and tells no one it was read.
+
+Source of truth is CHANGELOG.md. Run with the site checkout as the argument:
+
+    python3 tools/build_site.py ../sinq-site
+"""
+import html
+import http.client
+import json
+import os
+import re
+import sys
+import urllib.error
+import urllib.request
+from datetime import date
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CHANGELOG = os.path.join(ROOT, "CHANGELOG.md")
+# How many releases the page shows open. The rest are still on the page, folded
+# into a <details> beneath them — every release back to 0.2.0, so the page is
+# the archive it used to send people to GitHub for, without making a first-time
+# reader scroll through fifty of them to reach the install link.
+#
+# A <details> and not a script: the site's own reveal-on-scroll degrades to
+# "show everything" when JavaScript is off, and the fold has to degrade the
+# same way rather than hiding most of the page from a reader without it.
+KEEP = 7
+
+MONTHS = ["January", "February", "March", "April", "May", "June", "July",
+          "August", "September", "October", "November", "December"]
+
+
+def inline(md: str) -> str:
+    """Markdown inline → HTML, escaping everything else."""
+    out, i, parts = "", 0, []
+    # Protect code spans first so their contents are never treated as markup.
+    for seg in re.split(r"(`[^`]+`)", md):
+        if seg.startswith("`") and seg.endswith("`") and len(seg) > 1:
+            parts.append("<code>" + html.escape(seg[1:-1]) + "</code>")
+            continue
+        t = html.escape(seg)
+        t = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', t)
+        t = re.sub(r"\*\*([^*]+)\*\*", r"<b>\1</b>", t)
+        t = re.sub(r"(?<!\w)_([^_]+)_(?!\w)", r"<i>\1</i>", t)
+        parts.append(t)
+    return "".join(parts)
+
+
+def parse(text: str):
+    """CHANGELOG.md → [{version, date, motto, sections:[(name,[items])]}]."""
+    releases = []
+    blocks = re.split(r"^## \[", text, flags=re.M)[1:]
+    for b in blocks:
+        m = re.match(r"([0-9.]+)\]\s*—\s*(\d{4})-(\d{2})-(\d{2})", b)
+        if not m:
+            continue
+        ver, y, mo, d = m.group(1), int(m.group(2)), int(m.group(3)), int(m.group(4))
+        motto = ""
+        mm = re.search(r"^_versionCode \d+ · (.+?)_$", b, flags=re.M)
+        if mm:
+            motto = mm.group(1)
+        sections = []
+        for sm in re.finditer(r"^### (.+?)$\n(.*?)(?=^### |\Z)", b, flags=re.M | re.S):
+            items, cur = [], ""
+            for line in sm.group(2).split("\n"):
+                if line.startswith("- "):
+                    if cur:
+                        items.append(cur.strip())
+                    cur = line[2:]
+                elif line.startswith("  ") and cur:
+                    cur += " " + line.strip()
+                elif not line.strip() and cur:
+                    items.append(cur.strip())
+                    cur = ""
+            if cur:
+                items.append(cur.strip())
+            if items:
+                sections.append((sm.group(1).strip(), items))
+        releases.append({"version": ver, "date": f"{d} {MONTHS[mo - 1]} {y}",
+                         "motto": motto, "sections": sections})
+    return releases
+
+
+def article(r) -> str:
+    out = ['<article class="release">', "  <header>",
+           f'    <h2>{r["version"]} <span class="date">{r["date"]}</span></h2>']
+    if r["motto"]:
+        out.append(f'    <p class="motto"><span>{inline(r["motto"])}</span></p>')
+    out += ["  </header>", '  <div class="body">']
+    for name, items in r["sections"]:
+        out.append(f"  <h3><span>{html.escape(name)}</span></h3>")
+        out.append("  <ul>")
+        for it in items:
+            out.append(f"    <li><span>{inline(it)}</span></li>")
+        out.append("  </ul>")
+    out += ["  </div>", "</article>"]
+    return "\n".join(out)
+
+
+def star_count():
+    """Stars on the repository, or None if GitHub is unreachable."""
+    try:
+        req = urllib.request.Request(
+            "https://api.github.com/repos/natinael96/sinq",
+            headers={"Accept": "application/vnd.github+json", "User-Agent": "sinq-site-build"},
+        )
+        return json.load(urllib.request.urlopen(req, timeout=30)).get("stargazers_count")
+    # OSError covers URLError and TimeoutError; HTTPException covers the
+    # half-read body GitHub hands back under load, which is not a URLError
+    # and used to escape and abort the whole build — past index.html and
+    # before install.html was updated, leaving the site half-current.
+    except (OSError, http.client.HTTPException, ValueError) as e:
+        print(f"  stars: unavailable ({e.__class__.__name__})")
+        return None
+
+
+def download_total():
+    """Total APK downloads across every release, or None if GitHub is unreachable.
+
+    Counted here, at build time, and baked into the page as a number. The site
+    promises no tracking and means it: the reader's browser never contacts
+    GitHub, and nothing observes who is reading.
+    """
+    total, page = 0, 1
+    try:
+        while page <= 10:
+            req = urllib.request.Request(
+                f"https://api.github.com/repos/natinael96/sinq/releases?per_page=100&page={page}",
+                headers={"Accept": "application/vnd.github+json", "User-Agent": "sinq-site-build"},
+            )
+            batch = json.load(urllib.request.urlopen(req, timeout=30))
+            if not batch:
+                break
+            for release in batch:
+                for asset in release.get("assets", []):
+                    if asset.get("name", "").endswith(".apk"):
+                        total += asset.get("download_count", 0)
+            if len(batch) < 100:
+                break
+            page += 1
+    # OSError covers URLError and TimeoutError; HTTPException covers the
+    # half-read body GitHub hands back under load, which is not a URLError
+    # and used to escape and abort the whole build — past index.html and
+    # before install.html was updated, leaving the site half-current.
+    except (OSError, http.client.HTTPException, ValueError) as e:
+        print(f"  downloads: unavailable ({e.__class__.__name__}) — leaving the page as it is")
+        return None
+    return total
+
+
+def replace_between(text, start_mark, end_mark, body):
+    a = text.index(start_mark) + len(start_mark)
+    b = text.index(end_mark)
+    return text[:a] + "\n" + body + "\n" + text[b:]
+
+
+def main():
+    site = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "..", "sinq-site")
+    site = os.path.abspath(site)
+    releases = parse(open(CHANGELOG, encoding="utf-8").read())
+    if not releases:
+        sys.exit("no releases parsed from CHANGELOG.md")
+    latest = releases[0]
+    print(f"latest {latest['version']} ({latest['date']}) · {len(releases)} releases parsed")
+
+    # ── changelog.html ───────────────────────────────────────────────────
+    p = os.path.join(site, "changelog.html")
+    s = open(p, encoding="utf-8").read()
+    shown, rest = releases[:KEEP], releases[KEEP:]
+    body = "\n\n".join(article(r) for r in shown)
+    if rest:
+        first, last = rest[0]["version"], rest[-1]["version"]
+        body += "\n\n" + "\n".join([
+            '<details class="more-releases">',
+            f'  <summary><span>{len(rest)} earlier releases,'
+            f' {html.escape(first)} back to {html.escape(last)}</span></summary>',
+            '  <div class="more-body">',
+            "\n\n".join(article(r) for r in rest),
+            "  </div>",
+            "</details>",
+        ])
+    s = replace_between(s, "<!-- releases:start -->", "<!-- releases:end -->", body)
+    open(p, "w", encoding="utf-8").write(s)
+    print(f"  changelog.html: {len(shown)} shown, {len(rest)} folded")
+
+    # ── version strings elsewhere ────────────────────────────────────────
+    ver = latest["version"]
+    p = os.path.join(site, "index.html")
+    s = open(p, encoding="utf-8").read()
+    s = re.sub(r"v\d+\.\d+\.\d+ · Android [\d.]+\+", f"v{ver} · Android {MIN_ANDROID}+", s)
+    # The same two facts again, inside the JSON-LD that Google reads. They are
+    # written as literals in the page so the markup stays valid on its own, and
+    # they are rewritten here for the same reason the visible chip is: a version
+    # kept by hand in two places is a version wrong in one of them.
+    s = re.sub(r'("softwareVersion": ")\d+\.\d+\.\d+(")', rf"\g<1>{ver}\g<2>", s)
+    s = re.sub(r'("operatingSystem": "Android )[\d.]+(\+")', rf"\g<1>{MIN_ANDROID}\g<2>", s)
+    open(p, "w", encoding="utf-8").write(s)
+
+    # ── downloads and stars ──────────────────────────────────────────────
+    # Both read here and written in as text. The reader's browser never asks
+    # GitHub anything, so the site keeps its promise not to watch anyone — and
+    # the star link is a plain link, not GitHub's button, which is an iframe
+    # from a third party and would need a hole in the CSP to load.
+    total, stars = download_total(), star_count()
+    if total is not None or stars is not None:
+        p = os.path.join(site, "index.html")
+        s = open(p, encoding="utf-8").read()
+        if "<!-- counts:start -->" in s:
+            bits = []
+            if total is not None:
+                bits.append(f"<span>{total:,} downloads</span>")
+            if stars is not None:
+                plural = "" if stars == 1 else "s"
+                bits.append(
+                    '<a class="star" href="https://github.com/natinael96/sinq" '
+                    'rel="noopener">'
+                    f'<span>&#9733; {stars:,} star{plural} on GitHub</span></a>'
+                )
+            s = replace_between(
+                s, "<!-- counts:start -->", "<!-- counts:end -->",
+                "        " + "\n        ".join(bits),
+            )
+            open(p, "w", encoding="utf-8").write(s)
+            # Either number can be missing on its own — the downloads API
+            # rate-limits separately from the repo call — and formatting a
+            # missing one used to raise here, past the write and before
+            # install.html was ever touched. Whatever came back, say so.
+            said = ", ".join(
+                x for x in (
+                    f"{total:,} downloads" if total is not None else None,
+                    f"{stars:,} stars" if stars is not None else None,
+                ) if x
+            )
+            print(f"  index.html: {said}")
+
+    p = os.path.join(site, "install.html")
+    s = open(p, encoding="utf-8").read()
+    s = re.sub(r"Sinq-v\d+\.\d+\.\d+\.apk", f"Sinq-v{ver}.apk", s)
+    open(p, "w", encoding="utf-8").write(s)
+
+    # ── canonical URLs ───────────────────────────────────────────────────
+    for name in os.listdir(site):
+        if not name.endswith(".html"):
+            continue
+        p = os.path.join(site, name)
+        s = open(p, encoding="utf-8").read()
+        fixed = re.sub(
+            r'(<link rel="canonical" href=")[^"]*?/([^/"]+\.html")',
+            lambda m: m.group(1) + SITE_BASE + "/" + m.group(2),
+            s,
+        )
+        fixed = re.sub(
+            r'(<link rel="canonical" href=")[^"]*?"(\s*>)',
+            lambda m: m.group(1) + SITE_BASE + "/\"" + m.group(2),
+            fixed,
+        ) if "canonical" in fixed and "index" in name else fixed
+        if fixed != s:
+            open(p, "w", encoding="utf-8").write(fixed)
+    print(f"  canonicals -> {SITE_BASE}")
+    print(f"  index.html / install.html: v{ver}, Android {MIN_ANDROID}+")
+
+
+# Kept beside the app's minSdk; update both together.
+MIN_ANDROID = "6.0"
+
+# What the pages call themselves. Canonical URLs must name a page that actually
+# resolves — pointing them at a host that 404s tells search engines the real
+# copy is missing and buries the one that works.
+#
+# The Vercel deployment is serving again, so the pages name their own home.
+SITE_BASE = "https://sinq.natinael96.tech"
+
+if __name__ == "__main__":
+    main()

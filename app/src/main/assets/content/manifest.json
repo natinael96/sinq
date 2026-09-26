@@ -1,0 +1,37 @@
+{
+  "contentVersion": 1,
+  "hours": [
+    {
+      "id": "morning",
+      "file": "morning.json"
+    },
+    {
+      "id": "terce",
+      "file": "terce.json"
+    },
+    {
+      "id": "sext",
+      "file": "sext.json"
+    },
+    {
+      "id": "none",
+      "file": "none.json"
+    },
+    {
+      "id": "vespers",
+      "file": "vespers.json"
+    },
+    {
+      "id": "compline",
+      "file": "compline.json"
+    },
+    {
+      "id": "midnight",
+      "file": "midnight.json"
+    },
+    {
+      "id": "veil",
+      "file": "veil.json"
+    }
+  ]
+}

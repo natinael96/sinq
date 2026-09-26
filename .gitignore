@@ -1,0 +1,36 @@
+*.iml
+.gradle/
+local.properties
+.idea/
+.DS_Store
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.keystore
+*.jks
+keystore.properties
+# Local-only: decompiled third-party APKs kept for study, never distributed.
+docs/extracted/
+
+# Kotlin build cache and local agent/tooling config.
+.kotlin/
+.claude/
+.agents/
+skills-lock.json
+
+# Python bytecode from the content tools
+__pycache__/
+*.pyc
+
+# Generated promo renders and their toolchain: video files, frame captures and
+# a vendored node_modules carrying a 79MB ffmpeg binary. `git add -A` in this
+# directory would otherwise stage all of it.
+brag-output/
+
+# The scanned church books the shelf is built from. The transcription and the
+# generated JSON are the deliverable; the scan itself is large and stays local,
+# as every earlier one did — no PDF has ever been tracked here.
+*.pdf

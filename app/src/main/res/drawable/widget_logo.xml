@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Compact widget version of the dawn, rays, and cross launcher mark. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="21dp" android:height="18dp"
+    android:viewportWidth="54" android:viewportHeight="46">
+    <group android:translateX="-27" android:translateY="-23">
+        <path android:fillColor="#E4BC5A" android:pathData="M51.2,26 h5.6 v8 h9.2 v5.6 h-9.2 v12.4 h-5.6 v-12.4 h-9.2 v-5.6 h9.2 Z" />
+        <path android:fillColor="#E4BC5A" android:pathData="M43.5,66 A10.5,10.5 0 0 1 64.5,66 Z" />
+        <path android:strokeColor="#E4BC5A" android:strokeWidth="2.5" android:strokeLineCap="round" android:pathData="M29,66 L79,66" />
+        <path android:strokeColor="#E4BC5A" android:strokeWidth="2.5" android:strokeLineCap="round" android:pathData="M60.3,52.4 L62.9,47 M65.5,56.4 L70.1,52.5 M68.5,62.1 L74.3,60.6 M47.7,52.4 L45.1,47 M42.5,56.4 L37.9,52.5 M39.5,62.1 L33.7,60.6" />
+    </group>
+</vector>
