@@ -44,11 +44,9 @@ class SynaxariumDataTest {
         // The whole fixed-calendar book: twelve months of thirty days plus all
         // six of ጳጉሜን — the synaxarium keeps the leap day whatever the year does.
         assertEquals(366, days)
-        assertEquals(1066, entries)
+        assertEquals(1242, entries)
 
-        // The Ge'ez edition covers the same year. It splits its paragraphs
-        // differently — only 30 of the 366 days agree — so its entry count is
-        // its own and the two are never set side by side.
+        // The Ge'ez edition covers the same year and is aligned with the Amharic edition.
         var geezDays = 0
         var geezEntries = 0
         for (m in 1..13) {
@@ -57,7 +55,7 @@ class SynaxariumDataTest {
             geezEntries += month.days.sumOf { it.entries.size }
         }
         assertEquals(366, geezDays)
-        assertEquals(1094, geezEntries)
+        assertEquals(1242, geezEntries)
     }
 
     /**
