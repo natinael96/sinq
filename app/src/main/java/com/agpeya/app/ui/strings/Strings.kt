@@ -994,18 +994,6 @@ interface Strings {
     val widgetRolloverTimeTitle: String
     /** The subtitle when it is off: the card just follows the calendar. */
     val widgetRolloverOff: String
-    /** About row when the check is off, or nothing has been found yet. */
-
-    // ── ቁርባን ዝግጅት (communion preparation) ──────────────────────────────────
-
-    val kurbanPrepTitle: String
-    val kurbanPrepDesc: String
-    val kurbanChecklistHeader: String
-    val kurbanStatusHeader: String
-    val kurbanConfessionPending: String
-    val kurbanPenanceUnsettled: String
-    val kurbanPrePrayersHeader: String
-    val kurbanPostPrayersHeader: String
 }
 
 object AmharicStrings : Strings {
@@ -1933,17 +1921,6 @@ object AmharicStrings : Strings {
         "የግጻዌ ዊጀቱ ከመረጡት ሰዓት ጀምሮ የነገውን ግጻዌ ያሳያል። የቤተ ክርስቲያን ቀን የሚለወጠው ከእኩለ ሌሊት በፊት ስለሆነ ነው።"
     override val widgetRolloverTimeTitle = "የሚለወጥበት ሰዓት"
     override val widgetRolloverOff = "ዊጀቱ ሁልጊዜ የዕለቱን ያሳያል"
-
-    // ── ቁርባን ዝግጅት ──────────────────────────────────────────────────────────
-
-    override val kurbanPrepTitle = "የቁርባን ዝግጅት"
-    override val kurbanPrepDesc = "ሥርዓተ መቅረቢያውና ጸሎቶቹ"
-    override val kurbanChecklistHeader = "ሥርዓተ መቅረቢያ"
-    override val kurbanStatusHeader = "ዝግጅት"
-    override val kurbanConfessionPending = "ያልተናዘዙት የንስሐ ረቂቅ አለ።"
-    override val kurbanPenanceUnsettled = "ያልተፈጸመ ቀኖና አለ።"
-    override val kurbanPrePrayersHeader = "ጸሎት ዘቅድመ ቁርባን"
-    override val kurbanPostPrayersHeader = "ጸሎት ዘድኅረ ቁርባን"
 }
 
 object EnglishStrings : Strings {
@@ -2873,17 +2850,6 @@ object EnglishStrings : Strings {
         "From the hour you choose, the ግጻዌ widget shows the next day's readings — the Church's day turns before midnight does."
     override val widgetRolloverTimeTitle = "Turns at"
     override val widgetRolloverOff = "The widget always shows today"
-
-    // ── Communion preparation ────────────────────────────────────────────────
-
-    override val kurbanPrepTitle = "Preparing for Communion"
-    override val kurbanPrepDesc = "The order of approach and its prayers"
-    override val kurbanChecklistHeader = "The order of approach"
-    override val kurbanStatusHeader = "Preparation"
-    override val kurbanConfessionPending = "A confession draft is still waiting."
-    override val kurbanPenanceUnsettled = "An unfinished penance remains."
-    override val kurbanPrePrayersHeader = "Prayer before Communion"
-    override val kurbanPostPrayersHeader = "Prayer after Communion"
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { AmharicStrings }

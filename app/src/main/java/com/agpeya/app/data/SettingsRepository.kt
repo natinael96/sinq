@@ -186,13 +186,6 @@ object SettingsRepository {
     // finished OR skipped — never when it opens, so a tour interrupted by a
     // phone call is still there afterwards.
     private val KEY_LAST_TOUR_VERSION = intPreferencesKey("last_tour_version_code")
-
-    // The ቁርባን checklist is a preparation for ONE day, so the marks carry
-    // their date and silently read as empty the morning after. Transient by
-    // design: not backed up, and rewarding nothing.
-    private val KEY_KURBAN_CHECKED = stringSetPreferencesKey("kurban_checked")
-    private val KEY_KURBAN_CHECKED_DATE = stringPreferencesKey("kurban_checked_date")
-
     /** 09:00 — morning of the chosen alms day, before the day fills up. */
     const val DEFAULT_ALMS_REMINDER_MIN = 9 * 60
 
@@ -890,21 +883,6 @@ object SettingsRepository {
 
     suspend fun setLastTourVersion(context: Context, versionCode: Int) {
         context.settingsDataStore.edit { it[KEY_LAST_TOUR_VERSION] = versionCode }
-    }
-
-
-    /** Which ቁርባን rules were marked on [today]; another day's marks read empty. */
-    fun kurbanChecked(context: Context, today: String): Flow<Set<String>> =
-        context.settingsDataStore.data.map {
-            if (it[KEY_KURBAN_CHECKED_DATE] == today) it[KEY_KURBAN_CHECKED] ?: emptySet()
-            else emptySet()
-        }
-
-    suspend fun setKurbanChecked(context: Context, today: String, ids: Set<String>) {
-        context.settingsDataStore.edit {
-            it[KEY_KURBAN_CHECKED] = ids
-            it[KEY_KURBAN_CHECKED_DATE] = today
-        }
     }
 
     // ---- Quiet hours --------------------------------------------------------

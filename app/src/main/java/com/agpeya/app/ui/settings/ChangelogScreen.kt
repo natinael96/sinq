@@ -31,6 +31,19 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.2.1",
+        title = "Codebase refinement and performance optimizations",
+        titleAm = "የኮድ ማፅዳት እና የአፈጻጸም ማሻሻያ",
+        changes = listOf(
+            "Removed unused legacy code scaffolding to streamline app footprint.",
+            "Optimized numeric input parsing and regex caching across settings.",
+        ),
+        changesAm = listOf(
+            "የመተግበሪያውን ቅልጥፍና ለመጨመር ያገለገሉ አላስፈላጊ ኮዶች ተወግደዋል።",
+            "በቅንብሮች ውስጥ የቁጥር ግብዓት ትንተና እና ማህደረ-ትውስታ አጠቃቀም ተሻሽሏል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.2.0",
         title = "Bilingual Sinksar across all 366 days",
         titleAm = "የተሟላ የ፫፻፷፮ ቀናት ስንክሳር በአማርኛና በግእዝ",

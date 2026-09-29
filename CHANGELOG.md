@@ -5,6 +5,23 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.2.1] — 2026-09-29
+
+_versionCode 93 · Codebase refinement and performance optimizations_
+
+### Changed
+- **Removed Unused Scaffolding.** Cleaned out dead and unreferenced models, repositories, and preferences.
+- **Regex Optimization.** Hoisted and precompiled regular expressions in offering amounts entry.
+
+## [1.2.0] — 2026-09-29
+
+_versionCode 92 · Complete bilingual Sinksar across all 366 days in Amharic and Ge'ez_
+
+### Added
+- **Full 366-Day Sinksar.** Complete bilingual parallel editions for every day and month of the Ethiopian year.
+- **Reader UI.** Numbered narrative paragraphs, Arke salutations, and liturgical red rubrication.
+- **System Integration.** Deep integration with lectionary, search, and bookmarks.
+
 ## [1.0.0] — 2026-09-26
 
 _versionCode 90 · Official Google Play release with structured liturgical corpus, 81-book Bible, and modern reader_

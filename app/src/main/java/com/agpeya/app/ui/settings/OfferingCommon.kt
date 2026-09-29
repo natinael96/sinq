@@ -47,6 +47,10 @@ fun formatCents(cents: Cents, currency: String): String =
     java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols(java.util.Locale.US))
         .format(java.math.BigDecimal.valueOf(cents, 2)) + currency.takeIf { it.isNotBlank() }?.let { " $it" }.orEmpty()
 
+private val COMMA_DECIMAL_REGEX = Regex("""^\d+,\d{1,2}$""")
+private val THOUSANDS_REGEX = Regex("""^\d{1,3}(,\d{3})+(\.\d{0,2})?$""")
+private val VALID_AMOUNT_REGEX = Regex("""^\d+(\.\d{0,2})?$""")
+
 /**
  * Read a typed amount into minor units, or null if it isn't a number.
  *
@@ -58,11 +62,11 @@ fun formatCents(cents: Cents, currency: String): String =
 fun parseAmount(text: String): Cents? {
     val cleaned = text.trim().replace(" ", "")
     val normalized = when {
-        Regex("""^\d+,\d{1,2}$""").matches(cleaned) -> cleaned.replace(',', '.')
-        Regex("""^\d{1,3}(,\d{3})+(\.\d{0,2})?$""").matches(cleaned) -> cleaned.replace(",", "")
+        COMMA_DECIMAL_REGEX.matches(cleaned) -> cleaned.replace(',', '.')
+        THOUSANDS_REGEX.matches(cleaned) -> cleaned.replace(",", "")
         else -> cleaned
     }
-    if (!Regex("""^\d+(\.\d{0,2})?$""").matches(normalized)) return null
+    if (!VALID_AMOUNT_REGEX.matches(normalized)) return null
     return runCatching { java.math.BigDecimal(normalized).movePointRight(2).longValueExact() }.getOrNull()
 }
 
