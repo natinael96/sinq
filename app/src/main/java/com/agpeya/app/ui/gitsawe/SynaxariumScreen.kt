@@ -565,13 +565,18 @@ private fun NarrativePara(
         androidx.compose.foundation.text.selection.SelectionContainer {
             Text(
                 text = buildAnnotatedString {
-                    withStyle(
-                        SpanStyle(
-                            color = MaterialTheme.colorScheme.secondary,
-                            fontSize = scaledReadingSp(fontSp) * 0.85f,
-                        ),
-                    ) { append(geezNumeral(number)) }
-                    append("  ")
+                    if (number > 0) {
+                        withStyle(
+                            SpanStyle(
+                                color = MaterialTheme.colorScheme.secondary,
+                                fontSize = scaledReadingSp(fontSp) * 0.85f,
+                            ),
+                        ) {
+                            append(geezNumeral(number))
+                            append("፡")
+                        }
+                        append(" ")
+                    }
                     // SINKSAR: the day's whole subject is the saint, so the
                     // saint's name reddens here as it does in a መልክእ.
                     appendRubricated(

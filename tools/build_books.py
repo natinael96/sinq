@@ -70,7 +70,28 @@ SHELF_BY_TITLE = {
 }
 
 COMING_SOON = {
-    "ማኅሌተ ጽጌ",
+    "ማኅሌተ ጽጌ": {
+        "id": "f9217f008c",
+        "title": "ማኅሌተ ጽጌ",
+        "shelf": "zema",
+        "chapterCount": 1,
+        "blockCount": 0,
+        "charCount": 0,
+        "lang": "mixed",
+        "titledChapters": 1,
+        "sources": None,
+    },
+    "ሰቆቃወ ድንግል": {
+        "id": "7b38e5fa56",
+        "title": "ሰቆቃወ ድንግል",
+        "shelf": "zema",
+        "chapterCount": 1,
+        "blockCount": 0,
+        "charCount": 0,
+        "lang": "mixed",
+        "titledChapters": 1,
+        "sources": None,
+    },
 }
 
 # Title as the scan left it → the spelling to ship. Broken words in a title are
@@ -334,6 +355,21 @@ def build():
             },
         })
 
+    for title, meta in COMING_SOON.items():
+        if title not in {b["title"] for b in books}:
+            entry_meta = {
+                **meta,
+                "key": fold(title),
+                "comingSoon": True,
+            }
+            books.append({
+                "id": meta["id"],
+                "title": title,
+                "shelf": meta["shelf"],
+                "chapters": [],
+                "meta": entry_meta,
+            })
+
     # A book named "X ካልዕ" is a second recension of X. Each points at the other,
     # so a reader who opens one is told the other exists — the shelf lists them
     # adjacently but says nothing about their being the same hymn twice.
@@ -349,7 +385,7 @@ def build():
     # Every generated book that claims to replace a scan must actually have one
     # to replace; a stray file in sources/generated/ would otherwise ship as a
     # second copy under a name nothing else knows.
-    orphans = generated - shadowed - {"መጽሐፈ ሰዓታት", "ማኅሌተ ጽጌ", "ሰቆቃወ ድንግል"}
+    orphans = generated - shadowed - {"መጽሐፈ ሰዓታት"}
     if orphans:
         sys.exit(f"generated with nothing to replace: {sorted(orphans)}")
     if shadowed:

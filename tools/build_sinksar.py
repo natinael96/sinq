@@ -68,8 +68,8 @@ def clean(text: str) -> str:
     # Replace single Ethiopic wordspace (፡) with standard whitespace,
     # preserving double punctuation like ፡፡
     text = re.sub(r"(?<!፡)፡(?!፡)", " ", text)
-    # Normalize spacing around punctuation
-    text = re.sub(r"\s*([።፣፤፥፦])\s*", r" \1 ", text)
+    # Normalize spacing around punctuation: attach directly to preceding word
+    text = re.sub(r"\s*([።፣፤፥፦])\s*", r"\1 ", text)
     text = re.sub(r"\s+", " ", text).strip()
     return text
 
