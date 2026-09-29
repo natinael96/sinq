@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ስንቅ (Sinq) — Reader Navigation & Buttons Design Preview</title>
+  <style>
+    :root {
+      --primary: #0E3B31;         /* Liturgical Deep Emerald */
+      --primary-dark: #07241E;
+      --gold: #C49B38;            /* Sanctuary Gold */
+      --gold-soft: rgba(196, 155, 56, 0.16);
+      --gold-border: rgba(196, 155, 56, 0.45);
+      --rubric: #B71C1C;          /* Traditional Rubric Red */
+      --bg: #F7F5F0;              /* Parchment Ivory */
+      --surface: #FFFFFF;
+      --surface-variant: #EDE8DE;
+      --on-surface: #1C1B1F;
+      --on-surface-variant: #49454F;
+      --outline: #D7D2C7;
+      --outline-variant: #E8E3D8;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 14px rgba(0,0,0,0.08);
+      --font-reading: "Noto Serif Ethiopic", "Abyssinica SIL", "Nyala", serif;
+      --font-ui: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --primary: #123C32;
+      --primary-dark: #091F1A;
+      --gold: #E8C46B;
+      --gold-soft: rgba(232, 196, 107, 0.18);
+      --gold-border: rgba(232, 196, 107, 0.45);
+      --rubric: #EF5350;
+      --bg: #0B1A15;
+      --surface: #102620;
+      --surface-variant: #18382F;
+      --on-surface: #E8EDE8;
+      --on-surface-variant: #A4B5AC;
+      --outline: #224D41;
+      --outline-variant: #1A4036;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-ui);
+      background-color: var(--bg);
+      color: var(--on-surface);
+      line-height: 1.5;
+      padding: 24px 16px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+
+    /* Header Panel */
+    .header-panel {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px 24px;
+      background: var(--surface);
+      border: 1px solid var(--outline);
+      border-radius: 16px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .header-panel h1 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    [data-theme="dark"] .header-panel h1 {
+      color: var(--gold);
+    }
+    .header-panel p {
+      font-size: 14px;
+      color: var(--on-surface-variant);
+      margin-top: 4px;
+    }
+    .controls-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--outline);
+      background: var(--surface-variant);
+      color: var(--on-surface);
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      border-color: var(--gold);
+      background: var(--gold-soft);
+    }
+
+    /* Screen Selector Tabs */
+    .screen-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+    .screen-tab-btn {
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--outline);
+      background: var(--surface);
+      color: var(--on-surface-variant);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .screen-tab-btn:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+    .screen-tab-btn.active {
+      background: var(--primary);
+      color: #FFF;
+      border-color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+    [data-theme="dark"] .screen-tab-btn.active {
+      background: var(--gold);
+      color: #0E221B;
+      border-color: var(--gold);
+    }
+
+    /* Split layout: Phone mockup & Specs */
+    .preview-grid {
+      display: grid;
+      grid-template-columns: 410px 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+    @media (max-width: 960px) {
+      .preview-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Phone Device Mockup Frame */
+    .phone-frame {
+      width: 390px;
+      max-width: 100%;
+      height: 740px;
+      background: var(--surface);
+      border: 3px solid var(--outline);
+      border-radius: 36px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md), 0 20px 40px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      margin: 0 auto;
+    }
+    .status-bar {
+      height: 28px;
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--on-surface-variant);
+      border-bottom: 1px solid transparent;
+      user-select: none;
+    }
+    .screen-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    /* Top App Bar */
+    .mock-topbar {
+      height: 56px;
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--outline);
+      flex-shrink: 0;
+    }
+    .mock-topbar .left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .mock-topbar .title-group {
+      min-width: 0;
+    }
+    .mock-topbar h2 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--on-surface);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .mock-topbar .sub {
+      font-size: 11px;
+      color: var(--on-surface-variant);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: var(--on-surface-variant);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .icon-btn:hover { background: var(--surface-variant); }
+
+    /* ── UNIFIED NAV BARS ── */
+
+    /* Standard Stepper Bar (Sinksar, Psalter, Scripture) */
+    .unified-nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 12px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--outline);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      z-index: 9;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    /* Wudase Maryam Single-Line Bar (Scrollable Days + Divider + Single Lang Button) */
+    .wudase-nav-bar {
+      display: flex;
+      align-items: center;
+      padding: 6px 10px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--outline);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      z-index: 9;
+      gap: 8px;
+      width: 100%;
+      flex-shrink: 0;
+    }
+
+    /* Scrollable Days Track inside Wudase Nav Bar */
+    .scrollable-days-track {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      flex: 1;
+      padding: 2px 0;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .scrollable-days-track::-webkit-scrollbar { display: none; }
+
+    .day-pill {
+      padding: 5px 12px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      border: 1px solid var(--outline);
+      background: var(--surface-variant);
+      color: var(--on-surface-variant);
+      transition: all 0.18s cubic-bezier(0.2, 0, 0, 1);
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .day-pill:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+    .day-pill.active {
+      background: var(--primary);
+      color: #FFFFFF;
+      border-color: var(--primary);
+      font-weight: 700;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+    }
+    [data-theme="dark"] .day-pill.active {
+      background: var(--gold);
+      color: #0E221B;
+      border-color: var(--gold);
+    }
+
+    /* Vertical Divider between Days and Language Toggle */
+    .bar-divider {
+      width: 1px;
+      height: 22px;
+      background: var(--outline);
+      flex-shrink: 0;
+    }
+
+    /* Single Button Language Toggle (Compact, non-swipe) */
+    .single-lang-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid var(--gold-border);
+      background: var(--gold-soft);
+      color: var(--gold);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+      white-space: nowrap;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .single-lang-btn:hover {
+      background: var(--gold);
+      color: #0E221B;
+      transform: translateY(-1px);
+    }
+    .single-lang-btn svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+
+    /* Stepper Component */
+    .capsule-stepper {
+      display: inline-flex;
+      align-items: center;
+      background: var(--surface-variant);
+      border: 1px solid var(--outline);
+      border-radius: 9999px;
+      padding: 2px 4px;
+      gap: 4px;
+      min-width: 0;
+    }
+    .stepper-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .stepper-btn:hover { background: rgba(0,0,0,0.08); }
+    .stepper-label {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 0 6px;
+      color: var(--on-surface);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .stepper-label svg {
+      width: 14px;
+      height: 14px;
+      fill: var(--gold);
+      flex-shrink: 0;
+    }
+
+    /* Reading Scroll Area */
+    .reading-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 18px 40px;
+      font-family: var(--font-reading);
+      font-size: 16px;
+      line-height: 1.85;
+      color: var(--on-surface);
+    }
+    .reading-scroll p {
+      margin-bottom: 16px;
+      text-align: justify;
+    }
+    .section-heading {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gold);
+      text-align: center;
+      margin: 10px 0 20px;
+      font-family: var(--font-reading);
+    }
+    .rubric-text {
+      color: var(--rubric);
+      font-weight: 600;
+    }
+    .numeral {
+      color: var(--gold);
+      font-weight: 700;
+      margin-right: 4px;
+    }
+    .verse-num {
+      color: var(--gold);
+      font-weight: 700;
+      font-size: 14px;
+      display: inline-block;
+      width: 22px;
+      margin-right: 4px;
+    }
+
+    /* Right Specs Panel */
+    .specs-panel {
+      background: var(--surface);
+      border: 1px solid var(--outline);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .specs-panel h3 {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    [data-theme="dark"] .specs-panel h3 { color: var(--gold); }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--gold-soft);
+      color: var(--gold);
+      border: 1px solid var(--gold-border);
+      padding: 2px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .specs-panel p {
+      font-size: 13.5px;
+      color: var(--on-surface-variant);
+      margin-bottom: 16px;
+    }
+
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 13px;
+    }
+    .matrix-table th, .matrix-table td {
+      border: 1px solid var(--outline);
+      padding: 10px 12px;
+      text-align: left;
+    }
+    .matrix-table th {
+      background: var(--surface-variant);
+      font-weight: 700;
+      color: var(--on-surface);
+    }
+
+    .code-box {
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      border-radius: 10px;
+      padding: 16px;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      overflow-x: auto;
+      color: var(--on-surface);
+      margin-top: 14px;
+      line-height: 1.6;
+    }
+    .code-tag { color: var(--rubric); }
+    .code-attr { color: var(--gold); }
+    .code-str { color: #2E7D32; }
+
+    .toast-indicator {
+      position: absolute;
+      top: 66px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(14, 59, 49, 0.95);
+      color: #FFF;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 50;
+      white-space: nowrap;
+    }
+    .toast-indicator.show { opacity: 1; }
+
+    /* Comparison Card */
+    .compare-card {
+      background: var(--surface-variant);
+      border: 1px solid var(--outline);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .compare-title {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--on-surface);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+  </style>
+</head>
+<body data-theme="light">
+
+<div class="container">
+
+  <!-- Header & Mode Switcher -->
+  <div class="header-panel">
+    <div>
+      <h1>ስንቅ (Sinq) — Reader Navigation & Buttons Design Preview</h1>
+      <p>Interactive verification for <strong>ውዳሴ ማርያም (Wudase Maryam)</strong>, <strong>ስንክሳር (Synaxarium)</strong>, <strong>መዝሙረ ዳዊት (Psalter)</strong>, and <strong>መጽሐፍ ቅዱስ (Scripture)</strong>.</p>
+    </div>
+    <div class="controls-row">
+      <button class="btn" onclick="toggleTheme()" id="themeBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.36-4.4 2.36-3.03 0-5.5-2.47-5.5-5.5 0-1.82.99-3.42 2.36-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
+        <span id="themeLabel">Dark Sanctuary Mode</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Screen Selector Tabs -->
+  <div class="screen-tabs">
+    <button class="screen-tab-btn active" onclick="loadScreen('wudase')">
+      🌿 ፩. ውዳሴ ማርያም (Wudase Maryam)
+    </button>
+    <button class="screen-tab-btn" onclick="loadScreen('sinksar')">
+      📖 ፪. ስንክሳር (Synaxarium)
+    </button>
+    <button class="screen-tab-btn" onclick="loadScreen('psalter')">
+      📜 ፫. መዝሙረ ዳዊት (Psalter)
+    </button>
+    <button class="screen-tab-btn" onclick="loadScreen('scripture')">
+      ✝️ ፬. መጽሐፍ ቅዱስ (Bible / Scripture)
+    </button>
+  </div>
+
+  <div class="preview-grid">
+
+    <!-- Interactive Mobile Device Mockup -->
+    <div>
+      <div class="phone-frame">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span>ስንቅ</span>
+          <span>100%</span>
+        </div>
+
+        <div class="screen-content">
+          <div class="toast-indicator" id="toast">ተመርጧል</div>
+
+          <!-- TOP APP BAR -->
+          <div class="mock-topbar">
+            <div class="left">
+              <button class="icon-btn" title="Back">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+              </button>
+              <div class="title-group">
+                <h2 id="topbarTitle">ውዳሴ ማርያም</h2>
+                <div class="sub" id="topbarSubtitle">የሰኞ ውዳሴ · ዘሰኑይ</div>
+              </div>
+            </div>
+            <div class="controls-row">
+              <button class="icon-btn" title="ማውጫ (Contents)" onclick="showToast('ማውጫ ተከፍቷል')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+              </button>
+              <button class="icon-btn" title="የጽሑፍ መጠንና ቅንብር (Typography)" onclick="showToast('የቅርጸ-ቁምፊ መቆጣጠሪያ')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 4v3h5v12h3V7h5V4H9zm-6 8h3v7h3v-7h3V9H3v3z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- DOCKED NAV BAR AREA (Swapped dynamically based on screen) -->
+          <div id="navBarContainer">
+            <!-- Injected dynamically: either wudase-nav-bar or standard unified-nav-bar -->
+          </div>
+
+          <!-- READING SCROLL BODY -->
+          <div class="reading-scroll" id="readingBody">
+            <!-- Dynamic Content Injected Here -->
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Design Specifications per Screen -->
+    <div class="specs-panel">
+      <h3 id="specTitle">፩. ውዳሴ ማርያም (Wudase Maryam) <span class="badge">Single-Line Unified Bar</span></h3>
+      <p id="specDesc">
+        <strong>Zero wasted space:</strong> The weekday portions (with <em>ዘዘወትር</em> and all days) and the language toggle are placed together on <strong>one single line</strong>. Days are horizontally scrollable with smooth overflow, separated by a clean vertical divider from the compact single-button language switcher.
+      </p>
+
+      <div class="compare-card">
+        <div class="compare-title">
+          <span>✨</span> <strong>What changed per your request:</strong>
+        </div>
+        <ul style="font-size: 13px; color: var(--on-surface-variant); padding-left: 20px; line-height: 1.7;">
+          <li><strong>No popups or dropdown dialogs:</strong> Portions are placed directly on the top sub-bar.</li>
+          <li><strong>Single-line layout:</strong> The scrollable weekday track takes the left area; the single language button sits on the right.</li>
+          <li><strong>Single-button language toggle:</strong> Replaced the 2-segment swipe button with a compact <code>[ 🌐 ግእዝ ]</code> pill that directly flips the language on click.</li>
+          <li><strong>Scrollable track:</strong> <code>ዘዘወትር</code>, <code>ሰኑይ</code>, <code>ሠሉስ</code>, <code>ረቡዕ</code>, <code>ኀሙስ</code>, <code>ዓርብ</code>, <code>ቀዳሚት</code>, <code>እሑድ</code>, <code>አንቀጸ ብርሃን</code>, <code>ይወድስዋ</code> smoothly scroll horizontally with active highlighting.</li>
+        </ul>
+      </div>
+
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th>Screen</th>
+            <th>Primary Navigation Control</th>
+            <th>Language Toggle (Single Button)</th>
+            <th>Structure</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background: var(--gold-soft);">
+            <td><strong>ውዳሴ ማርያም</strong></td>
+            <td>Scrollable days track: <code>[ዘዘወትር] [ሰኑይ] [ሠሉስ]...</code></td>
+            <td>Compact single pill: <code>[ 🌐 ግእዝ ]</code></td>
+            <td><strong>Single 44dp row</strong> separated by divider <code>|</code></td>
+          </tr>
+          <tr>
+            <td><strong>ስንክሳር</strong></td>
+            <td>Day stepper: <code>[‹] [መስከረም ፩ 📅] [›]</code></td>
+            <td>Compact single pill: <code>[ 🌐 ግእዝ ]</code></td>
+            <td>Capsule stepper + language pill</td>
+          </tr>
+          <tr>
+            <td><strong>መዝሙረ ዳዊት</strong></td>
+            <td>Psalm stepper: <code>[‹] [መዝሙር ፩] [›]</code></td>
+            <td>Compact single pill: <code>[ 🌐 ግእዝ ]</code></td>
+            <td>Capsule stepper + daily 30-psalm filter</td>
+          </tr>
+          <tr>
+            <td><strong>መጽሐፍ ቅዱስ</strong></td>
+            <td>Chapter stepper: <code>[‹] [ምዕራፍ ፩ ▾] [›]</code></td>
+            <td>Canon info: <code>[ 1980 ]</code></td>
+            <td>Capsule stepper + chapter modal sheet</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 style="font-size: 14px; font-weight: 700; color: var(--gold); margin: 20px 0 8px;">JETPACK COMPOSE IMPLEMENTATION</h4>
+      <div class="code-box">
+<span class="code-tag">@Composable</span>
+<span class="code-attr">fun</span> <span class="code-str">WudaseControlBar</span>(
+    sections: List&lt;WudaseSection&gt;,
+    selected: Int,
+    isGeez: Boolean,
+    onSelectSection: (Int) -&gt; Unit,
+    onToggleGeez: () -&gt; Unit,
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.background,
+        tonalElevation = <span class="code-attr">1</span>.dp,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.screen, vertical = <span class="code-attr">6</span>.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(<span class="code-attr">8</span>.dp),
+        ) {
+            <span class="code-tag">// 1. Scrollable Day Pills Track (Takes available width)</span>
+            LazyRow(
+                modifier = Modifier.weight(<span class="code-attr">1f</span>),
+                horizontalArrangement = Arrangement.spacedBy(<span class="code-attr">6</span>.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                itemsIndexed(sections) { i, sec -&gt;
+                    DayPill(
+                        label = sec.label,
+                        selected = i == selected,
+                        onClick = { onSelectSection(i) },
+                    )
+                }
+            }
+
+            <span class="code-tag">// 2. Clean Vertical Divider</span>
+            VerticalDivider(
+                modifier = Modifier.height(<span class="code-attr">22</span>.dp),
+                color = MaterialTheme.colorScheme.outlineVariant,
+            )
+
+            <span class="code-tag">// 3. Single-Button Language Toggle (Non-swipe)</span>
+            SingleEditionButton(
+                isGeez = isGeez,
+                onClick = onToggleGeez,
+            )
+        }
+    }
+}
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  let currentScreen = 'wudase';
+  let currentLang = 'amh';
+  let currentSectionIndex = 1; // Default to ሰኞ (Monday)
+  let currentDayOffset = 0;
+
+  const wudaseSections = [
+    { id: "daily", label: "ዘዘወትር", subAmh: "ጸሎት ዘዘወትር", subGez: "ጸሎት ዘዘወትር",
+      titleAmh: "ጸሎት ዘዘወትር", titleGez: "ጸሎት ዘዘወትር",
+      bodyAmh: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>በስመ አብ ወወልድ ወመንፈስ ቅዱስ አሐዱ አምላክ፤</span> አሜን።</p><p><span class='numeral'>፪፡</span> <span class='rubric-text'>ቅዱስ እግዚአብሔር፣ ቅዱስ ኃያል፣ ቅዱስ ሕያው የማይሞት፤</span> ከድንግል ማርያም የተወለደ ማረን።</p><p><span class='numeral'>፫፡</span> <span class='rubric-text'>አቡነ ዘበሰማያት፤</span> ይትቀደስ ስምከ፤ ትምጻእ መንግሥትከ፤ ይኩን ፈቃድከ በከመ በሰማይ ከማሁ በምድር።</p>",
+      bodyGez: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>በስመ አብ ወወልድ ወመንፈስ ቅዱስ አሐዱ አምላክ፤</span> አሜን።</p><p><span class='numeral'>፪፡</span> <span class='rubric-text'>ቅዱስ እግዚአብሔር ቅዱስ ኃያል ቅዱስ ሕያው ዘኢይመውት፤</span> ዘተወልደ እማርያም እምቅድስት ድንግል ተሣሃለነ እግዚኦ።</p><p><span class='numeral'>፫፡</span> <span class='rubric-text'>አቡነ ዘበሰማያት፤</span> ይትቀደስ ስምከ፤ ትምጻእ መንግሥትከ፤ ይኩን ፈቃድከ በከመ በሰማይ ከማሁ በምድር።</p>"
+    },
+    { id: "mon", label: "ሰኑይ", subAmh: "የሰኞ ውዳሴ", subGez: "ውዳሴ ዘሰኑይ",
+      titleAmh: "ውዳሴ ማርያም ዘሰኑይ (የሰኞ)", titleGez: "ውዳሴ ማርያም ዘሰኑይ",
+      bodyAmh: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>ፈቀደ እግዚእ ያግዕዞ ለአዳም፤</span> ኅዙነ ወትኩዘ ልብ፤ ወያግብኦ ኀበ ዘቀዳሚ መንበሩ። ጌታ ያዘነና ቆሮቆረ ልብ ያለውን አዳምን ነፃ ያወጣው ዘንድ፤ ወደ ቀደመ ክብሩም ይመልሰው ዘንድ ወደደ።</p><p><span class='numeral'>፪፡</span> <span class='rubric-text'>እስመ በፈቃዱ ወበሥምረቱ፤</span> መጽአ ወተሰብአ እምድንግል፤ ዘእንበለ ዘርዐ ብእሲ አድኃነነ። በፈቃዱና በወደደው ነገር ያለ ወንድ ዘር ከድንግል ተወልዶ አዳነን።</p>",
+      bodyGez: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>ፈቀደ እግዚእ ያግዕዞ ለአዳም፤</span> ኅዙነ ወትኩዘ ልብ፤ ወያግብኦ ኀበ ዘቀዳሚ መንበሩ።</p><p><span class='numeral'>፪፡</span> <span class='rubric-text'>እስመ በፈቃዱ ወበሥምረቱ፤</span> መጽአ ወተሰብአ እምድንግል፤ ዘእንበለ ዘርዐ ብእሲ አድኃነነ።</p>"
+    },
+    { id: "tue", label: "ሠሉስ", subAmh: "የማክሰኞ ውዳሴ", subGez: "ውዳሴ ዘሠሉስ",
+      titleAmh: "ውዳሴ ማርያም ዘሠሉስ (የማክሰኞ)", titleGez: "ውዳሴ ማርያም ዘሠሉስ",
+      bodyAmh: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>አክሊለ ምክሕነ ወቀዳሚተ መድኃኒትነ፤</span> ወመሠረተ ንጽሕነ፤ ኮነ በማርያም ድንግል እንተ ወለደት ለነ ዘእግዚአብሔር ቃለ። የትምክሕታችን ዘውድ የመድኃኒታችንም መጀመሪያ የንጽሕናችን መሠረት የእግዚአብሔርን ቃል በወለደችልን በድንግል ማርያም ሆነ።</p>",
+      bodyGez: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>አክሊለ ምክሕነ ወቀዳሚተ መድኃኒትነ፤</span> ወመሠረተ ንጽሕነ፤ ኮነ በማርያም ድንግል እንተ ወለደት ለነ ዘእግዚአብሔር ቃለ።</p>"
+    },
+    { id: "wed", label: "ረቡዕ", subAmh: "የረቡዕ ውዳሴ", subGez: "ውዳሴ ዘረቡዕ",
+      titleAmh: "ውዳሴ ማርያም ዘረቡዕ (የረቡዕ)", titleGez: "ውዳሴ ማርያም ዘረቡዕ",
+      bodyAmh: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>ኵሉ ሠራዊተ ሰማያት ይብሉ፤</span> ብፅዕት አንቲ እምኵሉ ፍጥረት፤ ማርያም ድንግል ዘተወልደ እምኔኪ አምላከ ምሕረት።</p>",
+      bodyGez: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>ኵሉ ሠራዊተ ሰማያት ይብሉ፤</span> ብፅዕት አንቲ እምኵሉ ፍጥረት፤ ማርያም ድንግል ዘተወልደ እምኔኪ አምላከ ምሕረት።</p>"
+    },
+    { id: "thu", label: "ኀሙስ", subAmh: "የኀሙስ ውዳሴ", subGez: "ውዳሴ ዘኀሙስ",
+      titleAmh: "ውዳሴ ማርያም ዘኀሙስ (የኀሙስ)", titleGez: "ውዳሴ ማርያም ዘኀሙስ",
+      bodyAmh: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>ዕፀ ጳጦስ እንተ ርእየ ሙሴ በነደ እሳት፤</span> ዘኢትውዒ፤ ይእቲ ማርያም ድንግል ንጽሕት። ሙሴ በእሳት ነበልባል ውስጥ ያያት ያልተቃጠለችው ዕፀ ጳጦስ ንጽሕት ድንግል ማርያም ናት።</p>",
+      bodyGez: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>ዕፀ ጳጦስ እንተ ርእየ ሙሴ በነደ እሳት፤</span> ዘኢትውዒ፤ ይእቲ ማርያም ድንግል ንጽሕት።</p>"
+    },
+    { id: "fri", label: "ዓርብ", subAmh: "የዓርብ ውዳሴ", subGez: "ውዳሴ ዘዓርብ",
+      titleAmh: "ውዳሴ ማርያም ዘዓርብ (የዓርብ)", titleGez: "ውዳሴ ማርያም ዘዓርብ",
+      bodyAmh: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>ቡርክት አንቲ እምአንስት፤</span> ወቡሩክ ፍሬ ከርሥኪ፤ ማርያም ድንግል ወላዲተ አምላክ። ከሴቶች ተለይተሽ የተባረክሽ ነሽ፤ የማሕፀንሽም ፍሬ የተባረከ ነው፤ አምላክን የወለድሽ ድንግል ማርያም ሆይ።</p>",
+      bodyGez: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>ቡርክት አንቲ እምአንስት፤</span> ወቡሩክ ፍሬ ከርሥኪ፤ ማርያም ድንግል ወላዲተ አምላክ።</p>"
+    },
+    { id: "sat", label: "ቀዳሚት", subAmh: "የቅዳሜ ውዳሴ", subGez: "ውዳሴ ዘቀዳሚት",
+      titleAmh: "ውዳሴ ማርያም ዘቀዳሚት (የቅዳሜ)", titleGez: "ውዳሴ ማርያም ዘቀዳሚት",
+      bodyAmh: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>ንጽሕት ወብርህት ወቅድስት፤</span> በኵሉ ነገር፤ ዘኮንኪ ማኅደረ መለኮት። በነገር ሁሉ ንጽሕትና ብሩህት ቅድስትም የሆንሽ የመለኮት ማደሪያ ሆንሽ።</p>",
+      bodyGez: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>ንጽሕት ወብርህት ወቅድስት፤</span> በኵሉ ነገር፤ ዘኮንኪ ማኅደረ መለኮት።</p>"
+    },
+    { id: "sun", label: "እሑድ", subAmh: "የእሑድ ውዳሴ", subGez: "ውዳሴ ዘእሑድ",
+      titleAmh: "ውዳሴ ማርያም ዘእሑድ (የእሑድ)", titleGez: "ውዳሴ ማርያም ዘእሑድ",
+      bodyAmh: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>ይትፌሣሕ ልብየ በእግዚአብሔር፤</span> ወትልዕል ቀርንየ በአምላኪየ፤ እስመ አርሐወ አፉየ ላዕለ ፀርየ። ልቤ በእግዚአብሔር ደስ አለው፤ ቀንዴም በአምላኬ ከፍ ከፍ አለ፤ አፌ በጠላቶቼ ላይ ተከፈተ።</p>",
+      bodyGez: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>ይትፌሣሕ ልብየ በእግዚአብሔር፤</span> ወትልዕል ቀርንየ በአምላኪየ፤ እስመ አርሐወ አፉየ ላዕለ ፀርየ።</p>"
+    },
+    { id: "anqetse", label: "አንቀጸ ብርሃን", subAmh: "ቅዱስ ያሬድ", subGez: "አንቀጸ ብርሃን",
+      titleAmh: "አንቀጸ ብርሃን", titleGez: "አንቀጸ ብርሃን",
+      bodyAmh: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>ቅድስት ወብፅዕት ስብሕት ወቡርክት፤</span> ክብርት ወልዕልት አንቀጸ ብርሃን፤ መዐርገ ሕይወት ወማኅደረ መለኮት። ቅድስትና ብፅዕት ምስጉንና ቡርክት የሆንሽ አንቀጸ ብርሃን የሕይወት መውጫ መሰላል የመለኮት ማደሪያ።</p>",
+      bodyGez: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>ቅድስት ወብፅዕት ስብሕት ወቡርክት፤</span> ክብርት ወልዕልት አንቀጸ ብርሃን፤ መዐርገ ሕይወት ወማኅደረ መለኮት።</p>"
+    },
+    { id: "yiwedsewa", label: "ይወድስዋ", subAmh: "ይወድስዋ መላእክት", subGez: "ይወድስዋ መላእክት",
+      titleAmh: "ይወድስዋ መላእክት", titleGez: "ይወድስዋ መላእክት",
+      bodyAmh: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>ይወድስዋ መላእክት ለማርያም በውስተ ውሳጤ መንጦላዕት፤</span> ወይብልዋ በሰላም ንጽሕት ድንግል ወላዲተ አምላክ። መላእክት በመጋረጃው ውስጥ ማርያምን ያመሰግኗታል፤ ንጽሕት ድንግል አምላክን የወለድሽ ሆይ ሰላም ላንቺ ይሁን ይሏታል።</p>",
+      bodyGez: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>ይወድስዋ መላእክት ለማርያም በውስተ ውሳጤ መንጦላዕት፤</span> ወይብልዋ በሰላም ንጽሕት ድንግል ወላዲተ አምላክ።</p>"
+    },
+    { id: "melkea_maryam", label: "መልክአ ማርያም", subAmh: "መልክአ ማርያም", subGez: "መልክአ ማርያም",
+      titleAmh: "መልክአ ማርያም", titleGez: "መልክአ ማርያም",
+      bodyAmh: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>ሰላም ለዝክረ ስምኪ፤</span> ዘመንክር፤ ጣዕመ ዜናሁ በውስተ አእምሮ ወልብ፤ ማርያም ድንግል ወላዲተ አምላክ።</p><p><span class='numeral'>፪፡</span> <span class='rubric-text'>ሰላም ለሥዕርትኪ፤</span> ዘተከለለ በጽድቅ፤ ከመ ሐብለ ሜላት ዘቀይሕ።</p><p><span class='numeral'>፫፡</span> <span class='rubric-text'>ሰላም ለገጽኪ፤</span> ፀዓዳ ወቀይሕ፤ ዘይበርህ እምፀሐይ ወወርኅ።</p>",
+      bodyGez: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>ሰላም ለዝክረ ስምኪ፤</span> ዘመንክር፤ ጣዕመ ዜናሁ በውስተ አእምሮ ወልብ፤ ማርያም ድንግል ወላዲተ አምላክ።</p><p><span class='numeral'>፪፡</span> <span class='rubric-text'>ሰላም ለሥዕርትኪ፤</span> ዘተከለለ በጽድቅ፤ ከመ ሐብለ ሜላት ዘቀይሕ።</p><p><span class='numeral'>፫፡</span> <span class='rubric-text'>ሰላም ለገጽኪ፤</span> ፀዓዳ ወቀይሕ፤ ዘይበርህ እምፀሐይ ወወርኅ።</p>"
+    },
+    { id: "melkea_eyesus", label: "መልክአ ኢየሱስ", subAmh: "መልክአ ኢየሱስ", subGez: "መልክአ ኢየሱስ",
+      titleAmh: "መልክአ ኢየሱስ", titleGez: "መልክአ ኢየሱስ",
+      bodyAmh: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>ሰላም ለዝክረ ስምከ፤</span> ስመ መሐላ፤ ዘኢይሔሱ፤ ኢየሱስ ክርስቶስ ለዓለም ወለዓለመ ዓለም።</p><p><span class='numeral'>፪፡</span> <span class='rubric-text'>ሰላም ለሥዕርትከ፤</span> ዘጸሊም ጽላሎቱ፤ ከመ ፀምር ጸዓዳ በደብረ ታቦር ዘአስተርአየ ራእዩ።</p><p><span class='numeral'>፫፡</span> <span class='rubric-text'>ሰላም ለአዕይንቲከ፤</span> ከመ ርግብ ዘኀበ ምራወ ማይ።</p>",
+      bodyGez: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>ሰላም ለዝክረ ስምከ፤</span> ስመ መሐላ፤ ዘኢይሔሱ፤ ኢየሱስ ክርስቶስ ለዓለም ወለዓለመ ዓለም።</p><p><span class='numeral'>፪፡</span> <span class='rubric-text'>ሰላም ለሥዕርትከ፤</span> ዘጸሊም ጽላሎቱ፤ ከመ ፀምር ጸዓዳ በደብረ ታቦር ዘአስተርአየ ራእዩ።</p><p><span class='numeral'>፫፡</span> <span class='rubric-text'>ሰላም ለአዕይንቲከ፤</span> ከመ ርግብ ዘኀበ ምራወ ማይ።</p>"
+    }
+  ];
+
+  const sinksarItems = [
+    { label: "መስከረም ፩", sub: "መስከረም 1 (Sep 11)", headingAmh: "ስንክሳር ዘወርኀ መስከረም ፩", headingGez: "አመ ፩ ለወርኀ መስከረም",
+      bodyAmh: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>አንድ አምላክ በሚሆን በአብ በወልድ በመንፈስ ቅዱስ ስም፤</span> የመስከረም ወር የተባረከ ነው፤ ይኸውም የግብጽና የኢትዮጵያ ወሮች መጀመሪያ ነው። የቀኑ ሰዓት ከሌሊቱ ሰዓት ጋር የተስተካከለ ዐሥራ ሁለት ሰዓት ነው። ከዚህም በኋላ የቀኑ ሰዓት እየጐደለ ይሄዳል።</p><p><span class='numeral'>፪፡</span> በዚችም ቀን ለከበረ መልአክ <span class='rubric-text'>ለቅዱስ ራጉኤል</span> መታሰቢያው ሆነ።</p>",
+      bodyGez: "<p><span class='numeral'>፩፡</span> <span class='rubric-text'>በስመ አብ ወወልድ ወመንፈስ ቅዱስ አሐዱ አምላክ፤</span> ወርኀ መስከረም ቡሩክ ዘውእቱ ርእሰ ዓውደ ዓመት ዘግብፅ ወኢትዮጵያ ወኖባ። መዓልቱ ወሌሊቱ ለዝንቱ ወርኅ ዕሩይ ፲ወ፪ ውእቱ ሰዓቱ።</p><p><span class='numeral'>፪፡</span> ወበዛቲ ዕለት ተዝካረ በዓሉ <span class='rubric-text'>ለቅዱስ ራጉኤል</span> መልአክ ክቡር።</p>"
+    },
+    { label: "መስከረም ፪", sub: "መስከረም 2 (Sep 12)", headingAmh: "ስንክሳር ዘወርኀ መስከረም ፪", headingGez: "አመ ፪ ለወርኀ መስከረም",
+      bodyAmh: "<p><span class='numeral'>፩፡</span> በዚች ቀን አባቶቻችን ነቢያትና ጻድቃን የከበሩ ቅዱሳን ሁሉ የተሰበሰቡበት መታሰቢያ ሆነ።</p><p><span class='numeral'>፪፡</span> ዳግመኛም የከበረ <span class='rubric-text'>ዮሐንስ መጥምቅ</span> አንገቱ የተቆረጠበት መታሰቢያ ነው።</p>",
+      bodyGez: "<p><span class='numeral'>፩፡</span> በዛቲ ዕለት ተዝካሮሙ ለአበዊነ ነቢያት ወጻድቃን ቅዱሳን እለ ተጋብኡ።</p><p><span class='numeral'>፪፡</span> ወካዕበ ተዝካረ ክሣዱ ለክቡር <span class='rubric-text'>ዮሐንስ መጥምቅ</span>።</p>"
+    },
+    { label: "መስከረም ፫", sub: "መስከረም 3 (Sep 13)", headingAmh: "ስንክሳር ዘወርኀ መስከረም ፫", headingGez: "አመ ፫ ለወርኀ መስከረም",
+      bodyAmh: "<p><span class='numeral'>፩፡</span> በዚች ቀን የታላቁ ሊቀ ጳጳሳት <span class='rubric-text'>የቅዱስ ዲዮናስዮስ</span> መታሰቢያ ሆነ።</p>",
+      bodyGez: "<p><span class='numeral'>፩፡</span> በዛቲ ዕለት ተዝካሩ ለዓቢይ ሊቀ ጳጳሳት <span class='rubric-text'>ቅዱስ ዲዮናስዮስ</span>።</p>"
+    }
+  ];
+
+  const psalterItems = [
+    { label: "መዝሙር ፩", sub: "ምዕራፍ 1", headingAmh: "መዝሙረ ዳዊት ፩", headingGez: "መዝሙር ፩ ዘዳዊት",
+      bodyAmh: "<p><span class='verse-num'>፩</span> ምስጉን ነው በክፉዎች ምክር ያልሄደ፥ በኃጢአተኞችም መንገድ ያልቆመ፥ በዋዘኞችም ወንበር ያልተቀመጠ።</p><p><span class='verse-num'>፪</span> ነገር ግን በእግዚአብሔር ሕግ ደስ ይለዋል፥ ሕጉንም በቀንና በሌሊት ያስባል።</p><p><span class='verse-num'>፫</span> እርሱም በወንዝ ዳር እንደ ተተከለች፥ ፍሬዋን በየጊዜዋ እንደምትሰጥ፥ ቅጠልዋም እንደማይረግፍ ዛፍ ይሆናል፤ የሚሠራውም ሁሉ ይከናወንለታል።</p>",
+      bodyGez: "<p><span class='verse-num'>፩</span> ብፁዕ ብእሲ ዘኢሖረ በምክረ ረሲዓን። ወዘኢቆመ ውስተ ፍኖተ ኃጥአን። ወዘኢነበረ ውስተ መንበረ መስተሣልቃን።</p><p><span class='verse-num'>፪</span> ዘዳእሙ ሕገ እግዚአብሔር ሥምረቱ። ወሕጎ ይነብብ በመዓልት ወበሌሊት።</p><p><span class='verse-num'>፫</span> ወይከውን ከመ ዕፅ እንተ ትክልት ውስተ ወ繫ዘ ማይ። እንተ ትሁብ ፍሬሃ በጊዜሃ።</p>"
+    },
+    { label: "መዝሙር ፪", sub: "ምዕራፍ 2", headingAmh: "መዝሙረ ዳዊት ፪", headingGez: "መዝሙር ፪ ዘዳዊት",
+      bodyAmh: "<p><span class='verse-num'>፩</span> አሕዛብ ለምን አጎረመረሙ? ወገኖችስ ለምን ከንቱ ነገርን አሰቡ?</p><p><span class='verse-num'>፪</span> የምድር ነገሥታት ተነሡ፥ አለቆችም በእግዚአብሔርና በመሢሑ ላይ እንዲህ ሲሉ ተማከሩ።</p>",
+      bodyGez: "<p><span class='verse-num'>፩</span> ለአቴኑ አንጐርጐሩ አሕዛብ። ወሕዝብኒ ነበቡ ከንቶ።</p><p><span class='verse-num'>፪</span> ተንሥኡ ነገሥተ ምድር ወተጋብኡ መላእክት ኅቡረ።</p>"
+    }
+  ];
+
+  const scriptureItems = [
+    { label: "ምዕራፍ ፩", sub: "ኦሪት ዘፍጥረት ፩", headingAmh: "ኦሪት ዘፍጥረት ምዕራፍ ፩", headingGez: "ኦሪት ዘፍጥረት ምዕራፍ ፩",
+      bodyAmh: "<p><span class='verse-num'>፩</span> በመጀመሪያ እግዚአብሔር ሰማይንና ምድርን ፈጠረ።</p><p><span class='verse-num'>፪</span> ምድርም ባዶ ነበረች፥ አንዳችም አልነበረባትም፤ ጨለማም በጥልቁ ላይ ነበረ፤ የእግዚአብሔርም መንፈስ በውኃ ላይ ሰፍፎ ነበር።</p><p><span class='verse-num'>፫</span> እግዚአብሔርም፦ <span class='rubric-text'>ብርሃን ይሁን</span> አለ፤ ብርሃንም ሆነ።</p>",
+      bodyGez: "<p><span class='verse-num'>፩</span> በቀዳሚ ገብረ እግዚአብሔር ሰማየ ወምድረ።</p><p><span class='verse-num'>፪</span> ወምድርሰ ኢታስተርኢ ወኢኮነት ድልወተ፤ ወጽልመት መልዕልተ ቀላይ፤ ወመንፈሰ እግዚአብሔር ይጼልል መልዕልተ ማይ።</p><p><span class='verse-num'>፫</span> ወይቤ እግዚአብሔር፦ <span class='rubric-text'>ይኩን ብርሃን</span>፤ ወኮነ ብርሃን።</p>"
+    },
+    { label: "ምዕራፍ ፪", sub: "ኦሪት ዘፍጥረት ፪", headingAmh: "ኦሪት ዘፍጥረት ምዕራፍ ፪", headingGez: "ኦሪት ዘፍጥረት ምዕራፍ ፪",
+      bodyAmh: "<p><span class='verse-num'>፩</span> ሰማይና ምድር ሠራዊታቸውም ሁሉ ተፈጸሙ።</p><p><span class='verse-num'>፪</span> እግዚአብሔርም የሠራውን ሥራ በሰባተኛው ቀን ፈጸመ፤ በሰባተኛውም ቀን ከሠራው ሥራ ሁሉ ዐረፈ።</p>",
+      bodyGez: "<p><span class='verse-num'>፩</span> ወተፈጸሙ ሰማይ ወምድር ወኵሉ ሠራዊቶሙ።</p><p><span class='verse-num'>፪</span> ወፈጸመ እግዚአብሔር በዕለት ሳብዒት ግብሮ ዘገብረ፤ ወአዕረፈ በዕለት ሳብዒት እምኵሉ ግብሩ።</p>"
+    }
+  ];
+
+  function loadScreen(key) {
+    currentScreen = key;
+    document.querySelectorAll('.screen-tab-btn').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('onclick').includes(key));
+    });
+
+    const navContainer = document.getElementById("navBarContainer");
+
+    if (key === 'wudase') {
+      document.getElementById("topbarTitle").innerText = "ውዳሴ ማርያም";
+      document.getElementById("specTitle").innerHTML = `፩. ውዳሴ ማርያም (Wudase Maryam) <span class="badge">Single-Line Unified Bar</span>`;
+      document.getElementById("specDesc").innerHTML = `<strong>Zero wasted space:</strong> The weekday portions (with <em>ዘዘወትር</em> and all days) and the language toggle are placed together on <strong>one single line</strong>. Days are horizontally scrollable with smooth overflow, separated by a clean vertical divider from the compact single-button language switcher.`;
+
+      // Build Wudase Maryam Single-Line Bar
+      navContainer.innerHTML = `
+        <div class="wudase-nav-bar" id="wudaseBar">
+          <div class="scrollable-days-track" id="daysTrack">
+            ${wudaseSections.map((sec, i) => `
+              <div class="day-pill ${i === currentSectionIndex ? 'active' : ''}" onclick="selectWudaseDay(${i})">
+                ${sec.label}
+              </div>
+            `).join('')}
+          </div>
+          <div class="bar-divider"></div>
+          <button class="single-lang-btn" onclick="toggleLanguage()" id="singleLangBtn">
+            <span id="langBtnText">${currentLang === 'amh' ? 'ግእዝ' : 'አማርኛ'}</span>
+          </button>
+        </div>
+      `;
+      renderWudaseContent();
+    } else {
+      let items, title, specT, specD, labelPrefix;
+      if (key === 'sinksar') {
+        items = sinksarItems;
+        title = "መጽሐፈ ስንክሳር";
+        specT = "፪. መጽሐፈ ስንክሳር (Synaxarium)";
+        specD = "Integrated day stepper eliminates the crowded 5-icon topbar. Single-button language toggle keeps the bar lean.";
+        labelPrefix = "መስከረም";
+      } else if (key === 'psalter') {
+        items = psalterItems;
+        title = "መጽሐፈ መዝሙር";
+        specT = "፫. መዝሙረ ዳዊት (Psalter)";
+        specD = "Direct Psalm-by-Psalm stepper with quick daily range indicator (e.g. ሰኞ 1-30).";
+        labelPrefix = "መዝሙር";
+      } else {
+        items = scriptureItems;
+        title = "ኦሪት ዘፍጥረት";
+        specT = "፬. መጽሐፍ ቅዱስ (Bible / Scripture)";
+        specD = "Chapter navigation without scrolling back up to the top. Tapping the chapter chip opens the full chapter grid sheet.";
+        labelPrefix = "ምዕራፍ";
+      }
+
+      document.getElementById("topbarTitle").innerText = title;
+      document.getElementById("specTitle").innerHTML = `${specT} <span class="badge">Docked Stepper Bar</span>`;
+      document.getElementById("specDesc").innerText = specD;
+
+      navContainer.innerHTML = `
+        <div class="unified-nav-bar" id="stepperBar">
+          <div class="capsule-stepper">
+            <button class="stepper-btn" onclick="prevStepperItem()" id="btnPrev" title="ያለፈው">‹</button>
+            <div class="stepper-label" onclick="triggerPicker()" id="pickerTrigger">
+              <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>
+              <span id="navLabel">${items[currentDayOffset % items.length].label}</span>
+            </div>
+            <button class="stepper-btn" onclick="nextStepperItem()" id="btnNext" title="የሚቀጥለው">›</button>
+          </div>
+          <div class="bar-divider"></div>
+          <button class="single-lang-btn" onclick="toggleLanguage()" id="singleLangBtn">
+            <span id="langBtnText">${currentLang === 'amh' ? 'ግእዝ' : 'አማርኛ'}</span>
+          </button>
+        </div>
+      `;
+      renderStandardContent(items);
+    }
+  }
+
+  function renderWudaseContent() {
+    const sec = wudaseSections[currentSectionIndex];
+    document.getElementById("topbarSubtitle").innerText = `${currentLang === 'amh' ? sec.subAmh : sec.subGez}`;
+
+    const heading = currentLang === 'amh' ? sec.titleAmh : sec.titleGez;
+    const body = currentLang === 'amh' ? sec.bodyAmh : sec.bodyGez;
+
+    document.getElementById("readingBody").innerHTML = `
+      <div class="section-heading">${heading}</div>
+      ${body}
+    `;
+
+    // Ensure active pill is scrolled into view smoothly
+    const activePill = document.querySelector('.day-pill.active');
+    if (activePill) {
+      activePill.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+  }
+
+  function selectWudaseDay(idx) {
+    currentSectionIndex = idx;
+    document.querySelectorAll('.day-pill').forEach((p, i) => {
+      p.classList.toggle('active', i === idx);
+    });
+    renderWudaseContent();
+    showToast(`${wudaseSections[idx].label} ተመርጧል`);
+  }
+
+  function renderStandardContent(items) {
+    const idx = currentDayOffset % items.length;
+    const item = items[idx];
+
+    document.getElementById("topbarSubtitle").innerText = `${item.label} · ${item.sub}`;
+    document.getElementById("navLabel").innerText = item.label;
+
+    const heading = currentLang === 'amh' ? item.headingAmh : item.headingGez;
+    const body = currentLang === 'amh' ? item.bodyAmh : item.bodyGez;
+
+    document.getElementById("readingBody").innerHTML = `
+      <div class="section-heading">${heading}</div>
+      ${body}
+    `;
+
+    document.getElementById("btnPrev").style.opacity = idx === 0 ? "0.4" : "1";
+    document.getElementById("btnNext").style.opacity = idx === items.length - 1 ? "0.4" : "1";
+  }
+
+  function prevStepperItem() {
+    if (currentDayOffset > 0) {
+      currentDayOffset--;
+      let items = currentScreen === 'sinksar' ? sinksarItems : (currentScreen === 'psalter' ? psalterItems : scriptureItems);
+      renderStandardContent(items);
+      showToast(items[currentDayOffset % items.length].label);
+    }
+  }
+
+  function nextStepperItem() {
+    let items = currentScreen === 'sinksar' ? sinksarItems : (currentScreen === 'psalter' ? psalterItems : scriptureItems);
+    if (currentDayOffset < items.length - 1) {
+      currentDayOffset++;
+      renderStandardContent(items);
+      showToast(items[currentDayOffset % items.length].label);
+    }
+  }
+
+  function toggleLanguage() {
+    currentLang = currentLang === 'amh' ? 'gez' : 'amh';
+    const btnText = document.getElementById("langBtnText");
+    if (btnText) {
+      // Button shows the opposite language (the target to switch to), or the target language name
+      btnText.innerText = currentLang === 'amh' ? 'ግእዝ' : 'አማርኛ';
+    }
+
+    if (currentScreen === 'wudase') {
+      renderWudaseContent();
+    } else {
+      let items = currentScreen === 'sinksar' ? sinksarItems : (currentScreen === 'psalter' ? psalterItems : scriptureItems);
+      renderStandardContent(items);
+    }
+
+    showToast(currentLang === 'amh' ? "የአማርኛ እትም ተመርጧል" : "የግእዝ እትም ተመርጧል");
+  }
+
+  function triggerPicker() {
+    showToast("የቀን / ምዕራፍ መምረጫ ተከፍቷል");
+  }
+
+  function toggleTheme() {
+    const body = document.body;
+    const isDark = body.getAttribute('data-theme') === 'dark';
+    body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('themeLabel').innerText = isDark ? 'Dark Sanctuary Mode' : 'Light Paper Mode';
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.innerText = msg;
+    t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), 2000);
+  }
+
+  // Silent swipe gesture detection (touch & desktop mouse drag)
+  let touchStartX = 0;
+  let touchEndX = 0;
+  const readingBox = document.getElementById("readingBody");
+
+  readingBox.addEventListener('touchstart', e => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+
+  readingBox.addEventListener('touchend', e => {
+    touchEndX = e.changedTouches[0].screenX;
+    const diff = touchEndX - touchStartX;
+    if (Math.abs(diff) > 45) {
+      if (diff < 0) { // swipe left -> next portion
+        if (currentScreen === 'wudase' && currentSectionIndex < wudaseSections.length - 1) {
+          selectWudaseDay(currentSectionIndex + 1);
+        } else if (currentScreen !== 'wudase') {
+          nextStepperItem();
+        }
+      } else { // swipe right -> prev portion
+        if (currentScreen === 'wudase' && currentSectionIndex > 0) {
+          selectWudaseDay(currentSectionIndex - 1);
+        } else if (currentScreen !== 'wudase') {
+          prevStepperItem();
+        }
+      }
+    }
+  }, { passive: true });
+
+  // Initial load
+  loadScreen('wudase');
+</script>
+
+</body>
+</html>

@@ -5,6 +5,18 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.3.0] — 2026-09-29
+
+_versionCode 94 · Unified reader navigation, embedded Melkea hymns, and liturgical punctuation_
+
+### Added
+- **Embedded Melkea Hymns.** Integrated መልክአ ማርያም and መልክአ ኢየሱስ directly into Wudase Maryam as navigable pages.
+- **Unified Reader Control Bar.** Single-line docked bar in Wudase Maryam and Sinksar with a scrollable portion track and hairline divider.
+
+### Changed
+- **Minimalist Edition Toggle.** Replaced bulky swipe/button toggles with a clean, single-action liturgical pill displaying the target language without decorative emojis.
+- **Liturgical Punctuation & Strophes.** Restored traditional Ge'ez punctuation (`፦`, `፤`, `።`) and stanza numbering across Melkea hymns.
+
 ## [1.2.1] — 2026-09-29
 
 _versionCode 93 · Codebase refinement and performance optimizations_

@@ -518,34 +518,39 @@ fun ToggleRow(
 // ── Selection ────────────────────────────────────────────────────────────────
 
 /**
- * The edition pill in a reader's title bar.
- *
- * It carries the name of the edition it will switch *to*, because a button that
- * names where it is going is the one people press. Shared by the Psalter and
- * ውዳሴ ማርያም: the same two editions, so the same control in the same corner.
+ * A single-button liturgical toggle to switch between Amharic and Ge'ez editions.
+ * Displays the name of the alternate edition to switch to (e.g. "ግእዝ" when in Amharic,
+ * "አማርኛ" when in Ge'ez), maintaining a compact, distraction-free footprint.
  */
 @Composable
-fun EditionToggle(geez: Boolean, onToggle: () -> Unit) {
+fun EditionToggle(
+    geez: Boolean,
+    modifier: Modifier = Modifier,
+    amharicLabel: String? = null,
+    geezLabel: String? = null,
+    onToggle: () -> Unit = {},
+) {
     val s = LocalStrings.current
-    val other = if (geez) s.wudaseLangAmharic else s.wudaseLangGeez
+    val other = if (geez) (amharicLabel ?: s.wudaseLangAmharic) else (geezLabel ?: s.wudaseLangGeez)
+    val gold = MaterialTheme.colorScheme.secondary
+
     Box(
-        modifier = Modifier
-            .padding(end = Spacing.xs)
+        modifier = modifier
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f))
-            .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.45f), CircleShape)
+            .background(gold.copy(alpha = 0.12f))
+            .border(1.dp, gold.copy(alpha = 0.45f), CircleShape)
             .clickable(
                 onClickLabel = s.psalterEditionSwitch(other),
                 onClick = onToggle,
             )
-            .heightIn(min = 48.dp)
-            .padding(horizontal = Spacing.md, vertical = Spacing.xs),
+            .heightIn(min = 36.dp)
+            .padding(horizontal = 14.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            other,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.secondary,
+            text = other,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+            color = gold,
             maxLines = 1,
         )
     }
@@ -899,7 +904,7 @@ private fun StepperHalf(
         }
         Text(
             label,
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

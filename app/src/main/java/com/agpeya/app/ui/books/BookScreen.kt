@@ -47,6 +47,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.BookRepository
@@ -67,6 +68,7 @@ import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.inReadingFont
 import com.agpeya.app.ui.theme.readingBodyStyle
+import com.agpeya.app.ui.theme.scaledReadingSp
 import com.agpeya.app.ui.theme.sinqColors
 
 /**
@@ -147,7 +149,9 @@ fun BookScreen(
     val selRange = flatSelectionRange(selA, selB)
     val selBody = if (selRange.isEmpty()) null
     else blocks.filterIndexed { i, _ -> i in selRange }
-        .joinToString("\n\n") { it.text }
+        .joinToString("\n\n") {
+            if (it.index != null && it.index > 0) "${geezNumeral(it.index)}፡ ${it.text}" else it.text
+        }
         .ifBlank { null }
 
     Scaffold(
@@ -385,6 +389,8 @@ private fun BookBlockRow(
             )
         }
         val red = sinqColors.arke
+        val secondary = MaterialTheme.colorScheme.secondary
+        val markerSize = scaledReadingSp(bodyFontSp) * 0.85f
         // Two sources of red, unioned. The data's own spans come from a printed
         // page whose rubrication is editorial and cannot be derived — a ዜማ book
         // reddens a name on one line and leaves it black on the next. The rule's
@@ -392,14 +398,28 @@ private fun BookBlockRow(
         val body = if (isGloss) {
             remember(block.text) { AnnotatedString(block.text) }
         } else {
-            remember(block.text, block.red, scope, red) {
+            remember(block.text, block.red, block.index, scope, red, secondary, markerSize) {
                 buildAnnotatedString {
+                    val n = block.index
+                    if (n != null && n > 0) {
+                        withStyle(
+                            SpanStyle(
+                                color = secondary,
+                                fontSize = markerSize,
+                            ),
+                        ) {
+                            append(geezNumeral(n))
+                            append("፡")
+                        }
+                        append(" ")
+                    }
+                    val startOffset = length
                     append(block.text)
                     val spans = block.redRanges.ifEmpty {
                         Rubrication.redRanges(block.text, scope)
                     }
                     spans.forEach {
-                        addStyle(SpanStyle(color = red), it.first, it.last + 1)
+                        addStyle(SpanStyle(color = red), startOffset + it.first, startOffset + it.last + 1)
                     }
                 }
             }

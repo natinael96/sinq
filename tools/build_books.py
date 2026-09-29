@@ -166,8 +166,11 @@ def language(text):
 
 
 def clean_text(raw):
-    """Strip the tier marks, mend the scan, and normalise the whitespace."""
+    """Strip the tier marks, mend the scan, and normalise the whitespace and punctuation."""
     t = TIER_MARK.sub("\n", raw or "")
+    t = re.sub(r"[ \t]*([።፣፤፥፦])[ \t]*", r"\1 ", t)
+    t = re.sub(r"[ \t]+\n", "\n", t)
+    t = re.sub(r"\n[ \t]+", "\n", t)
     t = re.sub(r"[ \t]+", " ", t)
     t = re.sub(r"\n\s*\n+", "\n", t)
     return t.strip()
@@ -252,11 +255,14 @@ def build():
                         stext = strophe.get("text", {})
                         t = stext.get("gez") if isinstance(stext, dict) else str(stext)
                         if t:
-                            blocks.append({
+                            strophe_block = {
                                 "type": "paragraph",
                                 "text": t,
                                 "targetAnatomy": strophe.get("target") or strophe.get("target_anatomy"),
-                            })
+                            }
+                            if strophe.get("index") is not None:
+                                strophe_block["index"] = strophe["index"]
+                            blocks.append(strophe_block)
                 data["chapters"] = [{"number": 1, "title": "", "blocks": blocks}]
             else:
                 continue
@@ -295,6 +301,8 @@ def build():
                     block["rubric"] = b["rubric"]
                 if b.get("targetAnatomy"):
                     block["targetAnatomy"] = b["targetAnatomy"]
+                if b.get("index") is not None:
+                    block["index"] = b["index"]
                 lang = b.get("lang") or language(text)
                 block["lang"] = lang
                 if lang == "amh":

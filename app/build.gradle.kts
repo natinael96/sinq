@@ -40,8 +40,8 @@ android {
         // Versioning policy (semver-style):
         //   MINOR for features, PATCH for fixes/small tweaks.
         //   versionCode increments by 1 on EVERY update, no exceptions.
-        versionCode = 93
-        versionName = "1.2.1"
+        versionCode = 94
+        versionName = "1.3.0"
 
         // ስንቅ ships two ways, and only one of them may mention GitHub.
         //

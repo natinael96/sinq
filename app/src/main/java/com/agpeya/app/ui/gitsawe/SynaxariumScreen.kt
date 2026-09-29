@@ -1,7 +1,10 @@
 package com.agpeya.app.ui.gitsawe
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -230,62 +233,61 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: Str
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            SinqTopBar(
-                title = s.synaxariumTitle,
-                subtitle = formatEthiopianWithGregorian(date, s),
-                onBack = onBack,
-                actions = {
-                    if (day != null) {
-                        IconButton(onClick = { epochDay -= 1 }) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                                contentDescription = s.previousDay,
-                                modifier = Modifier.size(com.agpeya.app.ui.theme.IconSize.medium),
-                            )
-                        }
-                        IconButton(onClick = { epochDay += 1 }) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                contentDescription = s.nextDay,
-                                modifier = Modifier.size(com.agpeya.app.ui.theme.IconSize.medium),
-                            )
-                        }
-                        IconButton(onClick = { showPicker = true }) {
-                            Icon(
-                                Icons.Outlined.CalendarMonth,
-                                contentDescription = s.gitsaweChangeDay,
-                                modifier = Modifier.size(com.agpeya.app.ui.theme.IconSize.medium),
-                            )
-                        }
-                        if (entries.size > 2) {
-                            IconButton(onClick = { showContents = true }) {
-                                Icon(
-                                    Icons.Outlined.Menu,
-                                    contentDescription = s.contents,
-                                    modifier = Modifier.size(com.agpeya.app.ui.theme.IconSize.medium),
-                                )
+            Column {
+                SinqTopBar(
+                    title = s.synaxariumTitle,
+                    subtitle = formatEthiopianWithGregorian(date, s),
+                    onBack = onBack,
+                    actions = {
+                        if (day != null) {
+                            if (entries.size > 2) {
+                                IconButton(onClick = { showContents = true }) {
+                                    Icon(
+                                        Icons.Outlined.Menu,
+                                        contentDescription = s.contents,
+                                        modifier = Modifier.size(com.agpeya.app.ui.theme.IconSize.medium),
+                                    )
+                                }
                             }
+                            com.agpeya.app.ui.common.ReaderToolsMenu(
+                                fontStep = fontStep,
+                                maxFontStep = FONT_STEPS_SP.lastIndex,
+                                onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
+                                onWriteNote = onWriteNote?.let { write -> {
+                                    write("synaxarium/$epochDay", "${s.synaxariumTitle} · ${com.agpeya.app.ui.common.formatEthiopian(date, s)}")
+                                } },
+                                shareEnabled = true,
+                                sharePayload = {
+                                    com.agpeya.app.ui.common.SharePayload(
+                                        body = synaxariumShareBody(day),
+                                        kicker = s.synaxariumTitle,
+                                        title = day.entries.firstOrNull()?.heading?.takeIf { t -> t.isNotBlank() },
+                                        dateLabel = com.agpeya.app.ui.common.formatEthiopian(date, s),
+                                    )
+                                },
+                            )
                         }
-                        com.agpeya.app.ui.common.ReaderToolsMenu(
-                            fontStep = fontStep,
-                            maxFontStep = FONT_STEPS_SP.lastIndex,
-                            onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
-                            onWriteNote = onWriteNote?.let { write -> {
-                                write("synaxarium/$epochDay", "${s.synaxariumTitle} · ${com.agpeya.app.ui.common.formatEthiopian(date, s)}")
-                            } },
-                            shareEnabled = true,
-                            sharePayload = {
-                                com.agpeya.app.ui.common.SharePayload(
-                                    body = synaxariumShareBody(day),
-                                    kicker = s.synaxariumTitle,
-                                    title = day.entries.firstOrNull()?.heading?.takeIf { t -> t.isNotBlank() },
-                                    dateLabel = com.agpeya.app.ui.common.formatEthiopian(date, s),
-                                )
-                            },
-                        )
-                    }
-                },
-            )
+                    },
+                )
+                if (day != null) {
+                    SynaxariumControlBar(
+                        ethDate = eth,
+                        edition = edition,
+                        onPreviousDay = { epochDay -= 1 },
+                        onNextDay = { epochDay += 1 },
+                        onPickDate = { showPicker = true },
+                        onSelectEdition = { code ->
+                            scope.launch { SettingsRepository.setSynaxariumEdition(context, code) }
+                        },
+                        isToday = date == today,
+                        onToday = { epochDay = today.toEpochDay() },
+                    )
+                    androidx.compose.material3.HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                        thickness = 0.5.dp,
+                    )
+                }
+            }
         },
     ) { innerPadding ->
         androidx.compose.foundation.layout.Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
@@ -308,23 +310,8 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: Str
                 modifier = Modifier.fillMaxSize().padding(innerPadding).widthIn(max = ReadingMaxWidth),
                 contentPadding = PaddingValues(horizontal = Spacing.screen),
             ) {
-                item(key = "edition") {
+                item(key = "topSpacer") {
                     Spacer(Modifier.height(Spacing.sm))
-                    // Two editions, never side by side: only 30 of the 366 days
-                    // have the same paragraph count in both, so a parallel
-                    // layout would pair the wrong paragraphs all year.
-                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                        SynaxariumEdition.all.forEach { code ->
-                            com.agpeya.app.ui.common.SelectPill(
-                                label = if (code == SynaxariumEdition.AMHARIC) s.sinksarAmharic else s.sinksarGeez,
-                                selected = code == edition,
-                                onClick = {
-                                    scope.launch { SettingsRepository.setSynaxariumEdition(context, code) }
-                                },
-                            )
-                        }
-                    }
-                    Spacer(Modifier.height(Spacing.md))
                 }
 
                 itemsIndexed(entries, key = { _, e -> e.id }) { i, entry ->
@@ -838,5 +825,141 @@ private fun SynaxariumContents(entries: List<SynaxariumEntry>, onSelect: (Int) -
             )
         }
         item { Spacer(Modifier.height(Spacing.xxl)) }
+    }
+}
+
+/**
+ * Pinned liturgical sub-bar for Synaxarium.
+ * Features a capsule day stepper with date picker trigger, optional "ዛሬ" badge,
+ * and the segmented [አማርኛ | ግእዝ] edition switcher.
+ */
+@Composable
+private fun SynaxariumControlBar(
+    ethDate: EthiopianDate,
+    edition: String,
+    onPreviousDay: () -> Unit,
+    onNextDay: () -> Unit,
+    onPickDate: () -> Unit,
+    onSelectEdition: (String) -> Unit,
+    isToday: Boolean,
+    onToday: () -> Unit,
+) {
+    val s = LocalStrings.current
+    val gold = MaterialTheme.colorScheme.secondary
+    val outline = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
+
+    androidx.compose.material3.Surface(
+        color = MaterialTheme.colorScheme.background,
+        tonalElevation = 1.dp,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.screen, vertical = 6.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // Day Stepper Capsule: [ ‹ ] [ መስከረም ፲፱ 📅 ] [ › ] + optional [ ዛሬ ]
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .border(1.dp, outline, CircleShape)
+                        .padding(horizontal = 2.dp, vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    IconButton(
+                        onClick = onPreviousDay,
+                        modifier = Modifier.size(32.dp),
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = s.previousDay,
+                            tint = gold,
+                            modifier = Modifier.size(com.agpeya.app.ui.theme.IconSize.small),
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .clickable(
+                                onClickLabel = s.gitsaweChangeDay,
+                                onClick = onPickDate,
+                            )
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        val monthName = s.ethMonths.getOrElse(ethDate.month - 1) { "" }
+                        Text(
+                            text = "$monthName ${geezNumeral(ethDate.day)}",
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                        )
+                        Icon(
+                            Icons.Outlined.CalendarMonth,
+                            contentDescription = null,
+                            tint = gold,
+                            modifier = Modifier.size(15.dp),
+                        )
+                    }
+
+                    IconButton(
+                        onClick = onNextDay,
+                        modifier = Modifier.size(32.dp),
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = s.nextDay,
+                            tint = gold,
+                            modifier = Modifier.size(com.agpeya.app.ui.theme.IconSize.small),
+                        )
+                    }
+                }
+
+                if (!isToday) {
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(gold.copy(alpha = 0.14f))
+                            .border(1.dp, gold.copy(alpha = 0.5f), CircleShape)
+                            .clickable(onClick = onToday)
+                            .padding(horizontal = 9.dp, vertical = 5.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = s.todayLabel,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                            ),
+                            color = gold,
+                            maxLines = 1,
+                        )
+                    }
+                }
+            }
+
+            // Single-button edition toggle
+            com.agpeya.app.ui.common.EditionToggle(
+                geez = edition == SynaxariumEdition.GEEZ,
+                amharicLabel = s.sinksarAmharic,
+                geezLabel = s.sinksarGeez,
+                onToggle = {
+                    onSelectEdition(
+                        if (edition == SynaxariumEdition.GEEZ) SynaxariumEdition.AMHARIC
+                        else SynaxariumEdition.GEEZ,
+                    )
+                },
+            )
+        }
     }
 }

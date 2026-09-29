@@ -31,6 +31,23 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.3.0",
+        title = "Unified reader navigation and embedded Melkea hymns",
+        titleAm = "የተቀናጀ የንባብ ዳሰሳ እና የመልክዕ ጸሎታት ውህደት",
+        changes = listOf(
+            "Unified single-line navigation bar across Wudase Maryam and Sinksar with horizontal portion track.",
+            "Integrated Melkea Maryam and Melkea Yesus directly into Wudase Maryam for seamless reading.",
+            "Minimalist single-button edition toggle for Amharic and Ge'ez.",
+            "Preserved traditional liturgical Ge'ez punctuation and stanza numbering across Melkea hymns.",
+        ),
+        changesAm = listOf(
+            "በውዳሴ ማርያምና በስንክሳር የተስተካከለ፣ በአንድ መስመር የተቀናጀ እና የሚንሸራሸር የክፍል መምረጫ ባር።",
+            "መልክአ ማርያም እና መልክአ ኢየሱስ በቀጥታ በውዳሴ ማርያም የንባብ ገጽ ውስጥ ተካተዋል።",
+            "በቀላልና ውብ መልክ የተቀየሰ የግእዝና የአማርኛ መቀየሪያ ነጠላ አዝራር።",
+            "በመልክአ መልክዕ ጸሎታት ውስጥ ትክክለኛ የግእዝ ስርዓተ ነጥቦች እና የቁጥር አሰካክ ተሟልተዋል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.2.1",
         title = "Codebase refinement and performance optimizations",
         titleAm = "የኮድ ማፅዳት እና የአፈጻጸም ማሻሻያ",

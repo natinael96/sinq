@@ -31,6 +31,7 @@ data class BookBlock(
     val speaker: String? = null,
     val rubric: String? = null,
     val targetAnatomy: String? = null,
+    val index: Int? = null,
 ) {
     val isHeading: Boolean get() = type == "heading"
     val isAmharic: Boolean get() = lang == "amh"
