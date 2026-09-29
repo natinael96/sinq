@@ -650,7 +650,7 @@ private fun SynaxariumCard(
             // used to say "ስንክሳር" and then "የዕለቱ ስንክሳር" — the same words
             // twice — while the commemoration itself sat below it.
             Text(
-                s.comingSoon,
+                dayTitle?.takeIf { it.isNotBlank() } ?: s.synaxariumLibrarySubtitle,
                 style = MaterialTheme.typography.bodySmall.inReadingFont(),
                 color = sinq.onHeroMuted,
                 maxLines = 1,

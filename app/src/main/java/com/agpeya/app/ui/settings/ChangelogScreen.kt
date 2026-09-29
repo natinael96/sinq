@@ -31,6 +31,21 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.2.0",
+        title = "Bilingual Sinksar across all 366 days",
+        titleAm = "የተሟላ የ፫፻፷፮ ቀናት ስንክሳር በአማርኛና በግእዝ",
+        changes = listOf(
+            "Complete aligned bilingual Sinksar across all 366 days of the Ethiopian year in both Amharic and Ge'ez.",
+            "Commemorations with numbered narrative paragraphs, Arke salutations, and liturgical rubrication.",
+            "Integrated into the home lectionary and library with full search support and bookmarks.",
+        ),
+        changesAm = listOf(
+            "የተሟላ የ፫፻፷፮ቱ ቀናት ስንክሳር በአማርኛና በግእዝ ትይዩ እትሞች።",
+            "በቁጥር የተከፋፈሉ ታሪኮች፣ አርኬዎች፣ እና የቀይ ቀለም ስሞች ያካተተ የተሟላ የንባብ ገጽ።",
+            "በመነሻ ገጽ፣ በቤተ መጻሕፍት፣ በዕለታዊ ፍለጋ እና በዕልባቶች የተዋሃደ።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.0.0",
         title = "Official Google Play release",
         titleAm = "የመጀመሪያው ይፋዊ የGoogle Play እትም",

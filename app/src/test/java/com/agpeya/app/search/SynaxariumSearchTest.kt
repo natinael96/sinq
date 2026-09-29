@@ -81,7 +81,7 @@ class SynaxariumSearchTest {
     @Test
     fun `special Ethiopic punctuation is safe to search and highlight`() {
         org.junit.Assume.assumeTrue(docs.isNotEmpty())
-        val results = search("፡፡")
+        val results = search("።")
         assertTrue(results.isNotEmpty())
         results.forEach { result ->
             assertTrue(result.snippetMatchStart + result.snippetMatchLen <= result.snippet.length)

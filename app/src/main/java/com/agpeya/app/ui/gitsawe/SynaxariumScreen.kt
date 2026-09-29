@@ -293,8 +293,9 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: Str
             dayResult == null -> LoadingPanel(Modifier.padding(innerPadding))
 
             dayResult?.isFailure == true || day == null -> StatePanel(
-                title = s.comingSoon,
-                body = s.comingSoonBody,
+                title = s.contentUnavailable,
+                actionLabel = s.retryAction,
+                onAction = { loadAttempt++ },
                 modifier = Modifier.padding(innerPadding),
             )
 

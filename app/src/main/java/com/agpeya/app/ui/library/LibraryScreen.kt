@@ -130,7 +130,7 @@ fun LibraryScreen(
                 LibraryCard(
                     icon = Icons.Outlined.AutoStories,
                     title = s.synaxariumTitle,
-                    subtitle = s.comingSoon,
+                    subtitle = s.synaxariumLibrarySubtitle,
                     onClick = onOpenSynaxarium,
                 )
             }
