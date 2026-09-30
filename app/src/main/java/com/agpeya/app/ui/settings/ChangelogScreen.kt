@@ -31,6 +31,23 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.3.1",
+        title = "UI/UX accessibility and standardized button design system",
+        titleAm = "የተደራሽነት ማሻሻያ እና የተቀናጀ የአዝራሮች ስርዓት",
+        changes = listOf(
+            "Standardized button design system (SinqPrimaryButton, SinqOutlinedButton, SinqDestructiveButton, SinqStepperButton).",
+            "Enforced 48dp minimum interactive touch targets across toggles and steppers.",
+            "Elevated primary actions in forms and confirmation dialogs with semantic error styling for deletions.",
+            "Replaced raw text glyphs with accessible vector Material icons.",
+        ),
+        changesAm = listOf(
+            "የተቀናጀ የአዝራር ንድፍ ስርዓት (ዋና፣ የተሰመረባቸው፣ የማስጠንቀቂያ እና የመቆጣጠሪያ አዝራሮች)።",
+            "ለመንካት ምቹ የሆኑ የ48dp ዝቅተኛ የንክኪ ስፋት መስፈርቶች ተተግብረዋል።",
+            "በመገናኛ ሳጥኖችና ቅጾች ውስጥ ዋና ዋና አዝራሮች ጎልተው እንዲታዩና ማጥፋት በቀይ ቀለም እንዲለይ ተደርጓል።",
+            "የጽሑፍ ምልክቶች በይፋዊና ውብ በሆኑ የቬክተር ምስሎች (Material Icons) ተተክተዋል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.3.0",
         title = "Unified reader navigation and embedded Melkea hymns",
         titleAm = "የተቀናጀ የንባብ ዳሰሳ እና የመልክዕ ጸሎታት ውህደት",

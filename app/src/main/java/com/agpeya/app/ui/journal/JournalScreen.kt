@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.LockOpen
@@ -173,13 +175,25 @@ private fun JournalScreenContent(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    TextButton(onClick = { offset += 1 }) { Text("←") }
+                    IconButton(onClick = { offset += 1 }) {
+                        Icon(
+                            Icons.AutoMirrored.Outlined.ArrowBack,
+                            contentDescription = s.previousMonth,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                     Text(
                         "${s.ethMonths.getOrElse(month - 1) { "" }} $year",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
-                    TextButton(onClick = { offset -= 1 }, enabled = offset > 0) { Text("→") }
+                    IconButton(onClick = { offset -= 1 }, enabled = offset > 0) {
+                        Icon(
+                            Icons.AutoMirrored.Outlined.ArrowForward,
+                            contentDescription = s.nextMonth,
+                            tint = if (offset > 0) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
+                        )
+                    }
                 }
                 MonthStrip(
                     year = year,

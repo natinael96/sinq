@@ -661,25 +661,10 @@ private fun PartHeader(part: String) {
 private fun HourStepper(onPrevious: (() -> Unit)?, onNext: (() -> Unit)?) {
     if (onPrevious == null && onNext == null) return
     val s = com.agpeya.app.ui.strings.LocalStrings.current
-    val colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    com.agpeya.app.ui.common.ChapterStepper(
+        previousLabel = s.previousHour,
+        nextLabel = s.nextHour,
+        onPrevious = onPrevious,
+        onNext = onNext,
     )
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(top = Spacing.xxl),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (onPrevious != null) {
-            TextButton(onClick = onPrevious, colors = colors) {
-                Text("‹  ${s.previousHour}", style = MaterialTheme.typography.labelLarge)
-            }
-        } else {
-            Spacer(Modifier.width(Spacing.xxs))
-        }
-        if (onNext != null) {
-            TextButton(onClick = onNext, colors = colors) {
-                Text("${s.nextHour}  ›", style = MaterialTheme.typography.labelLarge)
-            }
-        }
-    }
 }

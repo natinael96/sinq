@@ -37,6 +37,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import com.agpeya.app.ui.common.SinqDestructiveButton
+import com.agpeya.app.ui.common.SinqOutlinedButton
+import com.agpeya.app.ui.common.SinqPrimaryButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.layout.imePadding
@@ -229,7 +232,7 @@ fun SpecialHabitScreen(
                                 }
                                 FlowRow {
                                     TextButton(enabled = !action.busy, onClick = { setDraft(entry) }) { Text(s.editPerson) }
-                                    TextButton(enabled = !action.busy, onClick = { deleting = entry }) { Text(s.delete) }
+                                    SinqDestructiveButton(enabled = !action.busy, onClick = { deleting = entry }) { Text(s.delete) }
                                 }
                             }
                         }
@@ -238,9 +241,7 @@ fun SpecialHabitScreen(
                 Spacer(Modifier.height(Spacing.md))
             }
 
-            OutlinedButton(enabled = !action.busy, onClick = { add() }) {
-                Icon(Icons.Outlined.Add, contentDescription = null)
-                Spacer(Modifier.width(Spacing.sm))
+            SinqOutlinedButton(enabled = !action.busy, onClick = { add() }, leadingIcon = Icons.Outlined.Add) {
                 Text(s.addSpecialReminder)
             }
 
@@ -285,7 +286,7 @@ fun SpecialHabitScreen(
                 }
             },
             confirmButton = {
-                TextButton(enabled = !action.busy, onClick = {
+                SinqPrimaryButton(enabled = !action.busy, onClick = {
                     update(value) { setDraft(null) }
                 }) { Text(s.save) }
             },
@@ -300,7 +301,7 @@ fun SpecialHabitScreen(
             title = { Text(s.delete) },
             text = { Text(entry.label.ifBlank { title }) },
             confirmButton = {
-                TextButton(enabled = !action.busy, onClick = {
+                SinqDestructiveButton(enabled = !action.busy, onClick = {
                     persist(reminders.filterNot { it.id == entry.id }) { deleting = null }
                 }) { Text(s.delete) }
             },

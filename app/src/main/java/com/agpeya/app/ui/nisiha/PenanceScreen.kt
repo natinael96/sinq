@@ -37,6 +37,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import com.agpeya.app.ui.common.SinqDestructiveButton
+import com.agpeya.app.ui.common.SinqOutlinedButton
+import com.agpeya.app.ui.common.SinqPrimaryButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -143,7 +146,7 @@ private fun PenanceScreenContent(onBack: () -> Unit) {
                         androidx.compose.foundation.layout.FlowRow {
                             TextButton(enabled = !action.busy, onClick = { recording = penance }) { Text(s.penanceLogProgress) }
                             TextButton(enabled = !action.busy, onClick = { editing = penance }) { Text(s.editPerson) }
-                            TextButton(enabled = !action.busy, onClick = { deleting = penance }) { Text(s.delete) }
+                            SinqDestructiveButton(enabled = !action.busy, onClick = { deleting = penance }) { Text(s.delete) }
                             if (penance.progress.isNotEmpty()) TextButton(onClick = { history = !history }) {
                                 Text("${s.penanceProgressHeader} (${penance.progress.size})")
                             }
@@ -152,17 +155,17 @@ private fun PenanceScreenContent(onBack: () -> Unit) {
                             Text(listOfNotNull(progress.localDate?.let { formatEthiopianShort(it, s) } ?: progress.date,
                                 progress.amount.takeIf { it > 0 }?.toString(), progress.note.takeIf { it.isNotBlank() })
                                 .joinToString(" · "), style = MaterialTheme.typography.bodySmall)
-                            TextButton(enabled = !action.busy, onClick = { removeRecord = penance to progress.id }) { Text(s.delete) }
+                            SinqDestructiveButton(enabled = !action.busy, onClick = { removeRecord = penance to progress.id }) { Text(s.delete) }
                         }
                     }
                 }
             }
             item {
-                OutlinedButton(enabled = !action.busy, onClick = {
+                SinqOutlinedButton(enabled = !action.busy, onClick = {
                     editing = Penance(UUID.randomUUID().toString(), enabled = false,
                         schedule = HabitSchedule(kind = HabitSchedule.Kind.WEEKLY, days = (1..7).toSet()),
                         assignedDate = today.toString())
-                }) { Text(s.penanceAdd) }
+                }, leadingIcon = Icons.Outlined.Add) { Text(s.penanceAdd) }
                 Spacer(Modifier.height(Spacing.huge))
             }
         }
@@ -181,7 +184,7 @@ private fun PenanceScreenContent(onBack: () -> Unit) {
     deleting?.let { value ->
         AlertDialog(onDismissRequest = { if (!action.busy) deleting = null },
             title = { Text(value.label.ifBlank { s.penanceTitle }) }, text = { Text(s.deletePenanceConfirm) },
-            confirmButton = { TextButton(enabled = !action.busy, onClick = {
+            confirmButton = { SinqDestructiveButton(enabled = !action.busy, onClick = {
                 persist(penances.filterNot { it.id == value.id }) { deleting = null }
             }) { Text(s.delete) } },
             dismissButton = { TextButton(enabled = !action.busy, onClick = { deleting = null }) { Text(s.cancel) } })
@@ -189,7 +192,7 @@ private fun PenanceScreenContent(onBack: () -> Unit) {
     removeRecord?.let { (value, id) ->
         AlertDialog(onDismissRequest = { if (!action.busy) removeRecord = null },
             title = { Text(s.delete) }, text = { Text(s.deleteEntryConfirm) },
-            confirmButton = { TextButton(enabled = !action.busy, onClick = {
+            confirmButton = { SinqDestructiveButton(enabled = !action.busy, onClick = {
                 update(value.copy(progress = value.progress.filterNot { it.id == id })) { removeRecord = null }
             }) { Text(s.delete) } },
             dismissButton = { TextButton(enabled = !action.busy, onClick = { removeRecord = null }) { Text(s.cancel) } })
@@ -219,7 +222,7 @@ private fun PenanceEditor(value: Penance, busy: Boolean, onDismiss: () -> Unit, 
                 TimeRow(draft.minute, s, { if (!busy) draft = draft.copy(minute = it) })
             }
         },
-        confirmButton = { TextButton(enabled = !busy, onClick = { onSave(draft) }) { Text(s.save) } },
+        confirmButton = { SinqPrimaryButton(enabled = !busy, onClick = { onSave(draft) }) { Text(s.save) } },
         dismissButton = { TextButton(enabled = !busy, onClick = onDismiss) { Text(s.cancel) } })
     if (quotaEditing) QuotaDialog(draft.quota, s, { quotaEditing = false }, {
         draft = draft.copy(quota = it); quotaEditing = false
@@ -262,7 +265,7 @@ private fun QuotaDialog(
             )
         },
         confirmButton = {
-            TextButton(enabled = valid, onClick = { onSave(parsed ?: 0) }) { Text(s.save) }
+            SinqPrimaryButton(enabled = valid, onClick = { onSave(parsed ?: 0) }) { Text(s.save) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
     )
@@ -308,7 +311,7 @@ private fun ProgressDialog(
             }
         },
         confirmButton = {
-            TextButton(enabled = valid && !busy, onClick = { onSave(parsed ?: 0, note.trim()) }) {
+            SinqPrimaryButton(enabled = valid && !busy, onClick = { onSave(parsed ?: 0, note.trim()) }) {
                 Text(s.save)
             }
         },

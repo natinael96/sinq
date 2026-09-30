@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -111,11 +112,16 @@ fun MarksScreen(
                 title = s.marksTitle,
                 onBack = onBack,
                 actions = {
-                    TextButton(onClick = {
+                    val exportLabel = if (tab == 2) s.backupExport else s.marksExport
+                    IconButton(onClick = {
                         if (tab == 2) onOpenRoute("settings/records")
                         else { exportTab = tab; exporter.launch("marks-${java.time.LocalDate.now()}.txt") }
                     }) {
-                        Text(if (tab == 2) s.backupExport else s.marksExport, style = MaterialTheme.typography.labelLarge)
+                        Icon(
+                            Icons.Outlined.FileDownload,
+                            contentDescription = exportLabel,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 },
             )

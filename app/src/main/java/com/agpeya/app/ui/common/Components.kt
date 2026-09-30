@@ -31,16 +31,21 @@ import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -515,6 +520,113 @@ fun ToggleRow(
     }
 }
 
+// ── Standardized Interactive Buttons ──────────────────────────────────────────
+
+/**
+ * Primary call-to-action button for positive commitments (Save, Continue, Log).
+ * Enforces a 48dp minimum touch target, consistent padding, and prominent shape.
+ */
+@Composable
+fun SinqPrimaryButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    content: @Composable RowScope.() -> Unit,
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier.heightIn(min = 48.dp),
+        enabled = enabled,
+        shape = MaterialTheme.shapes.medium,
+        contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.sm),
+        content = content,
+    )
+}
+
+/**
+ * Outlined button for secondary, independent actions (e.g. "+ Add Habit", "+ Add Vow").
+ * Enforces a 48dp minimum touch target with gold-tinted border and optional leading vector icon.
+ */
+@Composable
+fun SinqOutlinedButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    leadingIcon: ImageVector? = null,
+    content: @Composable RowScope.() -> Unit,
+) {
+    val gold = MaterialTheme.colorScheme.secondary
+    OutlinedButton(
+        onClick = onClick,
+        modifier = modifier.heightIn(min = 48.dp),
+        enabled = enabled,
+        shape = CircleShape,
+        border = BorderStroke(1.dp, gold.copy(alpha = 0.42f)),
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = MaterialTheme.colorScheme.onBackground,
+        ),
+        contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.sm),
+    ) {
+        if (leadingIcon != null) {
+            Icon(
+                imageVector = leadingIcon,
+                contentDescription = null,
+                tint = gold,
+                modifier = Modifier.size(com.agpeya.app.ui.theme.IconSize.small),
+            )
+            Spacer(Modifier.width(Spacing.sm))
+        }
+        content()
+    }
+}
+
+/**
+ * Semantic button for destructive operations (Delete, Remove).
+ * Uses semantic error role coloring for TalkBack and visual warning.
+ */
+@Composable
+fun SinqDestructiveButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    content: @Composable RowScope.() -> Unit,
+) {
+    TextButton(
+        onClick = onClick,
+        modifier = modifier.heightIn(min = 48.dp),
+        enabled = enabled,
+        colors = ButtonDefaults.textButtonColors(
+            contentColor = MaterialTheme.colorScheme.error,
+        ),
+        content = content,
+    )
+}
+
+/**
+ * Standardized stepper increment/decrement button with vector icon and 48dp touch bounds.
+ */
+@Composable
+fun SinqStepperButton(
+    icon: ImageVector,
+    contentDescription: String?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    IconButton(
+        onClick = onClick,
+        modifier = modifier.minimumInteractiveComponentSize(),
+        enabled = enabled,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = if (enabled) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+            modifier = Modifier.size(com.agpeya.app.ui.theme.IconSize.small),
+        )
+    }
+}
+
 // ── Selection ────────────────────────────────────────────────────────────────
 
 /**
@@ -536,6 +648,7 @@ fun EditionToggle(
 
     Box(
         modifier = modifier
+            .minimumInteractiveComponentSize()
             .clip(CircleShape)
             .background(gold.copy(alpha = 0.12f))
             .border(1.dp, gold.copy(alpha = 0.45f), CircleShape)
@@ -543,7 +656,7 @@ fun EditionToggle(
                 onClickLabel = s.psalterEditionSwitch(other),
                 onClick = onToggle,
             )
-            .heightIn(min = 36.dp)
+            .heightIn(min = 48.dp)
             .padding(horizontal = 14.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center,
     ) {

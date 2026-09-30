@@ -15,7 +15,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Delete
+import com.agpeya.app.ui.common.SinqDestructiveButton
+import com.agpeya.app.ui.common.SinqOutlinedButton
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -118,7 +121,7 @@ fun ModesScreen(onBack: () -> Unit, onEditMode: (String) -> Unit, onOpenBatteryH
             item {
                 Spacer(Modifier.height(Spacing.xl))
                 androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    TextButton(onClick = {
+                    SinqOutlinedButton(onClick = {
                         action.run {
                             val source = state.modes.find { it.isBuiltIn }
                             val mode = ModesRepository.addMode(
@@ -128,13 +131,13 @@ fun ModesScreen(onBack: () -> Unit, onEditMode: (String) -> Unit, onOpenBatteryH
                             )
                             onEditMode(mode.id)
                         }
-                    }) { Text(s.startFromAgpeya) }
-                    TextButton(onClick = {
+                    }, leadingIcon = Icons.Outlined.Add) { Text(s.startFromAgpeya) }
+                    SinqOutlinedButton(onClick = {
                         action.run {
                             val mode = ModesRepository.addMode(context, name = s.newModeName)
                             onEditMode(mode.id)
                         }
-                    }) { Text(s.startEmpty) }
+                    }, leadingIcon = Icons.Outlined.Add) { Text(s.startEmpty) }
                 }
                 Spacer(Modifier.height(Spacing.screen))
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -157,7 +160,7 @@ fun ModesScreen(onBack: () -> Unit, onEditMode: (String) -> Unit, onOpenBatteryH
             title = { Text(s.deleteModeTitle) },
             text = { Text(s.deleteModeBody(mode.name, mode.entries.size)) },
             confirmButton = {
-                TextButton(onClick = {
+                SinqDestructiveButton(onClick = {
                     action.run {
                         ModesRepository.deleteMode(context, mode.id)
                         reschedule()

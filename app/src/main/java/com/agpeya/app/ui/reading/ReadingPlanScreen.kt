@@ -36,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import com.agpeya.app.ui.common.SinqPrimaryButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -659,7 +660,7 @@ internal fun StartDialog(plan: ReadingPlan, onDismiss: () -> Unit, onStart: () -
                 )
             }
         },
-        confirmButton = { TextButton(onClick = onStart) { Text(s.readingStart) } },
+        confirmButton = { SinqPrimaryButton(onClick = onStart) { Text(s.readingStart) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
     )
 }

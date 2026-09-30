@@ -215,8 +215,12 @@ fun SearchScreen(
                     LoadingPanel()
                 }
                 failed -> {
-                    StatePanel(icon = Icons.Outlined.Search, title = s.contentUnavailable)
-                    TextButton(onClick = { attempt++ }) { Text(s.retryAction) }
+                    StatePanel(
+                        icon = Icons.Outlined.Search,
+                        title = s.contentUnavailable,
+                        actionLabel = s.retryAction,
+                        onAction = { attempt++ },
+                    )
                 }
                 query.trim().length >= 2 && results.isEmpty() && reference == null -> {
                     StatePanel(icon = Icons.Outlined.Search, title = s.noResults)

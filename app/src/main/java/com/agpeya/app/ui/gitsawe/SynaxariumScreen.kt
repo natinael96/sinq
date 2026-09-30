@@ -14,9 +14,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -875,7 +877,7 @@ private fun SynaxariumControlBar(
                 ) {
                     IconButton(
                         onClick = onPreviousDay,
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.minimumInteractiveComponentSize(),
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.KeyboardArrowLeft,
@@ -887,6 +889,7 @@ private fun SynaxariumControlBar(
 
                     Row(
                         modifier = Modifier
+                            .heightIn(min = 48.dp)
                             .clip(CircleShape)
                             .clickable(
                                 onClickLabel = s.gitsaweChangeDay,
@@ -915,7 +918,7 @@ private fun SynaxariumControlBar(
 
                     IconButton(
                         onClick = onNextDay,
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.minimumInteractiveComponentSize(),
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.KeyboardArrowRight,
@@ -927,24 +930,11 @@ private fun SynaxariumControlBar(
                 }
 
                 if (!isToday) {
-                    Box(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(gold.copy(alpha = 0.14f))
-                            .border(1.dp, gold.copy(alpha = 0.5f), CircleShape)
-                            .clickable(onClick = onToday)
-                            .padding(horizontal = 9.dp, vertical = 5.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = s.todayLabel,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = FontWeight.Bold,
-                            ),
-                            color = gold,
-                            maxLines = 1,
-                        )
-                    }
+                    com.agpeya.app.ui.common.SelectPill(
+                        label = s.todayLabel,
+                        selected = false,
+                        onClick = onToday,
+                    )
                 }
             }
 

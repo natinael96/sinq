@@ -26,11 +26,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material.icons.outlined.Remove
+import com.agpeya.app.ui.common.SinqPrimaryButton
+import com.agpeya.app.ui.common.SinqStepperButton
 import androidx.compose.material.icons.outlined.FormatAlignCenter
 import androidx.compose.material.icons.outlined.FormatAlignJustify
 import androidx.compose.material.icons.automirrored.outlined.FormatAlignLeft
@@ -511,7 +515,7 @@ private fun StreakReminderTimeRow(s: com.agpeya.app.ui.strings.Strings) {
             title = { Text(s.timeLabel) },
             text = { androidx.compose.material3.TimePicker(state = timeState) },
             confirmButton = {
-                TextButton(onClick = {
+                SinqPrimaryButton(onClick = {
                     picking = false
                     scope.launch {
                         SettingsRepository.setStreakReminderTime(
@@ -611,7 +615,7 @@ private fun QuietHoursRow(s: com.agpeya.app.ui.strings.Strings) {
             title = { Text(if (isStart) s.startTimeLabel else s.endTimeLabel) },
             text = { androidx.compose.material3.TimePicker(state = state) },
             confirmButton = {
-                TextButton(onClick = {
+                SinqPrimaryButton(onClick = {
                     val selected = state.hour * 60 + state.minute
                     editingStart = null
                     scope.launch {
@@ -682,15 +686,25 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
                 NavRow(s.readingFontTitle, onOpenFonts, subtitle = com.agpeya.app.ui.settings.fontLabel(font))
                 Text(s.fontSizeLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    TextButton(
+                    SinqStepperButton(
+                        icon = Icons.Outlined.Remove,
+                        contentDescription = null,
                         onClick = { action.run { SettingsRepository.setFontStep(context, step - 1) } },
                         enabled = step > 0,
-                    ) { Text("A−") }
-                    Text("${size}sp", modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
-                    TextButton(
+                    )
+                    Text(
+                        "${size}sp",
+                        modifier = Modifier.weight(1f),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                    SinqStepperButton(
+                        icon = Icons.Outlined.Add,
+                        contentDescription = null,
                         onClick = { action.run { SettingsRepository.setFontStep(context, step + 1) } },
                         enabled = step < SettingsRepository.FONT_STEPS_SP.lastIndex,
-                    ) { Text("A+") }
+                    )
                 }
                 Spacer(Modifier.height(Spacing.md))
                 Text(s.lineSpacingLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
@@ -706,9 +720,7 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
                             selected = lineSpacing == choice,
                             onClick = { action.run { SettingsRepository.setReadingLineSpacing(context, choice) } },
                             shape = androidx.compose.material3.SegmentedButtonDefaults.itemShape(index, choices.size),
-                            icon = {
-                                if (lineSpacing == choice) Icon(Icons.Outlined.Check, contentDescription = null)
-                            },
+                            icon = {},
                         ) { Text(label, maxLines = 1) }
                     }
                 }
@@ -823,7 +835,7 @@ private fun WidgetRolloverTimeRow(s: com.agpeya.app.ui.strings.Strings, minute: 
             title = { Text(s.widgetRolloverTimeTitle) },
             text = { androidx.compose.material3.TimePicker(state = timeState) },
             confirmButton = {
-                TextButton(onClick = {
+                SinqPrimaryButton(onClick = {
                     picking = false
                     scope.launch {
                         SettingsRepository.setWidgetRolloverTime(
@@ -934,7 +946,7 @@ fun CopyFormatScreen(onBack: () -> Unit) {
                 )
             },
             confirmButton = {
-                TextButton(onClick = {
+                SinqPrimaryButton(onClick = {
                     scope.launch { SettingsRepository.setHighlightName(context, editKey, text) }
                     editing = null
                 }) { Text(s.save) }
@@ -1209,7 +1221,7 @@ private fun GitsaweReminderTimeRow(s: com.agpeya.app.ui.strings.Strings) {
             title = { Text(s.settingsGitsaweReminder) },
             text = { androidx.compose.material3.TimePicker(state = timeState) },
             confirmButton = {
-                TextButton(onClick = {
+                SinqPrimaryButton(onClick = {
                     picking = false
                     scope.launch {
                         SettingsRepository.setGitsaweReminderTime(

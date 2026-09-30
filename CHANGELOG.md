@@ -5,6 +5,19 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.3.1] — 2026-09-30
+
+_versionCode 95 · UI/UX accessibility, touch targets, and standardized button design system_
+
+### Added
+- **Standardized Button System.** Introduced unified `SinqPrimaryButton`, `SinqOutlinedButton`, `SinqDestructiveButton`, and `SinqStepperButton` design tokens with Material 3 styling and color-scheme awareness.
+
+### Changed
+- **Touch Target Compliance (48dp Minimum).** Enforced minimum 48dp interactive boundaries across edition toggles, date steppers, and navigation controls to eliminate tap misses.
+- **Button Prominence & Hierarchy.** Elevated primary commit and confirmation actions in dialogs and forms across habits, vows, penance, tithe, and reading plans while preserving subdued text styling for dismissals.
+- **Vector Icons.** Replaced raw text glyphs with accessible Material vector symbols across reader steppers, settings, and journal navigation.
+- **Semantic Destructive Actions.** Applied semantic error coloration to irreversible deletion and reset confirmations.
+
 ## [1.3.0] — 2026-09-29
 
 _versionCode 94 · Unified reader navigation, embedded Melkea hymns, and liturgical punctuation_

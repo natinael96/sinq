@@ -488,6 +488,7 @@ object PassageShare {
                 if (spec.align == CardAlign.JUSTIFY &&
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
                 ) {
+                    @Suppress("WrongConstant")
                     setJustificationMode(Layout.JUSTIFICATION_MODE_INTER_WORD)
                 }
             }

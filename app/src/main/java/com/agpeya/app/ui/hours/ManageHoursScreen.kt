@@ -17,11 +17,15 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
+import com.agpeya.app.ui.common.SinqDestructiveButton
+import com.agpeya.app.ui.common.SinqOutlinedButton
+import com.agpeya.app.ui.common.SinqPrimaryButton
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -222,7 +226,9 @@ fun ManageHoursScreen(
             }
             item {
                 Spacer(Modifier.height(Spacing.md))
-                TextButton(onClick = { creating = true }) { Text("＋ ${s.newHour}") }
+                SinqOutlinedButton(onClick = { creating = true }, leadingIcon = Icons.Outlined.Add) {
+                    Text(s.newHour)
+                }
                 Spacer(Modifier.height(Spacing.huge))
             }
         }
@@ -231,14 +237,14 @@ fun ManageHoursScreen(
     if (notificationDenied) AlertDialog(
         onDismissRequest = { notificationDenied = false },
         title = { Text(s.notifDisabledTitle) },
-        confirmButton = { TextButton(onClick = {
+        confirmButton = { SinqPrimaryButton(onClick = {
             notificationDenied = false
             com.agpeya.app.ui.common.openNotificationSettings(context)
         }) { Text(s.settingsTitle) } },
     )
     deleting?.let { hour -> AlertDialog(
         onDismissRequest = { deleting = null }, title = { Text(s.remove) }, text = { Text(hour.name) },
-        confirmButton = { TextButton(onClick = { scope.launch {
+        confirmButton = { SinqDestructiveButton(onClick = { scope.launch {
             HoursRepository.deleteCustomHour(context, hour.id)
             reschedule(); deleting = null
         } }) { Text(s.remove) } },
@@ -433,7 +439,7 @@ private fun NameDialog(
             )
         },
         confirmButton = {
-            TextButton(
+            SinqPrimaryButton(
                 onClick = { onConfirm(text.trim()) },
                 enabled = text.isNotBlank(),
             ) { Text(confirm) }

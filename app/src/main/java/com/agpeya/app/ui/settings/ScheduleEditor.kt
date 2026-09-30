@@ -19,6 +19,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +30,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberTimePickerState
+import com.agpeya.app.ui.common.SinqPrimaryButton
+import com.agpeya.app.ui.common.SinqStepperButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -274,7 +279,7 @@ fun ScheduleEditorDialog(
                 HabitSchedule.Kind.FEAST -> feastKey.isNotBlank()
                 else -> true
             }
-            TextButton(
+            SinqPrimaryButton(
                 enabled = valid,
                 onClick = {
                     onSave(
@@ -304,14 +309,22 @@ fun ScheduleEditorDialog(
 @Composable
 private fun Stepper(label: String, onDown: () -> Unit, onUp: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        TextButton(onClick = onDown) { Text("−") }
+        SinqStepperButton(
+            icon = Icons.Outlined.Remove,
+            contentDescription = null,
+            onClick = onDown,
+        )
         Text(
             text = label,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.weight(1f),
             textAlign = TextAlign.Center,
         )
-        TextButton(onClick = onUp) { Text("+") }
+        SinqStepperButton(
+            icon = Icons.Outlined.Add,
+            contentDescription = null,
+            onClick = onUp,
+        )
     }
 }
 

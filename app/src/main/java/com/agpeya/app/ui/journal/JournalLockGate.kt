@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import com.agpeya.app.ui.common.SinqPrimaryButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -143,7 +144,7 @@ fun PassphraseDialog(
             }
         },
         confirmButton = {
-            TextButton(enabled = valid, onClick = { onSet(passphrase) }) { Text(s.save) }
+            SinqPrimaryButton(enabled = valid, onClick = { onSet(passphrase) }) { Text(s.save) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
     )
@@ -189,7 +190,7 @@ fun PassphrasePrompt(
             }
         },
         confirmButton = {
-            TextButton(
+            SinqPrimaryButton(
                 enabled = passphrase.isNotEmpty() && !verifying,
                 onClick = {
                     scope.launch {

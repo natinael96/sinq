@@ -34,6 +34,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import com.agpeya.app.ui.common.SinqDestructiveButton
+import com.agpeya.app.ui.common.SinqOutlinedButton
+import com.agpeya.app.ui.common.SinqPrimaryButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -173,9 +176,7 @@ fun VowScreen(onBack: () -> Unit) {
             }
 
             item {
-                OutlinedButton(onClick = { add() }) {
-                    Icon(Icons.Outlined.Add, contentDescription = null)
-                    Spacer(Modifier.width(Spacing.sm))
+                SinqOutlinedButton(onClick = { add() }, leadingIcon = Icons.Outlined.Add) {
                     Text(s.addVow)
                 }
                 Spacer(Modifier.height(Spacing.huge))
@@ -251,7 +252,7 @@ private fun VowCard(
             onDismissRequest = { removeRecord = null },
             title = { Text(s.delete) },
             text = { Text(s.deleteEntryConfirm) },
-            confirmButton = { TextButton(onClick = {
+            confirmButton = { SinqDestructiveButton(onClick = {
                 draft = draft.copy(fulfilments = draft.fulfilments.filterNot { it.id == id })
                 onChange(draft)
                 removeRecord = null
@@ -384,7 +385,7 @@ private fun VowCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(vertical = 2.dp),
                     )
-                    TextButton(onClick = { removeRecord = paid.id }) { Text(s.delete) }
+                    SinqDestructiveButton(onClick = { removeRecord = paid.id }) { Text(s.delete) }
                 }
             }
         }
@@ -439,7 +440,7 @@ private fun PledgeDialog(
             )
         },
         confirmButton = {
-            TextButton(enabled = valid, onClick = { onSave(parsed ?: 0L) }) { Text(s.save) }
+            SinqPrimaryButton(enabled = valid, onClick = { onSave(parsed ?: 0L) }) { Text(s.save) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
     )

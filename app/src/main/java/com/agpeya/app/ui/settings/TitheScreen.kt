@@ -29,6 +29,9 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import com.agpeya.app.ui.common.SinqDestructiveButton
+import com.agpeya.app.ui.common.SinqOutlinedButton
+import com.agpeya.app.ui.common.SinqPrimaryButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -214,13 +217,15 @@ fun TitheScreen(onBack: () -> Unit, onOpenReminders: () -> Unit) {
                 Spacer(Modifier.height(Spacing.md))
 
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                    OutlinedButton(
+                    SinqOutlinedButton(
                         onClick = { adding = TitheEntryKind.INCOME },
                         modifier = Modifier.weight(1f),
+                        leadingIcon = Icons.Outlined.Add,
                     ) { Text(s.addIncome, maxLines = 1) }
-                    OutlinedButton(
+                    SinqOutlinedButton(
                         onClick = { adding = TitheEntryKind.GIVEN },
                         modifier = Modifier.weight(1f),
+                        leadingIcon = Icons.Outlined.Add,
                     ) { Text(s.addGiven, maxLines = 1) }
                 }
                 Spacer(Modifier.height(Spacing.sm))
@@ -342,7 +347,7 @@ fun TitheScreen(onBack: () -> Unit, onOpenReminders: () -> Unit) {
             title = { Text(s.delete) },
             text = { Text(formatCents(entry.amount, currency)) },
             confirmButton = {
-                TextButton(onClick = {
+                SinqDestructiveButton(onClick = {
                     deleting = null
                     scope.launch { OfferingRepository.deleteTitheEntry(context, entry.id) }
                 }) { Text(s.delete) }
@@ -420,7 +425,7 @@ private fun NumberEntryDialog(
             )
         },
         confirmButton = {
-            TextButton(enabled = valid, onClick = { onSave(text) }) { Text(s.save) }
+            SinqPrimaryButton(enabled = valid, onClick = { onSave(text) }) { Text(s.save) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
     )
@@ -447,7 +452,7 @@ private fun TextEntryDialog(
                 placeholder = { Text(s.currencyDefault) },
             )
         },
-        confirmButton = { TextButton(onClick = { onSave(text) }) { Text(s.save) } },
+        confirmButton = { SinqPrimaryButton(onClick = { onSave(text) }) { Text(s.save) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
     )
 }

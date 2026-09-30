@@ -18,10 +18,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
+import com.agpeya.app.ui.common.SinqDestructiveButton
+import com.agpeya.app.ui.common.SinqOutlinedButton
+import com.agpeya.app.ui.common.SinqPrimaryButton
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -158,7 +162,9 @@ fun ManageHabitsScreen(onBack: () -> Unit) {
             }
             item {
                 Spacer(Modifier.height(Spacing.md))
-                TextButton(onClick = { creating = true }) { Text("＋ ${s.newHabit}") }
+                SinqOutlinedButton(onClick = { creating = true }, leadingIcon = Icons.Outlined.Add) {
+                    Text(s.newHabit)
+                }
             }
         }
     }
@@ -168,7 +174,7 @@ fun ManageHabitsScreen(onBack: () -> Unit) {
             onDismissRequest = { deletingId = null },
             title = { Text(s.remove) },
             text = { Text(habitName(id, state, s)) },
-            confirmButton = { TextButton(onClick = {
+            confirmButton = { SinqDestructiveButton(onClick = {
                 scope.launch { HabitsRepository.deleteCustomHabit(context, id) }
                 deletingId = null
             }) { Text(s.remove) } },
@@ -232,7 +238,7 @@ private fun HabitNameDialog(title: String, initial: String, onConfirm: (String) 
                 label = { Text(s.habitNameLabel) },
             )
         },
-        confirmButton = { TextButton(enabled = text.isNotBlank(), onClick = { onConfirm(text.trim()) }) { Text(s.save) } },
+        confirmButton = { SinqPrimaryButton(enabled = text.isNotBlank(), onClick = { onConfirm(text.trim()) }) { Text(s.save) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
     )
 }
