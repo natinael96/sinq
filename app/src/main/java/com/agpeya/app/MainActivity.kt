@@ -116,24 +116,6 @@ class MainActivity : ComponentActivity() {
                     // fragile. Once per activity launch. The Box is what makes it
                     // an overlay — without it the two are merely siblings.
                     var opened by rememberSaveable { mutableStateOf(false) }
-                    // The tour sits in the same overlay, behind Memento Mori:
-                    // the opening page finishes, then what is new is explained,
-                    // then the app. Resolved here rather than as a destination
-                    // for the same reason the Box exists at all.
-                    val tourContent by produceState(
-                        com.agpeya.app.model.TourContent(),
-                    ) { value = com.agpeya.app.data.TourRepository.content(this@MainActivity) }
-                    val lastTour by SettingsRepository.lastTourVersion(this@MainActivity)
-                        .collectAsState(initial = -1)
-                    val installedCode = remember {
-                        com.agpeya.app.data.TourRepository.installedVersionCode(this@MainActivity)
-                    }
-                    // -1 is "not loaded yet"; only decide once the store answers.
-                    val tour = if (lastTour == -1) null else com.agpeya.app.data.TourRepository
-                        .pending(tourContent.tours, lastTour, installedCode)
-                    val tourScope = rememberCoroutineScope()
-                    var tourRoute by rememberSaveable { mutableStateOf<String?>(null) }
-                    val tourAction = com.agpeya.app.ui.common.rememberUserAction()
                     // Asked once per launch, while the opening page is drawing:
                     // the notice is only ever read with the app open, so this is
                     // the moment it can matter.
@@ -156,8 +138,6 @@ class MainActivity : ComponentActivity() {
 
                     Box(Modifier.fillMaxSize()) {
                         AgpeyaNavHost(
-                            tourRoute = tourRoute,
-                            onTourRouteHandled = { tourRoute = null },
                             deepLinkHourId = pendingDeepLinkHourId.value,
                             onDeepLinkHandled = { pendingDeepLinkHourId.value = null },
                             openJourney = pendingOpenJourney.value,
@@ -173,24 +153,6 @@ class MainActivity : ComponentActivity() {
                                 pendingGitsaweEpochDay.value = null
                             },
                         )
-                        if (opened && tour != null && !bypassLaunchOverlays.value) {
-                            com.agpeya.app.ui.intro.WhatsNewTour(
-                                tour = tour,
-                                onOpenRoute = { route ->
-                                    tourAction.run {
-                                        SettingsRepository.setLastTourVersion(this@MainActivity, installedCode)
-                                        tourRoute = route
-                                    }
-                                },
-                                onDone = {
-                                    tourScope.launch {
-                                        SettingsRepository.setLastTourVersion(
-                                            this@MainActivity, installedCode,
-                                        )
-                                    }
-                                },
-                            )
-                        }
                         if (!opened && !bypassLaunchOverlays.value) {
                             com.agpeya.app.ui.intro.MementoMoriScreen(onDone = { opened = true })
                         }
@@ -326,8 +288,6 @@ private fun NavController.showTabs() {
 
 @Composable
 private fun AgpeyaNavHost(
-    tourRoute: String?,
-    onTourRouteHandled: () -> Unit,
     deepLinkHourId: String?,
     onDeepLinkHandled: () -> Unit,
     openJourney: Boolean,
@@ -416,13 +376,6 @@ private fun AgpeyaNavHost(
     // Deep link from a fired alarm. Gated on `ready` so it never runs before the
     // NavHost graph below is composed (navigating earlier crashes the app).
     // Consume it once so it isn't re-navigated on the next recomposition.
-    LaunchedEffect(ready, tourRoute) {
-        if (ready && tourRoute != null) {
-            if (tourRoute == Tab.JOURNEY.route) goToTab(Tab.JOURNEY)
-            else navController.navigate(tourRoute) { launchSingleTop = true }
-            onTourRouteHandled()
-        }
-    }
     LaunchedEffect(ready, deepLinkHourId) {
         if (ready && deepLinkHourId != null) {
             navController.navigate("reading/$deepLinkHourId") { launchSingleTop = true }
