@@ -39,10 +39,12 @@ import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material.icons.outlined.BatterySaver
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.VolunteerActivism
+import com.agpeya.app.ui.common.ReminderSetupSheet
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -249,7 +251,14 @@ fun HomeScreen(
     ) { innerPadding ->
       Column(Modifier.fillMaxSize().padding(innerPadding)) {
         if (offerReminderSetup && (!notificationsReady || !batteryReady)) {
-            ReminderSetupLine(onOpen = { showReminderSetup = true })
+            ReminderSetupLine(
+                onOpen = { showReminderSetup = true },
+                onDismiss = {
+                    scope.launch {
+                        com.agpeya.app.data.SettingsRepository.dismissHomeReminderSetup(context)
+                    }
+                },
+            )
         }
         // Above the day, outside the screen margin: a notice about the app
         // itself has no business indenting the date beneath it.
@@ -408,136 +417,52 @@ fun HomeScreen(
     }
 }
 
-/** A single quiet line above the dashboard; details stay in the sheet. */
+/** A single notice line above the dashboard; details stay in the sheet. */
 @Composable
-private fun ReminderSetupLine(onOpen: () -> Unit) {
+private fun ReminderSetupLine(onOpen: () -> Unit, onDismiss: () -> Unit) {
     val s = LocalStrings.current
     Column {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.secondaryContainer)
                 .heightIn(min = 48.dp)
                 .clickable(onClick = onOpen)
-                .padding(horizontal = Spacing.screen),
+                .padding(start = Spacing.screen),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             Icon(
                 Icons.Outlined.Notifications,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.secondary,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer,
                 modifier = Modifier.size(IconSize.small),
             )
             Text(
                 s.reminderSetupTitle,
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
             Text(
                 s.enableAction,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.secondary,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                maxLines = 1,
             )
+            IconButton(onClick = onDismiss, modifier = Modifier.size(48.dp)) {
+                Icon(
+                    Icons.Outlined.Close,
+                    contentDescription = s.dismiss,
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.size(IconSize.small),
+                )
+            }
         }
         SinqDivider()
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ReminderSetupSheet(
-    notificationsReady: Boolean,
-    batteryReady: Boolean,
-    onEnableNotifications: () -> Unit,
-    onReviewBattery: () -> Unit,
-    onNotNow: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val s = LocalStrings.current
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = Spacing.screen)
-                .padding(bottom = Spacing.lg),
-        ) {
-            Text(
-                s.reminderSetupTitle,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Spacer(Modifier.height(Spacing.xs))
-            Text(
-                s.reminderSetupBody,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(Spacing.lg))
-            ReminderSetupRow(
-                icon = Icons.Outlined.Notifications,
-                title = s.reminderSetupNotifications,
-                body = s.reminderSetupNotificationsBody,
-                complete = notificationsReady,
-                action = s.enableAction,
-                onAction = onEnableNotifications,
-            )
-            Spacer(Modifier.height(Spacing.sm))
-            ReminderSetupRow(
-                icon = Icons.Outlined.BatterySaver,
-                title = s.reminderSetupBattery,
-                body = s.reminderSetupBatteryBody,
-                complete = batteryReady,
-                action = s.allowBackground,
-                onAction = onReviewBattery,
-            )
-            Spacer(Modifier.height(Spacing.md))
-            TextButton(onClick = onNotNow, modifier = Modifier.align(Alignment.End)) {
-                Text(s.notNow)
-            }
-        }
-    }
-}
-
-@Composable
-private fun ReminderSetupRow(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    body: String,
-    complete: Boolean,
-    action: String,
-    onAction: () -> Unit,
-) {
-    val s = LocalStrings.current
-    Surface(
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
-        shape = MaterialTheme.shapes.medium,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Row(
-            Modifier.padding(Spacing.md),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-        ) {
-            Icon(
-                if (complete) Icons.Outlined.CheckCircle else icon,
-                contentDescription = null,
-                tint = if (complete) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.size(IconSize.medium),
-            )
-            Column(Modifier.weight(1f)) {
-                Text(title, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
-                Text(body, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            if (complete) {
-                Text(s.doneLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-            } else {
-                FilledTonalButton(onClick = onAction) { Text(action) }
-            }
-        }
     }
 }
 

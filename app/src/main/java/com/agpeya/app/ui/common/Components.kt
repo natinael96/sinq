@@ -222,6 +222,25 @@ fun openNotificationSettings(context: android.content.Context) {
     runCatching { context.startActivity(intent) }
 }
 
+fun openBatteryOptimizationSettings(context: android.content.Context) {
+    runCatching {
+        val intent = android.content.Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).apply {
+            addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+    }.onFailure {
+        runCatching {
+            val intent = android.content.Intent(
+                android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                android.net.Uri.fromParts("package", context.packageName, null),
+            ).apply {
+                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+        }
+    }
+}
+
 /**
  * Open a link in whatever the reader browses with.
  *

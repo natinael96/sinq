@@ -555,6 +555,14 @@ interface Strings {
     val reminderSetupBatteryBody: String
     val enableAction: String
     val notNow: String
+    val alertChoiceTitle: String
+    val alertChoiceBody: String
+    val alertChoiceAlarmTitle: String
+    val alertChoiceAlarmBody: String
+    val alertChoiceVibrateTitle: String
+    val alertChoiceVibrateBody: String
+    val alertChoiceNotificationTitle: String
+    val alertChoiceNotificationBody: String
 
     /** Day-of-week short labels, Monday..Sunday (ISO order). */
     val dayLabels: List<String>
@@ -1511,6 +1519,14 @@ object AmharicStrings : Strings {
     override val reminderSetupBatteryBody = "ማስታወሻዎች በሰዓቱ እንዲደርሱ የባትሪ ገደቡን ይመልከቱ።"
     override val enableAction = "ፍቀድ"
     override val notNow = "አሁን አይደለም"
+    override val alertChoiceTitle = "የማስታወሻ ዓይነት ይምረጡ"
+    override val alertChoiceBody = "የጸሎት ሰዓት ሲደርስ ማንቂያው እንዴት እንዲያሳውቅዎ ይፈልጋሉ?"
+    override val alertChoiceAlarmTitle = "ማንቂያ (ደወል)"
+    override val alertChoiceAlarmBody = "በጸሎት ሰዓት ድምፅና ንዝረት በማሰማት ጮክ ብሎ ይቀሰቅሳል"
+    override val alertChoiceVibrateTitle = "ንዝረት ብቻ"
+    override val alertChoiceVibrateBody = "በጸሎት ሰዓት ድምፅ ሳይረብሽ በንዝረት ብቻ ያስታውሳል"
+    override val alertChoiceNotificationTitle = "ማሳወቂያ ብቻ"
+    override val alertChoiceNotificationBody = "ድምፅና ንዝረት ሳይኖር በማያ ገጽ ማሳወቂያ ብቻ ያሳውቃል"
 
     override val dayLabels = listOf("ሰ", "ማ", "ረ", "ሐ", "ዓ", "ቅ", "እ")
     override val previousMonth = "ያለፈው ወር"
@@ -2455,6 +2471,14 @@ object EnglishStrings : Strings {
     override val reminderSetupBatteryBody = "Review battery limits for more reliable reminders."
     override val enableAction = "Enable"
     override val notNow = "Not now"
+    override val alertChoiceTitle = "Choose reminder style"
+    override val alertChoiceBody = "How would you like to be reminded when a prayer hour arrives?"
+    override val alertChoiceAlarmTitle = "Alarm (Ringing)"
+    override val alertChoiceAlarmBody = "Rings aloud with sound and vibration like an alarm clock"
+    override val alertChoiceVibrateTitle = "Vibrate only"
+    override val alertChoiceVibrateBody = "Vibrates at prayer hours without loud ringing"
+    override val alertChoiceNotificationTitle = "Just notification"
+    override val alertChoiceNotificationBody = "Shows a quiet notification banner without sound or vibration"
 
     override val dayLabels = listOf("M", "T", "W", "T", "F", "S", "S")
     override val previousMonth = "Previous month"

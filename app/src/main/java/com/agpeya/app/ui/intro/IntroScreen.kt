@@ -1,5 +1,21 @@
 package com.agpeya.app.ui.intro
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.PowerManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.mutableIntStateOf
+import com.agpeya.app.ui.common.ReminderSetupSheet
+import com.agpeya.app.ui.common.openNotificationSettings
+import com.agpeya.app.ui.common.openBatteryOptimizationSettings
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -21,20 +37,26 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
-import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.VolunteerActivism
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Route
+import androidx.compose.foundation.BorderStroke
+import com.agpeya.app.data.AlarmAlert
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.NotificationsActive
+import androidx.compose.material.icons.outlined.Vibration
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import com.agpeya.app.ui.theme.IconSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,11 +86,6 @@ private data class IntroPage(
     val body: String,
 )
 
-/** Shown before the name form: what the app is, and that it's fully offline. */
-private fun introPages(s: Strings): List<IntroPage> = listOf(
-    IntroPage(hero = "ስንቅ", title = s.introTitle, body = s.introBody),
-    IntroPage(icon = Icons.Outlined.CloudOff, title = s.introOfflineTitle, body = s.introOfflineBody),
-)
 
 /**
  * The tour of what the app holds — offered after the name, replayable from
@@ -87,7 +104,7 @@ private fun tutorialPages(s: Strings): List<IntroPage> = listOf(
     IntroPage(icon = Icons.Outlined.Search, title = s.introSearchTitle, body = s.introSearchBody),
 )
 
-private enum class IntroStage { PAGES, ASK, TUTORIAL }
+private enum class IntroStage { PAGES, ALERT_CHOICE, ASK, TUTORIAL }
 
 /**
  * First-run flow: intro pages → name → "want a quick tour?" → optional feature
@@ -98,6 +115,29 @@ fun IntroScreen(onDone: () -> Unit) {
     val s = LocalStrings.current
     val context = androidx.compose.ui.platform.LocalContext.current
     val scope = rememberCoroutineScope()
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var permissionPulse by remember { mutableIntStateOf(0) }
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) permissionPulse++
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    val notificationsReady = permissionPulse >= 0 &&
+        NotificationManagerCompat.from(context).areNotificationsEnabled() &&
+        (Build.VERSION.SDK_INT < 33 || ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.POST_NOTIFICATIONS,
+        ) == PackageManager.PERMISSION_GRANTED)
+    val batteryReady = context.getSystemService(PowerManager::class.java)
+        ?.isIgnoringBatteryOptimizations(context.packageName) ?: true
+
+    var showReminderSetupPopup by rememberSaveable { mutableStateOf(false) }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { permissionPulse++ }
 
     var stage by rememberSaveable { mutableStateOf(IntroStage.PAGES) }
     var name by rememberSaveable { mutableStateOf("") }
@@ -132,8 +172,7 @@ fun IntroScreen(onDone: () -> Unit) {
 
     when (stage) {
         IntroStage.PAGES -> {
-            val pages = introPages(s)
-            val pageCount = pages.size + 2 // + the name form + how much to pray
+            val pageCount = 2 // name form + how much to pray
             val pagerState = rememberPagerState(pageCount = { pageCount })
             val isLast = pagerState.currentPage == pageCount - 1
             TourScaffold(
@@ -143,11 +182,18 @@ fun IntroScreen(onDone: () -> Unit) {
                 isLast = isLast,
                 finishLabel = s.next, // name page → the tour question, not straight to Home
                 onSkip = { saveAnswers(onDone) },
-                onFinish = { saveAnswers { stage = IntroStage.ASK } },
+                onFinish = {
+                    saveAnswers {
+                        if (!notificationsReady || !batteryReady) {
+                            showReminderSetupPopup = true
+                        } else {
+                            stage = IntroStage.ALERT_CHOICE
+                        }
+                    }
+                },
             ) { page ->
                 when (page) {
-                    in pages.indices -> IntroPageContent(pages[page])
-                    pages.size -> NameForm(
+                    0 -> NameForm(
                         name = name,
                         christianName = christianName,
                         onName = { name = it },
@@ -157,6 +203,15 @@ fun IntroScreen(onDone: () -> Unit) {
                 }
             }
         }
+        IntroStage.ALERT_CHOICE -> AlertChoiceScreen(
+            onChoiceSelected = { choice ->
+                scope.launch {
+                    SettingsRepository.setAlarmAlert(context, choice)
+                    SettingsRepository.dismissAlarmSoundNotice(context)
+                }
+                stage = IntroStage.ASK
+            },
+        )
         IntroStage.ASK -> TutorialAsk(
             onShow = { stage = IntroStage.TUTORIAL },
             onSkip = onDone,
@@ -173,6 +228,137 @@ fun IntroScreen(onDone: () -> Unit) {
                 onSkip = onDone,
                 onFinish = onDone,
             ) { page -> IntroPageContent(pages[page]) }
+        }
+    }
+
+    if (showReminderSetupPopup) {
+        val dismissPopup = {
+            showReminderSetupPopup = false
+            stage = IntroStage.ALERT_CHOICE
+        }
+        ReminderSetupSheet(
+            notificationsReady = notificationsReady,
+            batteryReady = batteryReady,
+            onEnableNotifications = {
+                if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS,
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                } else {
+                    openNotificationSettings(context)
+                }
+            },
+            onReviewBattery = { openBatteryOptimizationSettings(context) },
+            onNotNow = dismissPopup,
+            onDismiss = dismissPopup,
+        )
+    }
+}
+
+/** "Alarm or just notification?" layer shown after prayer setup. */
+@Composable
+private fun AlertChoiceScreen(
+    onChoiceSelected: (AlarmAlert) -> Unit,
+) {
+    val s = LocalStrings.current
+    var selectedAlert by rememberSaveable { mutableStateOf(AlarmAlert.SOUND_VIBRATE) }
+    val options = listOf(
+        Triple(Icons.Outlined.NotificationsActive, s.alertChoiceAlarmTitle to s.alertChoiceAlarmBody, AlarmAlert.SOUND_VIBRATE),
+        Triple(Icons.Outlined.Vibration, s.alertChoiceVibrateTitle to s.alertChoiceVibrateBody, AlarmAlert.VIBRATE_ONLY),
+        Triple(Icons.Outlined.Notifications, s.alertChoiceNotificationTitle to s.alertChoiceNotificationBody, AlarmAlert.SILENT),
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = Spacing.screen)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = s.alertChoiceTitle,
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(Spacing.xs))
+        Text(
+            text = s.alertChoiceBody,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(Spacing.xl))
+
+        options.forEach { (icon, texts, alert) ->
+            AlertChoiceCard(
+                icon = icon,
+                title = texts.first,
+                body = texts.second,
+                selected = selectedAlert == alert,
+                onClick = { selectedAlert = alert },
+            )
+            Spacer(Modifier.height(Spacing.md))
+        }
+
+        Spacer(Modifier.height(Spacing.lg))
+        Button(
+            onClick = { onChoiceSelected(selectedAlert) },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(s.continueAction)
+        }
+    }
+}
+
+@Composable
+private fun AlertChoiceCard(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    body: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    Surface(
+        onClick = onClick,
+        shape = MaterialTheme.shapes.large,
+        color = if (selected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f)
+        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+        border = if (selected) BorderStroke(1.5.dp, MaterialTheme.colorScheme.secondary) else null,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier.padding(Spacing.lg),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+        ) {
+            Icon(
+                icon,
+                contentDescription = null,
+                tint = if (selected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(IconSize.medium),
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Spacer(Modifier.height(Spacing.xxs))
+                Text(
+                    text = body,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            RadioButton(
+                selected = selected,
+                onClick = null,
+            )
         }
     }
 }
@@ -367,19 +553,32 @@ private fun NameForm(
         verticalArrangement = Arrangement.Center,
     ) {
         Text(
+            text = "ስንቅ",
+            style = MaterialTheme.typography.headlineLarge.inReadingFont(),
+            color = MaterialTheme.colorScheme.primary,
+        )
+        Spacer(Modifier.height(Spacing.xs))
+        Text(
+            text = s.introBody,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(Spacing.xl))
+        Text(
             text = s.introNameTitle,
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(Spacing.sm))
+        Spacer(Modifier.height(Spacing.xs))
         Text(
             text = s.introNameBody,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(Spacing.screen))
+        Spacer(Modifier.height(Spacing.lg))
         OutlinedTextField(
             value = name,
             onValueChange = onName,
