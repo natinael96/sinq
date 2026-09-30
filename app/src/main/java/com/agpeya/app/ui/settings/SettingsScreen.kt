@@ -181,7 +181,7 @@ internal fun EditableRow(
 }
 
 /** The bundled reader faces, each shown rendered in itself. */
-private val FONT_CHOICES = listOf(
+internal val FONT_CHOICES = listOf(
     com.agpeya.app.data.ReadingFont.ABYSSINICA to "Abyssinica SIL",
     com.agpeya.app.data.ReadingFont.ABAY_LIGHT to "Ethiopic Abay Light",
     com.agpeya.app.data.ReadingFont.BELA_BEREKA to "Bela Bereka",
@@ -189,10 +189,10 @@ private val FONT_CHOICES = listOf(
 )
 
 /** A sample line of the script the choice actually affects. */
-private const val FONT_SAMPLE = "አቡነ ዘበሰማያት ፩፪፫"
+internal const val FONT_SAMPLE = "አቡነ ዘበሰማያት ፩፪፫"
 
 @Composable
-private fun ReadingFontPicker(
+internal fun ReadingFontPicker(
     selected: com.agpeya.app.data.ReadingFont,
     onSelect: (com.agpeya.app.data.ReadingFont) -> Unit,
 ) {

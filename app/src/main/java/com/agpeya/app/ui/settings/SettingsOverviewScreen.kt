@@ -1,49 +1,68 @@
 package com.agpeya.app.ui.settings
 
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Remove
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.Icon
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.runtime.remember
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
+import com.agpeya.app.data.AlarmAlert
 import com.agpeya.app.data.Language
 import com.agpeya.app.data.PrayerLevel
 import com.agpeya.app.data.ReadingFont
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.data.ThemeChoice
 import com.agpeya.app.ui.common.NavRow
-import com.agpeya.app.ui.common.Tab
-import com.agpeya.app.ui.strings.LocalStrings
-import kotlinx.coroutines.launch
-import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.common.SectionHeader
+import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.theme.Spacing
+import kotlinx.coroutines.launch
 
-/** The deliberately shallow Settings landing page: two direct choices and six doors. */
+/**
+ * Settings landing page organized into three clean groups:
+ * 1. Appearance & Reading (Theme, Language, Reading font, Text size, Copy format)
+ * 2. Prayer & Reminders (Prayer rule, Alert style, Daily alarms)
+ * 3. Data & About (Backup/Restore, What's new, Feedback, Rating, About)
+ */
 @Composable
 fun SettingsScreen(
     onOpenReading: () -> Unit,
@@ -62,13 +81,7 @@ fun SettingsScreen(
     val font by SettingsRepository.readingFont(context).collectAsState(initial = ReadingFont.ABYSSINICA)
     val fontStep by SettingsRepository.fontStep(context).collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
     val prayerLevel by SettingsRepository.prayerLevel(context).collectAsState(initial = PrayerLevel.FULL)
-    val night by SettingsRepository.streakReminder(context).collectAsState(initial = true)
-    val gitsawe by SettingsRepository.gitsaweReminder(context).collectAsState(initial = true)
-    val breath by SettingsRepository.breathReminder(context).collectAsState(initial = true)
-    val alms by SettingsRepository.almsReminders(context).collectAsState(initial = emptyList())
-    val repentance by SettingsRepository.repentanceReminders(context).collectAsState(initial = emptyList())
-    val tithe by SettingsRepository.titheReminders(context).collectAsState(initial = emptyList())
-    val vows by com.agpeya.app.data.OfferingRepository.vows(context).collectAsState(initial = emptyList())
+    val alert by SettingsRepository.alarmAlert(context).collectAsState(initial = AlarmAlert.SOUND_VIBRATE)
     val lastBackupAt by SettingsRepository.lastBackupAt(context).collectAsState(initial = 0L)
     val today by com.agpeya.app.ui.common.rememberCurrentDate()
     val schedule by remember(today) { com.agpeya.app.data.DaySchedule.observe(context, today) }
@@ -76,10 +89,11 @@ fun SettingsScreen(
     val enabledCount = schedule.count { it.today }
     val size = SettingsRepository.FONT_STEPS_SP[fontStep.coerceIn(0, SettingsRepository.FONT_STEPS_SP.lastIndex)]
 
+    var showFontDialog by remember { mutableStateOf(false) }
+    var showLevelDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        // The bar belongs to the host that holds all four tabs, and it carries
-        // its own navigation-bar padding; this page only insets for the status bar.
         contentWindowInsets = WindowInsets.statusBars,
     ) { inner ->
         LazyColumn(
@@ -89,6 +103,9 @@ fun SettingsScreen(
             item {
                 Text(s.settingsTitle, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
                 Spacer(Modifier.height(Spacing.md))
+
+                // Group 1: ገጽታና ንባብ (Appearance & Reading)
+                SectionHeader(s.settingsGroupReading)
                 CompactSegmented(
                     label = s.appearance,
                     options = listOf(s.themeSystem, s.themeLight, s.themeDark),
@@ -102,47 +119,109 @@ fun SettingsScreen(
                     selected = language.ordinal,
                     onSelect = { scope.launch { SettingsRepository.setLanguage(context, Language.entries[it]) } },
                 )
-                // Nine flat rows under no headings, in no order anyone could
-                // name. Four groups instead: what the app does, what it keeps,
-                // who is using it, and everything about the app itself.
-                Spacer(Modifier.height(Spacing.md))
-                SectionHeader(s.settingsGroupPrayer)
-                NavRow(s.settingsGroupReading, onOpenReading, subtitle = "${fontLabel(font)} · ${size}sp")
-                NavRow(s.prayerSettingsTitle, onOpenPrayer, subtitle = prayerLevelLabel(prayerLevel, s))
-                NavRow(s.remindersSettingsTitle, onOpenReminders, subtitle = "${s.todayLabel}: $enabledCount")
+                Spacer(Modifier.height(Spacing.xs))
+                NavRow(
+                    s.readingFontTitle,
+                    onClick = { showFontDialog = true },
+                    subtitle = fontLabel(font),
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 48.dp)
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        s.fontSizeLabel,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(
+                            onClick = {
+                                if (fontStep > 0) scope.launch { SettingsRepository.setFontStep(context, fontStep - 1) }
+                            },
+                            enabled = fontStep > 0,
+                        ) {
+                            Icon(Icons.Outlined.Remove, contentDescription = null)
+                        }
+                        Text(
+                            "${size}sp",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(horizontal = 4.dp),
+                        )
+                        IconButton(
+                            onClick = {
+                                if (fontStep < SettingsRepository.FONT_STEPS_SP.lastIndex) {
+                                    scope.launch { SettingsRepository.setFontStep(context, fontStep + 1) }
+                                }
+                            },
+                            enabled = fontStep < SettingsRepository.FONT_STEPS_SP.lastIndex,
+                        ) {
+                            Icon(Icons.Outlined.Add, contentDescription = null)
+                        }
+                    }
+                }
+                NavRow(s.copyFormatTitle, onOpenReading)
+
                 Spacer(Modifier.height(Spacing.lg))
+
+                // Group 2: ጸሎትና ማስታወሻ (Prayer & Reminders)
+                SectionHeader(s.settingsGroupPrayer)
+                NavRow(
+                    s.prayerLevelTitle,
+                    onClick = { showLevelDialog = true },
+                    subtitle = prayerLevelLabel(prayerLevel, s),
+                )
+                Spacer(Modifier.height(Spacing.xs))
+                val alertIndex = when (alert) {
+                    AlarmAlert.SOUND_VIBRATE -> 0
+                    AlarmAlert.VIBRATE_ONLY -> 1
+                    AlarmAlert.SILENT -> 2
+                    AlarmAlert.SOUND_ONLY -> 0
+                }
+                CompactSegmented(
+                    label = s.alertChoiceTitle,
+                    options = if (s is com.agpeya.app.ui.strings.AmharicStrings) listOf("ደወል", "ንዝረት", "ማሳወቂያ")
+                    else listOf("Alarm", "Vibrate", "Silent"),
+                    selected = alertIndex,
+                    onSelect = { idx ->
+                        val choice = when (idx) {
+                            0 -> AlarmAlert.SOUND_VIBRATE
+                            1 -> AlarmAlert.VIBRATE_ONLY
+                            else -> AlarmAlert.SILENT
+                        }
+                        scope.launch { SettingsRepository.setAlarmAlert(context, choice) }
+                    },
+                )
+                Spacer(Modifier.height(Spacing.xs))
+                NavRow(s.remindersSettingsTitle, onOpenReminders, subtitle = "${s.todayLabel}: $enabledCount")
+
+                Spacer(Modifier.height(Spacing.lg))
+
+                // Group 3: መረጃና ስለ መተግበሪያው (Data & About)
                 SectionHeader(s.settingsGroupRecords)
-                // One row, not two: መረጃ's own page opened with this page's
-                // ምልክቶቼ row repeated, so the ledgers and the file they are
-                // saved to now share a screen.
                 NavRow(
                     s.settingsGroupRecords,
                     onOpenRecords,
                     subtitle = "${s.settingsGroupRecordsDesc} · ${backupRelativeLabel(lastBackupAt, s)}",
                 )
-                Spacer(Modifier.height(Spacing.lg))
-                SectionHeader(s.settingsGroupMore)
                 NavRow(s.tutorial, onOpenTutorial)
-                // The tour of the new version was a row of its own beside this
-                // one. It is about the release, so it now opens from the top of
-                // the release notes instead.
                 NavRow(s.whatsNew, onOpenChangelog, subtitle = "v${appVersion(context)}")
                 NavRow(
                     s.rateAppTitle,
                     { com.agpeya.app.ui.common.openPlayStore(context) },
                     subtitle = s.rateAppSubtitle,
                 )
-                // Above About, because someone looking for where to report a
-                // wrong word is not looking for a page about the app.
                 NavRow(
                     s.feedbackTitle,
                     { com.agpeya.app.ui.common.openUrl(context, com.agpeya.app.ui.common.FEEDBACK_URL) },
                     subtitle = s.feedbackSubtitle,
                 )
-                // ፈቃዶች እና ምንጮች is a section of ስለ መተግበሪያው, and now reads as one.
                 NavRow(s.about, onOpenAbout)
                 Spacer(Modifier.height(Spacing.lg))
-                // The installed version, quietly closing the page.
                 Text(
                     "ስንቅ · v${appVersion(context)}",
                     style = MaterialTheme.typography.labelSmall,
@@ -153,6 +232,98 @@ fun SettingsScreen(
                 Spacer(Modifier.height(Spacing.sm))
             }
         }
+    }
+
+    if (showFontDialog) {
+        AlertDialog(
+            onDismissRequest = { showFontDialog = false },
+            title = { Text(s.readingFontTitle) },
+            text = {
+                Column(Modifier.verticalScroll(rememberScrollState())) {
+                    ReadingFontPicker(
+                        selected = font,
+                        onSelect = {
+                            scope.launch { SettingsRepository.setReadingFont(context, it) }
+                            showFontDialog = false
+                        },
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showFontDialog = false }) { Text(s.ok) }
+            },
+        )
+    }
+
+    if (showLevelDialog) {
+        val levels = listOf(
+            PrayerLevel.BEGINNING,
+            PrayerLevel.GROWTH,
+            PrayerLevel.STEADFAST,
+            PrayerLevel.FULL,
+            PrayerLevel.PSALM_50,
+        )
+        AlertDialog(
+            onDismissRequest = { showLevelDialog = false },
+            title = { Text(s.prayerLevelTitle) },
+            text = {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    levels.forEach { choice ->
+                        val isSel = choice == prayerLevel
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .selectable(
+                                    selected = isSel,
+                                    role = androidx.compose.ui.semantics.Role.RadioButton,
+                                    onClick = {
+                                        scope.launch { SettingsRepository.setPrayerLevel(context, choice) }
+                                        showLevelDialog = false
+                                    },
+                                ),
+                            shape = MaterialTheme.shapes.medium,
+                            color = if (isSel) MaterialTheme.colorScheme.secondary.copy(alpha = 0.14f)
+                            else MaterialTheme.colorScheme.surface,
+                            border = BorderStroke(
+                                1.dp,
+                                if (isSel) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outlineVariant,
+                            ),
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Column(Modifier.weight(1f)) {
+                                    Text(
+                                        prayerLevelLabel(choice, s),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onBackground,
+                                    )
+                                    Text(
+                                        prayerLevelDetail(choice, s),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                                if (isSel) {
+                                    Icon(
+                                        Icons.Outlined.Check,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.secondary,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLevelDialog = false }) { Text(s.ok) }
+            },
+        )
     }
 }
 
@@ -170,10 +341,10 @@ private fun appVersion(context: android.content.Context): String = runCatching {
 @Composable
 private fun CompactSegmented(label: String, options: List<String>, selected: Int, onSelect: (Int) -> Unit) {
     if (LocalDensity.current.fontScale <= 1.5f) {
-        androidx.compose.foundation.layout.Row(
+        Row(
             Modifier.fillMaxWidth().heightIn(min = 48.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(Spacing.md),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
             Text(
                 label,
@@ -197,26 +368,13 @@ private fun CompactSegmented(label: String, options: List<String>, selected: Int
     Column {
         Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.height(Spacing.xs))
-        if (true) {
-            options.forEachIndexed { index, text ->
-                androidx.compose.foundation.layout.Row(
-                    Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable { onSelect(index) },
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    androidx.compose.material3.RadioButton(selected == index, onClick = { onSelect(index) })
-                    Text(text, style = MaterialTheme.typography.titleMedium)
-                }
-            }
-        } else {
-            SingleChoiceSegmentedButtonRow {
-                options.forEachIndexed { index, text ->
-                    SegmentedButton(
-                        selected = selected == index,
-                        onClick = { onSelect(index) },
-                        shape = SegmentedButtonDefaults.itemShape(index, options.size),
-                        icon = { if (selected == index) Icon(Icons.Outlined.Check, contentDescription = null) },
-                    ) { Text(text, style = MaterialTheme.typography.labelSmall, maxLines = 1) }
-                }
+        options.forEachIndexed { index, text ->
+            Row(
+                Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable { onSelect(index) },
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                androidx.compose.material3.RadioButton(selected == index, onClick = { onSelect(index) })
+                Text(text, style = MaterialTheme.typography.titleMedium)
             }
         }
     }

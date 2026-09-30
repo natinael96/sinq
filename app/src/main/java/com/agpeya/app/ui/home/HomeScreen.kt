@@ -42,9 +42,12 @@ import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.NotificationsActive
+import androidx.compose.material.icons.outlined.Vibration
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.VolunteerActivism
 import com.agpeya.app.ui.common.ReminderSetupSheet
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,6 +56,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -225,12 +229,9 @@ fun HomeScreen(
     val alarmAlert by com.agpeya.app.data.SettingsRepository.alarmAlert(context)
         .collectAsState(initial = com.agpeya.app.data.AlarmAlert.VIBRATE_ONLY)
     var showAlarmSoundNotice by remember { mutableStateOf(false) }
-    LaunchedEffect(offerAlarmSoundNotice, notificationsReady, alarmAlert) {
+    LaunchedEffect(offerAlarmSoundNotice, notificationsReady) {
         if (!offerAlarmSoundNotice || !notificationsReady) return@LaunchedEffect
-        // Someone who has already been into that setting needs no telling; the
-        // flag is spent quietly rather than left to surface later.
-        if (alarmAlert == com.agpeya.app.data.AlarmAlert.VIBRATE_ONLY) showAlarmSoundNotice = true
-        else com.agpeya.app.data.SettingsRepository.dismissAlarmSoundNotice(context)
+        showAlarmSoundNotice = true
     }
 
     // The only network-facing thing on this screen, and it draws nothing unless
@@ -354,35 +355,80 @@ fun HomeScreen(
             showAlarmSoundNotice = false
             scope.launch { com.agpeya.app.data.SettingsRepository.dismissAlarmSoundNotice(context) }
         }
+        var selectedAlert by remember { mutableStateOf(alarmAlert) }
+        val options = listOf(
+            Triple(
+                Icons.Outlined.NotificationsActive,
+                strings.alertChoiceAlarmTitle to strings.alertChoiceAlarmBody,
+                com.agpeya.app.data.AlarmAlert.SOUND_VIBRATE,
+            ),
+            Triple(
+                Icons.Outlined.Vibration,
+                strings.alertChoiceVibrateTitle to strings.alertChoiceVibrateBody,
+                com.agpeya.app.data.AlarmAlert.VIBRATE_ONLY,
+            ),
+            Triple(
+                Icons.Outlined.Notifications,
+                strings.alertChoiceNotificationTitle to strings.alertChoiceNotificationBody,
+                com.agpeya.app.data.AlarmAlert.SILENT,
+            ),
+        )
         androidx.compose.material3.AlertDialog(
             onDismissRequest = dismissNotice,
-            title = { Text(strings.alarmVibratesTitle) },
+            title = { Text(strings.alertChoiceTitle) },
             text = {
-                Text(
-                    strings.alarmVibratesBody,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                    Text(
+                        strings.alertChoiceBody,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(Spacing.xs))
+                    options.forEach { (icon, texts, alert) ->
+                        val isSel = selectedAlert == alert
+                        Surface(
+                            onClick = { selectedAlert = alert },
+                            shape = MaterialTheme.shapes.medium,
+                            color = if (isSel) MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f)
+                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                            border = if (isSel) androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.secondary) else null,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(Spacing.md),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                            ) {
+                                Icon(
+                                    icon,
+                                    contentDescription = null,
+                                    tint = if (isSel) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(IconSize.small),
+                                )
+                                Column(Modifier.weight(1f)) {
+                                    Text(texts.first, style = MaterialTheme.typography.titleSmall)
+                                    Text(texts.second, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                RadioButton(selected = isSel, onClick = null)
+                            }
+                        }
+                    }
+                }
             },
-            // The choice is offered here rather than pointed at: sending someone
-            // to Settings to find a row they have never seen is not an offer.
             confirmButton = {
-                androidx.compose.material3.TextButton(
+                Button(
                     onClick = {
                         showAlarmSoundNotice = false
                         scope.launch {
-                            com.agpeya.app.data.SettingsRepository.setAlarmAlert(
-                                context,
-                                com.agpeya.app.data.AlarmAlert.SOUND_VIBRATE,
-                            )
+                            com.agpeya.app.data.SettingsRepository.setAlarmAlert(context, selectedAlert)
                             com.agpeya.app.data.SettingsRepository.dismissAlarmSoundNotice(context)
                         }
                     },
-                ) { Text(strings.alarmTurnOnSound) }
+                ) { Text(strings.save) }
             },
             dismissButton = {
-                androidx.compose.material3.TextButton(onClick = dismissNotice) {
-                    Text(strings.alarmKeepVibrating)
+                TextButton(onClick = dismissNotice) {
+                    Text(strings.notNow)
                 }
             },
         )

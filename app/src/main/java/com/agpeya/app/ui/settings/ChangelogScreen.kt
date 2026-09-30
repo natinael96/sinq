@@ -31,6 +31,21 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.4.1",
+        title = "Streamlined settings hierarchy and home screen alert choice",
+        titleAm = "የቅንብሮች አደረጃጀት ማሻሻያ እና በዋናው ገጽ ላይ የቀረበ የማንቂያ ምርጫ",
+        changes = listOf(
+            "Unified Settings into Appearance & Reading, Prayer & Reminders, and Data & About.",
+            "Inlined font picker dialog, text size stepper, and prayer level selector.",
+            "Surfaced 3-option alert style (Alarm, Vibrate, Notification) on Home and in Settings.",
+        ),
+        changesAm = listOf(
+            "ቅንብሮች በ3 ግልጽ ክፍሎች (ንባብ፣ ጸሎትና ማስታወሻ፣ መረጃ) ተደራጅተዋል።",
+            "የፊደል መምረጫ፣ የፊደል መጠን ማስተካከያ እና የሰዓታት መጠን በቀጥታ በቅንብሮች ገጽ ተካተዋል።",
+            "የ3 አማራጮች የማንቂያ ምርጫ (ደወል፣ ንዝረት፣ ማሳወቂያ) በዋናው ገጽና በቅንብሮች ተካቷል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.4.0",
         title = "Punctuation preservation, top bar language selector, and reminder setup",
         titleAm = "የሥርዓተ ነጥብ ጥበቃ፣ የቋንቋ መምረጫ ወደላይ ማዛወር እና የማስታወሻ ማስተካከያ",

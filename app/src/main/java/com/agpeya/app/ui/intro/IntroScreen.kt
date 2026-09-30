@@ -42,16 +42,12 @@ import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.VolunteerActivism
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Route
-import androidx.compose.foundation.BorderStroke
-import com.agpeya.app.data.AlarmAlert
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.NotificationsActive
-import androidx.compose.material.icons.outlined.Vibration
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -104,7 +100,7 @@ private fun tutorialPages(s: Strings): List<IntroPage> = listOf(
     IntroPage(icon = Icons.Outlined.Search, title = s.introSearchTitle, body = s.introSearchBody),
 )
 
-private enum class IntroStage { PAGES, ALERT_CHOICE, ASK, TUTORIAL }
+private enum class IntroStage { PAGES, ASK, TUTORIAL }
 
 /**
  * First-run flow: intro pages → name → "want a quick tour?" → optional feature
@@ -187,7 +183,7 @@ fun IntroScreen(onDone: () -> Unit) {
                         if (!notificationsReady || !batteryReady) {
                             showReminderSetupPopup = true
                         } else {
-                            stage = IntroStage.ALERT_CHOICE
+                            stage = IntroStage.ASK
                         }
                     }
                 },
@@ -203,15 +199,6 @@ fun IntroScreen(onDone: () -> Unit) {
                 }
             }
         }
-        IntroStage.ALERT_CHOICE -> AlertChoiceScreen(
-            onChoiceSelected = { choice ->
-                scope.launch {
-                    SettingsRepository.setAlarmAlert(context, choice)
-                    SettingsRepository.dismissAlarmSoundNotice(context)
-                }
-                stage = IntroStage.ASK
-            },
-        )
         IntroStage.ASK -> TutorialAsk(
             onShow = { stage = IntroStage.TUTORIAL },
             onSkip = onDone,
@@ -234,7 +221,7 @@ fun IntroScreen(onDone: () -> Unit) {
     if (showReminderSetupPopup) {
         val dismissPopup = {
             showReminderSetupPopup = false
-            stage = IntroStage.ALERT_CHOICE
+            stage = IntroStage.ASK
         }
         ReminderSetupSheet(
             notificationsReady = notificationsReady,
@@ -254,112 +241,6 @@ fun IntroScreen(onDone: () -> Unit) {
             onNotNow = dismissPopup,
             onDismiss = dismissPopup,
         )
-    }
-}
-
-/** "Alarm or just notification?" layer shown after prayer setup. */
-@Composable
-private fun AlertChoiceScreen(
-    onChoiceSelected: (AlarmAlert) -> Unit,
-) {
-    val s = LocalStrings.current
-    var selectedAlert by rememberSaveable { mutableStateOf(AlarmAlert.SOUND_VIBRATE) }
-    val options = listOf(
-        Triple(Icons.Outlined.NotificationsActive, s.alertChoiceAlarmTitle to s.alertChoiceAlarmBody, AlarmAlert.SOUND_VIBRATE),
-        Triple(Icons.Outlined.Vibration, s.alertChoiceVibrateTitle to s.alertChoiceVibrateBody, AlarmAlert.VIBRATE_ONLY),
-        Triple(Icons.Outlined.Notifications, s.alertChoiceNotificationTitle to s.alertChoiceNotificationBody, AlarmAlert.SILENT),
-    )
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = Spacing.screen)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = s.alertChoiceTitle,
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onBackground,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(Modifier.height(Spacing.xs))
-        Text(
-            text = s.alertChoiceBody,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(Modifier.height(Spacing.xl))
-
-        options.forEach { (icon, texts, alert) ->
-            AlertChoiceCard(
-                icon = icon,
-                title = texts.first,
-                body = texts.second,
-                selected = selectedAlert == alert,
-                onClick = { selectedAlert = alert },
-            )
-            Spacer(Modifier.height(Spacing.md))
-        }
-
-        Spacer(Modifier.height(Spacing.lg))
-        Button(
-            onClick = { onChoiceSelected(selectedAlert) },
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(s.continueAction)
-        }
-    }
-}
-
-@Composable
-private fun AlertChoiceCard(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    body: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-) {
-    Surface(
-        onClick = onClick,
-        shape = MaterialTheme.shapes.large,
-        color = if (selected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f)
-        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
-        border = if (selected) BorderStroke(1.5.dp, MaterialTheme.colorScheme.secondary) else null,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Row(
-            modifier = Modifier.padding(Spacing.lg),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-        ) {
-            Icon(
-                icon,
-                contentDescription = null,
-                tint = if (selected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(IconSize.medium),
-            )
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Spacer(Modifier.height(Spacing.xxs))
-                Text(
-                    text = body,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            RadioButton(
-                selected = selected,
-                onClick = null,
-            )
-        }
     }
 }
 

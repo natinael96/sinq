@@ -5,6 +5,14 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.4.1] — 2026-09-30
+
+_versionCode 98 · Streamlined 3-section settings hierarchy and first-run alert choice on home_
+
+### Changed
+- **Unified 3-Section Settings.** Reorganized Settings into Appearance & Reading, Prayer & Reminders, and Data & About with inline font picker, text size stepper, prayer level selector, and direct alert styling.
+- **Home Screen Alert Choice.** Presented the 3-option reminder style choice (Alarm, Vibrate, Notification) directly on the Home screen for first-run installs and updates.
+
 ## [1.4.0] — 2026-09-30
 
 _versionCode 97 · Preserved Ethiopic punctuation, top bar language selector, streamlined onboarding, and reminder setup_
