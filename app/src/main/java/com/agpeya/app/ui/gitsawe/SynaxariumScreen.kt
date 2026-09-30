@@ -250,6 +250,20 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: Str
                                     )
                                 }
                             }
+                            com.agpeya.app.ui.common.EditionToggle(
+                                geez = edition == SynaxariumEdition.GEEZ,
+                                amharicLabel = s.sinksarAmharic,
+                                geezLabel = s.sinksarGeez,
+                                onToggle = {
+                                    scope.launch {
+                                        SettingsRepository.setSynaxariumEdition(
+                                            context,
+                                            if (edition == SynaxariumEdition.GEEZ) SynaxariumEdition.AMHARIC
+                                            else SynaxariumEdition.GEEZ,
+                                        )
+                                    }
+                                },
+                            )
                             com.agpeya.app.ui.common.ReaderToolsMenu(
                                 fontStep = fontStep,
                                 maxFontStep = FONT_STEPS_SP.lastIndex,
@@ -273,13 +287,9 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: Str
                 if (day != null) {
                     SynaxariumControlBar(
                         ethDate = eth,
-                        edition = edition,
                         onPreviousDay = { epochDay -= 1 },
                         onNextDay = { epochDay += 1 },
                         onPickDate = { showPicker = true },
-                        onSelectEdition = { code ->
-                            scope.launch { SettingsRepository.setSynaxariumEdition(context, code) }
-                        },
                         isToday = date == today,
                         onToday = { epochDay = today.toEpochDay() },
                     )
@@ -837,11 +847,9 @@ private fun SynaxariumContents(entries: List<SynaxariumEntry>, onSelect: (Int) -
 @Composable
 private fun SynaxariumControlBar(
     ethDate: EthiopianDate,
-    edition: String,
     onPreviousDay: () -> Unit,
     onNextDay: () -> Unit,
     onPickDate: () -> Unit,
-    onSelectEdition: (String) -> Unit,
     isToday: Boolean,
     onToday: () -> Unit,
 ) {
@@ -858,7 +866,7 @@ private fun SynaxariumControlBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = Spacing.screen, vertical = 6.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // Day Stepper Capsule: [ ‹ ] [ መስከረም ፲፱ 📅 ] [ › ] + optional [ ዛሬ ]
@@ -934,19 +942,6 @@ private fun SynaxariumControlBar(
                     )
                 }
             }
-
-            // Single-button edition toggle
-            com.agpeya.app.ui.common.EditionToggle(
-                geez = edition == SynaxariumEdition.GEEZ,
-                amharicLabel = s.sinksarAmharic,
-                geezLabel = s.sinksarGeez,
-                onToggle = {
-                    onSelectEdition(
-                        if (edition == SynaxariumEdition.GEEZ) SynaxariumEdition.AMHARIC
-                        else SynaxariumEdition.GEEZ,
-                    )
-                },
-            )
         }
     }
 }

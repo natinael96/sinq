@@ -196,6 +196,10 @@ fun WudaseMaryamScreen(
                     subtitle = shown?.let { if (geez) it.titleGe else it.titleAm },
                     onBack = onBack,
                     actions = {
+                        com.agpeya.app.ui.common.EditionToggle(
+                            geez = geez,
+                            onToggle = { geez = !geez },
+                        )
                         com.agpeya.app.ui.common.ReaderToolsMenu(
                             fontStep = fontStep,
                             maxFontStep = FONT_STEPS_SP.lastIndex,
@@ -237,9 +241,7 @@ fun WudaseMaryamScreen(
                     WudaseControlBar(
                         pages = pages,
                         selected = selected,
-                        geez = geez,
                         onSelectPage = goToSection,
-                        onToggleGeez = { geez = !geez },
                     )
                     HorizontalDivider(
                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
@@ -421,9 +423,7 @@ fun WudaseMaryamScreen(
 private fun WudaseControlBar(
     pages: List<WudasePage>,
     selected: Int,
-    geez: Boolean,
     onSelectPage: (Int) -> Unit,
-    onToggleGeez: () -> Unit,
 ) {
     val trackState = androidx.compose.foundation.lazy.rememberLazyListState()
     androidx.compose.runtime.LaunchedEffect(selected) {
@@ -437,53 +437,37 @@ private fun WudaseControlBar(
         tonalElevation = 1.dp,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Row(
+        LazyRow(
+            state = trackState,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = Spacing.screen, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            LazyRow(
-                state = trackState,
-                modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                itemsIndexed(pages, key = { _, it -> it.id }) { i, item ->
-                    val isSel = i == selected
-                    Box(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .then(
-                                if (isSel) Modifier.background(MaterialTheme.colorScheme.primary)
-                                else Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
-                            )
-                            .clickable { onSelectPage(i) }
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = item.label,
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = if (isSel) FontWeight.Bold else FontWeight.Normal,
-                            ),
-                            color = if (isSel) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
+            itemsIndexed(pages, key = { _, it -> it.id }) { i, item ->
+                val isSel = i == selected
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .then(
+                            if (isSel) Modifier.background(MaterialTheme.colorScheme.primary)
+                            else Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
                         )
-                    }
+                        .clickable { onSelectPage(i) }
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = item.label,
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = if (isSel) FontWeight.Bold else FontWeight.Normal,
+                        ),
+                        color = if (isSel) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                    )
                 }
             }
-
-            VerticalDivider(
-                modifier = Modifier.height(20.dp),
-                color = MaterialTheme.colorScheme.outlineVariant,
-            )
-
-            com.agpeya.app.ui.common.EditionToggle(
-                geez = geez,
-                onToggle = onToggleGeez,
-            )
         }
     }
 }
