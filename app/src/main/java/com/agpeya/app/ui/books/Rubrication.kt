@@ -143,7 +143,12 @@ object Rubrication {
         "ዘ", "ወ", "ለ", "በ", "እም", "እማ", "እን", "እለ", "ከመ", "ውስተ", "ምስለ", "ኀበ", "ዲበ",
     )
 
-    private val LITURGICAL_ROLES = listOf("ይካ፡", "ይዲ፡", "ይሕ፡", "ይካ", "ይዲ", "ይሕ")
+    private val LITURGICAL_ROLES = listOf(
+        "ይ.ካ ነሣኤ መጽሐፍ፦", "ይ.ካ ሠራኢ፦", "ይ.ካ ንፍቅ፦", "ይ.ዲ ንፍቅ፦",
+        "ይ.ካ፦", "ይ.ዲ፦", "ይ.ሕ፦", "ይካ፦", "ይዲ፦", "ይሕ፦",
+        "ይ.ካ፡", "ይ.ዲ፡", "ይ.ሕ፡", "ይካ፡", "ይዲ፡", "ይሕ፡",
+        "ይ.ካ", "ይ.ዲ", "ይ.ሕ", "ይካ", "ይዲ", "ይሕ",
+    )
 
     /** Red spans over [text], in order and non-overlapping. */
     fun redRanges(text: String, scope: Scope = Scope.MELKIE): List<IntRange> {
@@ -194,12 +199,19 @@ object Rubrication {
     private fun match(text: String, names: List<String>): List<IntRange> {
         val found = mutableListOf<IntRange>()
         for (name in names) {
-            var from = 0
-            while (true) {
-                val at = text.indexOf(name, from)
-                if (at < 0) break
-                found += at until (at + name.length)
-                from = at + name.length
+            val variants = if (name.contains(' ')) {
+                listOf(name, name.replace(' ', '፡'))
+            } else {
+                listOf(name)
+            }
+            for (variant in variants) {
+                var from = 0
+                while (true) {
+                    val at = text.indexOf(variant, from)
+                    if (at < 0) break
+                    found += at until (at + variant.length)
+                    from = at + variant.length
+                }
             }
         }
         return found
@@ -207,7 +219,7 @@ object Rubrication {
 
     /** Word boundaries, as ranges into [text]. */
     private fun words(text: String): List<IntRange> =
-        Regex("\\S+").findAll(text).map { it.range }.toList()
+        Regex("[^\\s፡]+").findAll(text).map { it.range }.toList()
 
     private fun merge(ranges: List<IntRange>): List<IntRange> {
         if (ranges.isEmpty()) return ranges

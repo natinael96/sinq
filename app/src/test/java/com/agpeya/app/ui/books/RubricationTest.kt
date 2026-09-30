@@ -10,8 +10,8 @@ import org.junit.Test
  */
 class RubricationTest {
 
-    private fun red(text: String): List<String> =
-        Rubrication.redRanges(text).map { text.substring(it.first, it.last + 1) }
+    private fun red(text: String, scope: Rubrication.Scope = Rubrication.Scope.MELKIE): List<String> =
+        Rubrication.redRanges(text, scope).map { text.substring(it.first, it.last + 1) }
 
     @Test
     fun `salutation takes the le phrase and its construct`() {
@@ -140,6 +140,44 @@ class RubricationTest {
         assertEquals(
             listOf("እግዚአብሔር", "እግዚአብሔር"),
             red("በስመ እግዚአብሔር አብ እምቅድመ ዓለም ዘሀሎ፣ ወበስመ እግዚአብሔር ወልድ።"),
+        )
+    }
+
+    @Test
+    fun `liturgical roles with preface colons are rubricated in red`() {
+        assertEquals(
+            listOf("ይ.ካ፦", "ማርያም ድንግል"),
+            red("ይ.ካ፦ ሰላም ለኪ ማርያም ድንግል እምነ።"),
+        )
+        assertEquals(
+            listOf("ይ.ዲ፦"),
+            red("ይ.ዲ፦ በማኅፀነ ድንግል ሥጋኪ ንጹሐ።"),
+        )
+        assertEquals(
+            listOf("ይሕ፦", "ማርያም"),
+            red("ይሕ፦ ቅድስት ማርያም ቤዛዊተ ኵሉ ዓለም።"),
+        )
+        assertEquals(
+            listOf("ይ.ካ ነሣኤ መጽሐፍ፦", "ወላዲተ አምላክ", "ማርያም"),
+            red("ይ.ካ ነሣኤ መጽሐፍ፦ ወላዲተ አምላክ ማርያም እንበለ ሰብሳብ።"),
+        )
+    }
+
+    @Test
+    fun `strophes punctuated with traditional semicolons are cleanly rubricated`() {
+        val strophe = "ሰላም ለርእስኪ በቅብዐ ቅዳሴ ርሑስ፤ አኮ አኮ በቅብዐ ደነስ፤ ማርያም ድንግል ንጽሕተ ሥጋ ወነፍስ፤ ያንጽሐኒ እምነ ርኩስ፤ አዝዚዮ ለሚካኤል ዘሰማይ ቀሲስ።"
+        assertEquals(
+            listOf("ሰላም ለርእስኪ", "ማርያም ድንግል", "ሚካኤል"),
+            red(strophe),
+        )
+    }
+
+    @Test
+    fun `manuscript text with Ethiopic wordspaces is cleanly rubricated`() {
+        val manuscriptText = "በስመ፡አብ፡ወወልድ፡ወመንፈስ፡ቅዱስ፡፩ዱ፡አምላክ፡ጸሎቱ፡ለገብረ፡መንፈስ፡ቅዱስ፡ወበረከቱ፡ተሀሉ፡ምስሌነ።"
+        assertEquals(
+            listOf("መንፈስ፡ቅዱስ", "ገብረ፡መንፈስ፡ቅዱስ"),
+            red(manuscriptText, Rubrication.Scope.SINKSAR),
         )
     }
 }

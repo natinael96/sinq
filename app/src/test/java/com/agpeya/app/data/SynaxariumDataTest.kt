@@ -107,6 +107,29 @@ class SynaxariumDataTest {
         val day1 = meskerem.days.first { it.day == 1 }
         assertTrue(day1.entries.isNotEmpty())
         assertTrue("first entry has narrative text", day1.entries.first().text.length > 50)
-        assertTrue("the day carries its own heading", day1.header.startsWith("ስንክሳር ዘወርኀ"))
+        assertTrue("the day carries its own heading", day1.header.startsWith("ስንክሳር ዘወርኀ") || day1.header.startsWith("ስንክሳር፡ዘወርኀ"))
+    }
+
+    @Test
+    fun `arke hymns carry traditional liturgical punctuation with semicolons and periods`() {
+        org.junit.Assume.assumeTrue(dir != null && File(dir, "manifest.json").exists())
+        val meskerem: SynaxariumMonth = json.decodeFromString(File(dir!!, "am-1.json").readText())
+        val arke = meskerem.days.first().entries.first().arke
+        org.junit.Assert.assertNotNull("Meskerem 1 entry 0 has arke", arke)
+        assertTrue("Arke carries traditional semicolon line breaks", arke!!.contains("፤"))
+        assertTrue("Arke ends with full stop", arke.endsWith("።"))
+    }
+
+    @Test
+    fun `synaxarium narrative paragraphs preserve Ethiopic manuscript wordspace and punctuation`() {
+        org.junit.Assume.assumeTrue(dir != null && File(dir, "manifest.json").exists())
+        val meskeremAm: SynaxariumMonth = json.decodeFromString(File(dir!!, "am-1.json").readText())
+        val meskeremGe: SynaxariumMonth = json.decodeFromString(File(dir!!, "ge-1.json").readText())
+        val amText = meskeremAm.days.first().entries.first().paragraphs.first().text
+        val geText = meskeremGe.days.first().entries.first().paragraphs.first().text
+        assertTrue("Amharic text preserves wordspace ፡", amText.contains("፡"))
+        assertTrue("Amharic text preserves period ።", amText.contains("።"))
+        assertTrue("Ge'ez text preserves wordspace ፡", geText.contains("፡"))
+        assertTrue("Ge'ez text preserves period ።", geText.contains("።"))
     }
 }

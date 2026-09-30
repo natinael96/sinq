@@ -33,6 +33,7 @@ object AmharicSearch {
         in 0x12B8..0x12BF -> (0x1200 + (cp - 0x12B8)).toChar() // ኸ-series -> ሀ-series
         in 0x12D0..0x12D7 -> (0x12A0 + (cp - 0x12D0)).toChar() // ዐ-series -> አ-series
         in 0x1340..0x1347 -> (0x1338 + (cp - 0x1340)).toChar() // ፀ-series -> ጸ-series
+        0x1361 -> ' ' // Ethiopic wordspace ፡ folds to space
         else -> c
     }
 

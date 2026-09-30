@@ -206,7 +206,7 @@ def extract_target(raw_text: str) -> str:
 
 def split_into_lines(text: str) -> list[str]:
     """Split a 5-line Ge'ez strophe by Ethiopic punctuation markers."""
-    parts = [p.strip() for p in re.split(r"[።፤]", text) if p.strip()]
+    parts = [p.strip() for p in re.split(r"[።፤፣]", text) if p.strip()]
     lines = []
     for p in parts:
         lines.append(p + "፤")
@@ -215,11 +215,25 @@ def split_into_lines(text: str) -> list[str]:
     return lines
 
 
+ROLE_PATTERN = re.compile(r'^(ይ\.?[ካዲሕ](?:\s+(?:ንፍቅ|ነሣኤ\s+መጽሐፍ|ሠራኢ))?)\s*([፡:])?\s*')
+
+
+def format_liturgical_text(raw_text: str) -> str:
+    if raw_text.startswith("ይ") and "፦" not in raw_text[:30]:
+        return ROLE_PATTERN.sub(r"\1፦ ", raw_text)
+    return raw_text
+
+
 def convert_file(path: Path) -> dict:
     with open(path, "r", encoding="utf-8") as f:
         old_data = json.load(f)
 
-    title = old_data.get("title", path.stem).strip()
+    raw_title = old_data.get("title", path.stem)
+    if isinstance(raw_title, dict):
+        title = raw_title.get("gez", path.stem).strip()
+    else:
+        title = str(raw_title).strip()
+
     meta = MELKEA_METADATA.get(title)
     if not meta:
         clean_title = re.sub(r"[።\s]+$", "", title)
@@ -228,6 +242,24 @@ def convert_file(path: Path) -> dict:
             "en": clean_title,
             "dedicated_to": clean_title,
         })
+
+    if "sections" in old_data:
+        # File has already been converted to structured sections; re-punctuate strophes and stanzas
+        for sec in old_data["sections"]:
+            for s in sec.get("stanzas", []):
+                stext = s.get("text", {})
+                if isinstance(stext, dict) and "gez" in stext:
+                    stext["gez"] = format_liturgical_text(stext["gez"])
+                elif isinstance(stext, str):
+                    s["text"] = format_liturgical_text(stext)
+            for strophe in sec.get("strophes", []):
+                stext = strophe.get("text", {})
+                txt = stext.get("gez") if isinstance(stext, dict) else str(stext)
+                if txt:
+                    lines = split_into_lines(txt)
+                    strophe["lines"] = lines
+                    strophe["text"] = {"gez": " ".join(lines)}
+        return old_data
 
     blocks = old_data.get("chapters", [{}])[0].get("blocks", [])
 
@@ -255,23 +287,23 @@ def convert_file(path: Path) -> dict:
         if idx < min_strophe_idx:
             prelude_stanzas.append({
                 "type": "paragraph",
-                "text": {"gez": txt},
+                "text": {"gez": format_liturgical_text(txt)},
             })
         elif idx > max_strophe_idx:
             conclusion_stanzas.append({
                 "type": "prayer",
-                "text": {"gez": txt},
+                "text": {"gez": format_liturgical_text(txt)},
             })
         else:
+            lines = split_into_lines(txt)
             if SELAM_RE.search(txt):
                 target = extract_target(txt)
-                lines = split_into_lines(txt)
                 incipit_words = txt.split()[:4]
                 strophes.append({
                     "index": strophe_num,
                     "target": target,
                     "incipit": " ".join(incipit_words),
-                    "text": {"gez": txt},
+                    "text": {"gez": " ".join(lines)},
                     "lines": lines,
                 })
                 strophe_num += 1
@@ -280,8 +312,8 @@ def convert_file(path: Path) -> dict:
                     "index": strophe_num,
                     "target": "ማኅሌት",
                     "incipit": " ".join(txt.split()[:4]),
-                    "text": {"gez": txt},
-                    "lines": split_into_lines(txt),
+                    "text": {"gez": " ".join(lines)},
+                    "lines": lines,
                 })
                 strophe_num += 1
 

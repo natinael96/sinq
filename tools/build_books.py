@@ -252,8 +252,12 @@ def build():
                                 "targetAnatomy": s.get("target") or s.get("target_anatomy"),
                             })
                     for strophe in sec.get("strophes", []):
-                        stext = strophe.get("text", {})
-                        t = stext.get("gez") if isinstance(stext, dict) else str(stext)
+                        lines = strophe.get("lines", [])
+                        if lines:
+                            t = " ".join(lines)
+                        else:
+                            stext = strophe.get("text", {})
+                            t = stext.get("gez") if isinstance(stext, dict) else str(stext)
                         if t:
                             strophe_block = {
                                 "type": "paragraph",

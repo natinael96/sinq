@@ -140,4 +140,19 @@ class WudaseDataTest {
         assertTrue(monday.am.first().startsWith("፩."))
         assertTrue(monday.ge.first().startsWith("፩."))
     }
+
+    @Test
+    fun `Melkea hymns carry traditional liturgical punctuation`() {
+        val booksDir = listOf("src/main/assets/content/books", "app/src/main/assets/content/books")
+            .map(::File).firstOrNull { it.isDirectory }
+        org.junit.Assume.assumeTrue(booksDir != null)
+        val file = File(booksDir!!, "af9fe438f1.json")
+        val book: com.agpeya.app.model.Book = json.decodeFromString(file.readText())
+        val strophes = book.chapters.first().blocks.filter { it.index != null && it.index > 0 }
+        assertTrue("Melkea Maryam has strophes", strophes.isNotEmpty())
+        for (strophe in strophes.take(5)) {
+            assertTrue("Strophe ${strophe.index} contains semicolon line delimiters", strophe.text.contains("፤"))
+            assertTrue("Strophe ${strophe.index} ends with period", strophe.text.endsWith("።"))
+        }
+    }
 }

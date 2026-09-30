@@ -65,17 +65,34 @@ def clean(text: str) -> str:
     if not text:
         return ""
     text = JUNK.sub("", text)
-    # Replace single Ethiopic wordspace (፡) with standard whitespace,
-    # preserving double punctuation like ፡፡
-    text = re.sub(r"(?<!፡)፡(?!፡)", " ", text)
+    # Convert typed colon-dash representations to Ethiopic preface colon
+    text = re.sub(r"[፡:]-[፡:]?", "፦ ", text)
     # Normalize spacing around punctuation: attach directly to preceding word
-    text = re.sub(r"\s*([።፣፤፥፦])\s*", r"\1 ", text)
-    text = re.sub(r"\s+", " ", text).strip()
+    text = re.sub(r"[ \t]*([።፣፤፥፦])[ \t]*", r"\1 ", text)
+    text = re.sub(r"[ \t]+", " ", text).strip()
     return text
 
 
+def clean_arke(text: str) -> str:
+    """Format an Arke hymn preserving manuscript punctuation and Ge'ez strophe termination."""
+    text = clean(text)
+    if not text:
+        return ""
+    strophes = text.split("\n")
+    cleaned_strophes = []
+    for st in strophes:
+        st = st.strip()
+        if not st:
+            continue
+        if not st.endswith("።"):
+            st = st.rstrip("፤፣፡ ") + "።"
+        cleaned_strophes.append(st)
+    return "\n".join(cleaned_strophes)
+
+
 def entry_id(text: str) -> str:
-    return hashlib.sha1(re.sub(r"\s+", "", text)[:80].encode("utf-8")).hexdigest()[:8]
+    key = re.sub(r"[\s፡]+", "", text)[:80]
+    return hashlib.sha1(key.encode("utf-8")).hexdigest()[:8]
 
 
 def month_file(directory: Path, name: str) -> Path | None:
@@ -132,7 +149,7 @@ def parse_day(day_data: dict, edition: str) -> dict:
         if is_arke:
             # Arkes are Ge'ez hymns; use whichever field is non-empty
             arke_raw = (am_raw if edition == "am" else ge_raw) or (ge_raw if edition == "am" else am_raw)
-            arke_clean = clean(arke_raw)
+            arke_clean = clean_arke(arke_raw)
             if curr_arke:
                 curr_arke = f"{curr_arke}\n{arke_clean}"
             else:
