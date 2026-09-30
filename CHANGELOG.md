@@ -5,6 +5,19 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.4.0] — 2026-09-30
+
+_versionCode 97 · Preserved Ethiopic punctuation, top bar language selector, streamlined onboarding, and reminder setup_
+
+### Added
+- **Ethiopic Punctuation Preservation.** Preserved traditional wordspaces (`፡`) and punctuation (`፦`, `፤`, `።`) across the entire Synaxarium and Melkea corpora, with full normalization in search and rubrication.
+- **Top Bar Edition Selector.** Relocated Amharic and Ge'ez language switches to the top app bar in both Sinksar and Wudase Maryam, keeping bottom control bars minimal and focused.
+- **Reminder & Battery Setup.** Introduced a permission verification sheet and a Home notice bar ensuring reliable background prayer notifications.
+- **Three-Choice Alert Styling.** Added onboarding selection between full audible ringing, discreet vibration only, and silent banner notifications.
+
+### Changed
+- **Streamlined First-Run Onboarding.** Merged overview presentation directly into profile setup and retired the redundant post-install What's New tour overlay.
+
 ## [1.3.2] — 2026-09-30
 
 _versionCode 96 · Refactored stepper components and trimmed redundant interactive modifiers_

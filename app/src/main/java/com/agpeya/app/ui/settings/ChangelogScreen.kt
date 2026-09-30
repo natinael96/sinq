@@ -31,6 +31,23 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.4.0",
+        title = "Punctuation preservation, top bar language selector, and reminder setup",
+        titleAm = "የሥርዓተ ነጥብ ጥበቃ፣ የቋንቋ መምረጫ ወደላይ ማዛወር እና የማስታወሻ ማስተካከያ",
+        changes = listOf(
+            "Preserved traditional Ethiopic punctuation and wordspaces across Sinksar and Melkea hymns.",
+            "Relocated Amharic and Ge'ez language toggles to the top app bar.",
+            "Streamlined onboarding into a single overview and profile setup page.",
+            "Added reminder verification sheet and 3-choice alert styling (Ringing, Vibrate, Notification).",
+        ),
+        changesAm = listOf(
+            "በስንክሳርና በመልክአ መልክዕ ጽሑፎች ላይ የነበሩ የኢትዮጵያ ሥርዓተ ነጥቦችና ቃላት መለያዎች ተጠብቀዋል።",
+            "የአማርኛና የግዕዝ ቋንቋ መቀየሪያዎች ወደ ላይኛው አርዕስት አሞሌ ተዛውረዋል።",
+            "የመጀመሪያ ገጽ ቅንብር ወደ አንድ ቀላል ገጽ ተጠቃሏል።",
+            "የማስታወሻ ፈቃዶች ማረጋገጫ እና የ3 አማራጮች የማንቂያ ምርጫ ተካቷል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.3.2",
         title = "Reader stepper refactoring and interactive modifier trimming",
         titleAm = "የንባብ ገጽ መቆጣጠሪያ ማስተካከል እና የአላስፈላጊ ማሻሻያዎች ቅነሳ",
