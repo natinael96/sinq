@@ -80,6 +80,7 @@ fun SettingsScreen(
     val language by SettingsRepository.language(context).collectAsState(initial = SettingsRepository.DEFAULT_LANGUAGE)
     val font by SettingsRepository.readingFont(context).collectAsState(initial = ReadingFont.ABYSSINICA)
     val fontStep by SettingsRepository.fontStep(context).collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
+    val sinksarpunctuation by SettingsRepository.sinksarPunctuation(context).collectAsState(initial = true)
     val prayerLevel by SettingsRepository.prayerLevel(context).collectAsState(initial = PrayerLevel.FULL)
     val alert by SettingsRepository.alarmAlert(context).collectAsState(initial = AlarmAlert.SOUND_VIBRATE)
     val lastBackupAt by SettingsRepository.lastBackupAt(context).collectAsState(initial = 0L)
@@ -164,6 +165,14 @@ fun SettingsScreen(
                         }
                     }
                 }
+                com.agpeya.app.ui.common.ToggleRow(
+                    title = s.sinksarPunctuation,
+                    subtitle = s.sinksarPunctuationDesc,
+                    checked = sinksarpunctuation,
+                    onCheckedChange = { on ->
+                        scope.launch { SettingsRepository.setSinksarPunctuation(context, on) }
+                    },
+                )
                 NavRow(s.copyFormatTitle, onOpenReading)
 
                 Spacer(Modifier.height(Spacing.lg))

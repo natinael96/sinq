@@ -5,6 +5,19 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.4.2] — 2026-09-30
+
+_versionCode 99 · Sinksar punctuation setting, streamlined prayer list divider, and content fixes_
+
+### Added
+- **Sinksar Word-Colon Setting.** Added setting toggle in Appearance & Reading allowing readers to toggle traditional wordspaces (`፡`) while preserving clauses and sentence stops (`፦`, `፤`, `።`).
+
+### Changed
+- **Prayer List Divider.** Replaced separate Living and Departed section headers with a quiet thin dividing line between categories.
+
+### Fixed
+- **Meskerem 21 Sinksar.** Corrected commemoration paragraph alignment and readings for Meskerem 21.
+
 ## [1.4.1] — 2026-09-30
 
 _versionCode 98 · Streamlined 3-section settings hierarchy and first-run alert choice on home_

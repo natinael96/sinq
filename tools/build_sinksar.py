@@ -171,7 +171,8 @@ def parse_day(day_data: dict, edition: str) -> dict:
                     else (parse_num(m_oth.group(2)) if m_oth else 0)
                 )
                 body = clean(m_curr.group(3) if m_curr else raw_curr)
-                curr_paras.append({"n": num_val, "text": body})
+                if body:
+                    curr_paras.append({"n": num_val, "text": body})
 
             if raw_oth:
                 num_val_oth = (
@@ -180,7 +181,8 @@ def parse_day(day_data: dict, edition: str) -> dict:
                     else (parse_num(m_curr.group(2)) if m_curr else 0)
                 )
                 body_oth = clean(m_oth.group(3) if m_oth else raw_oth)
-                curr_other.append({"n": num_val_oth, "text": body_oth})
+                if body_oth:
+                    curr_other.append({"n": num_val_oth, "text": body_oth})
 
     close_entry()
 

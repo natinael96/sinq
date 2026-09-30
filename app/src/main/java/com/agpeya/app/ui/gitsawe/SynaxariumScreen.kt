@@ -126,6 +126,21 @@ private fun SynaxariumDay.pieces(): List<DayPiece> = buildList {
     reading?.let { add(DayPiece(it.text, entries.size)) }
 }
 
+/**
+ * Formats Synaxarium text according to liturgical punctuation preference.
+ * When liturgical punctuation is disabled, Ethiopic word-separating colons (፡)
+ * are replaced with standard spaces, while liturgical structural marks (።, ፣, ፤, ፦)
+ * remain intact.
+ */
+internal fun formatSinksarText(text: String, liturgicalPunctuation: Boolean): String {
+    if (liturgicalPunctuation) return text
+    return text.replace("፡", " ")
+        .replace(Regex(" +([።፣፤፦])"), "$1")
+        .replace(Regex(" +\\n"), "\n")
+        .replace(Regex(" +"), " ")
+        .trim()
+}
+
 /** ስንክሳር — the day's synaxarium commemorations for [epochDay]. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -156,6 +171,7 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: Str
 
     val fontStep by SettingsRepository.fontStep(context).collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
+    val sinksarpunctuation by SettingsRepository.sinksarPunctuation(context).collectAsState(initial = true)
 
     // Live paragraph selection across the day: a tap anchors, the next moves
     // the end. Keys are positions in [pieces], so a run spans commemorations
@@ -274,9 +290,9 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: Str
                                 shareEnabled = true,
                                 sharePayload = {
                                     com.agpeya.app.ui.common.SharePayload(
-                                        body = synaxariumShareBody(day),
+                                        body = formatSinksarText(synaxariumShareBody(day), sinksarpunctuation),
                                         kicker = s.synaxariumTitle,
-                                        title = day.entries.firstOrNull()?.heading?.takeIf { t -> t.isNotBlank() },
+                                        title = day.entries.firstOrNull()?.heading?.takeIf { t -> t.isNotBlank() }?.let { formatSinksarText(it, sinksarpunctuation) },
                                         dateLabel = com.agpeya.app.ui.common.formatEthiopian(date, s),
                                     )
                                 },
@@ -340,7 +356,7 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: Str
                                 // paragraphs the scan left unnumbered. Same
                                 // voice as the rest, only without a number.
                                 OpeningPara(
-                                    text = para.text,
+                                    text = formatSinksarText(para.text, sinksarpunctuation),
                                     fontSp = bodyFontSp,
                                     selected = key in selRange,
                                     onTap = { tapAt(key) },
@@ -348,8 +364,9 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: Str
                             } else {
                                 NarrativePara(
                                     number = para.n,
-                                    text = para.text,
+                                    text = formatSinksarText(para.text, sinksarpunctuation),
                                     fontSp = bodyFontSp,
+                                    liturgicalPunctuation = sinksarpunctuation,
                                     selected = key in selRange,
                                     onTap = { tapAt(key) },
                                     // The bookmark sits on the paragraph that
@@ -367,7 +384,7 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: Str
                             // Every stanza of it, centered — the hymn is now a
                             // block of its own in the source, so there is no
                             // longer any case where it falls through as prose.
-                            ArkeVerse(hymn, bodyFontSp, selected = key in selRange) { tapAt(key) }
+                            ArkeVerse(formatSinksarText(hymn, sinksarpunctuation), bodyFontSp, selected = key in selRange) { tapAt(key) }
                         }
                         Spacer(Modifier.height(Spacing.xl))
                     }
@@ -377,11 +394,11 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: Str
                     item(key = "feasts") {
                         if (day.feasts.isNotEmpty()) {
                             EntryTitle(s.sinksarAnnualFeasts)
-                            FeastList(day.feasts, bodyFontSp)
+                            FeastList(day.feasts.map { formatSinksarText(it, sinksarpunctuation) }, bodyFontSp)
                         }
                         if (day.monthly.isNotEmpty()) {
                             EntryTitle(s.sinksarMonthlyFeasts)
-                            FeastList(day.monthly, bodyFontSp)
+                            FeastList(day.monthly.map { formatSinksarText(it, sinksarpunctuation) }, bodyFontSp)
                         }
                     }
                 }
@@ -392,6 +409,7 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: Str
                         ReadingBlock(
                             reading = reading,
                             fontSp = bodyFontSp,
+                            liturgicalPunctuation = sinksarpunctuation,
                             bookmarked = sectionId in bookmarkedIds,
                             onToggleBookmark = {
                                 mark(sectionId, s.sinksarReading, reading.text)
@@ -400,7 +418,7 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: Str
                     }
                 }
 
-                item { ClosingPrayer(bodyFontSp) }
+                item { ClosingPrayer(bodyFontSp, liturgicalPunctuation = sinksarpunctuation) }
                 item { Spacer(Modifier.height(Spacing.huge)) }
             }
         }
@@ -417,7 +435,7 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: Str
         // The selected run, ready to copy or leave as text or a PNG card.
         val selBody = if (selRange.isEmpty()) null
         else pieces.filterIndexed { i, _ -> i in selRange }
-            .joinToString("\n\n") { it.text }
+            .joinToString("\n\n") { formatSinksarText(it.text, sinksarpunctuation) }
             .ifBlank { null }
         if (showPicker) {
             com.agpeya.app.ui.common.EthiopianDatePickerDialog(
@@ -433,6 +451,7 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: Str
             androidx.compose.material3.ModalBottomSheet(onDismissRequest = { showContents = false }) {
                 SynaxariumContents(
                     entries = entries,
+                    liturgicalPunctuation = sinksarpunctuation,
                     onSelect = { index ->
                         showContents = false
                         scope.launch { listState.scrollToItem(index + 1) }
@@ -470,7 +489,7 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: Str
  * counterpart stay in Ge'ez rather than vanishing.
  */
 @Composable
-private fun ClosingPrayer(fontSp: Int) {
+private fun ClosingPrayer(fontSp: Int, liturgicalPunctuation: Boolean = true) {
     val s = LocalStrings.current
     var showAmharic by rememberSaveable { mutableStateOf(false) }
     // The same fixed prayer closes every day, so it reads as a coda rather than
@@ -509,7 +528,7 @@ private fun ClosingPrayer(fontSp: Int) {
                 // አርኬ and the መልክእ are set by. It used to be a local list of
                 // three names with no salutation at all.
                 text = com.agpeya.app.ui.common.rubricated(
-                    verse,
+                    formatSinksarText(verse, liturgicalPunctuation),
                     com.agpeya.app.ui.books.Rubrication.Scope.SINKSAR,
                 ),
                 style = style,
@@ -518,7 +537,7 @@ private fun ClosingPrayer(fontSp: Int) {
             )
         }
         Text(
-            text = SYNAXARIUM_CLOSING_CODA,
+            text = formatSinksarText(SYNAXARIUM_CLOSING_CODA, liturgicalPunctuation),
             style = style,
             color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.fillMaxWidth(),
@@ -552,6 +571,7 @@ private fun NarrativePara(
     number: Int,
     text: String,
     fontSp: Int,
+    liturgicalPunctuation: Boolean = true,
     selected: Boolean = false,
     onTap: (() -> Unit)? = null,
     /** Null on every paragraph but a commemoration's first, which carries it. */
@@ -571,7 +591,9 @@ private fun NarrativePara(
                             ),
                         ) {
                             append(geezNumeral(number))
-                            append("፡")
+                            if (liturgicalPunctuation) {
+                                append("፡")
+                            }
                         }
                         append(" ")
                     }
@@ -734,6 +756,7 @@ private fun ReadingBlock(
     fontSp: Int,
     bookmarked: Boolean,
     onToggleBookmark: () -> Unit,
+    liturgicalPunctuation: Boolean = true,
 ) {
     val s = LocalStrings.current
     Box(Modifier.fillMaxWidth().padding(bottom = Spacing.md)) {
@@ -752,7 +775,7 @@ private fun ReadingBlock(
                     // narrative rather than the holy. The commemoration around
                     // it is the ስንክሳር; this is scripture quoted inside it.
                     text = com.agpeya.app.ui.common.rubricated(
-                        reading.text,
+                        formatSinksarText(reading.text, liturgicalPunctuation),
                         com.agpeya.app.ui.books.Rubrication.Scope.GENERAL,
                     ),
                     style = readingBodyStyle(fontSp),
@@ -761,7 +784,7 @@ private fun ReadingBlock(
                 )
                 reading.cite?.let {
                     Text(
-                        text = it,
+                        text = formatSinksarText(it, liturgicalPunctuation),
                         style = MaterialTheme.typography.labelMedium.inReadingFont(),
                         color = MaterialTheme.colorScheme.secondary,
                         textAlign = TextAlign.End,
@@ -812,7 +835,11 @@ private fun snippet(rawText: String): String {
  * it with. Each row is a life, titled by the sentence its account opens with.
  */
 @Composable
-private fun SynaxariumContents(entries: List<SynaxariumEntry>, onSelect: (Int) -> Unit) {
+private fun SynaxariumContents(
+    entries: List<SynaxariumEntry>,
+    liturgicalPunctuation: Boolean = true,
+    onSelect: (Int) -> Unit,
+) {
     val s = LocalStrings.current
     androidx.compose.foundation.lazy.LazyColumn(
         contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.sm),
@@ -827,7 +854,7 @@ private fun SynaxariumContents(entries: List<SynaxariumEntry>, onSelect: (Int) -
             Spacer(Modifier.height(Spacing.sm))
         }
         itemsIndexed(entries) { index, entry ->
-            val title = entry.heading
+            val title = formatSinksarText(entry.heading, liturgicalPunctuation)
             if (title.isBlank()) return@itemsIndexed
             com.agpeya.app.ui.common.ListRow(
                 title = title,

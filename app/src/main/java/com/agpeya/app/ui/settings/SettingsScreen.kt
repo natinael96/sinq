@@ -651,6 +651,7 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
     val rollover by SettingsRepository.widgetRollover(context).collectAsState(initial = true)
     val rolloverMinute by SettingsRepository.widgetRolloverTime(context)
         .collectAsState(initial = com.agpeya.app.widget.DEFAULT_WIDGET_ROLLOVER_MIN)
+    val sinksarpunctuation by SettingsRepository.sinksarPunctuation(context).collectAsState(initial = true)
     val size = SettingsRepository.FONT_STEPS_SP[step.coerceIn(0, SettingsRepository.FONT_STEPS_SP.lastIndex)]
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -783,6 +784,12 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
                     }
                 }
                 Spacer(Modifier.height(Spacing.sm))
+                ToggleRow(
+                    s.sinksarPunctuation,
+                    sinksarpunctuation,
+                    { action.run { SettingsRepository.setSinksarPunctuation(context, it) } },
+                    subtitle = s.sinksarPunctuationDesc,
+                )
                 NavRow(
                     title = s.copyFormatTitle,
                     subtitle = s.copyFormatSubtitle,

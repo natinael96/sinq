@@ -31,6 +31,21 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.4.2",
+        title = "Sinksar punctuation preference, clean prayer list division, and text corrections",
+        titleAm = "የስንክሳር ሥርዓተ ነጥብ ምርጫ፣ የቀለለ የጸሎት ዝርዝር እና የጽሑፍ ማስተካከያ",
+        changes = listOf(
+            "Added Sinksar word-spacing colon (፡) toggle in Settings under Reading & Appearance.",
+            "Replaced Living and Departed headers in Prayer List with a clean dividing line.",
+            "Corrected commemoration alignment for Meskerem 21 in Sinksar.",
+        ),
+        changesAm = listOf(
+            "በቅንብሮች ውስጥ የስንክሳር ሁለት ነጥብ (፡) ማብሪያና ማጥፊያ ተካቷል።",
+            "በጸሎት ዝርዝር ውስጥ የነበሩትን አርዕስቶች በማስቀረት በስሱ መስመር ተከፍለዋል።",
+            "የመስከረም ፳፩ የስንክሳር ምንባብ ማስተካከያ ተደርጓል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.4.1",
         title = "Streamlined settings hierarchy and home screen alert choice",
         titleAm = "የቅንብሮች አደረጃጀት ማሻሻያ እና በዋናው ገጽ ላይ የቀረበ የማንቂያ ምርጫ",

@@ -132,4 +132,19 @@ class SynaxariumDataTest {
         assertTrue("Ge'ez text preserves wordspace ፡", geText.contains("፡"))
         assertTrue("Ge'ez text preserves period ።", geText.contains("።"))
     }
+
+    @Test
+    fun `formatSinksarText toggles word-space colon while preserving sentence and clause punctuation`() {
+        val original = "፩፡አንድ፡አምላክ፡በሆነ፡በአብ፡በወልድ፡በመንፈስ፡ቅዱስ፡ስም፤ ይህን፡መጽሐፍ፡እንጀምራለን።"
+        assertEquals(original, com.agpeya.app.ui.gitsawe.formatSinksarText(original, liturgicalPunctuation = true))
+
+        val formatted = com.agpeya.app.ui.gitsawe.formatSinksarText(original, liturgicalPunctuation = false)
+        assertEquals(
+            "፩ አንድ አምላክ በሆነ በአብ በወልድ በመንፈስ ቅዱስ ስም፤ ይህን መጽሐፍ እንጀምራለን።",
+            formatted,
+        )
+        assertTrue("Contains semicolon ፤", formatted.contains("፤"))
+        assertTrue("Contains period ።", formatted.contains("።"))
+        assertTrue("Colon ፡ removed", !formatted.contains("፡"))
+    }
 }

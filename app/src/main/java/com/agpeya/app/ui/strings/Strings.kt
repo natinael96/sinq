@@ -257,6 +257,8 @@ interface Strings {
     /** ቅንብሮች › ንባብ › ቅዳና አጋራ. */
     val copyFormatTitle: String
     val copyFormatSubtitle: String
+    val sinksarPunctuation: String
+    val sinksarPunctuationDesc: String
     val copyVerseNumbers: String
     val copyReference: String
     val copyEdition: String
@@ -1219,6 +1221,8 @@ object AmharicStrings : Strings {
     override val noteAction = "ማስታወሻ"
     override val copyFormatTitle = "ቅዳና አጋራ"
     override val copyFormatSubtitle = "ከጥቅሱ ጋር የሚሄደው"
+    override val sinksarPunctuation = "የስንክሳር ሁለት ነጥብ (፡)"
+    override val sinksarPunctuationDesc = "በስንክሳር ንባብ የቃላት መለያ ሁለት ነጥብ (፡) አሳይ"
     override val copyVerseNumbers = "የቁጥር ምልክቶች"
     override val copyReference = "ምዕራፍና ቁጥር"
     override val copyEdition = "እትም"
@@ -2153,6 +2157,8 @@ object EnglishStrings : Strings {
     override val noteAction = "Note"
     override val copyFormatTitle = "Copy and share"
     override val copyFormatSubtitle = "What travels with the verse"
+    override val sinksarPunctuation = "Sinksar word colons (፡)"
+    override val sinksarPunctuationDesc = "Show traditional Ethiopic word separators (፡) in Sinksar"
     override val copyVerseNumbers = "Verse numbers"
     override val copyReference = "Chapter and verse"
     override val copyEdition = "Edition"

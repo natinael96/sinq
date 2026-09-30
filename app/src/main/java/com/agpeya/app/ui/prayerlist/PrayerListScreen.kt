@@ -76,7 +76,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.agpeya.app.data.PrayerListRepository
 import com.agpeya.app.model.PrayerPerson
-import com.agpeya.app.ui.common.SectionHeader
 import com.agpeya.app.ui.common.SinqDivider
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.common.StatePanel
@@ -190,8 +189,15 @@ fun PrayerListScreen(onBack: () -> Unit) {
             modifier = Modifier.fillMaxSize().padding(innerPadding),
             contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.sm),
         ) {
-            nameGroup(s.prayerListLiving, living, ::removeWithUndo) { editingId = it.id }
-            nameGroup(s.prayerListDeparted, departed, ::removeWithUndo) { editingId = it.id }
+            personList(living, ::removeWithUndo) { editingId = it.id }
+
+            if (living.isNotEmpty() && departed.isNotEmpty()) {
+                item(key = "divider") {
+                    SinqDivider(Modifier.padding(vertical = Spacing.sm))
+                }
+            }
+
+            personList(departed, ::removeWithUndo) { editingId = it.id }
 
             // One row, not one per group. A name typed here joins the living,
             // which is what almost every addition is; a name is moved to
@@ -229,26 +235,12 @@ fun PrayerListScreen(onBack: () -> Unit) {
     }
 }
 
-/** A header and its names, or nothing at all when no one is in the group. */
-private fun LazyListScope.nameGroup(
-    label: String,
+/** Renders a list of names with swipe-to-remove. */
+private fun LazyListScope.personList(
     people: List<PrayerPerson>,
     onRemove: (PrayerPerson) -> Unit,
     onEdit: (PrayerPerson) -> Unit,
 ) {
-    if (people.isEmpty()) return
-    item(key = "head_$label") {
-        val s = LocalStrings.current
-        Spacer(Modifier.height(Spacing.md))
-        SectionHeader(label) {
-            Text(
-                s.countMark(people.size),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.secondary,
-            )
-        }
-        Spacer(Modifier.height(Spacing.xxs))
-    }
     items(people, key = { it.id }) { person ->
         SwipeToRemove(onRemove = { onRemove(person) }) {
             PersonRow(person = person, onClick = { onEdit(person) })

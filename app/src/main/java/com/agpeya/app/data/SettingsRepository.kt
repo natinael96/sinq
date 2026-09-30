@@ -118,6 +118,7 @@ object SettingsRepository {
     // Which ስንክሳር edition is read. The two are parallel editions rather than a
     // parallel text, so this is a choice of book, not a display toggle.
     private val KEY_SINKSAR_EDITION = stringPreferencesKey("sinksar_edition")
+    private val KEY_SINKSAR_PUNCTUATION = booleanPreferencesKey("sinksar_punctuation")
     // Master switch for the automatic morning, afternoon and night reading reminders.
     private val KEY_READING_REMINDER = booleanPreferencesKey("reading_reminder")
     // What travels with a copied verse, and what the four highlight colours
@@ -401,6 +402,13 @@ object SettingsRepository {
     suspend fun setSynaxariumEdition(context: Context, edition: String) {
         if (edition !in com.agpeya.app.model.SynaxariumEdition.all) return
         context.settingsDataStore.edit { it[KEY_SINKSAR_EDITION] = edition }
+    }
+
+    fun sinksarPunctuation(context: Context): Flow<Boolean> =
+        context.settingsDataStore.data.map { it[KEY_SINKSAR_PUNCTUATION] ?: true }
+
+    suspend fun setSinksarPunctuation(context: Context, enabled: Boolean) {
+        context.settingsDataStore.edit { it[KEY_SINKSAR_PUNCTUATION] = enabled }
     }
 
     fun misbakLanguage(context: Context): Flow<MisbakLanguage> =
