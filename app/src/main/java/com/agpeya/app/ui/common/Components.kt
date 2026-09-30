@@ -45,7 +45,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -615,7 +614,7 @@ fun SinqStepperButton(
 ) {
     IconButton(
         onClick = onClick,
-        modifier = modifier.minimumInteractiveComponentSize(),
+        modifier = modifier,
         enabled = enabled,
     ) {
         Icon(
@@ -648,7 +647,6 @@ fun EditionToggle(
 
     Box(
         modifier = modifier
-            .minimumInteractiveComponentSize()
             .clip(CircleShape)
             .background(gold.copy(alpha = 0.12f))
             .border(1.dp, gold.copy(alpha = 0.45f), CircleShape)

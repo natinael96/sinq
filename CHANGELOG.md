@@ -5,6 +5,14 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.3.2] — 2026-09-30
+
+_versionCode 96 · Refactored stepper components and trimmed redundant interactive modifiers_
+
+### Changed
+- **Inline Chapter Stepper.** Inlined liturgical hour stepper directly into vertical reader, eliminating redundant single-caller wrapper layer.
+- **Pruned Redundant Modifiers.** Cleaned duplicate `minimumInteractiveComponentSize` calls on `IconButton` and edition toggle capsules, relying on native Material 3 sizing contracts.
+
 ## [1.3.1] — 2026-09-30
 
 _versionCode 95 · UI/UX accessibility, touch targets, and standardized button design system_

@@ -31,6 +31,19 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.3.2",
+        title = "Reader stepper refactoring and interactive modifier trimming",
+        titleAm = "የንባብ ገጽ መቆጣጠሪያ ማስተካከል እና የአላስፈላጊ ማሻሻያዎች ቅነሳ",
+        changes = listOf(
+            "Inlined prayer hour stepper directly into reader, simplifying component hierarchy.",
+            "Trimmed redundant sizing modifiers across buttons and language toggles.",
+        ),
+        changesAm = listOf(
+            "የሰዓታት ንባብ መቆጣጠሪያው በቀጥታ በዋናው ገጽ እንዲካተት ተደርጓል።",
+            "በአዝራሮችና በቋንቋ መቀየሪያዎች ላይ የነበሩ ድጋሚ ማስተካከያዎች ተወግደዋል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.3.1",
         title = "UI/UX accessibility and standardized button design system",
         titleAm = "የተደራሽነት ማሻሻያ እና የተቀናጀ የአዝራሮች ስርዓት",

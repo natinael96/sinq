@@ -73,7 +73,9 @@ import com.agpeya.app.model.Bookmark
 import com.agpeya.app.model.Hour
 import com.agpeya.app.model.HourLayout
 import com.agpeya.app.model.Section
+import com.agpeya.app.ui.common.ChapterStepper
 import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.LocalMotion
 import com.agpeya.app.ui.theme.ReadingMaxWidth
 import com.agpeya.app.ui.theme.Spacing
@@ -463,9 +465,17 @@ private fun VerticalReader(
 
             )
         }
-        item {
-            HourStepper(onPrevious = onPrevious, onNext = onNext)
-            Spacer(Modifier.height(Spacing.huge))
+        if (onPrevious != null || onNext != null) {
+            item {
+                val s = LocalStrings.current
+                ChapterStepper(
+                    previousLabel = s.previousHour,
+                    nextLabel = s.nextHour,
+                    onPrevious = onPrevious,
+                    onNext = onNext,
+                )
+                Spacer(Modifier.height(Spacing.huge))
+            }
         }
     }
 }
@@ -656,15 +666,3 @@ private fun PartHeader(part: String) {
 // SectionView, VerseText, and HighlightBar live in SectionUi.kt — shared with
 // the Psalter screen.
 
-/** Step to the neighbouring prayer hour from the foot of the reader. */
-@Composable
-private fun HourStepper(onPrevious: (() -> Unit)?, onNext: (() -> Unit)?) {
-    if (onPrevious == null && onNext == null) return
-    val s = com.agpeya.app.ui.strings.LocalStrings.current
-    com.agpeya.app.ui.common.ChapterStepper(
-        previousLabel = s.previousHour,
-        nextLabel = s.nextHour,
-        onPrevious = onPrevious,
-        onNext = onNext,
-    )
-}
