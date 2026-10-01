@@ -53,6 +53,7 @@ import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.data.ThemeChoice
 import com.agpeya.app.ui.common.NavRow
 import com.agpeya.app.ui.common.SectionHeader
+import com.agpeya.app.ui.common.SinqStepperButton
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.Spacing
 import kotlinx.coroutines.launch
@@ -139,30 +140,33 @@ fun SettingsScreen(
                         color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.weight(1f),
                     )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        IconButton(
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        SinqStepperButton(
+                            icon = Icons.Outlined.Remove,
+                            contentDescription = null,
                             onClick = {
                                 if (fontStep > 0) scope.launch { SettingsRepository.setFontStep(context, fontStep - 1) }
                             },
                             enabled = fontStep > 0,
-                        ) {
-                            Icon(Icons.Outlined.Remove, contentDescription = null)
-                        }
+                        )
                         Text(
                             "${size}sp",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(horizontal = 4.dp),
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(horizontal = 6.dp),
                         )
-                        IconButton(
+                        SinqStepperButton(
+                            icon = Icons.Outlined.Add,
+                            contentDescription = null,
                             onClick = {
                                 if (fontStep < SettingsRepository.FONT_STEPS_SP.lastIndex) {
                                     scope.launch { SettingsRepository.setFontStep(context, fontStep + 1) }
                                 }
                             },
                             enabled = fontStep < SettingsRepository.FONT_STEPS_SP.lastIndex,
-                        ) {
-                            Icon(Icons.Outlined.Add, contentDescription = null)
-                        }
+                        )
                     }
                 }
                 com.agpeya.app.ui.common.ToggleRow(
@@ -173,7 +177,11 @@ fun SettingsScreen(
                         scope.launch { SettingsRepository.setSinksarPunctuation(context, on) }
                     },
                 )
-                NavRow(s.copyFormatTitle, onOpenReading)
+                NavRow(
+                    s.settingsGroupReading,
+                    onOpenReading,
+                    subtitle = if (s.isAmharic) "የመስመር ክፍተት · አሰላለፍ · ማንሸራተት" else "Line spacing · alignment · scroll mode",
+                )
 
                 Spacer(Modifier.height(Spacing.lg))
 
@@ -192,8 +200,8 @@ fun SettingsScreen(
                     AlarmAlert.SOUND_ONLY -> 0
                 }
                 CompactSegmented(
-                    label = s.alertChoiceTitle,
-                    options = if (s is com.agpeya.app.ui.strings.AmharicStrings) listOf("ደወል", "ንዝረት", "ማሳወቂያ")
+                    label = s.alarmSection,
+                    options = if (s.isAmharic) listOf("ደወል", "ንዝረት", "ጸጥታ")
                     else listOf("Alarm", "Vibrate", "Silent"),
                     selected = alertIndex,
                     onSelect = { idx ->
@@ -259,7 +267,7 @@ fun SettingsScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showFontDialog = false }) { Text(s.ok) }
+                TextButton(onClick = { showFontDialog = false }) { Text(s.cancel) }
             },
         )
     }
@@ -330,7 +338,7 @@ fun SettingsScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showLevelDialog = false }) { Text(s.ok) }
+                TextButton(onClick = { showLevelDialog = false }) { Text(s.cancel) }
             },
         )
     }

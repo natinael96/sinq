@@ -211,22 +211,23 @@ internal fun ReadingFontPicker(
                 ),
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column(Modifier.weight(1f)) {
                         Text(
+                            text = name,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                        Spacer(Modifier.height(2.dp))
+                        Text(
                             text = FONT_SAMPLE,
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 fontFamily = com.agpeya.app.ui.theme.readingFontFamily(choice),
-                                fontSize = 21.sp,
-                                lineHeight = 34.sp,
+                                fontSize = 17.sp,
+                                lineHeight = 26.sp,
                             ),
-                            color = MaterialTheme.colorScheme.onBackground,
-                        )
-                        Text(
-                            text = name,
-                            style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
