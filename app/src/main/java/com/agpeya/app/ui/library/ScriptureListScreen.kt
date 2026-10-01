@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -98,7 +99,12 @@ internal fun canonSectionKey(book: ScriptureBookMeta): String =
 /** One testament from the unified Amharic 1980 Bible, grouped by canon section. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScriptureListScreen(testament: String, onBack: () -> Unit, onOpenBook: (String) -> Unit) {
+fun ScriptureListScreen(
+    testament: String,
+    onBack: () -> Unit,
+    onOpenBook: (String) -> Unit,
+    onSearch: (() -> Unit)? = null,
+) {
     val context = LocalContext.current
     val s = LocalStrings.current
     val booksLoad = com.agpeya.app.ui.common.rememberContentLoad { ScriptureRepository.books(context) }
@@ -122,6 +128,17 @@ fun ScriptureListScreen(testament: String, onBack: () -> Unit, onOpenBook: (Stri
                 title = s.scripturesTitle,
                 subtitle = if (testament == "old") s.oldTestamentLabel else s.newTestamentLabel,
                 onBack = onBack,
+                actions = {
+                    if (onSearch != null) {
+                        IconButton(onClick = onSearch) {
+                            Icon(
+                                Icons.Outlined.Search,
+                                contentDescription = s.tabSearch,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                },
             )
         },
     ) { innerPadding ->

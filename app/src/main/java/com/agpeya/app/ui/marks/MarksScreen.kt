@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.FileDownload
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +26,8 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.Composable
@@ -143,19 +146,17 @@ fun MarksScreen(
                     val notes by JournalRepository.fromPassages(context).collectAsState(initial = emptyList())
                     var noteQuery by remember { mutableStateOf("") }
                     Column {
-                    androidx.compose.material3.OutlinedTextField(value = noteQuery, onValueChange = { noteQuery = it },
-                        label = { Text(s.tabSearch) }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.screen))
-                    LazyColumn(contentPadding = PaddingValues(Spacing.screen)) {
-                        item { Text(s.exportJournalWarning, style = MaterialTheme.typography.bodySmall) }
-                        if (notes.isEmpty()) item { StatePanel(title = s.journalEmpty) }
-                        noteTab(notes.filter { it.body.contains(noteQuery, ignoreCase = true) || it.anchorLabel.orEmpty().contains(noteQuery, ignoreCase = true) }, onOpenRoute)
-                    }
+                        MarksSearchBar(query = noteQuery, onQueryChange = { noteQuery = it })
+                        LazyColumn(contentPadding = PaddingValues(Spacing.screen)) {
+                            item { Text(s.exportJournalWarning, style = MaterialTheme.typography.bodySmall) }
+                            if (notes.isEmpty()) item { StatePanel(title = s.journalEmpty) }
+                            noteTab(notes.filter { it.body.contains(noteQuery, ignoreCase = true) || it.anchorLabel.orEmpty().contains(noteQuery, ignoreCase = true) }, onOpenRoute)
+                        }
                     }
                 }
                 return@Column
             }
-            androidx.compose.material3.OutlinedTextField(value = query, onValueChange = { query = it },
-                label = { Text(s.tabSearch) }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.screen))
+            MarksSearchBar(query = query, onQueryChange = { query = it })
             if (tab == 1) androidx.compose.foundation.lazy.LazyRow(
                 contentPadding = PaddingValues(horizontal = Spacing.screen), horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
@@ -346,6 +347,52 @@ private fun RemoveButton(label: String, onRemove: () -> Unit) {
             modifier = Modifier.size(IconSize.small),
         )
     }
+}
+
+@Composable
+private fun MarksSearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val s = LocalStrings.current
+    TextField(
+        value = query,
+        onValueChange = onQueryChange,
+        placeholder = { Text(s.tabSearch) },
+        leadingIcon = {
+            Icon(
+                Icons.Outlined.Search,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(IconSize.small),
+            )
+        },
+        trailingIcon = {
+            if (query.isNotEmpty()) {
+                IconButton(onClick = { onQueryChange("") }) {
+                    Icon(
+                        Icons.Outlined.Close,
+                        contentDescription = s.cancel,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(IconSize.small),
+                    )
+                }
+            }
+        },
+        singleLine = true,
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+            focusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+            unfocusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+            cursorColor = MaterialTheme.colorScheme.secondary,
+        ),
+        shape = MaterialTheme.shapes.large,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.screen, vertical = Spacing.xs),
+    )
 }
 
 /**

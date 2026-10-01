@@ -732,6 +732,7 @@ private fun AgpeyaNavHost(
                 testament = backStackEntry.arguments?.getString("testament") ?: "new",
                 onBack = { navController.popBackStack() },
                 onOpenBook = { key -> navController.navigate("scripture/$key/0") { launchSingleTop = true } },
+                onSearch = { navController.navigate("search") { launchSingleTop = true } },
             )
         }
         composable(

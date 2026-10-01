@@ -83,4 +83,111 @@ object ContentRepository {
         in 20..22 -> "compline"
         else -> "midnight"
     }
+
+    /**
+     * Replaces the static prayer-book Gospel in [sections] with the dynamic Gospel
+     * appointed for [date] in the ግጻዌ (Gitsawe) lectionary.
+     *
+     * Falls back silently to the original sections if lectionary data or scripture
+     * verses cannot be resolved, maintaining offline-first reliability.
+     */
+    suspend fun withDynamicGospel(
+        context: Context,
+        hourId: String,
+        sections: List<com.agpeya.app.model.Section>,
+        date: java.time.LocalDate = java.time.LocalDate.now(),
+    ): List<com.agpeya.app.model.Section> {
+        val gospelIndex = sections.indexOfFirst { it.type == "gospel" }
+        if (gospelIndex < 0) return sections
+
+        val dynamicGospel = resolveDynamicGospel(context, hourId, sections[gospelIndex], date)
+            ?: return sections
+
+        val result = ArrayList<com.agpeya.app.model.Section>(sections.size)
+        var replaced = false
+        for (section in sections) {
+            if (section.type == "gospel") {
+                if (!replaced) {
+                    result.add(dynamicGospel.copy(id = section.id, part = section.part))
+                    replaced = true
+                } else if (hourId == "midnight") {
+                    result.add(section)
+                }
+            } else {
+                result.add(section)
+            }
+        }
+        return result
+    }
+
+    private suspend fun resolveDynamicGospel(
+        context: Context,
+        hourId: String,
+        template: com.agpeya.app.model.Section,
+        date: java.time.LocalDate,
+    ): com.agpeya.app.model.Section? {
+        val readings = runCatching { GitsaweRepository.readingsFor(context, date) }.getOrNull()
+            ?: return null
+
+        val wengelReading = pickWengel(readings, hourId) ?: return null
+        val verse = wengelReading.verse ?: return null
+        val bookTitle = verse.bookTitle ?: return null
+        val bookKey = ScriptureRepository.resolveBookKey(bookTitle) ?: return null
+        val chapter = verse.chapter ?: return null
+        val book = ScriptureRepository.book(context, bookKey) ?: return null
+        val citedVerses = ScriptureRepository.passage(context, bookKey, chapter, verse.start, verse.end)
+        if (citedVerses.isNullOrEmpty()) return null
+
+        val lo = citedVerses.first().n
+        val hi = citedVerses.last().n
+        val amharicRef = buildString {
+            append(com.agpeya.app.ui.reading.geezNumeral(chapter))
+            append("፥")
+            append(com.agpeya.app.ui.reading.geezNumeral(lo))
+            if (hi != lo) {
+                append("–")
+                append(com.agpeya.app.ui.reading.geezNumeral(hi))
+            }
+        }
+        val subtitle = "${book.nameAm} $amharicRef"
+        val reference = "${book.nameEn} $chapter:$lo-$hi"
+
+        return template.copy(
+            title = "የዕለቱ ወንጌል",
+            subtitle = subtitle,
+            reference = reference,
+            firstVerse = lo,
+            verses = citedVerses.map { it.text },
+        )
+    }
+
+    private fun pickWengel(
+        readings: DayReadings,
+        hourId: String,
+    ): com.agpeya.app.model.GitsaweReading? {
+        val (preferOffice, fallbackOffice) = when (hourId) {
+            "morning" -> ({ s: com.agpeya.app.model.GitsaweServices -> s.negh } to { s: com.agpeya.app.model.GitsaweServices -> s.kidassie })
+            "vespers", "compline", "veil" -> ({ s: com.agpeya.app.model.GitsaweServices -> s.serk } to { s: com.agpeya.app.model.GitsaweServices -> s.kidassie })
+            else -> ({ s: com.agpeya.app.model.GitsaweServices -> s.kidassie } to { s: com.agpeya.app.model.GitsaweServices -> s.negh })
+        }
+
+        // 1. Seasonal prefer
+        readings.seasonal.firstNotNullOfOrNull { preferOffice(it)?.wengel?.firstOrNull() }?.let { return it }
+        // 2. Daily prefer
+        readings.daily?.let { preferOffice(it)?.wengel?.firstOrNull() }?.let { return it }
+        // 3. Seasonal fallback
+        readings.seasonal.firstNotNullOfOrNull { fallbackOffice(it)?.wengel?.firstOrNull() }?.let { return it }
+        // 4. Daily fallback
+        readings.daily?.let { fallbackOffice(it)?.wengel?.firstOrNull() }?.let { return it }
+        // 5. Any wengel in seasonal
+        readings.seasonal.firstNotNullOfOrNull { s ->
+            listOfNotNull(s.kidassie, s.negh, s.serk).firstNotNullOfOrNull { it.wengel.firstOrNull() }
+        }?.let { return it }
+        // 6. Any wengel in daily
+        readings.daily?.let { d ->
+            listOfNotNull(d.kidassie, d.negh, d.serk).firstNotNullOfOrNull { it.wengel.firstOrNull() }
+        }?.let { return it }
+
+        return null
+    }
 }

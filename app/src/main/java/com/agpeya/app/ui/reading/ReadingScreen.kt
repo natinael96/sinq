@@ -147,19 +147,21 @@ fun ReadingScreen(
     }
     val layout by LayoutRepository.layout(context, hourId).collectAsState(initial = HourLayout())
     var showContents by remember { mutableStateOf(false) }
-    // Apply the user's per-hour customization (show/hide, reorder, added psalms).
-    val sectionLoad = com.agpeya.app.ui.common.rememberContentLoad(hour, layout, effectivePrayerLevel) {
+    val today by com.agpeya.app.ui.common.rememberCurrentDate()
+    // Apply the user's per-hour customization (show/hide, reorder, added psalms) and the day's Gospel.
+    val sectionLoad = com.agpeya.app.ui.common.rememberContentLoad(hour, layout, effectivePrayerLevel, today) {
         val h = hour
         if (h == null) emptyList()
         else {
             val extras = layout.added.mapNotNull { ContentRepository.psalm(context, it) }
-            PrayerLevelRepository.apply(
+            val base = PrayerLevelRepository.apply(
                 context,
                 hourId,
                 PrayerLayout.ordered(h.sections, extras, layout)
                     .filter { it.type == "gospel" || it.id !in layout.hidden },
                 effectivePrayerLevel,
             )
+            ContentRepository.withDynamicGospel(context, hourId, base, today)
         }
     }
     val sections = sectionLoad.value.orEmpty()
@@ -191,7 +193,6 @@ fun ReadingScreen(
             else pagerState.currentPage
         }
     }
-    val today by com.agpeya.app.ui.common.rememberCurrentDate()
     val progressKey = "prayer:$hourId:$today:${sections.map { it.id }}"
     val weights = remember(sections) { sections.map { section -> section.verses.sumOf { it.length } } }
     val recordRead = com.agpeya.app.ui.common.rememberHalfwayRead(progressKey) {
