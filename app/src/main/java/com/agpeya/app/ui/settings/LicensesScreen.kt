@@ -194,6 +194,7 @@ fun LicensesScreen(onBack: () -> Unit) {
                         "• Ethiopic Abay Light — abass alamnehe, via the Font.et open font library\n" +
                         "• Bela Bereka — Abel Daniel, via the Font.et open font library\n" +
                         "• Zemenay — Abel Yeshewalem, via the Font.et open font library\n" +
+                        "• Abba Garima — Jérémie Hornus, Gaëtan Baehr, Daniel Yacob, via the Font.et open font library\n" +
                         "• ዋልድባ (ይገዙ ብሥራት ጎፈር) — Abass Alamnehe, via the Font.et open font library (font.et)",
                 )
             }

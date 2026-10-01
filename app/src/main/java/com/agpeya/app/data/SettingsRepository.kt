@@ -27,7 +27,7 @@ enum class ReadingAlignment { JUSTIFIED, LEFT, RIGHT, CENTER }
  * scripture-grade default; the rest are Ethiopic faces from Font.et. Stored by
  * name, so adding or removing a face never corrupts an existing preference.
  */
-enum class ReadingFont { ABYSSINICA, ABAY_LIGHT, BELA_BEREKA, ZEMENAY }
+enum class ReadingFont { ABYSSINICA, ABAY_LIGHT, BELA_BEREKA, ZEMENAY, ABBA_GARIMA }
 
 /**
  * A nightly window in which reminders stay silent.

@@ -36,6 +36,7 @@ private fun opticalScale(family: FontFamily): Float = when (family) {
     AbayLight -> 1.05f     // x-height 0.459 em — runs small
     BelaBereka -> 0.96f    // 0.500 em
     Zemenay -> 0.91f       // 0.528 em
+    AbbaGarima -> 0.96f    // 0.500 em
     else -> 1f             // Abyssinica SIL, the baseline
 }
 

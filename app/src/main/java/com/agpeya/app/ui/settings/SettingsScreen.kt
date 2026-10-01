@@ -186,6 +186,7 @@ internal val FONT_CHOICES = listOf(
     com.agpeya.app.data.ReadingFont.ABAY_LIGHT to "Ethiopic Abay Light",
     com.agpeya.app.data.ReadingFont.BELA_BEREKA to "Bela Bereka",
     com.agpeya.app.data.ReadingFont.ZEMENAY to "Zemenay",
+    com.agpeya.app.data.ReadingFont.ABBA_GARIMA to "Abba Garima",
 )
 
 /** A sample line of the script the choice actually affects. */

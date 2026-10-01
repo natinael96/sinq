@@ -394,6 +394,7 @@ internal fun fontLabel(font: ReadingFont): String = when (font) {
     ReadingFont.ABAY_LIGHT -> "Ethiopic Abay Light"
     ReadingFont.BELA_BEREKA -> "Bela Bereka"
     ReadingFont.ZEMENAY -> "Zemenay"
+    ReadingFont.ABBA_GARIMA -> "Abba Garima"
 }
 
 internal fun prayerLevelLabel(level: PrayerLevel, s: com.agpeya.app.ui.strings.Strings): String = if (s === com.agpeya.app.ui.strings.EnglishStrings) when (level) {

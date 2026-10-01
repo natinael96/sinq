@@ -79,7 +79,7 @@ See [content structure](CONTENT_STRUCTURE.md) for the schemas and hour inventory
 
 The four tabs are **Home, Journey, Library, Settings**. Search and the combined marks screen are separate destinations. `MainActivity.kt` retains legacy routes needed for bookmarks and deep links while providing readers for Scripture, Gitsawe, Synaxarium, Wudase, books and Mahlet.
 
-Reading preferences currently offer six sizes (**16, 18, 20, 22, 25, 28sp**), four reader faces (Abyssinica, Abay Light, Bela Bereka, Zemenay), line spacing, alignment and keep-screen-on. `ReadingTypography.kt` applies per-face optical adjustments. Waldba is additionally bundled for specialist text, not a fifth selectable reader face. Text and image sharing use `ui/common/` helpers.
+Reading preferences currently offer six sizes (**16, 18, 20, 22, 25, 28sp**), five reader faces (Abyssinica, Abay Light, Bela Bereka, Zemenay, Abba Garima), line spacing, alignment and keep-screen-on. `ReadingTypography.kt` applies per-face optical adjustments. Waldba is additionally bundled for specialist text, not a selectable reader face. Text and image sharing use `ui/common/` helpers.
 
 Mahlet keeps service types, alternative chant branches and source editions distinct. Month 0 holds undated material; the Tsige season reader includes its relevant orders. The source-merge review files are editorial evidence, not automatic approval.
 

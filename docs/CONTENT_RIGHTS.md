@@ -37,9 +37,10 @@ Mahlet keeps the book spine, independent Telegram editions and explicit alternat
 | Ethiopic Abay Light | [Font notice](fonts/Ethiopic_Abay_Light-license.txt) |
 | Bela Bereka | [Font notice](fonts/Bela_Bereka-license.txt) |
 | Zemenay | [Font notice](fonts/Zemenay-license.txt); existing record notes a discrepancy between embedded ETHL metadata and distributor OFL terms |
+| Abba Garima | [Font notice](fonts/Abba_Garima-license.txt) |
 | Waldba | [Font notice](fonts/Waldba-license.txt); bundled specialist face |
 
-The four selectable reader fonts are Abyssinica, Abay Light, Bela Bereka and Zemenay. Noto provides interface typography and Waldba is separately bundled. Do not infer a fifth selectable reader font from its asset presence. See [font subsetting](FONT_SUBSETTING.md) for technical handling.
+The five selectable reader fonts are Abyssinica, Abay Light, Bela Bereka, Zemenay and Abba Garima. Noto provides interface typography and Waldba is separately bundled. See [font subsetting](FONT_SUBSETTING.md) for technical handling.
 
 ## Reminder sounds
 

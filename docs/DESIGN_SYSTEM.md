@@ -77,7 +77,7 @@ non-negotiable for this script:
 Reader text goes through `readingBodyStyle()` / `inReadingFont()`, which apply the
 per-face optical correction (`opticalScale`) so 19sp looks like 19sp in Abay Light
 and in Zemenay. Verse separation uses `readingVerseGap(fontSp)` — a fixed 4dp gap
-vanishes at the largest size. Current reader steps are **16, 18, 20, 22, 25 and 28sp**, with 18sp the default. The four selectable faces are Abyssinica, Abay Light, Bela Bereka and Zemenay; Waldba is a separately bundled specialist face. Lines are capped at `ReadingMaxWidth` (640dp) so a
+vanishes at the largest size. Current reader steps are **16, 18, 20, 22, 25 and 28sp**, with 18sp the default. The five selectable faces are Abyssinica, Abay Light, Bela Bereka, Zemenay and Abba Garima; Waldba is a separately bundled specialist face. Lines are capped at `ReadingMaxWidth` (640dp) so a
 tablet reads like a book rather than a spreadsheet.
 
 ## Motion
