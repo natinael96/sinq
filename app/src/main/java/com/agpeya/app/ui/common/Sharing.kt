@@ -10,6 +10,28 @@ import android.widget.Toast
 import com.agpeya.app.ui.strings.Strings
 
 /**
+ * The passage itself plus context lines: where it's from ([kicker]), what it is ([title]),
+ * and the day it belongs to ([dateLabel]).
+ */
+data class SharePayload(
+    val body: String,
+    val kicker: String? = null,
+    val title: String? = null,
+    val dateLabel: String? = null,
+) {
+    /** The payload as plain text, for the clipboard and the text share sheet. */
+    fun asText(): String = buildString {
+        kicker?.takeIf { it.isNotBlank() && it != title }?.let { append(it); append("\n") }
+        val heading = listOfNotNull(title, dateLabel).joinToString(" — ")
+        if (heading.isNotBlank()) {
+            append(heading)
+            append("\n\n")
+        }
+        append(body.trimEnd())
+    }
+}
+
+/**
  * Copying and sharing prayer text. Everything that leaves the app carries the
  * same signature line, so a verse forwarded into a chat still says where it
  * came from.

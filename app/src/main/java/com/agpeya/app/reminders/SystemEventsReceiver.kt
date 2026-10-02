@@ -66,6 +66,12 @@ class SystemEventsReceiver : BroadcastReceiver() {
                                     SettingsRepository.breathReminder(context).first(),
                                 )
                             }
+                            runCatching {
+                                DailyQuoteScheduler.sync(
+                                    context,
+                                    SettingsRepository.dailyQuoteLockscreen(context).first(),
+                                )
+                            }
                         }
                     } finally {
                         pending.finish()

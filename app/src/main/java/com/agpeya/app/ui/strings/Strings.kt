@@ -230,12 +230,6 @@ interface Strings {
     /** The two reading modes, named for a settings page rather than a toggle. */
     val readingModeVertical: String
     val readingModeHorizontal: String
-    /** The image sheet: three shapes, two grounds. */
-    val imageShapeCard: String
-    val imageShapeSquare: String
-    val imageShapeStory: String
-    val imageGroundGreen: String
-    val imageGroundIvory: String
     /** The ንባብ footer inside the Bible reader: this chapter is part of today. */
     fun readingChapterOfDay(done: Int, total: Int): String
     val previousChapter: String
@@ -293,6 +287,13 @@ interface Strings {
     val settingsGitsaweReminderDesc: String
     val settingsNightReminder: String
     val settingsNightReminderDesc: String
+    val dailyQuoteLockscreen: String
+    val dailyQuoteLockscreenDesc: String
+    val dailyQuoteChannelName: String
+    val dailyQuoteTitle: String
+    val dailyQuoteSample: String
+    val dailyQuoteLockscreenPrompt: String
+    val dailyQuoteSettingsAction: String
     val notifDisabledTitle: String
     val notifDisabledBody: String
 
@@ -624,12 +625,6 @@ interface Strings {
     val contentMissingTitle: String
     val contentMissingBody: String
 
-    /** The "share this passage as a PNG card" action, next to copy/share. */
-    val shareAsImage: String
-    val saveImage: String
-    val imageSaved: String
-    val imagePreparing: String
-    val imageSaveFailed: String
     val shareFailed: String
 
     /** የዕለቱ ቅዳሴ — the day's appointed anaphora, at the foot of the ግጻዌ. */
@@ -964,40 +959,6 @@ interface Strings {
     val updateReady: String
     val updateRestart: String
 
-    // ── The image editor ─────────────────────────────────────────────────────
-    val editorTitle: String
-    val editorStyle: String
-    val editorGround: String
-    val editorType: String
-    val editorLayout: String
-    val editorMark: String
-    val presetVerse: String
-    val presetPassage: String
-    val presetStory: String
-    val presetFeast: String
-    val presetPlain: String
-    val frameCard: String
-    val frameSquare: String
-    val frameStory: String
-    val editorSize: String
-    val editorSizeAuto: String
-    val editorAir: String
-    val groundGreen: String
-    val groundIvory: String
-    val groundNight: String
-    val positionTop: String
-    val positionCenter: String
-    val positionBottom: String
-    val marginTight: String
-    val marginNormal: String
-    val marginGenerous: String
-    val editorShowDate: String
-    val editorShowColophon: String
-    /** "3 pages" under the preview when a passage does not fit on one. */
-    fun editorPages(count: Int): String
-    /** What the preview shows, for a reader who cannot see it. */
-    fun editorPreviewOf(frame: String, ground: String, pages: Int): String
-
     // ── The ግጻዌ widget's evening rollover ────────────────────────────────────
     val widgetRolloverTitle: String
     val widgetRolloverBody: String
@@ -1199,11 +1160,6 @@ object AmharicStrings : Strings {
     override val booksFullHymn = "ሙሉውን ክፍል ክፈት"
     override val readingModeVertical = "ማንሸራተት"
     override val readingModeHorizontal = "ገጽ በገጽ"
-    override val imageShapeCard = "ካርድ"
-    override val imageShapeSquare = "ካሬ"
-    override val imageShapeStory = "ስቶሪ"
-    override val imageGroundGreen = "አረንጓዴ"
-    override val imageGroundIvory = "ነጣ ያለ"
     override fun readingChapterOfDay(done: Int, total: Int) = "የዛሬው ንባብ · $done ከ$total"
     override val previousChapter = "ያለፈው ምዕራፍ"
     override val nextChapter = "ቀጣይ ምዕራፍ"
@@ -1257,6 +1213,13 @@ object AmharicStrings : Strings {
     override val settingsGitsaweReminderDesc = "በመረጡት ሰዓት የዕለቱን የግጻዌ ምንባብ ያስታውስዎታል"
     override val settingsNightReminder = "የሌሊት ማስታወሻ"
     override val settingsNightReminderDesc = "ጸሎት ቢመዘገብም በየሌሊቱ ስንክሳርን፣ ቤተ ክርስቲያንንና ስግደትን ያስታውስዎታል"
+    override val dailyQuoteLockscreen = "ዕለታዊ ጥቅስ በመቆለፊያ ገጽ"
+    override val dailyQuoteLockscreenDesc = "ስልኩ በተቆለፈበት ገጽ ላይ ዕለታዊ ጥቅስ ያሳያል"
+    override val dailyQuoteChannelName = "ዕለታዊ ጥቅስ"
+    override val dailyQuoteTitle = "የዕለቱ ቃል"
+    override val dailyQuoteSample = "«እናንተ ሸክመ ከባዶች ሁሉ፥ ወደ እኔ ኑ፥ እኔም አሳርፋችኋለሁ።» (ማቴ ፲፩፥፳፰)"
+    override val dailyQuoteLockscreenPrompt = "ጥቅሱ በመቆለፊያ ገጽ ላይ እንዲታይ የስልክዎን የመቆለፊያ ገጽ ፈቃድ ለስንቅ ያብሩ"
+    override val dailyQuoteSettingsAction = "በቅንብሮች ያብሩ"
     override val notifDisabledTitle = "ማሳወቂያዎች ጠፍተዋል"
     override val notifDisabledBody = "ማንቂያዎችዎ እንዲደርሱዎት የመተግበሪያውን ማሳወቂያዎች ከቅንብሮች ያብሩ።"
 
@@ -1596,11 +1559,6 @@ object AmharicStrings : Strings {
     override val contentMissingBody =
         "ጽሑፉ በዚህ እትም ውስጥ የለም። የቀሩት ክፍሎች እንደተለመደው ይሠራሉ።"
 
-    override val shareAsImage = "እንደ ምስል አጋራ"
-    override val saveImage = "ምስሉን አስቀምጥ"
-    override val imageSaved = "ምስሉ በPictures/Sinq ተቀምጧል"
-    override val imagePreparing = "ምስል በመዘጋጀት ላይ…"
-    override val imageSaveFailed = "ምስሉን ማስቀመጥ አልተቻለም። እንደገና ይሞክሩ።"
     override val shareFailed = "ማጋራት አልተቻለም። እንደገና ይሞክሩ።"
 
     override val prayerListTitle = "የጸሎት ዝርዝር"
@@ -1903,38 +1861,6 @@ object AmharicStrings : Strings {
     override val updateReady = "አዲሱ እትም ተዘጋጅቷል"
     override val updateRestart = "እንደገና ክፈት"
 
-    // ── የምስል አርታዒ ───────────────────────────────────────────────────────────
-    override val editorTitle = "ምስል"
-    override val editorStyle = "ዘይቤ"
-    override val editorGround = "መደብ"
-    override val editorType = "ፊደል"
-    override val editorLayout = "አቀማመጥ"
-    override val editorMark = "ምልክት"
-    override val presetVerse = "ኀይለ ቃል"
-    override val presetPassage = "ምንባብ"
-    override val presetStory = "ስቶሪ"
-    override val presetFeast = "በዓል"
-    override val presetPlain = "ቀላል"
-    override val frameCard = "ካርድ"
-    override val frameSquare = "ካሬ"
-    override val frameStory = "ቁመት"
-    override val editorSize = "መጠን"
-    override val editorSizeAuto = "ራሱ"
-    override val editorAir = "ክፍተት"
-    override val groundGreen = "አረንጓዴ"
-    override val groundIvory = "የዝሆን ጥርስ"
-    override val groundNight = "ሌሊት"
-    override val positionTop = "ላይ"
-    override val positionCenter = "መሀል"
-    override val positionBottom = "ታች"
-    override val marginTight = "ጠባብ"
-    override val marginNormal = "መካከለኛ"
-    override val marginGenerous = "ሰፊ"
-    override val editorShowDate = "ዕለቱን አሳይ"
-    override val editorShowColophon = "የስንቅ ምልክት"
-    override fun editorPages(count: Int) = "$count ገጾች"
-    override fun editorPreviewOf(frame: String, ground: String, pages: Int) =
-        "የካርዱ ቅድመ ዕይታ፦ $frame፣ $ground መደብ" + if (pages > 1) "፣ $pages ገጾች" else ""
 
     override val widgetRolloverTitle = "ማታ ወደ ነገ ይለወጥ"
     override val widgetRolloverBody =
@@ -2135,11 +2061,6 @@ object EnglishStrings : Strings {
     override val booksFullHymn = "Open the whole hymn"
     override val readingModeVertical = "Scroll mode"
     override val readingModeHorizontal = "Swipe mode"
-    override val imageShapeCard = "Card"
-    override val imageShapeSquare = "Square"
-    override val imageShapeStory = "Story"
-    override val imageGroundGreen = "Green"
-    override val imageGroundIvory = "Ivory"
     override fun readingChapterOfDay(done: Int, total: Int) = "Today's reading · $done of $total"
     override val previousChapter = "Previous chapter"
     override val nextChapter = "Next chapter"
@@ -2187,6 +2108,13 @@ object EnglishStrings : Strings {
     override val settingsGitsaweReminderDesc = "Reminds you of today's Gitsawe reading at the time you choose"
     override val settingsNightReminder = "Nightly reminder"
     override val settingsNightReminderDesc = "Reminds you each evening — even after prayer is marked — of the Synaxarium, church, and prostrations"
+    override val dailyQuoteLockscreen = "Daily Quote on Lock Screen"
+    override val dailyQuoteLockscreenDesc = "Displays a daily quote on your phone's lock screen"
+    override val dailyQuoteChannelName = "Daily Quote"
+    override val dailyQuoteTitle = "Daily Verse"
+    override val dailyQuoteSample = "\"Come unto me, all ye that labour and are heavy laden, and I will give you rest.\" (Matt 11:28)"
+    override val dailyQuoteLockscreenPrompt = "To display the quote while locked, allow lock screen notifications for Sinq"
+    override val dailyQuoteSettingsAction = "Enable in Settings"
     override val notifDisabledTitle = "Notifications are off"
     override val notifDisabledBody = "Turn on notifications in settings so your reminders can reach you."
 
@@ -2549,11 +2477,6 @@ object EnglishStrings : Strings {
     override val contentMissingBody =
         "The text isn't part of this edition. Everything else still works as usual."
 
-    override val shareAsImage = "Share as image"
-    override val saveImage = "Save image"
-    override val imageSaved = "Saved to Pictures/Sinq"
-    override val imagePreparing = "Preparing image…"
-    override val imageSaveFailed = "Couldn't save the image. Please try again."
     override val shareFailed = "Couldn't share this passage. Please try again."
 
     override val prayerListTitle = "Prayer list"
@@ -2842,38 +2765,6 @@ object EnglishStrings : Strings {
     override val updateReady = "Update ready"
     override val updateRestart = "Restart"
 
-    // ── The image editor ─────────────────────────────────────────────────────
-    override val editorTitle = "Image"
-    override val editorStyle = "Style"
-    override val editorGround = "Ground"
-    override val editorType = "Type"
-    override val editorLayout = "Layout"
-    override val editorMark = "Mark"
-    override val presetVerse = "Verse"
-    override val presetPassage = "Passage"
-    override val presetStory = "Story"
-    override val presetFeast = "Feast"
-    override val presetPlain = "Plain"
-    override val frameCard = "Card"
-    override val frameSquare = "Square"
-    override val frameStory = "Story"
-    override val editorSize = "Size"
-    override val editorSizeAuto = "Auto"
-    override val editorAir = "Air"
-    override val groundGreen = "Green"
-    override val groundIvory = "Ivory"
-    override val groundNight = "Night"
-    override val positionTop = "Top"
-    override val positionCenter = "Centre"
-    override val positionBottom = "Bottom"
-    override val marginTight = "Tight"
-    override val marginNormal = "Normal"
-    override val marginGenerous = "Generous"
-    override val editorShowDate = "Show the date"
-    override val editorShowColophon = "Sinq mark"
-    override fun editorPages(count: Int) = if (count == 1) "1 page" else "$count pages"
-    override fun editorPreviewOf(frame: String, ground: String, pages: Int) =
-        "Card preview: $frame, $ground ground" + if (pages > 1) ", $pages pages" else ""
 
     override val widgetRolloverTitle = "Turn to tomorrow in the evening"
     override val widgetRolloverBody =

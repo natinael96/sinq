@@ -141,6 +141,7 @@ object SettingsRepository {
     const val DEFAULT_STREAK_REMINDER_MIN = 21 * 60 + 30
 
     private val KEY_GITSAWE_REMINDER = booleanPreferencesKey("gitsawe_reminder")
+    private val KEY_DAILY_QUOTE_LOCKSCREEN = booleanPreferencesKey("daily_quote_lockscreen")
     private val KEY_WIDGET_ROLLOVER = booleanPreferencesKey("widget_evening_rollover")
     private val KEY_WIDGET_ROLLOVER_TIME = intPreferencesKey("widget_evening_rollover_time")
     private val KEY_GITSAWE_REMINDER_TIME = intPreferencesKey("gitsawe_reminder_min")
@@ -629,6 +630,19 @@ object SettingsRepository {
     suspend fun setGitsaweReminder(context: Context, value: Boolean) {
         context.settingsDataStore.edit { it[KEY_GITSAWE_REMINDER] = value }
     }
+
+    /** Daily quote displayed on lock screen (silent, ongoing notification). Off by default. */
+    fun dailyQuoteLockscreen(context: Context): Flow<Boolean> =
+        context.settingsDataStore.data.map { it[KEY_DAILY_QUOTE_LOCKSCREEN] ?: false }
+
+    suspend fun setDailyQuoteLockscreen(context: Context, value: Boolean) {
+        context.settingsDataStore.edit { it[KEY_DAILY_QUOTE_LOCKSCREEN] = value }
+    }
+
+    fun dailyQuoteLockscreenBlocking(context: Context): Boolean =
+        kotlinx.coroutines.runBlocking {
+            runCatching { dailyQuoteLockscreen(context).first() }.getOrDefault(false)
+        }
 
     /**
      * Whether the ግጻዌ widget moves to the next day in the evening.

@@ -1028,6 +1028,8 @@ fun RemindersSettingsScreen(
     val gitsawe by SettingsRepository.gitsaweReminder(context).collectAsState(initial = true)
     val breath by SettingsRepository.breathReminder(context).collectAsState(initial = true)
     val reading by SettingsRepository.readingReminder(context).collectAsState(initial = true)
+    val dailyQuote by SettingsRepository.dailyQuoteLockscreen(context).collectAsState(initial = false)
+    var showLockscreenPrompt by remember { mutableStateOf(false) }
     val almsEntries by SettingsRepository.almsReminders(context).collectAsState(initial = emptyList())
     val repentanceEntries by SettingsRepository.repentanceReminders(context).collectAsState(initial = emptyList())
     val titheEntries by SettingsRepository.titheReminders(context).collectAsState(initial = emptyList())
@@ -1178,6 +1180,18 @@ fun RemindersSettingsScreen(
                         com.agpeya.app.reminders.ReadingReminderScheduler.sync(context, on)
                     }
                 }, subtitle = s.settingsReadingReminderDesc)
+                ToggleRow(s.dailyQuoteLockscreen, dailyQuote, { on ->
+                    if (on) {
+                        requestNotifications()
+                        if (!com.agpeya.app.reminders.DailyQuoteReceiver.isLockscreenVisible(context)) {
+                            showLockscreenPrompt = true
+                        }
+                    }
+                    scope.launch {
+                        SettingsRepository.setDailyQuoteLockscreen(context, on)
+                        com.agpeya.app.reminders.DailyQuoteScheduler.sync(context, on)
+                    }
+                }, subtitle = s.dailyQuoteLockscreenDesc)
                 // ምጽዋት and ንስሐ are here because they ring; their ledgers — the
                 // money, the vows, the penance — are records, and records live
                 // under መዝገብ. This page had become the door to all three.
@@ -1188,6 +1202,26 @@ fun RemindersSettingsScreen(
                 Spacer(Modifier.height(Spacing.xxl))
             }
         }
+    }
+    if (showLockscreenPrompt) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showLockscreenPrompt = false },
+            title = { androidx.compose.material3.Text(s.dailyQuoteLockscreen) },
+            text = { androidx.compose.material3.Text(s.dailyQuoteLockscreenPrompt) },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    showLockscreenPrompt = false
+                    com.agpeya.app.reminders.DailyQuoteReceiver.openChannelSettings(context)
+                }) {
+                    androidx.compose.material3.Text(s.dailyQuoteSettingsAction)
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { showLockscreenPrompt = false }) {
+                    androidx.compose.material3.Text(s.cancel)
+                }
+            },
+        )
     }
     if (soundSheetOpen) {
         androidx.compose.material3.ModalBottomSheet(onDismissRequest = { soundSheetOpen = false }) {

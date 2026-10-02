@@ -73,15 +73,11 @@
             android:name=".reminders.BreathPrayerReceiver"
             android:exported="false" />
 
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/share_paths" />
-        </provider>
+        <receiver
+            android:name=".reminders.DailyQuoteReceiver"
+            android:exported="false" />
+
+
 
         <!-- exported, unlike every other receiver here: these four come from
              the system server, which is a different uid, and a receiver only

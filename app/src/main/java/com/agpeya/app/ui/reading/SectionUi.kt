@@ -299,16 +299,6 @@ internal fun SelectionBar(
                 }
                 if (passage != null) {
                     val text = com.agpeya.app.ui.common.PassageFormat.text(passage, format)
-                    val payload = com.agpeya.app.ui.common.SharePayload(
-                        body = com.agpeya.app.ui.common.PassageFormat.body(
-                            passage,
-                            // The card is a picture of the text, so it keeps its
-                            // verse numbers whatever the copy format says.
-                            format.copy(verseNumbers = true),
-                        ),
-                        kicker = imageKicker,
-                        title = com.agpeya.app.ui.common.PassageFormat.heading(passage),
-                    )
                     // The references live behind their own action rather than
                     // under every verse. 22,905 verses carry them, so a marker
                     // on each would be a second text running beside the first —
@@ -322,19 +312,6 @@ internal fun SelectionBar(
                             refs = crossRefs,
                             onDismiss = { refsOpen = false },
                             onOpen = { route -> refsOpen = false; onDismiss(); onOpenRef(route) },
-                        )
-                    }
-                    // The shape and the ground used to be chosen from a list
-                    // of names, before the card existed, and the first sight of
-                    // the result was in the share sheet. They are chosen in
-                    // front of the card now, along with everything else.
-                    var imageSheet by androidx.compose.runtime.saveable.rememberSaveable {
-                        androidx.compose.runtime.mutableStateOf(false)
-                    }
-                    if (imageSheet) {
-                        com.agpeya.app.ui.common.ImageEditorDialog(
-                            payload = payload,
-                            onDismiss = { imageSheet = false; onDismiss() },
                         )
                     }
                     SelectionActions(
@@ -383,14 +360,6 @@ internal fun SelectionBar(
                                 SelectionAct(s.shareAction, Icons.Outlined.Share) {
                                     com.agpeya.app.ui.common.Sharing.share(ctx, text, strings = s)
                                     onDismiss()
-                                },
-                            )
-                            // One entry, because share and save are both inside
-                            // the editor now and choosing between them before
-                            // seeing the card was the wrong order to ask in.
-                            add(
-                                SelectionAct(s.shareAsImage, Icons.Outlined.Image) {
-                                    imageSheet = true
                                 },
                             )
                         },

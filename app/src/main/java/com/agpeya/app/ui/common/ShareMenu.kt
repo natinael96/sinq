@@ -4,10 +4,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
-import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material.icons.outlined.SaveAlt
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -15,26 +13,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import android.widget.Toast
-import android.os.Build
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.IconSize
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.collectAsState
 
 /**
- * The one share affordance every reader's app bar uses: a share icon opening
- * the same three actions everywhere — copy, share as text, share as a PNG card
- * ([PassageShare]). One menu instead of three icons, so a reading bar that
- * already carries A−/A+ and a bookmark doesn't turn into a toolbar.
+ * The share affordance used in readers: copy and share as text.
  *
  * [payload] is a producer, not a value: the passage is assembled only when the
  * user actually picks an action, so scrolling a long reader never pays for it.
@@ -46,14 +37,7 @@ fun ShareMenuAction(
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
-    val scope = rememberCoroutineScope()
     var open by remember { mutableStateOf(false) }
-    // The passage being edited, and the whole of the editor's state here: the
-    // dialog is the screen, so nothing else has to know it exists.
-    var editing by remember { mutableStateOf<SharePayload?>(null) }
-    // The same format the selection bar and the reader menu use. This one was
-    // still building its own text, so a passage shared from here ignored
-    // ቅዳና አጋራ while the very same passage shared from the bar obeyed it.
     val format by com.agpeya.app.data.SettingsRepository.copyFormat(context)
         .collectAsState(initial = CopyFormat())
     fun textOf(p: SharePayload): String = PassageFormat.text(
@@ -82,19 +66,13 @@ fun ShareMenuAction(
                 open = false
                 payload()?.let { Sharing.share(context, textOf(it), it.title ?: it.kicker, s) }
             }
-            MenuItem(s.shareAsImage, Icons.Outlined.Image) {
-                open = false
-                editing = payload()
-            }
         }
-        editing?.let { ImageEditorDialog(payload = it, onDismiss = { editing = null }) }
     }
 }
 
 /**
  * Compact reader toolbar for narrow screens. Font controls, optional display
- * toggles, and sharing live behind one overflow icon so the page title and its
- * primary contextual action keep predictable space in the app bar.
+ * toggles, and sharing live behind one overflow icon.
  */
 @Composable
 fun ReaderToolsMenu(
@@ -112,12 +90,7 @@ fun ReaderToolsMenu(
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
-    val scope = rememberCoroutineScope()
     var open by remember { mutableStateOf(false) }
-    var editing by remember { mutableStateOf<SharePayload?>(null) }
-    // The same format the selection bar uses. The menu built its own text, so
-    // one passage left the app in two different shapes depending on which
-    // control the reader reached for.
     val format by com.agpeya.app.data.SettingsRepository.copyFormat(context)
         .collectAsState(initial = CopyFormat())
     fun textOf(payload: SharePayload): String = PassageFormat.text(
@@ -207,18 +180,8 @@ fun ReaderToolsMenu(
                         sharePayload()?.let { Sharing.share(context, textOf(it), it.title ?: it.kicker, s) }
                     },
                 )
-                DropdownMenuItem(
-                    text = { Text(s.shareAsImage) },
-                    leadingIcon = { Icon(Icons.Outlined.Image, contentDescription = null) },
-                    enabled = shareEnabled,
-                    onClick = {
-                        open = false
-                        editing = sharePayload()
-                    },
-                )
             }
         }
-        editing?.let { ImageEditorDialog(payload = it, onDismiss = { editing = null }) }
     }
 }
 

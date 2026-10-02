@@ -34,6 +34,8 @@ object NotificationIds {
     const val READING = 7004
     /** The breath prayer. */
     const val BREATH = 7005
+    /** The daily quote on the lock screen. */
+    const val DAILY_QUOTE = 7006
 
     // ── Families: one notification per hour or per habit ─────────────────
     // Each takes BASE + bounded(key), so each occupies exactly its own

@@ -484,39 +484,21 @@ private fun ReadingRow(
                     overflow = TextOverflow.Ellipsis,
                 )
                 if (isMisbak) {
-                    // The day's chant, in the day's card, ready to send before
-                    // the liturgy. It is the one thing on this page that people
-                    // send every morning, and it took four taps to get out.
-                    val scope = androidx.compose.runtime.rememberCoroutineScope()
-                    val busy = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
                     IconButton(
                         onClick = {
                             val text = preview?.takeIf { it.isNotBlank() } ?: return@IconButton
-                            if (busy.value) return@IconButton
-                            scope.launch {
-                                busy.value = true
-                                try {
-                                    com.agpeya.app.ui.common.PassageShare.share(
-                                        context,
-                                        com.agpeya.app.ui.common.SharePayload(
-                                            body = text,
-                                            kicker = role,
-                                            title = verse?.let { verseRef(it) },
-                                            dateLabel = null,
-                                            shape = com.agpeya.app.ui.common.ImageShape.SQUARE,
-                                        ),
-                                        s,
-                                    )
-                                } finally {
-                                    busy.value = false
-                                }
+                            val shareText = buildString {
+                                role?.takeIf { it.isNotBlank() }?.let { append(it).append("\n") }
+                                verse?.let { append(verseRef(it)).append("\n\n") }
+                                append(text)
                             }
+                            com.agpeya.app.ui.common.Sharing.share(context, shareText, role, s)
                         },
                         enabled = !preview.isNullOrBlank(),
                     ) {
                         Icon(
-                            Icons.Outlined.Image,
-                            contentDescription = s.shareAsImage,
+                            Icons.Outlined.Share,
+                            contentDescription = s.shareAction,
                             tint = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.size(IconSize.small),
                         )
