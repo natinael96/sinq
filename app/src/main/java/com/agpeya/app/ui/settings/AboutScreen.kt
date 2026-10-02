@@ -16,6 +16,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -123,21 +126,27 @@ fun AboutScreen(onBack: () -> Unit, onOpenLicenses: () -> Unit = {}) {
             }
             Spacer(Modifier.height(Spacing.xxl))
             // A small truth, thinly set.
-            Text(
-                text = "powered by 2ቡና",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.Light,
-                    fontStyle = FontStyle.Italic,
-                    letterSpacing = 1.5.sp,
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                textAlign = TextAlign.Center,
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .heightIn(min = 48.dp)
+                    .clip(MaterialTheme.shapes.small)
                     .clickable {
                         com.agpeya.app.ui.common.openUrl(context, "https://t.me/buna_builds")
                     },
-            )
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "powered by 2ቡና",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Light,
+                        fontStyle = FontStyle.Italic,
+                        letterSpacing = 1.5.sp,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                    textAlign = TextAlign.Center,
+                )
+            }
             // ፈቃዶች እና ምንጮች was a row of its own in ቅንብሮች, directly under this
             // page. It is a section of what this page says, so it opens here.
             Spacer(Modifier.height(Spacing.lg))

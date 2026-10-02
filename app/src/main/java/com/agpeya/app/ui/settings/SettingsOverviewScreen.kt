@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
@@ -72,7 +73,9 @@ import com.agpeya.app.data.PrayerLevel
 import com.agpeya.app.data.ReadingFont
 import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.data.ThemeChoice
+import com.agpeya.app.ui.common.HeroCard
 import com.agpeya.app.ui.common.NavRow
+import com.agpeya.app.ui.theme.sinqColors
 import com.agpeya.app.ui.common.SectionHeader
 import com.agpeya.app.ui.common.SinqCard
 import com.agpeya.app.ui.common.SinqDivider
@@ -329,8 +332,7 @@ private fun SettingsHubCard(
 }
 
 /**
- * Prominent, beautifully crafted feedback hero card designed to invite and
- * encourage the user to share thoughts, report typos, or suggest blessings.
+ * Prominent feedback card matching the exact HeroCard design of the Home screen buttons (Gitsawe).
  */
 @Composable
 private fun FeedbackCard(
@@ -340,162 +342,46 @@ private fun FeedbackCard(
     onClick: () -> Unit,
 ) {
     val haptics = LocalHapticFeedback.current
-    val gold = MaterialTheme.colorScheme.secondary
-    val primary = MaterialTheme.colorScheme.primary
-    val shape = RoundedCornerShape(20.dp)
+    val sinq = sinqColors
 
-    // Deep liturgical emerald-to-pine gradient with a warm golden radiance border
-    val cardGradient = Brush.linearGradient(
-        colors = listOf(
-            primary,
-            Color(0xFF092922),
-            Color(0xFF051B17),
-        ),
-        start = Offset.Zero,
-        end = Offset.Infinite,
-    )
-    val borderBrush = Brush.horizontalGradient(
-        colors = listOf(
-            gold.copy(alpha = 0.85f),
-            gold.copy(alpha = 0.35f),
-            gold.copy(alpha = 0.90f),
-        ),
-    )
-
-    Surface(
+    HeroCard(
         onClick = {
             haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
             onClick()
         },
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(shape),
-        shape = shape,
-        color = Color.Transparent,
-        border = BorderStroke(1.2.dp, borderBrush),
-        tonalElevation = 4.dp,
-        shadowElevation = 2.dp,
+        contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.md),
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(cardGradient)
-                .drawWithCache {
-                    val radius = 100.dp.toPx()
-                    val center = Offset(size.width - 20.dp.toPx(), 20.dp.toPx())
-                    val glow = Brush.radialGradient(
-                        colors = listOf(gold.copy(alpha = 0.24f), Color.Transparent),
-                        center = center,
-                        radius = radius,
-                    )
-                    onDrawBehind {
-                        drawCircle(glow, radius = radius, center = center)
-                    }
-                }
-                .padding(horizontal = Spacing.lg, vertical = Spacing.lg),
-        ) {
-            Column(Modifier.fillMaxWidth()) {
-                // Top Badge + Glowing Emblem
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(100))
-                            .background(gold.copy(alpha = 0.18f))
-                            .border(1.dp, gold.copy(alpha = 0.45f), RoundedCornerShape(100))
-                            .padding(horizontal = 10.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        Text(
-                            text = "☩",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = gold,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = gold,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.5.sp,
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .size(38.dp)
-                            .clip(CircleShape)
-                            .background(gold.copy(alpha = 0.18f))
-                            .border(1.dp, gold.copy(alpha = 0.5f), CircleShape),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.RateReview,
-                            contentDescription = null,
-                            tint = gold,
-                            modifier = Modifier.size(20.dp),
-                        )
-                    }
-                }
-
-                Spacer(Modifier.height(Spacing.sm))
-
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    letterSpacing = (-0.2).sp,
-                )
-
-                Spacer(Modifier.height(4.dp))
-
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.82f),
-                    lineHeight = 20.sp,
-                )
-
-                Spacer(Modifier.height(Spacing.md))
-
-                // Bold Call-To-Action Pill Button
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(gold)
-                        .padding(horizontal = Spacing.md, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Outlined.Send,
-                        contentDescription = null,
-                        tint = Color(0xFF162E26),
-                        modifier = Modifier.size(16.dp),
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = cta,
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF162E26),
-                    )
-                    Spacer(Modifier.width(6.dp))
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = null,
-                        tint = Color(0xFF162E26),
-                        modifier = Modifier.size(16.dp),
-                    )
-                }
-            }
+        Icon(
+            imageVector = Icons.Outlined.RateReview,
+            contentDescription = null,
+            tint = sinq.onHeroMuted,
+            modifier = Modifier.size(IconSize.large),
+        )
+        Spacer(Modifier.width(Spacing.md))
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = sinq.onHero,
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = sinq.onHeroMuted,
+            )
+            Spacer(Modifier.height(Spacing.xxs))
+            Text(
+                text = cta,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = sinq.onHeroGold,
+            )
         }
+        Icon(
+            imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+            contentDescription = null,
+            tint = sinq.onHeroMuted,
+        )
     }
 }
 

@@ -15,12 +15,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -133,6 +131,7 @@ fun EthiopianYearHeatmap(
             pickingDate = false
         },
     )
+    androidx.compose.material3.TextButton(onClick = { pickingDate = true }) { Text(s.dateLabel) }
     val currentEc = remember(today) { EthiopianDate.from(today).year }
 
     // The whole Ethiopian year, መስከረም 1 → ጳጉሜን end. Future days render as
@@ -261,7 +260,7 @@ fun EthiopianYearHeatmap(
                             week.forEach { date ->
                                 val inRange = selectableRange?.contains(date) == true
                                 val shape = RoundedCornerShape(3.dp)
-                                Box(
+                                Spacer(
                                     Modifier
                                         .padding(gap)
                                         .size(cell)
@@ -269,14 +268,10 @@ fun EthiopianYearHeatmap(
                                         .background(cellColor(date))
                                         .then(
                                             if (inRange && date == selectedDay) Modifier.border(
-                                                1.5.dp,
-                                                MaterialTheme.colorScheme.secondary,
+                                                1.dp,
+                                                MaterialTheme.colorScheme.onSurface,
                                                 shape,
                                             )
-                                            else Modifier
-                                        )
-                                        .then(
-                                            if (inRange) Modifier.clickable { onDaySelect(date) }
                                             else Modifier
                                         ),
                                 )
@@ -315,18 +310,8 @@ fun EthiopianYearHeatmap(
                     text = dayDescription(selectedDay),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable { pickingDate = true },
+                    modifier = Modifier.weight(1f),
                 )
-                IconButton(
-                    onClick = { pickingDate = true },
-                ) {
-                    Icon(
-                        Icons.Outlined.CalendarMonth,
-                        contentDescription = s.dateLabel,
-                    )
-                }
                 IconButton(
                     onClick = { onDaySelect(selectedDay.minusDays(1)) },
                     enabled = selectedDay.isAfter(selectionStart),

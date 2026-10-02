@@ -1,8 +1,13 @@
 package com.agpeya.app.ui.nisiha
 
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.ui.text.input.KeyboardType
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -199,34 +204,75 @@ private fun PenanceScreenContent(onBack: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PenanceEditor(value: Penance, busy: Boolean, onDismiss: () -> Unit, onSave: (Penance) -> Unit) {
     val s = LocalStrings.current
     var draft by remember(value.id) { mutableStateOf(value) }
-    var quotaEditing by remember { mutableStateOf(false) }
-    AlertDialog(onDismissRequest = { if (!busy) onDismiss() },
-        title = { Text(s.penanceTitle) },
-        text = {
-            Column(Modifier.verticalScroll(rememberScrollState()).imePadding()) {
-                OutlinedTextField(draft.label, { draft = draft.copy(label = it) }, enabled = !busy,
-                    label = { Text(s.penanceNameLabel) }, placeholder = { Text(s.penanceNameHint) }, singleLine = true)
-                androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                    PenanceKind.entries.forEach { kind ->
-                        FilterChip(selected = draft.kind == kind, enabled = !busy,
-                            onClick = { draft = draft.copy(kind = kind) }, label = { Text(kindName(kind, s)) })
-                    }
+    ModalBottomSheet(onDismissRequest = { if (!busy) onDismiss() }) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = Spacing.screen)
+                .padding(bottom = Spacing.lg)
+                .imePadding()
+                .verticalScroll(rememberScrollState()),
+        ) {
+            Text(
+                s.penanceTitle,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Spacer(Modifier.height(Spacing.md))
+            OutlinedTextField(
+                value = draft.label,
+                onValueChange = { draft = draft.copy(label = it) },
+                enabled = !busy,
+                label = { Text(s.penanceNameLabel) },
+                placeholder = { Text(s.penanceNameHint) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(Spacing.sm))
+            androidx.compose.foundation.layout.FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+            ) {
+                PenanceKind.entries.forEach { kind ->
+                    FilterChip(
+                        selected = draft.kind == kind,
+                        enabled = !busy,
+                        onClick = { draft = draft.copy(kind = kind) },
+                        label = { Text(kindName(kind, s)) },
+                    )
                 }
-                com.agpeya.app.ui.common.ListRow(s.penanceQuotaLabel,
-                    subtitle = draft.quota.takeIf { it > 0 }?.toString() ?: "—", onClick = { if (!busy) quotaEditing = true })
-                ScheduleRow(draft.schedule, s, { if (!busy) draft = draft.copy(schedule = it) })
-                TimeRow(draft.minute, s, { if (!busy) draft = draft.copy(minute = it) })
             }
-        },
-        confirmButton = { SinqPrimaryButton(enabled = !busy, onClick = { onSave(draft) }) { Text(s.save) } },
-        dismissButton = { TextButton(enabled = !busy, onClick = onDismiss) { Text(s.cancel) } })
-    if (quotaEditing) QuotaDialog(draft.quota, s, { quotaEditing = false }, {
-        draft = draft.copy(quota = it); quotaEditing = false
-    })
+            Spacer(Modifier.height(Spacing.sm))
+            OutlinedTextField(
+                value = if (draft.quota > 0) draft.quota.toString() else "",
+                onValueChange = { input ->
+                    val digits = input.filter { it.isDigit() }
+                    draft = draft.copy(quota = digits.toIntOrNull() ?: 0)
+                },
+                enabled = !busy,
+                label = { Text(s.penanceQuotaLabel) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(Spacing.sm))
+            ScheduleRow(draft.schedule, s, { if (!busy) draft = draft.copy(schedule = it) })
+            TimeRow(draft.minute, s, { if (!busy) draft = draft.copy(minute = it) })
+            Spacer(Modifier.height(Spacing.lg))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm, Alignment.End),
+            ) {
+                TextButton(enabled = !busy, onClick = onDismiss) { Text(s.cancel) }
+                SinqPrimaryButton(enabled = !busy, onClick = { onSave(draft) }) { Text(s.save) }
+            }
+        }
+    }
 }
 
 private fun kindName(kind: PenanceKind, s: Strings): String = when (kind) {
@@ -235,40 +281,6 @@ private fun kindName(kind: PenanceKind, s: Strings): String = when (kind) {
     PenanceKind.ALMS -> s.penanceKindAlms
     PenanceKind.PRAYERS -> s.penanceKindPrayers
     PenanceKind.OTHER -> s.penanceKindOther
-}
-
-/** The measure given — a plain count, edited on its own since it is set once. */
-@Composable
-private fun QuotaDialog(
-    initial: Int,
-    s: Strings,
-    onDismiss: () -> Unit,
-    onSave: (Int) -> Unit,
-) {
-    var text by remember { mutableStateOf(if (initial > 0) initial.toString() else "") }
-    val parsed = text.trim().toIntOrNull()?.takeIf { it >= 0 }
-    // Blank clears the quota back to a penance with no count attached.
-    val valid = text.isBlank() || parsed != null
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(s.penanceQuotaLabel) },
-        text = {
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                singleLine = true,
-                label = { Text(s.penanceQuotaLabel) },
-                isError = !valid,
-                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                    keyboardType = androidx.compose.ui.text.input.KeyboardType.Number,
-                ),
-            )
-        },
-        confirmButton = {
-            SinqPrimaryButton(enabled = valid, onClick = { onSave(parsed ?: 0) }) { Text(s.save) }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
-    )
 }
 
 /** One session performed today: a count and, if wanted, a word about it. */

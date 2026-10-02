@@ -30,7 +30,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -268,32 +270,52 @@ fun SpecialHabitScreen(
         }
     }
     draft?.let { value ->
-        AlertDialog(
+        ModalBottomSheet(
             onDismissRequest = { if (!action.busy) setDraft(null) },
-            title = { Text(if (reminders.any { it.id == value.id }) s.editPerson else s.addSpecialReminder) },
-            text = {
-                Column(Modifier.verticalScroll(rememberScrollState()).imePadding()) {
-                    OutlinedTextField(
-                        value = value.label,
-                        onValueChange = { setDraft(value.copy(label = it)) },
-                        label = { Text(s.reminderNameLabel) },
-                        placeholder = { Text(nameHint) },
-                        singleLine = true,
-                        enabled = !action.busy,
-                    )
-                    ScheduleRow(value.schedule, s, { setDraft(value.copy(schedule = it)) })
-                    TimeRow(value.minute, s, { setDraft(value.copy(minute = it)) })
+        ) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(horizontal = Spacing.screen)
+                    .padding(bottom = Spacing.lg)
+                    .imePadding()
+                    .verticalScroll(rememberScrollState()),
+            ) {
+                Text(
+                    text = if (reminders.any { it.id == value.id }) s.editPerson else s.addSpecialReminder,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Spacer(Modifier.height(Spacing.md))
+                OutlinedTextField(
+                    value = value.label,
+                    onValueChange = { setDraft(value.copy(label = it)) },
+                    label = { Text(s.reminderNameLabel) },
+                    placeholder = { Text(nameHint) },
+                    singleLine = true,
+                    enabled = !action.busy,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(Modifier.height(Spacing.sm))
+                ScheduleRow(value.schedule, s, { setDraft(value.copy(schedule = it)) })
+                TimeRow(value.minute, s, { setDraft(value.copy(minute = it)) })
+                Spacer(Modifier.height(Spacing.lg))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm, Alignment.End),
+                ) {
+                    TextButton(enabled = !action.busy, onClick = { setDraft(null) }) {
+                        Text(s.cancel)
+                    }
+                    SinqPrimaryButton(enabled = !action.busy, onClick = {
+                        update(value) { setDraft(null) }
+                    }) {
+                        Text(s.save)
+                    }
                 }
-            },
-            confirmButton = {
-                SinqPrimaryButton(enabled = !action.busy, onClick = {
-                    update(value) { setDraft(null) }
-                }) { Text(s.save) }
-            },
-            dismissButton = {
-                TextButton(enabled = !action.busy, onClick = { setDraft(null) }) { Text(s.cancel) }
-            },
-        )
+            }
+        }
     }
     deleting?.let { entry ->
         AlertDialog(

@@ -157,16 +157,29 @@ fun MarksScreen(
                 return@Column
             }
             MarksSearchBar(query = query, onQueryChange = { query = it })
-            if (tab == 1) androidx.compose.foundation.lazy.LazyRow(
-                contentPadding = PaddingValues(horizontal = Spacing.screen), horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                item { androidx.compose.material3.FilterChip(selected = colorFilter == null,
-                    onClick = { colorFilter = null }, label = { Text(s.filterAll) }) }
-                items(HighlightRepository.COLOR_KEYS.size) { index ->
-                    val color = HighlightRepository.COLOR_KEYS[index]
-                    androidx.compose.material3.FilterChip(selected = colorFilter == color,
-                        onClick = { colorFilter = if (colorFilter == color) null else color },
-                        label = { Text(names[color]?.takeIf { it.isNotBlank() } ?: s.highlightColor(color)) })
+            if (tab == 1) {
+                val sinq = sinqColors
+                androidx.compose.foundation.lazy.LazyRow(
+                    contentPadding = PaddingValues(horizontal = Spacing.screen), horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    item { androidx.compose.material3.FilterChip(selected = colorFilter == null,
+                        onClick = { colorFilter = null }, label = { Text(s.filterAll) }) }
+                    items(HighlightRepository.COLOR_KEYS.size) { index ->
+                        val color = HighlightRepository.COLOR_KEYS[index]
+                        androidx.compose.material3.FilterChip(
+                            selected = colorFilter == color,
+                            onClick = { colorFilter = if (colorFilter == color) null else color },
+                            label = { Text(names[color]?.takeIf { it.isNotBlank() } ?: s.highlightColor(color)) },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Filled.Circle,
+                                    contentDescription = null,
+                                    tint = sinq.highlight(color).copy(alpha = 1f),
+                                    modifier = Modifier.size(10.dp),
+                                )
+                            },
+                        )
+                    }
                 }
             }
             val shownBookmarks = bookmarks.filter {

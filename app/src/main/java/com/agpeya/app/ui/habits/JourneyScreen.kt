@@ -27,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -84,14 +83,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import com.agpeya.app.ui.reading.geezNumeral
-import com.agpeya.app.ui.common.formatEthiopian
-import com.agpeya.app.ui.common.formatEthiopianShort
 import com.agpeya.app.ui.settings.scheduleSummary
 
 private fun builtInName(id: String, s: Strings): String = when (id) {
@@ -144,17 +135,13 @@ fun JourneyScreen(
     val hours by androidx.compose.runtime.produceState(emptyList<com.agpeya.app.model.Hour>()) {
         value = com.agpeya.app.data.HoursRepository.visibleHours(context)
     }
-    var activeEpochDay by rememberSaveable { androidx.compose.runtime.mutableStateOf<Long?>(null) }
-    val activeDate = activeEpochDay?.let(LocalDate::ofEpochDay) ?: today
-    val activeKey = activeDate.toString()
-    val isToday = activeDate == today
     // Prayer hours group under a collapsible ጸሎት header; other habits are flat.
     // Hours hidden in Manage Hours are already filtered out by visibleHours.
     val hourItems = remember(hours) { hours.map { HabitsRepository.hourHabitId(it.id) to it.name } }
-    // Only what the active date asks for. A habit kept on Wednesday and Friday is not a
+    // Only what today asks for. A habit kept on Wednesday and Friday is not a
     // thing missed on a Tuesday, so it is not on Tuesday's list at all.
-    val habitItems = remember(state, s, activeDate) {
-        HabitsRepository.dueHabitIds(state, activeDate).map { it to habitName(it, state, s) }
+    val habitItems = remember(state, s, today) {
+        HabitsRepository.dueHabitIds(state, today).map { it to habitName(it, state, s) }
     }
     val summary = remember(state, today) { PrayerJourney.summarize(state.records, today) }
     // Per-habit summaries always count the Ethiopian month, even during a fast:
@@ -264,70 +251,41 @@ fun JourneyScreen(
                     )
                 }
                 Spacer(Modifier.height(Spacing.sm))
-                val doneHours = hourItems.count { it.first in (state.records[activeKey] ?: emptySet()) }
-                val (keptHabits, dueHabits) = HabitsRepository.keptOfDue(state, activeDate)
-                val headerTitle = if (isToday) s.todayLabel else formatEthiopianShort(activeDate, s)
-                SectionHeader(headerTitle) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-                    ) {
-                        Text(
-                            "$doneHours/${hourItems.size}  ·  $keptHabits/$dueHabits",
-                            modifier = Modifier.clearAndSetSemantics {
-                                contentDescription = "${s.hoursHeader}: $doneHours/${hourItems.size} · ${s.habitsHeader}: $keptHabits/$dueHabits"
-                            },
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        if (!isToday) {
-                            Text(
-                                text = s.todayLabel,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.secondary,
-                                fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier
-                                    .clip(MaterialTheme.shapes.extraSmall)
-                                    .clickable {
-                                        activeEpochDay = null
-                                        selectedEpochDay = null
-                                    }
-                                    .padding(horizontal = Spacing.xxs, vertical = 2.dp),
-                            )
-                        }
-                    }
+                val doneHours = hourItems.count { it.first in (state.records[todayKey] ?: emptySet()) }
+                val (keptHabits, dueHabits) = HabitsRepository.keptOfDue(state, today)
+                SectionHeader(s.todayLabel) {
+                    Text(
+                        "$doneHours/${hourItems.size}  ·  $keptHabits/$dueHabits",
+                        modifier = Modifier.clearAndSetSemantics {
+                            contentDescription = "${s.hoursHeader}: $doneHours/${hourItems.size} · ${s.habitsHeader}: $keptHabits/$dueHabits"
+                        },
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
-                Spacer(Modifier.height(Spacing.xs))
-                JourneyDayStrip(
-                    today = today,
-                    activeDate = activeDate,
-                    records = state.records,
-                    s = s,
-                    onSelectDay = { date ->
-                        val epoch = if (date == today) null else date.toEpochDay()
-                        activeEpochDay = epoch
-                        selectedEpochDay = epoch
-                    },
-                )
-                Spacer(Modifier.height(Spacing.xs))
+                Spacer(Modifier.height(Spacing.xxs))
             }
 
+            // The seven hours as two hairline strips — four names to a line,
+            // colour the only state. They were behind a ጸሎት row that opened a
+            // list of seven 48 dp check rows, which is 336 dp to say what two
+            // 28 dp lines say, and the page could not show a day's prayer and
+            // a day's habits at the same time.
             item(key = "hours") {
                 HourStrips(
                     items = hourItems,
-                    done = state.records[activeKey] ?: emptySet(),
-                    onToggle = { id -> scope.launch { HabitsRepository.toggle(context, activeKey, id) } },
+                    done = state.records[todayKey] ?: emptySet(),
+                    onToggle = { id -> scope.launch { HabitsRepository.toggle(context, todayKey, id) } },
                 )
-                Spacer(Modifier.height(Spacing.xs))
             }
 
             items(habitItems.size, key = { habitItems[it].first }) { i ->
                 val (id, name) = habitItems[i]
                 HabitRow(
                     name = name,
-                    done = id in (state.records[activeKey] ?: emptySet()),
-                    detail = habitDetail(state, id, monthStart, activeDate, s),
-                    onToggle = { scope.launch { HabitsRepository.toggle(context, activeKey, id) } },
+                    done = id in (state.records[todayKey] ?: emptySet()),
+                    detail = habitDetail(state, id, monthStart, today, s),
+                    onToggle = { scope.launch { HabitsRepository.toggle(context, todayKey, id) } },
                 )
             }
             item(key = "habits_end") { SinqDivider() }
@@ -340,7 +298,6 @@ fun JourneyScreen(
                     EthiopianYearSwitcher(displayedEcYear, today, earliestYear = state.records.keys.mapNotNull { runCatching { EthiopianDate.from(LocalDate.parse(it)).year }.getOrNull() }.minOrNull()?.coerceAtMost(APP_EPOCH_EC.year) ?: APP_EPOCH_EC.year) { year ->
                         displayedEcYear = year
                         selectedEpochDay = null
-                        activeEpochDay = null
                     }
                 }
                 Spacer(Modifier.height(Spacing.xxs))
@@ -353,13 +310,8 @@ fun JourneyScreen(
                     onYearChange = { year ->
                         displayedEcYear = year
                         selectedEpochDay = null
-                        activeEpochDay = null
                     },
-                    onDaySelect = { date ->
-                        val epoch = if (date == today) null else date.toEpochDay()
-                        selectedEpochDay = epoch
-                        activeEpochDay = epoch
-                    },
+                    onDaySelect = { selectedEpochDay = it.toEpochDay() },
                 )
             }
 
@@ -395,114 +347,10 @@ fun JourneyScreen(
 }
 
 /**
- * Horizontal scrollable day strip allowing the user to seamlessly scroll through
- * recent days and view or toggle prayer records for any selected day.
- */
-@Composable
-private fun JourneyDayStrip(
-    today: LocalDate,
-    activeDate: LocalDate,
-    records: Map<String, Set<String>>,
-    s: Strings,
-    onSelectDay: (LocalDate) -> Unit,
-) {
-    val haptics = LocalHapticFeedback.current
-    val days = remember(today, activeDate) {
-        val minDate = minOf(today.minusDays(13), activeDate)
-        val count = (today.toEpochDay() - minDate.toEpochDay()).toInt()
-        (0..count).map { minDate.plusDays(it.toLong()) }
-    }
-    val stripState = rememberLazyListState()
-
-    LaunchedEffect(days.size, activeDate) {
-        val idx = days.indexOf(activeDate)
-        if (idx >= 0) {
-            stripState.animateScrollToItem(idx)
-        }
-    }
-
-    LazyRow(
-        state = stripState,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-        modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(vertical = Spacing.xxs),
-    ) {
-        items(days, key = { it.toString() }) { date ->
-            val isActive = date == activeDate
-            val isCurrentDay = date == today
-            val ethDate = remember(date) { EthiopianDate.from(date) }
-            val dayRecord = records[date.toString()]
-            val hasPrayer = !dayRecord.isNullOrEmpty()
-            val weekday = s.weekdayNames[date.dayOfWeek.value - 1]
-            val shortWeekday = if (weekday.length > 3) weekday.take(3) else weekday
-
-            val containerColor by animateColorAsState(
-                targetValue = when {
-                    isActive -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f)
-                    isCurrentDay -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                    else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
-                },
-                label = "dayContainerColor",
-            )
-            val borderColor by animateColorAsState(
-                targetValue = when {
-                    isActive -> MaterialTheme.colorScheme.secondary
-                    isCurrentDay -> MaterialTheme.colorScheme.outlineVariant
-                    else -> Color.Transparent
-                },
-                label = "dayBorderColor",
-            )
-
-            Column(
-                modifier = Modifier
-                    .width(52.dp)
-                    .height(68.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(containerColor)
-                    .border(1.2.dp, borderColor, RoundedCornerShape(12.dp))
-                    .clickable {
-                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        onSelectDay(date)
-                    }
-                    .padding(vertical = Spacing.xxs),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    text = shortWeekday,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (isActive) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                )
-                Text(
-                    text = geezNumeral(ethDate.day),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = if (isActive || isCurrentDay) FontWeight.Bold else FontWeight.Medium,
-                    color = if (isActive) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface,
-                )
-                Box(
-                    modifier = Modifier
-                        .size(6.dp)
-                        .clip(CircleShape)
-                        .background(
-                            when {
-                                hasPrayer -> MaterialTheme.colorScheme.secondary
-                                isCurrentDay -> MaterialTheme.colorScheme.outlineVariant
-                                else -> Color.Transparent
-                            }
-                        ),
-                )
-            }
-        }
-    }
-}
-
-/**
- * The canonical hours as a smooth, horizontally scrollable row of tactile pills.
+ * The seven hours, four to a line, on hairlines.
  *
- * Replaces the older 4-column x 2-row grid with a sleek, horizontally swiping
- * strip where each hour has its full liturgical name, full 44-48 dp touch height,
- * clear completion check, and warm gold glow.
+ * Kept hours add a check as well as gold, so completion never depends on colour.
+ * Each compact column still carries the platform's full 48 dp touch height.
  */
 @Composable
 private fun HourStrips(
@@ -512,75 +360,61 @@ private fun HourStrips(
 ) {
     val motion = LocalMotion.current
     val haptics = LocalHapticFeedback.current
-    val gold = MaterialTheme.colorScheme.secondary
-
-    LazyRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-        contentPadding = PaddingValues(vertical = Spacing.xxs),
-    ) {
-        items(items, key = { it.first }) { (id, name) ->
-            val kept = id in done
-            val containerColor by animateColorAsState(
-                targetValue = if (kept) gold.copy(alpha = 0.16f)
-                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                animationSpec = motion.spec(Motion.standard),
-                label = "hourBg",
-            )
-            val borderColor by animateColorAsState(
-                targetValue = if (kept) gold
-                else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
-                animationSpec = motion.spec(Motion.standard),
-                label = "hourBorder",
-            )
-            val textColor by animateColorAsState(
-                targetValue = if (kept) gold
-                else MaterialTheme.colorScheme.onSurfaceVariant,
-                animationSpec = motion.spec(Motion.standard),
-                label = "hourText",
-            )
-
+    Column(Modifier.fillMaxWidth()) {
+        SinqDivider()
+        items.chunked(4).forEach { line ->
             Row(
-                modifier = Modifier
-                    .heightIn(min = 44.dp)
-                    .clip(RoundedCornerShape(22.dp))
-                    .background(containerColor)
-                    .border(1.2.dp, borderColor, RoundedCornerShape(22.dp))
-                    .toggleable(
-                        value = kept,
-                        role = Role.Checkbox,
-                        onValueChange = {
-                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            onToggle(id)
-                        },
-                    )
-                    .padding(horizontal = Spacing.md, vertical = Spacing.xs),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                if (kept) {
-                    Icon(
-                        Icons.Filled.Check,
-                        contentDescription = null,
-                        tint = gold,
-                        modifier = Modifier.size(16.dp),
+                line.forEach { (id, name) ->
+                    val kept = id in done
+                    val tint by animateColorAsState(
+                        targetValue = if (kept) MaterialTheme.colorScheme.secondary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        animationSpec = motion.spec(Motion.standard),
+                        label = "hourTint",
                     )
-                } else {
-                    Box(
+                    Row(
                         modifier = Modifier
-                            .size(12.dp)
-                            .clip(CircleShape)
-                            .border(1.2.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
-                    )
+                            .weight(1f)
+                            .heightIn(min = 48.dp)
+                            .clip(MaterialTheme.shapes.small)
+                            .toggleable(
+                                value = kept,
+                                role = Role.Checkbox,
+                                onValueChange = {
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    onToggle(id)
+                                },
+                            )
+                            .padding(horizontal = Spacing.xxs),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
+                    ) {
+                        if (kept) {
+                            Icon(
+                                Icons.Filled.Check,
+                                contentDescription = null,
+                                tint = tint,
+                                modifier = Modifier.size(14.dp),
+                            )
+                        }
+                        Text(
+                            text = name,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = tint,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
                 }
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = if (kept) FontWeight.SemiBold else FontWeight.Normal,
-                    color = textColor,
-                    maxLines = 1,
-                )
+                // A short last line keeps its columns rather than spreading.
+                repeat(4 - line.size) { Spacer(Modifier.weight(1f)) }
             }
+            SinqDivider()
         }
     }
 }

@@ -17,8 +17,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.LockOpen
+import com.agpeya.app.ui.common.SinqOutlinedButton
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -57,14 +59,20 @@ import com.agpeya.app.ui.strings.Strings
 import com.agpeya.app.ui.theme.Spacing
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.data.FastingCalendar
 import com.agpeya.app.ui.theme.sinqColors
 import androidx.compose.ui.unit.dp
@@ -237,7 +245,12 @@ private fun JournalScreenContent(
             if (entries.any { it.isDraft }) {
                 item {
                     Spacer(Modifier.height(Spacing.md))
-                    TextButton(onClick = { confessing = true }) { Text(s.confessedAction) }
+                    SinqOutlinedButton(
+                        onClick = { confessing = true },
+                        leadingIcon = Icons.Outlined.CheckCircle,
+                    ) {
+                        Text(s.confessedAction)
+                    }
                 }
             }
             item { Spacer(Modifier.height(Spacing.huge)) }
@@ -319,7 +332,13 @@ private fun JournalScreenContent(
  * Thirty cells, because an Ethiopian month is thirty days. ጳጉሜን gets five or
  * six, and the row simply ends there.
  */
-@OptIn(ExperimentalLayoutApi::class)
+/**
+ * The month as a smooth, horizontally scrollable strip of days above its entries.
+ *
+ * Each card displays the weekday, day number, and status indicator.
+ * A written day carries a warm gold accent, a fast day carries the fasting wash,
+ * today carries a highlighted accent ring, and tapping a written day smoothly scrolls to its first entry.
+ */
 @Composable
 private fun MonthStrip(
     year: Int,
@@ -329,47 +348,105 @@ private fun MonthStrip(
     onDay: (Int) -> Unit,
 ) {
     val s = LocalStrings.current
+    val haptics = LocalHapticFeedback.current
     val days = remember(year, month) {
         if (month == 13) EthiopianDate.pagumeLength(year) else 30
     }
-    val fastWash = sinqColors.hero.copy(alpha = 0.14f)
+    val sinq = sinqColors
+    val fastWash = sinq.hero.copy(alpha = 0.14f)
     val gold = MaterialTheme.colorScheme.secondary
-    val empty = MaterialTheme.colorScheme.surfaceVariant
+    val empty = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
     val todayEth = remember(today) { EthiopianDate.from(today) }
-    // One pass over the month, so the calendar work is not redone per cell.
-    val fasting = remember(year, month, days) {
+
+    // Pre-calculate fasting and weekdays for all days in the month once
+    val dayInfos = remember(year, month, days) {
         (1..days).map { day ->
             runCatching {
                 val date = EthiopianDate(year, month, day).toGregorian()
-                FastingCalendar.fastOn(date) != null || FastingCalendar.isWeeklyFastDay(date)
-            }.getOrDefault(false)
+                val isFast = FastingCalendar.fastOn(date) != null || FastingCalendar.isWeeklyFastDay(date)
+                val weekday = s.weekdayNames.getOrElse(date.dayOfWeek.value - 1) { "" }
+                Triple(date, isFast, weekday)
+            }.getOrElse { Triple(null, false, "") }
         }
     }
-    FlowRow(
+
+    val rowState = rememberLazyListState()
+    LaunchedEffect(year, month) {
+        if (todayEth.year == year && todayEth.month == month) {
+            rowState.animateScrollToItem((todayEth.day - 3).coerceAtLeast(0))
+        }
+    }
+
+    LazyRow(
+        state = rowState,
         modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xs),
-        horizontalArrangement = Arrangement.spacedBy(3.dp),
-        verticalArrangement = Arrangement.spacedBy(3.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = 2.dp),
     ) {
-        (1..days).forEach { day ->
+        items(days) { index ->
+            val day = index + 1
             val isWritten = day in written
             val isToday = todayEth.year == year && todayEth.month == month && todayEth.day == day
-            Box(
+            val (gregDate, isFast, weekday) = dayInfos[index]
+
+            val containerColor = when {
+                isWritten -> gold.copy(alpha = 0.22f)
+                isFast -> fastWash
+                else -> empty
+            }
+            val borderColor = when {
+                isToday -> gold
+                isWritten -> gold.copy(alpha = 0.6f)
+                else -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+            }
+
+            Column(
                 modifier = Modifier
-                    .size(48.dp)
-                    .semantics(mergeDescendants = true) { contentDescription = formatEthiopian(EthiopianDate(year, month, day).toGregorian(), s) }
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(
-                        when {
-                            isWritten -> gold
-                            fasting[day - 1] -> fastWash
-                            else -> empty
-                        },
+                    .width(48.dp)
+                    .height(68.dp)
+                    .semantics(mergeDescendants = true) {
+                        gregDate?.let { contentDescription = formatEthiopian(it, s) }
+                    }
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(containerColor)
+                    .border(
+                        width = if (isToday) 1.6.dp else 1.dp,
+                        color = borderColor,
+                        shape = RoundedCornerShape(12.dp),
                     )
-                    .then(if (isToday) Modifier.border(1.dp, gold, RoundedCornerShape(2.dp)) else Modifier)
-                    .clickable(enabled = isWritten, onClickLabel = s.journalTitle) { onDay(day) },
-                contentAlignment = Alignment.Center,
+                    .clickable(enabled = isWritten, onClickLabel = s.journalTitle) {
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onDay(day)
+                    }
+                    .padding(vertical = 6.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text(day.toString(), color = if (isWritten) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurface)
+                Text(
+                    text = weekday,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (isToday) gold else MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                )
+                Text(
+                    text = geezNumeral(day),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = if (isToday || isWritten) FontWeight.Bold else FontWeight.Medium,
+                    color = if (isWritten) gold else MaterialTheme.colorScheme.onSurface,
+                )
+                Box(
+                    modifier = Modifier
+                        .size(6.dp)
+                        .clip(CircleShape)
+                        .background(
+                            when {
+                                isWritten -> gold
+                                isToday -> gold.copy(alpha = 0.5f)
+                                isFast -> sinq.hero.copy(alpha = 0.7f)
+                                else -> Color.Transparent
+                            }
+                        ),
+                )
             }
         }
     }

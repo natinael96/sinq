@@ -46,12 +46,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.ContentRepository
 import com.agpeya.app.data.HoursRepository
@@ -425,7 +430,18 @@ private fun NameDialog(
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var text by remember { mutableStateOf(initial) }
+    var text by remember {
+        mutableStateOf(
+            TextFieldValue(
+                text = initial,
+                selection = TextRange(0, initial.length),
+            ),
+        )
+    }
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
@@ -435,13 +451,15 @@ private fun NameDialog(
                 onValueChange = { text = it },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester),
             )
         },
         confirmButton = {
             SinqPrimaryButton(
-                onClick = { onConfirm(text.trim()) },
-                enabled = text.isNotBlank(),
+                onClick = { onConfirm(text.text.trim()) },
+                enabled = text.text.isNotBlank(),
             ) { Text(confirm) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(cancel) } },

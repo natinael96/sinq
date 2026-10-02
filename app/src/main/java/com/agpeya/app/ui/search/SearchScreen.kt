@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.UserDataRepository
 import com.agpeya.app.search.AmharicSearch
 import com.agpeya.app.ui.common.ListRow
+import com.agpeya.app.ui.common.SectionHeader
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.common.LoadingPanel
 import com.agpeya.app.ui.common.StatePanel
@@ -256,11 +257,23 @@ fun SearchScreen(
                             val whole = source in expanded || rows.size <= FIRST_PER_SOURCE
                             val visible = if (whole) rows else rows.take(FIRST_PER_SOURCE)
                             item(key = "h_$source") {
-                                Text(
-                                    text = "${sourceTitle(source, s)}  ${rows.size}",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.secondary,
-                                    modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+                                Spacer(Modifier.height(Spacing.sm))
+                                SectionHeader(
+                                    text = sourceTitle(source, s),
+                                    modifier = Modifier.padding(top = Spacing.sm, bottom = Spacing.xs),
+                                    trailing = {
+                                        Surface(
+                                            shape = MaterialTheme.shapes.extraSmall,
+                                            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f),
+                                        ) {
+                                            Text(
+                                                text = "${rows.size}",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                            )
+                                        }
+                                    },
                                 )
                             }
                             items(

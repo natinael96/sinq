@@ -650,22 +650,16 @@ private fun HomeDashboard(
             onClick = onOpenGitsawe,
             modifier = Modifier.grow(gitsaweWeight, max = gitsaweCeiling),
         )
-        if (dailyQuote != null) {
-            DailyQuoteHairlineRow(
-                quote = dailyQuote,
-                isBookmarked = isDailyQuoteBookmarked,
-                onToggleBookmark = onToggleDailyQuoteBookmark,
-                onClick = onOpenDailyQuote,
-            )
-        }
-        TodayRow(
-            habitIds = habitIds,
-            doneToday = doneToday,
+        TodayAndQuoteSection(
             records = habitState.records,
             today = today,
             onClick = onOpenJourney,
             scale = cardScale,
-            modifier = Modifier.grow(1f, max = TODAY_CEILING * room),
+            dailyQuote = dailyQuote,
+            isDailyQuoteBookmarked = isDailyQuoteBookmarked,
+            onToggleDailyQuoteBookmark = onToggleDailyQuoteBookmark,
+            onOpenDailyQuote = onOpenDailyQuote,
+            modifier = Modifier.grow(1f, max = (if (dailyQuote != null) 126.dp else TODAY_CEILING) * room),
         )
         ShortcutsRow(stackReadingCards, today, onOpenPsalter, onOpenZewotr)
     }
@@ -972,23 +966,54 @@ private fun GitsaweCard(state: HomeReadingsState, onClick: () -> Unit, modifier:
         Icon(Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = null, tint = sinq.onHeroMuted)
     }
 }
-
 /**
- * ዛሬ, at the foot of the page: a row between two hairlines rather than a card.
+ * Merged Today (ዛሬ) and Desert Father saying (የአበው ምክር) section.
  *
- * It is a summary, not a task, so it comes last and does not compete with the
- * things above it for the eye. The card cost 99 dp to say what a 64 dp row
- * says — the count, the candle, the month's line, and the full ten weeks of
- * the heatmap, which is the part worth keeping at full size.
+ * Today sits upper and Desert Father below, sharing a single middle dividing
+ * hairline to eliminate duplicate parallel divider lines.
  */
 @Composable
-private fun TodayRow(
-    habitIds: List<String>,
-    doneToday: Set<String>,
+private fun TodayAndQuoteSection(
     records: Map<String, Set<String>>,
     today: LocalDate,
     onClick: () -> Unit,
-    /** Matches the page's own font-driven growth — see [HomeDashboard]. */
+    scale: Float,
+    dailyQuote: com.agpeya.app.model.DailyQuote?,
+    isDailyQuoteBookmarked: Boolean,
+    onToggleDailyQuoteBookmark: () -> Unit,
+    onOpenDailyQuote: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        SinqDivider()
+        TodayRowContent(
+            records = records,
+            today = today,
+            onClick = onClick,
+            scale = scale,
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .heightIn(min = 60.dp),
+        )
+        if (dailyQuote != null) {
+            SinqDivider()
+            DailyQuoteRowContent(
+                quote = dailyQuote,
+                isBookmarked = isDailyQuoteBookmarked,
+                onToggleBookmark = onToggleDailyQuoteBookmark,
+                onClick = onOpenDailyQuote,
+            )
+        }
+        SinqDivider()
+    }
+}
+
+@Composable
+private fun TodayRowContent(
+    records: Map<String, Set<String>>,
+    today: LocalDate,
+    onClick: () -> Unit,
     scale: Float,
     modifier: Modifier = Modifier,
 ) {
@@ -998,56 +1023,48 @@ private fun TodayRow(
     // the text beside it. It grows with the row, but capped: past 1.5x it
     // would take the width that text needs.
     val glyphScale = scale.coerceAtMost(1.5f)
-    Column(modifier.fillMaxWidth()) {
-        SinqDivider()
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                // The row takes whatever height the block was given, so the
-                // hairlines stay at its edges and the tally sits in the middle.
-                .weight(1f)
-                .heightIn(min = 64.dp)
-                .clickable(onClick = onClick)
-                .semantics { role = Role.Button }
-                .padding(vertical = Spacing.sm),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        s.todayLabel,
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.secondary,
-                        maxLines = 1,
-                    )
-                    Spacer(Modifier.width(Spacing.sm))
-                    Candle(
-                        lit = summary.prayedToday,
-                        contentDescription = if (summary.prayedToday) s.journeyTodayLit else s.journeyTodayUnlit,
-                        bodyColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        flameColor = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(width = 13.dp * glyphScale, height = 22.dp * glyphScale),
-                    )
-                }
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .semantics { role = Role.Button }
+            .padding(vertical = Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    journeyLine(summary, s),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    s.todayLabel,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.secondary,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                )
+                Spacer(Modifier.width(Spacing.sm))
+                Candle(
+                    lit = summary.prayedToday,
+                    contentDescription = if (summary.prayedToday) s.journeyTodayLit else s.journeyTodayUnlit,
+                    bodyColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    flameColor = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(width = 13.dp * glyphScale, height = 22.dp * glyphScale),
                 )
             }
-            Spacer(Modifier.width(Spacing.xs))
-            // Drawn, not laid out, so the squares grow with the row: the one
-            // thing on ዛሬ that a taller block can actually spend height on.
-            CompactHeatmap(
-                records = records,
-                today = today,
-                weeks = 10,
-                maxCell = 10.dp * glyphScale,
+            Text(
+                journeyLine(summary, s),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
-        SinqDivider()
+        Spacer(Modifier.width(Spacing.xs))
+        // Drawn, not laid out, so the squares grow with the row: the one
+        // thing on ዛሬ that a taller block can actually spend height on.
+        CompactHeatmap(
+            records = records,
+            today = today,
+            weeks = 10,
+            maxCell = 10.dp * glyphScale,
+        )
     }
 }
 
@@ -1152,84 +1169,79 @@ private fun AllHoursSheet(hours: List<Hour>, currentHourId: String?, onOpenHour:
 }
 
 /**
- * Ultra-compact single-line hairline row for today's Desert Father saying (የአበው ምክር).
+ * Ultra-compact single-line hairline row content for today's Desert Father saying (የአበው ምክር).
  */
 @Composable
-private fun DailyQuoteHairlineRow(
-    quote: com.agpeya.app.model.DailyQuote?,
+private fun DailyQuoteRowContent(
+    quote: com.agpeya.app.model.DailyQuote,
     isBookmarked: Boolean = false,
     onToggleBookmark: () -> Unit = {},
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (quote == null) return
     val s = LocalStrings.current
     val gold = MaterialTheme.colorScheme.secondary
     val author = quote.authorAm.ifBlank { quote.authorEn }
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        SinqDivider()
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(38.dp)
+            .clickable(onClick = onClick)
+            .semantics { role = Role.Button }
+            .padding(horizontal = Spacing.xs),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(38.dp)
-                .clickable(onClick = onClick)
-                .semantics { role = Role.Button }
-                .padding(horizontal = Spacing.xs),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.weight(1f),
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f),
+            Text(
+                text = "☩",
+                style = MaterialTheme.typography.labelSmall,
+                color = gold,
+            )
+            Spacer(Modifier.width(Spacing.xs))
+            Text(
+                text = s.dailyQuoteChannelName,
+                style = MaterialTheme.typography.titleSmall,
+                color = gold,
+                maxLines = 1,
+            )
+            Spacer(Modifier.width(Spacing.xs))
+            Text(
+                text = "·",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.width(Spacing.xs))
+            Text(
+                text = author,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(
+                onClick = onToggleBookmark,
+                modifier = Modifier.size(32.dp),
             ) {
-                Text(
-                    text = "☩",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = gold,
-                )
-                Spacer(Modifier.width(Spacing.xs))
-                Text(
-                    text = s.dailyQuoteChannelName,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = gold,
-                    maxLines = 1,
-                )
-                Spacer(Modifier.width(Spacing.xs))
-                Text(
-                    text = "·",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.width(Spacing.xs))
-                Text(
-                    text = author,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(
-                    onClick = onToggleBookmark,
-                    modifier = Modifier.size(32.dp),
-                ) {
-                    Icon(
-                        imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-                        contentDescription = s.bookmarkAction,
-                        tint = if (isBookmarked) gold else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(IconSize.small),
-                    )
-                }
                 Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                    contentDescription = s.bookmarkAction,
+                    tint = if (isBookmarked) gold else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(IconSize.small),
                 )
             }
+            Icon(
+                imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(IconSize.small),
+            )
         }
-        SinqDivider()
     }
 }
