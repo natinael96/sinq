@@ -67,6 +67,25 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
 <!-- releases:start -->
 <article class="release">
   <header>
+    <h2>1.5.0 <span class="date">2 October 2026</span></h2>
+    <p class="motto"><span>Desert Fathers Daily Quotes, Lockscreen widgets, privacy-first lockscreen notifications, and multi-year rotation</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Desert Fathers Daily Sayings (የአበው ምክር).</b> Bundled 844 canonical sayings from the Desert Fathers (*Apophthegmata Patrum* / ዜና አበው) covering 124 Desert Fathers and Mothers with full Amharic and Ge&#x27;ez titles.</span></li>
+    <li><span><b>Continuous Multi-Year Rotation.</b> Implemented an advancing multi-year progression ensuring consecutive years never display the same sayings on the same day (~2.31 years of unique content).</span></li>
+    <li><span><b>Lockscreen &amp; Home Widget.</b> Created an offline Android AppWidget with <code>widgetCategory=&quot;home_screen|keyguard&quot;</code>, with ongoing public lockscreen notification fallback for devices without lockscreen widget support.</span></li>
+    <li><span><b>Home Contemplation Row &amp; Sheet.</b> Added an ultra-compact hairline row on Home (<code>☩  የአበው ምክር  ·  [Author]  →</code>) opening a contemplation sheet with sharing and direct spiritual journaling.</span></li>
+    <li><span><b>Privacy-First Lockscreen Notification Policy.</b> Explicitly configured notification visibility across the app: only Daily Quote and Daily Gitsawe are visible on the secure lockscreen (<code>VISIBILITY_PUBLIC</code>); prayer alarms, habit streaks, breath prayers, and reading reminders are strictly quarantined (<code>VISIBILITY_PRIVATE</code> and <code>VISIBILITY_SECRET</code>).</span></li>
+    <li><span><b>Notification Schedule &amp; Settings.</b> Added on/off toggle and custom time picker in Settings allowing users to customize when the daily quote refreshes.</span></li>
+    <li><span><b>Reading Plan Visuals.</b> Refined reading plan overview with visual section badges, part headers, and bookmark markers.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
     <h2>1.4.2 <span class="date">30 September 2026</span></h2>
     <p class="motto"><span>Sinksar punctuation setting, streamlined prayer list divider, and content fixes</span></p>
   </header>
@@ -173,6 +192,9 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   </div>
 </article>
 
+<details class="more-releases">
+  <summary><span>3 earlier releases, 1.2.1 back to 1.0.0</span></summary>
+  <div class="more-body">
 <article class="release">
   <header>
     <h2>1.2.1 <span class="date">29 September 2026</span></h2>
@@ -187,9 +209,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   </div>
 </article>
 
-<details class="more-releases">
-  <summary><span>2 earlier releases, 1.2.0 back to 1.0.0</span></summary>
-  <div class="more-body">
 <article class="release">
   <header>
     <h2>1.2.0 <span class="date">29 September 2026</span></h2>
