@@ -6,6 +6,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.FormatListBulleted
+import androidx.compose.material.icons.outlined.Bookmarks
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.CardGiftcard
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.VolunteerActivism
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -13,14 +20,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.ui.common.NavRow
 import com.agpeya.app.ui.common.SectionHeader
+import com.agpeya.app.ui.common.SinqCard
+import com.agpeya.app.ui.common.SinqDivider
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.Spacing
+import kotlinx.coroutines.launch
 
 /**
  * መዝገብ — what the app keeps a record of.
@@ -44,7 +53,7 @@ fun RecordsScreen(
 ) {
     val s = LocalStrings.current
     val context = androidx.compose.ui.platform.LocalContext.current
-    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
     val name by com.agpeya.app.data.SettingsRepository.profileName(context)
         .collectAsState(initial = "")
     val christianName by com.agpeya.app.data.SettingsRepository.christianName(context)
@@ -61,45 +70,85 @@ fun RecordsScreen(
         ) {
             item {
                 SectionHeader(s.remindersGroupGiving)
-                NavRow(s.settingsTitheTitle, onOpenTithe, subtitle = s.settingsTitheDesc)
-                NavRow(s.settingsVowTitle, onOpenVows, subtitle = s.settingsVowDesc)
-                NavRow(s.settingsPenanceTitle, onOpenPenance, subtitle = s.settingsPenanceDesc)
+                SinqCard(contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs)) {
+                    NavRow(
+                        title = s.settingsTitheTitle,
+                        onClick = onOpenTithe,
+                        subtitle = s.settingsTitheDesc,
+                        leadingIcon = Icons.Outlined.CardGiftcard,
+                    )
+                    SinqDivider()
+                    NavRow(
+                        title = s.settingsVowTitle,
+                        onClick = onOpenVows,
+                        subtitle = s.settingsVowDesc,
+                        leadingIcon = Icons.Outlined.VolunteerActivism,
+                    )
+                    SinqDivider()
+                    NavRow(
+                        title = s.settingsPenanceTitle,
+                        onClick = onOpenPenance,
+                        subtitle = s.settingsPenanceDesc,
+                        leadingIcon = Icons.Outlined.FavoriteBorder,
+                    )
+                }
+
                 Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(s.settingsGroupReading)
-                NavRow(
-                    s.marksTitle,
-                    onOpenMarks,
-                    subtitle = "${s.marksTabBookmarks} · ${s.marksTabHighlights} · ${s.marksTabNotes}",
-                )
-                NavRow(s.prayerListTitle, onOpenPrayerList)
-                NavRow(s.fastingTitle, onOpenFasting)
-                // መረጃ was its own page carrying five rows, one of which was this
-                // page's ምልክቶቼ over again, with the same subtitle and the same
-                // destination. A record and the file it is saved to belong on
-                // one page.
+                SinqCard(contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs)) {
+                    NavRow(
+                        title = s.marksTitle,
+                        onClick = onOpenMarks,
+                        subtitle = "${s.marksTabBookmarks} · ${s.marksTabHighlights} · ${s.marksTabNotes}",
+                        leadingIcon = Icons.Outlined.Bookmarks,
+                    )
+                    SinqDivider()
+                    NavRow(
+                        title = s.prayerListTitle,
+                        onClick = onOpenPrayerList,
+                        subtitle = if (s.isAmharic) "የግልና የቤተሰብ የጸሎት መዝገብ" else "Intercessory prayer list",
+                        leadingIcon = Icons.AutoMirrored.Outlined.FormatListBulleted,
+                    )
+                    SinqDivider()
+                    NavRow(
+                        title = s.fastingTitle,
+                        onClick = onOpenFasting,
+                        subtitle = if (s.isAmharic) "የአጽዋማት የቀን መቁጠሪያና ሥርዓት" else "Fasting calendar and rules",
+                        leadingIcon = Icons.Outlined.CalendarMonth,
+                    )
+                }
+
                 Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(s.settingsGroupData)
                 Text(
                     if (s.isAmharic) "መረጃዎ በዚህ ስልክ ላይ ይቀመጣል። ለሌላ መሣሪያ ለማዛወር ምትኬ ይፍጠሩ። የማስታወሻ ምትኬ ፋይል በይለፍ ቃል አይጠበቅም፤ ቀኖና በምትኬ አይካተትም።"
                     else "Your records stay on this phone. Create a backup to move them to another device. Exported journal files are not password-protected; penance records are excluded from backups.",
                     style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = Spacing.sm),
                 )
-                EditableRow(s.yourNameLabel, name, s.addName) {
-                    scope.launch { com.agpeya.app.data.SettingsRepository.setProfileName(context, it) }
-                }
-                EditableRow(s.christianNameLabel, christianName, s.addChristianName) {
-                    scope.launch { com.agpeya.app.data.SettingsRepository.setChristianName(context, it) }
+                SinqCard(contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs)) {
+                    EditableRow(s.yourNameLabel, name, s.addName) {
+                        scope.launch { com.agpeya.app.data.SettingsRepository.setProfileName(context, it) }
+                    }
+                    SinqDivider()
+                    EditableRow(s.christianNameLabel, christianName, s.addChristianName) {
+                        scope.launch { com.agpeya.app.data.SettingsRepository.setChristianName(context, it) }
+                    }
+                    SinqDivider()
+                    BackupRows(s)
                 }
                 if (lastBackupAt > 0L) {
                     val saved = java.time.Instant.ofEpochMilli(lastBackupAt)
                         .atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+                    Spacer(Modifier.height(Spacing.xs))
                     Text(
                         "${s.lastBackupLabel}: ${com.agpeya.app.ui.common.formatEthiopian(saved, s)}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = Spacing.xs),
                     )
                 }
-                BackupRows(s)
                 Spacer(Modifier.height(Spacing.xxl))
             }
         }

@@ -5,6 +5,16 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.5.3] — 2026-10-02
+
+_versionCode 103 · Settings hub reorganization, daily quote bookmarks, and UI card refinements_
+
+### Added
+- **Settings Category Hubs.** Reorganized settings into 4 structured category hubs (Preferences, Notifications, Records, Appearance) with live status subtitles.
+- **SinqCard Containers & Semantic Leading Icons.** Enclosed settings and spiritual records rows into styled `SinqCard` containers with leading icons (`Paid`, `VolunteerActivism`, `FavoriteBorder`, `Bookmarks`, `FormatListBulleted`, `CalendarMonth`).
+- **Desert Fathers Daily Quote Bookmarking.** Added bookmarking support to daily quotes with direct bookmark navigation and journaling from bookmarks.
+- **Daily Quotes Source Attribution.** Added attribution citing `catenabible.com` in the contemplation sheet and share intents.
+
 ## [1.5.2] — 2026-10-02
 
 _versionCode 102 · Compact lockscreen keyguard widget support and dimensions optimization_

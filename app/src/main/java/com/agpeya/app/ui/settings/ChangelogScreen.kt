@@ -31,6 +31,23 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.5.3",
+        title = "Settings hub reorganization, daily quote bookmarks, and UI card refinements",
+        titleAm = "የቅንብሮች አደረጃጀት፣ የአበው ምክር ዕልባቶች እና የተሻሻሉ የመረጃ ካርዶች",
+        changes = listOf(
+            "Reorganized settings into 4 dedicated category hubs (Preferences, Notifications, Records, Appearance) with live status summaries.",
+            "Enclosed records and copy format rows into styled SinqCard containers with semantic leading icons.",
+            "Added bookmarking for Desert Fathers daily quotes with direct bookmark navigation and journaling.",
+            "Added source attribution citing catenabible.com in the daily quotes sheet and share text.",
+        ),
+        changesAm = listOf(
+            "ቅንብሮች በ4 ዋና ዋና ክፍሎች (ምርጫዎች፣ ማሳሰቢያዎች፣ መዝገብ፣ ገጽታ) ከነቀጥታ ሁኔታ መግለጫቸው ተደራጅተዋል።",
+            "የመዝገብና የቅዳ ቅንብሮች ረድፎች በመለያ አዶዎችና በካርድ ቅርጽ ውብ ሆነው ተዘጋጅተዋል።",
+            "ለዕለታዊ የአበው ምክር የዕልባት ድጋፍ እና በቀጥታ ወደ ማስታወሻ የመጻፍ ዕድል ተጨምሯል።",
+            "ለአበው ምክር የድረ-ገጽ ምንጭ (catenabible.com) በመተግበሪያውና በማጋሪያ ጽሑፍ ላይ ተካቷል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.5.2",
         title = "Compact keyguard widget support for lockscreen customization",
         titleAm = "ለስልክ መቆለፊያ ገጽ የሚስማማ የታመቀ የአበው ምክር መተግበሪያ (Widget)",

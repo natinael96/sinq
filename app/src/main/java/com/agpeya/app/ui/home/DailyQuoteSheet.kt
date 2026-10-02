@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -181,6 +182,15 @@ fun DailyQuoteSheet(
                             style = MaterialTheme.typography.labelSmall,
                             color = gold,
                         )
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            text = if (s.isAmharic) "ምንጭ፦ catenabible.com" else "Source: catenabible.com",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.clickable {
+                                com.agpeya.app.ui.common.openUrl(context, "https://catenabible.com")
+                            },
+                        )
                     }
                 }
             }
@@ -193,7 +203,7 @@ fun DailyQuoteSheet(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
                 OutlinedButton(
-                    onClick = { shareQuote(context, quote) },
+                    onClick = { shareQuote(context, quote, s.isAmharic) },
                     modifier = Modifier.weight(1f),
                     shape = MaterialTheme.shapes.medium,
                 ) {
@@ -234,9 +244,11 @@ fun DailyQuoteSheet(
     }
 }
 
-private fun shareQuote(context: Context, quote: DailyQuote) {
-    val author = quote.authorAm.ifBlank { quote.authorEn }
-    val text = "«${quote.quote}»\n\n— $author (የአበው ምክር)\n\nስንቅ (Sinq)"
+private fun shareQuote(context: Context, quote: DailyQuote, isAmharic: Boolean = true) {
+    val author = if (isAmharic) quote.authorAm.ifBlank { quote.authorEn } else quote.authorEn.ifBlank { quote.authorAm }
+    val title = if (isAmharic) "የአበው ምክር" else "Desert Fathers"
+    val source = if (isAmharic) "ምንጭ፦ catenabible.com" else "Source: catenabible.com"
+    val text = "«${quote.quote}»\n\n— $author ($title)\n$source\n\nስንቅ (Sinq)"
     val sendIntent = Intent().apply {
         action = Intent.ACTION_SEND
         putExtra(Intent.EXTRA_TEXT, text)

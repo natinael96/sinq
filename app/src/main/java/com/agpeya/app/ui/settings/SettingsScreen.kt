@@ -41,6 +41,20 @@ import androidx.compose.material.icons.automirrored.outlined.FormatAlignLeft
 import androidx.compose.material.icons.automirrored.outlined.FormatAlignRight
 import androidx.compose.material.icons.outlined.Upload
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.outlined.Church
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.FormatQuote
+import androidx.compose.material.icons.outlined.NotificationsActive
+import androidx.compose.material.icons.outlined.RestartAlt
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.outlined.TextFields
+import androidx.compose.material.icons.automirrored.outlined.VolumeUp
+import androidx.compose.material.icons.outlined.VolunteerActivism
+import androidx.compose.runtime.CompositionLocalProvider
+import com.agpeya.app.ui.common.SinqCard
+import com.agpeya.app.ui.common.SinqDivider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -664,150 +678,267 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
         ) {
             item {
-                Text(
-                    if (s.isAmharic) "እነዚህ ቅንብሮች የንባብ ገጾችን ጽሑፍ ይቀይራሉ። የገጽ ማንሸራተት ምርጫው ለሰዓታት ጸሎትና ለዳዊት ንባብ ነው።"
-                    else "Text appearance applies across readers. Paged reading applies to prayer hours and the Psalter.",
-                    style = MaterialTheme.typography.bodySmall,
-                )
-                TextButton(enabled = !action.busy, onClick = {
-                    action.run { SettingsRepository.resetReadingPresentation(context) }
-                }) { Text(if (s.isAmharic) "የንባብ ቅንብሮችን ወደ መጀመሪያው መልስ" else "Reset reader appearance") }
-                Spacer(Modifier.height(Spacing.sm))
-                Surface(
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = MaterialTheme.shapes.large,
-                    modifier = Modifier.fillMaxWidth(),
+                // Sacred Dynamic Manuscript Live Preview
+                CompositionLocalProvider(
+                    com.agpeya.app.ui.theme.LocalReadingFont provides com.agpeya.app.ui.theme.readingFontFamily(font),
+                    com.agpeya.app.ui.theme.LocalReadingLineSpacing provides lineSpacing.multiplier,
+                    com.agpeya.app.ui.theme.LocalReadingTextAlign provides when (readingAlignment) {
+                        com.agpeya.app.data.ReadingAlignment.JUSTIFIED -> androidx.compose.ui.text.style.TextAlign.Justify
+                        com.agpeya.app.data.ReadingAlignment.LEFT -> androidx.compose.ui.text.style.TextAlign.Left
+                        com.agpeya.app.data.ReadingAlignment.RIGHT -> androidx.compose.ui.text.style.TextAlign.Right
+                        com.agpeya.app.data.ReadingAlignment.CENTER -> androidx.compose.ui.text.style.TextAlign.Center
+                    },
                 ) {
-                    Text(
-                        "አቡነ ዘበሰማያት ስምከ ይትቀደስ።\nመንግሥትከ ትምጻእ።",
-                        style = com.agpeya.app.ui.theme.readingBodyStyle(size),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.padding(Spacing.lg),
-                    )
-                }
-                Spacer(Modifier.height(Spacing.lg))
-                NavRow(s.readingFontTitle, onOpenFonts, subtitle = com.agpeya.app.ui.settings.fontLabel(font))
-                Text(s.fontSizeLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    SinqStepperButton(
-                        icon = Icons.Outlined.Remove,
-                        contentDescription = null,
-                        onClick = { action.run { SettingsRepository.setFontStep(context, step - 1) } },
-                        enabled = step > 0,
-                    )
-                    Text(
-                        "${size}sp",
-                        modifier = Modifier.weight(1f),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
-                    SinqStepperButton(
-                        icon = Icons.Outlined.Add,
-                        contentDescription = null,
-                        onClick = { action.run { SettingsRepository.setFontStep(context, step + 1) } },
-                        enabled = step < SettingsRepository.FONT_STEPS_SP.lastIndex,
-                    )
-                }
-                Spacer(Modifier.height(Spacing.md))
-                Text(s.lineSpacingLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-                Spacer(Modifier.height(Spacing.xs))
-                androidx.compose.material3.SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                    val choices = listOf(
-                        com.agpeya.app.data.ReadingLineSpacing.COMPACT to s.lineCompact,
-                        com.agpeya.app.data.ReadingLineSpacing.NORMAL to s.lineNormal,
-                        com.agpeya.app.data.ReadingLineSpacing.RELAXED to s.lineRelaxed,
-                    )
-                    choices.forEachIndexed { index, (choice, label) ->
-                        SegmentedButton(
-                            selected = lineSpacing == choice,
-                            onClick = { action.run { SettingsRepository.setReadingLineSpacing(context, choice) } },
-                            shape = androidx.compose.material3.SegmentedButtonDefaults.itemShape(index, choices.size),
-                            icon = {},
-                        ) { Text(label, maxLines = 1) }
-                    }
-                }
-                Spacer(Modifier.height(Spacing.md))
-                Text(s.textAlignmentLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-                Spacer(Modifier.height(Spacing.xs))
-                SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                    val choices = listOf(
-                        Triple(com.agpeya.app.data.ReadingAlignment.JUSTIFIED, Icons.Outlined.FormatAlignJustify, s.alignJustified),
-                        Triple(com.agpeya.app.data.ReadingAlignment.LEFT, Icons.AutoMirrored.Outlined.FormatAlignLeft, s.alignLeft),
-                        Triple(com.agpeya.app.data.ReadingAlignment.RIGHT, Icons.AutoMirrored.Outlined.FormatAlignRight, s.alignRight),
-                        Triple(com.agpeya.app.data.ReadingAlignment.CENTER, Icons.Outlined.FormatAlignCenter, s.alignCenter),
-                    )
-                    choices.forEachIndexed { index, (choice, icon, description) ->
-                        SegmentedButton(
-                            selected = readingAlignment == choice,
-                            onClick = { action.run { SettingsRepository.setReadingAlignment(context, choice) } },
-                            shape = SegmentedButtonDefaults.itemShape(index, choices.size),
-                            icon = {},
-                        ) {
-                            Icon(icon, contentDescription = description)
+                    androidx.compose.material3.Surface(
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = MaterialTheme.shapes.large,
+                        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.35f)),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Column(Modifier.padding(Spacing.lg)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text("☩ ", color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.labelSmall)
+                                    Text(
+                                        if (s.isAmharic) "የንባብ ቅድመ እይታ" else "Live Reading Preview",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                    )
+                                }
+                                Text(
+                                    "${com.agpeya.app.ui.settings.fontLabel(font)} · ${size}sp",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            Spacer(Modifier.height(Spacing.sm))
+                            Text(
+                                if (s.isAmharic)
+                                    "አቡነ ዘበሰማያት ይትቀደስ ስምከ፤ ትምጻእ መንግሥትከ፤ ይኩን ፈቃድከ በከመ በሰማይ ከማሁ በምድር። የዕለት እንጀራችንን ስጠን ዛሬ፤"
+                                else
+                                    "Our Father who art in heaven, hallowed be Thy name. Thy kingdom come, Thy will be done, on earth as it is in heaven. Give us this day our daily bread;",
+                                style = com.agpeya.app.ui.theme.readingBodyStyle(size),
+                                color = MaterialTheme.colorScheme.onBackground,
+                            )
                         }
                     }
                 }
-                ToggleRow(
-                    s.keepScreenOn,
-                    keepOn,
-                    { action.run { SettingsRepository.setKeepScreenOn(context, it) } },
-                    subtitle = s.keepScreenOnDesc,
-                )
-                // Both of these lived only inside a reader's ⋮ menu, so someone
-                // looking for them in ቅንብሮች could not find them at all.
-                SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                    val modes = listOf(
-                        com.agpeya.app.data.ReadingMode.VERTICAL to s.readingModeVertical,
-                        com.agpeya.app.data.ReadingMode.HORIZONTAL to s.readingModeHorizontal,
+
+                Spacer(Modifier.height(Spacing.lg))
+
+                // Group 1: Typography & Formatting
+                SectionHeader(if (s.isAmharic) "የፊደልና የቅርጸት ምርጫዎች" else "Typography & Formatting")
+                SinqCard(
+                    contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md),
+                ) {
+                    NavRow(
+                        title = s.readingFontTitle,
+                        onClick = onOpenFonts,
+                        subtitle = com.agpeya.app.ui.settings.fontLabel(font),
+                        leadingIcon = Icons.Outlined.TextFields,
                     )
-                    modes.forEachIndexed { index, (mode, label) ->
-                        SegmentedButton(
-                            selected = readingMode == mode,
-                            onClick = { action.run { SettingsRepository.setReadingMode(context, mode) } },
-                            shape = SegmentedButtonDefaults.itemShape(index, modes.size),
-                            icon = {},
-                        ) { Text(label, maxLines = 1) }
+                    SinqDivider(modifier = Modifier.padding(vertical = Spacing.xs))
+
+                    // Font size stepper
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xs),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text(s.fontSizeLabel, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
+                            Text("${size}sp", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            SinqStepperButton(
+                                icon = Icons.Outlined.Remove,
+                                contentDescription = null,
+                                onClick = { action.run { SettingsRepository.setFontStep(context, step - 1) } },
+                                enabled = step > 0,
+                            )
+                            Spacer(Modifier.width(Spacing.md))
+                            SinqStepperButton(
+                                icon = Icons.Outlined.Add,
+                                contentDescription = null,
+                                onClick = { action.run { SettingsRepository.setFontStep(context, step + 1) } },
+                                enabled = step < SettingsRepository.FONT_STEPS_SP.lastIndex,
+                            )
+                        }
+                    }
+                    SinqDivider(modifier = Modifier.padding(vertical = Spacing.xs))
+
+                    // Line spacing
+                    Column(Modifier.fillMaxWidth().padding(vertical = Spacing.xs)) {
+                        Text(s.lineSpacingLabel, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
+                        Spacer(Modifier.height(Spacing.xs))
+                        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                            val choices = listOf(
+                                com.agpeya.app.data.ReadingLineSpacing.COMPACT to s.lineCompact,
+                                com.agpeya.app.data.ReadingLineSpacing.NORMAL to s.lineNormal,
+                                com.agpeya.app.data.ReadingLineSpacing.RELAXED to s.lineRelaxed,
+                            )
+                            choices.forEachIndexed { index, (choice, label) ->
+                                SegmentedButton(
+                                    selected = lineSpacing == choice,
+                                    onClick = { action.run { SettingsRepository.setReadingLineSpacing(context, choice) } },
+                                    shape = SegmentedButtonDefaults.itemShape(index, choices.size),
+                                    icon = {},
+                                ) { Text(label, maxLines = 1) }
+                            }
+                        }
+                    }
+                    SinqDivider(modifier = Modifier.padding(vertical = Spacing.xs))
+
+                    // Text Alignment
+                    Column(Modifier.fillMaxWidth().padding(vertical = Spacing.xs)) {
+                        Text(s.textAlignmentLabel, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
+                        Spacer(Modifier.height(Spacing.xs))
+                        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                            val choices = listOf(
+                                Triple(com.agpeya.app.data.ReadingAlignment.JUSTIFIED, Icons.Outlined.FormatAlignJustify, s.alignJustified),
+                                Triple(com.agpeya.app.data.ReadingAlignment.LEFT, Icons.AutoMirrored.Outlined.FormatAlignLeft, s.alignLeft),
+                                Triple(com.agpeya.app.data.ReadingAlignment.RIGHT, Icons.AutoMirrored.Outlined.FormatAlignRight, s.alignRight),
+                                Triple(com.agpeya.app.data.ReadingAlignment.CENTER, Icons.Outlined.FormatAlignCenter, s.alignCenter),
+                            )
+                            choices.forEachIndexed { index, (choice, icon, description) ->
+                                SegmentedButton(
+                                    selected = readingAlignment == choice,
+                                    onClick = { action.run { SettingsRepository.setReadingAlignment(context, choice) } },
+                                    shape = SegmentedButtonDefaults.itemShape(index, choices.size),
+                                    icon = {},
+                                ) {
+                                    Icon(icon, contentDescription = description)
+                                }
+                            }
+                        }
                     }
                 }
-                Spacer(Modifier.height(Spacing.sm))
-                SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                    val langs = listOf(
-                        com.agpeya.app.data.MisbakLanguage.GEEZ to s.wudaseLangGeez,
-                        com.agpeya.app.data.MisbakLanguage.AMHARIC to s.wudaseLangAmharic,
+
+                Spacer(Modifier.height(Spacing.lg))
+
+                // Group 2: Reading Behavior & Display
+                SectionHeader(if (s.isAmharic) "የንባብ ባሕርይና ማሳያ" else "Reading Behavior & Display")
+                SinqCard(
+                    contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md),
+                ) {
+                    Column(Modifier.fillMaxWidth().padding(vertical = Spacing.xs)) {
+                        Text(
+                            if (s.isAmharic) "የገጽ አቀራረብ (ለሰዓታትና ለዳዊት)" else "Page style (Hours & Psalter)",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                        Spacer(Modifier.height(Spacing.xs))
+                        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                            val modes = listOf(
+                                com.agpeya.app.data.ReadingMode.VERTICAL to s.readingModeVertical,
+                                com.agpeya.app.data.ReadingMode.HORIZONTAL to s.readingModeHorizontal,
+                            )
+                            modes.forEachIndexed { index, (mode, label) ->
+                                SegmentedButton(
+                                    selected = readingMode == mode,
+                                    onClick = { action.run { SettingsRepository.setReadingMode(context, mode) } },
+                                    shape = SegmentedButtonDefaults.itemShape(index, modes.size),
+                                    icon = {},
+                                ) { Text(label, maxLines = 1) }
+                            }
+                        }
+                    }
+                    SinqDivider(modifier = Modifier.padding(vertical = Spacing.xs))
+
+                    ToggleRow(
+                        s.keepScreenOn,
+                        keepOn,
+                        { action.run { SettingsRepository.setKeepScreenOn(context, it) } },
+                        subtitle = s.keepScreenOnDesc,
                     )
-                    langs.forEachIndexed { index, (lang, label) ->
-                        SegmentedButton(
-                            selected = misbak == lang,
-                            onClick = { action.run { SettingsRepository.setMisbakLanguage(context, lang) } },
-                            shape = SegmentedButtonDefaults.itemShape(index, langs.size),
-                            icon = {},
-                        ) { Text(label, maxLines = 1) }
+                    SinqDivider(modifier = Modifier.padding(vertical = Spacing.xs))
+
+                    ToggleRow(
+                        s.sinksarPunctuation,
+                        sinksarpunctuation,
+                        { action.run { SettingsRepository.setSinksarPunctuation(context, it) } },
+                        subtitle = s.sinksarPunctuationDesc,
+                    )
+                    SinqDivider(modifier = Modifier.padding(vertical = Spacing.xs))
+
+                    Column(Modifier.fillMaxWidth().padding(vertical = Spacing.xs)) {
+                        Text(
+                            if (s.isAmharic) "የምስባክ ቋንቋ" else "Misbak Language",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                        Spacer(Modifier.height(Spacing.xs))
+                        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                            val langs = listOf(
+                                com.agpeya.app.data.MisbakLanguage.GEEZ to s.wudaseLangGeez,
+                                com.agpeya.app.data.MisbakLanguage.AMHARIC to s.wudaseLangAmharic,
+                            )
+                            langs.forEachIndexed { index, (lang, label) ->
+                                SegmentedButton(
+                                    selected = misbak == lang,
+                                    onClick = { action.run { SettingsRepository.setMisbakLanguage(context, lang) } },
+                                    shape = SegmentedButtonDefaults.itemShape(index, langs.size),
+                                    icon = {},
+                                ) { Text(label, maxLines = 1) }
+                            }
+                        }
                     }
                 }
-                Spacer(Modifier.height(Spacing.sm))
-                ToggleRow(
-                    s.sinksarPunctuation,
-                    sinksarpunctuation,
-                    { action.run { SettingsRepository.setSinksarPunctuation(context, it) } },
-                    subtitle = s.sinksarPunctuationDesc,
-                )
-                NavRow(
-                    title = s.copyFormatTitle,
-                    subtitle = s.copyFormatSubtitle,
-                    onClick = onOpenCopyFormat,
-                )
-                // The widget is a reading surface too, and this decides which
-                // day it reads. It sits with ምስባክ's language rather than with
-                // the alarms: nothing here rings.
-                Spacer(Modifier.height(Spacing.sm))
-                ToggleRow(
-                    s.widgetRolloverTitle,
-                    rollover,
-                    { action.run { SettingsRepository.setWidgetRollover(context, it) } },
-                    subtitle = if (rollover) s.widgetRolloverBody else s.widgetRolloverOff,
-                )
-                if (rollover) WidgetRolloverTimeRow(s, rolloverMinute)
+
+                Spacer(Modifier.height(Spacing.lg))
+
+                // Group 3: Sharing & Widget
+                SectionHeader(if (s.isAmharic) "ማጋራትና ንዑስ ፕሮግራም" else "Sharing & Widget")
+                SinqCard(
+                    contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs),
+                ) {
+                    NavRow(
+                        title = s.copyFormatTitle,
+                        subtitle = s.copyFormatSubtitle,
+                        onClick = onOpenCopyFormat,
+                        leadingIcon = Icons.Outlined.ContentCopy,
+                    )
+                    SinqDivider()
+                    ToggleRow(
+                        s.widgetRolloverTitle,
+                        rollover,
+                        { action.run { SettingsRepository.setWidgetRollover(context, it) } },
+                        subtitle = if (rollover) s.widgetRolloverBody else s.widgetRolloverOff,
+                    )
+                    if (rollover) {
+                        SinqDivider()
+                        WidgetRolloverTimeRow(s, rolloverMinute)
+                    }
+                }
+
+                Spacer(Modifier.height(Spacing.lg))
+
+                // Reset button with icon
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    TextButton(
+                        enabled = !action.busy,
+                        onClick = { action.run { SettingsRepository.resetReadingPresentation(context) } },
+                    ) {
+                        Icon(
+                            Icons.Outlined.RestartAlt,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = MaterialTheme.colorScheme.secondary,
+                        )
+                        Spacer(Modifier.width(Spacing.xs))
+                        Text(
+                            if (s.isAmharic) "የንባብ ቅንብሮችን ወደ መጀመሪያው መልስ" else "Reset reader appearance",
+                            color = MaterialTheme.colorScheme.secondary,
+                        )
+                    }
+                }
+                Spacer(Modifier.height(Spacing.xl))
             }
         }
     }
@@ -893,49 +1024,68 @@ fun CopyFormatScreen(onBack: () -> Unit) {
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
         ) {
             item {
-                com.agpeya.app.ui.common.SinqCard(contentPadding = PaddingValues(16.dp)) {
+                SinqCard(contentPadding = PaddingValues(16.dp), accented = true) {
                     Text(
                         com.agpeya.app.ui.common.PassageFormat.text(sample, format),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
-                Spacer(Modifier.height(12.dp))
-                ToggleRow(
-                    s.copyVerseNumbers,
-                    format.verseNumbers,
-                    { scope.launch { SettingsRepository.setCopyFormat(context, format.copy(verseNumbers = it)) } },
-                )
-                ToggleRow(
-                    s.copyReference,
-                    format.reference,
-                    { scope.launch { SettingsRepository.setCopyFormat(context, format.copy(reference = it)) } },
-                )
-                ToggleRow(
-                    s.copyEdition,
-                    format.edition,
-                    { scope.launch { SettingsRepository.setCopyFormat(context, format.copy(edition = it)) } },
-                    subtitle = s.amharicEdition,
-                )
+                Spacer(Modifier.height(Spacing.lg))
+                SectionHeader(if (s.isAmharic) "የቅዳና አጋራ አማራጮች" else "Format Options")
+                SinqCard(contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs)) {
+                    ToggleRow(
+                        s.copyVerseNumbers,
+                        format.verseNumbers,
+                        { scope.launch { SettingsRepository.setCopyFormat(context, format.copy(verseNumbers = it)) } },
+                    )
+                    SinqDivider()
+                    ToggleRow(
+                        s.copyReference,
+                        format.reference,
+                        { scope.launch { SettingsRepository.setCopyFormat(context, format.copy(reference = it)) } },
+                    )
+                    SinqDivider()
+                    ToggleRow(
+                        s.copyEdition,
+                        format.edition,
+                        { scope.launch { SettingsRepository.setCopyFormat(context, format.copy(edition = it)) } },
+                        subtitle = s.amharicEdition,
+                    )
+                }
                 Text(
                     s.copySignatureNote,
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(s.highlightNamesTitle)
-            }
-            items(com.agpeya.app.data.HighlightRepository.COLOR_KEYS.size) { i ->
-                val key = com.agpeya.app.data.HighlightRepository.COLOR_KEYS[i]
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                androidx.compose.foundation.layout.Box(Modifier.size(24.dp).background(com.agpeya.app.ui.theme.sinqColors.highlight(key), androidx.compose.foundation.shape.CircleShape))
-                NavRow(
-                    title = names[key]?.takeIf { it.isNotBlank() } ?: s.highlightColor(key),
-                    subtitle = s.highlightColor(key),
-                    onClick = { editing = key },
-                )
+                SinqCard(contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs)) {
+                    val colorKeys = com.agpeya.app.data.HighlightRepository.COLOR_KEYS
+                    colorKeys.forEachIndexed { index, key ->
+                        if (index > 0) SinqDivider()
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Box(
+                                Modifier.size(24.dp).background(
+                                    com.agpeya.app.ui.theme.sinqColors.highlight(key),
+                                    CircleShape,
+                                )
+                            )
+                            Spacer(Modifier.width(Spacing.md))
+                            NavRow(
+                                title = names[key]?.takeIf { it.isNotBlank() } ?: s.highlightColor(key),
+                                subtitle = s.highlightColor(key),
+                                onClick = { editing = key },
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                    }
                 }
+                Spacer(Modifier.height(Spacing.xl))
             }
         }
     }
@@ -985,10 +1135,65 @@ fun PrayerSettingsScreen(onBack: () -> Unit, onOpenManageHours: () -> Unit, onOp
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
         ) {
             item {
-                NavRow(s.prayerLevelTitle, { levelSheetOpen = true }, subtitle = com.agpeya.app.ui.settings.prayerLevelLabel(level, s))
-                NavRow(s.manageHours, onOpenManageHours)
-                // Its twin: the habits kept on ጉዞ are edited here, beside the hours.
-                NavRow(s.manageHabits, onOpenManageHabits)
+                // Sacred intro card
+                SinqCard(
+                    modifier = Modifier.padding(bottom = Spacing.lg),
+                    accented = true,
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                    ) {
+                        Surface(
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+                            modifier = Modifier.size(40.dp),
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text("☩", color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.titleMedium)
+                            }
+                        }
+                        Column {
+                            Text(
+                                s.prayerSettingsTitle,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onBackground,
+                            )
+                            Text(
+                                if (s.isAmharic) "የሰዓታት ጸሎት ሥርዓት፣ የጸሎት ደረጃና መንፈሳዊ ጉዞ"
+                                else "Canonical prayer structure, depth level, and devotional habits",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+
+                // Grouped navigation card
+                SinqCard(
+                    contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs),
+                ) {
+                    NavRow(
+                        title = s.prayerLevelTitle,
+                        onClick = { levelSheetOpen = true },
+                        subtitle = com.agpeya.app.ui.settings.prayerLevelLabel(level, s),
+                        leadingIcon = Icons.Outlined.Church,
+                    )
+                    SinqDivider()
+                    NavRow(
+                        title = s.manageHours,
+                        onClick = onOpenManageHours,
+                        subtitle = if (s.isAmharic) "የሰባቱ ሰዓታት ጸሎት ክፍሎችን ማስተካከያ" else "Canonical prayer hours configuration",
+                        leadingIcon = Icons.Outlined.Schedule,
+                    )
+                    SinqDivider()
+                    NavRow(
+                        title = s.manageHabits,
+                        onClick = onOpenManageHabits,
+                        subtitle = if (s.isAmharic) "መንፈሳዊ ጉዞና የጸሎት ልማዶች" else "Spiritual journey and devotional habits",
+                        leadingIcon = Icons.Outlined.VolunteerActivism,
+                    )
+                }
             }
         }
     }
@@ -1109,15 +1314,18 @@ fun RemindersSettingsScreen(
                 // while the hours those modes point at lived in another branch
                 // of Settings entirely.
                 SectionHeader(s.settingsGroupPrayer)
-                NavRow(
-                    s.manageHours,
-                    onOpenHours,
-                    subtitle = when (armedHours) {
-                        -1 -> s.manageHoursSubtitle
-                        0 -> s.remindersOff
-                        else -> s.remindersOn(armedHours)
-                    },
-                )
+                SinqCard(contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs)) {
+                    NavRow(
+                        s.manageHours,
+                        onOpenHours,
+                        subtitle = when (armedHours) {
+                            -1 -> s.manageHoursSubtitle
+                            0 -> s.remindersOff
+                            else -> s.remindersOn(armedHours)
+                        },
+                        leadingIcon = Icons.Outlined.Schedule,
+                    )
+                }
                 Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(s.remindersGroupSound)
                 val alertLabel = when (alert) {
@@ -1131,77 +1339,174 @@ fun RemindersSettingsScreen(
                     com.agpeya.app.data.AlarmSound.RINGTONE -> s.soundRingtone
                     com.agpeya.app.data.AlarmSound.NOTIFICATION -> s.soundNotification
                 }
-                NavRow(
-                    title = s.alarmSection,
-                    // The snooze length rides on the end so it can be read
-                    // without opening the sheet to find it.
-                    subtitle = listOfNotNull(
-                        alertLabel,
-                        soundLabel.takeIf {
-                            alert == com.agpeya.app.data.AlarmAlert.SOUND_VIBRATE ||
-                                alert == com.agpeya.app.data.AlarmAlert.SOUND_ONLY
-                        },
-                        s.snoozeMinutesLabel(snoozeMinutes),
-                    ).joinToString(" · "),
-                    onClick = { soundSheetOpen = true },
-                )
-                QuietHoursRow(s)
+                SinqCard(contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs)) {
+                    NavRow(
+                        title = s.alarmSection,
+                        subtitle = listOfNotNull(
+                            alertLabel,
+                            soundLabel.takeIf {
+                                alert == com.agpeya.app.data.AlarmAlert.SOUND_VIBRATE ||
+                                    alert == com.agpeya.app.data.AlarmAlert.SOUND_ONLY
+                            },
+                            s.snoozeMinutesLabel(snoozeMinutes),
+                        ).joinToString(" · "),
+                        onClick = { soundSheetOpen = true },
+                        leadingIcon = Icons.AutoMirrored.Outlined.VolumeUp,
+                    )
+                    SinqDivider()
+                    QuietHoursRow(s)
+                }
                 Spacer(Modifier.height(Spacing.lg))
                 DayTimeline()
                 Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(s.remindersGroupDaily)
-                ToggleRow(s.settingsNightReminder, streak, { on ->
-                    if (on) requestNotifications()
-                    scope.launch {
-                        SettingsRepository.setStreakReminder(context, on)
-                        com.agpeya.app.reminders.StreakReminderScheduler.sync(context, on)
+                SinqCard(contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs)) {
+                    ToggleRow(s.settingsNightReminder, streak, { on ->
+                        if (on) requestNotifications()
+                        scope.launch {
+                            SettingsRepository.setStreakReminder(context, on)
+                            com.agpeya.app.reminders.StreakReminderScheduler.sync(context, on)
+                        }
+                    }, subtitle = s.settingsNightReminderDesc)
+                    if (streak) {
+                        SinqDivider()
+                        StreakReminderTimeRow(s)
                     }
-                }, subtitle = s.settingsNightReminderDesc)
-                if (streak) StreakReminderTimeRow(s)
-                ToggleRow(s.settingsGitsaweReminder, gitsawe, { on ->
-                    if (on) requestNotifications()
-                    scope.launch {
-                        SettingsRepository.setGitsaweReminder(context, on)
-                        com.agpeya.app.reminders.GitsaweReminderScheduler.sync(context, on)
+                    SinqDivider()
+                    ToggleRow(s.settingsGitsaweReminder, gitsawe, { on ->
+                        if (on) requestNotifications()
+                        scope.launch {
+                            SettingsRepository.setGitsaweReminder(context, on)
+                            com.agpeya.app.reminders.GitsaweReminderScheduler.sync(context, on)
+                        }
+                    }, subtitle = s.settingsGitsaweReminderDesc)
+                    if (gitsawe) {
+                        SinqDivider()
+                        GitsaweReminderTimeRow(s)
                     }
-                }, subtitle = s.settingsGitsaweReminderDesc)
-                if (gitsawe) GitsaweReminderTimeRow(s)
-                ToggleRow(s.settingsBreathReminder, breath, { on ->
-                    if (on) requestNotifications()
-                    scope.launch {
-                        SettingsRepository.setBreathReminder(context, on)
-                        com.agpeya.app.reminders.BreathPrayerScheduler.sync(context, on)
+                    SinqDivider()
+                    ToggleRow(s.settingsBreathReminder, breath, { on ->
+                        if (on) requestNotifications()
+                        scope.launch {
+                            SettingsRepository.setBreathReminder(context, on)
+                            com.agpeya.app.reminders.BreathPrayerScheduler.sync(context, on)
+                        }
+                    }, subtitle = s.settingsBreathReminderDesc)
+                    SinqDivider()
+                    ToggleRow(s.settingsReadingReminder, reading, { on ->
+                        if (on) requestNotifications()
+                        scope.launch {
+                            SettingsRepository.setReadingReminder(context, on)
+                            com.agpeya.app.reminders.ReadingReminderScheduler.sync(context, on)
+                        }
+                    }, subtitle = s.settingsReadingReminderDesc)
+                }
+
+                Spacer(Modifier.height(Spacing.lg))
+                SectionHeader(if (s.isAmharic) "የአበው ምክር በመቆለፊያ ገጽ" else "Desert Fathers Lockscreen Quote")
+                SinqCard(
+                    contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md),
+                    accented = dailyQuote,
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                    ) {
+                        Surface(
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.14f),
+                            modifier = Modifier.size(36.dp),
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    Icons.Outlined.FormatQuote,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.size(20.dp),
+                                )
+                            }
+                        }
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                s.dailyQuoteLockscreen,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onBackground,
+                            )
+                            Text(
+                                s.dailyQuoteLockscreenDesc,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        androidx.compose.material3.Switch(
+                            checked = dailyQuote,
+                            onCheckedChange = { on ->
+                                if (on) {
+                                    requestNotifications()
+                                    if (!com.agpeya.app.reminders.DailyQuoteReceiver.isLockscreenVisible(context)) {
+                                        showLockscreenPrompt = true
+                                    }
+                                }
+                                scope.launch {
+                                    SettingsRepository.setDailyQuoteLockscreen(context, on)
+                                    com.agpeya.app.reminders.DailyQuoteScheduler.sync(context, on)
+                                }
+                            },
+                        )
                     }
-                }, subtitle = s.settingsBreathReminderDesc)
-                ToggleRow(s.settingsReadingReminder, reading, { on ->
-                    if (on) requestNotifications()
-                    scope.launch {
-                        SettingsRepository.setReadingReminder(context, on)
-                        com.agpeya.app.reminders.ReadingReminderScheduler.sync(context, on)
-                    }
-                }, subtitle = s.settingsReadingReminderDesc)
-                ToggleRow(s.dailyQuoteLockscreen, dailyQuote, { on ->
-                    if (on) {
-                        requestNotifications()
-                        if (!com.agpeya.app.reminders.DailyQuoteReceiver.isLockscreenVisible(context)) {
-                            showLockscreenPrompt = true
+                    if (dailyQuote) {
+                        SinqDivider(modifier = Modifier.padding(vertical = Spacing.xs))
+                        DailyQuoteTimeRow(s)
+                        SinqDivider(modifier = Modifier.padding(vertical = Spacing.xs))
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(top = Spacing.xs),
+                            horizontalArrangement = Arrangement.End,
+                        ) {
+                            TextButton(
+                                onClick = {
+                                    com.agpeya.app.reminders.DailyQuoteReceiver.postNow(context)
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        if (s.isAmharic) "የአበው ምክር ማሳሰቢያ ተልኳል (በመቆለፊያ ገጽ ላይ ይመልከቱ)"
+                                        else "Quote notification sent (check lock screen)",
+                                        android.widget.Toast.LENGTH_SHORT,
+                                    ).show()
+                                },
+                            ) {
+                                Icon(
+                                    Icons.Outlined.NotificationsActive,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.secondary,
+                                )
+                                Spacer(Modifier.width(Spacing.xs))
+                                Text(
+                                    if (s.isAmharic) "የሙከራ ማሳሰቢያ ላክ" else "Send test notification",
+                                    color = MaterialTheme.colorScheme.secondary,
+                                )
+                            }
                         }
                     }
-                    scope.launch {
-                        SettingsRepository.setDailyQuoteLockscreen(context, on)
-                        com.agpeya.app.reminders.DailyQuoteScheduler.sync(context, on)
-                    }
-                }, subtitle = s.dailyQuoteLockscreenDesc)
-                if (dailyQuote) {
-                    DailyQuoteTimeRow(s)
                 }
-                // ምጽዋት and ንስሐ are here because they ring; their ledgers — the
-                // money, the vows, the penance — are records, and records live
-                // under መዝገብ. This page had become the door to all three.
+
                 Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(s.remindersGroupGiving)
-                NavRow(s.settingsAlmsReminder, { onOpenSpecialHabit(com.agpeya.app.reminders.SpecialHabit.ALMS) }, subtitle = s.settingsAlmsReminderDesc)
-                NavRow(s.settingsRepentReminder, { onOpenSpecialHabit(com.agpeya.app.reminders.SpecialHabit.REPENTANCE) }, subtitle = s.settingsRepentReminderDesc)
+                SinqCard(contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs)) {
+                    NavRow(
+                        s.settingsAlmsReminder,
+                        { onOpenSpecialHabit(com.agpeya.app.reminders.SpecialHabit.ALMS) },
+                        subtitle = s.settingsAlmsReminderDesc,
+                        leadingIcon = Icons.Outlined.VolunteerActivism,
+                    )
+                    SinqDivider()
+                    NavRow(
+                        s.settingsRepentReminder,
+                        { onOpenSpecialHabit(com.agpeya.app.reminders.SpecialHabit.REPENTANCE) },
+                        subtitle = s.settingsRepentReminderDesc,
+                        leadingIcon = Icons.Outlined.FavoriteBorder,
+                    )
+                }
                 Spacer(Modifier.height(Spacing.xxl))
             }
         }

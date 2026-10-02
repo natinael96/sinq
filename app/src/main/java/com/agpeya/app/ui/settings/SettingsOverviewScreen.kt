@@ -1,7 +1,9 @@
 package com.agpeya.app.ui.settings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,8 +14,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import androidx.compose.material.icons.outlined.Church
+import androidx.compose.material.icons.outlined.CloudSync
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.MailOutline
+import androidx.compose.material.icons.outlined.NewReleases
+import androidx.compose.material.icons.outlined.NotificationsActive
+import androidx.compose.material.icons.outlined.StarOutline
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
@@ -27,8 +44,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.agpeya.app.data.AlarmAlert
 import com.agpeya.app.data.Language
@@ -38,7 +61,10 @@ import com.agpeya.app.data.SettingsRepository
 import com.agpeya.app.data.ThemeChoice
 import com.agpeya.app.ui.common.NavRow
 import com.agpeya.app.ui.common.SectionHeader
+import com.agpeya.app.ui.common.SinqCard
+import com.agpeya.app.ui.common.SinqDivider
 import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
 import kotlinx.coroutines.launch
 
@@ -63,6 +89,9 @@ fun SettingsScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val s = LocalStrings.current
+    val gold = MaterialTheme.colorScheme.secondary
+    val primary = MaterialTheme.colorScheme.primary
+
     val theme by SettingsRepository.theme(context).collectAsState(initial = ThemeChoice.SYSTEM)
     val language by SettingsRepository.language(context).collectAsState(initial = SettingsRepository.DEFAULT_LANGUAGE)
     val font by SettingsRepository.readingFont(context).collectAsState(initial = ReadingFont.ABYSSINICA)
@@ -87,23 +116,35 @@ fun SettingsScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
         ) {
             item {
-                Text(s.settingsTitle, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
+                Text(
+                    text = s.settingsTitle,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
                 Spacer(Modifier.height(Spacing.md))
 
-                // Fast 1-tap toggles: Theme & Language
-                CompactSegmented(
-                    label = s.appearance,
-                    options = listOf(s.themeSystem, s.themeLight, s.themeDark),
-                    selected = theme.ordinal,
-                    onSelect = { scope.launch { SettingsRepository.setTheme(context, ThemeChoice.entries[it]) } },
-                )
-                Spacer(Modifier.height(Spacing.sm))
-                CompactSegmented(
-                    label = s.languageLabel,
-                    options = listOf(s.langSystem, s.langAmharic, s.langEnglish),
-                    selected = language.ordinal,
-                    onSelect = { scope.launch { SettingsRepository.setLanguage(context, Language.entries[it]) } },
-                )
+                // Fast 1-tap toggles: Theme & Language in a unified card
+                SinqCard(
+                    contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    CompactSegmented(
+                        label = s.appearance,
+                        options = listOf(s.themeSystem, s.themeLight, s.themeDark),
+                        selected = theme.ordinal,
+                        onSelect = { scope.launch { SettingsRepository.setTheme(context, ThemeChoice.entries[it]) } },
+                    )
+                    Spacer(Modifier.height(Spacing.xs))
+                    SinqDivider()
+                    Spacer(Modifier.height(Spacing.xs))
+                    CompactSegmented(
+                        label = s.languageLabel,
+                        options = listOf(s.langSystem, s.langAmharic, s.langEnglish),
+                        selected = language.ordinal,
+                        onSelect = { scope.launch { SettingsRepository.setLanguage(context, Language.entries[it]) } },
+                    )
+                }
 
                 Spacer(Modifier.height(Spacing.lg))
 
@@ -111,63 +152,162 @@ fun SettingsScreen(
                 SectionHeader(s.settingsTitle)
 
                 // 1. Appearance & Reading
-                NavRow(
+                SettingsHubCard(
                     title = s.settingsGroupReading,
                     subtitle = "${fontLabel(font)} · ${size}sp",
+                    icon = Icons.AutoMirrored.Outlined.MenuBook,
+                    iconTint = gold,
+                    iconBackground = gold.copy(alpha = 0.12f),
                     onClick = onOpenReading,
                 )
+                Spacer(Modifier.height(Spacing.sm))
 
                 // 2. Prayer Rule & Hours
-                NavRow(
+                SettingsHubCard(
                     title = s.prayerSettingsTitle,
                     subtitle = "${prayerLevelLabel(prayerLevel, s)} · ${s.manageHours}",
+                    icon = Icons.Outlined.Church,
+                    iconTint = primary,
+                    iconBackground = primary.copy(alpha = 0.12f),
                     onClick = onOpenPrayer,
                 )
+                Spacer(Modifier.height(Spacing.sm))
 
                 // 3. Reminders & Daily Quote
-                NavRow(
+                SettingsHubCard(
                     title = "${s.remindersSettingsTitle} · ${s.dailyQuoteChannelName}",
                     subtitle = "${alarmAlertLabel(alert, s)} · ${s.todayLabel}: $enabledCount",
+                    icon = Icons.Outlined.NotificationsActive,
+                    iconTint = gold,
+                    iconBackground = gold.copy(alpha = 0.12f),
                     onClick = onOpenReminders,
                 )
+                Spacer(Modifier.height(Spacing.sm))
 
                 // 4. Data, Profile & Backup
                 val callName = christianName.ifBlank { profileName }.takeIf { it.isNotBlank() }
                 val backupText = backupRelativeLabel(lastBackupAt, s)
-                NavRow(
+                SettingsHubCard(
                     title = s.settingsGroupRecords,
                     subtitle = if (callName != null) "$callName · $backupText" else backupText,
+                    icon = Icons.Outlined.CloudSync,
+                    iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    iconBackground = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
                     onClick = onOpenRecords,
                 )
 
-                Spacer(Modifier.height(Spacing.lg))
+                Spacer(Modifier.height(Spacing.xl))
 
-                // About & Help
+                // About & Help Card
                 SectionHeader(s.about)
-                NavRow(s.whatsNew, onOpenChangelog, subtitle = "v${appVersion(context)}")
-                NavRow(s.tutorial, onOpenTutorial)
-                NavRow(
-                    s.feedbackTitle,
-                    { com.agpeya.app.ui.common.openUrl(context, com.agpeya.app.ui.common.FEEDBACK_URL) },
-                    subtitle = s.feedbackSubtitle,
-                )
-                NavRow(
-                    s.rateAppTitle,
-                    { com.agpeya.app.ui.common.openPlayStore(context) },
-                    subtitle = s.rateAppSubtitle,
-                )
-                NavRow(s.about, onOpenAbout)
+                SinqCard(
+                    contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    NavRow(
+                        title = s.whatsNew,
+                        subtitle = "v${appVersion(context)}",
+                        leadingIcon = Icons.Outlined.NewReleases,
+                        onClick = onOpenChangelog,
+                    )
+                    SinqDivider()
+                    NavRow(
+                        title = s.tutorial,
+                        leadingIcon = Icons.AutoMirrored.Outlined.HelpOutline,
+                        onClick = onOpenTutorial,
+                    )
+                    SinqDivider()
+                    NavRow(
+                        title = s.feedbackTitle,
+                        subtitle = s.feedbackSubtitle,
+                        leadingIcon = Icons.Outlined.MailOutline,
+                        onClick = { com.agpeya.app.ui.common.openUrl(context, com.agpeya.app.ui.common.FEEDBACK_URL) },
+                    )
+                    SinqDivider()
+                    NavRow(
+                        title = s.rateAppTitle,
+                        subtitle = s.rateAppSubtitle,
+                        leadingIcon = Icons.Outlined.StarOutline,
+                        onClick = { com.agpeya.app.ui.common.openPlayStore(context) },
+                    )
+                    SinqDivider()
+                    NavRow(
+                        title = s.about,
+                        leadingIcon = Icons.Outlined.Info,
+                        onClick = onOpenAbout,
+                    )
+                }
 
-                Spacer(Modifier.height(Spacing.lg))
+                Spacer(Modifier.height(Spacing.xl))
                 Text(
-                    "ስንቅ · v${appVersion(context)}",
+                    text = "☩  ስንቅ  ·  v${appVersion(context)}  ☩",
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    color = gold.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                Spacer(Modifier.height(Spacing.sm))
+                Spacer(Modifier.height(Spacing.md))
             }
+        }
+    }
+}
+
+@Composable
+private fun SettingsHubCard(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    iconTint: Color,
+    iconBackground: Color,
+    onClick: () -> Unit,
+) {
+    SinqCard(
+        onClick = onClick,
+        contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(42.dp)
+                    .clip(CircleShape)
+                    .background(iconBackground),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.size(IconSize.medium),
+                )
+            }
+            Spacer(Modifier.width(Spacing.md))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            Spacer(Modifier.width(Spacing.xs))
+            Icon(
+                imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                modifier = Modifier.size(IconSize.medium),
+            )
         }
     }
 }
@@ -188,7 +328,7 @@ private fun alarmAlertLabel(alert: AlarmAlert, s: com.agpeya.app.ui.strings.Stri
 private fun CompactSegmented(label: String, options: List<String>, selected: Int, onSelect: (Int) -> Unit) {
     if (LocalDensity.current.fontScale <= 1.5f) {
         Row(
-            Modifier.fillMaxWidth().heightIn(min = 48.dp),
+            Modifier.fillMaxWidth().heightIn(min = 44.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
