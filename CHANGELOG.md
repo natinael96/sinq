@@ -5,6 +5,19 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.5.0] — 2026-10-02
+
+_versionCode 100 · Desert Fathers Daily Quotes, Lockscreen widgets, privacy-first lockscreen notifications, and multi-year rotation_
+
+### Added
+- **Desert Fathers Daily Sayings (የአበው ምክር).** Bundled 844 canonical sayings from the Desert Fathers (*Apophthegmata Patrum* / ዜና አበው) covering 124 Desert Fathers and Mothers with full Amharic and Ge'ez titles.
+- **Continuous Multi-Year Rotation.** Implemented an advancing multi-year progression ensuring consecutive years never display the same sayings on the same day (~2.31 years of unique content).
+- **Lockscreen & Home Widget.** Created an offline Android AppWidget with `widgetCategory="home_screen|keyguard"`, with ongoing public lockscreen notification fallback for devices without lockscreen widget support.
+- **Home Contemplation Row & Sheet.** Added an ultra-compact hairline row on Home (`☩  የአበው ምክር  ·  [Author]  →`) opening a contemplation sheet with sharing and direct spiritual journaling.
+- **Privacy-First Lockscreen Notification Policy.** Explicitly configured notification visibility across the app: only Daily Quote and Daily Gitsawe are visible on the secure lockscreen (`VISIBILITY_PUBLIC`); prayer alarms, habit streaks, breath prayers, and reading reminders are strictly quarantined (`VISIBILITY_PRIVATE` and `VISIBILITY_SECRET`).
+- **Notification Schedule & Settings.** Added on/off toggle and custom time picker in Settings allowing users to customize when the daily quote refreshes.
+- **Reading Plan Visuals.** Refined reading plan overview with visual section badges, part headers, and bookmark markers.
+
 ## [1.4.2] — 2026-09-30
 
 _versionCode 99 · Sinksar punctuation setting, streamlined prayer list divider, and content fixes_

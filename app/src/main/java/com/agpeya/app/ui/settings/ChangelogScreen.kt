@@ -31,6 +31,27 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.5.0",
+        title = "Desert Fathers Daily Quotes, Lockscreen widgets, and privacy-first notifications",
+        titleAm = "የአበው ምክር ዕለታዊ ቃል፣ የመቆለፊያ ገጽ መተግበሪያ (Widget) እና አስተማማኝ ማሳወቂያዎች",
+        changes = listOf(
+            "Added 844 Desert Fathers sayings (Apophthegmata Patrum) with continuous multi-year rotation.",
+            "Introduced home and lockscreen widget for daily patristic contemplation.",
+            "Configured lockscreen visibility policy: Daily Quote and Gitsawe visible; alarms and habits kept private.",
+            "Added hairline quote row on Home screen opening a rich contemplation sheet with sharing and journaling.",
+            "Customizable daily quote notification schedule and toggle in Settings.",
+            "Refined reading plan overview with visual section badges and bookmark indicators.",
+        ),
+        changesAm = listOf(
+            "፰፻፵፬ የአበው ምክሮች (ዜና አበው) በዓመታት ዑደት እንዳይደጋገሙ ተደርገው ተካተዋል።",
+            "በመነሻ እና በመቆለፊያ ገጽ ላይ የሚቀመጥ ዕለታዊ የአበው ምክር መተግበሪያ (Widget) ተዘጋጅቷል።",
+            "የመቆለፊያ ገጽ ማሳወቂያዎች ደህንነት ተስተካክሏል፦ የአበው ምክር እና ግጻዌ ብቻ በመቆለፊያ ገጽ ይታያሉ።",
+            "በዋናው ገጽ ላይ የአበው ምክር ስስ መስመር ተካቷል፤ ሲነካም ቃሉን፣ ማጋሪያ እና የማስታወሻ መጻፊያ ያቀርባል።",
+            "በቅንብሮች ውስጥ የአበው ምክር ማሳወቂያ ሰዓት እና ማብሪያ/ማጥፊያ ተካቷል።",
+            "የንባብ ገጽ ዝርዝር በምዕራፍ መለያዎችና በዕልባት ምልክቶች ይበልጥ ተሻሽሏል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.4.2",
         title = "Sinksar punctuation preference, clean prayer list division, and text corrections",
         titleAm = "የስንክሳር ሥርዓተ ነጥብ ምርጫ፣ የቀለለ የጸሎት ዝርዝር እና የጽሑፍ ማስተካከያ",
