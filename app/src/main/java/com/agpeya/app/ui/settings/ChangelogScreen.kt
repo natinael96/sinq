@@ -31,6 +31,21 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.5.1",
+        title = "Guaranteed lockscreen quote notifications and streamlined home layout",
+        titleAm = "አስተማማኝ የመቆለፊያ ገጽ የአበው ምክር እና የቀለለ የመነሻ ገጽ ገጽታ",
+        changes = listOf(
+            "Configured guaranteed lockscreen visibility for daily quote notifications across all Android devices.",
+            "Enabled daily quote lockscreen notification by default and automated startup sync.",
+            "Removed annual reading plan box from home screen to restore spacious liturgical proportions to Now and Gitsawe cards.",
+        ),
+        changesAm = listOf(
+            "የአበው ምክር ማሳወቂያ በሁሉም የአንድሮይድ ስልኮች መቆለፊያ ገጽ ላይ ያለምንም እንቅፋት እንዲታይ ተደርጓል።",
+            "የአበው ምክር የመቆለፊያ ገጽ ማሳወቂያ በነባሪነት የበራ እንዲሆንና አፑ ሲከፈት ወዲያው እንዲዘጋጅ ተደርጓል።",
+            "የዓመታዊ ንባብ ሳጥን ከመነሻ ገጽ እንዲነሳ ተደርጎ ለሰዓታትና ለግጻዌ ካርዶች ሰፊና ምቹ ቦታ ተሰጥቷል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.5.0",
         title = "Desert Fathers Daily Quotes, Lockscreen widgets, and privacy-first notifications",
         titleAm = "የአበው ምክር ዕለታዊ ቃል፣ የመቆለፊያ ገጽ መተግበሪያ (Widget) እና አስተማማኝ ማሳወቂያዎች",

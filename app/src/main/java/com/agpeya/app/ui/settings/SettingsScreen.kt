@@ -1028,7 +1028,7 @@ fun RemindersSettingsScreen(
     val gitsawe by SettingsRepository.gitsaweReminder(context).collectAsState(initial = true)
     val breath by SettingsRepository.breathReminder(context).collectAsState(initial = true)
     val reading by SettingsRepository.readingReminder(context).collectAsState(initial = true)
-    val dailyQuote by SettingsRepository.dailyQuoteLockscreen(context).collectAsState(initial = false)
+    val dailyQuote by SettingsRepository.dailyQuoteLockscreen(context).collectAsState(initial = true)
     var showLockscreenPrompt by remember { mutableStateOf(false) }
     val almsEntries by SettingsRepository.almsReminders(context).collectAsState(initial = emptyList())
     val repentanceEntries by SettingsRepository.repentanceReminders(context).collectAsState(initial = emptyList())

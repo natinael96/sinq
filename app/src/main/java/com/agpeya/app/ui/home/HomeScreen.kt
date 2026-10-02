@@ -124,19 +124,11 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 
 private const val PRAYER_AGGREGATE_ID = "prayer"
 
-private data class ActiveReadingInfo(
-    val planTitle: String,
-    val day: Int,
-    val totalDays: Int,
-    val progressFraction: Float,
-    val progressPercent: Int,
-)
-
 /** A glanceable dashboard; constrained accessibility layouts retain a scroll safety net. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    onOpenReading: () -> Unit,
+    onOpenReading: () -> Unit = {},
     onManageHours: () -> Unit,
     onOpenHour: (String) -> Unit,
     onOpenSearch: () -> Unit,
@@ -157,8 +149,6 @@ fun HomeScreen(
     val hoursLoad = com.agpeya.app.ui.common.rememberContentLoad { ContentRepository.hours(context) }
     val builtIn = hoursLoad.value.orEmpty()
     val hours = remember(builtIn, config) { HoursRepository.merge(builtIn, config, includeHidden = false) }
-    val readingState by com.agpeya.app.data.ReadingPlanRepository.state(context)
-        .collectAsState(initial = com.agpeya.app.model.ReadingPlanState())
 
     // Keeps the date, daily content, and current prayer correct across time boundaries.
     val now by produceState(initialValue = LocalDateTime.now()) {
@@ -168,28 +158,6 @@ fun HomeScreen(
         }
     }
     val today = now.toLocalDate()
-    val planContent by produceState(com.agpeya.app.model.ReadingPlanContent()) {
-        value = com.agpeya.app.data.ReadingPlanRepository.content(context)
-    }
-    val activeReading = remember(readingState, planContent, today) {
-        val kept = readingState.plansKept.firstNotNullOfOrNull { k ->
-            planContent.plans.firstOrNull { it.id == k.planId }?.let { k to it }
-        }
-        if (kept != null) {
-            val (activeKept, plan) = kept
-            val days = com.agpeya.app.data.ReadingPlanRepository.effectiveDays(plan, readingState)
-            val day = com.agpeya.app.data.ReadingPlanRepository.dayOn(activeKept.startedOn, today, plan.days)
-            val (read, total) = com.agpeya.app.data.ReadingPlanRepository.chapterProgress(readingState, plan.id, days)
-            val frac = if (total > 0) (read.toFloat() / total).coerceIn(0f, 1f) else 0f
-            ActiveReadingInfo(
-                planTitle = plan.title,
-                day = day,
-                totalDays = plan.days,
-                progressFraction = frac,
-                progressPercent = (frac * 100).toInt(),
-            )
-        } else null
-    }
     val currentHourId = remember(hours, now.hour, now.minute) {
         com.agpeya.app.data.PrayerSchedule.currentHourId(hours, now.toLocalTime())
     }
@@ -361,9 +329,6 @@ fun HomeScreen(
                 // What the page has to fill: the viewport, less its own margin.
                 targetHeight = maxHeight - Spacing.md * 2,
                 stackReadingCards = stackReadingCards,
-                onOpenReading = onOpenReading,
-                hasReadingPlan = readingState.plansKept.isNotEmpty(),
-                activeReading = activeReading,
                 onManageHours = onManageHours,
                 hoursLoading = hoursLoad.result == null,
                 hoursFailed = hoursLoad.result?.isFailure == true,
@@ -583,9 +548,6 @@ private sealed interface HomeReadingsState {
 
 @Composable
 private fun HomeDashboard(
-    onOpenReading: () -> Unit,
-    hasReadingPlan: Boolean,
-    activeReading: ActiveReadingInfo? = null,
     onManageHours: () -> Unit,
     hoursLoading: Boolean,
     hoursFailed: Boolean,
@@ -621,14 +583,11 @@ private fun HomeDashboard(
 
     // ቤት is one screen, and it ends where the screen ends. Each block keeps the
     // height its own content asks for; the marked grow blocks share what is left
-    // over, and what their ceilings turn down becomes air between them. When a
-    // reading track is active, space is proportionally flexed from NowCard and
-    // GitsaweCard so the progress box fits calmly without vertical crowding.
-    val hasActiveReading = activeReading != null
-    val nowWeight = if (hasActiveReading) 2.2f else 3f
-    val nowCeiling = (if (hasActiveReading) NOW_CEILING * 0.88f else NOW_CEILING) * room
-    val gitsaweWeight = if (hasActiveReading) 1.5f else 2f
-    val gitsaweCeiling = (if (hasActiveReading) GITSAWE_CEILING * 0.85f else GITSAWE_CEILING) * room
+    // over, and what their ceilings turn down becomes air between them.
+    val nowWeight = 3f
+    val nowCeiling = NOW_CEILING * room
+    val gitsaweWeight = 2f
+    val gitsaweCeiling = GITSAWE_CEILING * room
 
     FillColumn(targetHeight = targetHeight, gap = Spacing.sm, modifier = modifier) {
         DayHeader(today, seasonLabel, onOpenSearch, onOpenFasting, onOpenBookmarks, onOpenPrayerList)
@@ -664,13 +623,6 @@ private fun HomeDashboard(
                 onClick = onOpenDailyQuote,
             )
         }
-        if (activeReading != null) {
-            ReadingPlanBox(
-                info = activeReading,
-                onClick = onOpenReading,
-                modifier = Modifier.grow(1.0f, max = 68.dp * room),
-            )
-        }
         TodayRow(
             habitIds = habitIds,
             doneToday = doneToday,
@@ -681,76 +633,6 @@ private fun HomeDashboard(
             modifier = Modifier.grow(1f, max = TODAY_CEILING * room),
         )
         ShortcutsRow(stackReadingCards, today, onOpenPsalter, onOpenZewotr)
-    }
-}
-
-/**
- * Option C1: Crisp rectangular reading plan progress card with bottom gold strip line.
- */
-@Composable
-private fun ReadingPlanBox(
-    info: ActiveReadingInfo,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val s = LocalStrings.current
-    val gold = MaterialTheme.colorScheme.secondary
-    val fraction = info.progressFraction.coerceIn(0f, 1f)
-    val dayText = s.readingDayLabel(geezNumeral(info.day))
-
-    Surface(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-    ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Spacing.lg, vertical = Spacing.md),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = info.planTitle.ifBlank { s.readingTitle },
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                    )
-                    Spacer(Modifier.height(2.dp))
-                    Text(
-                        text = dayText,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                Spacer(Modifier.width(Spacing.sm))
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
-                    contentDescription = null,
-                    tint = gold,
-                    modifier = Modifier.size(IconSize.small),
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .fillMaxWidth()
-                    .height(3.5.dp)
-                    .background(gold.copy(alpha = 0.2f)),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(fraction)
-                        .fillMaxHeight()
-                        .background(gold),
-                )
-            }
-        }
     }
 }
 

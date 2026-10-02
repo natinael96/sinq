@@ -380,6 +380,12 @@ private fun AgpeyaNavHost(
             runCatching {
                 com.agpeya.app.reminders.SpecialHabitReminderScheduler.syncAll(context)
             }
+            runCatching {
+                com.agpeya.app.reminders.DailyQuoteScheduler.sync(
+                    context,
+                    SettingsRepository.dailyQuoteLockscreen(context).first(),
+                )
+            }
         }
     }
 

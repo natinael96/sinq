@@ -633,9 +633,9 @@ object SettingsRepository {
         context.settingsDataStore.edit { it[KEY_GITSAWE_REMINDER] = value }
     }
 
-    /** Daily quote displayed on lock screen (silent, ongoing notification). Off by default. */
+    /** Daily quote displayed on lock screen (silent, ongoing notification). On by default. */
     fun dailyQuoteLockscreen(context: Context): Flow<Boolean> =
-        context.settingsDataStore.data.map { it[KEY_DAILY_QUOTE_LOCKSCREEN] ?: false }
+        context.settingsDataStore.data.map { it[KEY_DAILY_QUOTE_LOCKSCREEN] ?: true }
 
     suspend fun setDailyQuoteLockscreen(context: Context, value: Boolean) {
         context.settingsDataStore.edit { it[KEY_DAILY_QUOTE_LOCKSCREEN] = value }
@@ -643,7 +643,7 @@ object SettingsRepository {
 
     fun dailyQuoteLockscreenBlocking(context: Context): Boolean =
         kotlinx.coroutines.runBlocking {
-            runCatching { dailyQuoteLockscreen(context).first() }.getOrDefault(false)
+            runCatching { dailyQuoteLockscreen(context).first() }.getOrDefault(true)
         }
 
     fun dailyQuoteTime(context: Context): Flow<Int> =

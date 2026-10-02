@@ -5,6 +5,17 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.5.1] — 2026-10-02
+
+_versionCode 101 · Guaranteed lockscreen quote notifications, on-by-default quote reminders, and streamlined home layout_
+
+### Added
+- **Guaranteed Lockscreen Visibility for Daily Quotes.** Upgraded daily quote notification channel to `IMPORTANCE_DEFAULT` with silent sound and non-intrusive priority, guaranteeing display on Android lockscreens across vendor skins (Samsung One UI, Pixel, Xiaomi) where low-importance silent notifications are suppressed.
+- **On-by-Default Daily Quote & App-Start Sync.** Switched daily quote lockscreen reminder to enabled by default and added automatic sync on application startup.
+
+### Changed
+- **Streamlined Home Dashboard.** Removed the Annual Reading plan progress card from the Home screen, restoring spacious vertical hierarchy and focus to the canonical prayer hours (`NowCard`), daily scripture lectionary (`GitsaweCard`), and the hairline Desert Fathers contemplation row.
+
 ## [1.5.0] — 2026-10-02
 
 _versionCode 100 · Desert Fathers Daily Quotes, Lockscreen widgets, privacy-first lockscreen notifications, and multi-year rotation_

@@ -43,14 +43,24 @@ class DailyQuoteReceiver : BroadcastReceiver() {
         fun ensureChannel(context: Context) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val nm = context.getSystemService(NotificationManager::class.java)
+                val existing = nm.getNotificationChannel(CHANNEL_ID)
+                // If the channel was previously created with LOW importance (silent),
+                // modern Android (Android 12+, Samsung OneUI, Xiaomi, Pixel) hides it from
+                // the lockscreen by default under "silent notifications".
+                // Recreate with DEFAULT importance and silent sound so it reliably appears on the lock screen.
+                if (existing != null && existing.importance < NotificationManager.IMPORTANCE_DEFAULT) {
+                    nm.deleteNotificationChannel(CHANNEL_ID)
+                }
                 if (nm.getNotificationChannel(CHANNEL_ID) == null) {
                     val s = stringsFor(runBlocking { SettingsRepository.language(context).first() })
                     val channel = NotificationChannel(
                         CHANNEL_ID,
                         s.dailyQuoteChannelName,
-                        NotificationManager.IMPORTANCE_LOW,
+                        NotificationManager.IMPORTANCE_DEFAULT,
                     ).apply {
                         lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                        setSound(null, null)
+                        enableVibration(false)
                         setShowBadge(false)
                     }
                     nm.createNotificationChannel(channel)
@@ -85,8 +95,10 @@ class DailyQuoteReceiver : BroadcastReceiver() {
                 .setContentTitle(title)
                 .setContentText(body)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(body).setSummaryText(author))
-                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setSound(null)
+                .setVibrate(null)
                 .setOngoing(true)
                 .setAutoCancel(false)
                 .setContentIntent(tap)
