@@ -67,6 +67,7 @@ class BreathPrayerReceiver : BroadcastReceiver() {
                         .setContentText(prayer)
                         .setStyle(NotificationCompat.BigTextStyle().bigText(prayer))
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setVisibility(NotificationCompat.VISIBILITY_SECRET)
                         .setAutoCancel(true)
                         .setContentIntent(tap)
                         .build()
@@ -97,7 +98,9 @@ class BreathPrayerReceiver : BroadcastReceiver() {
                     BreathPrayerScheduler.CHANNEL_ID,
                     name,
                     NotificationManager.IMPORTANCE_DEFAULT,
-                ),
+                ).apply {
+                    lockscreenVisibility = android.app.Notification.VISIBILITY_SECRET
+                },
             )
         }
     }

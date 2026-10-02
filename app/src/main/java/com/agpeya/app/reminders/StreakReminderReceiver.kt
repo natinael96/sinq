@@ -71,6 +71,7 @@ class StreakReminderReceiver : BroadcastReceiver() {
                         .setContentText(body)
                         .setStyle(NotificationCompat.BigTextStyle().bigText(body))
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setVisibility(NotificationCompat.VISIBILITY_SECRET)
                         .setAutoCancel(true)
                         .setContentIntent(tap)
                         .build()
@@ -127,7 +128,9 @@ class StreakReminderReceiver : BroadcastReceiver() {
             nm.getNotificationChannel(CHANNEL_ID) == null
         ) {
             nm.createNotificationChannel(
-                NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT),
+                NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT).apply {
+                    lockscreenVisibility = android.app.Notification.VISIBILITY_SECRET
+                },
             )
         }
     }

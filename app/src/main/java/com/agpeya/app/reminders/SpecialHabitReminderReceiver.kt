@@ -112,6 +112,7 @@ class SpecialHabitReminderReceiver : BroadcastReceiver() {
                         .setContentText(body)
                         .setStyle(NotificationCompat.BigTextStyle().bigText(body))
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setVisibility(NotificationCompat.VISIBILITY_SECRET)
                         .setAutoCancel(true)
                         .setContentIntent(tap)
                         .build()
@@ -147,7 +148,9 @@ class SpecialHabitReminderReceiver : BroadcastReceiver() {
             nm.getNotificationChannel(habit.channelId) == null
         ) {
             nm.createNotificationChannel(
-                NotificationChannel(habit.channelId, name, NotificationManager.IMPORTANCE_DEFAULT),
+                NotificationChannel(habit.channelId, name, NotificationManager.IMPORTANCE_DEFAULT).apply {
+                    lockscreenVisibility = android.app.Notification.VISIBILITY_SECRET
+                },
             )
         }
     }

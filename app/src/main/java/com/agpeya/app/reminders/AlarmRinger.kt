@@ -131,6 +131,7 @@ object AlarmRinger {
             .setContentTitle(if (hourName.isNotBlank()) s.hourArrived(hourName) else s.itsTime)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
             .setAutoCancel(true)
             .setContentIntent(open)
             .setDeleteIntent(broadcastPi(DELETE_REQUEST_CODE, ACTION_REMOVED))
@@ -288,6 +289,7 @@ object AlarmRinger {
             .setContentTitle(if (hourName.isNotBlank()) s.snoozedUntil(hourName, at) else s.snoozedUntilPlain(at))
             .apply { if (count >= SettingsRepository.MAX_SNOOZES) setContentText(s.snoozeLastOne) }
             .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
             .setSilent(true)
             .setAutoCancel(true)
             .setTimeoutAfter(
@@ -305,6 +307,7 @@ object AlarmRinger {
         nm.createNotificationChannel(
             NotificationChannel(FOLLOWUP_CHANNEL_ID, "የጸሎት ማንቂያ ክትትል", NotificationManager.IMPORTANCE_DEFAULT).apply {
                 description = "Prayer alarm follow-up"
+                lockscreenVisibility = Notification.VISIBILITY_PRIVATE
                 setSound(null, null)
                 enableVibration(false)
             },
@@ -336,6 +339,7 @@ object AlarmRinger {
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(s.donePrompt)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
             .setAutoCancel(true)
             .addAction(0, s.yesAction, yes)
             .build()
@@ -371,6 +375,7 @@ object AlarmRinger {
 
         val channel = NotificationChannel(id, "የጸሎት ማንቂያ", NotificationManager.IMPORTANCE_HIGH).apply {
             description = "Prayer alarm"
+            lockscreenVisibility = Notification.VISIBILITY_PRIVATE
             if (wantsSound(alert)) {
                 setSound(
                     soundUri(context, sound),

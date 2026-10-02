@@ -56,6 +56,7 @@ class GitsaweReminderReceiver : BroadcastReceiver() {
                         .setContentText(heading)
                         .setStyle(NotificationCompat.BigTextStyle().bigText(heading))
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                         .setAutoCancel(true)
                         .setContentIntent(tap)
                         .build()
@@ -85,7 +86,9 @@ class GitsaweReminderReceiver : BroadcastReceiver() {
             nm.getNotificationChannel(CHANNEL_ID) == null
         ) {
             nm.createNotificationChannel(
-                NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT),
+                NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT).apply {
+                    lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+                },
             )
         }
     }
