@@ -169,7 +169,11 @@ fun MarksScreen(
                         label = { Text(names[color]?.takeIf { it.isNotBlank() } ?: s.highlightColor(color)) })
                 }
             }
-            val shownBookmarks = bookmarks.filter { it.title.contains(query, ignoreCase = true) || it.hourName.contains(query, ignoreCase = true) }
+            val shownBookmarks = bookmarks.filter {
+                it.title.contains(query, ignoreCase = true) ||
+                    it.hourName.contains(query, ignoreCase = true) ||
+                    (it.subtitle?.contains(query, ignoreCase = true) == true)
+            }
             val shownHighlights = highlights.filter {
                 (colorFilter == null || it.colorKey == colorFilter) &&
                     (it.citation.contains(query, ignoreCase = true) || it.snippet.contains(query, ignoreCase = true))
@@ -240,6 +244,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.bookmarkTab(
                     com.agpeya.app.ui.psalter.PSALTER_BOOKMARK_ID -> s.psalterTitle
                     "scripture_library" -> s.bookmarkGroupScripture
                     "sinksar_verse" -> s.bookmarkGroupSynaxarium
+                    "daily_quote" -> s.dailyQuoteChannelName
                     else -> items.last().hourName
                 },
             )

@@ -15,3 +15,16 @@ data class DailyQuote(
     val quote: String,
     @SerialName("quote_id") val quoteId: String,
 )
+
+/**
+ * Creates a stable Bookmark snapshot from a Desert Fathers daily quote.
+ * Adheres to identity stability contract: hourId = "daily_quote", sectionId = quoteId.
+ */
+fun DailyQuote.toBookmark(channelName: String): Bookmark = Bookmark(
+    hourId = "daily_quote",
+    hourName = channelName,
+    sectionId = quoteId,
+    title = authorAm.ifBlank { authorEn },
+    subtitle = quote,
+    route = "daily_quote?id=$quoteId",
+)

@@ -35,6 +35,9 @@ object DailyQuoteRepository {
             loadFromAssets(context)
         }
 
+    suspend fun quoteById(context: Context, id: String): DailyQuote? =
+        quotes(context).find { it.quoteId == id }
+
     fun quotesBlocking(context: Context): List<DailyQuote> {
         cache?.let { return it }
         return synchronized(this) {

@@ -38,6 +38,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material.icons.outlined.BatterySaver
 import androidx.compose.material.icons.outlined.CalendarMonth
@@ -96,6 +98,7 @@ import com.agpeya.app.data.PrayerJourney
 import com.agpeya.app.model.HabitsState
 import com.agpeya.app.model.Hour
 import com.agpeya.app.model.HoursConfig
+import com.agpeya.app.model.toBookmark
 import com.agpeya.app.ui.common.Candle
 import com.agpeya.app.ui.common.FillColumn
 import com.agpeya.app.ui.common.HeroCard
@@ -190,6 +193,12 @@ fun HomeScreen(
         value = runCatching { com.agpeya.app.data.DailyQuoteRepository.quoteFor(context, today) }.getOrNull()
     }
     var showDailyQuoteSheet by remember { mutableStateOf(false) }
+
+    val bookmarks by com.agpeya.app.data.UserDataRepository.bookmarks(context).collectAsState(initial = emptyList())
+    val isDailyQuoteBookmarked = remember(bookmarks, dailyQuote?.quoteId) {
+        val id = dailyQuote?.quoteId
+        id != null && bookmarks.any { it.hourId == "daily_quote" && it.sectionId == id }
+    }
 
     LaunchedEffect(openDailyQuote) {
         if (openDailyQuote) {
@@ -352,6 +361,17 @@ fun HomeScreen(
                 onOpenPsalter = onOpenPsalter,
                 onOpenZewotr = onOpenZewotr,
                 dailyQuote = dailyQuote,
+                isDailyQuoteBookmarked = isDailyQuoteBookmarked,
+                onToggleDailyQuoteBookmark = {
+                    dailyQuote?.let { q ->
+                        scope.launch {
+                            com.agpeya.app.data.UserDataRepository.toggleBookmark(
+                                context,
+                                q.toBookmark(strings.dailyQuoteChannelName),
+                            )
+                        }
+                    }
+                },
                 onOpenDailyQuote = { showDailyQuoteSheet = true },
             )
         }
@@ -361,6 +381,17 @@ fun HomeScreen(
     if (showDailyQuoteSheet && dailyQuote != null) {
         DailyQuoteSheet(
             quote = dailyQuote!!,
+            isBookmarked = isDailyQuoteBookmarked,
+            onToggleBookmark = {
+                scope.launch {
+                    dailyQuote?.let { q ->
+                        com.agpeya.app.data.UserDataRepository.toggleBookmark(
+                            context,
+                            q.toBookmark(strings.dailyQuoteChannelName),
+                        )
+                    }
+                }
+            },
             onDismiss = { showDailyQuoteSheet = false },
             onReflectInJournal = { q ->
                 showDailyQuoteSheet = false
@@ -574,6 +605,8 @@ private fun HomeDashboard(
     onOpenPsalter: () -> Unit,
     onOpenZewotr: () -> Unit,
     dailyQuote: com.agpeya.app.model.DailyQuote? = null,
+    isDailyQuoteBookmarked: Boolean = false,
+    onToggleDailyQuoteBookmark: () -> Unit = {},
     onOpenDailyQuote: () -> Unit = {},
 ) {
     val cardScale = LocalDensity.current.fontScale.coerceIn(1f, 2f)
@@ -620,6 +653,8 @@ private fun HomeDashboard(
         if (dailyQuote != null) {
             DailyQuoteHairlineRow(
                 quote = dailyQuote,
+                isBookmarked = isDailyQuoteBookmarked,
+                onToggleBookmark = onToggleDailyQuoteBookmark,
                 onClick = onOpenDailyQuote,
             )
         }
@@ -1122,6 +1157,8 @@ private fun AllHoursSheet(hours: List<Hour>, currentHourId: String?, onOpenHour:
 @Composable
 private fun DailyQuoteHairlineRow(
     quote: com.agpeya.app.model.DailyQuote?,
+    isBookmarked: Boolean = false,
+    onToggleBookmark: () -> Unit = {},
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -1135,7 +1172,7 @@ private fun DailyQuoteHairlineRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(36.dp)
+                .height(38.dp)
                 .clickable(onClick = onClick)
                 .semantics { role = Role.Button }
                 .padding(horizontal = Spacing.xs),
@@ -1173,12 +1210,25 @@ private fun DailyQuoteHairlineRow(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            Icon(
-                imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(IconSize.small),
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(
+                    onClick = onToggleBookmark,
+                    modifier = Modifier.size(32.dp),
+                ) {
+                    Icon(
+                        imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                        contentDescription = s.bookmarkAction,
+                        tint = if (isBookmarked) gold else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(IconSize.small),
+                    )
+                }
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(IconSize.small),
+                )
+            }
         }
         SinqDivider()
     }

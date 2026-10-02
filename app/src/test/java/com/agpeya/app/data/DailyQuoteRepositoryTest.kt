@@ -1,6 +1,7 @@
 package com.agpeya.app.data
 
 import com.agpeya.app.model.DailyQuote
+import com.agpeya.app.model.toBookmark
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -66,5 +67,22 @@ class DailyQuoteRepositoryTest {
             val idx2 = DailyQuoteRepository.quoteIndexFor(date2, totalQuotes)
             assertEquals((idx1 + 1) % totalQuotes, idx2)
         }
+    }
+
+    @Test
+    fun `toBookmark generates stable bookmark key and correct route`() {
+        assertNotNull("daily_quotes.json must exist in assets", file)
+        val raw = file!!.readText()
+        val quotes: List<DailyQuote> = json.decodeFromString(raw)
+        val firstQuote = quotes.first()
+
+        val bookmark = firstQuote.toBookmark("የአበው ምክር")
+
+        assertEquals("daily_quote", bookmark.hourId)
+        assertEquals("የአበው ምክር", bookmark.hourName)
+        assertEquals(firstQuote.quoteId, bookmark.sectionId)
+        assertEquals(firstQuote.authorAm, bookmark.title)
+        assertEquals(firstQuote.quote, bookmark.subtitle)
+        assertEquals("daily_quote?id=${firstQuote.quoteId}", bookmark.route)
     }
 }

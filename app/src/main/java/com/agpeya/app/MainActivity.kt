@@ -640,6 +640,35 @@ private fun AgpeyaNavHost(
                 },
             )
         }
+        composable(
+            route = "daily_quote?id={id}",
+            arguments = listOf(
+                navArgument("id") { type = NavType.StringType; defaultValue = "" },
+            ),
+        ) { backStackEntry ->
+            val quoteId = backStackEntry.arguments?.getString("id").orEmpty()
+            val quote = remember(quoteId) {
+                com.agpeya.app.data.DailyQuoteRepository.quotesBlocking(context).find { it.quoteId == quoteId }
+            }
+            if (quote != null) {
+                com.agpeya.app.ui.home.DailyQuoteSheet(
+                    quote = quote,
+                    onDismiss = { navController.popBackStack() },
+                    onReflectInJournal = { reflectedQuote ->
+                        navController.popBackStack()
+                        val author = reflectedQuote.authorAm.ifBlank { reflectedQuote.authorEn }
+                        val label = "የአበው ምክር · $author"
+                        navController.navigate("journal/entry?kind=${com.agpeya.app.model.JournalKind.REFLECTION.name}&label=${android.net.Uri.encode(label)}") {
+                            launchSingleTop = true
+                        }
+                    },
+                )
+            } else {
+                LaunchedEffect(Unit) {
+                    navController.popBackStack()
+                }
+            }
+        }
         // Catena's page for a verse, shown in a WebView rather than a Custom
         // Tab so the app can ask for the early fathers alone — see CatenaScreen.
         composable(

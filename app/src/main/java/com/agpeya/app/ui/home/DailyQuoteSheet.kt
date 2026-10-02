@@ -20,6 +20,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.Share
@@ -34,6 +36,10 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,14 +47,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.agpeya.app.data.UserDataRepository
 import com.agpeya.app.model.DailyQuote
+import com.agpeya.app.model.toBookmark
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
+import kotlinx.coroutines.launch
 
 /**
  * Bottom sheet displaying today's Desert Father saying for contemplation,
- * with quick actions to share and journal.
+ * with quick actions to bookmark, share and journal.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,10 +65,23 @@ fun DailyQuoteSheet(
     quote: DailyQuote,
     onDismiss: () -> Unit,
     onReflectInJournal: (DailyQuote) -> Unit,
+    isBookmarked: Boolean? = null,
+    onToggleBookmark: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val s = LocalStrings.current
     val gold = MaterialTheme.colorScheme.secondary
+
+    val bookmarks by UserDataRepository.bookmarks(context).collectAsState(initial = emptyList())
+    val bookmarked = isBookmarked ?: remember(bookmarks, quote.quoteId) {
+        bookmarks.any { it.hourId == "daily_quote" && it.sectionId == quote.quoteId }
+    }
+    val toggle: () -> Unit = onToggleBookmark ?: {
+        scope.launch {
+            UserDataRepository.toggleBookmark(context, quote.toBookmark(s.dailyQuoteChannelName))
+        }
+    }
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
@@ -69,7 +91,7 @@ fun DailyQuoteSheet(
                 .padding(horizontal = Spacing.screen)
                 .padding(bottom = Spacing.lg),
         ) {
-            // Header Row: Badge & Close
+            // Header Row: Badge & Actions (Bookmark, Close)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -89,13 +111,23 @@ fun DailyQuoteSheet(
                         color = gold,
                     )
                 }
-                IconButton(onClick = onDismiss, modifier = Modifier.size(36.dp)) {
-                    Icon(
-                        imageVector = Icons.Outlined.Close,
-                        contentDescription = s.dismiss,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(IconSize.small),
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = toggle, modifier = Modifier.size(36.dp)) {
+                        Icon(
+                            imageVector = if (bookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                            contentDescription = s.bookmarkAction,
+                            tint = if (bookmarked) gold else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(IconSize.small),
+                        )
+                    }
+                    IconButton(onClick = onDismiss, modifier = Modifier.size(36.dp)) {
+                        Icon(
+                            imageVector = Icons.Outlined.Close,
+                            contentDescription = s.dismiss,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(IconSize.small),
+                        )
+                    }
                 }
             }
 
