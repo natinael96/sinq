@@ -218,7 +218,16 @@ fun ReadingScreen(
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
     val s = com.agpeya.app.ui.strings.LocalStrings.current
     val motion = LocalMotion.current
-    var isImmersive by rememberSaveable(hourId) { mutableStateOf(false) }
+    val distractionFree = com.agpeya.app.ui.common.rememberDistractionFreeState(
+        pauseAutoImmersion = hourMenu || showContents,
+    )
+    val isImmersive = distractionFree.isImmersive
+
+    LaunchedEffect(listState.isScrollInProgress, pagerState.isScrollInProgress) {
+        if ((listState.isScrollInProgress || pagerState.isScrollInProgress) && !isImmersive && !hourMenu && !showContents) {
+            distractionFree.hide()
+        }
+    }
 
     val readingProgress by remember(sections.size, listState, pagerState, readingMode) {
         derivedStateOf {
@@ -229,11 +238,6 @@ fun ReadingScreen(
             }
         }
     }
-    val animatedProgress by animateFloatAsState(
-        targetValue = readingProgress,
-        animationSpec = motion.spec(com.agpeya.app.ui.theme.Motion.standard),
-        label = "readingProgress",
-    )
 
     // The section we want kept in view; shared across both readers so the
     // position survives a mode switch.
@@ -434,31 +438,21 @@ fun ReadingScreen(
                         ::toggleBookmark,
                         prevHour?.let { h -> { onSwitchHour(h.id) } },
                         nextHour?.let { h -> { onSwitchHour(h.id) } },
-                        onToggleImmersive = { isImmersive = !isImmersive },
+                        onToggleImmersive = { distractionFree.toggle() },
                     )
                     ReadingMode.HORIZONTAL -> PagedReader(
                         sections, pagerState, bodyFontSp, contentPadding, bookmarkedIds,
                         ::toggleBookmark, progressKey, weights, pageWasSwiped, recordRead,
-                        onToggleImmersive = { isImmersive = !isImmersive },
+                        onToggleImmersive = { distractionFree.toggle() },
                     )
                 }
             }
             if (sections.size > 1) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = if (!isImmersive) innerPadding.calculateTopPadding() else 0.dp)
-                        .height(2.5.dp)
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
-                        .align(Alignment.TopCenter),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(animatedProgress)
-                            .height(2.5.dp)
-                            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.9f)),
-                    )
-                }
+                com.agpeya.app.ui.common.ReadingProgressBar(
+                    progress = readingProgress,
+                    topPadding = if (!isImmersive) innerPadding.calculateTopPadding() else 0.dp,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                )
             }
         }
     }

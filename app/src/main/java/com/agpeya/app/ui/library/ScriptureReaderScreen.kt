@@ -373,7 +373,8 @@ fun ScriptureReaderScreen(
             )
         },
     ) { innerPadding ->
-        ReadingColumn(state = listState, innerPadding = innerPadding) {
+        Box(Modifier.fillMaxSize()) {
+            ReadingColumn(state = listState, innerPadding = innerPadding) {
             // The cited verses are emitted as ONE row so the citation reads as a
             // single tinted block instead of a stack of separate boxes.
             items(rows, key = { it.first().n }) { row ->
@@ -493,6 +494,14 @@ fun ScriptureReaderScreen(
                 Spacer(Modifier.height(Spacing.huge))
             }
         }
+        if (rows.size > 1) {
+            com.agpeya.app.ui.common.ReadingProgressBar(
+                progress = com.agpeya.app.ui.common.rememberLazyListProgress(listState),
+                topPadding = innerPadding.calculateTopPadding(),
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
+        }
+    }
         if (chaptersOpen) {
             com.agpeya.app.ui.common.ChapterSheet(
                 count = b.chapters.size,

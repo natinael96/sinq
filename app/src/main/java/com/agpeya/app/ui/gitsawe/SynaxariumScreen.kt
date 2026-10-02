@@ -432,6 +432,13 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: Str
                 .widthIn(max = ReadingMaxWidth)
                 .padding(innerPadding),
         )
+        if (day != null) {
+            com.agpeya.app.ui.common.ReadingProgressBar(
+                progress = com.agpeya.app.ui.common.rememberLazyListProgress(listState),
+                topPadding = innerPadding.calculateTopPadding(),
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
+        }
         // The selected run, ready to copy or leave as text or a PNG card.
         val selBody = if (selRange.isEmpty()) null
         else pieces.filterIndexed { i, _ -> i in selRange }

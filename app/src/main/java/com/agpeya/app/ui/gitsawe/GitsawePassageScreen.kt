@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
@@ -226,8 +227,10 @@ fun GitsawePassageScreen(
             }
             else -> {
                 val verseGap = readingVerseGap(bodyFontSp)
-                ReadingColumn(innerPadding = innerPadding) {
-                    item(key = "top") { Spacer(Modifier.height(Spacing.sm)) }
+                val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+                Box(Modifier.fillMaxSize()) {
+                    ReadingColumn(state = listState, innerPadding = innerPadding) {
+                        item(key = "top") { Spacer(Modifier.height(Spacing.sm)) }
                     items(
                         passage.verses.size,
                         key = { i ->
@@ -339,9 +342,15 @@ fun GitsawePassageScreen(
                         Spacer(Modifier.height(Spacing.xl))
                     }
                 }
+                com.agpeya.app.ui.common.ReadingProgressBar(
+                    progress = com.agpeya.app.ui.common.rememberLazyListProgress(listState),
+                    topPadding = innerPadding.calculateTopPadding(),
+                    modifier = Modifier.align(Alignment.TopCenter),
+                )
             }
         }
     }
+}
 }
 
 /**

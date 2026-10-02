@@ -31,6 +31,21 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.5.4",
+        title = "Distraction-free prayer mode, universal reading progress bars, and Mahlet screen redesign",
+        titleAm = "ያለ ትኩረት የሚከፋፍል የጸሎት ሁነታ፣ የንባብ ሂደት ማሳያ እና የማኅሌት ገጽ ማሻሻያ",
+        changes = listOf(
+            "Integrated system bar immersion and soft auto-hide of controls after 3s of stillness or on scroll for Hourly Prayers, Daily Psalms, and Wudase Maryam.",
+            "Added subtle 2dp golden reading progress bars across all scripture and devotional reading screens.",
+            "Redesigned Mahlet index with header action search, Ethiopian month pills with Ge'ez count badges, and 48dp liturgical service buttons.",
+        ),
+        changesAm = listOf(
+            "ለሰዓታት ጸሎት፣ ለዕለቱ ዳዊት እና ለውዳሴ ማርያም ትኩረትን የሚሰርቁ የስልክ ምልክቶችን (ሰዓት፣ ባትሪ፣ መልዕክቶች) የሚሰውር ሙሉ የጸሎት ሁነታ ተዘጋጅቷል።",
+            "በሁሉም የንባብ ክፍሎች (መዝሙረ ዳዊት፣ ስንክሳር፣ መጽሐፍ ቅዱስ፣ ውዳሴ ማርያም፣ መጻሕፍት፣ ግጻዌ) የንባብ ሂደትን የሚያሳይ ረቂቅ ወርቃማ መስመር ተካቷል።",
+            "የሥርዓተ ማኅሌት ማውጫ የፍለጋ አዶ በራስጌው ላይ በማድረግ፣ የኢትዮጵያ ወራትን በግዕዝ ቁጥር ባጅ በማስጌጥ እና ለዋዜማና ማኅሌት ምቹ ቁልፎችን በማዘጋጀት ተሻሽሏል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.5.3",
         title = "Settings hub reorganization, daily quote bookmarks, and UI card refinements",
         titleAm = "የቅንብሮች አደረጃጀት፣ የአበው ምክር ዕልባቶች እና የተሻሻሉ የመረጃ ካርዶች",

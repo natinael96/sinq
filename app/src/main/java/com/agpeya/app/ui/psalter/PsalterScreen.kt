@@ -1,5 +1,10 @@
 package com.agpeya.app.ui.psalter
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.CircleShape
@@ -180,6 +185,17 @@ fun PsalterScreen(
     val listState = rememberLazyListState()
     val pagerState = rememberPagerState(pageCount = { shown.size })
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val motion = com.agpeya.app.ui.theme.LocalMotion.current
+    val distractionFree = com.agpeya.app.ui.common.rememberDistractionFreeState(
+        pauseAutoImmersion = showContents,
+    )
+    val isImmersive = distractionFree.isImmersive
+
+    LaunchedEffect(listState.isScrollInProgress, pagerState.isScrollInProgress) {
+        if ((listState.isScrollInProgress || pagerState.isScrollInProgress) && !isImmersive && !showContents) {
+            distractionFree.hide()
+        }
+    }
 
     // Psalm index (into `shown`) to land on; -1 = none. Set from a bookmark and
     // when switching reading mode, so the position carries over.
@@ -190,6 +206,27 @@ fun PsalterScreen(
         when (readingMode) {
             ReadingMode.VERTICAL -> listState.scrollToItem(target + headerCount())
             ReadingMode.HORIZONTAL -> pagerState.scrollToPage(target)
+        }
+    }
+
+    val readingProgress by remember(shown.size, listState, pagerState, readingMode) {
+        derivedStateOf {
+            if (shown.size <= 1) 0f
+            else {
+                if (readingMode == ReadingMode.VERTICAL) {
+                    val idx = (listState.firstVisibleItemIndex - headerCount()).coerceAtLeast(0)
+                    val maxIdx = (shown.size - 1).coerceAtLeast(1)
+                    val firstVisible = listState.layoutInfo.visibleItemsInfo.firstOrNull()
+                    val offset = if (firstVisible != null && firstVisible.size > 0) {
+                        (listState.firstVisibleItemScrollOffset.toFloat() / firstVisible.size) / maxIdx
+                    } else 0f
+                    ((idx.toFloat() / maxIdx) + offset).coerceIn(0f, 1f)
+                } else {
+                    val page = pagerState.currentPage
+                    val offset = pagerState.currentPageOffsetFraction
+                    ((page + offset) / (shown.size - 1)).coerceIn(0f, 1f)
+                }
+            }
         }
     }
 
@@ -227,75 +264,86 @@ fun PsalterScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            SinqTopBar(
-                title = s.psalterTitle,
-                // The division being read, so the title bar answers "which
-                // psalms am I looking at" without a second glance.
-                subtitle = if (daily && range != null) s.psalmRange(range.first, range.last) else null,
-                onBack = onBack,
-                actions = {
-                    com.agpeya.app.ui.common.EditionToggle(geez = geez) {
-
-                        geez = !geez
-                    }
-                    com.agpeya.app.ui.common.ReaderToolsMenu(
-                        fontStep = fontStep,
-                        maxFontStep = FONT_STEPS_SP.lastIndex,
-                        onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
-                        onWriteNote = {
-                            // Which psalm is actually on screen, derived the
-                            // same way the layout toggle derives it.
-                            val index = if (readingMode == ReadingMode.VERTICAL) {
-                                (listState.firstVisibleItemIndex - headerCount()).coerceAtLeast(0)
-                            } else {
-                                pagerState.currentPage
-                            }
-                            onWriteNote(
-                                "psalter?section=${((shown.getOrNull(index)?.number ?: 1) - 1)}&lang=${if (geez) "gez" else "am"}",
-                                shown.getOrNull(index)?.title ?: s.psalterTitle,
-                            )
-                        },
-                        secondaryActionLabel = if (daily) s.wholePsalter else s.dailyPsalms,
-                        onSecondaryAction = {
-
-                            daily = !daily
-                            anchor = -1
-                        },
-                        readingMode = readingMode,
-                        onToggleReadingMode = {
-                            // Preserve the visible Psalm when changing layout.
-                            anchor = if (readingMode == ReadingMode.VERTICAL) {
-                                (listState.firstVisibleItemIndex - headerCount()).coerceAtLeast(0)
-                            } else {
-                                pagerState.currentPage
-                            }
-                            scope.launch {
-                                SettingsRepository.setReadingMode(
-                                    context,
-                                    if (readingMode == ReadingMode.VERTICAL) ReadingMode.HORIZONTAL
-                                    else ReadingMode.VERTICAL,
+            AnimatedVisibility(
+                visible = !isImmersive,
+                enter = slideInVertically(motion.spec(com.agpeya.app.ui.theme.Motion.standard)) { -it } + fadeIn(motion.spec(com.agpeya.app.ui.theme.Motion.fast)),
+                exit = slideOutVertically(motion.spec(com.agpeya.app.ui.theme.Motion.standard)) { -it } + fadeOut(motion.spec(com.agpeya.app.ui.theme.Motion.fast)),
+            ) {
+                SinqTopBar(
+                    title = s.psalterTitle,
+                    // The division being read, so the title bar answers "which
+                    // psalms am I looking at" without a second glance.
+                    subtitle = if (daily && range != null) s.psalmRange(range.first, range.last) else null,
+                    onBack = onBack,
+                    actions = {
+                        com.agpeya.app.ui.common.EditionToggle(geez = geez) {
+                            geez = !geez
+                        }
+                        com.agpeya.app.ui.common.ReaderToolsMenu(
+                            fontStep = fontStep,
+                            maxFontStep = FONT_STEPS_SP.lastIndex,
+                            onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
+                            onWriteNote = {
+                                // Which psalm is actually on screen, derived the
+                                // same way the layout toggle derives it.
+                                val index = if (readingMode == ReadingMode.VERTICAL) {
+                                    (listState.firstVisibleItemIndex - headerCount()).coerceAtLeast(0)
+                                } else {
+                                    pagerState.currentPage
+                                }
+                                onWriteNote(
+                                    "psalter?section=${((shown.getOrNull(index)?.number ?: 1) - 1)}&lang=${if (geez) "gez" else "am"}",
+                                    shown.getOrNull(index)?.title ?: s.psalterTitle,
                                 )
-                            }
-                        },
-                    )
-                    IconButton(onClick = { showContents = true }) {
-                        Icon(
-                            Icons.Outlined.Menu,
-                            contentDescription = s.contents,
-                            modifier = Modifier.size(IconSize.medium),
+                            },
+                            secondaryActionLabel = if (daily) s.wholePsalter else s.dailyPsalms,
+                            onSecondaryAction = {
+                                daily = !daily
+                                anchor = -1
+                            },
+                            readingMode = readingMode,
+                            onToggleReadingMode = {
+                                // Preserve the visible Psalm when changing layout.
+                                anchor = if (readingMode == ReadingMode.VERTICAL) {
+                                    (listState.firstVisibleItemIndex - headerCount()).coerceAtLeast(0)
+                                } else {
+                                    pagerState.currentPage
+                                }
+                                scope.launch {
+                                    SettingsRepository.setReadingMode(
+                                        context,
+                                        if (readingMode == ReadingMode.VERTICAL) ReadingMode.HORIZONTAL
+                                        else ReadingMode.VERTICAL,
+                                    )
+                                }
+                            },
                         )
-                    }
-                },
-            )
+                        IconButton(onClick = { showContents = true }) {
+                            Icon(
+                                Icons.Outlined.Menu,
+                                contentDescription = s.contents,
+                                modifier = Modifier.size(IconSize.medium),
+                            )
+                        }
+                    },
+                )
+            }
         },
-
     ) { innerPadding ->
+        val contentPadding = if (isImmersive) PaddingValues(0.dp) else innerPadding
         Box(Modifier.fillMaxSize()) {
+            if (shown.size > 1 && !reloading) {
+                com.agpeya.app.ui.common.ReadingProgressBar(
+                    progress = readingProgress,
+                    topPadding = if (!isImmersive) innerPadding.calculateTopPadding() else 0.dp,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                )
+            }
             if (reloading) {
                 androidx.compose.material3.LinearProgressIndicator(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = innerPadding.calculateTopPadding())
+                        .padding(top = if (!isImmersive) innerPadding.calculateTopPadding() else 0.dp)
                         .height(2.dp)
                         .align(Alignment.TopCenter),
                     color = MaterialTheme.colorScheme.secondary,
@@ -310,13 +358,17 @@ fun PsalterScreen(
                 // book on the shelf follows the edition being read here.
                 SundayCanticles(
                     geez = geez,
-                    modifier = Modifier.fillMaxSize().padding(innerPadding),
+                    modifier = Modifier.fillMaxSize().padding(contentPadding),
                     onOpen = onOpenBook,
                     onWholePsalter = { daily = false },
                 )
             } else when (readingMode) {
                 ReadingMode.VERTICAL -> {
-                    ReadingColumn(state = listState, innerPadding = innerPadding) {
+                    ReadingColumn(
+                        state = listState,
+                        innerPadding = contentPadding,
+                        onTap = { distractionFree.toggle() },
+                    ) {
                         if (daily && range != null) {
                             item {
                                 Text(
@@ -333,7 +385,6 @@ fun PsalterScreen(
                                 bodyFontSp = bodyFontSp,
                                 isBookmarked = section.id in bookmarkedIds,
                                 onToggleBookmark = { toggleBookmark(section) },
-
                             )
                         }
                         item { Spacer(Modifier.height(Spacing.huge)) }
@@ -343,7 +394,7 @@ fun PsalterScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(innerPadding),
+                            .padding(contentPadding),
                     ) {
                         HorizontalPager(
                             state = pagerState,
@@ -353,14 +404,16 @@ fun PsalterScreen(
                             // getOrNull: a composed page can outlive the list for a frame
                             // when the daily/all toggle shrinks it under the pager.
                             val section = shown.getOrNull(page) ?: return@HorizontalPager
-                            ReadingColumn(innerPadding = PaddingValues(0.dp)) {
+                            ReadingColumn(
+                                innerPadding = PaddingValues(0.dp),
+                                onTap = { distractionFree.toggle() },
+                            ) {
                                 item {
                                     SectionView(
                                         section = section,
                                         bodyFontSp = bodyFontSp,
                                         isBookmarked = section.id in bookmarkedIds,
                                         onToggleBookmark = { toggleBookmark(section) },
-
                                     )
                                     Spacer(Modifier.height(Spacing.huge))
                                 }

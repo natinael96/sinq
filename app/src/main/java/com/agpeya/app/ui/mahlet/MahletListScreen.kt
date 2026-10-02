@@ -1,12 +1,16 @@
 package com.agpeya.app.ui.mahlet
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,25 +22,46 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -44,31 +69,23 @@ import com.agpeya.app.data.MahletComputus
 import com.agpeya.app.data.MahletRepository
 import com.agpeya.app.model.MahletIndex
 import com.agpeya.app.model.MahletKind
+import com.agpeya.app.model.MahletMonth
 import com.agpeya.app.model.MahletOrder
 import com.agpeya.app.model.MahletOrderMeta
 import com.agpeya.app.model.MahletSeason
 import com.agpeya.app.ui.common.EthiopianDate
-import com.agpeya.app.ui.common.SelectPill
-import com.agpeya.app.ui.common.SectionHeader
-import com.agpeya.app.ui.common.formatEthiopianShort
 import com.agpeya.app.ui.common.SinqTopBar
+import com.agpeya.app.ui.common.formatEthiopianShort
 import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.IconSize
+import com.agpeya.app.ui.theme.LocalMotion
+import com.agpeya.app.ui.theme.Motion
 import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.inReadingFont
 import com.agpeya.app.ui.theme.sinqColors
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.Close
 
 /**
  * The whole year of ማኅሌት, in the order it is sung.
@@ -84,7 +101,7 @@ import androidx.compose.material.icons.outlined.Close
  * made the index twice as long as the book.
  */
 @Composable
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 fun MahletListScreen(
     onBack: () -> Unit,
     onOpen: (String) -> Unit,
@@ -93,6 +110,7 @@ fun MahletListScreen(
     val context = LocalContext.current
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
 
     val indexLoad = com.agpeya.app.ui.common.rememberContentLoad { MahletRepository.index(context) }
     val index = indexLoad.value ?: MahletIndex()
@@ -101,7 +119,21 @@ fun MahletListScreen(
     val today by produceState(emptyList<MahletOrder>(), currentDate) {
         value = MahletRepository.ordersOn(context, currentDate)
     }
+
+    var isSearching by rememberSaveable { mutableStateOf(false) }
     var query by rememberSaveable { mutableStateOf("") }
+    val searchFocusRequester = remember { FocusRequester() }
+
+    BackHandler(enabled = isSearching) {
+        isSearching = false
+        query = ""
+    }
+
+    LaunchedEffect(isSearching) {
+        if (isSearching) {
+            runCatching { searchFocusRequester.requestFocus() }
+        }
+    }
 
     // The dated months, in the year's order. Month 0 holds the orders no book
     // dates; it goes last, under its own heading rather than a month's name.
@@ -139,60 +171,135 @@ fun MahletListScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            SinqTopBar(
-                title = s.mahletTitle,
-                subtitle = if (total > 0) s.mahletOrders(total) else s.mahletSubtitle,
-                onBack = onBack,
-            )
+            if (isSearching) {
+                SinqTopBar(
+                    title = "",
+                    onBack = {
+                        isSearching = false
+                        query = ""
+                    },
+                    titleContent = {
+                        TextField(
+                            value = query,
+                            onValueChange = { query = it },
+                            placeholder = {
+                                Text(
+                                    s.mahletSearchHint,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                )
+                            },
+                            singleLine = true,
+                            textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(searchFocusRequester),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent,
+                                disabledContainerColor = Color.Transparent,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                cursorColor = MaterialTheme.colorScheme.secondary,
+                            ),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
+                        )
+                    },
+                    actions = {
+                        if (query.isNotEmpty()) {
+                            IconButton(onClick = { query = "" }) {
+                                Icon(
+                                    Icons.Outlined.Close,
+                                    contentDescription = s.clearAction,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(IconSize.medium),
+                                )
+                            }
+                        }
+                    },
+                )
+            } else {
+                SinqTopBar(
+                    title = s.mahletTitle,
+                    subtitle = if (total > 0) s.mahletOrders(total) else s.mahletSubtitle,
+                    onBack = onBack,
+                    actions = {
+                        IconButton(onClick = { isSearching = true }) {
+                            Icon(
+                                Icons.Outlined.Search,
+                                contentDescription = s.tabSearch,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(IconSize.medium),
+                            )
+                        }
+                    },
+                )
+            }
         },
     ) { inner ->
-        Column(Modifier.fillMaxSize().padding(inner)) {
-            MahletSearchField(query, { query = it }, Modifier.padding(horizontal = Spacing.screen))
-
-            if (query.isNotBlank()) {
-                // Searching leaves the months behind: a feast is looked up by
-                // name, and which month it falls in is the answer, not the way in.
-                SearchResults(hits, onOpen)
-                return@Column
-            }
-
-            // The strip is the pager's own tab row now: tapping moves the pages
-            // and swiping moves the strip, so the two can never disagree about
-            // which month is showing — which is what the old one could not say
-            // at all, every pill being drawn unselected.
-            MonthStrip(
-                months = pages,
-                selected = pager.currentPage,
-                onJump = { i -> scope.launch { pager.animateScrollToPage(i) } },
-            )
-            HorizontalPager(state = pager, modifier = Modifier.fillMaxSize()) { page ->
-                val m = pages[page]
-                val groups = remember(m) {
-                    groupByFeast(m.orders.filter { it.season != MahletSeason.TSIGE })
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(inner),
+        ) {
+            if (isSearching) {
+                if (query.isNotBlank()) {
+                    SearchResults(hits, onOpen)
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(Spacing.screen),
+                        contentAlignment = Alignment.TopCenter,
+                    ) {
+                        Text(
+                            text = s.mahletSearchHint,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = Spacing.xxl),
+                            textAlign = TextAlign.Center,
+                        )
+                    }
                 }
-                LazyColumn(
-                    Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = Spacing.screen),
-                ) {
-                    // Today's order rides on the month it belongs to rather
-                    // than above the pager, so swiping away from ጥቅምት does not
-                    // leave a card for a ጥቅምት feast hanging over ኅዳር.
-                    if (today.isNotEmpty() && m.month == EthiopianDate.from(LocalDate.now()).month) {
-                        item(key = "today") { TodayOrder(today, onOpen) }
+            } else {
+                MonthStrip(
+                    months = pages,
+                    selected = pager.currentPage,
+                    onJump = { i -> scope.launch { pager.animateScrollToPage(i) } },
+                )
+                HorizontalPager(
+                    state = pager,
+                    modifier = Modifier.fillMaxSize(),
+                ) { page ->
+                    val m = pages[page]
+                    val groups = remember(m) {
+                        groupByFeast(m.orders.filter { it.season != MahletSeason.TSIGE })
                     }
-                    if (m.month == TSIGE_HOME && tsigeCount > 0) {
-                        item(key = "tsige") {
-                            Spacer(Modifier.height(Spacing.sm))
-                            SeasonRow(tsigeCount, onOpenSeason)
+                    LazyColumn(
+                        Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.xs),
+                    ) {
+                        if (today.isNotEmpty() && m.month == EthiopianDate.from(LocalDate.now()).month) {
+                            item(key = "today") {
+                                TodayOrder(today, onOpen)
+                                Spacer(Modifier.height(Spacing.xs))
+                            }
                         }
+                        if (m.month == TSIGE_HOME && tsigeCount > 0) {
+                            item(key = "tsige") {
+                                SeasonRow(tsigeCount, onOpenSeason)
+                                Spacer(Modifier.height(Spacing.xs))
+                            }
+                        }
+                        items(groups.size, key = { groups[it].first().id }) { i ->
+                            FeastRow(groups[i], onOpen)
+                        }
+                        if (groups.isEmpty()) {
+                            item(key = "none") { MonthHasNothing(s.mahletNone) }
+                        }
+                        item { Spacer(Modifier.height(Spacing.huge)) }
                     }
-                    items(groups.size, key = { groups[it].first().id }) { i ->
-                        FeastRow(groups[i], onOpen)
-                    }
-                    if (groups.isEmpty()) {
-                        item(key = "none") { MonthHasNothing(s.mahletNone) }
-                    }
-                    item { Spacer(Modifier.height(Spacing.huge)) }
                 }
             }
         }
@@ -212,34 +319,6 @@ private fun searchOrders(index: MahletIndex, query: String): List<MahletOrderMet
 }
 
 @Composable
-private fun MahletSearchField(value: String, onValue: (String) -> Unit, modifier: Modifier = Modifier) {
-    val s = LocalStrings.current
-    androidx.compose.material3.OutlinedTextField(
-        value = value,
-        onValueChange = onValue,
-        placeholder = { Text(s.mahletSearchHint, style = MaterialTheme.typography.bodyMedium) },
-        leadingIcon = {
-            Icon(
-                androidx.compose.material.icons.Icons.Outlined.Search,
-                contentDescription = null,
-                modifier = Modifier.size(IconSize.medium),
-            )
-        },
-        trailingIcon = if (value.isNotBlank()) ({
-            androidx.compose.material3.IconButton(onClick = { onValue("") }) {
-                Icon(
-                    androidx.compose.material.icons.Icons.Outlined.Close,
-                    contentDescription = s.clearAction,
-                    modifier = Modifier.size(IconSize.medium),
-                )
-            }
-        }) else null,
-        singleLine = true,
-        modifier = modifier.fillMaxWidth().padding(top = Spacing.sm),
-    )
-}
-
-@Composable
 private fun SearchResults(hits: List<MahletOrderMeta>, onOpen: (String) -> Unit) {
     val s = LocalStrings.current
     if (hits.isEmpty()) {
@@ -248,7 +327,7 @@ private fun SearchResults(hits: List<MahletOrderMeta>, onOpen: (String) -> Unit)
     }
     LazyColumn(
         Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = Spacing.screen),
+        contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.xs),
     ) {
         items(hits.size, key = { hits[it].id }) { i -> FeastRow(listOf(hits[i]), onOpen) }
         item { Spacer(Modifier.height(Spacing.huge)) }
@@ -269,7 +348,7 @@ private fun MonthHasNothing(text: String) {
 
 /** A blank index is a broken install, not an empty month; say so rather than nothing. */
 @Composable
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 private fun MahletEmpty(title: String, onBack: () -> Unit) {
     val s = LocalStrings.current
     Scaffold(
@@ -298,16 +377,14 @@ private fun groupByFeast(orders: List<MahletOrderMeta>): List<List<MahletOrderMe
 /** A horizontally scrolling strip of the months that hold orders. */
 @Composable
 private fun MonthStrip(
-    months: List<com.agpeya.app.model.MahletMonth>,
+    months: List<MahletMonth>,
     selected: Int,
     onJump: (Int) -> Unit,
 ) {
     val s = LocalStrings.current
     val scroll = rememberScrollState()
-    // Keep the lit month on screen. Fourteen pills run about three times the
-    // width of a phone, so the one that matters is usually off it.
     LaunchedEffect(selected) {
-        val approx = (selected * 88) - 96
+        val approx = (selected * 96) - 96
         scroll.animateScrollTo(approx.coerceIn(0, scroll.maxValue))
     }
     Row(
@@ -318,12 +395,82 @@ private fun MonthStrip(
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         months.forEachIndexed { i, m ->
-            SelectPill(
-                label = if (m.month == 0) s.mahletUndated
-                else s.ethMonths.getOrNull(m.month - 1).orEmpty(),
+            val label = if (m.month == 0) s.mahletUndated
+            else s.ethMonths.getOrNull(m.month - 1).orEmpty()
+            MonthPill(
+                label = label,
+                count = m.orders.size,
                 selected = i == selected,
                 onClick = { onJump(i) },
             )
+        }
+    }
+}
+
+/**
+ * Liturgical month selector pill with Ethiopian month title and Ge'ez count badge.
+ */
+@Composable
+private fun MonthPill(
+    label: String,
+    count: Int,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val motion = LocalMotion.current
+    val background by animateColorAsState(
+        targetValue = if (selected) sinqColors.hero else MaterialTheme.colorScheme.surface,
+        animationSpec = motion.spec(Motion.fast),
+        label = "monthPillBg",
+    )
+    val border by animateColorAsState(
+        targetValue = if (selected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.7f)
+        else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
+        animationSpec = motion.spec(Motion.fast),
+        label = "monthPillBorder",
+    )
+    val labelColor by animateColorAsState(
+        targetValue = if (selected) sinqColors.onHero else MaterialTheme.colorScheme.onSurface,
+        animationSpec = motion.spec(Motion.fast),
+        label = "monthPillText",
+    )
+    val badgeBg = if (selected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.25f)
+    else MaterialTheme.colorScheme.surfaceVariant
+    val badgeColor = if (selected) sinqColors.onHeroGold
+    else MaterialTheme.colorScheme.onSurfaceVariant
+
+    Row(
+        modifier = modifier
+            .heightIn(min = 44.dp)
+            .clip(RoundedCornerShape(22.dp))
+            .background(background)
+            .border(1.dp, border, RoundedCornerShape(22.dp))
+            .selectable(selected = selected, onClick = onClick)
+            .padding(start = Spacing.md, end = Spacing.sm, top = Spacing.xs, bottom = Spacing.xs),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            color = labelColor,
+            maxLines = 1,
+        )
+        if (count > 0) {
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(badgeBg)
+                    .padding(horizontal = Spacing.xs, vertical = 2.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = geezNumeral(count),
+                    style = MaterialTheme.typography.labelSmall.inReadingFont(),
+                    color = badgeColor,
+                )
+            }
         }
     }
 }
@@ -342,7 +489,6 @@ private fun TodayOrder(orders: List<MahletOrder>, onOpen: (String) -> Unit) {
     Column(
         Modifier
             .fillMaxWidth()
-            .padding(top = Spacing.md)
             .clip(RoundedCornerShape(16.dp))
             .background(sinqColors.hero)
             .clickable { onOpen(first.id) }
@@ -362,13 +508,42 @@ private fun TodayOrder(orders: List<MahletOrder>, onOpen: (String) -> Unit) {
             overflow = TextOverflow.Ellipsis,
         )
         Spacer(Modifier.height(Spacing.sm))
-        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
             orders.forEach { o ->
-                Text(
-                    "${s.mahletKindLabel(o.kind)}  ${geezNumeral(o.parts.size)}",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = sinqColors.onHeroMuted,
-                )
+                Surface(
+                    onClick = { onOpen(o.id) },
+                    shape = RoundedCornerShape(8.dp),
+                    color = sinqColors.onHero.copy(alpha = 0.12f),
+                    border = BorderStroke(1.dp, sinqColors.onHeroGold.copy(alpha = 0.35f)),
+                    modifier = Modifier.heightIn(min = 40.dp),
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.xs),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                    ) {
+                        Text(
+                            text = s.mahletKindLabel(o.kind),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = sinqColors.onHero,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Text(
+                            text = geezNumeral(o.parts.size),
+                            style = MaterialTheme.typography.labelSmall.inReadingFont(),
+                            color = sinqColors.onHeroGold,
+                        )
+                        Icon(
+                            Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = sinqColors.onHeroGold.copy(alpha = 0.8f),
+                            modifier = Modifier.size(IconSize.small),
+                        )
+                    }
+                }
             }
         }
     }
@@ -378,125 +553,216 @@ private fun TodayOrder(orders: List<MahletOrder>, onOpen: (String) -> Unit) {
 @Composable
 private fun SeasonRow(count: Int, onClick: () -> Unit) {
     val s = LocalStrings.current
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(vertical = Spacing.xs)
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .clickable(onClick = onClick)
-            .padding(horizontal = Spacing.md, vertical = Spacing.md),
-        verticalAlignment = Alignment.CenterVertically,
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        Column(Modifier.weight(1f)) {
-            Text(
-                s.mahletTsige,
-                style = MaterialTheme.typography.titleSmall.inReadingFont(),
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-            Spacer(Modifier.height(Spacing.xxs))
-            Text(
-                s.mahletTsigeSubtitle(count),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+        Row(
+            modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.md),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f))
+                    .border(
+                        1.dp,
+                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.35f),
+                        RoundedCornerShape(10.dp),
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "ጽጌ",
+                    style = MaterialTheme.typography.titleSmall.inReadingFont(),
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            Spacer(Modifier.width(Spacing.md))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = s.mahletTsige,
+                    style = MaterialTheme.typography.titleMedium.inReadingFont(),
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Spacer(Modifier.height(Spacing.xxs))
+                Text(
+                    text = s.mahletTsigeSubtitle(count),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Icon(
+                Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.size(IconSize.medium),
             )
         }
-        Icon(
-            Icons.AutoMirrored.Outlined.KeyboardArrowRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.size(IconSize.medium),
-        )
     }
 }
 
-/** One feast: its day in Ge'ez, its name, and a chip for each service. */
+/** Liturgical button for an order service (ዋዜማ or ማኅሌት) meeting 48dp accessibility targets. */
+@Composable
+private fun ServiceButton(
+    label: String,
+    partsCount: Int,
+    isVigil: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val borderColor = if (isVigil) {
+        MaterialTheme.colorScheme.outlineVariant
+    } else {
+        MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
+    }
+    val containerColor = if (isVigil) {
+        MaterialTheme.colorScheme.surfaceContainerLow
+    } else {
+        MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f)
+    }
+    val contentColor = if (isVigil) {
+        MaterialTheme.colorScheme.onSurface
+    } else {
+        MaterialTheme.colorScheme.secondary
+    }
+
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(8.dp),
+        color = containerColor,
+        border = BorderStroke(1.dp, borderColor),
+        modifier = modifier.heightIn(min = 40.dp),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.xs),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = contentColor,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+                text = geezNumeral(partsCount),
+                style = MaterialTheme.typography.labelSmall.inReadingFont(),
+                color = contentColor.copy(alpha = 0.85f),
+            )
+            Icon(
+                Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                contentDescription = null,
+                tint = contentColor.copy(alpha = 0.7f),
+                modifier = Modifier.size(IconSize.small),
+            )
+        }
+    }
+}
+
+/** One feast: its day in Ge'ez, its name, and distinct liturgical service buttons. */
 @Composable
 private fun FeastRow(group: List<MahletOrderMeta>, onOpen: (String) -> Unit) {
     val s = LocalStrings.current
     val first = group.first()
-    Row(
-        Modifier
+    val isMulti = group.size > 1
+
+    Surface(
+        onClick = {
+            val target = if (isMulti) (group.find { it.kind == MahletKind.MAHLET } ?: first) else first
+            onOpen(target.id)
+        },
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 54.dp)
-            .then(if (group.size == 1) Modifier.clickable { onOpen(first.id) } else Modifier)
-            .padding(vertical = Spacing.sm),
-        verticalAlignment = Alignment.CenterVertically,
+            .padding(vertical = Spacing.xs),
     ) {
-        // The day leads, because that is how a liturgical index is set and it
-        // gives the eye a column to run down.
-        Text(
-            first.day?.let { geezNumeral(it) }.orEmpty(),
-            style = MaterialTheme.typography.titleMedium.inReadingFont(),
-            color = MaterialTheme.colorScheme.secondary,
-            textAlign = TextAlign.End,
-            maxLines = 1,
-            modifier = Modifier.width(34.dp),
-        )
-        Spacer(Modifier.width(Spacing.md))
-        Column(Modifier.weight(1f)) {
-            Text(
-                first.feast,
-                style = MaterialTheme.typography.titleSmall.inReadingFont(),
-                color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Spacer(Modifier.height(Spacing.xxs))
-            // Each kind opens its own order. These read as targets and were
-            // not: the row always opened the ዋዜማ, because vigil sorts first,
-            // so on the fifty feasts that have both, a reader after the morning
-            // ማኅሌት always landed on last night's service.
-            androidx.compose.foundation.layout.FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
+        Column(
+            modifier = Modifier.padding(Spacing.md),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                group.forEach { o ->
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f))
+                        .border(
+                            1.dp,
+                            MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
+                            RoundedCornerShape(10.dp),
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
                     Text(
-                        "${s.mahletKindLabel(o.kind)} ${geezNumeral(o.parts)}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (group.size > 1) MaterialTheme.colorScheme.secondary
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = if (group.size > 1) {
-                            Modifier
-                                .clip(MaterialTheme.shapes.small)
-                                .heightIn(min = 48.dp)
-                                .clickable { onOpen(o.id) }
-                                .padding(horizontal = Spacing.sm, vertical = Spacing.xs)
-                        } else Modifier,
-                    )
-                }
-                // Said only where it is true: most orders come from the scanned
-                // book, and labelling those would be labelling everything.
-                first.source?.let {
-                    Text(
-                        it,
-                        style = MaterialTheme.typography.labelSmall,
+                        text = first.day?.let { geezNumeral(it) } ?: "—",
+                        style = MaterialTheme.typography.titleMedium.inReadingFont(),
                         color = MaterialTheme.colorScheme.secondary,
+                        fontWeight = FontWeight.Bold,
                     )
                 }
-                // A feast the book could not date has no day column to fill,
-                // so it says when it falls this year instead — which is the
-                // question a reader with a ሆሣዕና order in front of them has.
-                first.movable?.let { key ->
-                    val thisYear = remember(key) {
-                        MahletComputus.dateOf(key, EthiopianDate.from(LocalDate.now()).year)
+                Spacer(Modifier.width(Spacing.md))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = first.feast,
+                        style = MaterialTheme.typography.titleMedium.inReadingFont(),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    val subtitle = when {
+                        first.movable != null -> {
+                            val thisYear = remember(first.movable) {
+                                MahletComputus.dateOf(first.movable, EthiopianDate.from(LocalDate.now()).year)
+                            }
+                            thisYear?.let { s.mahletThisYearOn(formatEthiopianShort(it, s)) }
+                        }
+                        first.source != null -> first.source
+                        else -> null
                     }
-                    thisYear?.let {
+                    if (subtitle != null) {
+                        Spacer(Modifier.height(Spacing.xxs))
                         Text(
-                            s.mahletThisYearOn(formatEthiopianShort(it, s)),
+                            text = subtitle,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.secondary,
                         )
                     }
                 }
+                if (!isMulti) {
+                    Icon(
+                        Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        modifier = Modifier.size(IconSize.medium),
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(Spacing.sm))
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                group.forEach { o ->
+                    ServiceButton(
+                        label = s.mahletKindLabel(o.kind),
+                        partsCount = o.parts,
+                        isVigil = o.kind == MahletKind.VIGIL,
+                        onClick = { onOpen(o.id) },
+                    )
+                }
             }
         }
-        Icon(
-            Icons.AutoMirrored.Outlined.KeyboardArrowRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(IconSize.medium),
-        )
     }
 }

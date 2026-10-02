@@ -269,6 +269,11 @@ fun BookScreen(
                 }
                 item { Spacer(Modifier.height(Spacing.huge)) }
             }
+            com.agpeya.app.ui.common.ReadingProgressBar(
+                progress = com.agpeya.app.ui.common.rememberLazyListProgress(listState),
+                topPadding = inner.calculateTopPadding(),
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
         }
         if (chaptersOpen) {
             com.agpeya.app.ui.common.ChapterSheet(

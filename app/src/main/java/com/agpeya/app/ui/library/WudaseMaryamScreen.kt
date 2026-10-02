@@ -1,7 +1,13 @@
 package com.agpeya.app.ui.library
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.clickable
@@ -39,6 +45,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -185,74 +192,90 @@ fun WudaseMaryamScreen(
         }
     }
     val goToSection: (Int) -> Unit = { i -> scope.launch { pager.animateScrollToPage(i) } }
+    val motion = com.agpeya.app.ui.theme.LocalMotion.current
+    val distractionFree = com.agpeya.app.ui.common.rememberDistractionFreeState()
+    val isImmersive = distractionFree.isImmersive
+
+    LaunchedEffect(pager.isScrollInProgress) {
+        if (pager.isScrollInProgress && !isImmersive) {
+            distractionFree.hide()
+        }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Column {
-                val shown = pages.getOrNull(selected)
-                SinqTopBar(
-                    title = s.wudaseMariam,
-                    subtitle = shown?.let { if (geez) it.titleGe else it.titleAm },
-                    onBack = onBack,
-                    actions = {
-                        com.agpeya.app.ui.common.EditionToggle(
-                            geez = geez,
-                            onToggle = { geez = !geez },
-                        )
-                        com.agpeya.app.ui.common.ReaderToolsMenu(
-                            fontStep = fontStep,
-                            maxFontStep = FONT_STEPS_SP.lastIndex,
-                            onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
-                            onWriteNote = shown?.let { pageItem -> onWriteNote?.let { write -> {
-                                when (pageItem) {
-                                    is WudasePage.Portioned ->
-                                        write("wudase?sec=${android.net.Uri.encode(pageItem.section.id)}&lang=${if (geez) "gez" else "am"}",
-                                            if (geez) pageItem.titleGe else pageItem.titleAm)
-                                    is WudasePage.Hymn ->
-                                        write("book/${pageItem.book.id}", pageItem.book.title)
-                                }
-                            } } },
-                            shareEnabled = shown != null,
-                            sharePayload = {
-                                shown?.let { pageItem ->
+            AnimatedVisibility(
+                visible = !isImmersive,
+                enter = slideInVertically(motion.spec(com.agpeya.app.ui.theme.Motion.standard)) { -it } + fadeIn(motion.spec(com.agpeya.app.ui.theme.Motion.fast)),
+                exit = slideOutVertically(motion.spec(com.agpeya.app.ui.theme.Motion.standard)) { -it } + fadeOut(motion.spec(com.agpeya.app.ui.theme.Motion.fast)),
+            ) {
+                Column {
+                    val shown = pages.getOrNull(selected)
+                    SinqTopBar(
+                        title = s.wudaseMariam,
+                        subtitle = shown?.let { if (geez) it.titleGe else it.titleAm },
+                        onBack = onBack,
+                        actions = {
+                            com.agpeya.app.ui.common.EditionToggle(
+                                geez = geez,
+                                onToggle = { geez = !geez },
+                            )
+                            com.agpeya.app.ui.common.ReaderToolsMenu(
+                                fontStep = fontStep,
+                                maxFontStep = FONT_STEPS_SP.lastIndex,
+                                onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
+                                onWriteNote = shown?.let { pageItem -> onWriteNote?.let { write -> {
                                     when (pageItem) {
                                         is WudasePage.Portioned ->
-                                            com.agpeya.app.ui.common.SharePayload(
-                                                body = (if (geez) pageItem.section.ge else pageItem.section.am).joinToString("\n\n"),
-                                                kicker = s.wudaseMariam,
-                                                title = if (geez) pageItem.titleGe else pageItem.titleAm,
-                                            )
+                                            write("wudase?sec=${android.net.Uri.encode(pageItem.section.id)}&lang=${if (geez) "gez" else "am"}",
+                                                if (geez) pageItem.titleGe else pageItem.titleAm)
                                         is WudasePage.Hymn ->
-                                            com.agpeya.app.ui.common.SharePayload(
-                                                body = pageItem.book.chapters.firstOrNull()?.blocks
-                                                    ?.filterNot { it.isHeading }
-                                                    ?.joinToString("\n\n") { it.text } ?: "",
-                                                kicker = s.wudaseMariam,
-                                                title = pageItem.book.title,
-                                            )
+                                            write("book/${pageItem.book.id}", pageItem.book.title)
                                     }
-                                } ?: com.agpeya.app.ui.common.SharePayload(body = "", kicker = s.wudaseMariam)
-                            },
+                                } } },
+                                shareEnabled = shown != null,
+                                sharePayload = {
+                                    shown?.let { pageItem ->
+                                        when (pageItem) {
+                                            is WudasePage.Portioned ->
+                                                com.agpeya.app.ui.common.SharePayload(
+                                                    body = (if (geez) pageItem.section.ge else pageItem.section.am).joinToString("\n\n"),
+                                                    kicker = s.wudaseMariam,
+                                                    title = if (geez) pageItem.titleGe else pageItem.titleAm,
+                                                )
+                                            is WudasePage.Hymn ->
+                                                com.agpeya.app.ui.common.SharePayload(
+                                                    body = pageItem.book.chapters.firstOrNull()?.blocks
+                                                        ?.filterNot { it.isHeading }
+                                                        ?.joinToString("\n\n") { it.text } ?: "",
+                                                    kicker = s.wudaseMariam,
+                                                    title = pageItem.book.title,
+                                                )
+                                        }
+                                    } ?: com.agpeya.app.ui.common.SharePayload(body = "", kicker = s.wudaseMariam)
+                                },
+                            )
+                        },
+                    )
+                    if (pages.isNotEmpty()) {
+                        WudaseControlBar(
+                            pages = pages,
+                            selected = selected,
+                            onSelectPage = goToSection,
                         )
-                    },
-                )
-                if (pages.isNotEmpty()) {
-                    WudaseControlBar(
-                        pages = pages,
-                        selected = selected,
-                        onSelectPage = goToSection,
-                    )
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-                        thickness = 0.5.dp,
-                    )
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                            thickness = 0.5.dp,
+                        )
+                    }
                 }
             }
         },
     ) { innerPadding ->
+        val contentPadding = if (isImmersive) PaddingValues(0.dp) else innerPadding
         if (contentResult == null) {
-            LoadingPanel(Modifier.padding(innerPadding))
+            LoadingPanel(Modifier.padding(contentPadding))
             return@Scaffold
         }
         if (data == null) {
@@ -261,12 +284,12 @@ fun WudaseMaryamScreen(
                 body = s.contentMissingBody,
                 actionLabel = s.retryAction,
                 onAction = { loadAttempt++ },
-                modifier = Modifier.padding(innerPadding),
+                modifier = Modifier.padding(contentPadding),
             )
             return@Scaffold
         }
         if (pages.isEmpty()) {
-            Box(Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+            Box(Modifier.fillMaxSize().padding(contentPadding), contentAlignment = Alignment.Center) {
                 StatePanel(
                     icon = Icons.AutoMirrored.Outlined.MenuBook,
                     title = s.contentUnavailable,
@@ -276,7 +299,7 @@ fun WudaseMaryamScreen(
             return@Scaffold
         }
 
-        Box(Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.TopCenter) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             androidx.compose.foundation.pager.HorizontalPager(
                 state = pager,
                 modifier = Modifier.fillMaxSize(),
@@ -285,11 +308,31 @@ fun WudaseMaryamScreen(
             ) { page ->
                 val pageItem = pages[page]
                 val listState = androidx.compose.foundation.lazy.rememberLazyListState()
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier.fillMaxSize().widthIn(max = ReadingMaxWidth),
-                    contentPadding = PaddingValues(horizontal = Spacing.screen),
+                LaunchedEffect(listState.isScrollInProgress) {
+                    if (listState.isScrollInProgress && !isImmersive) {
+                        distractionFree.hide()
+                    }
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = { distractionFree.toggle() },
+                        ),
+                    contentAlignment = Alignment.TopCenter,
                 ) {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize().widthIn(max = ReadingMaxWidth),
+                        contentPadding = PaddingValues(
+                            start = Spacing.screen,
+                            end = Spacing.screen,
+                            top = if (!isImmersive) innerPadding.calculateTopPadding() else Spacing.sm,
+                            bottom = Spacing.huge,
+                        ),
+                    ) {
                     item(key = "title") {
                         Text(
                             text = if (geez) pageItem.titleGe else pageItem.titleAm,
@@ -409,9 +452,15 @@ fun WudaseMaryamScreen(
 
                     item { Spacer(Modifier.height(Spacing.huge)) }
                 }
+                com.agpeya.app.ui.common.ReadingProgressBar(
+                    progress = com.agpeya.app.ui.common.rememberLazyListProgress(listState),
+                    topPadding = if (!isImmersive) innerPadding.calculateTopPadding() else 0.dp,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                )
             }
         }
     }
+}
 }
 
 /**

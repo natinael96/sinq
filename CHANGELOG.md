@@ -5,6 +5,15 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.5.4] — 2026-10-02
+
+_versionCode 104 · Distraction-free prayer mode, universal reading progress bars, and Mahlet screen redesign_
+
+### Added
+- **Distraction-Free Prayer Mode.** Integrated system bar immersion and soft auto-hide of headers for Hourly Canonical Prayers, Psalm of the Day (Psalter), and Wudase Maryam. Hides the status bar (clock, battery, notifications) and controls after 3 seconds of stillness or upon scroll, with seamless tap-to-reveal interaction.
+- **Universal Reading Progress Bars.** Added subtle 2dp golden reading progress indicator across all scripture and devotional readers: Psalter, Sinksar, Scripture, Wudase Maryam, Melkea/Mahlet, Shelf Books, and Gitsawe lectionary passages.
+- **Mahlet List Screen Redesign.** Streamlined Mahlet feast index with header action search icon, refined Ethiopian month pills with Ge'ez count badges, and accessible 48dp liturgical service buttons for vigil (ዋዜማ) and dawn (ማኅሌት).
+
 ## [1.5.3] — 2026-10-02
 
 _versionCode 103 · Settings hub reorganization, daily quote bookmarks, and UI card refinements_
