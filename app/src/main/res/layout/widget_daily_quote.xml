@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  የአበው ምክር widget: shows today's Desert Father saying at a glance.
+  Tapping opens the Daily Contemplation Sheet inside Sinq.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_quote_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_background"
+    android:paddingStart="15dp"
+    android:paddingEnd="15dp"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp">
+
+    <!-- Header line: ☩ የአበው ምክር -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/widget_quote_tag"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="☩ የአበው ምክር"
+            android:textColor="#E5BE5E"
+            android:textSize="11sp"
+            android:letterSpacing="0.04"
+            android:maxLines="1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="→"
+            android:textColor="#A9C1B6"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <!-- Author name -->
+    <TextView
+        android:id="@+id/widget_quote_author"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="አባ እንጦንስ ዓቢይ"
+        android:textColor="#F2EDDE"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <!-- Hairline rule -->
+    <ImageView
+        android:id="@+id/widget_quote_rule"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="6dp"
+        android:contentDescription="@null"
+        android:background="#2E4A42" />
+
+    <!-- Quote body -->
+    <TextView
+        android:id="@+id/widget_quote_body"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="«ቅዱስ አባ እንጦንስ በበረሃ ሳለ...»"
+        android:textColor="#D9D3C2"
+        android:textSize="12.5sp"
+        android:lineSpacingExtra="2dp"
+        android:maxLines="5"
+        android:ellipsize="end" />
+
+</LinearLayout>

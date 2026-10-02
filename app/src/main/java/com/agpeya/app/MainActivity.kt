@@ -73,6 +73,7 @@ class MainActivity : ComponentActivity() {
     private val bypassLaunchOverlays = mutableStateOf(false)
     private val pendingOpenReading = mutableStateOf(false)
     private val pendingGitsaweEpochDay = mutableStateOf<Long?>(null)
+    private val pendingOpenDailyQuote = mutableStateOf(false)
 
     // Play's own consent dialog for an update. Registered unconditionally —
     // registerForActivityResult must run before the activity is started — but
@@ -152,6 +153,8 @@ class MainActivity : ComponentActivity() {
                                 pendingOpenGitsawe.value = false
                                 pendingGitsaweEpochDay.value = null
                             },
+                            openDailyQuote = pendingOpenDailyQuote.value,
+                            onDailyQuoteHandled = { pendingOpenDailyQuote.value = false },
                         )
                         if (!opened && !bypassLaunchOverlays.value) {
                             com.agpeya.app.ui.intro.MementoMoriScreen(onDone = { opened = true })
@@ -216,10 +219,15 @@ class MainActivity : ComponentActivity() {
             intent.getBooleanExtra(com.agpeya.app.reminders.ReadingReminderScheduler.EXTRA_OPEN_READING, false) ||
             intent.getBooleanExtra(StreakReminderScheduler.EXTRA_OPEN_STREAK, false) ||
             intent.hasExtra(EXTRA_OPEN_OFFERING) ||
+            intent.getBooleanExtra(com.agpeya.app.reminders.DailyQuoteReceiver.EXTRA_OPEN_DAILY_QUOTE, false) ||
             intent.getBooleanExtra(com.agpeya.app.reminders.GitsaweReminderScheduler.EXTRA_OPEN_GITSAWE, false)) {
             bypassLaunchOverlays.value = true
             // Persist the launch intent marker across activity recreation.
             intent.putExtra(EXTRA_SKIP_INTRO, true)
+        }
+        if (intent.getBooleanExtra(com.agpeya.app.reminders.DailyQuoteReceiver.EXTRA_OPEN_DAILY_QUOTE, false)) {
+            pendingOpenDailyQuote.value = true
+            intent.removeExtra(com.agpeya.app.reminders.DailyQuoteReceiver.EXTRA_OPEN_DAILY_QUOTE)
         }
         if (intent.getBooleanExtra(com.agpeya.app.widget.PrayerClockWidgetProvider.EXTRA_OPEN_CLOCK, false)) {
             // Resolve at tap time, even if the launcher delayed refreshing the dial.
@@ -299,6 +307,8 @@ private fun AgpeyaNavHost(
     openGitsawe: Boolean,
     gitsaweEpochDay: Long?,
     onGitsaweHandled: () -> Unit,
+    openDailyQuote: Boolean = false,
+    onDailyQuoteHandled: () -> Unit = {},
 ) {
     val navController = rememberNavController()
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -529,6 +539,15 @@ private fun AgpeyaNavHost(
                                                 onOpenGitsawe = { navController.navigate("gitsawe") { launchSingleTop = true } },
                                                 onOpenBatteryHelp = { navController.navigate("battery") { launchSingleTop = true } },
                                                 onSelectTab = goToTab,
+                                                onReflectQuote = { quote ->
+                                                    val author = quote.authorAm.ifBlank { quote.authorEn }
+                                                    val label = "የአበው ምክር · $author"
+                                                    navController.navigate("journal/entry?kind=${com.agpeya.app.model.JournalKind.REFLECTION.name}&label=${android.net.Uri.encode(label)}") {
+                                                        launchSingleTop = true
+                                                    }
+                                                },
+                                                openDailyQuote = openDailyQuote,
+                                                onDailyQuoteConsumed = onDailyQuoteHandled,
                                             )
                                         Tab.JOURNEY ->
                                             com.agpeya.app.ui.habits.JourneyScreen(
@@ -1034,6 +1053,9 @@ private fun AgpeyaNavHost(
                     navController.navigate("reading/days/$planId") { launchSingleTop = true }
                 },
                 onOpenMap = { navController.navigate("reading/map") { launchSingleTop = true } },
+                onWriteNote = { route, label ->
+                    navController.navigate(writeNoteRoute(route, label)) { launchSingleTop = true }
+                },
             )
         }
         composable("reading/choose") {

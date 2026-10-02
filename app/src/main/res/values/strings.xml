@@ -21,5 +21,7 @@
     <string name="widget_prayer_clock_label">የጸሎት ሰዓት</string>
     <string name="widget_prayer_clock_description">ሰባቱን የጸሎት ሰዓታት ያሳያል። የአሁኑን ጸሎት ለመክፈት ይንኩ።</string>
     <string name="widget_prayer_clock_caption">የጸሎት ሰዓታት</string>
+    <string name="widget_daily_quote_label">የአበው ምክር</string>
+    <string name="widget_daily_quote_description">ዕለታዊ የበረሃ አባቶች ምክር በመነሻ ገጽ ወይም በመቆለፊያ ገጽ ላይ ይመልከቱ።</string>
     <string name="external_link_unavailable">አገናኙን የሚከፍት መተግበሪያ አልተገኘም። አሳሽ እንደተጫነና እንደነቃ ያረጋግጡ።</string>
 </resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  የአበው ምክር (Desert Fathers Daily Quote) widget.
+  Available for both home screen and lock screen (keyguard on compatible devices).
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="250dp"
+    android:minHeight="110dp"
+    android:minResizeWidth="140dp"
+    android:minResizeHeight="60dp"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="21600000"
+    android:initialLayout="@layout/widget_daily_quote"
+    android:initialKeyguardLayout="@layout/widget_daily_quote"
+    android:description="@string/widget_daily_quote_description"
+    android:widgetCategory="home_screen|keyguard" />

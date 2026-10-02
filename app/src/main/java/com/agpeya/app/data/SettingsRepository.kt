@@ -142,12 +142,14 @@ object SettingsRepository {
 
     private val KEY_GITSAWE_REMINDER = booleanPreferencesKey("gitsawe_reminder")
     private val KEY_DAILY_QUOTE_LOCKSCREEN = booleanPreferencesKey("daily_quote_lockscreen")
+    private val KEY_DAILY_QUOTE_TIME = intPreferencesKey("daily_quote_reminder_min")
     private val KEY_WIDGET_ROLLOVER = booleanPreferencesKey("widget_evening_rollover")
     private val KEY_WIDGET_ROLLOVER_TIME = intPreferencesKey("widget_evening_rollover_time")
     private val KEY_GITSAWE_REMINDER_TIME = intPreferencesKey("gitsawe_reminder_min")
 
     /** 06:00 — the old fixed Gitsawe time, now the editable default. */
     const val DEFAULT_GITSAWE_REMINDER_MIN = 6 * 60
+    const val DEFAULT_DAILY_QUOTE_MIN = 6 * 60
     // Legacy single-reminder keys — read only, to migrate the one old alms /
     // repentance reminder into the first entry of the new lists below.
     private val KEY_ALMS_REMINDER = booleanPreferencesKey("alms_reminder")
@@ -642,6 +644,18 @@ object SettingsRepository {
     fun dailyQuoteLockscreenBlocking(context: Context): Boolean =
         kotlinx.coroutines.runBlocking {
             runCatching { dailyQuoteLockscreen(context).first() }.getOrDefault(false)
+        }
+
+    fun dailyQuoteTime(context: Context): Flow<Int> =
+        context.settingsDataStore.data.map { it[KEY_DAILY_QUOTE_TIME] ?: DEFAULT_DAILY_QUOTE_MIN }
+
+    suspend fun setDailyQuoteTime(context: Context, value: Int) {
+        context.settingsDataStore.edit { it[KEY_DAILY_QUOTE_TIME] = value }
+    }
+
+    fun dailyQuoteTimeBlocking(context: Context): Int =
+        kotlinx.coroutines.runBlocking {
+            runCatching { dailyQuoteTime(context).first() }.getOrDefault(DEFAULT_DAILY_QUOTE_MIN)
         }
 
     /**

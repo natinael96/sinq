@@ -17,7 +17,6 @@ object DailyQuoteScheduler {
 
     const val ACTION_DAILY_QUOTE = "com.agpeya.app.DAILY_QUOTE"
     private const val REQUEST_CODE = 9600
-    private val REFRESH_TIME = LocalTime.of(6, 0)
 
     fun sync(context: Context, enabled: Boolean) {
         if (enabled) {
@@ -31,8 +30,10 @@ object DailyQuoteScheduler {
     @SuppressLint("MissingPermission")
     fun schedule(context: Context) = ReminderDispatchGate.locked {
         if (!SettingsRepository.dailyQuoteLockscreenBlocking(context)) return@locked cancel(context)
+        val minute = SettingsRepository.dailyQuoteTimeBlocking(context)
+        val refreshTime = LocalTime.of(minute / 60, minute % 60)
         val now = LocalDateTime.now()
-        var next = now.toLocalDate().atTime(REFRESH_TIME)
+        var next = now.toLocalDate().atTime(refreshTime)
         if (!next.isAfter(now)) next = next.plusDays(1)
         val triggerAt = next.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         val am = context.getSystemService(AlarmManager::class.java)

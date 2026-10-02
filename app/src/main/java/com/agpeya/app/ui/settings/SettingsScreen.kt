@@ -1192,6 +1192,9 @@ fun RemindersSettingsScreen(
                         com.agpeya.app.reminders.DailyQuoteScheduler.sync(context, on)
                     }
                 }, subtitle = s.dailyQuoteLockscreenDesc)
+                if (dailyQuote) {
+                    DailyQuoteTimeRow(s)
+                }
                 // ምጽዋት and ንስሐ are here because they ring; their ledgers — the
                 // money, the vows, the penance — are records, and records live
                 // under መዝገብ. This page had become the door to all three.
@@ -1272,6 +1275,51 @@ private fun GitsaweReminderTimeRow(s: com.agpeya.app.ui.strings.Strings) {
                             timeState.hour * 60 + timeState.minute,
                         )
                         com.agpeya.app.reminders.GitsaweReminderScheduler.sync(context, true)
+                    }
+                }) { Text(s.save) }
+            },
+            dismissButton = {
+                TextButton(onClick = { picking = false }) { Text(s.cancel) }
+            },
+        )
+    }
+}
+
+/** The daily Desert Fathers quote posting time; saving immediately reschedules the alarm. */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun DailyQuoteTimeRow(s: com.agpeya.app.ui.strings.Strings) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val minute by SettingsRepository.dailyQuoteTime(context)
+        .collectAsState(initial = SettingsRepository.DEFAULT_DAILY_QUOTE_MIN)
+    var picking by remember { mutableStateOf(false) }
+
+    com.agpeya.app.ui.common.ListRow(
+        title = s.timeLabel,
+        subtitle = "%02d:%02d".format(minute / 60, minute % 60),
+        onClick = { picking = true },
+    )
+
+    if (picking) {
+        val timeState = androidx.compose.material3.rememberTimePickerState(
+            initialHour = minute / 60,
+            initialMinute = minute % 60,
+            is24Hour = true,
+        )
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { picking = false },
+            title = { Text(s.dailyQuoteTitle) },
+            text = { androidx.compose.material3.TimePicker(state = timeState) },
+            confirmButton = {
+                SinqPrimaryButton(onClick = {
+                    picking = false
+                    scope.launch {
+                        SettingsRepository.setDailyQuoteTime(
+                            context,
+                            timeState.hour * 60 + timeState.minute,
+                        )
+                        com.agpeya.app.reminders.DailyQuoteScheduler.schedule(context)
                     }
                 }) { Text(s.save) }
             },

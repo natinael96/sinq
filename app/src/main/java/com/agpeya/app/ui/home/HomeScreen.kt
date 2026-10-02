@@ -148,6 +148,9 @@ fun HomeScreen(
     onOpenGitsawe: () -> Unit,
     onOpenBatteryHelp: () -> Unit,
     onSelectTab: (Tab) -> Unit,
+    onReflectQuote: ((com.agpeya.app.model.DailyQuote) -> Unit)? = null,
+    openDailyQuote: Boolean = false,
+    onDailyQuoteConsumed: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val config by HoursRepository.config(context).collectAsState(initial = HoursConfig())
@@ -214,6 +217,18 @@ fun HomeScreen(
     }
     var showHours by remember { mutableStateOf(false) }
     var showReminderSetup by remember { mutableStateOf(false) }
+
+    val dailyQuote by produceState<com.agpeya.app.model.DailyQuote?>(initialValue = null, today) {
+        value = runCatching { com.agpeya.app.data.DailyQuoteRepository.quoteFor(context, today) }.getOrNull()
+    }
+    var showDailyQuoteSheet by remember { mutableStateOf(false) }
+
+    LaunchedEffect(openDailyQuote) {
+        if (openDailyQuote) {
+            showDailyQuoteSheet = true
+            onDailyQuoteConsumed?.invoke()
+        }
+    }
 
     // Android owns both settings, so refresh them whenever the app resumes
     // after a permission dialog or a visit to system settings.
@@ -371,9 +386,22 @@ fun HomeScreen(
                 onOpenJourney = { onSelectTab(Tab.JOURNEY) },
                 onOpenPsalter = onOpenPsalter,
                 onOpenZewotr = onOpenZewotr,
+                dailyQuote = dailyQuote,
+                onOpenDailyQuote = { showDailyQuoteSheet = true },
             )
         }
       }
+    }
+
+    if (showDailyQuoteSheet && dailyQuote != null) {
+        DailyQuoteSheet(
+            quote = dailyQuote!!,
+            onDismiss = { showDailyQuoteSheet = false },
+            onReflectInJournal = { q ->
+                showDailyQuoteSheet = false
+                onReflectQuote?.invoke(q)
+            },
+        )
     }
 
     if (showHours) {
@@ -583,6 +611,8 @@ private fun HomeDashboard(
     onOpenJourney: () -> Unit,
     onOpenPsalter: () -> Unit,
     onOpenZewotr: () -> Unit,
+    dailyQuote: com.agpeya.app.model.DailyQuote? = null,
+    onOpenDailyQuote: () -> Unit = {},
 ) {
     val cardScale = LocalDensity.current.fontScale.coerceIn(1f, 2f)
     // The ceilings rise with the type size, so a page set large can still use
@@ -628,6 +658,12 @@ private fun HomeDashboard(
             onClick = onOpenGitsawe,
             modifier = Modifier.grow(gitsaweWeight, max = gitsaweCeiling),
         )
+        if (dailyQuote != null) {
+            DailyQuoteHairlineRow(
+                quote = dailyQuote,
+                onClick = onOpenDailyQuote,
+            )
+        }
         if (activeReading != null) {
             ReadingPlanBox(
                 info = activeReading,
@@ -1195,5 +1231,73 @@ private fun AllHoursSheet(hours: List<Hour>, currentHourId: String?, onOpenHour:
                 if (index < hours.lastIndex) SinqDivider()
             }
         }
+    }
+}
+
+/**
+ * Ultra-compact single-line hairline row for today's Desert Father saying (የአበው ምክር).
+ */
+@Composable
+private fun DailyQuoteHairlineRow(
+    quote: com.agpeya.app.model.DailyQuote?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (quote == null) return
+    val s = LocalStrings.current
+    val gold = MaterialTheme.colorScheme.secondary
+    val author = quote.authorAm.ifBlank { quote.authorEn }
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        SinqDivider()
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(36.dp)
+                .clickable(onClick = onClick)
+                .semantics { role = Role.Button }
+                .padding(horizontal = Spacing.xs),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(
+                    text = "☩",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = gold,
+                )
+                Spacer(Modifier.width(Spacing.xs))
+                Text(
+                    text = s.dailyQuoteChannelName,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = gold,
+                    maxLines = 1,
+                )
+                Spacer(Modifier.width(Spacing.xs))
+                Text(
+                    text = "·",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.width(Spacing.xs))
+                Text(
+                    text = author,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(IconSize.small),
+            )
+        }
+        SinqDivider()
     }
 }

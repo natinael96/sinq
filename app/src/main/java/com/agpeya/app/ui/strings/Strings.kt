@@ -925,6 +925,10 @@ interface Strings {
     val readingRedistribute: String
     /** What "spread the rest out" costs: the day, not the finish date. */
     val readingRedistributeDesc: String
+    val readingCatchMeUp: String
+    fun readingCatchReadFrom(day: String): String
+    val readingStudyReflection: String
+    val fathersCommentary: String
     /** e.g. "፫፻፷ ቀን · በቀን ፫ ምዕራፍ". */
     fun readingPlanMeta(days: String, perDay: String): String
     val readingNoPlan: String
@@ -1213,12 +1217,12 @@ object AmharicStrings : Strings {
     override val settingsGitsaweReminderDesc = "በመረጡት ሰዓት የዕለቱን የግጻዌ ምንባብ ያስታውስዎታል"
     override val settingsNightReminder = "የሌሊት ማስታወሻ"
     override val settingsNightReminderDesc = "ጸሎት ቢመዘገብም በየሌሊቱ ስንክሳርን፣ ቤተ ክርስቲያንንና ስግደትን ያስታውስዎታል"
-    override val dailyQuoteLockscreen = "ዕለታዊ ጥቅስ በመቆለፊያ ገጽ"
-    override val dailyQuoteLockscreenDesc = "ስልኩ በተቆለፈበት ገጽ ላይ ዕለታዊ ጥቅስ ያሳያል"
-    override val dailyQuoteChannelName = "ዕለታዊ ጥቅስ"
-    override val dailyQuoteTitle = "የዕለቱ ቃል"
-    override val dailyQuoteSample = "«እናንተ ሸክመ ከባዶች ሁሉ፥ ወደ እኔ ኑ፥ እኔም አሳርፋችኋለሁ።» (ማቴ ፲፩፥፳፰)"
-    override val dailyQuoteLockscreenPrompt = "ጥቅሱ በመቆለፊያ ገጽ ላይ እንዲታይ የስልክዎን የመቆለፊያ ገጽ ፈቃድ ለስንቅ ያብሩ"
+    override val dailyQuoteLockscreen = "የአበው ምክር በመቆለፊያ ገጽ"
+    override val dailyQuoteLockscreenDesc = "ስልኩ በተቆለፈበት ገጽ ላይ ዕለታዊ የአበው ምክር ያሳያል (ዊጅት በማይደግፉ ስልኮች በማሳወቂያ በኩል)"
+    override val dailyQuoteChannelName = "የአበው ምክር"
+    override val dailyQuoteTitle = "የአበው ምክር"
+    override val dailyQuoteSample = "«ቅዱስ አባ እንጦንስ በበረሃ ሳለ በስንፍናና በክፉ ሐሳቦች ተፈተነ... "
+    override val dailyQuoteLockscreenPrompt = "የአበው ምክር በመቆለፊያ ገጽ ላይ እንዲታይ የስልክዎን የመቆለፊያ ገጽ ፈቃድ ለስንቅ ያብሩ"
     override val dailyQuoteSettingsAction = "በቅንብሮች ያብሩ"
     override val notifDisabledTitle = "ማሳወቂያዎች ጠፍተዋል"
     override val notifDisabledBody = "ማንቂያዎችዎ እንዲደርሱዎት የመተግበሪያውን ማሳወቂያዎች ከቅንብሮች ያብሩ።"
@@ -1810,6 +1814,10 @@ object AmharicStrings : Strings {
     override val readingCatchOldestDesc = "የቀኑ ንባብ እንደነበረው ይቀጥላል፤ ንባቡ ዘግይቶ ይጠናቀቃል።"
     override val readingRedistribute = "ቀሪውን አከፋፍል"
     override val readingRedistributeDesc = "ቀሪው በቀሩት ቀናት ይከፋፈላል፤ በጊዜው ይጠናቀቃል።"
+    override val readingCatchMeUp = "ቀኑን አስተካክል"
+    override fun readingCatchReadFrom(day: String) = "ከቀን $day አንብብ"
+    override val readingStudyReflection = "የዕለቱ ማሰላሰያ"
+    override val fathersCommentary = "የአበው ትርጓሜ"
     override fun readingPlanMeta(days: String, perDay: String) = "$days ቀን · በቀን $perDay ምዕራፍ"
     override val readingAdd = "ንባብ ጨምር"
     override fun readingConflict(other: String) = "ከ$other ጋር ተመሳሳይ ምዕራፎችን ያነብባል። አንዱን ብቻ ይጠብቁ።"
@@ -2108,12 +2116,12 @@ object EnglishStrings : Strings {
     override val settingsGitsaweReminderDesc = "Reminds you of today's Gitsawe reading at the time you choose"
     override val settingsNightReminder = "Nightly reminder"
     override val settingsNightReminderDesc = "Reminds you each evening — even after prayer is marked — of the Synaxarium, church, and prostrations"
-    override val dailyQuoteLockscreen = "Daily Quote on Lock Screen"
-    override val dailyQuoteLockscreenDesc = "Displays a daily quote on your phone's lock screen"
-    override val dailyQuoteChannelName = "Daily Quote"
-    override val dailyQuoteTitle = "Daily Verse"
-    override val dailyQuoteSample = "\"Come unto me, all ye that labour and are heavy laden, and I will give you rest.\" (Matt 11:28)"
-    override val dailyQuoteLockscreenPrompt = "To display the quote while locked, allow lock screen notifications for Sinq"
+    override val dailyQuoteLockscreen = "Desert Fathers on Lock Screen"
+    override val dailyQuoteLockscreenDesc = "Displays a daily patristic saying on your lock screen (or notification if widgets not supported)"
+    override val dailyQuoteChannelName = "Desert Fathers"
+    override val dailyQuoteTitle = "Sayings of the Fathers"
+    override val dailyQuoteSample = "\"When the holy Abba Anthony lived in the desert he was beset by accidie...\""
+    override val dailyQuoteLockscreenPrompt = "To display the saying while locked, allow lock screen notifications for Sinq"
     override val dailyQuoteSettingsAction = "Enable in Settings"
     override val notifDisabledTitle = "Notifications are off"
     override val notifDisabledBody = "Turn on notifications in settings so your reminders can reach you."
@@ -2714,6 +2722,10 @@ object EnglishStrings : Strings {
     override val readingCatchOldestDesc = "The daily reading stays as it is; the plan finishes later."
     override val readingRedistribute = "Spread the rest out"
     override val readingRedistributeDesc = "What is left is shared across the days that remain; the plan finishes on time."
+    override val readingCatchMeUp = "Catch me up"
+    override fun readingCatchReadFrom(day: String) = "Read from day $day"
+    override val readingStudyReflection = "Daily reflection"
+    override val fathersCommentary = "Fathers' commentary"
     override fun readingPlanMeta(days: String, perDay: String) = "$days days · $perDay chapters a day"
     override val readingAdd = "Add a plan"
     override fun readingConflict(other: String) = "Reads the same chapters as $other. Keep one of them."

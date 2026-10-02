@@ -58,26 +58,33 @@ class DailyQuoteReceiver : BroadcastReceiver() {
             }
         }
 
+        const val EXTRA_OPEN_DAILY_QUOTE = "open_daily_quote"
+
         fun postNow(context: Context) {
             ensureChannel(context)
-            val s = stringsFor(runBlocking { SettingsRepository.language(context).first() })
-            // ponytail: sample quote for now; quote list will replace this when provided
-            val quote = s.dailyQuoteSample
+            val lang = runBlocking { SettingsRepository.language(context).first() }
+            val s = stringsFor(lang)
+            val today = java.time.LocalDate.now()
+            val dailyQuote = com.agpeya.app.data.DailyQuoteRepository.quoteForBlocking(context, today)
+            val author = if (lang == com.agpeya.app.data.Language.ENGLISH) dailyQuote.authorEn else dailyQuote.authorAm
+            val title = "${s.dailyQuoteTitle}  ·  $author"
+            val body = "«${dailyQuote.quote}»"
 
             val tap = PendingIntent.getActivity(
                 context,
                 0,
                 Intent(context, MainActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    putExtra(EXTRA_OPEN_DAILY_QUOTE, true)
                 },
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
             )
 
             val notification = NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notification)
-                .setContentTitle(s.dailyQuoteTitle)
-                .setContentText(quote)
-                .setStyle(NotificationCompat.BigTextStyle().bigText(quote))
+                .setContentTitle(title)
+                .setContentText(body)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(body).setSummaryText(author))
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setOngoing(true)
