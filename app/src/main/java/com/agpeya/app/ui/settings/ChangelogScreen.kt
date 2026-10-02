@@ -31,6 +31,17 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.5.2",
+        title = "Compact keyguard widget support for lockscreen customization",
+        titleAm = "ለስልክ መቆለፊያ ገጽ የሚስማማ የታመቀ የአበው ምክር መተግበሪያ (Widget)",
+        changes = listOf(
+            "Configured 2×1 compact cell dimensions and reduced minimum widget height for Samsung One UI and Android keyguard lockscreen editors.",
+        ),
+        changesAm = listOf(
+            "የአበው ምክር መተግበሪያ (Widget) በሳምሰንግ እና በሌሎች ስልኮች የመቆለፊያ ገጽ ላይ በሚገባ እንዲቀመጥ የመጠኑ ልኬት ተስተካክሏል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.5.1",
         title = "Guaranteed lockscreen quote notifications and streamlined home layout",
         titleAm = "አስተማማኝ የመቆለፊያ ገጽ የአበው ምክር እና የቀለለ የመነሻ ገጽ ገጽታ",

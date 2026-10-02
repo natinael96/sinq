@@ -5,6 +5,13 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.5.2] — 2026-10-02
+
+_versionCode 102 · Compact lockscreen keyguard widget support and dimensions optimization_
+
+### Added
+- **Compact Lockscreen Widget Support.** Configured `targetCellWidth="2"`, `targetCellHeight="1"`, and reduced minimum height in widget provider metadata, allowing the Desert Fathers saying widget to qualify for compact lockscreen widget trays (e.g. Samsung One UI 6.1+ under-clock widget editor and Android keyguard pickers).
+
 ## [1.5.1] — 2026-10-02
 
 _versionCode 101 · Guaranteed lockscreen quote notifications, on-by-default quote reminders, and streamlined home layout_
