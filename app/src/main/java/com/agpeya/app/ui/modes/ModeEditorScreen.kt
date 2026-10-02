@@ -10,6 +10,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -210,6 +211,13 @@ fun ModeEditorScreen(modeId: String, onBack: () -> Unit) {
             onDismissRequest = { editing = null },
             sheetState = sheetState,
         ) {
+            val hourName = hourNames[entry.hourId] ?: entry.hourId
+            Text(
+                text = hourName,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(horizontal = Spacing.screen, vertical = Spacing.sm),
+            )
             EntryEditor(
                 entry = entry,
                 hours = hours,
@@ -295,17 +303,17 @@ internal fun EntryEditor(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp),
+            .verticalScroll(rememberScrollState()),
     ) {
         if (canPickHour) {
             Text(
                 text = s.prayerLabel,
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = Spacing.screen),
             )
             Spacer(Modifier.height(Spacing.sm))
-            Column {
+            Column(modifier = Modifier.padding(horizontal = Spacing.screen)) {
                 hours.chunked(2).forEach { rowHours ->
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         rowHours.forEach { h ->
@@ -328,17 +336,33 @@ internal fun EntryEditor(
             text = s.timeLabel,
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = Spacing.screen),
         )
         Spacer(Modifier.height(Spacing.sm))
-        TimePicker(state = timeState)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = Spacing.xs),
+            contentAlignment = Alignment.Center,
+        ) {
+            TimePicker(
+                state = timeState,
+                colors = com.agpeya.app.ui.common.sinqTimePickerColors(),
+            )
+        }
 
+        Spacer(Modifier.height(Spacing.sm))
         Text(
             text = s.daysLabel,
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = Spacing.screen),
         )
         Spacer(Modifier.height(Spacing.sm))
-        androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        androidx.compose.foundation.layout.FlowRow(
+            modifier = Modifier.padding(horizontal = Spacing.screen),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
             s.dayLabels.forEachIndexed { index, label ->
                 val day = index + 1
                 FilterChip(
@@ -351,12 +375,18 @@ internal fun EntryEditor(
             }
         }
         Spacer(Modifier.height(Spacing.sm))
-        TextButton(onClick = { days = ReminderEntry.ALL_DAYS }) { Text(s.everyDay) }
+        TextButton(
+            onClick = { days = ReminderEntry.ALL_DAYS },
+            modifier = Modifier.padding(horizontal = Spacing.screen - 12.dp),
+        ) { Text(s.everyDay) }
 
         Spacer(Modifier.height(Spacing.lg))
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.screen),
             horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             if (canDelete) {
                 TextButton(onClick = onDelete) {
@@ -365,7 +395,7 @@ internal fun EntryEditor(
             } else {
                 Spacer(Modifier.height(Spacing.xxs))
             }
-            TextButton(
+            com.agpeya.app.ui.common.SinqPrimaryButton(
                 enabled = days.isNotEmpty(),
                 onClick = {
                     onSave(
@@ -383,3 +413,4 @@ internal fun EntryEditor(
         Spacer(Modifier.height(Spacing.huge))
     }
 }
+

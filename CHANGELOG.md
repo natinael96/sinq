@@ -5,6 +5,20 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.5.5] — 2026-10-02
+
+_versionCode 105 · Bold settings feedback card, journey day and prayer hours horizontal scrolling, and clock picker alignment_
+
+### Added
+- **Prominent Feedback Card on Settings.** Replaced nested text list item with a dedicated, illuminated liturgical hero card in Settings featuring deep emerald gradients, gold accents, and a high-visibility *"Share your thoughts"* action pill.
+- **Horizontal Journey Day Strip.** Added an interactive, horizontally scrollable day strip on the Journey screen displaying recent days with Ethiopian Ge'ez numerals, weekday labels, prayer completion dots, and a quick-return button to today.
+- **Horizontal Canonical Hours Pills.** Replaced the 4-column x 2-row grid of prayer hours with a smooth horizontally swiping row of tactile capsule pills with golden completion checks.
+- **Interactive Heatmap Cells.** Made Ethiopian year heatmap density cells directly clickable to select and inspect dates, integrating a calendar picker icon.
+
+### Fixed
+- **Clock Time Picker Unalignment.** Fixed horizontal alignment and right-edge dial clipping when setting prayer alarms and reminder schedules across all dialogs.
+- **Content Provenance & Typography.** Updated Synaxarium and Wudase Maryam digitization attributions and added Abba Garima to web typography credits.
+
 ## [1.5.4] — 2026-10-02
 
 _versionCode 104 · Distraction-free prayer mode, universal reading progress bars, and Mahlet screen redesign_

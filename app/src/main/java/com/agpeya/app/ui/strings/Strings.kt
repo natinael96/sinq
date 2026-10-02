@@ -356,6 +356,7 @@ interface Strings {
     val licensesTitle: String
     val feedbackTitle: String
     val feedbackSubtitle: String
+    val feedbackCta: String
     val about: String
     val alarmSection: String
     /** The one-time notice that an arriving hour vibrates rather than rings. */
@@ -1284,6 +1285,7 @@ object AmharicStrings : Strings {
     override val licensesTitle = "ፈቃዶች እና ምንጮች"
     override val feedbackTitle = "አስተያየት ይላኩ"
     override val feedbackSubtitle = "በጽሑፉ ላይ ስሕተት፣ የተበላሸ ነገር፣ ወይም ሐሳብ"
+    override val feedbackCta = "ሐሳብዎን ያካፍሉን"
     override val about = "ስለ መተግበሪያው"
     override val alarmSection = "ማንቂያ"
     override val alarmVibratesTitle = "ማንቂያው ይነዝራል"
@@ -2181,6 +2183,7 @@ object EnglishStrings : Strings {
     override val licensesTitle = "Licenses & sources"
     override val feedbackTitle = "Send feedback"
     override val feedbackSubtitle = "A mistake in the text, something broken, or an idea"
+    override val feedbackCta = "Share your thoughts"
     override val about = "About"
     override val alarmSection = "Alarm"
     override val alarmVibratesTitle = "The alarm vibrates"

@@ -137,21 +137,14 @@ fun LicensesScreen(onBack: () -> Unit) {
                         "Editorial dingbats and stray markup are removed. And two Ge'ez days " +
                         "that carry no heading block are given one naming their date.",
                 )
-                LicPara(
-                    "Earlier releases bundled the Amharic synaxarium from the " +
-                        "gitsaweandsinksarbot project by hailemariam-eyayu and the " +
-                        "Nexuss0781/synaxarium dataset on the Hugging Face Hub. Neither is " +
-                        "bundled any longer.",
-                )
             }
             item {
                 LicSection("Wudase Maryam (ውዳሴ ማርያም)")
-                LicenseLink("wudase-mariam", "https://github.com/tecleet/wudase-mariam")
                 LicPara(
-                    "ውዳሴ ማርያም and ጸሎት ዘዘወትር are bundled from the digitisation at " +
-                        "github.com/tecleet/wudase-mariam. The underlying prayer is centuries-old, " +
-                        "traditional Ethiopian Orthodox liturgical text; this particular " +
-                        "digitisation is credited to that repository.",
+                    "ውዳሴ ማርያም and ጸሎት ዘዘወትር were scanned and digitized directly from " +
+                        "publicly available printed editions and PDF scans by the Sinq maintainer, " +
+                        "and formatted into liturgical stanzas for the app. The underlying prayers " +
+                        "are centuries-old, public-domain Ethiopian Orthodox liturgical texts.",
                 )
             }
             item {

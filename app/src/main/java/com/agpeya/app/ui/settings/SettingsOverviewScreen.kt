@@ -1,6 +1,8 @@
 package com.agpeya.app.ui.settings
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,10 +21,14 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import androidx.compose.material.icons.automirrored.outlined.Send
+import androidx.compose.material.icons.outlined.RateReview
 import androidx.compose.material.icons.outlined.Church
 import androidx.compose.material.icons.outlined.CloudSync
 import androidx.compose.material.icons.outlined.Info
@@ -36,6 +42,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -45,14 +52,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.agpeya.app.data.AlarmAlert
 import com.agpeya.app.data.Language
 import com.agpeya.app.data.PrayerLevel
@@ -198,6 +211,16 @@ fun SettingsScreen(
 
                 Spacer(Modifier.height(Spacing.xl))
 
+                // Bold, Unique Feedback Card
+                FeedbackCard(
+                    title = s.feedbackTitle,
+                    subtitle = s.feedbackSubtitle,
+                    cta = s.feedbackCta,
+                    onClick = { com.agpeya.app.ui.common.openUrl(context, com.agpeya.app.ui.common.FEEDBACK_URL) },
+                )
+
+                Spacer(Modifier.height(Spacing.xl))
+
                 // About & Help Card
                 SectionHeader(s.about)
                 SinqCard(
@@ -215,13 +238,6 @@ fun SettingsScreen(
                         title = s.tutorial,
                         leadingIcon = Icons.AutoMirrored.Outlined.HelpOutline,
                         onClick = onOpenTutorial,
-                    )
-                    SinqDivider()
-                    NavRow(
-                        title = s.feedbackTitle,
-                        subtitle = s.feedbackSubtitle,
-                        leadingIcon = Icons.Outlined.MailOutline,
-                        onClick = { com.agpeya.app.ui.common.openUrl(context, com.agpeya.app.ui.common.FEEDBACK_URL) },
                     )
                     SinqDivider()
                     NavRow(
@@ -308,6 +324,177 @@ private fun SettingsHubCard(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 modifier = Modifier.size(IconSize.medium),
             )
+        }
+    }
+}
+
+/**
+ * Prominent, beautifully crafted feedback hero card designed to invite and
+ * encourage the user to share thoughts, report typos, or suggest blessings.
+ */
+@Composable
+private fun FeedbackCard(
+    title: String,
+    subtitle: String,
+    cta: String,
+    onClick: () -> Unit,
+) {
+    val haptics = LocalHapticFeedback.current
+    val gold = MaterialTheme.colorScheme.secondary
+    val primary = MaterialTheme.colorScheme.primary
+    val shape = RoundedCornerShape(20.dp)
+
+    // Deep liturgical emerald-to-pine gradient with a warm golden radiance border
+    val cardGradient = Brush.linearGradient(
+        colors = listOf(
+            primary,
+            Color(0xFF092922),
+            Color(0xFF051B17),
+        ),
+        start = Offset.Zero,
+        end = Offset.Infinite,
+    )
+    val borderBrush = Brush.horizontalGradient(
+        colors = listOf(
+            gold.copy(alpha = 0.85f),
+            gold.copy(alpha = 0.35f),
+            gold.copy(alpha = 0.90f),
+        ),
+    )
+
+    Surface(
+        onClick = {
+            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            onClick()
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape),
+        shape = shape,
+        color = Color.Transparent,
+        border = BorderStroke(1.2.dp, borderBrush),
+        tonalElevation = 4.dp,
+        shadowElevation = 2.dp,
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(cardGradient)
+                .drawWithCache {
+                    val radius = 100.dp.toPx()
+                    val center = Offset(size.width - 20.dp.toPx(), 20.dp.toPx())
+                    val glow = Brush.radialGradient(
+                        colors = listOf(gold.copy(alpha = 0.24f), Color.Transparent),
+                        center = center,
+                        radius = radius,
+                    )
+                    onDrawBehind {
+                        drawCircle(glow, radius = radius, center = center)
+                    }
+                }
+                .padding(horizontal = Spacing.lg, vertical = Spacing.lg),
+        ) {
+            Column(Modifier.fillMaxWidth()) {
+                // Top Badge + Glowing Emblem
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(100))
+                            .background(gold.copy(alpha = 0.18f))
+                            .border(1.dp, gold.copy(alpha = 0.45f), RoundedCornerShape(100))
+                            .padding(horizontal = 10.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Text(
+                            text = "☩",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = gold,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = gold,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.5.sp,
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(gold.copy(alpha = 0.18f))
+                            .border(1.dp, gold.copy(alpha = 0.5f), CircleShape),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.RateReview,
+                            contentDescription = null,
+                            tint = gold,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(Spacing.sm))
+
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    letterSpacing = (-0.2).sp,
+                )
+
+                Spacer(Modifier.height(4.dp))
+
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.82f),
+                    lineHeight = 20.sp,
+                )
+
+                Spacer(Modifier.height(Spacing.md))
+
+                // Bold Call-To-Action Pill Button
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(gold)
+                        .padding(horizontal = Spacing.md, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.Send,
+                        contentDescription = null,
+                        tint = Color(0xFF162E26),
+                        modifier = Modifier.size(16.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = cta,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF162E26),
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null,
+                        tint = Color(0xFF162E26),
+                        modifier = Modifier.size(16.dp),
+                    )
+                }
+            }
         }
     }
 }

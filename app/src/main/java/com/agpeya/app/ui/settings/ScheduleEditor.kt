@@ -394,19 +394,18 @@ fun TimeRow(minute: Int, s: Strings, onChange: (Int) -> Unit, modifier: Modifier
             initialMinute = minute % 60,
             is24Hour = true,
         )
-        AlertDialog(
-            onDismissRequest = { picking = false },
-            title = { Text(s.timeLabel) },
-            text = { TimePicker(state = timeState) },
-            confirmButton = {
-                TextButton(onClick = {
-                    picking = false
-                    onChange(timeState.hour * 60 + timeState.minute)
-                }) { Text(s.save) }
+        com.agpeya.app.ui.common.SinqTimePickerDialog(
+            title = s.timeLabel,
+            onDismiss = { picking = false },
+            onConfirm = {
+                picking = false
+                onChange(timeState.hour * 60 + timeState.minute)
             },
-            dismissButton = {
-                TextButton(onClick = { picking = false }) { Text(s.cancel) }
-            },
-        )
+        ) {
+            TimePicker(
+                state = timeState,
+                colors = com.agpeya.app.ui.common.sinqTimePickerColors(),
+            )
+        }
     }
 }

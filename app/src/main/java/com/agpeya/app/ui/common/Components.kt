@@ -24,6 +24,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -595,6 +597,90 @@ fun SinqOutlinedButton(
             Spacer(Modifier.width(Spacing.sm))
         }
         content()
+    }
+}
+/**
+ * Liturgical gold & deep green color configuration for Material 3 TimePicker,
+ * consistent across bottom sheets and dialogs throughout the app.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun sinqTimePickerColors(): androidx.compose.material3.TimePickerColors = androidx.compose.material3.TimePickerDefaults.colors(
+    clockDialColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+    clockDialSelectedContentColor = MaterialTheme.colorScheme.onPrimary,
+    clockDialUnselectedContentColor = MaterialTheme.colorScheme.onSurface,
+    selectorColor = MaterialTheme.colorScheme.primary,
+    timeSelectorSelectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+    timeSelectorSelectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+    timeSelectorUnselectedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+    timeSelectorUnselectedContentColor = MaterialTheme.colorScheme.onSurface,
+)
+
+/**
+ * Standardized Time Picker Dialog matching Sinq's sacred surface aesthetic.
+ *
+ * Prevents the double-padding and unalignment that happens when TimePicker
+ * is placed into an ordinary AlertDialog's text slot. Ensures the clock face
+ * is centered, properly padded, and comfortable on all screen widths.
+ */
+@Composable
+fun SinqTimePickerDialog(
+    title: String,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    val s = LocalStrings.current
+    androidx.compose.ui.window.Dialog(
+        onDismissRequest = onDismiss,
+        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Surface(
+            modifier = Modifier
+                .padding(Spacing.lg)
+                .widthIn(min = 328.dp, max = 360.dp)
+                .fillMaxWidth(0.92f),
+            shape = MaterialTheme.shapes.extraLarge,
+            color = MaterialTheme.colorScheme.surface,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            tonalElevation = 6.dp,
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = Spacing.lg, vertical = Spacing.xl)
+                    .verticalScroll(androidx.compose.foundation.rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = Spacing.md),
+                )
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    content()
+                }
+                Spacer(Modifier.height(Spacing.lg))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text(s.cancel)
+                    }
+                    Spacer(Modifier.width(Spacing.sm))
+                    SinqPrimaryButton(onClick = onConfirm) {
+                        Text(s.save)
+                    }
+                }
+            }
+        }
     }
 }
 

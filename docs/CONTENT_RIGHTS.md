@@ -14,7 +14,7 @@ The source code uses [Apache-2.0](../LICENSE). Bundled content under `app/src/ma
 | Synaxarium | Maintainer's Amharic/Ge'ez scanned editions, 366 days each; NOTICE records CC BY-NC-ND 4.0 | Earlier bot/Hugging Face corpora are no longer bundled; their MIT notice is not the license for the current Synaxarium |
 | Mahlet | Maintainer's book scan, EOTC Mahlet Telegram editions, Tsige sources and Gitsawe fallback orders; NOTICE records CC BY-NC-ND 4.0 | Preserve edition-specific source links, alternatives and outstanding editorial/source review |
 | Church-book shelf | Maintainer's scanned traditional texts; NOTICE records CC BY-NC-ND 4.0 | 37 app books; preserve source and transformation records |
-| Wudase/daily prayers | `tecleet/wudase-mariam`, no source-repository license stated in the existing record | Traditional prayer provenance does not by itself close transcription-specific rights questions |
+| Wudase/daily prayers | Maintainer's scan/digitization from publicly available printed editions/PDFs; traditional liturgical text | Public-domain traditional prayer text formatted into stanzas |
 
 The maintainer's 2026-07-28 decision was to keep Sinq noncommercial while these texts ship: no ads, in-app purchases or subscriptions. The repository records the Bible license transition from MIT (`c419216`) to CC BY-NC-ND (`f1b2786`). This audit did not recheck those upstream commits online.
 

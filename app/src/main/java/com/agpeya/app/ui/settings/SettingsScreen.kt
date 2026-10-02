@@ -526,26 +526,25 @@ private fun StreakReminderTimeRow(s: com.agpeya.app.ui.strings.Strings) {
             initialMinute = minute % 60,
             is24Hour = true,
         )
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { picking = false },
-            title = { Text(s.timeLabel) },
-            text = { androidx.compose.material3.TimePicker(state = timeState) },
-            confirmButton = {
-                SinqPrimaryButton(onClick = {
-                    picking = false
-                    scope.launch {
-                        SettingsRepository.setStreakReminderTime(
-                            context,
-                            timeState.hour * 60 + timeState.minute,
-                        )
-                        com.agpeya.app.reminders.StreakReminderScheduler.sync(context, true)
-                    }
-                }) { Text(s.save) }
+        com.agpeya.app.ui.common.SinqTimePickerDialog(
+            title = s.timeLabel,
+            onDismiss = { picking = false },
+            onConfirm = {
+                picking = false
+                scope.launch {
+                    SettingsRepository.setStreakReminderTime(
+                        context,
+                        timeState.hour * 60 + timeState.minute,
+                    )
+                    com.agpeya.app.reminders.StreakReminderScheduler.sync(context, true)
+                }
             },
-            dismissButton = {
-                TextButton(onClick = { picking = false }) { Text(s.cancel) }
-            },
-        )
+        ) {
+            androidx.compose.material3.TimePicker(
+                state = timeState,
+                colors = com.agpeya.app.ui.common.sinqTimePickerColors(),
+            )
+        }
     }
 }
 
@@ -626,24 +625,25 @@ private fun QuietHoursRow(s: com.agpeya.app.ui.strings.Strings) {
             initialMinute = minute % 60,
             is24Hour = true,
         )
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { editingStart = null },
-            title = { Text(if (isStart) s.startTimeLabel else s.endTimeLabel) },
-            text = { androidx.compose.material3.TimePicker(state = state) },
-            confirmButton = {
-                SinqPrimaryButton(onClick = {
-                    val selected = state.hour * 60 + state.minute
-                    editingStart = null
-                    scope.launch {
-                        SettingsRepository.setQuietHours(
-                            context,
-                            if (isStart) quiet.copy(startMinute = selected) else quiet.copy(endMinute = selected),
-                        )
-                    }
-                }) { Text(s.save) }
+        com.agpeya.app.ui.common.SinqTimePickerDialog(
+            title = if (isStart) s.startTimeLabel else s.endTimeLabel,
+            onDismiss = { editingStart = null },
+            onConfirm = {
+                val selected = state.hour * 60 + state.minute
+                editingStart = null
+                scope.launch {
+                    SettingsRepository.setQuietHours(
+                        context,
+                        if (isStart) quiet.copy(startMinute = selected) else quiet.copy(endMinute = selected),
+                    )
+                }
             },
-            dismissButton = { TextButton(onClick = { editingStart = null }) { Text(s.cancel) } },
-        )
+        ) {
+            androidx.compose.material3.TimePicker(
+                state = state,
+                colors = com.agpeya.app.ui.common.sinqTimePickerColors(),
+            )
+        }
     }
 }
 
@@ -970,25 +970,24 @@ private fun WidgetRolloverTimeRow(s: com.agpeya.app.ui.strings.Strings, minute: 
             initialMinute = minute % 60,
             is24Hour = true,
         )
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { picking = false },
-            title = { Text(s.widgetRolloverTimeTitle) },
-            text = { androidx.compose.material3.TimePicker(state = timeState) },
-            confirmButton = {
-                SinqPrimaryButton(onClick = {
-                    picking = false
-                    scope.launch {
-                        SettingsRepository.setWidgetRolloverTime(
-                            context,
-                            timeState.hour * 60 + timeState.minute,
-                        )
-                    }
-                }) { Text(s.save) }
+        com.agpeya.app.ui.common.SinqTimePickerDialog(
+            title = s.widgetRolloverTimeTitle,
+            onDismiss = { picking = false },
+            onConfirm = {
+                picking = false
+                scope.launch {
+                    SettingsRepository.setWidgetRolloverTime(
+                        context,
+                        timeState.hour * 60 + timeState.minute,
+                    )
+                }
             },
-            dismissButton = {
-                TextButton(onClick = { picking = false }) { Text(s.cancel) }
-            },
-        )
+        ) {
+            androidx.compose.material3.TimePicker(
+                state = timeState,
+                colors = com.agpeya.app.ui.common.sinqTimePickerColors(),
+            )
+        }
     }
 }
 
@@ -1567,26 +1566,25 @@ private fun GitsaweReminderTimeRow(s: com.agpeya.app.ui.strings.Strings) {
             initialMinute = minute % 60,
             is24Hour = true,
         )
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { picking = false },
-            title = { Text(s.settingsGitsaweReminder) },
-            text = { androidx.compose.material3.TimePicker(state = timeState) },
-            confirmButton = {
-                SinqPrimaryButton(onClick = {
-                    picking = false
-                    scope.launch {
-                        SettingsRepository.setGitsaweReminderTime(
-                            context,
-                            timeState.hour * 60 + timeState.minute,
-                        )
-                        com.agpeya.app.reminders.GitsaweReminderScheduler.sync(context, true)
-                    }
-                }) { Text(s.save) }
+        com.agpeya.app.ui.common.SinqTimePickerDialog(
+            title = s.settingsGitsaweReminder,
+            onDismiss = { picking = false },
+            onConfirm = {
+                picking = false
+                scope.launch {
+                    SettingsRepository.setGitsaweReminderTime(
+                        context,
+                        timeState.hour * 60 + timeState.minute,
+                    )
+                    com.agpeya.app.reminders.GitsaweReminderScheduler.sync(context, true)
+                }
             },
-            dismissButton = {
-                TextButton(onClick = { picking = false }) { Text(s.cancel) }
-            },
-        )
+        ) {
+            androidx.compose.material3.TimePicker(
+                state = timeState,
+                colors = com.agpeya.app.ui.common.sinqTimePickerColors(),
+            )
+        }
     }
 }
 
@@ -1612,26 +1610,25 @@ private fun DailyQuoteTimeRow(s: com.agpeya.app.ui.strings.Strings) {
             initialMinute = minute % 60,
             is24Hour = true,
         )
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { picking = false },
-            title = { Text(s.dailyQuoteTitle) },
-            text = { androidx.compose.material3.TimePicker(state = timeState) },
-            confirmButton = {
-                SinqPrimaryButton(onClick = {
-                    picking = false
-                    scope.launch {
-                        SettingsRepository.setDailyQuoteTime(
-                            context,
-                            timeState.hour * 60 + timeState.minute,
-                        )
-                        com.agpeya.app.reminders.DailyQuoteScheduler.schedule(context)
-                    }
-                }) { Text(s.save) }
+        com.agpeya.app.ui.common.SinqTimePickerDialog(
+            title = s.dailyQuoteTitle,
+            onDismiss = { picking = false },
+            onConfirm = {
+                picking = false
+                scope.launch {
+                    SettingsRepository.setDailyQuoteTime(
+                        context,
+                        timeState.hour * 60 + timeState.minute,
+                    )
+                    com.agpeya.app.reminders.DailyQuoteScheduler.schedule(context)
+                }
             },
-            dismissButton = {
-                TextButton(onClick = { picking = false }) { Text(s.cancel) }
-            },
-        )
+        ) {
+            androidx.compose.material3.TimePicker(
+                state = timeState,
+                colors = com.agpeya.app.ui.common.sinqTimePickerColors(),
+            )
+        }
     }
 }
 

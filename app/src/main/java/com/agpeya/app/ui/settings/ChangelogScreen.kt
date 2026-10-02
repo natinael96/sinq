@@ -31,6 +31,23 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.5.5",
+        title = "Settings feedback card, horizontal journey scrolling, and clock picker alignment",
+        titleAm = "ጎልቶ የወጣ የአስተያየት መስጫ ገጽ፣ የጉዞ ዕለታትና ሰዓታት አግድም ዝውውር እና የሰዓት መምረጫ ማስተካከያ",
+        changes = listOf(
+            "Replaced nested settings row with a bold, dedicated liturgical feedback card with direct action button.",
+            "Added an interactive, horizontally scrollable day strip and horizontal canonical hours capsule pills on the Journey screen.",
+            "Made Ethiopian year heatmap cells directly clickable and added a calendar picker button.",
+            "Fixed clock time picker alignment and edge-clipping across all reminder and alarm dialogs.",
+        ),
+        changesAm = listOf(
+            "በቅንብሮች ውስጥ አስተያየት በቀላሉ ለመስጠት የሚያስችል ልዩ፣ ውብና ጎልቶ የሚታይ የወርቅና አረንጓዴ ቀለም መድረክ ተዘጋጅቷል።",
+            "በጉዞ ገጽ ላይ ያለፉትን ቀናትና የሰዓታት ጸሎቶችን ወደ ጎን በማሸብለል በቀላሉ ለመመልከትና ምልክት ለማድረግ የሚያስችል አግድም ዝውውር ተዘጋጅቷል።",
+            "የዓመቱን የጸሎት ሁኔታ የሚያሳየው ሠንጠረዥ እያንዳንዱ ዕለት ሲነካ እንዲመረጥ ተደርጎ የቀን መቁጠሪያ አዶ ተካቷል።",
+            "የማንቂያና የጸሎት ማሳሰቢያ ሰዓት መምረጫው ጠርዝ ሳይቆረጥና ሳይዛነፍ በትክክል እንዲታይ ተስተካክሏል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.5.4",
         title = "Distraction-free prayer mode, universal reading progress bars, and Mahlet screen redesign",
         titleAm = "ያለ ትኩረት የሚከፋፍል የጸሎት ሁነታ፣ የንባብ ሂደት ማሳያ እና የማኅሌት ገጽ ማሻሻያ",
