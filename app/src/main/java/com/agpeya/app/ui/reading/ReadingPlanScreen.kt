@@ -106,6 +106,7 @@ fun ReadingPlanScreen(
     onOpenGitsawe: () -> Unit,
     onOpenAllDays: (String) -> Unit,
     onOpenMap: () -> Unit,
+    onWriteNote: ((route: String, label: String) -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -119,6 +120,11 @@ fun ReadingPlanScreen(
     // The plan stores slugs; every screen that shows one uses the bundle's own name.
     val bookNames by produceState(emptyMap<String, String>()) {
         value = runCatching { com.agpeya.app.data.ScriptureRepository.bookNames(context) }.getOrDefault(emptyMap())
+    }
+    val booksMeta by produceState(emptyMap<String, com.agpeya.app.model.ScriptureBookMeta>()) {
+        value = runCatching {
+            com.agpeya.app.data.ScriptureRepository.books(context).associateBy { it.key }
+        }.getOrDefault(emptyMap())
     }
     val stateLoad = com.agpeya.app.ui.common.rememberFlowLoad { ReadingPlanRepository.state(context) }
     if (com.agpeya.app.ui.common.contentLoadScreen(stateLoad, s.readingTitle, onBack)) return
@@ -202,6 +208,29 @@ fun ReadingPlanScreen(
                             only = kept.size == 1,
                         )
                     }
+
+                    // Offered, never insisted on: missed days can be caught up sequentially or rebased forward.
+                    if (!complete && oldest != null && oldest < day) {
+                        val oldestDay = days.firstOrNull { it.d == oldest }
+                        item(key = "behind_${plan.id}") {
+                            CatchUpBanner(
+                                oldest = oldest,
+                                onReadOldest = {
+                                    oldestDay?.r?.firstOrNull()?.let { r ->
+                                        onOpenRoute(planReadingRoute(r.b, r.c, plan.id, oldest))
+                                    }
+                                },
+                                onCatchMeUp = {
+                                    action.run {
+                                        ReadingPlanRepository.rebaseTo(context, plan.id, oldest, today)
+                                    }
+                                },
+                                onMoreOptions = { catching = active to plan },
+                            )
+                            Spacer(Modifier.height(Spacing.xs))
+                        }
+                    }
+
                     if (complete) {
                         item(key = "done_${plan.id}") {
                             CompletePanel(
@@ -227,9 +256,16 @@ fun ReadingPlanScreen(
                     } else {
                         items(todayDay.r.size, key = { "${plan.id}_r_$it" }) { i ->
                             val r = todayDay.r[i]
+                            val catLabel = when {
+                                r.b == "psalms" -> s.psalterTitle
+                                booksMeta[r.b]?.testament == "new" -> s.newTestamentLabel
+                                booksMeta[r.b]?.testament in listOf("old", "deuterocanonical") -> s.oldTestamentLabel
+                                else -> null
+                            }
                             PassageRow(
                                 reading = r,
                                 names = bookNames,
+                                category = catLabel,
                                 read = ReadingPlanRepository.chaptersOf(PlanDay(d = 0, r = listOf(r)))
                                     .all { it in state.readFor(plan.id) },
                                 onToggle = {
@@ -242,19 +278,38 @@ fun ReadingPlanScreen(
                                         )
                                     }
                                 },
-                                onOpen = { onOpenRoute(planReadingRoute(r.b, r.c)) },
+                                onOpen = { onOpenRoute(planReadingRoute(r.b, r.c, plan.id, day)) },
                             )
                         }
-                    }
-                    // Offered, never insisted on: an unread day behind us is a
-                    // fact, not a failure, and nothing here shows a shortfall.
-                    if (!complete && oldest != null && oldest < day) {
-                        item(key = "behind_${plan.id}") {
-                            NavRow(
-                                title = s.readingBehindTitle,
-                                onClick = { catching = active to plan },
-                                subtitle = s.readingDayLabel(geezNumeral(oldest)),
-                            )
+
+                        // ── Bible study and reflection anchor ────────────────────────────
+                        item(key = "study_${plan.id}_$day") {
+                            val firstR = todayDay.r.firstOrNull()
+                            if (firstR != null) {
+                                val catenaUrl = remember(firstR) {
+                                    com.agpeya.app.data.CatenaLink.url(firstR.b, firstR.c, 1)
+                                }
+                                Spacer(Modifier.height(Spacing.xs))
+                                StudyCard(
+                                    bookName = bookName(firstR.b, bookNames),
+                                    reading = firstR,
+                                    hasCatena = catenaUrl != null,
+                                    onOpenCatena = {
+                                        catenaUrl?.let { url ->
+                                            val ref = "${bookName(firstR.b, bookNames)} ${chapterLabel(firstR.c, firstR.to)}"
+                                            onOpenRoute("catena?url=${android.net.Uri.encode(url)}&ref=${android.net.Uri.encode(ref)}")
+                                        }
+                                    },
+                                    onWriteNote = onWriteNote?.let { writer ->
+                                        {
+                                            writer(
+                                                planReadingRoute(firstR.b, firstR.c, plan.id, day),
+                                                "${plan.title} · ${s.readingDayLabel(geezNumeral(day))}",
+                                            )
+                                        }
+                                    },
+                                )
+                            }
                         }
                     }
                 }
@@ -421,6 +476,7 @@ private fun Rail(fraction: Float) {
 private fun PassageRow(
     reading: PlanReading,
     names: Map<String, String>,
+    category: String? = null,
     read: Boolean,
     onToggle: () -> Unit,
     onOpen: () -> Unit,
@@ -465,6 +521,13 @@ private fun PassageRow(
                 .clickable(onClick = onOpen)
                 .padding(vertical = Spacing.xs),
         ) {
+            if (!category.isNullOrBlank()) {
+                Text(
+                    category,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = gold,
+                )
+            }
             Text(
                 bookName(reading.b, names),
                 style = MaterialTheme.typography.titleSmall,
@@ -477,6 +540,149 @@ private fun PassageRow(
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+    }
+}
+
+/**
+ * Catch-up banner for missed days:
+ * Combines sequence-first (Ascension-style "pick up where left off")
+ * with calendar rebase (YouVersion-style "catch me up").
+ */
+@Composable
+private fun CatchUpBanner(
+    oldest: Int,
+    onReadOldest: () -> Unit,
+    onCatchMeUp: () -> Unit,
+    onMoreOptions: () -> Unit,
+) {
+    val s = LocalStrings.current
+    val gold = MaterialTheme.colorScheme.secondary
+    val sinq = sinqColors
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(gold.copy(alpha = 0.08f))
+            .border(1.dp, gold.copy(alpha = 0.35f), RoundedCornerShape(12.dp))
+            .padding(Spacing.md),
+    ) {
+        Column {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "${s.readingBehindTitle} · ${s.readingDayLabel(geezNumeral(oldest))}",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                Text(
+                    text = s.moreActions,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(4.dp))
+                        .clickable(onClick = onMoreOptions)
+                        .padding(horizontal = Spacing.xs, vertical = Spacing.xxs),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.secondary,
+                )
+            }
+            Spacer(Modifier.height(Spacing.xs))
+            Text(
+                text = s.readingCatchOldestDesc,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(Spacing.sm))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(gold)
+                        .clickable(onClick = onReadOldest)
+                        .padding(horizontal = Spacing.md, vertical = Spacing.xs),
+                ) {
+                    Text(
+                        text = s.readingCatchReadFrom(geezNumeral(oldest)),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = sinq.hero,
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .border(1.dp, gold, RoundedCornerShape(8.dp))
+                        .clickable(onClick = onCatchMeUp)
+                        .padding(horizontal = Spacing.md, vertical = Spacing.xs),
+                ) {
+                    Text(
+                        text = s.readingCatchMeUp,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Bible study and reflection anchor for today's reading.
+ */
+@Composable
+private fun StudyCard(
+    bookName: String,
+    reading: PlanReading,
+    hasCatena: Boolean,
+    onOpenCatena: () -> Unit,
+    onWriteNote: (() -> Unit)?,
+) {
+    val s = LocalStrings.current
+    val gold = MaterialTheme.colorScheme.secondary
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(gold.copy(alpha = 0.05f))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
+            .padding(Spacing.md),
+    ) {
+        Column {
+            Text(
+                text = s.readingStudyReflection,
+                style = MaterialTheme.typography.labelMedium,
+                color = gold,
+            )
+            Spacer(Modifier.height(Spacing.xxs))
+            Text(
+                text = "$bookName ${s.chapterUnit} ${chapterLabel(reading.c, reading.to)}",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Spacer(Modifier.height(Spacing.sm))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (hasCatena) {
+                    DoorChip(
+                        icon = Icons.Outlined.AutoStories,
+                        label = s.fathersCommentary,
+                        onClick = onOpenCatena,
+                    )
+                }
+                if (onWriteNote != null) {
+                    DoorChip(
+                        icon = Icons.AutoMirrored.Outlined.EventNote,
+                        label = s.writeAboutThis,
+                        onClick = onWriteNote,
+                    )
+                }
+            }
         }
     }
 }

@@ -396,4 +396,12 @@ class ReadingPlanTest {
         assertEquals(1, old.readFor("annual").size)
         assertEquals(0, old.readFor("psalter").size)
     }
+
+    @Test
+    fun `rebasing a plan shifts start date so today becomes the unread day`() {
+        val today = LocalDate.of(2026, 1, 10)
+        val oldestUnreadDay = 5
+        val rebasedStart = today.minusDays((oldestUnreadDay - 1).toLong()).toString()
+        assertEquals(5, ReadingPlanRepository.dayOn(rebasedStart, today, 360))
+    }
 }

@@ -3,6 +3,7 @@ package com.agpeya.app.ui.common
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AutoStories
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Share
@@ -23,6 +24,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.IconSize
+import kotlinx.coroutines.launch
 
 /**
  * The share affordance used in readers: copy and share as text.
@@ -90,7 +92,11 @@ fun ReaderToolsMenu(
 ) {
     val context = LocalContext.current
     val s = LocalStrings.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
     var open by remember { mutableStateOf(false) }
+    var appearanceOpen by remember { mutableStateOf(false) }
+    val readingFont by com.agpeya.app.data.SettingsRepository.readingFont(context)
+        .collectAsState(initial = com.agpeya.app.data.ReadingFont.ABYSSINICA)
     val format by com.agpeya.app.data.SettingsRepository.copyFormat(context)
         .collectAsState(initial = CopyFormat())
     fun textOf(payload: SharePayload): String = PassageFormat.text(
@@ -111,6 +117,20 @@ fun ReaderToolsMenu(
             )
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            DropdownMenuItem(
+                text = { Text(s.appearance) },
+                leadingIcon = {
+                    Icon(
+                        Icons.Outlined.AutoStories,
+                        contentDescription = null,
+                        modifier = Modifier.size(IconSize.medium),
+                    )
+                },
+                onClick = {
+                    open = false
+                    appearanceOpen = true
+                },
+            )
             DropdownMenuItem(
                 text = { Text("A−  ${s.readingFontTitle}") },
                 enabled = fontStep > 0,
@@ -182,6 +202,20 @@ fun ReaderToolsMenu(
                 )
             }
         }
+    }
+
+    if (appearanceOpen) {
+        ReaderAppearanceSheet(
+            fontStep = fontStep,
+            onFontStepChange = onFontChange,
+            currentFont = readingFont,
+            onFontChange = { newFont ->
+                scope.launch { com.agpeya.app.data.SettingsRepository.setReadingFont(context, newFont) }
+            },
+            readingMode = readingMode,
+            onToggleReadingMode = onToggleReadingMode,
+            onDismiss = { appearanceOpen = false },
+        )
     }
 }
 

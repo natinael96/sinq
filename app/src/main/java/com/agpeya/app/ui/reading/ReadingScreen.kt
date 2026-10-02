@@ -5,9 +5,15 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.view.WindowManager
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +32,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.DropdownMenu
@@ -36,6 +43,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -43,6 +51,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -209,6 +218,22 @@ fun ReadingScreen(
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
     val s = com.agpeya.app.ui.strings.LocalStrings.current
     val motion = LocalMotion.current
+    var isImmersive by rememberSaveable(hourId) { mutableStateOf(false) }
+
+    val readingProgress by remember(sections.size, listState, pagerState, readingMode) {
+        derivedStateOf {
+            if (sections.size <= 1) 0f
+            else {
+                val idx = if (readingMode == ReadingMode.VERTICAL) listState.firstVisibleItemIndex else pagerState.currentPage
+                (idx.toFloat() / (sections.size - 1)).coerceIn(0f, 1f)
+            }
+        }
+    }
+    val animatedProgress by animateFloatAsState(
+        targetValue = readingProgress,
+        animationSpec = motion.spec(com.agpeya.app.ui.theme.Motion.standard),
+        label = "readingProgress",
+    )
 
     // The section we want kept in view; shared across both readers so the
     // position survives a mode switch.
@@ -286,111 +311,118 @@ fun ReadingScreen(
     Scaffold(
         // Collapsing app bar only makes sense for vertical reading; in paged mode the
         // nested-scroll connection can swallow the pager's swipes, so leave it off.
-        modifier = if (readingMode == ReadingMode.VERTICAL) {
+        modifier = if (readingMode == ReadingMode.VERTICAL && !isImmersive) {
             Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
         } else {
             Modifier
         },
         topBar = {
-            SinqTopBar(
-                title = hour?.name ?: "",
-                onBack = onBack,
-                scrollBehavior = scrollBehavior,
-                titleContent = {
-                    Box {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 48.dp)
-                                .clip(MaterialTheme.shapes.small)
-                                .clickable(role = Role.DropdownList) { hourMenu = true }
-                                .padding(horizontal = Spacing.xs),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = hour?.name ?: "",
-                                style = MaterialTheme.typography.titleSmall,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f),
-                            )
-                            Icon(
-                                Icons.Filled.ArrowDropDown,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+            AnimatedVisibility(
+                visible = !isImmersive,
+                enter = slideInVertically(motion.spec(com.agpeya.app.ui.theme.Motion.standard)) { -it } + fadeIn(motion.spec(com.agpeya.app.ui.theme.Motion.fast)),
+                exit = slideOutVertically(motion.spec(com.agpeya.app.ui.theme.Motion.standard)) { -it } + fadeOut(motion.spec(com.agpeya.app.ui.theme.Motion.fast)),
+            ) {
+                SinqTopBar(
+                    title = hour?.name ?: "",
+                    onBack = onBack,
+                    scrollBehavior = scrollBehavior,
+                    titleContent = {
+                        Box {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 48.dp)
+                                    .clip(MaterialTheme.shapes.small)
+                                    .clickable(role = Role.DropdownList) { hourMenu = true }
+                                    .padding(horizontal = Spacing.xs),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    text = hour?.name ?: "",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                Icon(
+                                    Icons.Filled.ArrowDropDown,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            DropdownMenu(expanded = hourMenu, onDismissRequest = { hourMenu = false }) {
+                                allHours.forEach { h ->
+                                    val isCurrent = h.id == hourId
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                h.name,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                color = if (isCurrent) MaterialTheme.colorScheme.secondary
+                                                else MaterialTheme.colorScheme.onSurface,
+                                            )
+                                        },
+                                        onClick = {
+                                            hourMenu = false
+                                            if (!isCurrent) onSwitchHour(h.id)
+                                        },
+                                    )
+                                }
+                            }
                         }
-                        DropdownMenu(expanded = hourMenu, onDismissRequest = { hourMenu = false }) {
-                            allHours.forEach { h ->
-                                val isCurrent = h.id == hourId
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            h.name,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = if (isCurrent) MaterialTheme.colorScheme.secondary
-                                            else MaterialTheme.colorScheme.onSurface,
-                                        )
-                                    },
-                                    onClick = {
-                                        hourMenu = false
-                                        if (!isCurrent) onSwitchHour(h.id)
-                                    },
-                                )
-                            }
-                        }
-                    }
-                },
-                actions = {
-                    com.agpeya.app.ui.common.ReaderToolsMenu(
-                        fontStep = fontStep,
-                        maxFontStep = FONT_STEPS_SP.lastIndex,
-                        onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
-                        secondaryActionLabel = s.showFullPsalms.takeIf { effectivePrayerLevel != PrayerLevel.FULL },
-                        onSecondaryAction = if (effectivePrayerLevel != PrayerLevel.FULL) ({ showFullHour = true }) else null,
-                        onWriteNote = {
-                            val section = sections.getOrNull(contentsIndex)
-                            val h = hour
-                            if (section != null && h != null) {
-                                onWriteNote(
-                                    "reading/${h.id}?sectionId=${android.net.Uri.encode(section.id)}",
-                                    "${h.name} · ${section.title}",
-                                )
-                            }
-                        },
-                        readingMode = readingMode,
-                        onToggleReadingMode = {
-                            // Preserve the visible passage when changing layout.
-                            anchor = if (readingMode == ReadingMode.VERTICAL) {
-                                listState.firstVisibleItemIndex
-                            } else {
-                                pagerState.currentPage
-                            }
-                            scope.launch {
-                                SettingsRepository.setReadingMode(
-                                    context,
-                                    if (readingMode == ReadingMode.VERTICAL) ReadingMode.HORIZONTAL
-                                    else ReadingMode.VERTICAL,
-                                )
-                            }
-                        },
-                    )
-                    IconButton(onClick = { showContents = true }) {
-                        Icon(
-                            Icons.Outlined.Menu,
-                            contentDescription = s.contents,
-                            modifier = Modifier.size(IconSize.medium),
+                    },
+                    actions = {
+                        com.agpeya.app.ui.common.ReaderToolsMenu(
+                            fontStep = fontStep,
+                            maxFontStep = FONT_STEPS_SP.lastIndex,
+                            onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
+                            secondaryActionLabel = s.showFullPsalms.takeIf { effectivePrayerLevel != PrayerLevel.FULL },
+                            onSecondaryAction = if (effectivePrayerLevel != PrayerLevel.FULL) ({ showFullHour = true }) else null,
+                            onWriteNote = {
+                                val section = sections.getOrNull(contentsIndex)
+                                val h = hour
+                                if (section != null && h != null) {
+                                    onWriteNote(
+                                        "reading/${h.id}?sectionId=${android.net.Uri.encode(section.id)}",
+                                        "${h.name} · ${section.title}",
+                                    )
+                                }
+                            },
+                            readingMode = readingMode,
+                            onToggleReadingMode = {
+                                // Preserve the visible passage when changing layout.
+                                anchor = if (readingMode == ReadingMode.VERTICAL) {
+                                    listState.firstVisibleItemIndex
+                                } else {
+                                    pagerState.currentPage
+                                }
+                                scope.launch {
+                                    SettingsRepository.setReadingMode(
+                                        context,
+                                        if (readingMode == ReadingMode.VERTICAL) ReadingMode.HORIZONTAL
+                                        else ReadingMode.VERTICAL,
+                                    )
+                                }
+                            },
                         )
-                    }
-                },
-            )
+                        IconButton(onClick = { showContents = true }) {
+                            Icon(
+                                Icons.Outlined.Menu,
+                                contentDescription = s.contents,
+                                modifier = Modifier.size(IconSize.medium),
+                            )
+                        }
+                    },
+                )
+            }
         },
         containerColor = MaterialTheme.colorScheme.background,
     ) { innerPadding ->
+        val contentPadding = if (isImmersive) PaddingValues(0.dp) else innerPadding
         Box(Modifier.fillMaxSize()) {
             if (sections.isEmpty()) com.agpeya.app.ui.common.StatePanel(
                 title = s.contentUnavailable, body = s.customizeIntro,
-                modifier = Modifier.padding(innerPadding),
+                modifier = Modifier.padding(contentPadding),
             )
             AnimatedVisibility(
                 visible = sections.isNotEmpty(),
@@ -398,14 +430,33 @@ fun ReadingScreen(
             ) {
                 when (readingMode) {
                     ReadingMode.VERTICAL -> VerticalReader(
-                        sections, listState, bodyFontSp, innerPadding, bookmarkedIds,
+                        sections, listState, bodyFontSp, contentPadding, bookmarkedIds,
                         ::toggleBookmark,
                         prevHour?.let { h -> { onSwitchHour(h.id) } },
                         nextHour?.let { h -> { onSwitchHour(h.id) } },
+                        onToggleImmersive = { isImmersive = !isImmersive },
                     )
                     ReadingMode.HORIZONTAL -> PagedReader(
-                        sections, pagerState, bodyFontSp, innerPadding, bookmarkedIds,
+                        sections, pagerState, bodyFontSp, contentPadding, bookmarkedIds,
                         ::toggleBookmark, progressKey, weights, pageWasSwiped, recordRead,
+                        onToggleImmersive = { isImmersive = !isImmersive },
+                    )
+                }
+            }
+            if (sections.size > 1) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = if (!isImmersive) innerPadding.calculateTopPadding() else 0.dp)
+                        .height(2.5.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+                        .align(Alignment.TopCenter),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(animatedProgress)
+                            .height(2.5.dp)
+                            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.9f)),
                     )
                 }
             }
@@ -420,9 +471,8 @@ fun ReadingScreen(
         ) {
             ContentsSheet(
                 sections = sections,
-                // Where the reader is right now, so opening the contents tells
-                // you where you are before it asks where you want to go.
                 currentIndex = contentsIndex,
+                bookmarkedIds = bookmarkedIds,
                 onSelect = { index ->
                     scope.launch {
                         sheetState.hide()
@@ -448,10 +498,12 @@ private fun VerticalReader(
     onToggleBookmark: (Section, Int) -> Unit,
     onPrevious: (() -> Unit)?,
     onNext: (() -> Unit)?,
+    onToggleImmersive: () -> Unit = {},
 ) {
     ReadingColumn(
         state = listState,
         innerPadding = innerPadding,
+        onTap = onToggleImmersive,
     ) {
         items(sections.size, key = { sections[it].id }) { index ->
             val section = sections[index]
@@ -463,7 +515,6 @@ private fun VerticalReader(
                 bodyFontSp = bodyFontSp,
                 isBookmarked = section.id in bookmarkedIds,
                 onToggleBookmark = { onToggleBookmark(section, index) },
-
             )
         }
         if (onPrevious != null || onNext != null) {
@@ -493,6 +544,7 @@ private fun PagedReader(
     weights: List<Int>,
     pageWasSwiped: Boolean,
     onProgress: (Double) -> Unit,
+    onToggleImmersive: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -502,10 +554,6 @@ private fun PagedReader(
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.weight(1f),
-            // The pager's pageCount lambda reads the live section list while
-            // these lambdas hold the one from the current composition; when the
-            // list changes size (the full-psalms toggle), the pager can measure
-            // a page index the captured list doesn't have yet — index safely.
             key = { sections.getOrNull(it)?.id ?: it },
         ) { page ->
             val section = sections.getOrNull(page) ?: return@HorizontalPager
@@ -515,7 +563,11 @@ private fun PagedReader(
                 enabled = pagerState.settledPage == page,
                 pageWasSwiped = pageWasSwiped,
             ) { fraction -> onProgress(com.agpeya.app.ui.common.pageReadingFraction(weights, page, fraction)) }
-            ReadingColumn(state = pageList, innerPadding = PaddingValues(0.dp)) {
+            ReadingColumn(
+                state = pageList,
+                innerPadding = PaddingValues(0.dp),
+                onTap = onToggleImmersive,
+            ) {
                 item {
                     section.part?.let { part ->
                         Spacer(Modifier.height(Spacing.md))
@@ -532,7 +584,6 @@ private fun PagedReader(
                         bodyFontSp = bodyFontSp,
                         isBookmarked = section.id in bookmarkedIds,
                         onToggleBookmark = { onToggleBookmark(section, page) },
-
                     )
                     Spacer(Modifier.height(Spacing.huge))
                 }
@@ -569,6 +620,7 @@ internal fun PageIndicator(current: Int, total: Int) {
 internal fun ReadingColumn(
     innerPadding: PaddingValues,
     state: androidx.compose.foundation.lazy.LazyListState = rememberLazyListState(),
+    onTap: (() -> Unit)? = null,
     content: androidx.compose.foundation.lazy.LazyListScope.() -> Unit,
 ) {
     Box(
@@ -577,7 +629,20 @@ internal fun ReadingColumn(
             .padding(innerPadding),
         contentAlignment = Alignment.TopCenter,
     ) {
-        Box(Modifier.fillMaxSize().widthIn(max = ReadingMaxWidth)) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .widthIn(max = ReadingMaxWidth)
+                .then(
+                    if (onTap != null) {
+                        Modifier.clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = onTap,
+                        )
+                    } else Modifier
+                ),
+        ) {
             LazyColumn(
                 state = state,
                 modifier = Modifier.fillMaxSize(),
@@ -593,47 +658,143 @@ internal fun ReadingColumn(
 }
 
 /**
- * The contents sheet. The section being read is marked in gold — a table of
- * contents that can't tell you where you are is only half of one.
+ * The contents sheet with rich liturgical wayfinding: bookmark markers,
+ * section types, and active highlight.
  */
 @Composable
-private fun ContentsSheet(sections: List<Section>, currentIndex: Int, onSelect: (Int) -> Unit) {
+private fun ContentsSheet(
+    sections: List<Section>,
+    currentIndex: Int,
+    bookmarkedIds: Set<String>,
+    onSelect: (Int) -> Unit,
+) {
+    val s = LocalStrings.current
     LazyColumn(
         contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.sm),
         modifier = Modifier.fillMaxWidth(),
     ) {
         item {
-            Text(
-                com.agpeya.app.ui.strings.LocalStrings.current.contents,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = Spacing.xs),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = s.contents,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    text = "${geezNumeral(sections.size)} ክፍሎች",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.secondary,
+                )
+            }
+            Spacer(Modifier.height(Spacing.xs))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
             Spacer(Modifier.height(Spacing.sm))
         }
         items(sections.size) { index ->
             val section = sections[index]
             if (section.part != null && sections.getOrNull(index - 1)?.part != section.part) {
                 Spacer(Modifier.height(Spacing.md))
-                Text(section.part, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                Text(
+                    text = section.part,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.secondary,
+                )
                 Spacer(Modifier.height(Spacing.xs))
             }
             val isCurrent = index == currentIndex
-            Row(
+            val isBookmarked = section.id in bookmarkedIds
+
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 48.dp)
+                    .padding(vertical = Spacing.xxs)
                     .clip(MaterialTheme.shapes.small)
-                    .selectable(selected = isCurrent, onClick = { onSelect(index) })
-                    .padding(vertical = Spacing.sm),
-                verticalAlignment = Alignment.CenterVertically,
+                    .selectable(selected = isCurrent, onClick = { onSelect(index) }),
+                shape = MaterialTheme.shapes.small,
+                color = if (isCurrent) MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f)
+                else MaterialTheme.colorScheme.surface,
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    if (isCurrent) MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
+                    else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                ),
             ) {
-                Text(
-                    text = section.title,
-                    style = MaterialTheme.typography.titleMedium.inReadingFont(),
-                    color = if (isCurrent) MaterialTheme.colorScheme.secondary
-                    else MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(1f),
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 48.dp)
+                        .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = geezNumeral(index + 1),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (isCurrent) MaterialTheme.colorScheme.secondary
+                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        modifier = Modifier.width(28.dp),
+                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = section.title,
+                            style = MaterialTheme.typography.titleMedium.inReadingFont(),
+                            color = if (isCurrent) MaterialTheme.colorScheme.secondary
+                            else MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        section.subtitle?.let { sub ->
+                            Text(
+                                text = sub,
+                                style = MaterialTheme.typography.bodySmall.inReadingFont(),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                    if (section.type == "gospel") {
+                        Spacer(Modifier.width(Spacing.xs))
+                        Surface(
+                            shape = MaterialTheme.shapes.extraSmall,
+                            color = androidx.compose.ui.graphics.Color(0xFFB3261E).copy(alpha = 0.14f),
+                        ) {
+                            Text(
+                                text = "ወንጌል",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = androidx.compose.ui.graphics.Color(0xFFB3261E),
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            )
+                        }
+                    } else if (section.number != null) {
+                        Spacer(Modifier.width(Spacing.xs))
+                        Text(
+                            text = "መዝ ${geezNumeral(section.number)}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.secondary,
+                        )
+                    }
+                    if (isBookmarked) {
+                        Spacer(Modifier.width(Spacing.xs))
+                        Icon(
+                            Icons.Filled.Bookmark,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(IconSize.small),
+                        )
+                    }
+                    Spacer(Modifier.width(Spacing.xs))
+                    Text(
+                        text = "${geezNumeral(section.verses.size)}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                    )
+                }
             }
         }
         item { Spacer(Modifier.height(Spacing.huge)) }
