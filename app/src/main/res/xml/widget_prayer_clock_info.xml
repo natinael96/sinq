@@ -4,5 +4,7 @@
     android:minResizeWidth="180dp" android:minResizeHeight="180dp"
     android:resizeMode="horizontal|vertical" android:updatePeriodMillis="1800000"
     android:initialLayout="@layout/widget_prayer_clock"
+    android:initialKeyguardLayout="@layout/widget_prayer_clock"
     android:description="@string/widget_prayer_clock_description"
-    android:widgetCategory="home_screen" />
+    android:targetCellWidth="3" android:targetCellHeight="3"
+    android:widgetCategory="home_screen|keyguard" />

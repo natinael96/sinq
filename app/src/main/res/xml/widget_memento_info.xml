@@ -6,6 +6,8 @@
   which is why it listens for LOCALE_CHANGED in the manifest.
 -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:targetCellWidth="3"
+    android:targetCellHeight="2"
     android:minWidth="180dp"
     android:minHeight="110dp"
     android:minResizeWidth="140dp"

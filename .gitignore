@@ -19,6 +19,7 @@ docs/extracted/
 .kotlin/
 .claude/
 .agents/
+graphify-out/
 skills-lock.json
 
 # Python bytecode from the content tools
