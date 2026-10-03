@@ -30,6 +30,7 @@ import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.outlined.RateReview
+import androidx.compose.material.icons.outlined.AutoStories
 import androidx.compose.material.icons.outlined.Church
 import androidx.compose.material.icons.outlined.CloudSync
 import androidx.compose.material.icons.outlined.Info
@@ -235,6 +236,13 @@ fun SettingsScreen(
                         subtitle = "v${appVersion(context)}",
                         leadingIcon = Icons.Outlined.NewReleases,
                         onClick = onOpenChangelog,
+                    )
+                    SinqDivider()
+                    NavRow(
+                        title = s.userGuide,
+                        subtitle = s.userGuideSubtitle,
+                        leadingIcon = Icons.Outlined.AutoStories,
+                        onClick = { com.agpeya.app.ui.common.openUrl(context, com.agpeya.app.ui.common.GUIDE_URL) },
                     )
                     SinqDivider()
                     NavRow(

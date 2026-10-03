@@ -116,6 +116,11 @@ interface Strings {
     val habitNameLabel: String
     val less: String
     val more: String
+    val manage: String
+    val prayHour: String
+    val viewDayJournalEntry: String
+    val noRecordOnDay: String
+    val habitDailySuggestion: String
 
     // The Journey metric: distinct days with prayer in the current period —
     // the Ethiopian month, or the running fast. Never a consecutive count.
@@ -536,6 +541,8 @@ interface Strings {
     val tutorial: String
     val tutorialAskTitle: String
     val tutorialAskBody: String
+    val userGuide: String
+    val userGuideSubtitle: String
     val showTutorial: String
     val gotIt: String
     val getStarted: String
@@ -696,8 +703,34 @@ interface Strings {
     val entryBodyHint: String
     val journalKindReflection: String
     val journalKindPassage: String
+    val journalKindChecklist: String
     val journalKindConfession: String
     val journalKindConfessionNote: String
+    val journalFilterAll: String
+    fun journalWrittenDays(written: String, total: String): String
+    val journalNewEntryPrompt: String
+    val journalKindReflectionDesc: String
+    val journalKindChecklistDesc: String
+    val journalKindPassageDesc: String
+    val journalKindConfessionDesc: String
+    val checklistProgress: String
+    val checklistAddItemHint: String
+    val checklistNotesHint: String
+    val checklistEmpty: String
+    val checklistCompletedAll: String
+    val checklistWhenFor: String
+    val checklistReminderSwitch: String
+    val checklistReminderTitle: String
+    val checklistChannelName: String
+    val checklistHourMorning: String
+    val checklistHourTerce: String
+    val checklistHourNoon: String
+    val checklistHourNone: String
+    val checklistHourVespers: String
+    val checklistHourCompline: String
+    val checklistHourAnytime: String
+    val checklistAlarmOn: String
+    val checklistAlarmOff: String
     val confessedAction: String
     val confessedConfirm: String
     val deleteEntryConfirm: String
@@ -1063,6 +1096,11 @@ object AmharicStrings : Strings {
     override val habitNameLabel = "የልማዱ ስም"
     override val less = "ያነሰ"
     override val more = "የበዛ"
+    override val manage = "አስተካክል"
+    override val prayHour = "ጸሎቱን ክፈት"
+    override val viewDayJournalEntry = "የዕለቱን ማስታወሻ ተመልከት"
+    override val noRecordOnDay = "በዚህ ቀን የተመዘገበ ተግባር የለም"
+    override val habitDailySuggestion = "ልምምዶች ለዕለታዊ መንፈሳዊ ግዴታዎች የተዘጋጁ ናቸው። ለተወሰነ ቀን ወይም አልፎ አልፎ ለሚሆኑ ተግባራት የቀን መዝገብ (የፍተሻ ዝርዝር) መጠቀም ይችላሉ።"
 
     override fun journeyMonthLine(days: Int) =
         if (days <= 0) "በዚህ ወር ገና አልጸለዩም"
@@ -1470,6 +1508,8 @@ object AmharicStrings : Strings {
     override val tutorial = "እንዴት እንደሚሠራ"
     override val tutorialAskTitle = "አጭር ማብራሪያ ይፈልጋሉ?"
     override val tutorialAskBody = "ዋና ዋና ባህሪያትን በፍጥነት እናሳይዎ።"
+    override val userGuide = "የአጠቃቀም መመሪያ"
+    override val userGuideSubtitle = "የአዝራሮችና የገጾች ዝርዝር መመሪያ (ድህረ ገጽ)"
     override val showTutorial = "አሳየኝ"
     override val gotIt = "ገባኝ"
     override val getStarted = "ጀምር"
@@ -1617,9 +1657,35 @@ object AmharicStrings : Strings {
     override val entryBodyHint = "ዛሬ ምን ሆነ? ምን ተሰማዎት?"
     override val journalKindReflection = "ሐሳብ"
     override val journalKindPassage = "ከምንባብ"
+    override val journalKindChecklist = "የፍተሻ ዝርዝር"
     override val journalKindConfession = "የንስሐ መዘጋጃ"
     override val journalKindConfessionNote =
         "ይህ ከመሣሪያዎ አይወጣም፤ በምትኬም ውስጥ አይገባም። ንስሐ ከገቡ በኋላ ይሰረዛል።"
+    override val journalFilterAll = "ሁሉም"
+    override fun journalWrittenDays(written: String, total: String) = "$written/$total ቀናት"
+    override val journalNewEntryPrompt = "አዲስ ማስታወሻ መዝግብ"
+    override val journalKindReflectionDesc = "የዕለቱ የግል ጸሎትና መንፈሳዊ ማሰላሰያ"
+    override val journalKindChecklistDesc = "የዕለት ተግባራት፣ ሰዓታትና የደወል ማስታወሻዎች"
+    override val journalKindPassageDesc = "ከዕለቱ ምንባብ ወይም ከቅዱሳት መጻሕፍት ማስታወሻ"
+    override val journalKindConfessionDesc = "ለንስሐ አባትህ የምትናገረውን ለመዘከር (ምስጢራዊ)"
+    override val checklistProgress = "የተከናወኑ ተግባራት"
+    override val checklistAddItemHint = "አዲስ ተግባር ያክሉ..."
+    override val checklistNotesHint = "ተጨማሪ ማስታወሻ ወይም ሐሳብ..."
+    override val checklistEmpty = "ምንም ተግባር አልተጨመረም። ከታች አዲስ ተግባር ያክሉ።"
+    override val checklistCompletedAll = "ሁሉም ተከናውኗል"
+    override val checklistWhenFor = "ለየትኛው ሰዓት?"
+    override val checklistReminderSwitch = "የደወል ማስታወሻ አብራ"
+    override val checklistReminderTitle = "የዕለት የፍተሻ ማስታወሻ"
+    override val checklistChannelName = "የዕለት የፍተሻ ማስታወሻዎች"
+    override val checklistHourMorning = "ነግህ (6:00 AM)"
+    override val checklistHourTerce = "ሠለስት (9:00 AM)"
+    override val checklistHourNoon = "ቀትር (12:00 PM)"
+    override val checklistHourNone = "ተሰዓቱ (3:00 PM)"
+    override val checklistHourVespers = "ሠርክ (6:00 PM)"
+    override val checklistHourCompline = "ነዋም (9:00 PM)"
+    override val checklistHourAnytime = "ማንኛውም ሰዓት"
+    override val checklistAlarmOn = "ደወል በርቷል"
+    override val checklistAlarmOff = "ደወል ጠፍቷል"
     override val confessedAction = "ንስሐ ገብቻለሁ"
     override val confessedConfirm = "ሁሉም የንስሐ መዘጋጃዎች ይሰረዛሉ። ይህ አይመለስም።"
     override val deleteEntryConfirm = "ይህ ማስታወሻ ይሰረዛል።"
@@ -1970,6 +2036,11 @@ object EnglishStrings : Strings {
     override val habitNameLabel = "Habit name"
     override val less = "Less"
     override val more = "More"
+    override val manage = "Manage"
+    override val prayHour = "Open prayer"
+    override val viewDayJournalEntry = "View Journal Entry"
+    override val noRecordOnDay = "No disciplines recorded on this day"
+    override val habitDailySuggestion = "Habits are intended for daily spiritual disciplines. For specific dates or occasional tasks, use the Journal Checklist."
 
     override fun journeyMonthLine(days: Int) = when (days) {
         0 -> "No days of prayer yet this month"
@@ -2394,6 +2465,8 @@ object EnglishStrings : Strings {
     override val tutorial = "How it works"
     override val tutorialAskTitle = "Want a quick tour?"
     override val tutorialAskBody = "We'll show you the main features in a few taps."
+    override val userGuide = "User Guide"
+    override val userGuideSubtitle = "Complete guide to buttons and flows (Web)"
     override val showTutorial = "Show me"
     override val gotIt = "Got it"
     override val getStarted = "Get started"
@@ -2540,9 +2613,35 @@ object EnglishStrings : Strings {
     override val entryBodyHint = "What happened today? What did you feel?"
     override val journalKindReflection = "Reflection"
     override val journalKindPassage = "From a reading"
+    override val journalKindChecklist = "Checklist"
     override val journalKindConfession = "Preparing for confession"
     override val journalKindConfessionNote =
         "This never leaves your device and is never put in a backup. It is deleted once you have confessed."
+    override val journalFilterAll = "All"
+    override fun journalWrittenDays(written: String, total: String) = "$written/$total days"
+    override val journalNewEntryPrompt = "New Entry"
+    override val journalKindReflectionDesc = "Personal prayer & spiritual contemplation"
+    override val journalKindChecklistDesc = "Day-to-day checklist, hours & alarms"
+    override val journalKindPassageDesc = "Notes from daily lectionary or scriptures"
+    override val journalKindConfessionDesc = "Preparation for your father confessor (confidential)"
+    override val checklistProgress = "Completed Tasks"
+    override val checklistAddItemHint = "Add a task..."
+    override val checklistNotesHint = "Additional notes or reflections..."
+    override val checklistEmpty = "No tasks added yet. Add a task below."
+    override val checklistCompletedAll = "All completed"
+    override val checklistWhenFor = "When is it for?"
+    override val checklistReminderSwitch = "Wire Alarm Reminder"
+    override val checklistReminderTitle = "Checklist Reminder"
+    override val checklistChannelName = "Checklist Reminders"
+    override val checklistHourMorning = "Morning (6:00 AM)"
+    override val checklistHourTerce = "3rd Hour (9:00 AM)"
+    override val checklistHourNoon = "Noon (12:00 PM)"
+    override val checklistHourNone = "9th Hour (3:00 PM)"
+    override val checklistHourVespers = "11th Hour (6:00 PM)"
+    override val checklistHourCompline = "Bedtime (9:00 PM)"
+    override val checklistHourAnytime = "Anytime"
+    override val checklistAlarmOn = "Alarm On"
+    override val checklistAlarmOff = "Alarm Off"
     override val confessedAction = "I have confessed"
     override val confessedConfirm = "Every confession draft will be deleted. This cannot be undone."
     override val deleteEntryConfirm = "This entry will be deleted."

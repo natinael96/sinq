@@ -23,9 +23,27 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material3.Surface
+import com.agpeya.app.ui.common.formatEthiopian
+import com.agpeya.app.model.JournalEntry
+import androidx.compose.runtime.produceState
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.outlined.AutoStories
+import androidx.compose.ui.text.font.FontWeight
+import com.agpeya.app.data.FastingCalendar
+import com.agpeya.app.data.JournalRepository
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -125,6 +143,9 @@ private const val JOURNAL_ACTION = "journal_action"
 @Composable
 fun JourneyScreen(
     onOpenJournal: () -> Unit,
+    onOpenEntry: (String) -> Unit = {},
+    onOpenManageHabits: () -> Unit = {},
+    onOpenHour: (String) -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -137,7 +158,9 @@ fun JourneyScreen(
     }
     // Prayer hours group under a collapsible ጸሎት header; other habits are flat.
     // Hours hidden in Manage Hours are already filtered out by visibleHours.
-    val hourItems = remember(hours) { hours.map { HabitsRepository.hourHabitId(it.id) to it.name } }
+    val hourItems = remember(hours) {
+        hours.map { Triple(HabitsRepository.hourHabitId(it.id), it.id, it.name) }
+    }
     // Only what today asks for. A habit kept on Wednesday and Friday is not a
     // thing missed on a Tuesday, so it is not on Tuesday's list at all.
     val habitItems = remember(state, s, today) {
@@ -220,7 +243,7 @@ fun JourneyScreen(
                         // is still owed the day.
                         val prayedNames = hourItems
                             .filter { it.first in (state.records[todayKey] ?: emptySet()) }
-                            .joinToString("፣ ") { it.second }
+                            .joinToString("፣ ") { it.third }
                         Text(
                             when {
                                 summary.returning -> s.welcomeBack
@@ -254,14 +277,29 @@ fun JourneyScreen(
                 val doneHours = hourItems.count { it.first in (state.records[todayKey] ?: emptySet()) }
                 val (keptHabits, dueHabits) = HabitsRepository.keptOfDue(state, today)
                 SectionHeader(s.todayLabel) {
-                    Text(
-                        "$doneHours/${hourItems.size}  ·  $keptHabits/$dueHabits",
-                        modifier = Modifier.clearAndSetSemantics {
-                            contentDescription = "${s.hoursHeader}: $doneHours/${hourItems.size} · ${s.habitsHeader}: $keptHabits/$dueHabits"
-                        },
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                    ) {
+                        Text(
+                            "$doneHours/${hourItems.size}  ·  $keptHabits/$dueHabits",
+                            modifier = Modifier.clearAndSetSemantics {
+                                contentDescription = "${s.hoursHeader}: $doneHours/${hourItems.size} · ${s.habitsHeader}: $keptHabits/$dueHabits"
+                            },
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        TextButton(
+                            onClick = onOpenManageHabits,
+                            contentPadding = PaddingValues(horizontal = Spacing.xs, vertical = 0.dp),
+                        ) {
+                            Text(
+                                s.manage,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    }
                 }
                 Spacer(Modifier.height(Spacing.xxs))
             }
@@ -276,6 +314,7 @@ fun JourneyScreen(
                     items = hourItems,
                     done = state.records[todayKey] ?: emptySet(),
                     onToggle = { id -> scope.launch { HabitsRepository.toggle(context, todayKey, id) } },
+                    onOpenHour = onOpenHour,
                 )
             }
 
@@ -311,8 +350,37 @@ fun JourneyScreen(
                         displayedEcYear = year
                         selectedEpochDay = null
                     },
-                    onDaySelect = { selectedEpochDay = it.toEpochDay() },
+                    onDaySelect = { day ->
+                        selectedEpochDay = if (selectedEpochDay == day.toEpochDay()) null else day.toEpochDay()
+                    },
                 )
+                val selectableRange = remember(displayedEcYear, today) {
+                    val earliest = state.records.keys.mapNotNull { runCatching { EthiopianDate.from(LocalDate.parse(it)).toGregorian() }.getOrNull() }.minOrNull() ?: APP_EPOCH_EC.toGregorian()
+                    journeyYearSelectableRange(displayedEcYear, today, earliest)
+                }
+                if (selectedDay != null) {
+                    Spacer(Modifier.height(Spacing.sm))
+                    DayInspectionCard(
+                        date = selectedDay,
+                        records = state.records,
+                        hourItems = hourItems,
+                        state = state,
+                        s = s,
+                        onClose = { selectedEpochDay = null },
+                        onPreviousDay = selectableRange?.let { range ->
+                            if (selectedDay.isAfter(range.start)) {
+                                { selectedEpochDay = selectedDay.minusDays(1).toEpochDay() }
+                            } else null
+                        },
+                        onNextDay = selectableRange?.let { range ->
+                            if (selectedDay.isBefore(range.endInclusive)) {
+                                { selectedEpochDay = selectedDay.plusDays(1).toEpochDay() }
+                            } else null
+                        },
+                        onOpenEntry = onOpenEntry,
+                        onOpenHour = onOpenHour,
+                    )
+                }
             }
 
             item(key = JOURNAL_ACTION) {
@@ -352,14 +420,17 @@ fun JourneyScreen(
  * Kept hours add a check as well as gold, so completion never depends on colour.
  * Each compact column still carries the platform's full 48 dp touch height.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HourStrips(
-    items: List<Pair<String, String>>,
+    items: List<Triple<String, String, String>>,
     done: Set<String>,
     onToggle: (String) -> Unit,
+    onOpenHour: (String) -> Unit,
 ) {
     val motion = LocalMotion.current
     val haptics = LocalHapticFeedback.current
+    val s = LocalStrings.current
     Column(Modifier.fillMaxWidth()) {
         SinqDivider()
         items.chunked(4).forEach { line ->
@@ -368,7 +439,7 @@ private fun HourStrips(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                line.forEach { (id, name) ->
+                line.forEach { (id, rawHourId, name) ->
                     val kept = id in done
                     val tint by animateColorAsState(
                         targetValue = if (kept) MaterialTheme.colorScheme.secondary
@@ -381,13 +452,17 @@ private fun HourStrips(
                             .weight(1f)
                             .heightIn(min = 48.dp)
                             .clip(MaterialTheme.shapes.small)
-                            .toggleable(
-                                value = kept,
+                            .combinedClickable(
                                 role = Role.Checkbox,
-                                onValueChange = {
+                                onClick = {
                                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                     onToggle(id)
                                 },
+                                onLongClick = {
+                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onOpenHour(rawHourId)
+                                },
+                                onLongClickLabel = s.prayHour,
                             )
                             .padding(horizontal = Spacing.xxs),
                         verticalAlignment = Alignment.CenterVertically,
@@ -415,6 +490,205 @@ private fun HourStrips(
                 repeat(4 - line.size) { Spacer(Modifier.weight(1f)) }
             }
             SinqDivider()
+        }
+    }
+}
+
+/**
+ * Inspection card shown below the heatmap when a day is selected.
+ * Displays the exact canonical hours and habits kept on that day,
+ * along with a button to view any journal entry written on that date.
+ */
+@Composable
+private fun DayInspectionCard(
+    date: LocalDate,
+    records: Map<String, Set<String>>,
+    hourItems: List<Triple<String, String, String>>,
+    state: HabitsState,
+    s: Strings,
+    onClose: () -> Unit,
+    onPreviousDay: (() -> Unit)?,
+    onNextDay: (() -> Unit)?,
+    onOpenEntry: (String) -> Unit,
+    onOpenHour: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    val dayKey = date.toString()
+    val dayRecords = records[dayKey] ?: emptySet()
+    val keptHours = remember(dayRecords, hourItems) {
+        hourItems.filter { it.first in dayRecords }
+    }
+    val keptOtherHabits = remember(dayRecords, state, s) {
+        dayRecords.filter { !it.startsWith("hour_") }.map { habitName(it, state, s) }
+    }
+    val fasts = remember(date) {
+        val ecYear = EthiopianDate.from(date).year
+        runCatching { FastingCalendar.fastsOf(ecYear) }.getOrDefault(emptyList())
+    }
+    val fastName = remember(fasts, date) {
+        fasts.firstOrNull { it.contains(date) }?.nameAm
+    }
+    val journalEntries by produceState<List<JournalEntry>>(emptyList(), date) {
+        JournalRepository.onDate(context, date).collect { value = it }
+    }
+
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+    ) {
+        Column(
+            modifier = Modifier.padding(Spacing.md),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+        ) {
+            // Header: Date info + Nav chevrons + Close
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = formatEthiopian(date, s),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
+                    if (fastName != null) {
+                        Text(
+                            text = fastName,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                IconButton(
+                    onClick = { onPreviousDay?.invoke() },
+                    enabled = onPreviousDay != null,
+                    modifier = Modifier.size(36.dp),
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = s.previousDay,
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
+                IconButton(
+                    onClick = { onNextDay?.invoke() },
+                    enabled = onNextDay != null,
+                    modifier = Modifier.size(36.dp),
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = s.nextDay,
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
+                IconButton(
+                    onClick = onClose,
+                    modifier = Modifier.size(36.dp),
+                ) {
+                    Icon(
+                        Icons.Outlined.Close,
+                        contentDescription = s.cancel,
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
+            }
+
+            // Kept Hours & Habits List
+            if (keptHours.isEmpty() && keptOtherHabits.isEmpty()) {
+                Text(
+                    text = s.noRecordOnDay,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(vertical = Spacing.xxs),
+                )
+            } else {
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+                ) {
+                    keptHours.forEach { (_, rawHourId, name) ->
+                        Surface(
+                            shape = RoundedCornerShape(4.dp),
+                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.35f)),
+                            modifier = Modifier.clickable { onOpenHour(rawHourId) },
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = Spacing.xs, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                Icon(
+                                    Icons.Filled.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.size(12.dp),
+                                )
+                                Text(
+                                    text = name,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.secondary,
+                                )
+                            }
+                        }
+                    }
+                    keptOtherHabits.forEach { name ->
+                        Surface(
+                            shape = RoundedCornerShape(4.dp),
+                            color = MaterialTheme.colorScheme.surface,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = Spacing.xs, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                Icon(
+                                    Icons.Filled.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(12.dp),
+                                )
+                                Text(
+                                    text = name,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Journal Entry Button if exists
+            val entry = journalEntries.firstOrNull()
+            if (entry != null) {
+                OutlinedButton(
+                    onClick = { onOpenEntry(entry.id) },
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 40.dp),
+                    shape = MaterialTheme.shapes.small,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f)),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.secondary,
+                    ),
+                    contentPadding = PaddingValues(horizontal = Spacing.sm, vertical = Spacing.xxs),
+                ) {
+                    Icon(
+                        Icons.Outlined.EditNote,
+                        contentDescription = null,
+                        modifier = Modifier.size(IconSize.small),
+                    )
+                    Spacer(Modifier.width(Spacing.xs))
+                    Text(
+                        text = s.viewDayJournalEntry,
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                }
+            }
         }
     }
 }

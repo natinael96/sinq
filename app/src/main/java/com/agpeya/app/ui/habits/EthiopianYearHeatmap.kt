@@ -297,40 +297,5 @@ fun EthiopianYearHeatmap(
             Spacer(Modifier.padding(gap).size(cell).clip(RoundedCornerShape(3.dp)).background(fastWash))
             Text(s.fastLegendLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-
-        val selectionStart = selectableRange?.start
-        val selectionEnd = selectableRange?.endInclusive
-        if (selectedDay != null && selectionStart != null && selectionEnd != null && selectableRange.contains(selectedDay)) {
-            Spacer(Modifier.height(Spacing.sm))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = dayDescription(selectedDay),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.weight(1f),
-                )
-                IconButton(
-                    onClick = { onDaySelect(selectedDay.minusDays(1)) },
-                    enabled = selectedDay.isAfter(selectionStart),
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                        contentDescription = s.previousDay,
-                    )
-                }
-                IconButton(
-                    onClick = { onDaySelect(selectedDay.plusDays(1)) },
-                    enabled = selectedDay.isBefore(selectionEnd),
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = s.nextDay,
-                    )
-                }
-            }
-        }
     }
 }

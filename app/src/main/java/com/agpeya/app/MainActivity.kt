@@ -580,6 +580,9 @@ private fun AgpeyaNavHost(
                                         Tab.JOURNEY ->
                                             com.agpeya.app.ui.habits.JourneyScreen(
                                                 onOpenJournal = { navController.navigate("journal") { launchSingleTop = true } },
+                                                onOpenEntry = { id -> navController.navigate("journal/entry?id=$id") { launchSingleTop = true } },
+                                                onOpenManageHabits = { navController.navigate("habits") { launchSingleTop = true } },
+                                                onOpenHour = { hourId -> navController.navigate("reading/$hourId") { launchSingleTop = true } },
                                             )
                                         Tab.LIBRARY ->
                                             com.agpeya.app.ui.library.LibraryScreen(
@@ -593,6 +596,8 @@ private fun AgpeyaNavHost(
                                                 },
                                                 onOpenReading = { navController.navigate("reading") { launchSingleTop = true } },
                                                 onOpenMarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
+                                                onOpenMahlets = { navController.navigate("mahlets") { launchSingleTop = true } },
+                                                onOpenHour = { hourId -> navController.navigate("reading/$hourId") { launchSingleTop = true } },
                                             )
                                         Tab.SETTINGS ->
                                             SettingsScreen(
@@ -1153,6 +1158,28 @@ private fun AgpeyaNavHost(
                 onSwitchHour = { id ->
                     navController.navigate("reading/$id") {
                         popUpTo("reading/{hourId}?section={section}&sectionId={sectionId}") { inclusive = true }
+                    }
+                },
+                onWriteNote = { route, label ->
+                    navController.navigate(writeNoteRoute(route, label)) { launchSingleTop = true }
+                },
+            )
+        }
+        composable(
+            route = "hour/{hourId}",
+            arguments = listOf(
+                navArgument("hourId") { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val hourId = backStackEntry.arguments?.getString("hourId") ?: "morning"
+            ReadingScreen(
+                hourId = hourId,
+                initialSectionIndex = -1,
+                initialSectionId = null,
+                onBack = { navController.popBackStack() },
+                onSwitchHour = { id ->
+                    navController.navigate("reading/$id") {
+                        popUpTo("hour/{hourId}") { inclusive = true }
                     }
                 },
                 onWriteNote = { route, label ->

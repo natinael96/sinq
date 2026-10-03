@@ -264,6 +264,8 @@ fun openUrl(context: android.content.Context, url: String) {
 const val FEEDBACK_URL = "https://sinq.natinael96.tech/feedback.html"
 /** The full public privacy policy hosted on the app's website. */
 const val PRIVACY_URL = "https://sinq.natinael96.tech/privacy-policy.html"
+/** Comprehensive liturgical user manual and button flow guide. */
+const val GUIDE_URL = "https://sinq.natinael96.tech/guide.html"
 const val PLAY_STORE_URL = "market://details?id=com.sinq.app"
 const val PLAY_STORE_WEB_URL = "https://play.google.com/store/apps/details?id=com.sinq.app"
 

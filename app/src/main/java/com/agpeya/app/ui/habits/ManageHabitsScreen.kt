@@ -102,6 +102,13 @@ fun ManageHabitsScreen(onBack: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 8.dp),
                 )
+                Spacer(Modifier.height(Spacing.xs))
+                Text(
+                    s.habitDailySuggestion,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                )
                 Spacer(Modifier.height(Spacing.sm))
             }
             items(ids.size, key = { ids[it] }) { index ->
