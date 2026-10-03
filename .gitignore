@@ -23,6 +23,8 @@ graphify-out/
 skills-lock.json
 preview.html
 *_preview.html
+*preview*.html
+preview-lib.html
 
 # Python bytecode from the content tools
 __pycache__/
