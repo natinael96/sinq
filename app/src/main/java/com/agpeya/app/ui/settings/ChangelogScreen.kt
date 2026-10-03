@@ -31,6 +31,23 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.5.7",
+        title = "Interactive heatmap day inspection card, direct Horologium reader jump, and habit management",
+        titleAm = "የዓመቱ የጉዞ ካርታ ዝርዝር መመልከቻ፣ የቀጥታ የሰዓታት ጸሎት ንባብ እና የልማዶች አስተዳደር ማሻሻያ",
+        changes = listOf(
+            "Added an interactive Day Inspection Card below the year heatmap showing canonical hours, kept habits, active fasts, and a button to view that day's journal entry.",
+            "Long-pressing an hour strip chip or tapping a chip in the day inspector opens the Horologium reader directly to that hour's prayers.",
+            "Added a discreet አስተካክል (Manage) text button in the Habits section header for quick access to habit configuration.",
+            "Added habit cadence guidance advising daily disciplines for habits and Journal checklists for periodic tasks, with optional checklist reminders.",
+        ),
+        changesAm = listOf(
+            "በዓመቱ የጉዞ ካርታ ላይ የተመረጠውን ዕለት የተከናወኑ የሰዓታት ጸሎታት፣ ልማዶች፣ አጽዋማት እና የተጻፈ ማስታወሻ በቀጥታ የሚያሳይ ዝርዝር ካርድ ተዘጋጅቷል።",
+            "የሰዓታት መምረጫውን ረዘም ላለ ጊዜ በመጫን ወይም በዝርዝር ካርዱ ላይ ያለውን ሰዓት በመንካት በቀጥታ ወደ ሰዓቱ ጸሎት ንባብ መግባት ይቻላል።",
+            "በልማዶች ርዕስ ስር ልማዶችን በቀጥታ ለማስተካከል የሚያስችል 'አስተካክል' የሚል አዝራር ተጨምሯል።",
+            "ልማዶች የዕለት ተዕለት እንዲሆኑና አልፎ አልፎ ለሚከናወኑ በማስታወሻ ዝርዝር እንዲጠቀሙ የሚጠቁም መመሪያ እና የማስታወሻ ማሳሰቢያ ተካቷል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.5.6",
         title = "Unified home hairline dividers, HeroCard feedback in settings, and horizontal journal day strip",
         titleAm = "የተጣጣመ የመነሻ ገጽ መስመሮች፣ የተሻሻለ የአስተያየት መስጫ ገጽ እና የማስታወሻ ዕለታት አግድም ዝውውር",

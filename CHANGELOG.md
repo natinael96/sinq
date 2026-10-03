@@ -5,6 +5,16 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.5.7] — 2026-10-04
+
+_versionCode 107 · Interactive heatmap day inspection card, direct Horologium reader jump, and habit management flow_
+
+### Added
+- **Interactive Day Inspection Card.** Selecting any day on the Ethiopian year heatmap displays an inspection card detailing canonical hours and habits kept on that date, active fasts, day navigation chevrons, and a direct button to view the day's journal entry.
+- **Direct Horologium Reader Jump.** Long-pressing any canonical hour strip item (or tapping an hour chip in the day inspection card) opens the Horologium reader directly to that hour's prayers (`hour/{hourId}`).
+- **Discreet Habits Management Button.** Added an አስተካክል (Manage) text button in the Habits section header for direct access to habit configuration.
+- **Daily Discipline Guidance & Checklist Integration.** Added guidance in habit creation advising daily disciplines for habits and Journal checklists for periodic tasks, backed by optional scheduled checklist reminders.
+
 ## [1.5.6] — 2026-10-03
 
 _versionCode 106 · Unified home hairline dividers, HeroCard feedback in settings, horizontal journal day strip, and liturgical UI audit_
