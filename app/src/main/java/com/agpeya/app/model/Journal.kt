@@ -29,6 +29,12 @@ enum class JournalKind {
      * deletion.
      */
     CONFESSION_DRAFT,
+
+    /**
+     * A day-to-day customizable checklist of spiritual tasks, devotionals,
+     * or vows with an optional reflection note.
+     */
+    CHECKLIST,
 }
 
 /**
@@ -102,5 +108,108 @@ data class JournalEntry(
      * never return it to list rows or their accessibility semantics.
      */
     val preview: String
-        get() = if (isDraft) "" else body.lineSequence().firstOrNull { it.isNotBlank() }?.trim().orEmpty()
+        get() = when {
+            isDraft -> ""
+            kind == JournalKind.CHECKLIST -> {
+                val (items, note) = ChecklistParser.parse(body)
+                if (items.isNotEmpty()) {
+                    val done = items.count { it.isDone }
+                    val total = items.size
+                    val firstRemaining = items.firstOrNull { !it.isDone }?.text ?: items.first().text
+                    "✓ $done/$total · $firstRemaining"
+                } else {
+                    note.lineSequence().firstOrNull { it.isNotBlank() }?.trim().orEmpty()
+                }
+            }
+            else -> body.lineSequence().firstOrNull { it.isNotBlank() }?.trim().orEmpty()
+        }
 }
+
+/**
+ * A single item in a [JournalKind.CHECKLIST] entry.
+ */
+@Serializable
+data class ChecklistItem(
+    val text: String,
+    val isDone: Boolean = false,
+    val scheduledHour: String? = null,
+    val hasReminder: Boolean = false,
+)
+
+/**
+ * Parses and serializes checklist entries from the entry's markdown body.
+ *
+ * Uses standard markdown task lists (`- [ ] ` and `- [x] `) with optional
+ * `@time:...` and `@alarm` tags so entries remain human-readable when backed up,
+ * shared, or switched to another view.
+ */
+object ChecklistParser {
+    private val TASK_PATTERN = Regex("""^-\s*\[([ xX])\]\s*(.*)$""")
+    private val TIME_TAG_PATTERN = Regex("""@time:([^\s@]+)""")
+    private const val ALARM_TAG = "@alarm"
+
+    fun parse(body: String): Pair<List<ChecklistItem>, String> {
+        val items = mutableListOf<ChecklistItem>()
+        val noteLines = mutableListOf<String>()
+        var inNotes = false
+
+        for (line in body.lines()) {
+            val trimmed = line.trim()
+            if (!inNotes) {
+                val match = TASK_PATTERN.matchEntire(trimmed)
+                if (match != null) {
+                    val isDone = match.groupValues[1].equals("x", ignoreCase = true)
+                    var raw = match.groupValues[2].trim()
+                    var scheduledHour: String? = null
+                    var hasReminder = false
+
+                    if (raw.contains(ALARM_TAG)) {
+                        hasReminder = true
+                        raw = raw.replace(ALARM_TAG, "").trim()
+                    }
+                    val timeMatch = TIME_TAG_PATTERN.find(raw)
+                    if (timeMatch != null) {
+                        scheduledHour = timeMatch.groupValues[1].replace("_", " ")
+                        raw = raw.removeRange(timeMatch.range).trim()
+                    }
+
+                    if (raw.isNotEmpty()) {
+                        items.add(ChecklistItem(raw, isDone, scheduledHour, hasReminder))
+                    }
+                    continue
+                } else if (items.isNotEmpty()) {
+                    inNotes = true
+                }
+            }
+            if (inNotes) {
+                noteLines.add(line)
+            } else if (trimmed.isNotEmpty()) {
+                noteLines.add(line)
+                inNotes = true
+            }
+        }
+        return items to noteLines.joinToString("\n").trim()
+    }
+
+    fun serialize(items: List<ChecklistItem>, note: String): String {
+        val sb = StringBuilder()
+        for (item in items) {
+            val mark = if (item.isDone) "x" else " "
+            sb.append("- [$mark] ").append(item.text.trim())
+            if (item.scheduledHour != null) {
+                sb.append(" @time:").append(item.scheduledHour.replace(" ", "_"))
+            }
+            if (item.hasReminder) {
+                sb.append(" @alarm")
+            }
+            sb.append("\n")
+        }
+        val trimmedNote = note.trim()
+        if (trimmedNote.isNotEmpty()) {
+            if (items.isNotEmpty()) sb.append("\n")
+            sb.append(trimmedNote)
+        }
+        return sb.toString().trim()
+    }
+}
+

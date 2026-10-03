@@ -17,17 +17,26 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.AutoStories
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.CheckCircleOutline
+import androidx.compose.material.icons.outlined.Checklist
+import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.LockOpen
+import androidx.compose.material.icons.outlined.NotificationsActive
 import com.agpeya.app.ui.common.SinqOutlinedButton
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -127,6 +136,12 @@ private fun JournalScreenContent(
     var settingPassphrase by remember { mutableStateOf(false) }
     var lockMenu by remember { mutableStateOf(false) }
     var removingPassphrase by remember { mutableStateOf(false) }
+    var showCreateSheet by remember { mutableStateOf(false) }
+    var selectedKindFilter by remember { mutableStateOf<JournalKind?>(null) }
+
+    val displayedEntries = remember(entries, selectedKindFilter) {
+        if (selectedKindFilter == null) entries else entries.filter { it.kind == selectedKindFilter }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -163,7 +178,7 @@ private fun JournalScreenContent(
         },
         floatingActionButton = {
             if (!locked || unlocked) {
-                FloatingActionButton(onClick = { onNewEntry(JournalKind.REFLECTION) }) {
+                FloatingActionButton(onClick = { showCreateSheet = true }) {
                     Icon(Icons.Outlined.Add, contentDescription = s.newEntry)
                 }
             }
@@ -190,11 +205,27 @@ private fun JournalScreenContent(
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    Text(
-                        "${s.ethMonths.getOrElse(month - 1) { "" }} $year",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(
+                            "${s.ethMonths.getOrElse(month - 1) { "" }} $year",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        val daysInMonth = if (month == 13) EthiopianDate.pagumeLength(year) else 30
+                        Text(
+                            text = s.journalWrittenDays(geezNumeral(writtenDays.size), geezNumeral(daysInMonth)),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.secondary,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f))
+                                .padding(horizontal = 7.dp, vertical = 2.dp),
+                        )
+                    }
                     IconButton(onClick = { offset -= 1 }, enabled = offset > 0) {
                         Icon(
                             Icons.AutoMirrored.Outlined.ArrowForward,
@@ -209,13 +240,58 @@ private fun JournalScreenContent(
                     written = writtenDays.toSet(),
                     today = today,
                     onDay = { day ->
-                        // The header is item 0, so the first entry of a day
-                        // sits one past its index in the list.
-                        val index = entries.indexOfFirst { it.context.ethDay == day }
-                        if (index >= 0) scope.launch { listState.animateScrollToItem(index + 1) }
+                        val index = displayedEntries.indexOfFirst { it.context.ethDay == day }
+                        if (index >= 0) {
+                            scope.launch { listState.animateScrollToItem(index + 1) }
+                        } else {
+                            showCreateSheet = true
+                        }
                     },
                 )
-                if (entries.isEmpty()) {
+
+                // Kind Filter Chips
+                val filterOptions = listOf(
+                    null to s.journalFilterAll,
+                    JournalKind.CHECKLIST to s.journalKindChecklist,
+                    JournalKind.REFLECTION to s.journalKindReflection,
+                    JournalKind.PASSAGE to s.journalKindPassage,
+                )
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth().padding(top = Spacing.xs, bottom = Spacing.xs),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    items(filterOptions) { (kind, label) ->
+                        val selected = selectedKindFilter == kind
+                        FilterChip(
+                            selected = selected,
+                            onClick = { selectedKindFilter = kind },
+                            label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+                            leadingIcon = if (selected) {
+                                {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Check,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(12.dp),
+                                    )
+                                }
+                            } else null,
+                            shape = RoundedCornerShape(8.dp),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f),
+                                selectedLabelColor = MaterialTheme.colorScheme.secondary,
+                                selectedLeadingIconColor = MaterialTheme.colorScheme.secondary,
+                            ),
+                            border = FilterChipDefaults.filterChipBorder(
+                                enabled = true,
+                                selected = selected,
+                                borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                                selectedBorderColor = MaterialTheme.colorScheme.secondary,
+                            ),
+                        )
+                    }
+                }
+
+                if (displayedEntries.isEmpty()) {
                     Spacer(Modifier.height(Spacing.lg))
                     Text(
                         s.journalEmpty,
@@ -225,7 +301,7 @@ private fun JournalScreenContent(
                 }
             }
 
-            items(entries, key = { it.id }) { entry ->
+            items(displayedEntries, key = { it.id }) { entry ->
                 EntryRow(entry = entry, s = s, onClick = { onOpenEntry(entry.id) })
             }
 
@@ -255,6 +331,17 @@ private fun JournalScreenContent(
             }
             item { Spacer(Modifier.height(Spacing.huge)) }
         }
+    }
+
+    if (showCreateSheet) {
+        NewEntryBottomSheet(
+            s = s,
+            onDismiss = { showCreateSheet = false },
+            onSelectKind = { kind ->
+                showCreateSheet = false
+                onNewEntry(kind)
+            },
+        )
     }
 
     if (confessing) {
@@ -414,7 +501,7 @@ private fun MonthStrip(
                         color = borderColor,
                         shape = RoundedCornerShape(12.dp),
                     )
-                    .clickable(enabled = isWritten, onClickLabel = s.journalTitle) {
+                    .clickable(onClickLabel = s.journalTitle) {
                         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         onDay(day)
                     }
@@ -458,19 +545,116 @@ private fun MonthStrip(
 @Composable
 private fun EntryRow(entry: JournalEntry, s: Strings, onClick: () -> Unit) {
     SinqCard(onClick = onClick) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                entry.localDate?.let { formatEthiopianShort(it, s) } ?: entry.date,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.secondary,
-            )
-            if (entry.isDraft) {
-                Spacer(Modifier.width(Spacing.sm))
-                Icon(
-                    Icons.Outlined.Lock,
-                    contentDescription = s.journalKindConfession,
-                    tint = MaterialTheme.colorScheme.error,
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    entry.localDate?.let { formatEthiopianShort(it, s) } ?: entry.date,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.secondary,
                 )
+                if (entry.isDraft) {
+                    Spacer(Modifier.width(Spacing.sm))
+                    Icon(
+                        Icons.Outlined.Lock,
+                        contentDescription = s.journalKindConfession,
+                        tint = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
+            when (entry.kind) {
+                JournalKind.CHECKLIST -> {
+                    val (items, _) = com.agpeya.app.model.ChecklistParser.parse(entry.body)
+                    if (items.isNotEmpty()) {
+                        val done = items.count { it.isDone }
+                        val total = items.size
+                        val isAllDone = done == total
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(
+                                    if (isAllDone) MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
+                                    else MaterialTheme.colorScheme.surfaceVariant
+                                )
+                                .padding(horizontal = 6.dp, vertical = 2.dp),
+                        ) {
+                            Icon(
+                                if (isAllDone) Icons.Outlined.CheckCircle else Icons.Outlined.CheckCircleOutline,
+                                contentDescription = null,
+                                tint = if (isAllDone) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(13.dp),
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                "${geezNumeral(done)}/${geezNumeral(total)}",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (isAllDone) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            if (items.any { it.hasReminder }) {
+                                Spacer(Modifier.width(4.dp))
+                                Icon(
+                                    Icons.Outlined.NotificationsActive,
+                                    contentDescription = s.checklistAlarmOn,
+                                    tint = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.size(12.dp),
+                                )
+                            }
+                        }
+                    }
+                }
+                JournalKind.PASSAGE -> {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.14f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                    ) {
+                        Icon(
+                            Icons.Outlined.AutoStories,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(12.dp),
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            entry.anchorLabel ?: s.journalKindPassage,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.secondary,
+                            maxLines = 1,
+                        )
+                    }
+                }
+                JournalKind.CONFESSION_DRAFT -> {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(MaterialTheme.colorScheme.error.copy(alpha = 0.12f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                    ) {
+                        Icon(
+                            Icons.Outlined.Lock,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(12.dp),
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            s.journalKindConfession,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
+                JournalKind.REFLECTION -> {
+                    // Minimal liturgical reflection presentation
+                }
             }
         }
         Spacer(Modifier.height(Spacing.xs))
@@ -497,6 +681,132 @@ private fun EntryRow(entry: JournalEntry, s: Strings, onClick: () -> Unit) {
         }
     }
 }
+
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun NewEntryBottomSheet(
+    s: Strings,
+    onDismiss: () -> Unit,
+    onSelectKind: (JournalKind) -> Unit,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 10.dp)
+                    .width(36.dp)
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            )
+        },
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.screen)
+                .padding(bottom = Spacing.huge),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = s.journalNewEntryPrompt,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(bottom = 6.dp),
+            )
+            val options = listOf(
+                EntryKindOption(
+                    kind = JournalKind.CHECKLIST,
+                    icon = Icons.Outlined.Checklist,
+                    title = s.journalKindChecklist,
+                    desc = s.journalKindChecklistDesc,
+                ),
+                EntryKindOption(
+                    kind = JournalKind.REFLECTION,
+                    icon = Icons.Outlined.EditNote,
+                    title = s.journalKindReflection,
+                    desc = s.journalKindReflectionDesc,
+                ),
+                EntryKindOption(
+                    kind = JournalKind.PASSAGE,
+                    icon = Icons.Outlined.AutoStories,
+                    title = s.journalKindPassage,
+                    desc = s.journalKindPassageDesc,
+                ),
+                EntryKindOption(
+                    kind = JournalKind.CONFESSION_DRAFT,
+                    icon = Icons.Outlined.Lock,
+                    title = s.journalKindConfession,
+                    desc = s.journalKindConfessionDesc,
+                ),
+            )
+            options.forEach { opt ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                            shape = RoundedCornerShape(12.dp),
+                        )
+                        .clickable {
+                            onDismiss()
+                            onSelectKind(opt.kind)
+                        }
+                        .padding(horizontal = 14.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.14f)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = opt.icon,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = opt.title,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
+                            text = opt.desc,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        modifier = Modifier.size(16.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+private data class EntryKindOption(
+    val kind: JournalKind,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val title: String,
+    val desc: String,
+)
 
 @Composable
 fun JournalScreen(onBack: () -> Unit, onOpenEntry: (String) -> Unit, onNewEntry: (JournalKind) -> Unit, onStartConfessionPrep: () -> Unit, onOpenPenance: () -> Unit) {

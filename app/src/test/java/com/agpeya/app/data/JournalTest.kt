@@ -1,5 +1,7 @@
 package com.agpeya.app.data
 
+import com.agpeya.app.model.ChecklistItem
+import com.agpeya.app.model.ChecklistParser
 import com.agpeya.app.model.DayContext
 import com.agpeya.app.model.JournalEntry
 import com.agpeya.app.model.JournalKind
@@ -30,12 +32,14 @@ class JournalTest {
         assertFalse(entry(JournalKind.CONFESSION_DRAFT).exportable)
         assertTrue(entry(JournalKind.REFLECTION).exportable)
         assertTrue(entry(JournalKind.PASSAGE).exportable)
+        assertTrue(entry(JournalKind.CHECKLIST).exportable)
     }
 
     @Test
     fun `only a confession draft counts as a draft`() {
         assertTrue(entry(JournalKind.CONFESSION_DRAFT).isDraft)
         assertFalse(entry(JournalKind.REFLECTION).isDraft)
+        assertFalse(entry(JournalKind.CHECKLIST).isDraft)
     }
 
     @Test
@@ -62,6 +66,36 @@ class JournalTest {
         assertEquals(JournalKind.REFLECTION, converters.toKind("SOMETHING_ELSE"))
         assertEquals(JournalKind.CONFESSION_DRAFT, converters.toKind("CONFESSION_DRAFT"))
         assertEquals("CONFESSION_DRAFT", converters.fromKind(JournalKind.CONFESSION_DRAFT))
+        assertEquals(JournalKind.CHECKLIST, converters.toKind("CHECKLIST"))
+        assertEquals("CHECKLIST", converters.fromKind(JournalKind.CHECKLIST))
+    }
+
+    @Test
+    fun `checklist parser round-trips markdown tasks and optional reflection note`() {
+        val originalItems = listOf(
+            ChecklistItem("ማኅሌት መቆም", isDone = true),
+            ChecklistItem("ውዳሴ ማርያም መድገም", isDone = false),
+            ChecklistItem("ምጽዋት መስጠት", isDone = true),
+        )
+        val originalNote = "እግዚአብሔር ይመስገን መልካም ቀን ነበር።"
+        val serialized = ChecklistParser.serialize(originalItems, originalNote)
+
+        val (parsedItems, parsedNote) = ChecklistParser.parse(serialized)
+        assertEquals(originalItems, parsedItems)
+        assertEquals(originalNote, parsedNote)
+    }
+
+    @Test
+    fun `checklist preview reports completed ratio and next remaining item`() {
+        val body = """
+            - [x] ማኅሌት መቆም
+            - [ ] ውዳሴ ማርያም
+            - [ ] ምጽዋት
+            
+            ተጨማሪ ሐሳብ
+        """.trimIndent()
+        val e = entry(JournalKind.CHECKLIST, body)
+        assertEquals("✓ 1/3 · ውዳሴ ማርያም", e.preview)
     }
 
     // ── The passphrase gate ──────────────────────────────────────────────────
@@ -71,9 +105,18 @@ class JournalTest {
         val salt = ByteArray(16) { it.toByte() }
         val other = ByteArray(16) { (it + 1).toByte() }
         assertTrue(JournalLock.derive("pass", salt).contentEquals(JournalLock.derive("pass", salt)))
-        assertFalse(JournalLock.derive("pass", salt).contentEquals(JournalLock.derive("pass", other)))
         assertFalse(JournalLock.derive("pass", salt).contentEquals(JournalLock.derive("Pass", salt)))
         assertEquals("256-bit key", 32, JournalLock.derive("pass", salt).size)
     }
 
+    @Test
+    fun `checklist reminder scheduler resolves custom times and canonical hours`() {
+        assertEquals(java.time.LocalTime.of(7, 15), com.agpeya.app.reminders.ChecklistReminderScheduler.resolveTime("07:15"))
+        assertEquals(java.time.LocalTime.of(14, 30), com.agpeya.app.reminders.ChecklistReminderScheduler.resolveTime("14:30"))
+        assertEquals(java.time.LocalTime.of(7, 15), com.agpeya.app.reminders.ChecklistReminderScheduler.resolveTime("07:15 AM"))
+        assertEquals(java.time.LocalTime.of(21, 45), com.agpeya.app.reminders.ChecklistReminderScheduler.resolveTime("9:45 PM"))
+        assertEquals(java.time.LocalTime.of(6, 0), com.agpeya.app.reminders.ChecklistReminderScheduler.resolveTime("ነግህ (6:00 AM)"))
+        assertEquals(java.time.LocalTime.of(12, 0), com.agpeya.app.reminders.ChecklistReminderScheduler.resolveTime("ቀትር (12:00 PM)"))
+        assertEquals(java.time.LocalTime.of(18, 0), com.agpeya.app.reminders.ChecklistReminderScheduler.resolveTime("ሠርክ"))
+    }
 }

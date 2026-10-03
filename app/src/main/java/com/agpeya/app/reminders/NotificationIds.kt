@@ -44,6 +44,7 @@ object NotificationIds {
     const val DONE_BASE = 10_000
     const val SNOOZE_BASE = 11_000
     const val HABIT_BASE = 12_000
+    const val CHECKLIST_BASE = 13_000
 
     /**
      * A stable id within one family's thousand.

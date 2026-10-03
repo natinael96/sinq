@@ -80,6 +80,10 @@
             android:name=".reminders.DailyQuoteReceiver"
             android:exported="false" />
 
+        <receiver
+            android:name=".reminders.ChecklistReminderReceiver"
+            android:exported="false" />
+
 
 
         <!-- exported, unlike every other receiver here: these four come from
