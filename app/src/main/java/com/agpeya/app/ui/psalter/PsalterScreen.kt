@@ -18,8 +18,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
@@ -121,8 +124,13 @@ fun PsalterScreen(
     val context = LocalContext.current
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
+    var isParallel by rememberSaveable { mutableStateOf(false) }
     var geez by rememberSaveable { mutableStateOf(initialGeez) }
     val psalmsLoad = com.agpeya.app.ui.common.rememberContentLoad(geez) { ScriptureRepository.psalms(context, geez) }
+    val parallelPsalms by produceState<List<Section>>(emptyList(), isParallel, geez) {
+        value = if (isParallel) ScriptureRepository.psalms(context, !geez) else emptyList()
+    }
+    val parallelMap = remember(parallelPsalms) { parallelPsalms.associateBy { it.number } }
 
     // The edition on screen while another one loads.
     //
@@ -276,8 +284,46 @@ fun PsalterScreen(
                     subtitle = if (daily && range != null) s.psalmRange(range.first, range.last) else null,
                     onBack = onBack,
                     actions = {
-                        com.agpeya.app.ui.common.EditionToggle(geez = geez) {
-                            geez = !geez
+                        val gold = MaterialTheme.colorScheme.secondary
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(gold.copy(alpha = 0.12f))
+                                .border(1.dp, gold.copy(alpha = 0.45f), CircleShape)
+                                .clickable(
+                                    onClickLabel = "ቀይር",
+                                    onClick = {
+                                        when {
+                                            !geez && !isParallel -> {
+                                                geez = true
+                                                isParallel = false
+                                            }
+                                            geez && !isParallel -> {
+                                                geez = false
+                                                isParallel = true
+                                            }
+                                            else -> {
+                                                geez = false
+                                                isParallel = false
+                                            }
+                                        }
+                                    },
+                                )
+                                .heightIn(min = 48.dp)
+                                .padding(horizontal = 14.dp, vertical = 6.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            val editionText = when {
+                                isParallel -> "አማ + ግእዝ"
+                                geez -> s.wudaseLangGeez
+                                else -> s.wudaseLangAmharic
+                            }
+                            Text(
+                                text = editionText,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = gold,
+                                maxLines = 1,
+                            )
                         }
                         com.agpeya.app.ui.common.ReaderToolsMenu(
                             fontStep = fontStep,
@@ -385,6 +431,7 @@ fun PsalterScreen(
                                 bodyFontSp = bodyFontSp,
                                 isBookmarked = section.id in bookmarkedIds,
                                 onToggleBookmark = { toggleBookmark(section) },
+                                parallelSection = if (isParallel) parallelMap[section.number] else null,
                             )
                         }
                         item { Spacer(Modifier.height(Spacing.huge)) }
@@ -414,6 +461,7 @@ fun PsalterScreen(
                                         bodyFontSp = bodyFontSp,
                                         isBookmarked = section.id in bookmarkedIds,
                                         onToggleBookmark = { toggleBookmark(section) },
+                                        parallelSection = if (isParallel) parallelMap[section.number] else null,
                                     )
                                     Spacer(Modifier.height(Spacing.huge))
                                 }

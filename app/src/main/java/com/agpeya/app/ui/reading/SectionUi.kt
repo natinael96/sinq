@@ -99,6 +99,7 @@ internal fun SectionView(
     bodyFontSp: Int,
     isBookmarked: Boolean,
     onToggleBookmark: () -> Unit,
+    parallelSection: Section? = null,
 ) {
     val s = LocalStrings.current
     val haptics = LocalHapticFeedback.current
@@ -161,45 +162,80 @@ internal fun SectionView(
         VerseText(
             section = section,
             bodyFontSp = bodyFontSp,
+            parallelVerses = parallelSection?.verses,
         )
     }
 }
 
 /** Prayer text has no saved colours or tap-to-select overlay. Long press still copies text. */
 @Composable
-internal fun VerseText(section: Section, bodyFontSp: Int) {
+internal fun VerseText(
+    section: Section,
+    bodyFontSp: Int,
+    parallelVerses: List<String>? = null,
+) {
     val style = readingBodyStyle(bodyFontSp)
     val markerColor = MaterialTheme.colorScheme.secondary
     val markerSize = scaledReadingSp(bodyFontSp) * 0.72f
     val gutterWidth = (bodyFontSp * 1.65f).dp
     val verseGap = readingVerseGap(bodyFontSp)
+    val totalVerses = if (parallelVerses != null) maxOf(section.verses.size, parallelVerses.size) else section.verses.size
+
     androidx.compose.foundation.text.selection.SelectionContainer {
         Column(Modifier.fillMaxWidth()) {
-            section.verses.forEachIndexed { index, verse ->
+            for (index in 0 until totalVerses) {
                 val number = section.firstVerse + index
                 section.verseHeaders[number]?.let { header ->
-                    Text(header, style = MaterialTheme.typography.titleSmall.inReadingFont(),
-                        color = markerColor, textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                            .padding(top = if (index == 0) 0.dp else Spacing.xl, bottom = Spacing.sm))
-                }
-                Row(Modifier.fillMaxWidth().padding(vertical = verseGap / 2)
-                    .padding(horizontal = Spacing.sm, vertical = Spacing.xs)) {
-                    Text(geezNumeral(number), style = style.copy(fontSize = markerSize),
-                        color = markerColor, textAlign = TextAlign.End, maxLines = 1,
-                        modifier = Modifier.width(gutterWidth))
-                    Spacer(Modifier.width(Spacing.sm))
-                    // GENERAL: psalmody and the hours are prose and prayer, not
-                    // a saint's office, so the Name reddens and the people the
-                    // Psalms name — ዳዊት, ሙሴ, ያዕቆብ — stay in ink.
                     Text(
-                        com.agpeya.app.ui.common.rubricated(
-                            verse,
-                            com.agpeya.app.ui.books.Rubrication.Scope.GENERAL,
-                        ),
-                        style = style, color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.weight(1f),
+                        header,
+                        style = MaterialTheme.typography.titleSmall.inReadingFont(),
+                        color = markerColor,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(top = if (index == 0) 0.dp else Spacing.xl, bottom = Spacing.sm),
                     )
+                }
+                val primaryVerse = section.verses.getOrNull(index)
+                val secondaryVerse = parallelVerses?.getOrNull(index)
+
+                Row(
+                    Modifier.fillMaxWidth().padding(vertical = verseGap / 2)
+                        .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
+                ) {
+                    Text(
+                        geezNumeral(number),
+                        style = style.copy(fontSize = markerSize),
+                        color = markerColor,
+                        textAlign = TextAlign.End,
+                        maxLines = 1,
+                        modifier = Modifier.width(gutterWidth),
+                    )
+                    Spacer(Modifier.width(Spacing.sm))
+                    Column(Modifier.weight(1f)) {
+                        if (primaryVerse != null) {
+                            Text(
+                                com.agpeya.app.ui.common.rubricated(
+                                    primaryVerse,
+                                    com.agpeya.app.ui.books.Rubrication.Scope.GENERAL,
+                                ),
+                                style = style,
+                                color = MaterialTheme.colorScheme.onBackground,
+                            )
+                        }
+                        if (secondaryVerse != null) {
+                            if (primaryVerse != null) Spacer(Modifier.height(Spacing.xs))
+                            Text(
+                                com.agpeya.app.ui.common.rubricated(
+                                    secondaryVerse,
+                                    com.agpeya.app.ui.books.Rubrication.Scope.GENERAL,
+                                ),
+                                style = style.copy(
+                                    fontSize = style.fontSize * 0.94f,
+                                    color = MaterialTheme.colorScheme.secondary,
+                                ),
+                            )
+                        }
+                    }
                 }
             }
         }

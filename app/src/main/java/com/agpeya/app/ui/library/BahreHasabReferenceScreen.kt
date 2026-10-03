@@ -7,6 +7,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Calculate
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -34,22 +38,28 @@ internal data class BahreHasabYear(
     val year: Int,
     val ameteAlem: Int,
     val evangelist: String,
+    val medeb: Int,
     val wenber: Int,
     val abekte: Int,
     val metqi: Int,
+    val metqiDate: EthiopianDate,
+    val mebajaHamer: Int,
     val observances: List<Pair<String, LocalDate>>,
 )
 
 internal fun calculateBahreHasabYear(year: Int) = BahreHasabYear(
-    year,
-    BahreHasab.ameteAlem(year),
-    when (BahreHasab.evangelist(year)) {
+    year = year,
+    ameteAlem = BahreHasab.ameteAlem(year),
+    evangelist = when (BahreHasab.evangelist(year)) {
         1 -> "ማቴዎስ"; 2 -> "ማርቆስ"; 3 -> "ሉቃስ"; else -> "ዮሐንስ"
     },
-    BahreHasab.wenber(year),
-    BahreHasab.abekte(year),
-    BahreHasab.metqi(year),
-    listOf(
+    medeb = BahreHasab.medeb(year),
+    wenber = BahreHasab.wenber(year),
+    abekte = BahreHasab.abekte(year),
+    metqi = BahreHasab.metqi(year),
+    metqiDate = BahreHasab.metqiDate(year),
+    mebajaHamer = BahreHasab.mebajaHamer(year),
+    observances = listOf(
         "ጾመ ነነዌ" to BahreHasab.nineveh(year),
         "ዐቢይ ጾም" to BahreHasab.greatLentStart(year),
         "ደብረ ዘይት" to BahreHasab.debreZeit(year),
@@ -63,7 +73,7 @@ internal fun calculateBahreHasabYear(year: Int) = BahreHasabYear(
     ),
 )
 
-/** Live computus explorer: current Ethiopian year plus 25 future years. */
+/** Live computus explorer and calculator for any Ethiopian year. */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun BahreHasabReferenceScreen(onBack: () -> Unit) {
@@ -74,7 +84,51 @@ fun BahreHasabReferenceScreen(onBack: () -> Unit) {
         bahreHasabYearsFrom(currentYear).map(::calculateBahreHasabYear)
     }
     var selectedYear by rememberSaveable(currentYear) { mutableIntStateOf(currentYear) }
-    val selected = years.first { it.year == selectedYear }
+    val selected = remember(selectedYear) { calculateBahreHasabYear(selectedYear) }
+    var showCustomYearDialog by rememberSaveable { mutableStateOf(false) }
+    var customYearText by rememberSaveable { mutableStateOf("") }
+
+    if (showCustomYearDialog) {
+        AlertDialog(
+            onDismissRequest = { showCustomYearDialog = false },
+            title = { Text(if (s.isAmharic) "የባሕረ ሐሳብ ዓመት አስላ" else "Calculate Computus Year") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                    Text(
+                        if (s.isAmharic) "ማንኛውንም የኢትዮጵያ ዓመት ያስገቡ፦" else "Enter any Ethiopian calendar year:",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    OutlinedTextField(
+                        value = customYearText,
+                        onValueChange = { customYearText = it.filter(Char::isDigit).take(4) },
+                        placeholder = { Text("2018") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val y = customYearText.toIntOrNull()
+                        if (y != null && y in 1..9999) {
+                            selectedYear = y
+                            showCustomYearDialog = false
+                        }
+                    },
+                    enabled = customYearText.toIntOrNull() != null,
+                ) {
+                    Text(if (s.isAmharic) "አስላ" else "Calculate")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCustomYearDialog = false }) {
+                    Text(s.cancel)
+                }
+            },
+        )
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -83,6 +137,17 @@ fun BahreHasabReferenceScreen(onBack: () -> Unit) {
                 title = s.bahreHasabTitle,
                 subtitle = s.bahreHasabRange,
                 onBack = onBack,
+                actions = {
+                    IconButton(onClick = {
+                        customYearText = selectedYear.toString()
+                        showCustomYearDialog = true
+                    }) {
+                        Icon(
+                            Icons.Outlined.Calculate,
+                            contentDescription = if (s.isAmharic) "ዓመት ምረጥ" else "Pick year",
+                        )
+                    }
+                },
             )
         },
     ) { padding ->
@@ -91,7 +156,16 @@ fun BahreHasabReferenceScreen(onBack: () -> Unit) {
                 Modifier.fillMaxSize().widthIn(max = ReadingMaxWidth)
                     .verticalScroll(rememberScrollState()).padding(vertical = Spacing.md),
             ) {
-                YearRail(years, selectedYear, currentYear) { selectedYear = it }
+                YearRail(
+                    years = years,
+                    selectedYear = selectedYear,
+                    currentYear = currentYear,
+                    onOpenCalculator = {
+                        customYearText = selectedYear.toString()
+                        showCustomYearDialog = true
+                    },
+                    onSelect = { selectedYear = it },
+                )
                 Spacer(Modifier.height(Spacing.lg))
                 YearHero(selected, selected.year == currentYear)
                 Spacer(Modifier.height(Spacing.xl))
@@ -99,8 +173,8 @@ fun BahreHasabReferenceScreen(onBack: () -> Unit) {
                 Spacer(Modifier.height(Spacing.sm))
                 CycleValues(selected)
                 Text(
-                    if (s.isAmharic) "ዓመተ ዓለም፦ የኢትዮጵያ ዓመት + ፶፭፻። ወንጌላዊ፦ የአራት ዓመት ዙር። ወንበር፦ በ፲፱ ዓመት ዙር ውስጥ ያለው ቦታ። አበቅቴና መጥቅዕ፦ ከወንበር የሚሰሉ የቀን እሴቶች።"
-                    else "Amete Alem: the Ethiopian year plus 5,500. Evangelist: the four-year cycle. Wenber: the position used in the 19-year cycle. Abekte and Metqi: day values calculated from Wenber (×11 and ×19, respectively, with the remainder after division by 30).",
+                    if (s.isAmharic) "ዓመተ ዓለም፦ የኢትዮጵያ ዓመት + ፶፭፻።\nወንጌላዊ፦ ዓመተ ዓለም ÷ ፬ ቀሪው (፩=ማቴዎስ፣ ፪=ማርቆስ፣ ፫=ሉቃስ፣ ፬/0=ዮሐንስ)።\nመደብ፦ ዓመተ ዓለም ÷ ፲፱ ቀሪው፤ ወንበር፦ መደብ - ፩።\nአበቅቴ፦ (ወንበር × ፲፩) ÷ ፴ ቀሪው፤ መጥቅዕ፦ (ወንበር × ፲፱) ÷ ፴ ቀሪው።\nመባጃ ሐመር፦ ዕለተ መጥቅዕ + የዕለቱ ተውሳክ።"
+                    else "Amete Alem: Ethiopian year + 5,500.\nEvangelist: Amete Alem % 4 (1=Matthew, 2=Mark, 3=Luke, 0=John).\nMedeb: Amete Alem % 19. Wenber: Medeb − 1.\nAbekte: (Wenber × 11) % 30. Metqi: (Wenber × 19) % 30.\nMebaja Hamer: Metqi day + weekday Tewsak.",
                     Modifier.padding(horizontal = Spacing.screen, vertical = Spacing.md),
                     style = MaterialTheme.typography.bodySmall,
                 )
@@ -116,14 +190,47 @@ fun BahreHasabReferenceScreen(onBack: () -> Unit) {
 
 @Composable
 private fun YearRail(
-    years: List<BahreHasabYear>, selectedYear: Int, currentYear: Int, onSelect: (Int) -> Unit,
+    years: List<BahreHasabYear>,
+    selectedYear: Int,
+    currentYear: Int,
+    onOpenCalculator: () -> Unit,
+    onSelect: (Int) -> Unit,
 ) {
+    val s = LocalStrings.current
     Row(
         Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
             .padding(horizontal = Spacing.screen),
         horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        years.forEach { year ->
+        Surface(
+            color = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            shape = RoundedCornerShape(18.dp),
+            modifier = Modifier.clickable(role = Role.Button, onClick = onOpenCalculator),
+        ) {
+            Row(
+                Modifier.padding(horizontal = 14.dp, vertical = 11.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Icon(
+                    Icons.Outlined.Calculate,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Text(
+                    if (s.isAmharic) "ዓመት ምረጥ" else "Pick year",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        }
+        val displayedYears = remember(years, selectedYear) {
+            if (years.any { it.year == selectedYear }) years
+            else (listOf(calculateBahreHasabYear(selectedYear)) + years).sortedBy { it.year }
+        }
+        displayedYears.forEach { year ->
             val chosen = year.year == selectedYear
             val current = year.year == currentYear
             Surface(
@@ -187,12 +294,16 @@ private fun YearHero(year: BahreHasabYear, current: Boolean) {
 @Composable
 private fun CycleValues(year: BahreHasabYear) {
     val s = LocalStrings.current
+    val metqiDateStr = "${s.ethMonths[year.metqiDate.month - 1]} ${geezNumeral(year.metqiDate.day)}"
     val values = listOf(
-        (if (s.isAmharic) "ዓመተ ዓለም" else "Amete Alem · ዓመተ ዓለም") to geezNumeral(year.ameteAlem),
+        (if (s.isAmharic) "ዓመተ ዓለም" else "Amete Alem · ዓመተ ዓለም") to "${geezNumeral(year.ameteAlem)} (${year.ameteAlem})",
         (if (s.isAmharic) "ወንጌላዊ" else "Evangelist · ወንጌላዊ") to year.evangelist,
+        (if (s.isAmharic) "መደብ" else "Medeb · መደብ") to geezNumeral(year.medeb),
         (if (s.isAmharic) "ወንበር" else "Wenber · ወንበር") to geezNumeral(year.wenber),
         (if (s.isAmharic) "አበቅቴ" else "Abekte · አበቅቴ") to geezNumeral(year.abekte),
         (if (s.isAmharic) "መጥቅዕ" else "Metqi · መጥቅዕ") to geezNumeral(year.metqi),
+        (if (s.isAmharic) "ዕለተ መጥቅዕ" else "Metqi Date · ዕለተ መጥቅዕ") to metqiDateStr,
+        (if (s.isAmharic) "መባጃ ሐመር" else "Mebaja Hamer · መባጃ ሐመር") to geezNumeral(year.mebajaHamer),
     )
     Row(
         Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())

@@ -74,6 +74,7 @@ class MainActivity : ComponentActivity() {
     private val pendingOpenReading = mutableStateOf(false)
     private val pendingGitsaweEpochDay = mutableStateOf<Long?>(null)
     private val pendingOpenDailyQuote = mutableStateOf(false)
+    private val pendingShortcutRoute = mutableStateOf<String?>(null)
 
     // Play's own consent dialog for an update. Registered unconditionally —
     // registerForActivityResult must run before the activity is started — but
@@ -155,6 +156,8 @@ class MainActivity : ComponentActivity() {
                             },
                             openDailyQuote = pendingOpenDailyQuote.value,
                             onDailyQuoteHandled = { pendingOpenDailyQuote.value = false },
+                            shortcutRoute = pendingShortcutRoute.value,
+                            onShortcutRouteHandled = { pendingShortcutRoute.value = null },
                         )
                         if (!opened && !bypassLaunchOverlays.value) {
                             com.agpeya.app.ui.intro.MementoMoriScreen(onDone = { opened = true })
@@ -269,6 +272,11 @@ class MainActivity : ComponentActivity() {
             intent.removeExtra(com.agpeya.app.reminders.GitsaweReminderScheduler.EXTRA_OPEN_GITSAWE)
             intent.removeExtra(com.agpeya.app.widget.GitsaweWidgetProvider.EXTRA_GITSAWE_EPOCH_DAY)
         }
+        intent.getStringExtra("route")?.let {
+            bypassLaunchOverlays.value = true
+            pendingShortcutRoute.value = it
+            intent.removeExtra("route")
+        }
     }
 }
 
@@ -309,6 +317,8 @@ private fun AgpeyaNavHost(
     onGitsaweHandled: () -> Unit,
     openDailyQuote: Boolean = false,
     onDailyQuoteHandled: () -> Unit = {},
+    shortcutRoute: String? = null,
+    onShortcutRouteHandled: () -> Unit = {},
 ) {
     val navController = rememberNavController()
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -436,6 +446,18 @@ private fun AgpeyaNavHost(
             val route = gitsaweEpochDay?.let { "gitsawe?epochDay=$it" } ?: "gitsawe"
             navController.navigate(route) { launchSingleTop = true }
             onGitsaweHandled()
+        }
+    }
+
+    // Opened from an App Shortcut (Launcher quick action).
+    LaunchedEffect(ready, shortcutRoute) {
+        if (ready && shortcutRoute != null) {
+            val target = when (shortcutRoute) {
+                "sinksar" -> "synaxarium/${java.time.LocalDate.now().toEpochDay()}"
+                else -> shortcutRoute
+            }
+            runCatching { navController.navigate(target) { launchSingleTop = true } }
+            onShortcutRouteHandled()
         }
     }
 

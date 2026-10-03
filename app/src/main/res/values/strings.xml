@@ -24,4 +24,14 @@
     <string name="widget_daily_quote_label">የአበው ምክር</string>
     <string name="widget_daily_quote_description">ዕለታዊ የበረሃ አባቶች ምክር በመነሻ ገጽ ወይም በመቆለፊያ ገጽ ላይ ይመልከቱ።</string>
     <string name="external_link_unavailable">አገናኙን የሚከፍት መተግበሪያ አልተገኘም። አሳሽ እንደተጫነና እንደነቃ ያረጋግጡ።</string>
+
+    <!-- App Shortcuts (Launcher Quick Actions) -->
+    <string name="shortcut_gitsawe_short">ግጻዌ</string>
+    <string name="shortcut_gitsawe_long">የዕለቱ ግጻዌ</string>
+    <string name="shortcut_sinksar_short">ስንክሳር</string>
+    <string name="shortcut_sinksar_long">የዕለቱ ስንክሳር</string>
+    <string name="shortcut_psalter_short">መዝሙር</string>
+    <string name="shortcut_psalter_long">መዝሙረ ዳዊት</string>
+    <string name="shortcut_confession_short">ንስሐ</string>
+    <string name="shortcut_confession_long">የንስሐ ዝግጅት</string>
 </resources>

@@ -26,10 +26,13 @@ object BahreHasab {
     /** Evangelist of the year: 1 Matthew, 2 Mark, 3 Luke, 0 John. */
     fun evangelist(ethYear: Int): Int = ameteAlem(ethYear) % 4
 
+    /** Medeb — position in the 19-year cycle. */
+    fun medeb(ethYear: Int): Int = ameteAlem(ethYear) % 19
+
     /** Wenber — seeds Abekte and Metqi (Medeb − 1, wrapping 0 → 18). */
     fun wenber(ethYear: Int): Int {
-        val medeb = ameteAlem(ethYear) % 19
-        return if (medeb == 0) 18 else medeb - 1
+        val m = medeb(ethYear)
+        return if (m == 0) 18 else m - 1
     }
 
     /** Abekte — the solar/lunar difference. */
@@ -37,6 +40,36 @@ object BahreHasab {
 
     /** Metqi — used to seat the paschal cycle (Abekte + Metqi = 30). */
     fun metqi(ethYear: Int): Int = (wenber(ethYear) * 19) % 30
+
+    /**
+     * ዕለተ መጥቅዕ — the Ethiopian date where Metqi falls.
+     * If Metqi > 14, falls in Meskerem (month 1); otherwise Tikimt (month 2).
+     * If Metqi is 0, counted as 30 in Meskerem.
+     */
+    fun metqiDate(ethYear: Int): EthiopianDate {
+        val raw = metqi(ethYear)
+        val day = if (raw == 0) 30 else raw
+        val month = if (day > 14) 1 else 2
+        return EthiopianDate(ethYear, month, day)
+    }
+
+    /** ዕለተ ተውሳክ for the weekday. */
+    fun tewsak(dayOfWeek: java.time.DayOfWeek): Int = when (dayOfWeek) {
+        java.time.DayOfWeek.SUNDAY -> 7
+        java.time.DayOfWeek.MONDAY -> 6
+        java.time.DayOfWeek.TUESDAY -> 5
+        java.time.DayOfWeek.WEDNESDAY -> 4
+        java.time.DayOfWeek.THURSDAY -> 3
+        java.time.DayOfWeek.FRIDAY -> 2
+        java.time.DayOfWeek.SATURDAY -> 8
+    }
+
+    /** መባጃ ሐመር = መጥቅዕ + ተውሳክ */
+    fun mebajaHamer(ethYear: Int): Int {
+        val date = metqiDate(ethYear)
+        val dow = date.toGregorian().dayOfWeek
+        return date.day + tewsak(dow)
+    }
 
     // ---- Movable feasts (Gregorian dates) -----------------------------------
 

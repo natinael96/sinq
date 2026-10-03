@@ -21,6 +21,8 @@ docs/extracted/
 .agents/
 graphify-out/
 skills-lock.json
+preview.html
+*_preview.html
 
 # Python bytecode from the content tools
 __pycache__/
