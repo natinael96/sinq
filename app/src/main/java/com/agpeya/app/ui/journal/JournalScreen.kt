@@ -664,11 +664,8 @@ private fun EntryRow(entry: JournalEntry, s: Strings, onClick: () -> Unit) {
             maxLines = 2,
             overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
         )
-        // The Church's day, which is most of why an old entry is worth reading.
-        val context = listOfNotNull(
-            entry.context.monthlyFeast,
-            entry.context.fast,
-        ).joinToString(" · ")
+        // Fast information if the day carried a fast
+        val context = entry.context.fast.orEmpty()
         if (context.isNotBlank()) {
             Spacer(Modifier.height(Spacing.xs))
             Text(

@@ -74,7 +74,7 @@ object SettingsRepository {
     data class BackupSettings(
         val readingMode: String = ReadingMode.VERTICAL.name,
         val fontStep: Int = DEFAULT_FONT_STEP,
-        val theme: String = ThemeChoice.SYSTEM.name,
+        val theme: String = ThemeChoice.LIGHT.name,
         val readingFont: String = ReadingFont.ABYSSINICA.name,
         val lineSpacing: String = ReadingLineSpacing.NORMAL.name,
         val readingAlignment: String = ReadingAlignment.JUSTIFIED.name,
@@ -210,7 +210,7 @@ object SettingsRepository {
         return BackupSettings(
             readingMode = prefs[KEY_READING_MODE] ?: ReadingMode.VERTICAL.name,
             fontStep = fontStep(context).first(),
-            theme = prefs[KEY_THEME] ?: ThemeChoice.SYSTEM.name,
+            theme = prefs[KEY_THEME] ?: ThemeChoice.LIGHT.name,
             readingFont = prefs[KEY_READING_FONT] ?: ReadingFont.ABYSSINICA.name,
             lineSpacing = prefs[KEY_READING_LINE_SPACING] ?: ReadingLineSpacing.NORMAL.name,
             readingAlignment = prefs[KEY_READING_ALIGNMENT] ?: ReadingAlignment.JUSTIFIED.name,
@@ -253,7 +253,7 @@ object SettingsRepository {
         context.settingsDataStore.edit { prefs ->
             prefs[KEY_READING_MODE] = runCatching { ReadingMode.valueOf(value.readingMode) }.getOrDefault(ReadingMode.VERTICAL).name
             prefs[KEY_FONT_SIZE_SP] = FONT_STEPS_SP[value.fontStep.coerceIn(FONT_STEPS_SP.indices)]
-            prefs[KEY_THEME] = runCatching { ThemeChoice.valueOf(value.theme) }.getOrDefault(ThemeChoice.SYSTEM).name
+            prefs[KEY_THEME] = runCatching { ThemeChoice.valueOf(value.theme) }.getOrDefault(ThemeChoice.LIGHT).name
             prefs[KEY_READING_FONT] = runCatching { ReadingFont.valueOf(value.readingFont) }.getOrDefault(ReadingFont.ABYSSINICA).name
             prefs[KEY_READING_LINE_SPACING] = runCatching { ReadingLineSpacing.valueOf(value.lineSpacing) }.getOrDefault(ReadingLineSpacing.NORMAL).name
             prefs[KEY_READING_ALIGNMENT] = runCatching { ReadingAlignment.valueOf(value.readingAlignment) }.getOrDefault(ReadingAlignment.JUSTIFIED).name
@@ -342,7 +342,7 @@ object SettingsRepository {
     fun theme(context: Context): Flow<ThemeChoice> =
         context.settingsDataStore.data.map {
             runCatching { ThemeChoice.valueOf(it[KEY_THEME] ?: "") }
-                .getOrDefault(ThemeChoice.SYSTEM)
+                .getOrDefault(ThemeChoice.LIGHT)
         }
 
     suspend fun setTheme(context: Context, choice: ThemeChoice) {

@@ -33,7 +33,7 @@ import com.agpeya.app.ui.reading.ReadingColumn
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
-import com.agpeya.app.ui.theme.inReadingFont
+import com.agpeya.app.ui.reading.geezNumeral
 
 /**
  * ሌሎች መጻሕፍት — the church books outside the 81, as six shelves.
@@ -151,7 +151,7 @@ private fun ShelfRow(name: String, subtitle: String, count: Int, onOpen: () -> U
         Column(Modifier.weight(1f)) {
             Text(
                 name,
-                style = MaterialTheme.typography.titleSmall.inReadingFont(),
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -159,7 +159,7 @@ private fun ShelfRow(name: String, subtitle: String, count: Int, onOpen: () -> U
             Spacer(Modifier.height(Spacing.xxs))
             Text(
                 subtitle,
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -167,8 +167,8 @@ private fun ShelfRow(name: String, subtitle: String, count: Int, onOpen: () -> U
         }
         Spacer(Modifier.width(Spacing.sm))
         Text(
-            count.toString(),
-            style = MaterialTheme.typography.labelSmall,
+            geezNumeral(count),
+            style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.secondary,
         )
         Spacer(Modifier.width(Spacing.sm))
@@ -196,7 +196,7 @@ private fun BookRow(book: BookMeta, onOpen: (String) -> Unit) {
         Column(Modifier.weight(1f)) {
             Text(
                 book.title,
-                style = MaterialTheme.typography.titleSmall.inReadingFont(),
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
@@ -205,7 +205,7 @@ private fun BookRow(book: BookMeta, onOpen: (String) -> Unit) {
             if (book.comingSoon || book.id == "f9217f008c" || book.id == "7b38e5fa56") {
                 Text(
                     s.comingSoon,
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.secondary,
                 )
             } else {
@@ -213,7 +213,7 @@ private fun BookRow(book: BookMeta, onOpen: (String) -> Unit) {
                     Text(
                         if (book.chapterCount > 1) s.booksChapters(book.chapterCount)
                         else s.booksStanzas(book.blockCount),
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     // Said only when it is worth saying: the shelf is Ge'ez by
@@ -225,7 +225,7 @@ private fun BookRow(book: BookMeta, onOpen: (String) -> Unit) {
                     }?.let {
                         Text(
                             it,
-                            style = MaterialTheme.typography.labelSmall,
+                            style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.secondary,
                         )
                     }

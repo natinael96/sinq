@@ -5,6 +5,17 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.5.8] — 2026-10-04
+
+_versionCode 108 · Light mode default, Library codex structure, Church books typography polish, and Journal refinement_
+
+### Changed
+- **Default Light Mode Theme.** Configured light mode (Sacred Ivory / Parchment) as the app-wide initial default theme upon first launch across settings and theme resolution.
+- **Library Codex Architecture.** Reverted Library screen to its clean canonical single `ቅዱሳት መጻሕፍት` entry pointing to the full 81-book canonical structure, keeping the signature `ReadingHeroCard`.
+- **Books Page Typography Harmonization.** Standardized typography across Church book shelves (`ShelfRow` and `BookRow` in `BookShelfScreen.kt`) to `titleMedium` and `bodySmall`, eliminating bold reading serif weights on navigation buttons.
+- **Journal Day Refinement.** Removed daily feast names from Journal entry cards and headers to keep prayer reflections clean and focused on personal devotion.
+- **Web User Guide Integration.** Synchronized liturgical user manual (`guide.html`) with website navigation and site generator.
+
 ## [1.5.7] — 2026-10-04
 
 _versionCode 107 · Interactive heatmap day inspection card, direct Horologium reader jump, and habit management flow_

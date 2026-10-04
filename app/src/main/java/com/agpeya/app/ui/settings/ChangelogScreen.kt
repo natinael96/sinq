@@ -31,6 +31,25 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.5.8",
+        title = "Light mode default, Library codex structure, Church books typography polish, and Journal refinement",
+        titleAm = "የብርሃናማ ገጽታ ቅድመ-ምርጫ፣ የቤተ መጻሕፍት ቀኖናዊ አደረጃጀት፣ የመጻሕፍት ፊደላት ማስተካከያ እና የማስታወሻ ማሻሻያ",
+        changes = listOf(
+            "Configured light mode (Sacred Ivory / Parchment) as the app-wide initial default theme on first launch.",
+            "Reverted Library screen to its clean canonical single ቅዱሳት መጻሕፍት entry pointing to the full 81-book canonical structure.",
+            "Standardized typography across Church book shelves (ShelfRow and BookRow) to clean titleMedium, eliminating bold reading fonts on buttons.",
+            "Removed daily feast names from Journal entry cards and headers to keep prayer reflections clean and focused.",
+            "Synchronized liturgical user manual (guide.html) with website navigation and site generator.",
+        ),
+        changesAm = listOf(
+            "መተግበሪያው ለመጀመሪያ ጊዜ ሲከፈት በነባሪነት የብርሃናማ (Sacred Ivory) ገጽታ እንዲጠቀም ተደርጓል።",
+            "የቤተ መጻሕፍት ገጽ ወደ ነጠላ 'ቅዱሳት መጻሕፍት' መግቢያ ተመልሶ የ፹፩ዱን መጻሕፍት ሙሉ ቀኖና እንዲያሳይ ተደርጓል።",
+            "በሌሎች መጻሕፍት መደርደሪያ ላይ የነበሩት ደማቅ የብራና ፊደላት ተስተካክለው ከመተግበሪያው መደበኛ ፊደላት ጋር እንዲጣጣሙ ተደርጓል።",
+            "በማስታወሻ ገጽ ላይ የዕለቱን በዓል ስም የማሳየቱ አሠራር ተወግዷል።",
+            "የድረ-ገጽ አጠቃቀም መመሪያው (guide.html) ከድረ-ገጹ ማውጫና አገናኞች ጋር ሙሉ በሙሉ ተገናኝቷል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.5.7",
         title = "Interactive heatmap day inspection card, direct Horologium reader jump, and habit management",
         titleAm = "የዓመቱ የጉዞ ካርታ ዝርዝር መመልከቻ፣ የቀጥታ የሰዓታት ጸሎት ንባብ እና የልማዶች አስተዳደር ማሻሻያ",

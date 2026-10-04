@@ -244,6 +244,35 @@ def main():
     s = re.sub(r"Sinq-v\d+\.\d+\.\d+\.apk", f"Sinq-v{ver}.apk", s)
     open(p, "w", encoding="utf-8").write(s)
 
+    # ── guide.html & site navigation wiring ──────────────────────────────
+    docs_guide = os.path.join(ROOT, "docs", "guide.html")
+    if os.path.exists(docs_guide):
+        guide_dest = os.path.join(site, "guide.html")
+        guide_content = open(docs_guide, encoding="utf-8").read()
+        open(guide_dest, "w", encoding="utf-8").write(guide_content)
+        print("  guide.html: synced from docs/guide.html")
+
+    for name in ["index.html", "about.html", "install.html", "changelog.html", "credits.html", "feedback.html"]:
+        page_path = os.path.join(site, name)
+        if not os.path.exists(page_path):
+            continue
+        page_html = open(page_path, encoding="utf-8").read()
+        changed = False
+        if '<a href="guide.html">' not in page_html and '<div class="nav-links">' in page_html:
+            page_html = page_html.replace(
+                '<a href="changelog.html"><span>Changes</span></a>',
+                '<a href="changelog.html"><span>Changes</span></a>\n      <a href="guide.html"><span>Guide</span></a>',
+            )
+            changed = True
+        if '<li><a href="guide.html">' not in page_html and '<ul class="foot-links">' in page_html:
+            page_html = page_html.replace(
+                '<ul class="foot-links">',
+                '<ul class="foot-links">\n      <li><a href="guide.html">Guide</a></li>',
+            )
+            changed = True
+        if changed:
+            open(page_path, "w", encoding="utf-8").write(page_html)
+
     # ── canonical URLs ───────────────────────────────────────────────────
     for name in os.listdir(site):
         if not name.endswith(".html"):
@@ -263,7 +292,7 @@ def main():
         if fixed != s:
             open(p, "w", encoding="utf-8").write(fixed)
     print(f"  canonicals -> {SITE_BASE}")
-    print(f"  index.html / install.html: v{ver}, Android {MIN_ANDROID}+")
+    print(f"  index.html / install.html / guide.html: v{ver}, Android {MIN_ANDROID}+")
 
 
 # Kept beside the app's minSdk; update both together.

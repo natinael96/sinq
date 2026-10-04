@@ -192,12 +192,8 @@ private fun JournalEntryScreenContent(
             SinqTopBar(
                 title = if (confessionOnly) s.confessionPrepTitle else s.journalTitle,
                 subtitle = if (confessionOnly) null else loaded?.localDate?.let { formatEthiopian(it, s) },
-                // The feast or fast the day carried, in the app's gold accent —
-                // the reason this entry reads as more than a dated note later.
-                accentLine = if (confessionOnly) null else listOfNotNull(
-                    loaded?.context?.monthlyFeast,
-                    loaded?.context?.fast,
-                ).joinToString(" · ").takeIf { it.isNotBlank() },
+                // The fast the day carried, in the app's gold accent
+                accentLine = if (confessionOnly) null else loaded?.context?.fast,
                 onBack = onBack,
                 actions = {
                     if (saved) {

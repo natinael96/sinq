@@ -91,7 +91,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         consumeDeepLink(intent)
         setContent {
-            val themeChoice by SettingsRepository.theme(this).collectAsState(initial = ThemeChoice.SYSTEM)
+            val themeChoice by SettingsRepository.theme(this).collectAsState(initial = ThemeChoice.LIGHT)
             val language by SettingsRepository.language(this).collectAsState(initial = SettingsRepository.DEFAULT_LANGUAGE)
             val readingFont by SettingsRepository.readingFont(this)
                 .collectAsState(initial = com.agpeya.app.data.ReadingFont.ABYSSINICA)
@@ -596,8 +596,6 @@ private fun AgpeyaNavHost(
                                                 },
                                                 onOpenReading = { navController.navigate("reading") { launchSingleTop = true } },
                                                 onOpenMarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
-                                                onOpenMahlets = { navController.navigate("mahlets") { launchSingleTop = true } },
-                                                onOpenHour = { hourId -> navController.navigate("reading/$hourId") { launchSingleTop = true } },
                                             )
                                         Tab.SETTINGS ->
                                             SettingsScreen(

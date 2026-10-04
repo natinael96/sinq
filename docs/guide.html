@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Sinq (ስንቅ) — User Guide & Liturgical Manual</title>
+  <meta name="description" content="Complete user guide and liturgical manual for Sinq (ስንቅ) - The Ethiopian Orthodox Tewahedo Horologium, Psalter, and Lectionary app.">
+  <link rel="canonical" href="https://sinq.natinael96.tech/guide.html">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Ethiopic:wght@400;500;600;700&family=Noto+Serif+Ethiopic:wght@600;700&display=swap" rel="stylesheet">
@@ -561,12 +564,12 @@
     }
   </style>
 </head>
-<body class="theme-dark lang-en">
+<body class="lang-en">
 
   <!-- Mobile Top Sticky Header -->
   <header class="top-header">
     <div class="header-content">
-      <a href="#" class="brand-mark">
+      <a href="index.html" class="brand-mark" title="Back to Sinq Website">
         <!-- Pure Authored Orthodox Cross SVG -->
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
           <line x1="12" y1="2" x2="12" y2="22"></line>
@@ -580,6 +583,12 @@
       </a>
 
       <div class="header-actions">
+        <!-- Back to Website Link -->
+        <a href="index.html" class="action-button" style="text-decoration:none;">
+          <span class="en-only">← Web</span>
+          <span class="am-only">← ድረ-ገጽ</span>
+        </a>
+
         <!-- Language Switcher Pill -->
         <button class="action-button" onclick="toggleLanguage()">
           <span class="en-only">አማርኛ</span>
@@ -1782,8 +1791,16 @@
         <line x1="8" y1="5" x2="16" y2="5"></line>
         <line x1="8" y1="19" x2="16" y2="19"></line>
       </svg>
-      <div>Sinq (ስንቅ)</div>
-      <div style="margin-top: 2px; font-size: 11px; opacity: 0.75;">
+      <div><a href="index.html" style="color:inherit; text-decoration:none; font-weight:700;">Sinq (ስንቅ)</a></div>
+      <div class="guide-footer-links" style="display:flex; justify-content:center; flex-wrap:wrap; gap:16px; margin: 12px 0; font-size:13px;">
+        <a href="index.html" style="color:var(--gold); text-decoration:none;">Home</a>
+        <a href="install.html" style="color:var(--gold); text-decoration:none;">Install</a>
+        <a href="about.html" style="color:var(--gold); text-decoration:none;">About</a>
+        <a href="changelog.html" style="color:var(--gold); text-decoration:none;">Changes</a>
+        <a href="privacy-policy.html" style="color:var(--gold); text-decoration:none;">Privacy</a>
+        <a href="feedback.html" style="color:var(--gold); text-decoration:none;">Feedback</a>
+      </div>
+      <div style="margin-top: 4px; font-size: 11px; opacity: 0.75;">
         100% Free · 100% Offline · Private Liturgical Prayer
       </div>
     </footer>

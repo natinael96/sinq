@@ -171,7 +171,7 @@ private val DarkSinq = SinqColors(
 
 @Composable
 fun AgpeyaTheme(
-    themeChoice: ThemeChoice = ThemeChoice.SYSTEM,
+    themeChoice: ThemeChoice = ThemeChoice.LIGHT,
     content: @Composable () -> Unit,
 ) {
     val darkTheme = when (themeChoice) {

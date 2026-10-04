@@ -109,7 +109,7 @@ fun SettingsScreen(
     val gold = MaterialTheme.colorScheme.secondary
     val primary = MaterialTheme.colorScheme.primary
 
-    val theme by SettingsRepository.theme(context).collectAsState(initial = ThemeChoice.SYSTEM)
+    val theme by SettingsRepository.theme(context).collectAsState(initial = ThemeChoice.LIGHT)
     val language by SettingsRepository.language(context).collectAsState(initial = SettingsRepository.DEFAULT_LANGUAGE)
     val font by SettingsRepository.readingFont(context).collectAsState(initial = ReadingFont.ABYSSINICA)
     val fontStep by SettingsRepository.fontStep(context).collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
