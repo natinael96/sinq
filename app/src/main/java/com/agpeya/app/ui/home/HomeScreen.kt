@@ -1116,8 +1116,8 @@ private fun DailyPsalmCard(today: LocalDate, onClick: () -> Unit, modifier: Modi
     val s = LocalStrings.current
     val range = remember(today) { com.agpeya.app.ui.psalter.dailyRange(today.dayOfWeek) }
     ShortcutCard(
-        title = range?.let { s.psalmRange(it.first, it.last) } ?: s.wholePsalter,
-        caption = "${s.psalterTitle}  ·  ${s.dailyPsalms}",
+        title = s.psalterTitle,
+        caption = range?.let { s.psalmRange(it.first, it.last) } ?: s.dailyPsalms,
         onClick = onClick,
         modifier = modifier,
     )

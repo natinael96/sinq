@@ -178,6 +178,7 @@ fun WudaseMaryamScreen(
     val dailyIndex = remember(pages) {
         pages.indexOfFirst { it.id == "daily" }.takeIf { it >= 0 } ?: 0
     }
+    val targetIndex = initialIndex ?: if (initialSectionId != null) dailyIndex else todayIndex
 
     val pager = androidx.compose.foundation.pager.rememberPagerState(
         pageCount = { pages.size },
@@ -187,7 +188,8 @@ fun WudaseMaryamScreen(
     var landed by rememberSaveable { mutableStateOf(false) }
     androidx.compose.runtime.LaunchedEffect(pages.size) {
         if (!landed && pages.isNotEmpty()) {
-            pager.scrollToPage(initialIndex ?: dailyIndex)
+            val target = targetIndex.coerceIn(0, pages.size - 1)
+            pager.scrollToPage(target)
             landed = true
         }
     }
@@ -304,9 +306,9 @@ fun WudaseMaryamScreen(
                 state = pager,
                 modifier = Modifier.fillMaxSize(),
                 beyondViewportPageCount = 1,
-                key = { pages[it].id },
+                key = { pages.getOrNull(it)?.id ?: it.toString() },
             ) { page ->
-                val pageItem = pages[page]
+                val pageItem = pages.getOrNull(page) ?: return@HorizontalPager
                 val listState = androidx.compose.foundation.lazy.rememberLazyListState()
                 LaunchedEffect(listState.isScrollInProgress) {
                     if (listState.isScrollInProgress && !isImmersive) {
@@ -347,8 +349,9 @@ fun WudaseMaryamScreen(
                         is WudasePage.Portioned -> {
                             val stanzas = if (geez) pageItem.section.ge else pageItem.section.am
                             items(stanzas.size, key = { "st_$it" }) { i ->
+                                val stanza = stanzas.getOrNull(i) ?: return@items
                                 val body = com.agpeya.app.ui.common.rubricated(
-                                    stanzas[i],
+                                    stanza,
                                     Rubrication.Scope.GENERAL,
                                 )
                                 androidx.compose.foundation.text.selection.SelectionContainer {

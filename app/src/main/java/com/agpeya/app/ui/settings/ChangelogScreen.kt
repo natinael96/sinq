@@ -31,6 +31,21 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.5.9",
+        title = "Home Psalter button polish, Wudase Maryam stability, and web manual redesign",
+        titleAm = "የመነሻ ገጽ መዝሙረ ዳዊት አዝራር ማስተካከያ፣ የውዳሴ ማርያም ጥንካሬ እና የተሟላ የድረ-ገጽ መመሪያ",
+        changes = listOf(
+            "Polished Home screen Psalter button label to always display 'መዝሙረ ዳዊት' alongside the daily psalm range caption.",
+            "Hardened Wudase Maryam screen against page index boundary errors and ensured reliable initial section navigation from Home.",
+            "Completely redesigned and styled the web User Guide & Liturgical Manual (guide.html) with a responsive 2-column layout, sticky sidebar, real-time search, bilingual toggle, and unified site navigation.",
+        ),
+        changesAm = listOf(
+            "በመነሻ ገጽ ላይ የሚገኘው የመዝሙረ ዳዊት አዝራር ስም በትክክል 'መዝሙረ ዳዊት' እና የዕለቱን ምዕራፍ እንዲያሳይ ተስተካክሏል።",
+            "የውዳሴ ማርያም ገጽ ከመነሻ ገጽ ሲከፈት ሊያጋጥም የሚችለው መቋረጥ ተፈትቶ አስተማማኝ እንዲሆን ተደርጓል።",
+            "የድረ-ገጽ የተጠቃሚ መመሪያው (guide.html) በሁለት ዓምድ የተደራጀ ዘመናዊ ቅርጽ፣ የቀጥታ ፍለጋ፣ የቋንቋ መቀየሪያና የድረ-ገጽ ማውጫ እንዲኖረው ተደርጎ በድጋሚ ተሰናድቷል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.5.8",
         title = "Light mode default, Library codex structure, Church books typography polish, and Journal refinement",
         titleAm = "የብርሃናማ ገጽታ ቅድመ-ምርጫ፣ የቤተ መጻሕፍት ቀኖናዊ አደረጃጀት፣ የመጻሕፍት ፊደላት ማስተካከያ እና የማስታወሻ ማሻሻያ",

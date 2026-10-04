@@ -5,6 +5,17 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.5.9] — 2026-10-04
+
+_versionCode 109 · Home Psalter button polish, Wudase Maryam stability, and web manual redesign_
+
+### Changed
+- **Home Psalter Button Label.** Polished the Home screen Psalter button label to always display `መዝሙረ ዳዊት` (Psalter) accompanied by the daily psalm range caption (`የዕለቱ መዝሙር` / `መዝ ፩–፴`) instead of the generic range prefix.
+- **Web User Guide Redesign.** Completely redesigned and styled the web User Guide & Liturgical Manual (`guide.html`) with a responsive 2-column documentation layout, sticky sidebar, real-time search filter, bilingual Amharic/English toggle, Expand/Collapse controls, Ge'ez numeral table of contents, scrollspy, and unified website navigation.
+
+### Fixed
+- **Wudase Maryam Home Navigation.** Fixed an app crash when opening Wudase Maryam from the Home screen by hardening horizontal pager key and page bounds, clamping initial page indices, and ensuring explicit daily section parameter routing.
+
 ## [1.5.8] — 2026-10-04
 
 _versionCode 108 · Light mode default, Library codex structure, Church books typography polish, and Journal refinement_
