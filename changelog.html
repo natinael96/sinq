@@ -67,6 +67,24 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
 <!-- releases:start -->
 <article class="release">
   <header>
+    <h2>1.5.9 <span class="date">4 October 2026</span></h2>
+    <p class="motto"><span>Home Psalter button polish, Wudase Maryam stability, and web manual redesign</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Home Psalter Button Label.</b> Polished the Home screen Psalter button label to always display <code>መዝሙረ ዳዊት</code> (Psalter) accompanied by the daily psalm range caption (<code>የዕለቱ መዝሙር</code> / <code>መዝ ፩–፴</code>) instead of the generic range prefix.</span></li>
+    <li><span><b>Web User Guide Redesign.</b> Completely redesigned and styled the web User Guide &amp; Liturgical Manual (<code>guide.html</code>) with a responsive 2-column documentation layout, sticky sidebar, real-time search filter, bilingual Amharic/English toggle, Expand/Collapse controls, Ge&#x27;ez numeral table of contents, scrollspy, and unified website navigation.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>Wudase Maryam Home Navigation.</b> Fixed an app crash when opening Wudase Maryam from the Home screen by hardening horizontal pager key and page bounds, clamping initial page indices, and ensuring explicit daily section parameter routing.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
     <h2>1.5.8 <span class="date">4 October 2026</span></h2>
     <p class="motto"><span>Light mode default, Library codex structure, Church books typography polish, and Journal refinement</span></p>
   </header>
@@ -169,6 +187,9 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   </div>
 </article>
 
+<details class="more-releases">
+  <summary><span>12 earlier releases, 1.5.2 back to 1.0.0</span></summary>
+  <div class="more-body">
 <article class="release">
   <header>
     <h2>1.5.2 <span class="date">2 October 2026</span></h2>
@@ -182,9 +203,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   </div>
 </article>
 
-<details class="more-releases">
-  <summary><span>11 earlier releases, 1.5.1 back to 1.0.0</span></summary>
-  <div class="more-body">
 <article class="release">
   <header>
     <h2>1.5.1 <span class="date">2 October 2026</span></h2>
