@@ -709,6 +709,7 @@ interface Strings {
     val journalFilterAll: String
     fun journalWrittenDays(written: String, total: String): String
     val journalNewEntryPrompt: String
+    val journalFutureDateNotice: String
     val journalKindReflectionDesc: String
     val journalKindChecklistDesc: String
     val journalKindPassageDesc: String
@@ -1664,6 +1665,7 @@ object AmharicStrings : Strings {
     override val journalFilterAll = "ሁሉም"
     override fun journalWrittenDays(written: String, total: String) = "$written/$total ቀናት"
     override val journalNewEntryPrompt = "አዲስ ማስታወሻ መዝግብ"
+    override val journalFutureDateNotice = "የወደፊት ዕለት · ተግባራትና ማሳሰቢያዎች ብቻ"
     override val journalKindReflectionDesc = "የዕለቱ የግል ጸሎትና መንፈሳዊ ማሰላሰያ"
     override val journalKindChecklistDesc = "የዕለት ተግባራት፣ ሰዓታትና የደወል ማስታወሻዎች"
     override val journalKindPassageDesc = "ከዕለቱ ምንባብ ወይም ከቅዱሳት መጻሕፍት ማስታወሻ"
@@ -2620,6 +2622,7 @@ object EnglishStrings : Strings {
     override val journalFilterAll = "All"
     override fun journalWrittenDays(written: String, total: String) = "$written/$total days"
     override val journalNewEntryPrompt = "New Entry"
+    override val journalFutureDateNotice = "Future date · Checklists and reminders only"
     override val journalKindReflectionDesc = "Personal prayer & spiritual contemplation"
     override val journalKindChecklistDesc = "Day-to-day checklist, hours & alarms"
     override val journalKindPassageDesc = "Notes from daily lectionary or scriptures"

@@ -112,6 +112,7 @@ private fun JournalEntryScreenContent(
     onBack: () -> Unit,
     /** Opens the passage the entry was written about. */
     onOpenAnchor: (route: String) -> Unit,
+    targetDate: LocalDate? = null,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -132,17 +133,20 @@ private fun JournalEntryScreenContent(
         if (entry != null) return@LaunchedEffect
         loadFailed = false
         try {
-        val loaded = if (entryId != null) {
-            JournalRepository.byId(context, entryId) ?: error("Entry no longer exists")
-        } else (if (confessionOnly) JournalRepository.latestConfessionDraft(context) else null) ?: JournalRepository.draft(
+            val isTargetFuture = targetDate != null && targetDate.isAfter(LocalDate.now())
+            val effectiveInitialKind = if (isTargetFuture) JournalKind.CHECKLIST else initialKind
+            val loaded = if (entryId != null) {
+                JournalRepository.byId(context, entryId) ?: error("Entry no longer exists")
+            } else (if (confessionOnly) JournalRepository.latestConfessionDraft(context) else null) ?: JournalRepository.draft(
                 context = context,
-                kind = initialKind,
+                date = targetDate ?: LocalDate.now(),
+                kind = effectiveInitialKind,
                 anchorRoute = anchorRoute,
                 anchorLabel = anchorLabel,
             )
-        entry = loaded
-        body = loaded.body
-        kind = loaded.kind
+            entry = loaded
+            body = loaded.body
+            kind = if (loaded.localDate?.isAfter(LocalDate.now()) == true) JournalKind.CHECKLIST else loaded.kind
         } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
         catch (_: Exception) { loadFailed = true }
     }
@@ -231,47 +235,74 @@ private fun JournalEntryScreenContent(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = Spacing.screen, vertical = Spacing.md),
         ) {
+            val isFutureDate = (loaded.localDate ?: targetDate ?: LocalDate.now()).isAfter(LocalDate.now())
             if (!confessionOnly) {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(horizontal = 2.dp),
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                ) {
-                    val options = listOf(
-                        JournalKind.REFLECTION to s.journalKindReflection,
-                        JournalKind.PASSAGE to s.journalKindPassage,
-                        JournalKind.CHECKLIST to s.journalKindChecklist,
-                        JournalKind.CONFESSION_DRAFT to s.journalKindConfession,
-                    )
-                    items(options) { (choice, label) ->
-                        FilterChip(
-                            selected = kind == choice,
-                            onClick = { kind = choice },
-                            label = { Text(label, maxLines = 1) },
-                            leadingIcon = {
-                                val icon = when (choice) {
-                                    JournalKind.REFLECTION -> Icons.Outlined.EditNote
-                                    JournalKind.PASSAGE -> Icons.Outlined.AutoStories
-                                    JournalKind.CHECKLIST -> Icons.Outlined.Checklist
-                                    JournalKind.CONFESSION_DRAFT -> Icons.Outlined.Lock
-                                }
-                                Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp))
-                            },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.18f),
-                                selectedLabelColor = MaterialTheme.colorScheme.secondary,
-                                selectedLeadingIconColor = MaterialTheme.colorScheme.secondary,
-                            ),
-                            border = FilterChipDefaults.filterChipBorder(
-                                enabled = true,
-                                selected = kind == choice,
-                                borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                                selectedBorderColor = MaterialTheme.colorScheme.secondary,
-                                borderWidth = 1.dp,
-                                selectedBorderWidth = 1.2.dp,
-                            ),
-                            shape = RoundedCornerShape(10.dp),
+                if (isFutureDate) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f))
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Icon(
+                            Icons.Outlined.NotificationsActive,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(16.dp),
                         )
+                        Text(
+                            text = s.journalFutureDateNotice,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.secondary,
+                            fontWeight = FontWeight.Medium,
+                        )
+                    }
+                    Spacer(Modifier.height(Spacing.xs))
+                } else {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(horizontal = 2.dp),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    ) {
+                        val options = listOf(
+                            JournalKind.REFLECTION to s.journalKindReflection,
+                            JournalKind.PASSAGE to s.journalKindPassage,
+                            JournalKind.CHECKLIST to s.journalKindChecklist,
+                            JournalKind.CONFESSION_DRAFT to s.journalKindConfession,
+                        )
+                        items(options) { (choice, label) ->
+                            FilterChip(
+                                selected = kind == choice,
+                                onClick = { kind = choice },
+                                label = { Text(label, maxLines = 1) },
+                                leadingIcon = {
+                                    val icon = when (choice) {
+                                        JournalKind.REFLECTION -> Icons.Outlined.EditNote
+                                        JournalKind.PASSAGE -> Icons.Outlined.AutoStories
+                                        JournalKind.CHECKLIST -> Icons.Outlined.Checklist
+                                        JournalKind.CONFESSION_DRAFT -> Icons.Outlined.Lock
+                                    }
+                                    Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp))
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.18f),
+                                    selectedLabelColor = MaterialTheme.colorScheme.secondary,
+                                    selectedLeadingIconColor = MaterialTheme.colorScheme.secondary,
+                                ),
+                                border = FilterChipDefaults.filterChipBorder(
+                                    enabled = true,
+                                    selected = kind == choice,
+                                    borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                                    selectedBorderColor = MaterialTheme.colorScheme.secondary,
+                                    borderWidth = 1.dp,
+                                    selectedBorderWidth = 1.2.dp,
+                                ),
+                                shape = RoundedCornerShape(10.dp),
+                            )
+                        }
                     }
                 }
             }
@@ -315,7 +346,8 @@ private fun JournalEntryScreenContent(
                     body = body,
                     onBodyChange = { body = it },
                     s = s,
-                    entryId = entryId ?: "draft",
+                    entryId = entryId ?: loaded.id,
+                    entryDate = loaded.localDate ?: targetDate ?: LocalDate.now(),
                 )
             } else {
                 OutlinedTextField(
@@ -355,23 +387,34 @@ private fun JournalEntryScreenContent(
 }
 
 @Composable
-fun JournalEntryScreen(entryId: String?, initialKind: JournalKind, anchorRoute: String?, anchorLabel: String?, onBack: () -> Unit, onOpenAnchor: (String) -> Unit, confessionOnly: Boolean = false) {
+fun JournalEntryScreen(
+    entryId: String?,
+    initialKind: JournalKind,
+    anchorRoute: String?,
+    anchorLabel: String?,
+    onBack: () -> Unit,
+    onOpenAnchor: (String) -> Unit,
+    confessionOnly: Boolean = false,
+    targetDate: LocalDate? = null,
+) {
+    val isTargetFuture = targetDate != null && targetDate.isAfter(LocalDate.now())
+    val effectiveKind = if (isTargetFuture) JournalKind.CHECKLIST else initialKind
     // Keep the draft in memory while the private UI is removed on relock.
     val editor = androidx.compose.runtime.saveable.rememberSaveable(entryId,
         saver = androidx.compose.runtime.saveable.Saver<JournalEditorState, String>(
             save = { state -> state.entry?.copy(body = state.body, kind = state.kind)?.let {
                 kotlinx.serialization.json.Json.encodeToString(JournalEntry.serializer(), it)
             }.orEmpty() },
-            restore = { encoded -> JournalEditorState(initialKind).apply {
+            restore = { encoded -> JournalEditorState(effectiveKind).apply {
                 if (encoded.isNotEmpty()) {
                     entry = kotlinx.serialization.json.Json.decodeFromString(JournalEntry.serializer(), encoded)
                     body = entry!!.body; kind = entry!!.kind
                 }
             } },
         ),
-    ) { JournalEditorState(initialKind) }
+    ) { JournalEditorState(effectiveKind) }
     com.agpeya.app.ui.journal.JournalAccess(onBack) {
-        JournalEntryScreenContent(editor, entryId, initialKind, confessionOnly, anchorRoute, anchorLabel, onBack, onOpenAnchor)
+        JournalEntryScreenContent(editor, entryId, effectiveKind, confessionOnly, anchorRoute, anchorLabel, onBack, onOpenAnchor, targetDate)
     }
 }
 
@@ -390,6 +433,7 @@ private fun ChecklistEditor(
     onBodyChange: (String) -> Unit,
     s: Strings,
     entryId: String,
+    entryDate: LocalDate = LocalDate.now(),
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -555,6 +599,8 @@ private fun ChecklistEditor(
                                         taskId = taskId,
                                         taskText = item.text,
                                         scheduledHour = item.scheduledHour,
+                                        date = entryDate,
+                                        entryId = entryId,
                                     )
                                 } else {
                                     com.agpeya.app.reminders.ChecklistReminderScheduler.cancel(
@@ -626,6 +672,8 @@ private fun ChecklistEditor(
                             taskId = taskId,
                             taskText = task.text,
                             scheduledHour = task.scheduledHour,
+                            date = entryDate,
+                            entryId = entryId,
                         )
                     }
                     newTaskText = ""

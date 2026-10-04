@@ -25,6 +25,8 @@ class ChecklistReminderReceiver : BroadcastReceiver() {
         val taskId = intent.getStringExtra(ChecklistReminderScheduler.EXTRA_TASK_ID) ?: return
         val taskText = intent.getStringExtra(ChecklistReminderScheduler.EXTRA_TASK_TEXT) ?: return
         val hourName = intent.getStringExtra(ChecklistReminderScheduler.EXTRA_HOUR_NAME) ?: "ነግህ"
+        val reminderDate = intent.getStringExtra(ChecklistReminderScheduler.EXTRA_DATE)
+        val entryId = intent.getStringExtra(ChecklistReminderScheduler.EXTRA_ENTRY_ID)
 
         val pending = goAsync()
         Thread {
@@ -37,11 +39,19 @@ class ChecklistReminderReceiver : BroadcastReceiver() {
 
                 ensureChannel(context, s.checklistChannelName)
 
+                val targetRoute = when {
+                    !entryId.isNullOrBlank() && entryId != "draft" -> "journal/entry?id=$entryId"
+                    !reminderDate.isNullOrBlank() -> "journal?date=$reminderDate"
+                    else -> "journal"
+                }
+
                 val tap = PendingIntent.getActivity(
                     context,
                     taskId.hashCode(),
                     Intent(context, MainActivity::class.java).apply {
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        putExtra("route", targetRoute)
+                        putExtra(MainActivity.EXTRA_SKIP_INTRO, true)
                     },
                     PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
                 )

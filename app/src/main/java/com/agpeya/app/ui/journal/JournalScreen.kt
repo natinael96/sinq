@@ -102,9 +102,10 @@ import androidx.compose.ui.unit.dp
 private fun JournalScreenContent(
     onBack: () -> Unit,
     onOpenEntry: (String) -> Unit,
-    onNewEntry: (kind: JournalKind) -> Unit,
+    onNewEntry: (kind: JournalKind, targetDate: LocalDate?) -> Unit,
     onStartConfessionPrep: () -> Unit,
     onOpenPenance: () -> Unit,
+    initialDate: String? = null,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -125,18 +126,42 @@ private fun JournalScreenContent(
         total / 13 to (total % 13) + 1
     }
 
+    val parsedInitialDate = remember(initialDate) {
+        initialDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+    }
+    LaunchedEffect(parsedInitialDate) {
+        parsedInitialDate?.let { initDate ->
+            val initEth = EthiopianDate.from(initDate)
+            val currentTotal = todayEth.year * 13 + (todayEth.month - 1)
+            val targetTotal = initEth.year * 13 + (initEth.month - 1)
+            offset = currentTotal - targetTotal
+        }
+    }
+
     val entries by JournalRepository.inEthiopianMonth(context, year, month)
         .collectAsState(initial = emptyList())
     val writtenDays by JournalRepository.writtenDaysIn(context, year, month)
         .collectAsState(initial = emptyList())
 
     val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+
+    LaunchedEffect(parsedInitialDate, entries) {
+        if (parsedInitialDate != null) {
+            val initEth = EthiopianDate.from(parsedInitialDate)
+            val index = entries.indexOfFirst { it.context.ethDay == initEth.day }
+            if (index >= 0) {
+                listState.animateScrollToItem(index + 1)
+            }
+        }
+    }
+
     var confessing by remember { mutableStateOf(false) }
     var penancePrompt by remember { mutableStateOf(false) }
     var settingPassphrase by remember { mutableStateOf(false) }
     var lockMenu by remember { mutableStateOf(false) }
     var removingPassphrase by remember { mutableStateOf(false) }
     var showCreateSheet by remember { mutableStateOf(false) }
+    var createSheetDate by remember { mutableStateOf<LocalDate?>(null) }
     var selectedKindFilter by remember { mutableStateOf<JournalKind?>(null) }
 
     val displayedEntries = remember(entries, selectedKindFilter) {
@@ -178,7 +203,15 @@ private fun JournalScreenContent(
         },
         floatingActionButton = {
             if (!locked || unlocked) {
-                FloatingActionButton(onClick = { showCreateSheet = true }) {
+                FloatingActionButton(onClick = {
+                    if (offset < 0) {
+                        val futureDate = runCatching { EthiopianDate(year, month, 1).toGregorian() }.getOrNull()
+                        createSheetDate = futureDate
+                    } else {
+                        createSheetDate = today
+                    }
+                    showCreateSheet = true
+                }) {
                     Icon(Icons.Outlined.Add, contentDescription = s.newEntry)
                 }
             }
@@ -226,11 +259,11 @@ private fun JournalScreenContent(
                                 .padding(horizontal = 7.dp, vertical = 2.dp),
                         )
                     }
-                    IconButton(onClick = { offset -= 1 }, enabled = offset > 0) {
+                    IconButton(onClick = { offset -= 1 }, enabled = offset > -12) {
                         Icon(
                             Icons.AutoMirrored.Outlined.ArrowForward,
                             contentDescription = s.nextMonth,
-                            tint = if (offset > 0) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
+                            tint = if (offset > -12) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
                         )
                     }
                 }
@@ -244,7 +277,15 @@ private fun JournalScreenContent(
                         if (index >= 0) {
                             scope.launch { listState.animateScrollToItem(index + 1) }
                         } else {
-                            showCreateSheet = true
+                            val dayDate = runCatching {
+                                EthiopianDate(year, month, day).toGregorian()
+                            }.getOrNull()
+                            if (dayDate != null && dayDate.isAfter(today)) {
+                                onNewEntry(JournalKind.CHECKLIST, dayDate)
+                            } else {
+                                createSheetDate = dayDate
+                                showCreateSheet = true
+                            }
                         }
                     },
                 )
@@ -334,12 +375,19 @@ private fun JournalScreenContent(
     }
 
     if (showCreateSheet) {
+        val isFuture = createSheetDate?.isAfter(today) == true || offset < 0
         NewEntryBottomSheet(
             s = s,
-            onDismiss = { showCreateSheet = false },
-            onSelectKind = { kind ->
+            isFutureDate = isFuture,
+            onDismiss = {
                 showCreateSheet = false
-                onNewEntry(kind)
+                createSheetDate = null
+            },
+            onSelectKind = { kind ->
+                val targetDate = createSheetDate
+                showCreateSheet = false
+                createSheetDate = null
+                onNewEntry(kind, targetDate)
             },
         )
     }
@@ -683,6 +731,7 @@ private fun EntryRow(entry: JournalEntry, s: Strings, onClick: () -> Unit) {
 @Composable
 private fun NewEntryBottomSheet(
     s: Strings,
+    isFutureDate: Boolean = false,
     onDismiss: () -> Unit,
     onSelectKind: (JournalKind) -> Unit,
 ) {
@@ -714,7 +763,31 @@ private fun NewEntryBottomSheet(
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(bottom = 6.dp),
             )
-            val options = listOf(
+            if (isFutureDate) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f))
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Icon(
+                        Icons.Outlined.NotificationsActive,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.size(16.dp),
+                    )
+                    Text(
+                        text = s.journalFutureDateNotice,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontWeight = FontWeight.Medium,
+                    )
+                }
+            }
+            val allOptions = listOf(
                 EntryKindOption(
                     kind = JournalKind.CHECKLIST,
                     icon = Icons.Outlined.Checklist,
@@ -740,6 +813,11 @@ private fun NewEntryBottomSheet(
                     desc = s.journalKindConfessionDesc,
                 ),
             )
+            val options = if (isFutureDate) {
+                allOptions.filter { it.kind == JournalKind.CHECKLIST }
+            } else {
+                allOptions
+            }
             options.forEach { opt ->
                 Row(
                     modifier = Modifier
@@ -806,8 +884,33 @@ private data class EntryKindOption(
 )
 
 @Composable
-fun JournalScreen(onBack: () -> Unit, onOpenEntry: (String) -> Unit, onNewEntry: (JournalKind) -> Unit, onStartConfessionPrep: () -> Unit, onOpenPenance: () -> Unit) {
+fun JournalScreen(
+    onBack: () -> Unit,
+    onOpenEntry: (String) -> Unit,
+    onNewEntry: (JournalKind, LocalDate?) -> Unit,
+    onStartConfessionPrep: () -> Unit,
+    onOpenPenance: () -> Unit,
+    initialDate: String? = null,
+) {
     com.agpeya.app.ui.journal.JournalAccess(onBack) {
-        JournalScreenContent(onBack, onOpenEntry, onNewEntry, onStartConfessionPrep, onOpenPenance)
+        JournalScreenContent(onBack, onOpenEntry, onNewEntry, onStartConfessionPrep, onOpenPenance, initialDate)
     }
+}
+
+@Composable
+fun JournalScreen(
+    onBack: () -> Unit,
+    onOpenEntry: (String) -> Unit,
+    onNewEntry: (JournalKind) -> Unit,
+    onStartConfessionPrep: () -> Unit,
+    onOpenPenance: () -> Unit,
+) {
+    JournalScreen(
+        onBack = onBack,
+        onOpenEntry = onOpenEntry,
+        onNewEntry = { kind, _ -> onNewEntry(kind) },
+        onStartConfessionPrep = onStartConfessionPrep,
+        onOpenPenance = onOpenPenance,
+        initialDate = null,
+    )
 }

@@ -119,4 +119,20 @@ class JournalTest {
         assertEquals(java.time.LocalTime.of(12, 0), com.agpeya.app.reminders.ChecklistReminderScheduler.resolveTime("ቀትር (12:00 PM)"))
         assertEquals(java.time.LocalTime.of(18, 0), com.agpeya.app.reminders.ChecklistReminderScheduler.resolveTime("ሠርክ"))
     }
+
+    @Test
+    fun `future date entry detection and scheduler extras`() {
+        val futureDate = java.time.LocalDate.now().plusDays(3)
+        val futureEntry = JournalEntry(
+            id = "e-future",
+            date = futureDate.toString(),
+            kind = JournalKind.CHECKLIST,
+            body = "- [ ] ጸሎተ ነግህ",
+            context = DayContext(ethYear = 2018, ethMonth = 12, ethDay = 28),
+        )
+        assertTrue(futureEntry.localDate!!.isAfter(java.time.LocalDate.now()))
+        assertEquals(JournalKind.CHECKLIST, futureEntry.kind)
+        assertEquals("checklistDate", com.agpeya.app.reminders.ChecklistReminderScheduler.EXTRA_DATE)
+        assertEquals("checklistEntryId", com.agpeya.app.reminders.ChecklistReminderScheduler.EXTRA_ENTRY_ID)
+    }
 }

@@ -1,0 +1,919 @@
+/* Sinq site: one stylesheet, no external requests.
+   Colours follow the app's design system (docs/DESIGN_SYSTEM.md): deep
+   liturgical green as the constant brand ground, gold for what matters.
+   The app's rule holds here too, hierarchy comes from spacing and type
+   rather than from wrapping everything in a box. */
+
+/* ---- The app own Ethiopic, self-hosted ---------------------------------
+   The site used to name "Noto Sans Ethiopic" and hope: every Amharic string on
+   it rendered in whatever Ethiopic face the visitor happened to own, which is
+   Nyala on Windows, Kefa on macOS and Noto elsewhere. Those look nothing like
+   each other, so the drawn frames could not look like the app by construction.
+
+   The face comes from app/src/main/res/font, so the site reads in the same
+   letters the app does. To regenerate it after the app changes face, with
+   fonttools installed:
+
+     Sinq Ethiopic    Abyssinica SIL, the face the app reads in. Kept at the
+                      FULL Ethiopic block, because changelog.html is
+                      regenerated from CHANGELOG.md on every release and a
+                      tight subset would turn the next release's new words
+                      into tofu. Built straight from the app's own copy:
+
+       pyftsubset app/src/main/res/font/abyssinica_sil.ttf \
+         --unicodes=U+1200-139F,U+2D80-2DDF,U+AB00-AB2F \
+         --layout-features='*' --flavor=woff2 \
+         --output-file=abyssinica-ethiopic.woff2
+
+   Self-hosted, like the face before it. A web font pulled from Google would
+   tell a third party who read this page, which is not a thing a site about an
+   app that sends nothing should do.
+
+   Abyssinica SIL is SIL International's, under the Open Font Licence, which
+   permits serving it this way; the licence travels with the app in
+   docs/AbyssinicaSIL-OFL.txt.
+
+   The app declares it as a single Font() with no weight, so Android renders
+   the 400 instance and synthesises bold. This file is the 400 for exactly
+   that reason, and the frames turn font synthesis back on so a browser fakes
+   bold the same way Android does. */
+@font-face {
+  font-family: "Sinq Ethiopic";
+  src: url("abyssinica-ethiopic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+1200-139F, U+2D80-2DDF, U+AB00-AB2F;
+}
+
+:root {
+  color-scheme: light dark;
+  --hero:    #0B3129;
+  --brand:   #0E3B31;
+  --gold:    #7E5F1E;   /* bronzed; #E4BC5A only reaches 3.1:1 on ivory */
+  --gold-lit:#E4BC5A;   /* the true brand gold, for use on the green ground */
+  --bg:      #FAF9F6;
+  --surface: #FFFFFF;
+  --sunken:  #F2F0E9;
+  --ink:     #14231D;
+  --muted:   #4D5D55;
+  --line:    #E3E1D8;
+  --hair:    #EDEBE3;
+  --link:    #1F6B4A;
+  --chip-bg: rgba(126,95,30,.08);
+  --shadow:  0 1px 2px rgba(20,35,29,.04), 0 10px 30px rgba(20,35,29,.055);
+  --shadow-lift: 0 2px 4px rgba(20,35,29,.05), 0 18px 44px rgba(20,35,29,.1);
+  --radius:  14px;
+  --radius-lg: 22px;
+  --chip-line: rgba(126,95,30,.22);
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* ---- Themes -------------------------------------------------------------
+   One set of tokens, three ways in. The reader's OS preference decides unless
+   they have chosen a theme with the button in the nav, and an explicit choice
+   wins in both directions. Nothing below this point names a literal colour,
+   so the two themes cannot drift apart. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --gold:    #D3B04A;
+    --bg:      #101613;
+    --surface: #16201B;
+    --sunken:  #131A16;
+    --ink:     #E4E8E2;
+    --muted:   #A9B4AC;
+    --line:    #253029;
+    --hair:    #1E2822;
+    --link:    #9FD0B8;
+    --chip-bg: rgba(211,176,74,.1);
+    --chip-line: rgba(211,176,74,.28);
+    --shadow:  0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.28);
+    --shadow-lift: 0 2px 6px rgba(0,0,0,.34), 0 18px 44px rgba(0,0,0,.4);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+    --gold:    #D3B04A;
+    --bg:      #101613;
+    --surface: #16201B;
+    --sunken:  #131A16;
+    --ink:     #E4E8E2;
+    --muted:   #A9B4AC;
+    --line:    #253029;
+    --hair:    #1E2822;
+    --link:    #9FD0B8;
+    --chip-bg: rgba(211,176,74,.1);
+    --chip-line: rgba(211,176,74,.28);
+    --shadow:  0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.28);
+    --shadow-lift: 0 2px 6px rgba(0,0,0,.34), 0 18px 44px rgba(0,0,0,.4);
+    color-scheme: dark;
+}
+
+:root[data-theme="light"] { color-scheme: light; }
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 17px/1.68 system-ui, -apple-system, "Segoe UI", Roboto, "Sinq Ethiopic", sans-serif;
+  font-synthesis-weight: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Ethiopic wants a touch more air between lines than Latin does. */
+.ethi {
+  font-family: "Sinq Ethiopic", "Abyssinica SIL", "Noto Sans Ethiopic",
+               "Nyala", system-ui, -apple-system, sans-serif;
+  line-height: 1.85;
+}
+
+/* ---- Language switching -------------------------------------------------
+   Every translated string ships as a pair of elements. CSS decides which one
+   is in the document; the hidden half leaves the accessibility tree too.
+   Both rules carry the same specificity so authored display rules on the
+   translated elements cannot outrank them. */
+/* The rules themselves live at the very end of this file, where nothing
+   authored later can outrank them on a specificity tie. */
+
+a { color: var(--link); text-underline-offset: 3px; }
+a:hover { text-decoration-thickness: 2px; }
+
+h1, h2, h3 { line-height: 1.22; font-weight: 700; letter-spacing: -.012em; }
+h1.ethi, h2.ethi, h3.ethi, .ethi { letter-spacing: 0; }
+
+::selection { background: rgba(228,188,90,.3); color: var(--ink); }
+
+.skip {
+  position: absolute; left: -9999px;
+  background: var(--gold-lit); color: #14231D;
+  padding: 10px 16px; border-radius: 0 0 var(--radius) 0; z-index: 10;
+}
+.skip:focus { left: 0; top: 0; }
+
+:focus-visible { outline: 2px solid var(--gold-lit); outline-offset: 3px; border-radius: 3px; }
+
+/* ---- Nav ---------------------------------------------------------------- */
+/* Phone first. On a phone the nav does not stick — sticky, it wrapped to
+   three rows and ate a fifth of the screen — and the links become one
+   swipeable row under the brand. From 560px up it behaves as a bar. */
+.nav {
+  background: var(--hero);
+  border-bottom: 1px solid rgba(228,188,90,.18);
+}
+.nav-in {
+  max-width: 1040px; margin: 0 auto; padding: 10px 16px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  color: #F2EDDE; text-decoration: none; font-weight: 700; margin-right: auto;
+}
+.brand svg { width: 26px; height: 26px; display: block; }
+.brand .name { font-size: 19px; }
+.nav-links {
+  order: 3; width: 100%;
+  display: flex; align-items: center; gap: 18px;
+  flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.nav-links::-webkit-scrollbar { display: none; }
+.nav-links a {
+  color: #C9DCD2; text-decoration: none; font-size: 14px; padding: 6px 0;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent; transition: color .18s, border-color .18s;
+}
+.nav-links a:hover, .nav-links a[aria-current="page"] {
+  color: #F6F2E6; border-bottom-color: var(--gold-lit);
+}
+
+/* ---- Theme button -------------------------------------------------------
+   Three states, not two: the reader's system setting is the default and has
+   to stay reachable, so the button cycles system → light → dark rather than
+   flipping between two and stranding whoever wanted to follow their OS.
+   The choice is kept in localStorage and applied before first paint by a
+   small script in each page's head, so the page never flashes the wrong
+   theme on the way in. */
+.theme {
+  flex: none;
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 34px; padding: 0 12px;
+  border: 1px solid rgba(228,188,90,.34); border-radius: 999px;
+  background: rgba(255,255,255,.05); color: #C9DCD2;
+  font: 600 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase;
+  cursor: pointer;
+  transition: color .18s, border-color .18s, background-color .18s, transform .12s;
+}
+.theme svg {
+  width: 15px; height: 15px; display: none;
+  fill: none; stroke: currentColor; stroke-width: 1.7;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+:root:not([data-theme]) .theme .ic-system,
+:root[data-theme="light"] .theme .ic-light,
+:root[data-theme="dark"]  .theme .ic-dark { display: block; }
+.theme:hover { color: #F6F2E6; border-color: var(--gold-lit);
+               background: rgba(228,188,90,.12); }
+.theme:active { transform: scale(.96); }
+.theme .lbl { display: none; }
+
+/* ---- Layout ------------------------------------------------------------- */
+main { max-width: 880px; margin: 0 auto; padding: 0 20px 64px; }
+section { margin: 60px 0; }
+
+/* Prose stays inside a comfortable measure even when its section is wide. */
+section > p, .page-head > p:not(.page-eyebrow), .measure { max-width: 34em; }
+
+/* The section header: a short gold rule, a small label, then the line that
+   carries the section. */
+section > h2 {
+  font: 600 12px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase;
+  color: var(--gold); margin: 0 0 14px;
+  display: flex; align-items: center; gap: 14px;
+}
+section > h2::before {
+  content: ""; width: 26px; height: 2px; flex: none;
+  background: var(--gold); border-radius: 2px;
+}
+section > .lede {
+  font-size: clamp(24px, 3vw, 30px); margin: 0 0 26px;
+  line-height: 1.28; max-width: 20em; letter-spacing: -.015em;
+}
+section > .lede .ethi { letter-spacing: 0; line-height: 1.5; }
+
+.page-head { padding: 40px 0 26px; margin-bottom: 8px;
+              border-bottom: 1px solid var(--line); }
+.page-eyebrow {
+  font: 600 12px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase;
+  color: var(--gold); margin: 0 0 16px;
+  display: flex; align-items: center; gap: 14px;
+}
+.page-eyebrow::before {
+  content: ""; width: 26px; height: 2px; flex: none;
+  background: var(--gold); border-radius: 2px;
+}
+.page-head h1 { font-size: clamp(30px, 5vw, 44px); margin: 0 0 14px;
+                letter-spacing: -.022em; }
+/* :not(), because .page-head > p outranks .page-eyebrow on specificity and
+   was quietly repainting the label as body text. */
+.page-head > p:not(.page-eyebrow) {
+  color: var(--muted); margin: 0; font-size: 17px; line-height: 1.6;
+}
+
+/* ---- Hero ---------------------------------------------------------------
+   Split layout: identity and the ask on the left, the seven hours on the
+   right so the page shows what the app holds instead of only claiming it. */
+.hero {
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(circle at 75% 45%, rgba(13, 44, 37, 0.45) 0%, rgba(9, 26, 21, 0.88) 75%), var(--hero);
+  color: #F6F2E6;
+  padding: 44px 20px 48px;
+}
+#hero-bg-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  transition: filter .3s ease-out, transform .3s ease-out;
+}
+@media (max-width: 819px) {
+  #hero-bg-canvas {
+    filter: blur(20px);
+    transform: scale(1.08);
+    opacity: 0.88;
+  }
+}
+.hero-in {
+  position: relative;
+  z-index: 1;
+  max-width: 1040px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr;
+  gap: 40px; align-items: center;
+}
+
+.eyebrow {
+  display: flex; align-items: center; gap: 11px;
+  margin: 0 0 18px; color: #B5CEC3;
+  font-size: 14px; letter-spacing: .2em; text-transform: uppercase;
+  text-shadow: 0 1px 6px rgba(0, 15, 11, 0.8);
+}
+.eyebrow .mark { width: 32px; height: auto; display: block; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4)); }
+.eyebrow .wordmark { font-weight: 600; }
+
+.motto {
+  margin: 0 0 26px; color: #B8D1C6;
+  font-style: italic; font-size: 16px;
+  text-shadow: 0 1px 6px rgba(0, 15, 11, 0.7);
+}
+
+.hero h1 {
+  font-size: clamp(38px, 5.2vw, 58px);
+  line-height: 1.1; letter-spacing: -.015em;
+  margin: 0; color: #FFFDF7;
+  text-shadow: 0 2px 16px rgba(0, 15, 11, 0.85);
+}
+
+/* The one word each line turns on. */
+.hl { color: var(--gold-lit); text-shadow: 0 0 24px rgba(228, 188, 90, 0.4); }
+.hero .sub .hl { font-weight: 600; color: #F8D988; text-shadow: 0 1px 6px rgba(0, 15, 11, 0.9); }
+
+.hero .sub {
+  font-size: 17px; line-height: 1.62; color: #D5E7DF;
+  margin: 20px 0 0;
+  text-shadow: 0 1px 8px rgba(0, 15, 11, 0.85);
+}
+
+/* On a phone the two buttons are full width and stacked; they become a row
+   at 560px. A 44px-plus target either way. */
+.cta {
+  display: flex; flex-direction: column; align-items: stretch;
+  gap: 14px; margin: 28px 0 0;
+}
+.btn {
+  display: inline-block; text-decoration: none; font-weight: 600; font-size: 16px;
+  padding: 14px 30px; border-radius: 999px; border: 1px solid transparent;
+  text-align: center;
+}
+.btn-primary {
+  background: var(--gold-lit);
+  color: #10241E;
+  font-weight: 700;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+}
+.btn-primary:hover {
+  background: #EFCD76;
+  box-shadow: 0 6px 22px rgba(228, 188, 90, 0.35);
+}
+.btn-ghost {
+  background: rgba(9, 30, 24, 0.72);
+  border: 1px solid rgba(228, 188, 90, 0.45);
+  color: #F5E4B8;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+.btn-ghost:hover {
+  background: rgba(228, 188, 90, 0.2);
+  border-color: #E8C46B;
+  color: #FFFDF7;
+}
+.btn-sm { font-size: 15px; padding: 10px 22px; }
+/* align-self, not text-align: stretched to the column width its underline
+   spanned the whole hero and read as a divider rather than a link. */
+.cta-link {
+  align-self: center;
+  color: #E2EFE9; font-size: 16px; text-decoration: none;
+  border-bottom: 1px solid rgba(228, 188, 90, 0.55); padding-bottom: 2px;
+  text-shadow: 0 1px 4px rgba(0, 15, 11, 0.8);
+}
+.cta-link:hover { color: #F8D988; border-bottom-color: #F8D988; }
+
+.hero-fine { margin: 24px 0 0; font-size: 13.5px; color: #A6C2B5; text-shadow: 0 1px 4px rgba(0, 15, 11, 0.6); }
+
+/* Facts about the build, as chips rather than a run-on line: on a phone the
+   old single line wrapped to three and read as a paragraph. */
+.facts { display: flex; flex-wrap: wrap; gap: 7px; margin: 22px 0 0; padding: 0;
+         list-style: none; }
+.facts li, .facts .fact, .facts > span, .facts > .star {
+  display: inline-flex; align-items: center;
+  padding: 6px 12px; border-radius: 999px;
+  border: 1px solid rgba(228, 188, 90, 0.32);
+  background: rgba(9, 30, 24, 0.75);
+  color: #DDEBE3; font: 600 11.5px/1 var(--mono); letter-spacing: .04em;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+  text-shadow: 0 1px 2px rgba(0, 15, 11, 0.7);
+}
+.facts .fact.lit {
+  color: #F8D988;
+  border-color: rgba(228, 188, 90, 0.6);
+  background: rgba(228, 188, 90, 0.16);
+}
+
+/* The right-hand panel: the day's hours, as the app names them. */
+.hours {
+  position: relative;
+  z-index: 1;
+  background: rgba(7, 24, 19, 0.68);
+  border: 1px solid rgba(228, 188, 90, 0.32);
+  border-radius: 22px; padding: 20px 18px 16px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.4);
+}
+.hours h2 {
+  font: 600 11.5px/1 var(--mono); letter-spacing: .18em; text-transform: uppercase;
+  color: var(--gold-lit); margin: 0;
+}
+
+/* ---- The dial -----------------------------------------------------------
+   The day as a circle: the gold arc is the part of today that has already
+   gone, and the lit node is the hour being kept now, read from the visitor's
+   own clock. It is drawn, not fetched — the page still contacts nobody.
+   Without JavaScript the dial simply does not appear and the list below it,
+   which carries the same seven hours, is the whole panel. */
+.dial-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding-bottom: 14px; margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255,255,255,.09);
+}
+.dial-head .live {
+  display: inline-flex; align-items: center; gap: 7px;
+  font: 600 11px/1 var(--mono); letter-spacing: .08em;
+  color: var(--gold-lit); font-variant-numeric: tabular-nums;
+}
+.dial-head .live i {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--gold-lit);
+  animation: sinq-pulse 2.8s ease-in-out infinite;
+}
+@keyframes sinq-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+
+.dial { position: relative; width: 100%; max-width: 260px; aspect-ratio: 1;
+        margin: 14px auto 4px; }
+.dial svg {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.dial .track   { fill: none; stroke: rgba(255,255,255,.14); stroke-width: 1.5; }
+.dial .spoke   { stroke: rgba(255,255,255,.1); stroke-width: 1; }
+.dial .elapsed {
+  fill: none; stroke: var(--gold-lit); stroke-width: 2.5; stroke-linecap: round;
+  transition: stroke-dashoffset 1400ms cubic-bezier(.2,.7,.3,1);
+}
+.dial .hand { stroke: var(--gold-lit); stroke-width: 1.5; stroke-linecap: round;
+              opacity: .45; }
+.dial .hr { cursor: pointer; }
+.dial .hr circle {
+  fill: var(--hero); stroke: rgba(228,188,90,.4); stroke-width: 1.5;
+  transition: fill .18s, stroke .18s;
+}
+.dial .hr text {
+  fill: #A9C1B6; font-size: 12px; text-anchor: middle;
+  dominant-baseline: central; transition: fill .18s;
+}
+.dial .hr:hover circle { stroke: var(--gold-lit); }
+.dial .hr:hover text { fill: #F6F2E6; }
+.dial .hr:focus { outline: none; }
+.dial .hr:focus-visible circle { stroke: var(--gold-lit); stroke-width: 3; }
+.dial .hr.now circle { fill: var(--gold-lit); stroke: var(--gold-lit); }
+.dial .hr.now text { fill: #14231D; font-weight: 700; }
+
+.dial-readout {
+  position: absolute; inset: 0; display: grid; place-content: center;
+  text-align: center; pointer-events: none; padding: 0 16%;
+  z-index: 2;
+}
+.dial-readout .k {
+  font: 600 9.5px/1 var(--mono); letter-spacing: .18em; text-transform: uppercase;
+  color: #B5CEC3;
+  text-shadow: 0 1px 4px rgba(0, 15, 11, 0.95);
+}
+.dial-readout .n {
+  font-size: 19px; color: #FFFDF7; margin-top: 8px;
+  line-height: 1.2;
+  text-shadow: 0 1px 6px rgba(0, 15, 11, 0.95), 0 0 14px rgba(0, 15, 11, 0.85);
+}
+.dial-readout .e {
+  font: 400 11px/1 var(--mono); color: #B5CEC3; margin-top: 6px;
+  letter-spacing: .05em;
+  text-shadow: 0 1px 4px rgba(0, 15, 11, 0.95);
+}
+.dial-readout .t {
+  font: 700 12.5px/1 var(--mono); color: #F8D988;
+  margin-top: 9px; font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 4px rgba(0, 15, 11, 0.95);
+}
+.hours ol { list-style: none; margin: 10px 0 0; padding: 0; }
+.hours li {
+  display: flex; align-items: center; gap: 10px;
+  padding: 5px 0; border-bottom: none;
+}
+.hours .num { color: #F3CF76; font-size: 13px; min-width: 15px;
+              line-height: 1; font-weight: 600; }
+.hours .nm { color: #FFFDF7; font-size: 15px; line-height: 1.5; }
+/* The English gloss is the first thing to go when the row is tight: the
+   Ge'ez numeral and the Amharic name are what the app itself shows. */
+.hours .gl { display: none; }
+.hours .at { color: #AEC5BA; font: 600 11px/1 var(--mono); margin-left: auto;
+             padding-left: 10px; font-variant-numeric: tabular-nums;
+             min-width: 4.4em; text-align: right; }
+
+/* The hour being kept right now, marked in the list as well as on the dial,
+   so the mark survives a reader who never looks at the circle. */
+.hours li.is-now { background: rgba(228,188,90,.16); margin: 0 -8px;
+                   padding: 5px 8px; border-radius: 7px; }
+.hours li.is-now .nm { color: #FFFDF7; font-weight: 600; }
+.hours li.is-now .at { color: #F8D988; font-weight: 700; }
+.hours .note-row {
+  margin: 12px 0 4px; font-size: 12.5px; line-height: 1.55; color: #A8C2B6;
+  border-top: 1px solid rgba(255,255,255,.09); padding-top: 12px;
+}
+
+/* ---- Bands -------------------------------------------------------------- */
+.band {
+  background: var(--hero); color: #E7EFE9;
+  padding: 56px 20px; margin: 64px 0;
+  position: relative;
+}
+.band-in { max-width: 720px; margin: 0 auto; }
+.band h2 {
+  color: var(--gold-lit); font: 600 12px/1 var(--mono); letter-spacing: .16em;
+  text-transform: uppercase; margin: 0 0 20px;
+  display: flex; align-items: center; gap: 14px;
+}
+.band h2::before {
+  content: ""; width: 26px; height: 2px; flex: none;
+  background: var(--gold-lit); border-radius: 2px;
+}
+.band p { margin: 0 0 18px; font-size: 18px; line-height: 1.66; }
+.band p:last-child { margin-bottom: 0; }
+.band strong { color: #FFFDF7; }
+.band a { color: var(--gold-lit); }
+
+/* ---- Feature groups -----------------------------------------------------
+   Two columns on wide screens: the group's name holds the left rail while
+   its items scroll past on the right. */
+.group {
+  display: grid; grid-template-columns: 1fr; gap: 18px;
+  margin: 0 0 66px; padding-top: 30px; border-top: 1px solid var(--line);
+}
+.group:first-of-type { border-top: none; padding-top: 0; }
+.group h3 { font-size: 24px; margin: 0; align-self: start; }
+.group h3 .sub {
+  display: inline; margin-left: 8px; color: var(--muted); font-weight: 400;
+  font-size: 14.5px; letter-spacing: .01em;
+}
+.group ul {
+  list-style: none; padding: 0; margin: 0;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  overflow: hidden; background: var(--surface);
+}
+.group li {
+  margin: 0; padding: 16px 18px;
+  border-top: 1px solid var(--hair);
+  transition: background-color .18s ease;
+}
+.group li:first-child { border-top: none; }
+.group li:hover { background: var(--sunken); }
+.group li b {
+  display: block; font-size: 16.5px; margin-bottom: 4px; letter-spacing: -.008em;
+}
+.group li span { color: var(--muted); font-size: 15.5px; line-height: 1.6; }
+
+/* ---- Cards -------------------------------------------------------------- */
+.cards {
+  display: grid; gap: 1px; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+  background: var(--line); border: 1px solid var(--line);
+  border-radius: var(--radius); overflow: hidden;
+}
+.card {
+  background: var(--surface); padding: 24px 22px 20px;
+  display: flex; flex-direction: column;
+  transition: background-color .18s ease;
+}
+.card:hover { background: var(--sunken); }
+.card h3 { margin: 0 0 10px; font-size: 18px; }
+.card p { margin: 0; color: var(--muted); font-size: 15.5px; }
+.card p:last-child { margin-top: auto; padding-top: 16px; }
+.card a { font-weight: 600; text-decoration: none; }
+.card a:hover { text-decoration: underline; }
+
+/* ---- Steps -------------------------------------------------------------- */
+.steps { list-style: none; counter-reset: step; padding: 0; margin: 0; }
+.steps > li {
+  counter-increment: step; position: relative;
+  padding: 0 0 40px 52px; margin: 0 0 0 19px;
+  border-left: 1px solid var(--line);
+}
+.steps > li:last-child { border-left-color: transparent; padding-bottom: 0; }
+.steps > li::before {
+  content: counter(step);
+  position: absolute; left: -20px; top: -4px;
+  width: 39px; height: 39px; border-radius: 50%;
+  background: var(--bg); color: var(--gold);
+  border: 1.5px solid var(--gold);
+  display: grid; place-items: center; font: 700 15px/1 var(--mono);
+}
+.steps h3 { margin: 2px 0 8px; font-size: 19px; }
+.steps p { margin: 0 0 12px; color: var(--muted); max-width: 34em;
+           font-size: 15.5px; line-height: 1.62; }
+.steps > li:last-child p:last-child { margin-bottom: 0; }
+
+/* ---- Notes, definition lists, chips, code -------------------------------- */
+.note {
+  border: 1px solid var(--line); border-left: 3px solid var(--gold);
+  background: var(--sunken);
+  padding: 20px 22px; border-radius: 0 var(--radius) var(--radius) 0;
+  margin: 32px 0; font-size: 15.5px; line-height: 1.62;
+}
+.note p { margin: 0 0 12px; }
+.note p:last-child { margin: 0; }
+
+dl.terms {
+  margin: 0; padding: 0 18px;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface);
+}
+dl.terms dt {
+  font-weight: 700; margin: 0; padding: 18px 0 5px;
+  border-top: 1px solid var(--hair); font-size: 16.5px;
+}
+dl.terms dt:first-of-type { border-top: none; }
+dl.terms dd { margin: 0 0 18px; color: var(--muted); max-width: 34em;
+              font-size: 15.5px; line-height: 1.62; }
+dl.terms dd + dd { margin-top: -10px; }
+dl.terms dd.fine { font: 400 13.5px/1.6 var(--mono); margin-top: -10px; }
+
+.chip {
+  display: inline-block; font: 600 12px/1.5 var(--mono);
+  letter-spacing: .05em; text-transform: uppercase;
+  padding: 5px 12px; border-radius: 999px;
+  background: var(--chip-bg); color: var(--gold);
+  border: 1px solid var(--chip-line);
+  vertical-align: middle;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .88em;
+  background: var(--sunken); padding: 2px 6px; border-radius: 5px;
+  border: 1px solid var(--hair); overflow-wrap: anywhere;
+}
+pre {
+  background: var(--sunken); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 18px 20px; overflow-x: auto;
+  line-height: 1.55;
+}
+pre code { background: none; padding: 0; border: none; }
+
+ul.plain { list-style: none; padding: 0; margin: 0; }
+ul.plain li {
+  margin: 0; padding: 14px 0 14px 20px;
+  border-top: 1px solid var(--hair); position: relative; max-width: 40em;
+  font-size: 15.5px; line-height: 1.62;
+}
+ul.plain li:first-child { border-top: none; padding-top: 0; }
+ul.plain li::before {
+  content: ""; position: absolute; left: 0; top: 23px;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--gold);
+}
+ul.plain li:first-child::before { top: 9px; }
+
+/* ---- Release entries ----------------------------------------------------
+   The version holds a left rail so a long release reads against its number. */
+.release {
+  display: grid; grid-template-columns: 1fr; gap: 18px;
+  margin: 0 0 72px; padding-top: 34px; border-top: 1px solid var(--line);
+}
+.release:first-of-type { border-top: none; padding-top: 0; }
+.release header { align-self: start;
+  border-bottom: 1px solid var(--hair); padding-bottom: 16px; }
+.release h2 { font: 700 30px/1.1 var(--mono); margin: 0; letter-spacing: -.02em; }
+.release .date { display: block; font: 400 13px/1 var(--mono); color: var(--muted);
+                 margin-top: 8px; }
+.release .motto { color: var(--gold); font-style: italic; margin: 12px 0 0; font-size: 15px; line-height: 1.45; }
+.release h3 {
+  font: 600 12px/1.5 var(--mono); letter-spacing: .05em; text-transform: uppercase;
+  margin: 0 0 14px;
+  display: inline-block; padding: 5px 12px; border-radius: 999px;
+  background: var(--chip-bg); color: var(--gold);
+  border: 1px solid var(--chip-line);
+}
+.release .body > *:first-child { margin-top: 0; }
+.release .body h3 { margin-top: 30px; }
+.release .body > h3:first-child { margin-top: 0; }
+.release ul { margin: 0; padding: 0; list-style: none; }
+.release li {
+  margin: 0; padding: 0 0 14px 18px;
+  border-left: 2px solid var(--hair); max-width: 40em;
+}
+.release li:last-child { padding-bottom: 0; }
+
+/* ---- Source blocks (credits) -------------------------------------------- */
+.source { margin: 0 0 46px; padding-top: 30px; border-top: 1px solid var(--line); }
+.source:first-of-type { border-top: none; padding-top: 0; }
+.source-head {
+  display: flex; align-items: baseline; gap: 14px;
+  flex-wrap: wrap; margin: 0 0 14px;
+}
+.source-head h3 { margin: 0; font-size: 20px; }
+.source-head h3 .sub { color: var(--muted); font-weight: 400; font-size: 15px; }
+.source p { margin: 0 0 14px; max-width: 34em; font-size: 15.5px; line-height: 1.62; }
+.source p:last-child { margin-bottom: 0; }
+
+/* ---- Feedback form ------------------------------------------------------
+   The only place on the site that sends anything anywhere, and only when the
+   reader presses the button. Styled like the rest: hairlines and spacing
+   rather than boxes, gold for the thing you are about to do. */
+.form { margin: 0; max-width: 34em; }
+.field { margin: 0 0 26px; }
+.field > label, .field > .legend {
+  display: block; font-weight: 600; font-size: 15.5px; margin: 0 0 7px;
+}
+.field .opt { color: var(--muted); font: 400 12px/1 var(--mono);
+              letter-spacing: .06em; text-transform: uppercase; margin-left: 6px; }
+.field .hint { display: block; color: var(--muted); font-size: 14px;
+               line-height: 1.55; margin: 0 0 9px; }
+
+.field input[type="text"],
+.field input[type="email"],
+.field textarea {
+  display: block; width: 100%; font: inherit; font-size: 16.5px;
+  color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 12px 14px; transition: border-color .16s, box-shadow .16s;
+}
+.field textarea { min-height: 168px; resize: vertical; line-height: 1.6; }
+.field input::placeholder, .field textarea::placeholder { color: var(--muted); opacity: .75; }
+.field input:focus, .field textarea:focus {
+  outline: none; border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--chip-bg);
+}
+.field input:user-invalid, .field textarea:user-invalid { border-color: #A6402F; }
+
+/* The kind of feedback, as a row of chips rather than a dropdown: the four
+   options are the point, so they should be readable without opening anything. */
+fieldset.kinds { border: 0; margin: 0 0 26px; padding: 0; }
+.kinds .row { display: flex; flex-wrap: wrap; gap: 9px; }
+.kinds label {
+  display: inline-block; cursor: pointer;
+  font-size: 15px; padding: 9px 16px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  transition: border-color .16s, background .16s, color .16s;
+}
+.kinds input { position: absolute; opacity: 0; width: 0; height: 0; }
+.kinds label:hover { border-color: var(--gold); }
+.kinds input:checked + label {
+  background: var(--chip-bg); border-color: var(--gold);
+  color: var(--gold); font-weight: 600;
+}
+.kinds input:focus-visible + label { outline: 2px solid var(--gold-lit); outline-offset: 2px; }
+
+/* Bots fill in everything they can see. This one they cannot. */
+.trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+.form button {
+  font: inherit; font-weight: 600; font-size: 16px; cursor: pointer;
+  background: var(--gold-lit); color: #14231D;
+  border: 1px solid transparent; border-radius: 999px; padding: 13px 30px;
+  transition: background .16s;
+}
+.form button:hover { background: #EFCD76; }
+.form button[disabled] { opacity: .6; cursor: default; }
+.form-foot { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.form-foot .fine { color: var(--muted); font-size: 14px; margin: 0; }
+
+/* Status is written by script; it stays empty and invisible without it. */
+.form-status { margin: 20px 0 0; font-size: 16px; }
+.form-status:empty { display: none; }
+.form-status.ok { color: var(--link); font-weight: 600; }
+.form-status.bad { color: #A6402F; font-weight: 600; }
+
+/* ---- Footer ------------------------------------------------------------- */
+footer { background: var(--hero); color: #A9C1B6; padding: 48px 20px 44px; font-size: 15.5px; }
+.foot-in { max-width: 880px; margin: 0 auto; }
+.foot-links {
+  display: flex; gap: 12px 28px; flex-wrap: wrap;
+  margin: 0 0 28px; padding: 0 0 26px; list-style: none;
+  border-bottom: 1px solid rgba(228,188,90,.16);
+}
+.foot-links a {
+  color: #F2EDDE; text-decoration: none;
+  border-bottom: 1px solid rgba(228,188,90,.35); transition: border-color .18s;
+}
+.foot-links a:hover { border-bottom-color: var(--gold-lit); }
+footer p { margin: 0 0 12px; max-width: 40em; line-height: 1.62; }
+footer a { color: var(--gold-lit); }
+footer .fine { color: #8FA99C; font: 400 12.5px/1.7 var(--mono); }
+
+/* ---- Reveal on scroll ---------------------------------------------------
+   The class is added by script, never by the stylesheet, so a page with no
+   JavaScript renders everything visible instead of blank. */
+/* The folded archive on the changelog page.
+
+   Everything inside starts life display:none, so the reveal-on-scroll observer
+   has nothing to report on until the fold is opened. Rather than rely on it
+   firing at that moment, the releases inside are exempted from the animation
+   outright — they are already the result of a deliberate click. */
+.more-releases { border-top: 1px solid var(--hair); margin-top: 44px; padding-top: 28px; }
+.more-releases > summary {
+  cursor: pointer; color: var(--gold); font-size: 16px; list-style: none;
+  padding: 12px 0; display: flex; align-items: center; gap: 10px;
+}
+.more-releases > summary::-webkit-details-marker { display: none; }
+.more-releases > summary::after { content: "\203A"; transform: rotate(90deg); font-size: 20px; line-height: 1; }
+.more-releases[open] > summary::after { transform: rotate(-90deg); }
+.more-releases > summary:hover { text-decoration: underline; }
+.more-releases > summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+.more-body { padding-top: 26px; }
+.more-body .release:first-of-type { border-top: none; padding-top: 0; }
+.more-releases .reveal, .more-releases .reveal.in { opacity: 1; transform: none; transition: none; }
+
+/* Entrances, not performances: .55s was long enough that a reader scrolling
+   at a normal pace met sections still fading in. ease-out, because an
+   entrance should arrive and settle rather than accelerate away. */
+.reveal { opacity: 0; transform: translateY(12px); }
+.reveal.in {
+  opacity: 1; transform: none;
+  transition: opacity .34s ease-out, transform .34s cubic-bezier(.2,.7,.3,1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .reveal.in { opacity: 1; transform: none; transition: none; }
+  .card { transition: none; }
+  .card:hover { transform: none; }
+}
+
+/* ---- Wider screens ------------------------------------------------------
+   Everything above is the phone layout. These are the only places the design
+   changes as the screen grows, so a narrow screen is never a stack of
+   overrides fighting a desktop rule it cannot see. */
+@media (min-width: 560px) {
+  .nav { position: sticky; top: 0; z-index: 5;
+         background: rgba(11,49,41,.92);
+         backdrop-filter: saturate(140%) blur(12px); }
+  .nav-in { padding: 11px 20px; gap: 18px; flex-wrap: nowrap; }
+  .nav-links { order: 0; width: auto; gap: 18px; margin-left: auto; }
+  .nav-links a { font-size: 15px; }
+  .theme .lbl { display: inline; min-width: 3.6em; text-align: left; }
+
+  .cta { flex-direction: row; align-items: center; flex-wrap: wrap;
+         gap: 12px 26px; margin: 34px 0 0; }
+  .btn { width: auto; }
+
+  .hero { padding: 64px 20px 64px; }
+  .hero .sub { font-size: 18.5px; }
+  .hours { padding: 24px 26px 18px; }
+  .hours .gl { display: block; color: #8FA99C; margin-left: auto;
+               font: 400 11.5px/1 var(--mono); letter-spacing: .04em; }
+  .hours .at { margin-left: 0; }
+  .dial { max-width: 300px; }
+
+  main { padding-bottom: 96px; }
+  section { margin: 84px 0; }
+  .page-head { padding: 68px 0 10px; }
+  .steps > li { padding-left: 62px; }
+  .band { padding: 76px 20px; margin: 96px 0; }
+  footer { padding: 64px 20px 52px; }
+}
+
+@media (min-width: 820px) {
+  .group { grid-template-columns: 210px 1fr; gap: 20px 46px; }
+  .group h3 { position: sticky; top: 88px; }
+  .group h3 .sub { display: block; margin-left: 0; }
+  .release { grid-template-columns: 150px 1fr; gap: 16px 44px; }
+  .release header { position: sticky; top: 88px; border-bottom: none;
+                    padding-bottom: 0; }
+}
+
+@media (min-width: 900px) {
+  .hero { padding: 88px 20px 84px; }
+  .hero-in { grid-template-columns: 1.06fr .94fr; gap: 72px; }
+  .hero .sub { max-width: 42ch; }
+  .hours { padding: 26px 30px 20px; }
+  .dial { max-width: 320px; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+/* Downloads and stars. The star is a link to the repository, not GitHub's own
+   button: that is an iframe from a third party, and this site loads nothing
+   from anywhere else. Both numbers are counted at build time and written in
+   as text, so the reader's browser never asks GitHub anything. */
+.facts .star { text-decoration: none; transition: color .18s, border-color .18s; }
+.facts .star:hover, .facts .star:focus-visible {
+  color: var(--gold-lit); border-color: rgba(228,188,90,.5);
+}
+
+/* The home page keeps the hero, followed by one quiet path to the details. */
+main.home-more { max-width: 1040px; padding: 28px 20px; }
+.home-more a { display: inline-flex; align-items: center; gap: 16px; min-height: 44px; }
+footer.home-footer { padding: 24px 20px; }
+.home-footer .foot-links { margin-bottom: 14px; }
+.home-footer .fine { margin: 0; }
+
+footer .powered-by {
+  max-width: none; margin: 24px 0 0; text-align: center;
+  color: #A9C1B6; font-size: 14px; font-weight: 300;
+  font-style: italic; letter-spacing: .08em;
+}
+footer .powered-by a {
+  color: inherit;
+  text-decoration: none;
+}
+footer .powered-by a:hover {
+  text-decoration: underline;
+}

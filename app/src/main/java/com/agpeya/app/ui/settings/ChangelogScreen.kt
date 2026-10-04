@@ -31,6 +31,23 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.5.10",
+        title = "Future date checklist reminders, Scripture Psalms reader with highlights, and web guide styling",
+        titleAm = "የወደፊት ቀናት የማረጋገጫ ማስታወሻዎች፣ የመዝሙረ ዳዊት ቅዱሳት መጻሕፍት ንባብ ከቀለም ምልክት ጋር፣ እና የድረ-ገጽ መመሪያ",
+        changes = listOf(
+            "Restricted future-date journal entries to checklists with liturgical guidance banner, preserving reflections for the present day while supporting advance task planning.",
+            "Tapping checklist reminder notifications now deep-links directly to the target entry and date in the Journal.",
+            "Accessing Psalms from Books & Scripture now opens the Scripture Reader with verse selection, 4-color highlights, bookmarks, notes, and copying, while devotional prayer retains the classic Psalter.",
+            "Polished the web liturgical manual and user guide with responsive sidebar, real-time search, and bilingual navigation.",
+        ),
+        changesAm = listOf(
+            "የወደፊት ቀናት ማስታወሻዎች ለማረጋገጫ ዝርዝር (Checklist) ብቻ ክፍት ሆነው ተገቢውን መንፈሳዊ መመሪያ እንዲያሳዩ ተደርጓል።",
+            "የማረጋገጫ ዝርዝር ማስታወሻ ሲደርስ ማሳወቂያውን በመጫን በቀጥታ ወደ ተዘጋጀለት ቀን እና ማስታወሻ ገጽ ይገባል።",
+            "በመጻሕፍት ክፍል የሚገኘው መዝሙረ ዳዊት ልክ እንደ ሌሎች የቅዱሳት መጻሕፍት ክፍሎች በቁጥር መምረጥ፣ በ፬ ቀለማት ማድመቅ፣ ማስታወሻ መያዝ እና መቅዳት እንዲያስችል ተደርጓል።",
+            "የድረ-ገጽ የተጠቃሚ መመሪያው የጎን ማውጫ፣ የቀጥታ ፍለጋ እና የሁለቱም ቋንቋዎች ድጋፍ ተሟልቶለታል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.5.9",
         title = "Home Psalter button polish, Wudase Maryam stability, and web manual redesign",
         titleAm = "የመነሻ ገጽ መዝሙረ ዳዊት አዝራር ማስተካከያ፣ የውዳሴ ማርያም ጥንካሬ እና የተሟላ የድረ-ገጽ መመሪያ",

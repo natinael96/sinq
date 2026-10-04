@@ -82,6 +82,14 @@ class ScriptureDataTest {
     }
 
     @Test
+    fun `Psalms decodes as a ScriptureBook with 150 chapters`() {
+        val root = json.parseToJsonElement(File(bibleDir, "books/19-psalms.json").readText()).jsonObject
+        val chs = root["chapters"]!!.jsonArray
+        assertEquals(150, chs.size)
+        assertTrue("all 150 psalms have verses", chs.all { it.jsonObject["verses"]!!.jsonArray.isNotEmpty() })
+    }
+
+    @Test
     fun `every Gitsawe book title resolves to a psalm or an NT book`() {
         val unresolved = gitsaweTitles().toSet().filter { title ->
             !GitsaweLinks.isPsalms(title) && ScriptureRepository.resolveBookKey(title) == null

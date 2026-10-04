@@ -5,6 +5,18 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.5.10] — 2026-10-04
+
+_versionCode 110 · Future date checklist reminders & deep linking, Scripture Psalms reader with highlights, and web guide styling_
+
+### Added
+- **Future Date Journal Checklist Restriction.** Browsing to future dates in the Journal now permits checklist-only entries with an informative liturgical notice banner, reserving prayer reflections and freeform text for the present day while supporting advance task and discipline planning.
+- **Checklist Reminder Deep Linking.** Tapping a checklist reminder notification directly opens the target entry and date in the Journal, bypassing onboarding screens.
+- **Scripture Psalms in Library Codex.** Accessing Psalms (መዝሙረ ዳዊት) from the Books & Scripture hub now opens the full 150-psalm Scripture Reader with verse selection, 4-color highlighting, bookmarks, personal notes, and verse copying, while keeping the dedicated prayer psalter for devotional hours and Home screen reading.
+
+### Changed
+- **Web User Guide & Liturgical Manual Polish.** Polished and unified the standalone web guide (`guide.html`) with responsive sidebar navigation, real-time search, bilingual Amharic/English toggles, and seamless site integration across all pages.
+
 ## [1.5.9] — 2026-10-04
 
 _versionCode 109 · Home Psalter button polish, Wudase Maryam stability, and web manual redesign_

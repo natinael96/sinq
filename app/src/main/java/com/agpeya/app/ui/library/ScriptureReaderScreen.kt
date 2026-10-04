@@ -237,7 +237,9 @@ fun ScriptureReaderScreen(
     val verseGap = readingVerseGap(bodyFontSp)
     val selRange = com.agpeya.app.ui.reading.flatSelectionRange(selA, selB)
     val sinq = sinqColors
-    val chapterTitle = "${b.nameAm} ${s.chapterUnit} ${geezNumeral(chapter)}"
+    val isPsalms = bookKey == "psalms" || b.key == "psalms"
+    val chapterUnitLabel = if (isPsalms) (if (s.isAmharic) "መዝሙር" else "Psalm") else s.chapterUnit
+    val chapterTitle = if (isPsalms) "${b.nameAm} ${geezNumeral(chapter)}" else "${b.nameAm} ${s.chapterUnit} ${geezNumeral(chapter)}"
     // The selection as the Church names it: the book's Amharic name, the
     // chapter and the verses, in Ge'ez numerals — the same string the copy, the
     // share, the image card and the bookmark all carry.
@@ -273,7 +275,7 @@ fun ScriptureReaderScreen(
                 titleContent = {
                     com.agpeya.app.ui.common.ReaderTitleBar(
                         title = b.nameAm,
-                        chapterLabel = "${s.chapterUnit} ${geezNumeral(chapter)}",
+                        chapterLabel = "$chapterUnitLabel ${geezNumeral(chapter)}",
                         pickable = b.chapters.size > 1,
                         onPick = { chaptersOpen = true },
                     )
@@ -486,8 +488,8 @@ fun ScriptureReaderScreen(
                     }
                 }
                 com.agpeya.app.ui.common.ChapterStepper(
-                    previousLabel = "${s.chapterUnit} ${com.agpeya.app.ui.reading.geezNumeral(chapter - 1)}",
-                    nextLabel = "${s.chapterUnit} ${com.agpeya.app.ui.reading.geezNumeral(chapter + 1)}",
+                    previousLabel = "$chapterUnitLabel ${com.agpeya.app.ui.reading.geezNumeral(chapter - 1)}",
+                    nextLabel = "$chapterUnitLabel ${com.agpeya.app.ui.reading.geezNumeral(chapter + 1)}",
                     onPrevious = { chapter -= 1; scope.launch { listState.scrollToItem(0) }; Unit }.takeIf { chapter > 1 },
                     onNext = { chapter += 1; scope.launch { listState.scrollToItem(0) }; Unit }.takeIf { chapter < b.chapters.size },
                 )
@@ -508,6 +510,7 @@ fun ScriptureReaderScreen(
                 current = chapter - 1,
                 onPick = { chaptersOpen = false; chapter = it + 1; scope.launch { listState.scrollToItem(0) }; Unit },
                 onDismiss = { chaptersOpen = false },
+                labelFor = { i -> if (isPsalms) "$chapterUnitLabel ${com.agpeya.app.ui.reading.geezNumeral(i + 1)}" else null },
             )
         }
     }

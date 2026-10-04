@@ -54,7 +54,6 @@ object ScriptureRepository {
                 meta["books"]!!.jsonArray.mapNotNull { node ->
                     val b = node.jsonObject
                     val id = b["id"]!!.jsonPrimitive.content
-                    if (id == "PSA") return@mapNotNull null
                     val canonical = canon[id]?.jsonObject
                     ScriptureBookMeta(
                         number = b["order"]!!.jsonPrimitive.int,

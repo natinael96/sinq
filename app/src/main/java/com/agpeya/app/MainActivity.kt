@@ -740,31 +740,43 @@ private fun AgpeyaNavHost(
                 },
             )
         }
-        composable("journal") {
+        composable(
+            route = "journal?date={date}",
+            arguments = listOf(
+                navArgument("date") { type = NavType.StringType; nullable = true; defaultValue = null },
+            ),
+        ) { backStackEntry ->
+            val initialDate = backStackEntry.arguments?.getString("date")
             com.agpeya.app.ui.journal.JournalScreen(
                 onBack = { navController.popBackStack() },
                 onOpenEntry = { id ->
                     navController.navigate("journal/entry?id=$id") { launchSingleTop = true }
                 },
-                onNewEntry = { kind ->
-                    navController.navigate("journal/entry?kind=${kind.name}") { launchSingleTop = true }
+                onNewEntry = { kind, date ->
+                    val dateParam = date?.let { "&date=$it" } ?: ""
+                    navController.navigate("journal/entry?kind=${kind.name}$dateParam") { launchSingleTop = true }
                 },
                 onStartConfessionPrep = {
                     navController.navigate("confessionPrep") { launchSingleTop = true }
                 },
                 onOpenPenance = { navController.navigate("penance") { launchSingleTop = true } },
+                initialDate = initialDate,
             )
         }
         composable(
-            route = "journal/entry?id={id}&kind={kind}&route={route}&label={label}",
+            route = "journal/entry?id={id}&kind={kind}&route={route}&label={label}&date={date}",
             arguments = listOf(
                 navArgument("id") { type = NavType.StringType; nullable = true; defaultValue = null },
                 navArgument("kind") { type = NavType.StringType; nullable = true; defaultValue = null },
                 navArgument("route") { type = NavType.StringType; nullable = true; defaultValue = null },
                 navArgument("label") { type = NavType.StringType; nullable = true; defaultValue = null },
+                navArgument("date") { type = NavType.StringType; nullable = true; defaultValue = null },
             ),
         ) { backStackEntry ->
             val args = backStackEntry.arguments
+            val targetDate = args?.getString("date")?.let {
+                runCatching { java.time.LocalDate.parse(it) }.getOrNull()
+            }
             com.agpeya.app.ui.journal.JournalEntryScreen(
                 entryId = args?.getString("id"),
                 initialKind = runCatching {
@@ -772,6 +784,7 @@ private fun AgpeyaNavHost(
                 }.getOrDefault(com.agpeya.app.model.JournalKind.REFLECTION),
                 anchorRoute = args?.getString("route"),
                 anchorLabel = args?.getString("label"),
+                targetDate = targetDate,
                 onBack = { navController.popBackStack() },
                 onOpenAnchor = { route ->
                     runCatching { navController.navigate(route) { launchSingleTop = true } }
@@ -803,7 +816,7 @@ private fun AgpeyaNavHost(
                 onBack = { navController.popBackStack() },
                 onOpenOldTestament = { navController.navigate("scripture/books/old") { launchSingleTop = true } },
                 onOpenNewTestament = { navController.navigate("scripture/books/new") { launchSingleTop = true } },
-                onOpenPsalms = { navController.navigate("psalter") { launchSingleTop = true } },
+                onOpenPsalms = { navController.navigate("scripture/psalms/0") { launchSingleTop = true } },
             )
         }
         composable("scripture/books/{testament}") { backStackEntry ->

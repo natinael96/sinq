@@ -18,6 +18,8 @@ object ChecklistReminderScheduler {
     const val EXTRA_TASK_TEXT = "checklistTaskText"
     const val EXTRA_HOUR_NAME = "checklistHourName"
     const val EXTRA_TASK_ID = "checklistTaskId"
+    const val EXTRA_DATE = "checklistDate"
+    const val EXTRA_ENTRY_ID = "checklistEntryId"
 
     /**
      * Resolves the canonical hour name, timestamp, or any custom time string to a [LocalTime].
@@ -74,6 +76,7 @@ object ChecklistReminderScheduler {
         taskText: String,
         scheduledHour: String?,
         date: LocalDate = LocalDate.now(),
+        entryId: String? = null,
     ) {
         val app = context.applicationContext
         val am = app.getSystemService(AlarmManager::class.java)
@@ -91,6 +94,10 @@ object ChecklistReminderScheduler {
             putExtra(EXTRA_TASK_ID, taskId)
             putExtra(EXTRA_TASK_TEXT, taskText)
             putExtra(EXTRA_HOUR_NAME, scheduledHour ?: "ነግህ")
+            putExtra(EXTRA_DATE, date.toString())
+            if (!entryId.isNullOrBlank()) {
+                putExtra(EXTRA_ENTRY_ID, entryId)
+            }
         }
         val pi = PendingIntent.getBroadcast(
             app,
