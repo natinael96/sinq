@@ -67,6 +67,23 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
 <!-- releases:start -->
 <article class="release">
   <header>
+    <h2>1.5.8 <span class="date">4 October 2026</span></h2>
+    <p class="motto"><span>Light mode default, Library codex structure, Church books typography polish, and Journal refinement</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Default Light Mode Theme.</b> Configured light mode (Sacred Ivory / Parchment) as the app-wide initial default theme upon first launch across settings and theme resolution.</span></li>
+    <li><span><b>Library Codex Architecture.</b> Reverted Library screen to its clean canonical single <code>ቅዱሳት መጻሕፍት</code> entry pointing to the full 81-book canonical structure, keeping the signature <code>ReadingHeroCard</code>.</span></li>
+    <li><span><b>Books Page Typography Harmonization.</b> Standardized typography across Church book shelves (<code>ShelfRow</code> and <code>BookRow</code> in <code>BookShelfScreen.kt</code>) to <code>titleMedium</code> and <code>bodySmall</code>, eliminating bold reading serif weights on navigation buttons.</span></li>
+    <li><span><b>Journal Day Refinement.</b> Removed daily feast names from Journal entry cards and headers to keep prayer reflections clean and focused on personal devotion.</span></li>
+    <li><span><b>Web User Guide Integration.</b> Synchronized liturgical user manual (<code>guide.html</code>) with website navigation and site generator.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
     <h2>1.5.7 <span class="date">4 October 2026</span></h2>
     <p class="motto"><span>Interactive heatmap day inspection card, direct Horologium reader jump, and habit management flow</span></p>
   </header>
@@ -165,6 +182,9 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   </div>
 </article>
 
+<details class="more-releases">
+  <summary><span>11 earlier releases, 1.5.1 back to 1.0.0</span></summary>
+  <div class="more-body">
 <article class="release">
   <header>
     <h2>1.5.1 <span class="date">2 October 2026</span></h2>
@@ -183,9 +203,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   </div>
 </article>
 
-<details class="more-releases">
-  <summary><span>10 earlier releases, 1.5.0 back to 1.0.0</span></summary>
-  <div class="more-body">
 <article class="release">
   <header>
     <h2>1.5.0 <span class="date">2 October 2026</span></h2>
@@ -375,6 +392,7 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
 <footer>
   <div class="foot-in">
     <ul class="foot-links">
+      <li><a href="guide.html">Guide</a></li>
       <li><a href="index.html"><span>Home</span></a></li>
       <li><a href="https://github.com/natinael96/sinq/releases"><span>Releases</span></a></li>
       <li><a href="install.html"><span>Install</span></a></li>

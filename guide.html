@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Sinq (ስንቅ) — User Guide & Liturgical Manual</title>
+  <meta name="description" content="Complete user guide and liturgical manual for Sinq (ስንቅ) - The Ethiopian Orthodox Tewahedo Horologium, Psalter, and Lectionary app.">
+  <link rel="canonical" href="https://sinq.natinael96.tech/guide.html">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Ethiopic:wght@400;500;600;700&family=Noto+Serif+Ethiopic:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Sacred Ivory Ground */
+      --bg: #F7F5EB;
+      --surface: #FFFFFF;
+      --surface-dim: #ECE8DC;
+      --border: #D6D0C0;
+      --border-subtle: #E2DDD0;
+      --text: #16221C;
+      --text-muted: #53635C;
+      --text-faint: #7A8C84;
+      --brand: #0E3B31;
+      --gold: #8E6D24;
+      --gold-dim: rgba(142, 109, 36, 0.12);
+      --rubric: #A5140A;
+      --nav-bg: rgba(247, 245, 235, 0.94);
+      --shadow-sm: 0 1px 3px rgba(14, 59, 49, 0.04);
+      --shadow-md: 0 4px 16px rgba(14, 59, 49, 0.06);
+      --font-serif: 'Cinzel', 'Noto Serif Ethiopic', Georgia, serif;
+      --font-body: 'Inter', 'Noto Sans Ethiopic', -apple-system, sans-serif;
+      --font-ethiopic-serif: 'Noto Serif Ethiopic', Georgia, serif;
+    }
+
+    body.theme-dark {
+      /* Monastic Forest Ground */
+      --bg: #09211C;
+      --surface: #0E2E27;
+      --surface-dim: #133A32;
+      --border: #1C4D43;
+      --border-subtle: #164037;
+      --text: #ECE8DC;
+      --text-muted: #9EBAAF;
+      --text-faint: #6D8E81;
+      --brand: #86CBB1;
+      --gold: #E8C46B;
+      --gold-dim: rgba(232, 196, 107, 0.14);
+      --rubric: #FF8277;
+      --nav-bg: rgba(9, 33, 28, 0.94);
+      --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 6px 24px rgba(0, 0, 0, 0.45);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    ::selection {
+      background: var(--gold);
+      color: #09211C;
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--gold);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.68;
+      font-size: 15px;
+      -webkit-font-smoothing: antialiased;
+      padding-bottom: max(60px, env(safe-area-inset-bottom));
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    /* Top Sticky Header */
+    .top-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--nav-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+    }
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .brand-mark svg {
+      width: 18px;
+      height: 18px;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+    .brand-title {
+      font-family: var(--font-serif);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .brand-subtitle {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      border-left: 1px solid var(--border);
+      padding-left: 8px;
+      margin-left: 2px;
+      font-weight: 500;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .action-button {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s;
+    }
+    .action-button:hover {
+      border-color: var(--gold);
+    }
+    .action-button:active {
+      background: var(--surface-dim);
+    }
+
+    /* Horizontal Section Jump Bar */
+    .jump-strip {
+      display: flex;
+      overflow-x: auto;
+      gap: 6px;
+      padding: 8px 16px 10px;
+      max-width: 680px;
+      margin: 0 auto;
+      scrollbar-width: none;
+    }
+    .jump-strip::-webkit-scrollbar { display: none; }
+    .jump-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 16px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .jump-chip:hover {
+      color: var(--text);
+      border-color: var(--gold);
+    }
+    .jump-chip:active {
+      background: var(--surface-dim);
+    }
+
+    /* Main Content Wrapper */
+    .main-wrapper {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+
+    /* Masthead Hero */
+    .hero-banner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 26px 22px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .hero-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--gold);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .hero-banner h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(23px, 5vw, 28px);
+      font-weight: 700;
+      line-height: 1.25;
+      letter-spacing: -0.3px;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+    .hero-banner p {
+      font-size: 14.5px;
+      color: var(--text-muted);
+      line-height: 1.62;
+    }
+
+    /* Offline Guarantee Callout */
+    .offline-callout {
+      background: var(--surface-dim);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-top: 16px;
+    }
+    .offline-callout svg {
+      width: 18px;
+      height: 18px;
+      color: var(--gold);
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+    .offline-callout-text h4 {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .offline-callout-text p {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Tab Architecture Map */
+    .tabs-map {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 28px;
+      box-shadow: var(--shadow-sm);
+    }
+    .tabs-map-header {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+    .tabs-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    @media (max-width: 440px) {
+      .tabs-grid { grid-template-columns: 1fr; }
+    }
+    .tab-item-box {
+      background: var(--surface-dim);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+    .tab-name-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 13.5px;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .tab-name-line svg {
+      width: 15px;
+      height: 15px;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+    .tab-desc-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* Section Headings */
+    .guide-section {
+      margin-bottom: 32px;
+      scroll-margin-top: 110px;
+    }
+    .section-title-bar {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-geez-num {
+      font-family: var(--font-serif);
+      color: var(--gold);
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .section-heading-text {
+      font-family: var(--font-serif);
+      font-size: 18.5px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+
+    /* Pure Typographic Accordions */
+    .accordion-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    details.guide-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.2s;
+    }
+    details.guide-item[open] {
+      border-color: var(--gold);
+    }
+    summary.guide-summary {
+      padding: 14px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+      list-style: none;
+    }
+    summary.guide-summary::-webkit-details-marker { display: none; }
+    
+    .summary-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      overflow: hidden;
+    }
+    .summary-icon-well {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      background: var(--surface-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+    .summary-icon-well svg {
+      width: 14px;
+      height: 14px;
+    }
+    .summary-text-block {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      overflow: hidden;
+    }
+    .summary-heading {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .summary-subline {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .accordion-arrow {
+      width: 16px;
+      height: 16px;
+      color: var(--text-faint);
+      transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+      flex-shrink: 0;
+      margin-left: 8px;
+    }
+    details[open] .accordion-arrow {
+      transform: rotate(180deg);
+      color: var(--gold);
+    }
+
+    .guide-details-body {
+      padding: 0 16px 16px;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 12px;
+      background: var(--surface);
+    }
+    .guide-prose {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.62;
+      margin-bottom: 10px;
+    }
+
+    .key-points-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 10px 0;
+    }
+    .key-point {
+      display: flex;
+      gap: 8px;
+      font-size: 13px;
+      align-items: flex-start;
+      line-height: 1.5;
+    }
+    .point-bullet {
+      color: var(--gold);
+      font-size: 12px;
+      line-height: 1.6;
+      flex-shrink: 0;
+    }
+    .point-text {
+      color: var(--text);
+      flex: 1;
+    }
+    .point-text strong {
+      color: var(--text);
+    }
+
+    /* Timetable / Hourly Prayer Grid */
+    .hours-schedule-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .hour-card-row {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      box-shadow: var(--shadow-sm);
+    }
+    .hour-time-pill {
+      background: var(--surface-dim);
+      border-radius: 8px;
+      padding: 5px 8px;
+      text-align: center;
+      min-width: 64px;
+      flex-shrink: 0;
+    }
+    .hour-geez-str {
+      font-family: var(--font-serif);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .hour-civic-str {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+    .hour-body-block {
+      flex: 1;
+    }
+    .hour-name-line {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 2px;
+      color: var(--text);
+    }
+    .hour-spiritual-meaning {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.48;
+    }
+
+    /* Liturgical Red Rubrication */
+    .rubric {
+      color: var(--rubric);
+      font-weight: 600;
+    }
+    .gold-accent {
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    /* Author Footer */
+    .guide-footer {
+      text-align: center;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      margin-top: 36px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .footer-cross-icon {
+      width: 14px;
+      height: 14px;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+
+    /* SVG Stroke Utility */
+    .icon {
+      stroke-width: 2;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Bilingual Switching System */
+    body.lang-am .en-only { display: none !important; }
+    body.lang-en .am-only { display: none !important; }
+    body.lang-am {
+      font-family: 'Noto Sans Ethiopic', -apple-system, sans-serif;
+    }
+    body.lang-am .brand-title,
+    body.lang-am .hero-banner h1,
+    body.lang-am .section-heading-text {
+      font-family: var(--font-ethiopic-serif);
+    }
+  </style>
+</head>
+<body class="lang-en">
+
+  <!-- Mobile Top Sticky Header -->
+  <header class="top-header">
+    <div class="header-content">
+      <a href="index.html" class="brand-mark" title="Back to Sinq Website">
+        <!-- Pure Authored Orthodox Cross SVG -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <line x1="12" y1="2" x2="12" y2="22"></line>
+          <line x1="5" y1="8" x2="19" y2="8"></line>
+          <line x1="8" y1="5" x2="16" y2="5"></line>
+          <line x1="8" y1="19" x2="16" y2="19"></line>
+        </svg>
+        <span class="brand-title">Sinq</span>
+        <span class="brand-subtitle en-only">Guide</span>
+        <span class="brand-subtitle am-only">መመሪያ</span>
+      </a>
+
+      <div class="header-actions">
+        <!-- Back to Website Link -->
+        <a href="index.html" class="action-button" style="text-decoration:none;">
+          <span class="en-only">← Web</span>
+          <span class="am-only">← ድረ-ገጽ</span>
+        </a>
+
+        <!-- Language Switcher Pill -->
+        <button class="action-button" onclick="toggleLanguage()">
+          <span class="en-only">አማርኛ</span>
+          <span class="am-only">English</span>
+        </button>
+
+        <!-- Theme Toggle Pill -->
+        <button class="action-button" onclick="toggleTheme()" title="Toggle appearance">
+          <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Horizontal Scrollable Navigation Strip -->
+  <nav class="jump-strip">
+    <a href="#overview" class="jump-chip en-only">At a Glance</a>
+    <a href="#overview" class="jump-chip am-only">፬ቱ ዋና ገጾች</a>
+
+    <a href="#home-controls" class="jump-chip en-only">Home Screen</a>
+    <a href="#home-controls" class="jump-chip am-only">የመነሻ ገጽ (ቤት)</a>
+
+    <a href="#readers" class="jump-chip en-only">81 Books & Reading</a>
+    <a href="#readers" class="jump-chip am-only">፹፩ መጻሕፍትና ንባብ</a>
+
+    <a href="#search" class="jump-chip en-only">Global Search</a>
+    <a href="#search" class="jump-chip am-only">ሁለንተናዊ ፍለጋ</a>
+
+    <a href="#canonical-hours" class="jump-chip en-only">7 Hours & Levels</a>
+    <a href="#canonical-hours" class="jump-chip am-only">፯ቱ ሰዓታትና ደረጃዎች</a>
+
+    <a href="#alarms-reminders" class="jump-chip en-only">Alarms & Reminders</a>
+    <a href="#alarms-reminders" class="jump-chip am-only">ደወሎችና ማሳሰቢያዎች</a>
+
+    <a href="#tithe-offerings" class="jump-chip en-only">Tithe & Records</a>
+    <a href="#tithe-offerings" class="jump-chip am-only">አስራትና ስእለት</a>
+
+    <a href="#journey-vault" class="jump-chip en-only">Journey & Vault</a>
+    <a href="#journey-vault" class="jump-chip am-only">የጸሎት ጉዞና መዝገብ</a>
+
+    <a href="#tools-widgets" class="jump-chip en-only">Widgets & Tools</a>
+    <a href="#tools-widgets" class="jump-chip am-only">ዊጅቶችና ባሕረ ሐሳብ</a>
+
+    <a href="#alarms-faq" class="jump-chip en-only">Battery FAQ</a>
+    <a href="#alarms-faq" class="jump-chip am-only">የባትሪ ማስተካከያ</a>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="main-wrapper">
+
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+      <div class="hero-label en-only">Official User Manual</div>
+      <div class="hero-label am-only">የተሟላ የአጠቃቀም መመሪያ</div>
+
+      <h1 class="en-only">How to Use Sinq</h1>
+      <h1 class="am-only">ስንቅን እንዴት እንጠቀም?</h1>
+
+      <p class="en-only">
+        Sinq (ስንቅ) gives you the complete daily prayers, Psalms, and Bible readings of the Ethiopian Orthodox Tewahedo Church completely offline. Tap any section below to see its step-by-step guide.
+      </p>
+      <p class="am-only">
+        ስንቅ የሰዓታት ጸሎታትን፣ መዝሙረ ዳዊትንና መጽሐፍ ቅዱስን ያለ ኢንተርኔት በስልክዎ የሚያቀርብ መተግበሪያ ነው። ዝርዝር ማብራሪያቸውን ለማንበብ ክፍሎቹን ይክፈቱ።
+      </p>
+
+      <div class="offline-callout">
+        <!-- Shield SVG -->
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        <div class="offline-callout-text">
+          <h4 class="en-only">100% Offline & Private</h4>
+          <h4 class="am-only">ያለ ኢንተርኔት የሚሠራና አስተማማኝ</h4>
+          <p class="en-only">
+            No internet, no user accounts, and zero advertising trackers. All texts and journals stay strictly on your phone.
+          </p>
+          <p class="am-only">
+            ምንም ኢንተርኔት፣ መለያ ወይም ማስታወቂያ የለውም። ሁሉም ጸሎታትና የግል ማስታወሻዎ በስልክዎ ብቻ ይቀመጣሉ።
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- The 4 Main Bottom Tabs -->
+    <section class="tabs-map" id="overview">
+      <div class="tabs-map-header en-only">The 4 Bottom Navigation Tabs</div>
+      <div class="tabs-map-header am-only">ከታች የሚገኙ ፬ቱ ዋና ገጾች</div>
+
+      <div class="tabs-grid">
+        <div class="tab-item-box">
+          <div class="tab-name-line">
+            <!-- Home Icon SVG -->
+            <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span class="en-only">Home (ቤት)</span>
+            <span class="am-only">ቤት</span>
+          </div>
+          <p class="tab-desc-text en-only">Current prayer hour, daily scripture lectionary, and daily quote.</p>
+          <p class="tab-desc-text am-only">የሰዓቱ ጸሎት፣ የዕለቱ ግጻዌ እና የአበው ምክር።</p>
+        </div>
+
+        <div class="tab-item-box">
+          <div class="tab-name-line">
+            <!-- Book Icon SVG -->
+            <svg class="icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            <span class="en-only">Books (መጻሕፍት)</span>
+            <span class="am-only">መጻሕፍት</span>
+          </div>
+          <p class="tab-desc-text en-only">81-book Bible, 150 Psalms, Sinksar, and 181 Mahlet feast orders.</p>
+          <p class="tab-desc-text am-only">፹፩ መጽሐፍ ቅዱስ፣ ዳዊት፣ ስንክሳርና ማኅሌት።</p>
+        </div>
+
+        <div class="tab-item-box">
+          <div class="tab-name-line">
+            <!-- Compass Icon SVG -->
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+            <span class="en-only">Journey (ጉዞ)</span>
+            <span class="am-only">ጉዞ</span>
+          </div>
+          <p class="tab-desc-text en-only">Full-year prayer calendar and locked confession journal.</p>
+          <p class="tab-desc-text am-only">የዓመቱ የጸሎት ካላንደር እና የተቆለፈ ማስታወሻ።</p>
+        </div>
+
+        <div class="tab-item-box">
+          <div class="tab-name-line">
+            <!-- Settings Icon SVG -->
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <span class="en-only">Settings (ቅንብሮች)</span>
+            <span class="am-only">ቅንብሮች</span>
+          </div>
+          <p class="tab-desc-text en-only">Prayer chimes, typography choice, and backup export.</p>
+          <p class="tab-desc-text am-only">የደወል ሰዓታት፣ የፊደል ቅርጽና የውሂብ ማስቀመጫ።</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 1: Home Screen Controls -->
+    <section class="guide-section" id="home-controls">
+      <div class="section-title-bar">
+        <span class="section-geez-num">፩.</span>
+        <h2 class="section-heading-text en-only">Home Screen (ቤት) Controls</h2>
+        <h2 class="section-heading-text am-only">የመነሻ ገጽ (ቤት) አዝራሮች</h2>
+      </div>
+
+      <div class="accordion-stack">
+
+        <!-- Now Card -->
+        <details class="guide-item" open>
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Candle SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c-.5 1-1.5 2-1.5 3.5 0 1.1.7 2 1.5 2s1.5-.9 1.5-2C13.5 4 12.5 3 12 2z"></path><rect x="8" y="10" width="8" height="12" rx="1.5"></rect><line x1="12" y1="7.5" x2="12" y2="10"></line></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">Now Card (The Big Green Card)</span>
+                <span class="summary-heading am-only">የዕለቱ ሰዓት ጸሎት (ዋናው ካርድ)</span>
+                <span class="summary-subline en-only">Recommended prayer for the current hour</span>
+                <span class="summary-subline am-only">በሰዓቱ የሚመከር ጸሎት</span>
+              </div>
+            </div>
+            <!-- Chevron SVG -->
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              The focal point of the home interface. It automatically calculates the current Ethiopian prayer hour (such as Morning, Afternoon, or Sunset) and tells you what to pray right now.
+            </p>
+            <p class="guide-prose am-only">
+              ይህ በማያ ገጹ መካከል የሚገኝ ዋና ካርድ ነው። አሁን ካለው ሰዓት ጋር ተስማሚ የሆነውን ጸሎት በራሱ አስልቶ ያሳያል።
+            </p>
+            <div class="key-points-list">
+              <div class="key-point">
+                <span class="point-bullet">☩</span>
+                <span class="point-text en-only"><strong>Tap to pray:</strong> Tapping anywhere on the card opens the full prayer text immediately.</span>
+                <span class="point-text am-only"><strong>ለመጸለይ ይጫኑ:</strong> ካርዱን መንካት በቀጥታ ወደ ሰዓቱ ጸሎት ይወስዳል።</span>
+              </div>
+              <div class="key-point">
+                <span class="point-bullet">☩</span>
+                <span class="point-text en-only"><strong>Lit candle mark:</strong> Reaching the final blessing of any hour automatically records your prayer and lights a small candle on this card.</span>
+                <span class="point-text am-only"><strong>የበራ ሻማ:</strong> ጸሎቱን አንብበው ሲጨርሱ አፑ በራሱ የበራ ሻማ ምልክት ያሳያል።</span>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Hours Strip & All Button -->
+        <details class="guide-item">
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Clock SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">Upcoming Hour & "All (7)" Action</span>
+                <span class="summary-heading am-only">ቀጣይ ሰዓትና "ሁሉንም (፯)" አዝራር</span>
+                <span class="summary-subline en-only">Access all seven daily canonical hours</span>
+                <span class="summary-subline am-only">፯ቱን የሰዓታት ጸሎታት ዝርዝር ያሳያል</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              Directly below the Now Card, this strip indicates what hour is approaching next.
+            </p>
+            <p class="guide-prose am-only">
+              ከዋናው አረንጓዴ ካርድ ሥር የሚገኝ ሲሆን የሚቀጥለውን የጸሎት ሰዓት ያሳውቃል።
+            </p>
+            <div class="key-points-list">
+              <div class="key-point">
+                <span class="point-bullet">☩</span>
+                <span class="point-text en-only"><strong>Tap "All (7)":</strong> Tapping the gold text opens a bottom sheet showing all 7 hours from Morning to Midnight so you can pick any prayer anytime.</span>
+                <span class="point-text am-only"><strong>"ሁሉንም (፯)" ሲጫኑ:</strong> ከነግህ እስከ መንፈቀ ሌሊት ያሉትን ፯ቱንም ሰዓታት ዘርዝሮ ያቀርባል፤ የፈለጉትን መርጠው መጸለይ ይችላሉ።</span>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Daily Lectionary Card -->
+        <details class="guide-item">
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Book SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">Daily Lectionary (የዕለቱ ግጻዌ)</span>
+                <span class="summary-heading am-only">የዕለቱ ግጻዌ (ንባባትና ስንክሳር)</span>
+                <span class="summary-subline en-only">Daily Gospel, Epistle & Synaxarium feast</span>
+                <span class="summary-subline am-only">የዕለቱ ወንጌልና የሚከበሩ ቅዱሳን</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              Presents the appointed Epistle and Gospel readings for today, together with the saints being commemorated from the Synaxarium.
+            </p>
+            <p class="guide-prose am-only">
+              ቤተክርስቲያን ለእያንዳንዱ ቀን የመደበችውን የቅዳሴ ንባባት፣ ምስባክ፣ ወንጌልና የስንክሳር በዓል ያሳያል።
+            </p>
+            <div class="key-points-list">
+              <div class="key-point">
+                <span class="point-bullet">☩</span>
+                <span class="point-text en-only"><strong>Red Rubrication:</strong> Holy names and saints are wrapped in sacred red ink (<span class="rubric">ቀይ ጽሑፍ</span>) according to Ethiopian manuscript tradition.</span>
+                <span class="point-text am-only"><strong>ቀይ ጽሑፍ:</strong> የቅዱሳን ስም፣ የጌታ በዓላትና የስንክሳር ስሞች በባህላዊው መሠረት በቀይ ቀለም ደምቀው ተቀምጠዋል።</span>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Today & Habits Row -->
+        <details class="guide-item">
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Flame SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">Today Row & Heatmap Dots (ዛሬ)</span>
+                <span class="summary-heading am-only">ዛሬ እና የነጥቦች ማትሪክስ</span>
+                <span class="summary-subline en-only">Daily completed prayer count and 10-week streak</span>
+                <span class="summary-subline am-only">የዕለት ጸሎት ቆጣሪና ወጥነት</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              Counts completed prayers for today. The 70 small squares beside it visualize your prayer consistency across the previous 10 weeks.
+            </p>
+            <p class="guide-prose am-only">
+              በዛሬው ዕለት የጸለዩትን የጸሎት ብዛት በሻማ ያሳያል። በቀኝ ያሉት ፸ ትናንሽ ነጥቦች ላለፉት ፲ ሳምንታት የጸለዩበትን ወጥነት ያሳያሉ።
+            </p>
+            <div class="key-points-list">
+              <div class="key-point">
+                <span class="point-bullet">☩</span>
+                <span class="point-text en-only"><strong>Full Calendar:</strong> Tapping this row opens the Journey tab with your complete 365-day Ethiopian year heatmap.</span>
+                <span class="point-text am-only"><strong>ሙሉ ጉዞን ለማየት:</strong> ክፍሉን ሲጫኑ ወደ ሙሉው የጉዞ ገጽ ይወስዳል።</span>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Daily Quote & Bookmarking -->
+        <details class="guide-item">
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Bookmark SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">Desert Father Wisdom & Bookmark</span>
+                <span class="summary-heading am-only">የአበው ምክርና የማስታወሻ ምልክት</span>
+                <span class="summary-subline en-only">Daily patristic quote and 1-tap save</span>
+                <span class="summary-subline am-only">የዕለቱ አጭር ምክርና ማስቀመጫ</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              A fresh spiritual quote from the early desert fathers every morning (St. John Chrysostom, St. Basil, Abba Poemen).
+            </p>
+            <p class="guide-prose am-only">
+              በየዕለቱ ከቀደምት የቤተክርስቲያን አባቶች የተመረጠ አጭር ምክር ያቀርባል።
+            </p>
+            <div class="key-points-list">
+              <div class="key-point">
+                <span class="point-bullet">☩</span>
+                <span class="point-text en-only"><strong>Read in full:</strong> Tap the quote to open the complete message and reflection.</span>
+                <span class="point-text am-only"><strong>ሙሉውን ለማንበብ:</strong> ጥቅሱን ሲጫኑ ሙሉውን ቃል በሰፊው ያሳያል።</span>
+              </div>
+              <div class="key-point">
+                <span class="point-bullet">☩</span>
+                <span class="point-text en-only"><strong>Bookmark:</strong> Tap the bookmark icon on the right to preserve it in your saved bookmarks.</span>
+                <span class="point-text am-only"><strong>ምልክት ለማድረግ:</strong> በስተቀኝ ያለውን የምልክት አዝራር ሲጫኑ ወደ ተመረጡ ጥቅሶች ያስቀምጠዋል።</span>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Search & Options -->
+        <details class="guide-item">
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Search SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">Global Search & Overflow Menu (⋮)</span>
+                <span class="summary-heading am-only">ፍለጋ እና ተጨማሪ ምርጫዎች (⋮)</span>
+                <span class="summary-subline en-only">Top bar actions</span>
+                <span class="summary-subline am-only">ከላይ በቀኝ የሚገኙ</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <div class="key-points-list">
+              <div class="key-point">
+                <span class="point-bullet">☩</span>
+                <span class="point-text en-only"><strong>Homophone Search:</strong> Searches across the entire Bible, Psalter, and Synaxarium. Understands Amharic letter variations automatically (ሀ/ሐ/ኀ, ሠ/ሰ, ጸ/ፀ, አ/ዐ).</span>
+                <span class="point-text am-only"><strong>ብልህ ፍለጋ:</strong> በሙሉ መጽሐፍ ቅዱስና ስንክሳር ውስጥ ቃላትን ይፈልጋል። የሆሄያት መቀያየርን (ሀ/ሐ/ኀ፣ ጸ/ፀ) በራሱ አስተካክሎ ያገኛል።</span>
+              </div>
+              <div class="key-point">
+                <span class="point-bullet">☩</span>
+                <span class="point-text en-only"><strong>Menu (⋮):</strong> Opens the Fasting Calendar, Saved Bookmarks, and Personal Prayer List.</span>
+                <span class="point-text am-only"><strong>የሶስት ነጥብ ምልክት (⋮):</strong> የአጽዋማት ካላንደር፣ የተቀመጡ ጥቅሶችና የግል ጸሎት ዝርዝርን ይከፍታል።</span>
+              </div>
+            </div>
+          </div>
+        </details>
+
+      </div>
+    </section>
+
+    <!-- Section 2: Reading & Scriptures -->
+    <section class="guide-section" id="readers">
+      <div class="section-title-bar">
+        <span class="section-geez-num">፪.</span>
+        <h2 class="section-heading-text en-only">81-Book Bible & Sacred Reading</h2>
+        <h2 class="section-heading-text am-only">፹፩ መጻሕፍትና የንባብ ሥርዓት</h2>
+      </div>
+
+      <div class="accordion-stack">
+        <!-- 81-Book Canon & Deuterocanon -->
+        <details class="guide-item" open>
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Book SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">Complete 81-Book Ethiopian Orthodox Canon</span>
+                <span class="summary-heading am-only">ሙሉው ፹፩ የኢትዮጵያ ኦርቶዶክስ መጽሐፍ ቅዱስ</span>
+                <span class="summary-subline en-only">Old Testament, New Testament, Deuterocanon</span>
+                <span class="summary-subline am-only">ብሉይ፣ ሐዲስና አዋልድ መጻሕፍት</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              Unlike generic Bible apps that only carry 66 books, Sinq bundles the complete 81-book canonical scriptures of the Ethiopian Orthodox Tewahedo Church offline:
+            </p>
+            <p class="guide-prose am-only">
+              ስንቅ ፷፮ቱን ብቻ ሳይሆን ሙሉውን የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተ ክርስቲያን ፹፩ መጽሐፍ ቅዱስ ከመስመር ውጭ ይዟል፦
+            </p>
+            <div class="key-points-list">
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Unique Canonical Books:</strong> Includes Book of Enoch (መጽሐፈ ሄኖክ), Book of Jubilees (መጽሐፈ ኩፋሌ), 1, 2, and 3 Meqabyan (፩፣ ፪፣ ፫ መቃብያን), Sirach (ሲራክ), Wisdom of Solomon (ጥበበ ሰሎሞን), Baruch (ባሮክ), and the Epistle of Jeremiah.</span><span class="point-text am-only"><strong>ቀኖናዊ አዋልድ መጻሕፍት:</strong> መጽሐፈ ሄኖክ፣ መጽሐፈ ኩፋሌ፣ ፩፣ ፪፣ ፫ መቃብያን፣ ሲራክ፣ ጥበበ ሰሎሞን፣ ባሮክና ተረፈ ኤርምያስን ያካትታል።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Complete LXX 150 Psalms (መዝሙረ ዳዊት):</strong> Grouped into the traditional seven daily divisions (Monday through Sunday), plus the 15 Biblical Canticles (ማሕልየ ነቢያት) and Song of Songs (ማሕልየ መሓልይ).</span><span class="point-text am-only"><strong>ሙሉ ፻፶ መዝሙረ ዳዊት:</strong> በባህላዊው የሰባቱ ቀናት ክፍፍል (ከሰኞ እስከ እሑድ) ከነ ማሕልየ ነቢያትና ማሕልየ መሓልይ ጋር ተዘጋጅቷል።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Wudase Maryam & Melkea Hymns:</strong> Daily Praises of Mary (ውዳሴ ማርያም), Anqetse Berhan, Yewediswamelekt, and 32 canonical Melkea saints' hymns.</span><span class="point-text am-only"><strong>ውዳሴ ማርያምና መልክዓ መልክዕ:</strong> የሰባቱ ቀናት ውዳሴ ማርያም፣ አንቀጸ ብርሃን፣ ይዌድስዋ መላእክት እና ፴፪ቱ መልክአ ቅዱሳን።</span></div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Red Rubrication & Ge'ez Numerals -->
+        <details class="guide-item">
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Sparkle / Pen SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">Red Rubrication (ቀይ ጽሑፍ) & Ge'ez Numerals</span>
+                <span class="summary-heading am-only">ቀይ ጽሑፍና የግዕዝ ቁጥሮች</span>
+                <span class="summary-subline en-only">Traditional manuscript aesthetics</span>
+                <span class="summary-subline am-only">እንደ ጥንታዊ የብራና መጻሕፍት</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              Sinq honors centuries-old Ethiopian manuscript illumination:
+            </p>
+            <p class="guide-prose am-only">
+              ስንቅ የጥንታውያን የብራና መጻሕፍትን ሥርዓት ጠብቆ የተዘጋጀ ነው፦
+            </p>
+            <div class="key-points-list">
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Red Rubrication (ቀይ ጽሑፍ):</strong> Holy names (God, Christ, Mary, angels, and saints) and priest/deacon liturgical directives are highlighted in sacred manuscript red.</span><span class="point-text am-only"><strong>ቀይ ጽሑፍ:</strong> የእግዚአብሔር፣ የድንግል ማርያምና የቅዱሳን ስሞች እንዲሁም የካህንና የዲያቆን መመሪያዎች በቀይ ቀለም ተውበው ይቀርባሉ።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Authentic Ge'ez Numerals:</strong> Chapters, Psalms, and verses display using native Ge'ez numbers (፩, ፪, ፫, ፲, ፻) rather than Western digits.</span><span class="point-text am-only"><strong>የግዕዝ ቁጥሮች:</strong> የምዕራፎችና የቁጥሮች መጠሪያ በግዕዝ አኃዝ (፩፣ ፪፣ ፫፣ ፲፣ ፻) ይታያሉ።</span></div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Amharic/Ge'ez Toggle -->
+        <details class="guide-item">
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Text/Type SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">Amharic ↔ Ge'ez Parallel Edition Switcher</span>
+                <span class="summary-heading am-only">የአማርኛና የግዕዝ መቀያየሪያ</span>
+                <span class="summary-subline en-only">Instant language toggle in readers</span>
+                <span class="summary-subline am-only">በአንድ ንክኪ ቋንቋ ይቀይሩ</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              While reading the Psalter (መዝሙረ ዳዊት), Sinksar, or Wudase Maryam, tap the toggle at the very top of the reader to switch between modern Amharic and canonical Ge'ez text.
+            </p>
+            <p class="guide-prose am-only">
+              በስንክሳር፣ በመዝሙረ ዳዊትና በውዳሴ ማርያም ገጾች ላይ በቀላሉ ጽሑፉን ከአማርኛ ወደ ትክክለኛ የግዕዝ ቅጂ በአንድ ንክኪ ለመቀየር ያስችላል።
+            </p>
+          </div>
+        </details>
+
+        <!-- Distraction-Free Immersion -->
+        <details class="guide-item">
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Eye / Focus SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">Distraction-Free Immersion Mode</span>
+                <span class="summary-heading am-only">ከሐሳብ ነፃ የጸሎት ሁኔታ (Distraction-Free)</span>
+                <span class="summary-subline en-only">Auto-hiding chrome during prayer</span>
+                <span class="summary-subline am-only">አዝራሮች በጸጥታ ይሰወራሉ</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              As soon as you scroll down to pray, all top bars and status buttons quietly fade away, dedicating 100% of screen pixels to prayer. A gentle scroll back up brings them back instantly.
+            </p>
+            <p class="guide-prose am-only">
+              ወደ ታች ማንበብ ሲጀምሩ የስልኩ አሞሌዎችና አዝራሮች በጸጥታ ተሰውረው ማያ ገጹ ሙሉ በሙሉ ለጸሎቱ ብቻ ክፍት ይሆናል። ወደ ላይ ትንሽ ሲያንሸራትቱ ይመለሳሉ።
+            </p>
+          </div>
+        </details>
+
+        <!-- Highlighting, Sharing & Notes -->
+        <details class="guide-item">
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Highlight SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">Highlighting in 4 Colors, Sharing & Notes</span>
+                <span class="summary-heading am-only">ጥቅሶችን ማድመቅ፣ ማጋራትና ማስታወሻ</span>
+                <span class="summary-subline en-only">Yellow, Green, Blue, Pink</span>
+                <span class="summary-subline am-only">በ፬ ቀለማት ማድመቅ</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              In any chapter or Psalm, tap any verse number to highlight it in yellow, green, blue, or pink. Tap the Share icon to send the formatted verse to Telegram, WhatsApp, or SMS, or tap the Note icon to write a private reflection linked to that verse.
+            </p>
+            <p class="guide-prose am-only">
+              በማንኛውም ንባብ ወይም መዝሙር ላይ የቁጥሩን ምልክት ሲጫኑ በቢጫ፣ አረንጓዴ፣ ሰማያዊ ወይም ሮዝ ቀለም ማድመቅ ይችላሉ። የጋራ ማድረጊያውን (Share) በመጫን ለወዳጅዎ መላክ ወይም የራስዎን ማስታወሻ ማያያዝ ይችላሉ።
+            </p>
+          </div>
+        </details>
+
+        <!-- Fonts & Reading Modes -->
+        <details class="guide-item">
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Sliders / Font SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">5 Ethiopic Fonts & Scroll vs. Paged Modes</span>
+                <span class="summary-heading am-only">፭ የፊደል ቅርጾችና የአነባበብ ሁነታ</span>
+                <span class="summary-subline en-only">Settings → Reading</span>
+                <span class="summary-subline am-only">ቅንብሮች → ንባብ</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              Under <strong>Settings → Reading</strong>:
+            </p>
+            <p class="guide-prose am-only">
+              በ<strong>ቅንብሮች → ንባብ</strong> ገጽ ውስጥ፦
+            </p>
+            <div class="key-points-list">
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>5 Bundled Manuscript Fonts:</strong> Choose between Abyssinica SIL, Ethiopic Abay Light, Bela Bereka, Zemenay, and Abba Garima.</span><span class="point-text am-only"><strong>፭ የፊደል ቅርጾች:</strong> አቢሲኒካ፣ አባይ ላይት፣ በላ በረካ፣ ዘመናይና አባ ገሪማን እንደ ምርጫዎ መምረጥ ይችላሉ።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Scroll vs. Paging:</strong> Switch between continuous vertical scrolling or clean horizontal page-flipping (like a real printed book).</span><span class="point-text am-only"><strong>ማንሸራተት ወይስ ገጽ መግለጥ:</strong> ወደ ታች እያወረዱ ማንበብ ወይም እንደ እውነተኛ መጽሐፍ ገጽ በገጽ መግለጥን መምረጥ ይችላሉ።</span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Section 3: Global Homophone-Tolerant Search -->
+    <section class="guide-section" id="search">
+      <div class="section-title-bar">
+        <span class="section-geez-num">፫.</span>
+        <h2 class="section-heading-text en-only">Homophone-Tolerant Global Search</h2>
+        <h2 class="section-heading-text am-only">ሁለንተናዊና የድምፅ-አንድነት (Homophone) ፍለጋ</h2>
+      </div>
+
+      <div class="accordion-stack">
+        <details class="guide-item" open>
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Search SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">How Smart Ethiopic Search Works</span>
+                <span class="summary-heading am-only">ብልጥ የፊደላት ፍለጋ እንዴት ይሠራል?</span>
+                <span class="summary-subline en-only">Finds words even with spelling variations</span>
+                <span class="summary-subline am-only">ፊደል ቢለያይም ቃሉን ያገኘዋል</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              In Amharic and Ge'ez, different letters share the same sound. If you search for a word, Sinq automatically searches all variations simultaneously:
+            </p>
+            <p class="guide-prose am-only">
+              በአማርኛና በግዕዝ ተቀራራቢ ድምፅ ያላቸው ፊደላት አሉ። ስንቅ ፊደላቱ ቢለያዩም ቃሉን እንዳያጡት በአንድ ጊዜ ፈልጎ ያቀርባል፦
+            </p>
+            <div class="key-points-list">
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>ሀ / ሐ / ኀ:</strong> Searching <em>ምህረት</em> will also find <em>ምሕረት</em> and <em>ምኅረት</em>.</span><span class="point-text am-only"><strong>ሀ / ሐ / ኀ:</strong> «ምህረት» ብለው ቢፈልጉ «ምሕረት»ንም «ምኅረት»ንም ያገኘዋል።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>ሰ / ሠ:</strong> Searching <em>ሰላም</em> also matches <em>ሠላም</em>.</span><span class="point-text am-only"><strong>ሰ / ሠ:</strong> «ሰላም» ሲሉ «ሠላም»ንም አብሮ ያካትታል።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>አ / ዐ:</strong> Searching <em>አምላክ</em> automatically matches <em>ዐምላክ</em>.</span><span class="point-text am-only"><strong>አ / ዐ:</strong> «አምላክ» ቢሉ «ዐምላክ»ንም ያገኘዋል።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>ጸ / ፀ:</strong> Searching <em>ጸሎት</em> automatically matches <em>ፀሎት</em>.</span><span class="point-text am-only"><strong>ጸ / ፀ:</strong> «ጸሎት» ቢሉ «ፀሎት»ንም ያገኘዋል።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Whole Corpus Search:</strong> Instantly searches across the entire 81-book Bible, 150 Psalms, Synaxarium saints' lives, and 181 Mahlet feast orders.</span><span class="point-text am-only"><strong>በሁሉም መጻሕፍት ውስጥ:</strong> በ፹፩ መጽሐፍ ቅዱስ፣ ዳዊት፣ ስንክሳርና ማኅሌት ውስጥ በአንድ ጊዜ ይፈልጋል።</span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Section 4: The 7 Canonical Hours & Prayer Levels -->
+    <section class="guide-section" id="canonical-hours">
+      <div class="section-title-bar">
+        <span class="section-geez-num">፬.</span>
+        <h2 class="section-heading-text en-only">The Seven Canonical Hours & 5 Prayer Levels</h2>
+        <h2 class="section-heading-text am-only">፯ቱ የጸሎት ሰዓታትና ፭ቱ የጸሎት ደረጃዎች</h2>
+      </div>
+
+      <p class="en-only" style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 12px;">
+        The Ethiopian Orthodox Church sanctifies the day and night through 7 prayer hours, commemorating the life, passion, and resurrection of Christ:
+      </p>
+      <p class="am-only" style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 12px;">
+        በኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተክርስቲያን ሥርዓት መሠረት ፯ቱ የሰዓታት ጸሎታት እንደሚከተለው ይከናወናሉ፦
+      </p>
+
+      <div class="hours-schedule-stack">
+        <!-- 1st Hour -->
+        <div class="hour-card-row">
+          <div class="hour-time-pill">
+            <div class="hour-geez-str">፩ ሰዓት</div>
+            <div class="hour-civic-str">7:00 AM</div>
+          </div>
+          <div class="hour-body-block">
+            <div class="hour-name-line en-only">Prime / Matins (የነግህ ጸሎት)</div>
+            <div class="hour-name-line am-only">የነግህ ጸሎት (Morning Prayer)</div>
+            <div class="hour-spiritual-meaning en-only">Prayed at sunrise to thank God for delivering creation from the darkness of night. Includes daily appointed Psalms.</div>
+            <div class="hour-spiritual-meaning am-only">ሌሊቱ አልፎ ብርሃን ሲተካ የሚጸለይ። የዓለም ብርሃን ስለሆነው ክርስቶስ ምስጋና የሚቀርብበት ሰዓት ነው።</div>
+          </div>
+        </div>
+
+        <!-- 3rd Hour -->
+        <div class="hour-card-row">
+          <div class="hour-time-pill">
+            <div class="hour-geez-str">፫ ሰዓት</div>
+            <div class="hour-civic-str">9:00 AM</div>
+          </div>
+          <div class="hour-body-block">
+            <div class="hour-name-line en-only">Terce (የሠለስት ጸሎት)</div>
+            <div class="hour-name-line am-only">የሠለስት ጸሎት (Third Hour)</div>
+            <div class="hour-spiritual-meaning en-only">Commemorates Christ condemned before Pontius Pilate, and the Holy Spirit descending at Pentecost in Zion.</div>
+            <div class="hour-spiritual-meaning am-only">ጌታችን በጲላጦስ አደባባይ የተፈረደበትና መንፈስ ቅዱስ ለሐዋርያት የወረደበት ሰዓት ነው።</div>
+          </div>
+        </div>
+
+        <!-- 6th Hour -->
+        <div class="hour-card-row">
+          <div class="hour-time-pill">
+            <div class="hour-geez-str">፮ ሰዓት</div>
+            <div class="hour-civic-str">12:00 PM</div>
+          </div>
+          <div class="hour-body-block">
+            <div class="hour-name-line en-only">Sext (የቀትር ጸሎት)</div>
+            <div class="hour-name-line am-only">የቀትር ጸሎት (Midday Prayer)</div>
+            <div class="hour-spiritual-meaning en-only">Commemorates the Crucifixion of Christ on Golgotha when the sun darkened and redemption was accomplished.</div>
+            <div class="hour-spiritual-meaning am-only">ጌታችን መድኃኒታችን ኢየሱስ ክርስቶስ በቀራንዮ አደባባይ በመስቀል ላይ የተሰቀለበት ሰዓት ነው።</div>
+          </div>
+        </div>
+
+        <!-- 9th Hour -->
+        <div class="hour-card-row">
+          <div class="hour-time-pill">
+            <div class="hour-geez-str">፱ ሰዓት</div>
+            <div class="hour-civic-str">3:00 PM</div>
+          </div>
+          <div class="hour-body-block">
+            <div class="hour-name-line en-only">None (የሠርክ ጸሎት)</div>
+            <div class="hour-name-line am-only">የሠርክ ጸሎት (Ninth Hour)</div>
+            <div class="hour-spiritual-meaning en-only">Commemorates Christ giving up His spirit on the Cross, tearing the temple veil and opening Paradise.</div>
+            <div class="hour-spiritual-meaning am-only">ጌታችን ቅድስት ነፍሱን ከሥጋው በገዛ ፈቃዱ የለየበትና አዳምን ነፃ ያወጣበት ሰዓት ነው።</div>
+          </div>
+        </div>
+
+        <!-- 12th Hour -->
+        <div class="hour-card-row">
+          <div class="hour-time-pill">
+            <div class="hour-geez-str">፲፪ ሰዓት</div>
+            <div class="hour-civic-str">6:00 PM</div>
+          </div>
+          <div class="hour-body-block">
+            <div class="hour-name-line en-only">Vespers (የነዋም ጸሎት)</div>
+            <div class="hour-name-line am-only">የነዋም ጸሎት (Sunset Prayer)</div>
+            <div class="hour-spiritual-meaning en-only">Prayed as sunset arrives, remembering Christ taken down from the Cross and wrapped in linen for burial.</div>
+            <div class="hour-spiritual-meaning am-only">የቀኑ ድካም አብቅቶ ወደ ማረፊያ ሲገባ፣ ጌታችን በመቃብር መገነዙን እያሰቡ የሚቀርብ የምሽት ጸሎት ነው።</div>
+          </div>
+        </div>
+
+        <!-- Bedtime -->
+        <div class="hour-card-row">
+          <div class="hour-time-pill">
+            <div class="hour-geez-str">፫ ሰዓት ሌሊት</div>
+            <div class="hour-civic-str">9:00 PM</div>
+          </div>
+          <div class="hour-body-block">
+            <div class="hour-name-line en-only">Compline (የዕረፍት ጸሎት)</div>
+            <div class="hour-name-line am-only">የዕረፍት ጸሎት (Bedtime Prayer)</div>
+            <div class="hour-spiritual-meaning en-only">Prayed right before sleep for protection from nocturnal terrors. Accompanied by daily ውዳሴ ማርያም.</div>
+            <div class="hour-spiritual-meaning am-only">ከመተኛት በፊት የሚጸለይ። ከክፉ ሕልምና ሌሊት ፍርሃት እንዲጠብቀን እየተለመነ የዕለቱ ውዳሴ ማርያም ይጸለያል።</div>
+          </div>
+        </div>
+
+        <!-- Midnight -->
+        <div class="hour-card-row">
+          <div class="hour-time-pill">
+            <div class="hour-geez-str">፮ ሰዓት ሌሊት</div>
+            <div class="hour-civic-str">12:00 AM</div>
+          </div>
+          <div class="hour-body-block">
+            <div class="hour-name-line en-only">Midnight Vigil (ጸሎተ መንፈቀ ሌሊት)</div>
+            <div class="hour-name-line am-only">ጸሎተ መንፈቀ ሌሊት (Midnight Vigil)</div>
+            <div class="hour-spiritual-meaning en-only">The monastic watch in the stillness of night, honoring the Resurrection and watching for the Bridegroom.</div>
+            <div class="hour-spiritual-meaning am-only">ጌታችን ከሙታን ተለይቶ የተነሣበትና በዳግም ምጽአቱ የሚመጣበት የንቃትና የትጋት ሰዓት ነው።</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-stack" style="margin-top: 16px;">
+        <!-- The 5 Prayer Levels -->
+        <details class="guide-item">
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Levels SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">The 5 Configurable Prayer Levels</span>
+                <span class="summary-heading am-only">፭ቱ የጸሎት ደረጃዎች (Prayer Levels)</span>
+                <span class="summary-subline en-only">Settings → Prayer Rule & Hours</span>
+                <span class="summary-subline am-only">ቅንብሮች → የጸሎት ሥርዓት</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              The Horologium contains prayers for every spiritual capacity. You can choose a level that fits your daily rule in <strong>Settings → Prayer Rule & Hours</strong>:
+            </p>
+            <p class="guide-prose am-only">
+              መጽሐፈ ሰዓታት እንደ ግለሰቡ መንፈሳዊ ጥንካሬ የተዘጋጀ ሥርዓት አለው። በ<strong>ቅንብሮች → የጸሎት ሥርዓት</strong> ውስጥ ለእርስዎ የሚስማማውን መምረጥ ይችላሉ፦
+            </p>
+            <div class="key-points-list">
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Psalm 50 (መዝሙር ፶):</strong> Shortest rule for travel, urgent work, or sickness — introductory prayers and Psalm 50 ("Have mercy upon me, O God").</span><span class="point-text am-only"><strong>መዝሙር ፶:</strong> በመንገድ ላይ ወይም በችኮላ ወቅት የሚጸለይ አጭር የጸሎት ሥርዓት።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Beginning (መጀመሪያ):</strong> For those newly establishing daily prayer habits — introductory prayers and one Psalm.</span><span class="point-text am-only"><strong>መጀመሪያ:</strong> ጸሎት ለሚጀምሩ ሰዎች የተዘጋጀ ቀለል ያለ መርሐ ግብር።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Growth (እድገት):</strong> Standard daily rule with core Psalms and the canonical Gospel reading.</span><span class="point-text am-only"><strong>እድገት:</strong> መደበኛ የክርስቲያን የጸሎት ሥርዓት (ምርጥ መዝሙራትና ወንጌል)።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Steadfast (ጽናት):</strong> Expanded rule with all canonical Psalms appointed for that hour.</span><span class="point-text am-only"><strong>ጽናት:</strong> ለሰዓቱ የተመደቡትን ሙሉ መዝሙራት የሚያካትት የጸሎት ሥርዓት።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Full (ሙሉ):</strong> Complete monastic office with full petitions, litanies, and Gospel readings.</span><span class="point-text am-only"><strong>ሙሉ:</strong> ሙሉው የመጽሐፈ ሰዓታት ጸሎትና ማኅሌት።</span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+
+
+    <!-- Section 5: Alarms, Chimes & Daily Reminders -->
+    <section class="guide-section" id="alarms-reminders">
+      <div class="section-title-bar">
+        <span class="section-geez-num">፭.</span>
+        <h2 class="section-heading-text en-only">Alarms, Chimes & Daily Reminders</h2>
+        <h2 class="section-heading-text am-only">ደወሎች፣ የሰዓታት ማሳሰቢያና የአበው ምክር</h2>
+      </div>
+
+      <div class="accordion-stack">
+        <!-- 7 Canonical Hour Chimes & Modes -->
+        <details class="guide-item" open>
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Clock/Alarm SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2 2"></path><path d="M5 3L2 6"></path><path d="M22 6l-3-3"></path><path d="M6.38 18.7L4 21"></path><path d="M17.64 18.67L20 21"></path></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">The 7 Hour Chimes & Prayer Modes</span>
+                <span class="summary-heading am-only">የሰዓታት ደወሎችና መርሐ ግብሮች (Modes)</span>
+                <span class="summary-subline en-only">Settings → Prayer Rule & Hours → Manage Hours</span>
+                <span class="summary-subline am-only">ቅንብሮች → የጸሎት ሥርዓት → ሰዓታትን አስተካክል</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              Sinq can remind you at each of the seven canonical liturgical hours. You can customize them to match your lifestyle:
+            </p>
+            <p class="guide-prose am-only">
+              ስንቅ በሰባቱ የጸሎት ሰዓታት ደውሎ ያስታውሳዎታል። እንደ ኑሮ ሁኔታዎ መርሐ ግብሮችን ማስተካከል ይችላሉ፦
+            </p>
+            <div class="key-points-list">
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Prayer Modes:</strong> Switch between pre-set schedules like <em>Regular</em> (for work and family life) or <em>Monastic Vigil</em> (includes midnight watches).</span><span class="point-text am-only"><strong>የጸሎት መርሐ ግብሮች:</strong> እንደ ሥራና ቤተሰብ ሁኔታ በተዘጋጁ ቅንብሮች (መደበኛ፣ የሌሊት ንቃት) መካከል መምረጥ ይችላሉ።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Custom Times:</strong> Tap any hour in <em>Manage Hours</em> to change its ringing time to fit your work or church schedule.</span><span class="point-text am-only"><strong>የራስዎን ሰዓት መምረጥ:</strong> በ<em>ሰዓታት ማስተካከያ</em> ውስጥ የፈለጉትን ሰዓት በመጫን የሚደውልበትን ሰዓት ማስተካከል ይችላሉ።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Toggle Specific Hours:</strong> Turn off midday hours if you are in meetings, and keep morning and night active.</span><span class="point-text am-only"><strong>የተወሰኑ ሰዓታትን ብቻ ማብራት:</strong> በሥራ ሰዓት የማይመችዎትን አጥፍተው የጧትና የማታውን ብቻ ማብራት ይችላሉ።</span></div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Sound, Volume & Quiet Hours -->
+        <details class="guide-item">
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Volume SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">Alarm Sounds, Alert Modes & Quiet Hours</span>
+                <span class="summary-heading am-only">የደወል ድምፅ፣ ንዝረትና የጸጥታ ሰዓት</span>
+                <span class="summary-subline en-only">Settings → Reminders & Daily Quote</span>
+                <span class="summary-subline am-only">ቅንብሮች → ማስታወሻዎች</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              Control exactly how prayer alarms sound:
+            </p>
+            <p class="guide-prose am-only">
+              የደወሎችን አደዋወልና ድምፅ እንደ ፍላጎትዎ መቆጣጠር ይችላሉ፦
+            </p>
+            <div class="key-points-list">
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Alert Mode:</strong> Choose from <em>Sound & Vibrate</em>, <em>Sound Only</em>, <em>Vibrate Only</em>, or <em>Silent</em>.</span><span class="point-text am-only"><strong>የማንቂያ ዓይነት:</strong> ድምፅና ንዝረት፣ ድምፅ ብቻ፣ ንዝረት ብቻ ወይም ድምፅ-አልባ (ጸጥታ) መምረጥ ይችላሉ።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Sound Channel:</strong> Use <em>System Alarm</em> (rings even if phone ringer is muted) or gentle <em>Notification Chime</em>.</span><span class="point-text am-only"><strong>የድምፅ መስመር:</strong> ስልኩ ድምፅ-አልባ ቢሆንም የሚጮኸውን <em>የማንቂያ ደወል (Alarm)</em> ወይም ረጋ ያለ <em>የማሳወቂያ ድምፅ (Notification)</em> መምረጥ።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Quiet Hours (ጸጥታ ሰዓት):</strong> Set a night window (e.g. 10:30 PM to 6:00 AM) where alarms stay silent so your household is not woken.</span><span class="point-text am-only"><strong>የጸጥታ ሰዓታት:</strong> በመኝታ ወቅት (ለምሳሌ ከምሽቱ 4:30 እስከ ጧቱ 12:00) ደወሎች እንዳይጮሁ የጸጥታ ሰዓት መወሰን።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Snooze Duration:</strong> Choose 5, 10, or 15 minute snooze lengths when you need a few moments before standing up to pray.</span><span class="point-text am-only"><strong>ማዘግያ (Snooze):</strong> ጸሎት ለመጀመር ዝግጁ እስኪሆኑ በ፭፣ ፲ ወይም ፲፭ ደቂቃ እንዲዘገይ ማድረግ።</span></div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Daily Reminders & Lockscreen Quote -->
+        <details class="guide-item">
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Sun / Sparkle SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">Daily Reminders & Desert Fathers Quote</span>
+                <span class="summary-heading am-only">ዕለታዊ ማሳሰቢያዎችና የአበው ምክር በመቆለፊያ ገጽ</span>
+                <span class="summary-subline en-only">Gitsawe, Evening Rule, Breath Prayer</span>
+                <span class="summary-subline am-only">ግጻዌ፣ የማታ ጸሎትና የእረፍት ጸሎት</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              In <strong>Settings → Reminders & Daily Quote</strong>, you can enable helpful daily spiritual habits:
+            </p>
+            <p class="guide-prose am-only">
+              በ<strong>ቅንብሮች → ማስታወሻዎች</strong> ገጽ ውስጥ የሚከተሉትን መንፈሳዊ ልምዶች ማብራት ይችላሉ፦
+            </p>
+            <div class="key-points-list">
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Morning Gitsawe Reminder:</strong> A gentle notification at your chosen morning time bringing you today's lectionary readings.</span><span class="point-text am-only"><strong>የዕለቱ ግጻዌ ማሳሰቢያ:</strong> በጧት ሰዓት የቀኑን የወንጌልና የሐዋርያት ንባብ እንዲያነቡ ያሳስባል።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Night / Streak Reminder:</strong> An evening prompt reminding you to complete your daily prayer rule before sleeping.</span><span class="point-text am-only"><strong>የማታ ጸሎት ማሳሰቢያ:</strong> ከመተኛትዎ በፊት የቀኑን የጸሎት ሥርዓት እንዳያቋርጡ በምሽት ያሳስባል።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Breath Prayer (የእረፍት ጸሎት):</strong> Occasional gentle nudges during daytime hours to pause for 10 seconds and pray: <em>"Lord Jesus Christ, Son of God, have mercy on me."</em></span><span class="point-text am-only"><strong>የእረፍት ጸሎት:</strong> በቀን ውስጥ ለጥቂት ሰከንዶች ቆም ብለው <em>«ጌታ ኢየሱስ ክርስቶስ ሆይ ማረኝ»</em> ብለው እንዲጸልዩ የሚያስታውስ መንፈሳዊ ጥሪ።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Daily Bible Reading Reminder:</strong> Helps you stay on track with your full Bible reading plan.</span><span class="point-text am-only"><strong>የመጽሐፍ ቅዱስ ንባብ ማስታወሻ:</strong> በጀመሩት የመጽሐፍ ቅዱስ ንባብ እቅድ እንዲቀጥሉ ያግዛል።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Desert Fathers Lockscreen Quote:</strong> Wakes your phone with an authentic wisdom quote from monastic fathers (አበው መነኮሳት) every morning.</span><span class="point-text am-only"><strong>የአበው ምክር በመቆለፊያ ገጽ:</strong> በየማለዳው የሚያንጽ የአበው አባባል በስልክዎ መቆለፊያ ገጽ ላይ ያቀርባል።</span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Section 6: Tithe, Vows & Spiritual Records -->
+    <section class="guide-section" id="tithe-offerings">
+      <div class="section-title-bar">
+        <span class="section-geez-num">፮.</span>
+        <h2 class="section-heading-text en-only">Tithe (አስራት), Vows (ስእለት) & Records</h2>
+        <h2 class="section-heading-text am-only">አስራት፣ ስእለትና መንፈሳዊ መዛግብት</h2>
+      </div>
+
+      <div class="accordion-stack">
+        <!-- Tithe Ledger -->
+        <details class="guide-item" open>
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Gift Box / Tithe SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">Tithe Calculator & Ledger (የአስራት መዝገብ)</span>
+                <span class="summary-heading am-only">የአስራት ማስያና የገቢ መዝገብ</span>
+                <span class="summary-subline en-only">Settings → Records & Data → Tithe</span>
+                <span class="summary-subline am-only">ቅንብሮች → መዝገብና ውሂብ → አስራት</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              Giving a tenth of what we receive to God and the poor is a holy commandment (Malachi 3:10). Sinq includes a private, 100% offline Tithe Ledger that does the accounting automatically:
+            </p>
+            <p class="guide-prose am-only">
+              አስራት ማውጣት መጽሐፍ ቅዱሳዊና ቀኖናዊ ሥርዓት ነው (ሚል ፫፥፲)። ስንቅ ምንም ኢንተርኔት ሳይፈልግ በስልክዎ ብቻ የሚቀመጥ አስተማማኝ የአስራት መዝገብ አለው፦
+            </p>
+            <div class="key-points-list">
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Record Income (ገቢ):</strong> Whenever you receive wages, salary, or financial gifts, tap <em>+ Income</em> and enter the amount. Sinq automatically calculates the 10% owed.</span><span class="point-text am-only"><strong>ገቢ መመዝገብ:</strong> ደመወዝ ወይም የገንዘብ ገቢ ሲያገኙ <em>+ ገቢ</em>ን በመጫን መጠኑን ያስገቡ። ስንቅ የሚገባውን አስራት (10%) ወዲያውኑ ያሰላል።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Record Giving (የተሰጠ):</strong> When you give your tithe to church, monasteries, or the needy, tap <em>+ Given</em> to record the amount and optional notes.</span><span class="point-text am-only"><strong>የተሰጠውን መመዝገብ:</strong> አስራትዎን ለቤተ ክርስቲያን ወይም ለተቸገሩ ሲሰጡ <em>+ የተሰጠ</em>ን በመጫን ቀኑንና መጠኑን ይመዝግቡ።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Remaining vs. Surplus Balance:</strong> Sinq shows your exact status — whether you have remaining tithe to give or if you have given generously beyond the tenth.</span><span class="point-text am-only"><strong>ቀሪና ትርፍ:</strong> ገቢዎትንና የሰጡትን በማመዛዘን ምን ያህል አስራት እንደቀረዎት ወይም ተጨማሪ እንደሰጡ በግልጽ ያሳያል።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Configurable Percentage:</strong> Default is 10%, but you can adjust the percentage in settings to match your personal spiritual rule.</span><span class="point-text am-only"><strong>የመቶኛ ድርሻ (%):</strong> መደበኛው 10% ሲሆን እንደ መንፈሳዊ አባትዎ ምክር መጠኑን መቀየር ይችላሉ።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Tithe Day Reminder:</strong> Set a recurring monthly reminder (e.g. payday) so you remember to dedicate your tithe before other expenses.</span><span class="point-text am-only"><strong>የአስራት ቀን ማስታወሻ:</strong> በደመወዝ ቀን አስራትዎን ለይተው እንዲያስቀምጡ ማሳሰቢያ ደወል መመደብ ይችላሉ።</span></div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Vows Tracker -->
+        <details class="guide-item">
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Heart / Vow SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">Vows Tracker (የስእለት መዝገብ)</span>
+                <span class="summary-heading am-only">የስእለት መዝገብ</span>
+                <span class="summary-subline en-only">Settings → Records & Data → Vows</span>
+                <span class="summary-subline am-only">ቅንብሮች → መዝገብና ውሂብ → ስእለት</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              A sacred promise made to God or a saint is a debt willingly taken on (Ecclesiastes 5:4). Under <strong>Records → Vows</strong>, record your vows, target dates, and descriptions. Sinq keeps them visible and reminds you until they are fulfilled and marked complete.
+            </p>
+            <p class="guide-prose am-only">
+              ለእግዚአብሔር ወይም ለቅዱሳን የተሳሉትን ስእለት ሳይረሱ በታማኝነት እንዲፈጽሙ የሚያግዝ መዝገብ ነው። ስእለቱን፣ ቀኑንና ዝርዝሩን መዝግበው ሲፈጽሙት «ተፈጽሟል» ብለው ማጠናቀቅ ይችላሉ።
+            </p>
+          </div>
+        </details>
+
+        <!-- Marks, Prayer List & Fasting Calendar -->
+        <details class="guide-item">
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Bookmarks SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">My Marks, Family Prayer List & Fasting Rules</span>
+                <span class="summary-heading am-only">ምልክቶች፣ የቤተሰብ የጸሎት መዝገብና አጽዋማት</span>
+                <span class="summary-subline en-only">Centralized spiritual records</span>
+                <span class="summary-subline am-only">በመዝገብና ውሂብ ውስጥ የሚገኙ</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <div class="key-points-list">
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>My Marks (ምልክቶቼ):</strong> Browse every Bible bookmark, colored highlight, and passage note you have made across Scripture and the Horologium.</span><span class="point-text am-only"><strong>ምልክቶቼ:</strong> በመጽሐፍ ቅዱስና በጸሎት መጻሕፍት ላይ ያደረጓቸውን ዕልባቶች (Bookmarks)፣ ቀለማትና ማስታወሻዎች በአንድ ላይ ያገኛሉ።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Intercessory Prayer List (የጸሎት መዝገብ):</strong> Keep names of family members, spiritual children, the sick, and departed loved ones to remember during your daily prayers.</span><span class="point-text am-only"><strong>የጸሎት መዝገብ:</strong> በጸሎት ወቅት የሚያስቧቸውን የቤተሰብ፣ የሕሙማንና የሙታን ስሞች መዝግበው የሚያስታውሱበት።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Fasting Calendar (የአጽዋማት ሥርዓት):</strong> Complete timetable and dietary fasting rules for all seven canonical fasts of the Ethiopian Orthodox Tewahedo Church.</span><span class="point-text am-only"><strong>የአጽዋማት ሥርዓት:</strong> የሰባቱ አጽዋማት መግቢያና መውጫ ቀናት እንዲሁም የቀኖና ሕጎች።</span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Section 7: Prayer Journey & The Vault -->
+    <section class="guide-section" id="journey-vault">
+      <div class="section-title-bar">
+        <span class="section-geez-num">፯.</span>
+        <h2 class="section-heading-text en-only">Prayer Journey & The Vault</h2>
+        <h2 class="section-heading-text am-only">የጸሎት ጉዞና የንስሐ ማስታወሻ</h2>
+      </div>
+
+      <div class="accordion-stack">
+        <!-- 365-Day Heatmap -->
+        <details class="guide-item" open>
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Calendar SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">365-Day Ethiopian Year Heatmap & Streaks</span>
+                <span class="summary-heading am-only">የዓመቱ የጸሎት ካላንደርና ጽናት</span>
+                <span class="summary-subline en-only">All 13 Ethiopian months</span>
+                <span class="summary-subline am-only">ሙሉ ፫፻፷፭ቱ ቀናት</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              In the Journey (ጉዞ) tab, the full calendar grid for all 13 Ethiopian months lights up as you pray. It serves as a gentle encouragement toward spiritual consistency across the liturgical year.
+            </p>
+            <p class="guide-prose am-only">
+              በጉዞ ገጽ ውስጥ የሙሉ ፫፻፷፭ቱን ቀናት የጸሎት ካላንደር ያሳያል። የጸለዩባቸው ቀናት በወርቃማ ቀለም ደምቀው የሚታዩ ሲሆን መንፈሳዊ ጥንካሬዎትን ለመጠበቅ ያግዛል።
+            </p>
+          </div>
+        </details>
+
+        <!-- The 3 Journal Kinds -->
+        <details class="guide-item">
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Lock SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">Encrypted Journal & Confession Preparation</span>
+                <span class="summary-heading am-only">የተቆለፈ የጸሎት ማስታወሻና የንስሐ ዝግጅት</span>
+                <span class="summary-subline en-only">Passphrase-protected reflections</span>
+                <span class="summary-subline am-only">በይለፍ ቃል ብቻ የሚከፈት</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              The Journal provides a private sanctuary on your device protected by your custom passphrase. It supports three distinct spiritual entry types:
+            </p>
+            <p class="guide-prose am-only">
+              ማስታወሻው በስልክዎ ላይ በይለፍ ቃል የሚቆለፍ የግል መዝገብ ሲሆን ፫ ዓይነት መንፈሳዊ ማስታወሻዎችን ይይዛል፦
+            </p>
+            <div class="key-points-list">
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Spiritual Reflection (አስተንትኖ):</strong> Free-form personal thoughts, prayers, and gratitude stamped with today's Ethiopian Church feast.</span><span class="point-text am-only"><strong>አስተንትኖ:</strong> በዕለቱ የበዓል ስም የሚመዘገብ የግል መንፈሳዊ ሀሳብና ጸሎት።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Passage Reflection (ከጥቅስ ጋር የተያያዘ):</strong> Notes written directly while reading a Bible chapter, Psalm, or Synaxarium saint — includes a direct link back to that verse.</span><span class="point-text am-only"><strong>የንባብ ማስታወሻ:</strong> ከመጽሐፍ ቅዱስ ወይም ከዳዊት ጋር ተያይዞ የሚጻፍ ሲሆን በቀጥታ ወደ ጥቅሱ የሚመልስ አዝራር አለው።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Confession Draft (የንስሐ ዝግጅት):</strong> Built strictly to be destroyed. Notes for your spiritual father that permanently self-destruct upon tapping "Confessed", and are never written to data exports.</span><span class="point-text am-only"><strong>የንስሐ ዝግጅት:</strong> ለንስሐ አባት የሚዘጋጅ ማስታወሻ ሲሆን ንስሐ ሲገቡ ወዲያውኑ ይሰረዛል፤ በባክአፕ ፋይል ውስጥም አይካተትም።</span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Section 8: Home Screen Widgets, Computus & Tools -->
+    <section class="guide-section" id="tools-widgets">
+      <div class="section-title-bar">
+        <span class="section-geez-num">፰.</span>
+        <h2 class="section-heading-text en-only">Home Screen Widgets & Sacred Tools</h2>
+        <h2 class="section-heading-text am-only">የስልክ መነሻ ዊጅቶችና ባሕረ ሐሳብ</h2>
+      </div>
+
+      <div class="accordion-stack">
+        <!-- Android Widgets -->
+        <details class="guide-item" open>
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Grid / Widget SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">4 Android Home Screen Widgets</span>
+                <span class="summary-heading am-only">፬ቱ የስልክ መነሻ ገጽ ዊጅቶች (Widgets)</span>
+                <span class="summary-subline en-only">Add to your phone's home screen</span>
+                <span class="summary-subline am-only">በስልክዎ መነሻ ገጽ ላይ ለማስቀመጥ</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              Long-press an empty space on your Android phone's home screen, tap <strong>Widgets</strong>, and scroll to <strong>Sinq</strong> to add:
+            </p>
+            <p class="guide-prose am-only">
+              የስልክዎን መነሻ ገጽ ክፍት ቦታ ጫን አድርገው በመያዝ <strong>Widgets</strong>ን ይምረጡና ከስንቅ ፬ቱን ዊጅቶች ያግኙ፦
+            </p>
+            <div class="key-points-list">
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Daily Gitsawe Widget (የዕለቱ ግጻዌ):</strong> Displays today's Gospel verse, Misbak Psalm, and feast commemoration right on your home screen.</span><span class="point-text am-only"><strong>የዕለቱ ግጻዌ ዊጅት:</strong> የቀኑን ወንጌልና ምስባክ አፑን መክፈት ሳያስፈልግዎ በስልክዎ መነሻ ገጽ ላይ ያሳያል።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Prayer Clock Widget (የሰዓታት ሰዓት):</strong> Shows the active canonical prayer watch (e.g. 9:00 AM / ፫ ሰዓት) and counts toward the next liturgical hour.</span><span class="point-text am-only"><strong>የሰዓታት ሰዓት ዊጅት:</strong> አሁን ያለውን የጸሎት ሰዓትና ቀጣዩን ሰዓት ያሳውቃል።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Daily Quote Widget (የአበው ምክር):</strong> Displays a rotating contemplative saying from the Desert Fathers each morning.</span><span class="point-text am-only"><strong>የአበው ምክር ዊጅት:</strong> በየማለዳው የሚያንጽ መንፈሳዊ የአበው አባባል በስክሪኑ ላይ ያቀርባል።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Memento Widget (የዕለቱ ማሳሰቢያ):</strong> A quiet sacred reminder of eternity, prayer duty, and mindfulness.</span><span class="point-text am-only"><strong>የዕለቱ ማሳሰቢያ ዊጅት:</strong> ጸሎትና የሕይወት ዝግጅትን ሁልጊዜ እንድናስብ የሚያነሳሳ።</span></div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Bahre Hasab Computus -->
+        <details class="guide-item">
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Calculator SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="16" y1="14" x2="16" y2="18"></line><path d="M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M8 18h.01M12 18h.01"></path></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">Bahre Hasab (ባሕረ ሐሳብ) Computus Engine</span>
+                <span class="summary-heading am-only">የባሕረ ሐሳብ የቀመር ማሽን</span>
+                <span class="summary-subline en-only">Books tab → ባሕረ ሐሳብ</span>
+                <span class="summary-subline am-only">የአጽዋማትና የበዓላት ቀን አግኚ</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              Under <strong>Books (መጻሕፍት) → ባሕረ ሐሳብ</strong>, enter any Ethiopian calendar year to calculate the nineteen-year computus cycle (አበቅቴ፣ መጥቅዕ፣ ጾመ ነነዌ፣ ዐቢይ ጾም፣ ደብረ ዘይት፣ ሆሣዕና፣ ስቅለት፣ ትንሣኤ).
+            </p>
+            <p class="guide-prose am-only">
+              በመጻሕፍት ገጽ ውስጥ ባሕረ ሐሳብ የሚለውን ይክፈቱ። ማንኛውንም ዓመተ ምሕረት በማስገባት የበዓላትና አጽዋማትን ቀን በቀላሉ ማግኘት ይችላሉ።
+            </p>
+          </div>
+        </details>
+
+        <!-- App Icon Shortcuts -->
+        <details class="guide-item">
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Smartphone SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">App Icon Long-Press Shortcuts</span>
+                <span class="summary-heading am-only">የስልክ መነሻ ፈጣን አቋራጮች</span>
+                <span class="summary-subline en-only">Long press the Sinq app icon</span>
+                <span class="summary-subline am-only">አርማውን ጫን አድርገው ሲይዙ</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              Press and hold the Sinq app icon on your phone's home screen to jump directly into:
+            </p>
+            <p class="guide-prose am-only">
+              የስንቅ (Sinq) መተግበሪያ አርማን (App Icon) ጫን አድርገው ሲይዙ የሚከተሉት ፬ ፈጣን አቋራጮች ይወጣሉ፦
+            </p>
+            <div class="key-points-list">
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Daily Lectionary (ግጻዌ):</strong> Opens today's Bible readings immediately.</span><span class="point-text am-only"><strong>የዕለቱ ግጻዌ:</strong> የቀኑን የቅዳሴ ንባባት በቀጥታ ይከፍታል።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Synaxarium (ስንክሳር):</strong> Opens today's commemorative saints.</span><span class="point-text am-only"><strong>ስንክሳር:</strong> የዕለቱን የቅዱሳን ታሪክ ወዲያውኑ ያቀርባል።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Psalter (ዳዊት):</strong> Resumes where you last stopped.</span><span class="point-text am-only"><strong>መዝሙረ ዳዊት:</strong> ዳዊቱን ከመቆሚያው ይቀጥላል።</span></div>
+              <div class="key-point"><span class="point-bullet">☩</span><span class="point-text en-only"><strong>Penance (ንስሐ):</strong> Opens confession and prayer preparation.</span><span class="point-text am-only"><strong>የንስሐ ዝግጅት:</strong> የንስሐ ጸሎትና ራስን መመርመሪያ ገጽን ያቀርባል።</span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Section 9: Battery & Reliability FAQ -->
+    <section class="guide-section" id="alarms-faq">
+      <div class="section-title-bar">
+        <span class="section-geez-num">፱.</span>
+        <h2 class="section-heading-text en-only">Battery & Reliability Troubleshooting</h2>
+        <h2 class="section-heading-text am-only">የባትሪ ማስተካከያና ተደጋጋሚ ጥያቄዎች</h2>
+      </div>
+
+      <div class="accordion-stack">
+        <details class="guide-item" open>
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Bell SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">Why didn't my prayer alarm ring on time?</span>
+                <span class="summary-heading am-only">የጸሎት ማሳሰቢያ ደወል በሰዓቱ ለምን አልጮኸም?</span>
+                <span class="summary-subline en-only">Android battery optimization fix</span>
+                <span class="summary-subline am-only">የባትሪ ቆጣቢ ቅንብርን ማስተካከል</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              Modern Android devices aggressively silence background apps to conserve power. To guarantee reliable prayer chimes:
+            </p>
+            <p class="guide-prose am-only">
+              አዳዲስ የአንድሮይድ ስልኮች የባትሪ ቆጣቢ ሥርዓት አፕሊኬሽኖች በጀርባ እንዳይነቁ ሊያግዱ ይችላሉ። ይህንን ለማስተካከል፦
+            </p>
+            <div class="key-points-list">
+              <div class="key-point"><span class="point-bullet">1.</span><span class="point-text en-only">In Sinq, navigate to <strong>Settings → Battery Help</strong>.</span><span class="point-text am-only">በስንቅ ውስጥ <strong>ቅንብሮች → የባትሪ አጠቃቀም እርዳታ</strong> ይክፈቱ።</span></div>
+              <div class="key-point"><span class="point-bullet">2.</span><span class="point-text en-only">Tap the button to open your Android system settings.</span><span class="point-text am-only">የስልኩን ቅንብር ለመክፈት አዝራሩን ይጫኑ።</span></div>
+              <div class="key-point"><span class="point-bullet">3.</span><span class="point-text en-only">Change Battery Usage from "Optimized" to <strong>"Unrestricted"</strong>.</span><span class="point-text am-only">የባትሪ አጠቃቀምን ወደ <strong>“Unrestricted” (ያልተገደበ)</strong> ይቀይሩ።</span></div>
+            </div>
+          </div>
+        </details>
+
+        <details class="guide-item">
+          <summary class="guide-summary">
+            <div class="summary-title-group">
+              <div class="summary-icon-well">
+                <!-- Database / Disk SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+              </div>
+              <div class="summary-text-block">
+                <span class="summary-heading en-only">How do I backup and restore my records?</span>
+                <span class="summary-heading am-only">የተቀመጡ ጥቅሶችንና ማስታወሻዎችን ማስቀመጥ</span>
+                <span class="summary-subline en-only">Settings → Records & Data</span>
+                <span class="summary-subline am-only">ቅንብሮች ውስጥ የሚገኝ</span>
+              </div>
+            </div>
+            <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-details-body">
+            <p class="guide-prose en-only">
+              In <strong>Settings → Records & Data</strong>, you can export all your bookmarks, highlights, and prayer streaks into a single encrypted JSON file to restore if you switch devices.
+            </p>
+            <p class="guide-prose am-only">
+              በ<strong>ቅንብሮች</strong> ገጽ ውስጥ የውሂብ ማስቀመጫን (Backup / Export) በመጠቀም ሁሉንም ያዘጋጇቸውን ማስታወሻዎችና ምልክቶች በፋይል ማስቀመጥና ወደ ሌላ ስልክ ማስተላለፍ ይችላሉ።
+            </p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Page Footer -->
+    <footer class="guide-footer">
+      <svg class="footer-cross-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <line x1="12" y1="2" x2="12" y2="22"></line>
+        <line x1="5" y1="8" x2="19" y2="8"></line>
+        <line x1="8" y1="5" x2="16" y2="5"></line>
+        <line x1="8" y1="19" x2="16" y2="19"></line>
+      </svg>
+      <div><a href="index.html" style="color:inherit; text-decoration:none; font-weight:700;">Sinq (ስንቅ)</a></div>
+      <div class="guide-footer-links" style="display:flex; justify-content:center; flex-wrap:wrap; gap:16px; margin: 12px 0; font-size:13px;">
+        <a href="index.html" style="color:var(--gold); text-decoration:none;">Home</a>
+        <a href="install.html" style="color:var(--gold); text-decoration:none;">Install</a>
+        <a href="about.html" style="color:var(--gold); text-decoration:none;">About</a>
+        <a href="changelog.html" style="color:var(--gold); text-decoration:none;">Changes</a>
+        <a href="privacy-policy.html" style="color:var(--gold); text-decoration:none;">Privacy</a>
+        <a href="feedback.html" style="color:var(--gold); text-decoration:none;">Feedback</a>
+      </div>
+      <div style="margin-top: 4px; font-size: 11px; opacity: 0.75;">
+        100% Free · 100% Offline · Private Liturgical Prayer
+      </div>
+    </footer>
+
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const isDark = document.body.classList.contains('theme-dark');
+      if (isDark) {
+        document.body.classList.remove('theme-dark');
+      } else {
+        document.body.classList.add('theme-dark');
+      }
+    }
+
+    function toggleLanguage() {
+      const isAm = document.body.classList.contains('lang-am');
+      if (isAm) {
+        document.body.classList.remove('lang-am');
+        document.body.classList.add('lang-en');
+        document.documentElement.lang = 'en';
+      } else {
+        document.body.classList.remove('lang-en');
+        document.body.classList.add('lang-am');
+        document.documentElement.lang = 'am';
+      }
+    }
+  </script>
+</body>
+</html>
