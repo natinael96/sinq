@@ -88,6 +88,18 @@ import com.agpeya.app.ui.common.ListRow
 
 private val FONT_STEPS_SP = com.agpeya.app.data.SettingsRepository.FONT_STEPS_SP
 
+enum class ScriptureTranslationMode {
+    AMHARIC,
+    ENGLISH,
+    PARALLEL_AMH_ENG;
+
+    fun next(): ScriptureTranslationMode = when (this) {
+        AMHARIC -> ENGLISH
+        ENGLISH -> PARALLEL_AMH_ENG
+        PARALLEL_AMH_ENG -> AMHARIC
+    }
+}
+
 /**
  * A New-Testament book reader. Opens at [initialChapter] (and scrolls to
  * [initialStart], tinting [initialStart]..[initialEnd]) when arrived at from a
@@ -112,9 +124,22 @@ fun ScriptureReaderScreen(
     val context = LocalContext.current
     val s = LocalStrings.current
     val scope = androidx.compose.runtime.rememberCoroutineScope()
-    var loadAttempt by rememberSaveable(bookKey) { mutableIntStateOf(0) }
-    val bookResult by produceState<Result<ScriptureBook?>?>(initialValue = null, bookKey, loadAttempt) {
-        value = runCatching { ScriptureRepository.book(context, bookKey) }
+    val hasEnglish = remember(bookKey) { ScriptureRepository.hasEnglish(bookKey) }
+    var translationMode by rememberSaveable(bookKey) { mutableStateOf(ScriptureTranslationMode.AMHARIC) }
+    val effectiveMode = if (hasEnglish) translationMode else ScriptureTranslationMode.AMHARIC
+    val activeEdition = if (effectiveMode == ScriptureTranslationMode.ENGLISH) {
+        ScriptureRepository.BIBLE_ENGLISH_EDITION
+    } else {
+        ScriptureRepository.BIBLE_EDITION
+    }
+    var loadAttempt by rememberSaveable(bookKey, activeEdition) { mutableIntStateOf(0) }
+    val bookResult by produceState<Result<ScriptureBook?>?>(initialValue = null, bookKey, activeEdition, loadAttempt) {
+        value = runCatching { ScriptureRepository.book(context, bookKey, activeEdition) }
+    }
+    val parallelBookResult by produceState<ScriptureBook?>(initialValue = null, bookKey, effectiveMode) {
+        value = if (effectiveMode == ScriptureTranslationMode.PARALLEL_AMH_ENG && hasEnglish) {
+            ScriptureRepository.book(context, bookKey, ScriptureRepository.BIBLE_ENGLISH_EDITION)
+        } else null
     }
     val fontStep by SettingsRepository.fontStep(context).collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
@@ -186,6 +211,12 @@ fun ScriptureReaderScreen(
     var selA by rememberSaveable(bookKey, chapter) { mutableIntStateOf(-1) }
     var selB by rememberSaveable(bookKey, chapter) { mutableIntStateOf(-1) }
     val current = remember(b, chapter) { b.chapters.find { it.chapter == chapter } ?: b.chapters.first() }
+    val parallelChapter = remember(parallelBookResult, chapter) {
+        parallelBookResult?.chapters?.find { it.chapter == chapter }
+    }
+    val parallelVersesMap = remember(parallelChapter) {
+        parallelChapter?.verses?.associateBy { it.n } ?: emptyMap()
+    }
     val highlightSectionId = "scripture:${ScriptureRepository.BIBLE_EDITION}:$bookKey:$chapter"
     // Only the chapter we arrived on shows the cited-verse tint. The cited range
     // is snapped onto verse numbers that actually exist: the Amharic source merges
@@ -238,8 +269,14 @@ fun ScriptureReaderScreen(
     val selRange = com.agpeya.app.ui.reading.flatSelectionRange(selA, selB)
     val sinq = sinqColors
     val isPsalms = bookKey == "psalms" || b.key == "psalms"
-    val chapterUnitLabel = if (isPsalms) (if (s.isAmharic) "መዝሙር" else "Psalm") else s.chapterUnit
-    val chapterTitle = if (isPsalms) "${b.nameAm} ${geezNumeral(chapter)}" else "${b.nameAm} ${s.chapterUnit} ${geezNumeral(chapter)}"
+    val displayBookName = if (effectiveMode == ScriptureTranslationMode.ENGLISH) b.nameEn else b.nameAm
+    val chapterUnitLabel = if (effectiveMode == ScriptureTranslationMode.ENGLISH) {
+        if (isPsalms) "Psalm" else "Chapter"
+    } else {
+        if (isPsalms) (if (s.isAmharic) "መዝሙር" else "Psalm") else s.chapterUnit
+    }
+    val chapterNumStr = if (effectiveMode == ScriptureTranslationMode.ENGLISH) "$chapter" else geezNumeral(chapter)
+    val chapterTitle = "$displayBookName $chapterUnitLabel $chapterNumStr"
     // The selection as the Church names it: the book's Amharic name, the
     // chapter and the verses, in Ge'ez numerals — the same string the copy, the
     // share, the image card and the bookmark all carry.
@@ -247,8 +284,8 @@ fun ScriptureReaderScreen(
         val verses = current.verses.filter { it.n in selRange }
         if (verses.isEmpty()) null else com.agpeya.app.ui.common.Passage(
             verses = verses.map { it.n as Int? to it.text },
-            citation = com.agpeya.app.data.Citation.of(b.nameAm, chapter, selRange.first, selRange.last),
-            edition = s.amharicEdition,
+            citation = com.agpeya.app.data.Citation.of(displayBookName, chapter, selRange.first, selRange.last),
+            edition = if (effectiveMode == ScriptureTranslationMode.ENGLISH) "NKJV" else s.amharicEdition,
         )
     }
     val selRoute = "scripture/$bookKey/$chapter" +
@@ -270,12 +307,12 @@ fun ScriptureReaderScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             SinqTopBar(
-                title = b.nameAm,
+                title = displayBookName,
                 onBack = onBack,
                 titleContent = {
                     com.agpeya.app.ui.common.ReaderTitleBar(
-                        title = b.nameAm,
-                        chapterLabel = "$chapterUnitLabel ${geezNumeral(chapter)}",
+                        title = displayBookName,
+                        chapterLabel = "$chapterUnitLabel $chapterNumStr",
                         pickable = b.chapters.size > 1,
                         onPick = { chaptersOpen = true },
                     )
@@ -286,6 +323,35 @@ fun ScriptureReaderScreen(
                 // and it is the same control in every reader. Chapter bookmarks
                 // already saved keep working and keep opening the chapter.
                 actions = {
+                    val gold = MaterialTheme.colorScheme.secondary
+                    if (hasEnglish) {
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(gold.copy(alpha = 0.12f))
+                                .border(1.dp, gold.copy(alpha = 0.45f), CircleShape)
+                                .clickable(
+                                    onClickLabel = "ቀይር",
+                                    onClick = { translationMode = translationMode.next() },
+                                )
+                                .heightIn(min = 48.dp)
+                                .padding(horizontal = 14.dp, vertical = 6.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            val editionText = when (effectiveMode) {
+                                ScriptureTranslationMode.AMHARIC -> s.wudaseLangAmharic
+                                ScriptureTranslationMode.ENGLISH -> "English"
+                                ScriptureTranslationMode.PARALLEL_AMH_ENG -> "አማ + Eng"
+                            }
+                            Text(
+                                text = editionText,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = gold,
+                                maxLines = 1,
+                            )
+                        }
+                        Spacer(Modifier.width(Spacing.xs))
+                    }
                     com.agpeya.app.ui.common.ReaderToolsMenu(
                         fontStep = fontStep,
                         maxFontStep = FONT_STEPS_SP.lastIndex,
@@ -382,6 +448,8 @@ fun ScriptureReaderScreen(
             items(rows, key = { it.first().n }) { row ->
                 val tinted = row.first().n in highlightRange
                 val body = @Composable { verse: com.agpeya.app.model.ScriptureVerse ->
+                    val isEnglishMode = effectiveMode == ScriptureTranslationMode.ENGLISH
+                    val marker = if (isEnglishMode) "${verse.n}" else geezNumeral(verse.n)
                     val annotated = buildAnnotatedString {
                         withStyle(
                             SpanStyle(
@@ -389,14 +457,15 @@ fun ScriptureReaderScreen(
                                 fontSize = scaledReadingSp(bodyFontSp) * 0.58f,
                                 baselineShift = BaselineShift.Superscript,
                             )
-                        ) { append(geezNumeral(verse.n)) }
+                        ) { append(marker) }
                         append("  ")
                         append(verse.text)
                     }
-                    Text(
-                        text = annotated,
-                        style = readingBodyStyle(bodyFontSp),
-                        color = MaterialTheme.colorScheme.onBackground,
+                    val secondaryVerseText = if (effectiveMode == ScriptureTranslationMode.PARALLEL_AMH_ENG) {
+                        parallelVersesMap[verse.n]?.text
+                    } else null
+
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = verseGap / 2)
@@ -414,8 +483,25 @@ fun ScriptureReaderScreen(
                                 selA = a
                                 selB = bSel
                             }
-                            .padding(horizontal = Spacing.sm),
-                    )
+                            .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
+                    ) {
+                        Text(
+                            text = annotated,
+                            style = readingBodyStyle(bodyFontSp),
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                        if (secondaryVerseText != null) {
+                            Spacer(Modifier.height(Spacing.xs))
+                            Text(
+                                text = secondaryVerseText,
+                                style = readingBodyStyle(bodyFontSp).copy(
+                                    fontSize = readingBodyStyle(bodyFontSp).fontSize * 0.94f,
+                                    color = MaterialTheme.colorScheme.secondary,
+                                ),
+                                modifier = Modifier.padding(start = Spacing.md),
+                            )
+                        }
+                    }
                 }
                 // The edition's own heading, where it prints one — a psalm's
                 // superscription, the note opening ሲኖዶስ. The parser used to

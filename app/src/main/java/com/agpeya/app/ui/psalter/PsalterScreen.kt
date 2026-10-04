@@ -106,6 +106,20 @@ fun dailyRange(day: DayOfWeek): IntRange? = when (day) {
     DayOfWeek.SUNDAY -> null
 }
 
+enum class PsalterMode {
+    AMHARIC,
+    ENGLISH,
+    GEEZ,
+    PARALLEL_AMH_GEEZ;
+
+    fun next(): PsalterMode = when (this) {
+        AMHARIC -> ENGLISH
+        ENGLISH -> GEEZ
+        GEEZ -> PARALLEL_AMH_GEEZ
+        PARALLEL_AMH_GEEZ -> AMHARIC
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PsalterScreen(
@@ -124,11 +138,22 @@ fun PsalterScreen(
     val context = LocalContext.current
     val s = LocalStrings.current
     val scope = rememberCoroutineScope()
-    var isParallel by rememberSaveable { mutableStateOf(false) }
-    var geez by rememberSaveable { mutableStateOf(initialGeez) }
-    val psalmsLoad = com.agpeya.app.ui.common.rememberContentLoad(geez) { ScriptureRepository.psalms(context, geez) }
-    val parallelPsalms by produceState<List<Section>>(emptyList(), isParallel, geez) {
-        value = if (isParallel) ScriptureRepository.psalms(context, !geez) else emptyList()
+    var psalterMode by rememberSaveable {
+        mutableStateOf(if (initialGeez) PsalterMode.GEEZ else PsalterMode.AMHARIC)
+    }
+    val isParallel = psalterMode == PsalterMode.PARALLEL_AMH_GEEZ
+    val geez = psalterMode == PsalterMode.GEEZ
+    val activeEdition = when (psalterMode) {
+        PsalterMode.AMHARIC -> ScriptureRepository.PSALMS_AMHARIC_EDITION
+        PsalterMode.ENGLISH -> ScriptureRepository.PSALMS_ENGLISH_EDITION
+        PsalterMode.GEEZ -> ScriptureRepository.PSALMS_GEEZ_EDITION
+        PsalterMode.PARALLEL_AMH_GEEZ -> ScriptureRepository.PSALMS_AMHARIC_EDITION
+    }
+    val psalmsLoad = com.agpeya.app.ui.common.rememberContentLoad(activeEdition) {
+        ScriptureRepository.psalms(context, activeEdition)
+    }
+    val parallelPsalms by produceState<List<Section>>(emptyList(), isParallel) {
+        value = if (isParallel) ScriptureRepository.psalms(context, ScriptureRepository.PSALMS_GEEZ_EDITION) else emptyList()
     }
     val parallelMap = remember(parallelPsalms) { parallelPsalms.associateBy { it.number } }
 
@@ -292,31 +317,17 @@ fun PsalterScreen(
                                 .border(1.dp, gold.copy(alpha = 0.45f), CircleShape)
                                 .clickable(
                                     onClickLabel = "ቀይር",
-                                    onClick = {
-                                        when {
-                                            !geez && !isParallel -> {
-                                                geez = true
-                                                isParallel = false
-                                            }
-                                            geez && !isParallel -> {
-                                                geez = false
-                                                isParallel = true
-                                            }
-                                            else -> {
-                                                geez = false
-                                                isParallel = false
-                                            }
-                                        }
-                                    },
+                                    onClick = { psalterMode = psalterMode.next() },
                                 )
                                 .heightIn(min = 48.dp)
                                 .padding(horizontal = 14.dp, vertical = 6.dp),
                             contentAlignment = Alignment.Center,
                         ) {
-                            val editionText = when {
-                                isParallel -> "አማ + ግእዝ"
-                                geez -> s.wudaseLangGeez
-                                else -> s.wudaseLangAmharic
+                            val editionText = when (psalterMode) {
+                                PsalterMode.AMHARIC -> s.wudaseLangAmharic
+                                PsalterMode.ENGLISH -> "English"
+                                PsalterMode.GEEZ -> s.wudaseLangGeez
+                                PsalterMode.PARALLEL_AMH_GEEZ -> "አማ + ግእዝ"
                             }
                             Text(
                                 text = editionText,
@@ -337,8 +348,13 @@ fun PsalterScreen(
                                 } else {
                                     pagerState.currentPage
                                 }
+                                val langCode = when (psalterMode) {
+                                    PsalterMode.GEEZ -> "gez"
+                                    PsalterMode.ENGLISH -> "en"
+                                    else -> "am"
+                                }
                                 onWriteNote(
-                                    "psalter?section=${((shown.getOrNull(index)?.number ?: 1) - 1)}&lang=${if (geez) "gez" else "am"}",
+                                    "psalter?section=${((shown.getOrNull(index)?.number ?: 1) - 1)}&lang=$langCode",
                                     shown.getOrNull(index)?.title ?: s.psalterTitle,
                                 )
                             },

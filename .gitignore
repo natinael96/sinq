@@ -29,6 +29,8 @@ preview-lib.html
 # Python bytecode from the content tools
 __pycache__/
 *.pyc
+.cache/
+nkjv_*.json
 
 # Generated promo renders and their toolchain: video files, frame captures and
 # a vendored node_modules carrying a 79MB ffmpeg binary. `git add -A` in this

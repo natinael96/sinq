@@ -19,8 +19,10 @@ object ScriptureRepository {
     private const val TAG = "ScriptureRepository"
     private const val DIR = "content/bible"
     const val BIBLE_EDITION = "am-1980"
+    const val BIBLE_ENGLISH_EDITION = "en-nkjv"
     const val PSALMS_AMHARIC_EDITION = "am-1980"
     const val PSALMS_GEEZ_EDITION = "gez-1980"
+    const val PSALMS_ENGLISH_EDITION = "en-nkjv"
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -32,7 +34,23 @@ object ScriptureRepository {
      * megabytes for chapters nobody is reading. LruCache is synchronized.
      */
     private val bookCache = android.util.LruCache<String, ScriptureBook>(8)
-    private val psalmCache = ConcurrentHashMap<Boolean, List<com.agpeya.app.model.Section>>()
+    private val psalmCache = ConcurrentHashMap<String, List<com.agpeya.app.model.Section>>()
+
+    private val ENGLISH_CANON_KEYS = setOf(
+        "genesis", "exodus", "leviticus", "numbers", "deuteronomy", "joshua",
+        "judges", "ruth", "1-samuel", "2-samuel", "1-kings", "2-kings",
+        "1-chronicles", "2-chronicles", "ezra", "nehemiah", "esther", "job",
+        "psalms", "proverbs", "ecclesiastes", "song-of-solomon", "isaiah", "jeremiah",
+        "lamentations", "ezekiel", "daniel", "hosea", "joel", "amos",
+        "obadiah", "jonah", "micah", "nahum", "habakkuk", "zephaniah",
+        "haggai", "zechariah", "malachi", "matthew", "mark", "luke", "john",
+        "acts", "romans", "1-corinthians", "2-corinthians", "galatians", "ephesians",
+        "philippians", "colossians", "1-thessalonians", "2-thessalonians",
+        "1-timothy", "2-timothy", "titus", "philemon", "hebrews", "james",
+        "1-peter", "2-peter", "1-john", "2-john", "3-john", "jude", "revelation"
+    )
+
+    fun hasEnglish(key: String): Boolean = key in ENGLISH_CANON_KEYS
 
     /** Drop the rebuildable caches under memory pressure (see [CacheTrimmer]). */
     fun trimCaches() {
@@ -89,24 +107,34 @@ object ScriptureRepository {
      * [cache] false reads without populating the cache — the search indexer
      * walks every book once and must not evict what the reader is using.
      */
-    suspend fun book(context: Context, key: String, cache: Boolean = true): ScriptureBook? =
-        bookCache.get(key) ?: withContext(Dispatchers.IO) {
+    suspend fun book(
+        context: Context,
+        key: String,
+        edition: String = BIBLE_EDITION,
+        cache: Boolean = true,
+    ): ScriptureBook? {
+        val cacheKey = "$edition:$key"
+        return bookCache.get(cacheKey) ?: withContext(Dispatchers.IO) {
             CacheTrimmer.ensureRegistered(context)
             runCatching {
                 val meta = books(context.applicationContext).first { it.key == key }
                 val raw = context.applicationContext.assets
-                    .open("$DIR/$BIBLE_EDITION/books/${meta.number.toString().padStart(2, '0')}-$key.json")
+                    .open("$DIR/$edition/books/${meta.number.toString().padStart(2, '0')}-$key.json")
                     .readBytes().decodeToString()
                 parseBook(json.parseToJsonElement(raw).jsonObject, meta)
-            }.onFailure { Log.e(TAG, "Failed to load book $key", it) }
-                .getOrNull()?.also { if (cache) bookCache.put(key, it) }
+            }.onFailure { Log.e(TAG, "Failed to load book $key from $edition", it) }
+                .getOrNull()?.also { if (cache) bookCache.put(cacheKey, it) }
         }
+    }
 
     /** Psalms as the shared Section model used by prayer and scripture readers. */
     suspend fun psalms(context: Context, geez: Boolean = false): List<com.agpeya.app.model.Section> =
-        psalmCache[geez] ?: withContext(Dispatchers.IO) {
+        psalms(context, if (geez) PSALMS_GEEZ_EDITION else PSALMS_AMHARIC_EDITION)
+
+    /** Load Psalms from the specified edition (Amharic, Ge'ez, or English NKJV). */
+    suspend fun psalms(context: Context, edition: String): List<com.agpeya.app.model.Section> =
+        psalmCache[edition] ?: withContext(Dispatchers.IO) {
             CacheTrimmer.ensureRegistered(context)
-            val edition = if (geez) PSALMS_GEEZ_EDITION else PSALMS_AMHARIC_EDITION
             runCatching {
                 val raw = context.applicationContext.assets
                     .open("$DIR/$edition/books/19-psalms.json").readBytes().decodeToString()
@@ -125,12 +153,17 @@ object ScriptureRepository {
                                 ?: return@mapNotNull null
                             before to text
                         }.toMap()
+                        val title = if (edition == PSALMS_ENGLISH_EDITION) {
+                            "Psalm $number"
+                        } else {
+                            "መዝሙር ${com.agpeya.app.ui.reading.geezNumeral(number)}"
+                        }
                         com.agpeya.app.model.Section(
                             id = "ps_$number",
                             orderIndex = number - 1,
                             type = "psalm",
                             number = number,
-                            title = "መዝሙር ${com.agpeya.app.ui.reading.geezNumeral(number)}",
+                            title = title,
                             firstVerse = 1,
                             verseHeaders = headings,
                             verses = verses,
@@ -145,7 +178,7 @@ object ScriptureRepository {
                     if (it is kotlinx.coroutines.CancellationException) throw it
                     Log.e(TAG, "Failed to load Psalms from $edition", it)
                 }
-                .getOrDefault(emptyList()).also { if (it.isNotEmpty()) psalmCache[geez] = it }
+                .getOrDefault(emptyList()).also { if (it.isNotEmpty()) psalmCache[edition] = it }
         }
 
     /**
