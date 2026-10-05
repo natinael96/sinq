@@ -68,6 +68,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -146,6 +147,7 @@ fun HomeScreen(
     onReflectQuote: ((com.agpeya.app.model.DailyQuote) -> Unit)? = null,
     openDailyQuote: Boolean = false,
     onDailyQuoteConsumed: (() -> Unit)? = null,
+    onOpenTour: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val config by HoursRepository.config(context).collectAsState(initial = HoursConfig())
@@ -231,6 +233,21 @@ fun HomeScreen(
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { permissionPulse++ }
+
+    val installedVersionCode = remember { com.agpeya.app.data.TourRepository.installedVersionCode(context) }
+    val lastTourVersion by com.agpeya.app.data.SettingsRepository.lastTourVersion(context)
+        .collectAsState(initial = installedVersionCode)
+    val onboarded by com.agpeya.app.data.SettingsRepository.onboarded(context)
+        .collectAsState(initial = true)
+    var showWhatsNewDialog by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(lastTourVersion, installedVersionCode, onboarded) {
+        if (installedVersionCode > 0 && onboarded) {
+            if (lastTourVersion == null || lastTourVersion!! < installedVersionCode) {
+                showWhatsNewDialog = true
+            }
+        }
+    }
 
     LaunchedEffect(offerReminderSetup, notificationsReady, batteryReady) {
         if (offerReminderSetup && notificationsReady && batteryReady) {
@@ -488,6 +505,24 @@ fun HomeScreen(
                 TextButton(onClick = dismissNotice) {
                     Text(strings.notNow)
                 }
+            },
+        )
+    }
+    if (showWhatsNewDialog) {
+        com.agpeya.app.ui.intro.WhatsNewUpdateDialog(
+            versionName = "1.5.11",
+            onDismiss = {
+                showWhatsNewDialog = false
+                scope.launch {
+                    com.agpeya.app.data.SettingsRepository.setLastTourVersion(context, installedVersionCode)
+                }
+            },
+            onOpenTour = {
+                showWhatsNewDialog = false
+                scope.launch {
+                    com.agpeya.app.data.SettingsRepository.setLastTourVersion(context, installedVersionCode)
+                }
+                onOpenTour()
             },
         )
     }

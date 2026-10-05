@@ -5,6 +5,18 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.5.11] — 2026-10-05
+
+_versionCode 111 · Synaxarium Arke correction, Wudase Amlak prayer book, and English NKJV Bible integration_
+
+### Added
+- **Wudase Amlak (ውዳሴ አምላክ በአማርኛ) Prayer Book.** Added the complete 8 canonical daily sections (የዘወትር, ሰኞ, ማክሰኞ, ረቡዕ, ሐሙስ, ዓርብ, ቅዳሜ, እሑድ) under the Church Books (የጸሎት መጻሕፍት) shelf.
+- **English Bible (NKJV) Translation.** Fully wired English New King James Version (NKJV) Bible with parallel Amharic/English reader toggles, verse selection, and global search.
+- **What's New Update Dialog.** Added a launch update dialog presenting headline liturgical additions and fixes upon updating to a new version.
+
+### Fixed
+- **Synaxarium Arke Strophes.** Audited, verified, and corrected all 1,017 Synaxarium Arke strophes across the entire 366-day liturgical year against authentic Ethiopian Orthodox Tewahedo Church manuscripts.
+
 ## [1.5.10] — 2026-10-04
 
 _versionCode 110 · Future date checklist reminders & deep linking, Scripture Psalms reader with highlights, and web guide styling_

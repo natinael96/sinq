@@ -41,3 +41,8 @@ brag-output/
 # generated JSON are the deliverable; the scan itself is large and stays local,
 # as every earlier one did — no PDF has ever been tracked here.
 *.pdf
+
+# Local research and extraction scripts
+tools/extract_catena_patristics.py
+sources/patristics/
+

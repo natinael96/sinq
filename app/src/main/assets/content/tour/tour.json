@@ -2,6 +2,73 @@
   "contentVersion": 1,
   "tours": [
     {
+      "versionCode": 111,
+      "version": "1.5.11",
+      "title": {
+        "am": "ምን አዲስ ነገር አለ",
+        "en": "What's New in Sinq"
+      },
+      "pages": [
+        {
+          "kicker": {
+            "am": "ስንክሳር",
+            "en": "Synaxarium"
+          },
+          "title": {
+            "am": "የስንክሳር አርኬ ተስተካክሏል",
+            "en": "Synaxarium Arke Hymns Fixed"
+          },
+          "body": {
+            "am": "በዓመቱ ሙሉ የሚገኙት ፩ሺህ፲፯ቱ የስንክሳር አርኬዎች ከትክክለኛ የቤተ ክርስቲያን የብራና ቅጂዎች ጋር ተገናዝበው ሙሉ በሙሉ ተስተካክለዋል።",
+            "en": "All 1,017 Synaxarium Arke strophes across the entire liturgical year have been audited and corrected to match authentic church manuscripts."
+          },
+          "route": "synaxarium/today",
+          "actionLabel": {
+            "am": "ስንክሳርን ክፈት",
+            "en": "Open Synaxarium"
+          }
+        },
+        {
+          "kicker": {
+            "am": "የጸሎት መጻሕፍት",
+            "en": "Prayer Books"
+          },
+          "title": {
+            "am": "ውዳሴ አምላክ በአማርኛ ተካቷል",
+            "en": "Wudase Amlak Prayer Book Added"
+          },
+          "body": {
+            "am": "ከዘወትር እስከ እሑድ ያሉትን ፰ቱን የውዳሴ አምላክ የጸሎት ክፍሎች በቤተ ክርስቲያን መጻሕፍት (የጸሎት መጻሕፍት) ስር ያገኛሉ።",
+            "en": "The complete 8 daily prayer sections of Wudase Amlak (Praise of God) are now fully available under Church Books."
+          },
+          "route": "books/43ad4fe4ff",
+          "actionLabel": {
+            "am": "ውዳሴ አምላክን ክፈት",
+            "en": "Open Wudase Amlak"
+          }
+        },
+        {
+          "kicker": {
+            "am": "ቅዱሳት መጻሕፍት",
+            "en": "Holy Scriptures"
+          },
+          "title": {
+            "am": "የእንግሊዝኛ መጽሐፍ ቅዱስ (NKJV)",
+            "en": "English Bible (NKJV) Wired"
+          },
+          "body": {
+            "am": "የእንግሊዝኛ መጽሐፍ ቅዱስ (NKJV) ተካቷል፤ በአማርኛና በእንግሊዝኛ ጎን ለጎን ለማንበብና ለማነጻጸር ያስችላል።",
+            "en": "The English New King James Version (NKJV) is now wired with parallel reading toggles and search."
+          },
+          "route": "scriptures",
+          "actionLabel": {
+            "am": "መጽሐፍ ቅዱስን ክፈት",
+            "en": "Open Scriptures"
+          }
+        }
+      ]
+    },
+    {
       "versionCode": 90,
       "version": "1.0.0",
       "title": {

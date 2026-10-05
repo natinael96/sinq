@@ -35,7 +35,7 @@ SHELVES = [
     ("dersan", "ድርሳናትና ተአምራት",   "የመላእክትና የጌታ ድርሳናት"),
     ("gedl",   "ገድላት",           "የቅዱሳን ገድል"),
     ("kidase", "የቅዳሴ መጻሕፍት",     "ሥርዓተ ቅዳሴ"),
-    ("tselot", "የጸሎት መጻሕፍት",     "የነቢያት ጸሎት"),
+    ("tselot", "የጸሎት መጻሕፍት",     "ውዳሴ አምላክ፣ የነቢያት ጸሎት"),
 ]
 
 # The printed collection every መልክእ on the shelf was scanned out of. The
@@ -67,6 +67,7 @@ SHELF_BY_TITLE = {
     "መጽሐፈ ሰዓታት": "zema",
     "ሰቆቃወ ድንግል": "zema",
     "ዜማ ዘነግሥ": "zema",
+    "ውዳሴ አምላክ በአማርኛ": "tselot",
 }
 
 COMING_SOON = {
@@ -155,7 +156,7 @@ def shelf_of(title):
         return "gedl"
     if "ቅዳሴ" in title:
         return "kidase"
-    if title.startswith("ጸሎት"):
+    if title.startswith(("ጸሎት", "ውዳሴ አምላክ")):
         return "tselot"
     return "melkie"
 

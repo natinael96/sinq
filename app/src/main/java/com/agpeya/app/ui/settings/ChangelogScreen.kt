@@ -1,24 +1,46 @@
 package com.agpeya.app.ui.settings
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.strings.LocalStrings
+import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
+import com.agpeya.app.ui.theme.inReadingFont
 
 /** One release, carrying both languages; the screen picks by [Strings.isAmharic]. */
 private data class ReleaseNote(
@@ -30,6 +52,23 @@ private data class ReleaseNote(
 )
 
 private val releaseHistory = listOf(
+    ReleaseNote(
+        version = "1.5.11",
+        title = "Synaxarium Arke correction, Wudase Amlak prayer book, and English NKJV Bible integration",
+        titleAm = "የስንክሳር አርኬ እርማት፣ የውዳሴ አምላክ የጸሎት መጽሐፍ እና የእንግሊዝኛ መጽሐፍ ቅዱስ (NKJV) ማካተት",
+        changes = listOf(
+            "Audited, verified, and corrected all 1,017 Synaxarium Arke strophes across the entire liturgical year against authentic church manuscripts.",
+            "Added the complete 8 daily prayer sections of Wudase Amlak (ውዳሴ አምላክ በአማርኛ) under the Church Books (የጸሎት መጻሕፍት) shelf.",
+            "Wired English New King James Version (NKJV) Bible translation with bilingual parallel reader toggles, verse selection, and global search.",
+            "Added a What's New update dialog highlighting major liturgical content additions upon version update.",
+        ),
+        changesAm = listOf(
+            "በዓመቱ ሙሉ የሚገኙት ፩ሺህ፲፯ቱ የስንክሳር አርኬዎች ከትክክለኛ የቤተ ክርስቲያን የብራና ቅጂዎች ጋር ተገናዝበው ሙሉ በሙሉ ተስተካክለዋል።",
+            "ከዘወትር እስከ እሑድ ያሉትን ፰ቱን የውዳሴ አምላክ የጸሎት ክፍሎች በቤተ ክርስቲያን መጻሕፍት (የጸሎት መጻሕፍት) ስር ተካተዋል።",
+            "የእንግሊዝኛ መጽሐፍ ቅዱስ (NKJV) ተካቷል፤ በአማርኛና በእንግሊዝኛ ጎን ለጎን ለማንበብና ለማነጻጸር ያስችላል።",
+            "በአዳዲስ እትሞች የተካተቱ ዋና ዋና መንፈሳዊ ይዘቶችን የሚያሳይ 'ምን አዲስ ነገር አለ' ማሳወቂያ ተካቷል።",
+        ),
+    ),
     ReleaseNote(
         version = "1.5.10",
         title = "Future date checklist reminders, Scripture Psalms reader with highlights, and web guide styling",
@@ -358,44 +397,197 @@ private val releaseHistory = listOf(
 @Composable
 fun ChangelogScreen(onBack: () -> Unit, onOpenTour: () -> Unit = {}) {
     val s = LocalStrings.current
+    val isAmharic = s.isAmharic
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = { SinqTopBar(title = s.whatsNew, onBack = onBack) },
     ) { inner ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(inner),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(inner),
+            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.md),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
+            // ── Illuminated Hero What's New Tour Card ───────────────────────
             item(key = "tour") {
-                com.agpeya.app.ui.common.NavRow(s.whatsNewTour, onOpenTour)
+                Surface(
+                    onClick = onOpenTour,
+                    shape = RoundedCornerShape(18.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.45f)),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(Spacing.lg),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Surface(
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)),
+                            modifier = Modifier.size(50.dp),
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Outlined.NewReleases,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            }
+                        }
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                            ) {
+                                Surface(
+                                    shape = RoundedCornerShape(4.dp),
+                                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f),
+                                ) {
+                                    Text(
+                                        text = if (isAmharic) "አዲስ እትም" else "Latest",
+                                        style = MaterialTheme.typography.labelSmall.inReadingFont(),
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    )
+                                }
+                                Text(
+                                    text = "v1.5.11",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.secondary,
+                                )
+                            }
+
+                            Spacer(Modifier.height(Spacing.xxs))
+
+                            Text(
+                                text = s.whatsNewTour,
+                                style = MaterialTheme.typography.titleMedium.inReadingFont(),
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+
+                            Text(
+                                text = if (isAmharic)
+                                    "ዋና ዋና አዳዲስ ይዘቶችን በስዕላዊ ጉብኝት ይመልከቱ"
+                                else
+                                    "Visual walkthrough of new additions and fixes",
+                                style = MaterialTheme.typography.bodySmall.inReadingFont(),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(IconSize.medium),
+                        )
+                    }
+                }
             }
+
+            // ── Release History Cards ───────────────────────────────────────
             items(releaseHistory, key = { it.version }) { release ->
+                val isLatest = release.version == "1.5.11"
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.large,
-                    color = MaterialTheme.colorScheme.surfaceContainer,
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    border = BorderStroke(
+                        1.dp,
+                        if (isLatest) MaterialTheme.colorScheme.secondary.copy(alpha = 0.35f)
+                        else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
+                    ),
                 ) {
                     Column(
                         modifier = Modifier.padding(Spacing.lg),
                         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
                     ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = if (isLatest) MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f)
+                                else MaterialTheme.colorScheme.surfaceVariant,
+                                border = BorderStroke(
+                                    1.dp,
+                                    if (isLatest) MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
+                                    else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                                ),
+                            ) {
+                                Text(
+                                    text = "v${release.version}",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isLatest) MaterialTheme.colorScheme.secondary
+                                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(horizontal = Spacing.sm, vertical = 2.dp),
+                                )
+                            }
+
+                            if (isLatest) {
+                                Surface(
+                                    shape = RoundedCornerShape(6.dp),
+                                    color = MaterialTheme.colorScheme.primaryContainer,
+                                ) {
+                                    Text(
+                                        text = if (isAmharic) "የአሁኑ እትም" else "Current",
+                                        style = MaterialTheme.typography.labelSmall.inReadingFont(),
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        modifier = Modifier.padding(horizontal = Spacing.sm, vertical = 2.dp),
+                                    )
+                                }
+                            }
+                        }
+
                         Text(
-                            text = "v${release.version}",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.secondary,
+                            text = if (isAmharic) release.titleAm else release.title,
+                            style = MaterialTheme.typography.titleMedium.inReadingFont(),
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onBackground,
                         )
-                        Text(
-                            text = if (s.isAmharic) release.titleAm else release.title,
-                            style = MaterialTheme.typography.titleMedium,
+
+                        HorizontalDivider(
+                            thickness = 0.5.dp,
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
                         )
-                        val changes = if (s.isAmharic) release.changesAm else release.changes
+
+                        val changes = if (isAmharic) release.changesAm else release.changes
                         changes.forEach { change ->
-                            Text(
-                                text = "•  $change",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                                verticalAlignment = Alignment.Top,
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .padding(top = 7.dp)
+                                        .size(6.dp)
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.secondary),
+                                )
+                                Text(
+                                    text = change,
+                                    style = MaterialTheme.typography.bodyMedium.inReadingFont(),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    lineHeight = 20.sp,
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
                         }
                     }
                 }

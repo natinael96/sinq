@@ -499,7 +499,10 @@ private fun AgpeyaNavHost(
         composable("intro") {
             com.agpeya.app.ui.intro.IntroScreen(
                 onDone = {
-                    scope.launch { SettingsRepository.setOnboarded(context) }
+                    scope.launch {
+                        SettingsRepository.setOnboarded(context)
+                        SettingsRepository.setLastTourVersion(context, com.agpeya.app.data.TourRepository.installedVersionCode(context))
+                    }
                     navController.navigate(Tab.HOME.route) {
                         popUpTo("intro") { inclusive = true }
                     }
@@ -576,6 +579,7 @@ private fun AgpeyaNavHost(
                                                 },
                                                 openDailyQuote = openDailyQuote,
                                                 onDailyQuoteConsumed = onDailyQuoteHandled,
+                                                onOpenTour = { navController.navigate("whatsNew") { launchSingleTop = true } },
                                             )
                                         Tab.JOURNEY ->
                                             com.agpeya.app.ui.habits.JourneyScreen(
@@ -1241,10 +1245,17 @@ private fun AgpeyaNavHost(
                 else -> com.agpeya.app.ui.intro.WhatsNewTour(
                     tour = newest,
                     onOpenRoute = { route ->
+                        scope.launch { SettingsRepository.setLastTourVersion(context, newest.versionCode) }
                         navController.popBackStack()
-                        navController.navigate(route) { launchSingleTop = true }
+                        val target = if (route == "synaxarium" || route == "synaxarium/today") {
+                            "synaxarium/${java.time.LocalDate.now().toEpochDay()}"
+                        } else route
+                        navController.navigate(target) { launchSingleTop = true }
                     },
-                    onDone = { navController.popBackStack() },
+                    onDone = {
+                        scope.launch { SettingsRepository.setLastTourVersion(context, newest.versionCode) }
+                        navController.popBackStack()
+                    },
                 )
             }
         }
