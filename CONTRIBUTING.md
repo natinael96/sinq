@@ -229,6 +229,7 @@ To run a specific unit test during development:
    * `sources/hours/hour_mapping.json`: Prayer hour composition and structure
    * `sources/gitsawe/`: Lectionary source transcriptions
    * `sources/wudase/`: Wudase Maryam texts
+   * `sources/mahlet/`: Mahlet orders and feast sources (curated alongside [EOTC Mahlet](https://t.me/EOTCmahlet))
 2. Extraction and build scripts live under `tools/`:
    * `python3 tools/extract_content.py`: Rebuilds canonical hours
    * `python3 tools/build_sinksar.py`: Rebuilds Synaxarium assets

@@ -58,8 +58,15 @@ The [UI/UX audit](docs/UI_UX_PRODUCT_AUDIT.md) and [fix tracker](docs/UI_UX_FIX_
 
 ### Expanded library
 - **Church books** — 37 curated books with chapter navigation.
-- **ሥርዓተ ማኅሌት** — 181 orders with month paging, feast search, seasonal access, source editions and alternatives.
-- **Commentary** — optional online Catena viewer, separate from bundled Scripture.
+- **ሥርዓተ ማኅሌት** — 181 orders with month paging, feast search, seasonal access, source editions and alternatives, sourced from printed texts and [EOTC Mahlet](https://t.me/EOTCmahlet).
+- **Catena patristic commentary** — optional verse-by-verse commentary from early Church Fathers via [Catena Bible](https://catenabible.com), seamlessly mapped from Ethiopian Orthodox Septuagint (LXX) verse citations.
+
+### Patristic Commentary (Catena Bible)
+
+Sinq integrates verse-by-verse commentary from the early Church Fathers via [Catena Bible](https://catenabible.com):
+- **Deep Patristic Insights:** While reading Scripture in the codex or Psalter, tapping the commentary action opens early Church patristic reflections (St. John Chrysostom, St. Athanasius, St. Cyril of Alexandria, etc.) on that specific verse.
+- **LXX to Masoretic Alignment:** The Ethiopian Orthodox Church canonical Psalter follows the Septuagint (LXX) chapter numbering, whereas Catena numbers chapters according to the Masoretic text. Sinq automatically maps the citation offsets (`CatenaLink.kt`), so LXX Psalm 22 ("The Lord is my shepherd") accurately opens Catena's Psalm 23, ensuring readers always land on the authentic commentary for the psalm they are reading.
+- **Strict Privacy & Offline Boundary:** All canonical Scriptures and liturgical books remain completely offline on-device. Network access is only invoked when you explicitly choose to launch the commentary viewer.
 
 ## Installation
 
@@ -175,7 +182,9 @@ The code and the bundled prayer text are under **different licenses**. If you fo
 
 - **Code:** [Apache License 2.0](LICENSE).
 - **Prayer and Scripture text:** the 80-weahadu Amharic Bible by [EOTCOpenSource](https://github.com/EOTCOpenSource/80-weahadu), used under [**CC BY-NC-ND 4.0**](https://creativecommons.org/licenses/by-nc-nd/4.0/). Passages are selected and arranged into the hours of prayer; verse text is reproduced unchanged, except that the acrostic letters of Psalm 118 are rendered as stanza headings. This material may not be used commercially or redistributed in modified form. Sinq is and will remain non-commercial: no ads, no in-app purchases, no subscriptions.
-- **ግጻዌ, Synaxarium, Mahlet and church books:** [NOTICE](NOTICE) records these transcriptions as CC BY-NC-ND 4.0. Source-specific provenance and unresolved review questions remain in [the rights record](docs/CONTENT_RIGHTS.md); content does not inherit Apache-2.0.
+- **ሥርዓተ ማኅሌት (Mahlet):** Transcriptions and feast orders are merged from printed editions of *ሥርዓተ ማኅሌት ዘዓበይት በዓላት* and liturgical posts from the [EOTC Mahlet Telegram channel](https://t.me/EOTCmahlet). Released under [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/).
+- **ግጻዌ, Synaxarium, and church books:** [NOTICE](NOTICE) records these transcriptions as CC BY-NC-ND 4.0. Source-specific provenance and unresolved review questions remain in [the rights record](docs/CONTENT_RIGHTS.md); content does not inherit Apache-2.0.
+- **Catena Bible patristic commentary:** Commentary data is hosted independently by [Catena Bible](https://catenabible.com). Sinq links out to patristic commentaries as a devotional study aid and does not republish or relicense Catena's proprietary platform.
 - **ውዳሴ ማርያም (Wudase Maryam):** the Ge'ez and Amharic text is a centuries-old, public-domain Ethiopian Orthodox liturgical prayer. Scanned and digitized directly from publicly available printed editions and PDF scans by the Sinq maintainer, and reshaped into stanzas by `tools/build_wudase.py`.
 - **Font:** [Abyssinica SIL](https://software.sil.org/abyssinica/) and Noto Sans Ethiopic, under the [SIL Open Font License 1.1](docs/AbyssinicaSIL-OFL.txt).
 - **Reader fonts:** the selectable faces — Ethiopic Abay Light (abass alamnehe), Bela Bereka (Abel Daniel), Zemenay (Abel Yeshewalem), and Abba Garima (Jérémie Hornus, Gaëtan Baehr, Daniel Yacob) — are distributed by [Font.et](https://www.font.et/) under the SIL Open Font License; per-font notices, including the additionally bundled Waldba face, are in [docs/fonts/](docs/fonts/). OFL permits bundling and redistribution with software provided the fonts are not sold on their own. *Note: Zemenay's embedded metadata names an "ETHL" license (t.me/ethelglyphs) while Font.et distributes it as OFL; we follow the distributor's stated terms.*
