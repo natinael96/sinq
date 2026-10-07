@@ -11,7 +11,7 @@ The source code uses [Apache-2.0](../LICENSE). Bundled content under `app/src/ma
 | Prayer-hour Scripture | EOTCOpenSource/80-weahadu; CC BY-NC-ND 4.0 | `extract_content.py` uses legacy `data/am`; mapping is in `sources/hours/hour_mapping.json` |
 | Library Scripture | Same project; full Amharic 1980 Bible and Ge'ez 1980 Psalms | Catalog records source commit `5bd3bf31092b22fc3e26dc4b330778448773ebce`; digitizer's license alone does not settle underlying translation provenance |
 | Gitsawe | Maintainer's scan/transcription; NOTICE records CC BY-NC-ND 4.0 | Replaces the older “separate private permission required” description; source preserved under `sources/gitsawe/` |
-| Synaxarium | Maintainer's Amharic/Ge'ez scanned editions, 366 days each; NOTICE records CC BY-NC-ND 4.0 | Earlier bot/Hugging Face corpora are no longer bundled; their MIT notice is not the license for the current Synaxarium |
+| Synaxarium | Maintainer's scanned and digitized Amharic/Ge'ez editions (366 days each); NOTICE records CC BY-NC-ND 4.0 | Scanned directly from printed editions of መጽሐፈ ስንክሳር and digitized by the maintainer; structured and normalized by `tools/build_sinksar.py` |
 | Mahlet | Maintainer's book scan, EOTC Mahlet Telegram editions, Tsige sources and Gitsawe fallback orders; NOTICE records CC BY-NC-ND 4.0 | Preserve edition-specific source links, alternatives and outstanding editorial/source review |
 | Church-book shelf | Maintainer's scanned traditional texts; NOTICE records CC BY-NC-ND 4.0 | 37 app books; preserve source and transformation records |
 | Wudase/daily prayers | Maintainer's scan/digitization from publicly available printed editions/PDFs; traditional liturgical text | Public-domain traditional prayer text formatted into stanzas |
