@@ -156,7 +156,11 @@ Normal builds use the checked-in assets. Other corpora have separate generators;
 
 ## Contributing
 
-Issues and pull requests are welcome — especially corrections to prayer text mapping, Amharic/English translations, and testing across devices. For text changes, edit `sources/hours/hour_mapping.json` or `tools/extract_content.py` and regenerate; never edit the bundled JSON directly.
+We welcome contributions of all kinds — bug reports, UI/UX improvements, translations, and liturgical corrections.
+
+Please see our **[Contribution Guidelines](CONTRIBUTING.md)** for details on development setup, architecture invariants, testing requirements, and the PR process. All contributors are expected to uphold our **[Code of Conduct](CODE_OF_CONDUCT.md)**.
+
+> **Note on text changes:** For liturgical and prayer text edits, edit the source mappings (e.g. `sources/hours/hour_mapping.json`) or generator scripts (`tools/`) and rebuild; never hand-edit the generated JSON in `app/src/main/assets/content/`.
 
 ## License & Content
 
