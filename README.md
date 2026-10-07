@@ -1,41 +1,48 @@
 # Sinq (ስንቅ)
 
-> **Current baseline:** 2.5.1 (versionCode 77), reviewed 2026-09-18. See [detailed project status](docs/PROJECT_STATUS.md) for implemented features, content counts, verification results and outstanding work.
+> 📦 **Latest Release:** [![Release](https://img.shields.io/github/v/release/natinael96/sinq?color=0E3B31&label=release&sort=semver)](https://github.com/natinael96/sinq/releases/latest) · See **[CHANGELOG.md](CHANGELOG.md)** for recent additions and **[PROJECT_STATUS.md](docs/PROJECT_STATUS.md)** for audit verification.
 
 **The Ethiopian Orthodox Tewahedo Book of Hours (ሰዓታት) for Android — Amharic-first, with prayer and Scripture available offline.**
 
-![Version](https://img.shields.io/github/v/tag/natinael96/sinq?label=version&color=0E3B31)
-![Platform](https://img.shields.io/badge/platform-Android%206.0%2B-E4BC5A)
-![UI](https://img.shields.io/badge/UI-Jetpack%20Compose-0E3B31)
+[![Latest Release](https://img.shields.io/github/v/release/natinael96/sinq?color=0E3B31&label=version&sort=semver)](https://github.com/natinael96/sinq/releases/latest)
+[![Total Downloads](https://img.shields.io/github/downloads/natinael96/sinq/total?color=E4BC5A&label=downloads)](https://github.com/natinael96/sinq/releases)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/natinael96/sinq/release.yml?label=build&color=0E3B31)](https://github.com/natinael96/sinq/actions)
+[![Platform](https://img.shields.io/badge/platform-Android%206.0%2B%20(API%2023%2B)-E4BC5A)](https://developer.android.com/about/versions/marshmallow)
+[![Target SDK](https://img.shields.io/badge/targetSdk-36%20(Android%2016)-0E3B31)](https://developer.android.com)
+[![UI](https://img.shields.io/badge/UI-Jetpack%20Compose-0E3B31)](https://developer.android.com/jetpack/compose)
+[![License](https://img.shields.io/badge/license-Apache--2.0-0E3B31.svg)](LICENSE)
+[![Last Commit](https://img.shields.io/github/last-commit/natinael96/sinq?color=E4BC5A)](https://github.com/natinael96/sinq/commits/master)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-0E3B31.svg)](CONTRIBUTING.md)
+[![Code of Conduct](https://img.shields.io/badge/Contributor%20Covenant-2.1-E4BC5A.svg)](CODE_OF_CONDUCT.md)
 
 *Sinq (ስንቅ) — "provisions for the journey."*
 
 Sinq brings the Agpeya's seven canonical prayer hours and the complete Psalter (መዝሙረ ዳዊት) to your phone in a focused, distraction-free reading experience — deep liturgical green, gold accents, and Ge'ez verse numerals. No account or analytics SDK: the prayer and Scripture texts ship in the APK, and personal records are stored locally. GitHub APK builds check for updates online; optional Catena commentary opens a third-party website. User-selected backups and shares export files ([privacy policy](https://natinael96.github.io/sinq/privacy-policy.html)).
 
-The [UI/UX audit](docs/UI_UX_PRODUCT_AUDIT.md) and [fix tracker](docs/UI_UX_FIX_PROGRESS.md) document the current remediation work and remaining device checks.
+The [UI/UX audit](docs/UI_UX_PRODUCT_AUDIT.md) and [fix tracker](docs/UI_UX_FIX_PROGRESS.md) document the ongoing remediation work and device checks.
 
 ## Features
 
 ### Prayer
 - **The prayer hours** — ጸሎተ ነግህ (Morning), ሠለስት (Terce), ቀትር (Sext), ተሰዓት (None), ሰርክ (Vespers), ንዋም (Compline), መንፈቀ ሌሊት (Midnight, with its three watches), and the Veil prayer — with a time-of-day suggestion on the home screen.
-- **Unified Scripture library** — the Old and New Testaments use the Amharic 1980 edition; all 150 Psalms use Amharic 1980 by default with a reader-local Ge'ez 1980 switch.
-- **ውዳሴ ማርያም and ዘወትር ጸሎት** — a portion for each weekday plus ይወድስዋ መላእክት and አንቀጸ ብርሃን, in Amharic with a Ge'ez toggle.
+- **Unified Scripture library** — the Old and New Testaments use the Amharic 1980 edition alongside the parallel English NKJV translation; all 150 Psalms use Amharic 1980 by default with a reader-local Ge'ez 1980 switch.
+- **ውዳሴ ማርያም, ዘወትር ጸሎት, and ውዳሴ አምላክ** — a portion for each weekday plus ይወድስዋ መላእክት and አንቀጸ ብርሃን, in Amharic with a Ge'ez toggle, plus the complete 8 canonical daily sections of ውዳሴ አምላክ.
 
 ### Calendar and lectionary
 - **ግጻዌ** — the complete source-backed lectionary: all 366 fixed dates,
   movable weekday seasons, and the Sunday/mezmur cycle, resolved through the
   Bahre Hasab. Each valid citation opens in the unified Scripture system.
-- **ስንክሳር** — Amharic and Ge'ez editions, each covering 366 dates, with commemorations, አርኬ hymns and closing prayer.
+- **ስንክሳር** — Amharic and Ge'ez editions, each covering 366 dates, with commemorations, 1,017 verified አርኬ hymns and closing prayer.
 - **አጽዋማት** — the fasting calendar: what is in effect today, and every fast of the Ethiopian year.
 - **Bahre Hasab reference** — the printed 2001–2015 EC annual table, available from the Library.
 
 ### Reading
-- **Bible** — the bundled Amharic 1980 Ethiopian Orthodox canon, organized into Old and New Testaments without a network connection.
+- **Bible** — bundled Amharic 1980 Ethiopian Orthodox canon and English NKJV translation, organized into Old and New Testaments without a network connection.
 - Two reading modes: vertical scroll or page-by-page swiping, remembered per preference.
-- Six font-size steps (16–28sp), four selectable Ethiopic faces, three line-spacing
+- Six font-size steps (16–28sp), selectable Ethiopic faces, three line-spacing
   choices, and four text alignments, optically matched across reading surfaces.
 - Keep-screen-on across supported text readers; prayer positions retain their section identity and offset.
-- Light and dark themes; Amharic and English interface languages.
+- Light (Sacred Ivory default) and dark themes; Amharic and English interface languages.
 
 ### Personal
 - **Bookmarks** — prayer sections, psalms, scripture chapters and ስንክሳር passages, in one list.
@@ -43,22 +50,22 @@ The [UI/UX audit](docs/UI_UX_PRODUCT_AUDIT.md) and [fix tracker](docs/UI_UX_FIX_
 - **Search** — homophone-tolerant Amharic search (ሀ/ሐ/ኀ, ሰ/ሠ, ጸ/ፀ … treated as equal) across the prayers, Psalter, Scripture, ስንክሳር, ውዳሴ ማርያም and church books.
 - **Copy, share and save** — export a verse, focused reading, selected ግጻዌ office or scripture chapter as text or paginated image cards; save images to the gallery on Android 10+.
 - **Backup and restore** — selected Journey/reading history, marks, prayer lists, setup and offering records to a local JSON file. Journal export is opt-in, plaintext and excludes confession drafts.
-- **Journey & habits** — track daily prayer and personal practices without punitive streaks or broken-run language.
-- **Reminders** — prayer-time notifications with per-mode configuration, plus a nightly streak nudge and a morning ግጻዌ reading.
-- **Home-screen widgets** — today's ምስባክ and ወንጌል, plus a memento mori widget.
+- **Journey & habits** — track daily prayer and personal practices without punitive streaks or broken-run language; interactive Ethiopian-year heatmap with day inspection.
+- **Reminders** — prayer-time notifications with per-mode configuration, plus a nightly streak nudge, morning ግጻዌ reading, and future date checklist reminders with deep linking.
+- **Home-screen widgets** — today's ምስባክ and ወንጌል, memento mori widget, and 24-hour canonical prayer clock dial.
 - **Reading plans** — day-by-day readings, progress, a book map and completion flow. Automatic reminders at 06:30, 14:00 and 20:00 local time follow up while today’s passages remain unfinished; quiet hours and the off switch still apply.
 - **Journal and personal records** — reflections, prayer intentions, tithe/vow records, penance and private confession notes. The optional journal passphrase gates access; it does not encrypt the database.
 
 ### Expanded library
 - **Church books** — 37 curated books with chapter navigation.
-- **ሥርዓተ ማኅሌት** — 190 orders with month paging, feast search, seasonal access, source editions and alternatives.
+- **ሥርዓተ ማኅሌት** — 181 orders with month paging, feast search, seasonal access, source editions and alternatives.
 - **Commentary** — optional online Catena viewer, separate from bundled Scripture.
 
 ## Installation
 
 Signed APKs are published on the [Releases page](https://github.com/natinael96/sinq/releases) — every `v*` tag builds one in CI.
 
-1. Download `Sinq-vX.Y.Z.apk` from the latest release.
+1. Download `Sinq-v*.apk` from the [Latest Release](https://github.com/natinael96/sinq/releases/latest).
 2. Allow **Install unknown apps** for your browser or file manager (Android Settings → Apps).
 3. Open the APK and install. Requires **Android 6.0 (API 23)** or newer.
    `java.time` and `java.util.Base64` reach that floor through core library
