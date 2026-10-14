@@ -53,6 +53,23 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.5.12",
+        title = "Ethiopian Beeswax candle in gentle stillness, Sacred Manuscript Folio heatmap plate with fasting dot and perforations, and compact interactive day inspection",
+        titleAm = "የኢትዮጵያ ንብ ሰም ጧፍ በእርጋታ፣ የብራና ሰሌዳ የጸሎት ግጻዌ ከጾም ነጥብና ከተበሳሱ ጠርዞች ጋር፣ እና የተሟላ የዕለታት መረጃ",
+        changes = listOf(
+            "Reimagined the daily prayer candle with Ethiopian church beeswax (ቱዋፍ) organic depth, crater pool, glowing ember tip, and gentle stillness harmonic sway and convection breathing.",
+            "Enclosed Home and Journey prayer heatmaps in a traditional Ethiopian manuscript folio (የብራና ሰሌዳ) with gold fillet framing, corner rosettes (፨), center sacred dot (●), and perforated/dashed fasting edges.",
+            "Selecting any day on the Journey year heatmap immediately opens the day inspection card showing canonical hours prayed, habits completed, active fasts, and written reflections with day navigation chevrons.",
+            "Streamlined Journey heatmap footprint to a compact 11dp cell pitch, lowering grid height by ~40% and surfacing 5–6 months on screen simultaneously.",
+        ),
+        changesAm = listOf(
+            "የዕለቱ የጸሎት ጧፍ በኢትዮጵያ ቤተ ክርስቲያን የንብ ሰም (ቱዋፍ) ቅርጽ፣ የሰም ኩሬ፣ የሚበራ የፈትል ፍም እና በእርጋታ በሚወዛወዝ ህያው ነበልባል ተሻሽሏል።",
+            "የመነሻ እና የጉዞ የጸሎት ግጻዌ በባህላዊ የብራና ሰሌዳ ክፈፍ፣ የማዕዘን ፨ ምልክቶች፣ የጾም ነጥብ (●) እና የተበሳሱ ጠርዞች ተውቧል።",
+            "በዓመቱ ግጻዌ ላይ ማንኛውንም ቀን በመጫን የተጸለዩትን የሰዓታት ጸሎታት፣ የተፈጸሙ መንፈሳዊ ልምዶችን፣ የጾም ስሞችን እና የማስታወሻ ጽሑፎችን በቀጥታ መመልከት ይቻላል።",
+            "የጉዞ ግጻዌ ቁመቱ በ፵% በመቀነሱ ፭ እስከ ፮ ወራትን በአንድ ጊዜ በስክሪኑ ላይ ያለ መጣበብ በግልጽ ለማየት ያስችላል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.5.11",
         title = "Synaxarium Arke correction, Wudase Amlak prayer book, and English NKJV Bible integration",
         titleAm = "የስንክሳር አርኬ እርማት፣ የውዳሴ አምላክ የጸሎት መጽሐፍ እና የእንግሊዝኛ መጽሐፍ ቅዱስ (NKJV) ማካተት",
@@ -460,7 +477,7 @@ fun ChangelogScreen(onBack: () -> Unit, onOpenTour: () -> Unit = {}) {
                                     )
                                 }
                                 Text(
-                                    text = "v1.5.11",
+                                    text = "v1.5.12",
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.secondary,
@@ -498,7 +515,7 @@ fun ChangelogScreen(onBack: () -> Unit, onOpenTour: () -> Unit = {}) {
 
             // ── Release History Cards ───────────────────────────────────────
             items(releaseHistory, key = { it.version }) { release ->
-                val isLatest = release.version == "1.5.11"
+                val isLatest = release.version == "1.5.12"
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),

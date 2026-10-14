@@ -5,6 +5,18 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.5.12] — 2026-10-14
+
+_versionCode 112 · Ethiopian Beeswax candle in gentle stillness, Sacred Manuscript Folio heatmap plate with fasting dot and perforations, and compact interactive day inspection_
+
+### Added
+- **Ethiopian Church Beeswax Candle (ቱዋፍ).** Reimagined the daily prayer candle with natural shaded beeswax depth, crater pool, glowing wick ember, and gentle stillness harmonic sway and convection breathing.
+- **Sacred Manuscript Folio (የብራና ሰሌዳ) Heatmap Plate.** Enclosed both Home and Journey prayer heatmaps in a traditional Ethiopian manuscript folio with gold fillet framing, corner rosettes (፨), center sacred dot (●), and perforated/dashed fasting edges.
+- **Interactive Heatmap Day Inspection.** Tapping any day on the Journey year heatmap immediately opens the day inspection card showing canonical hours prayed, habits completed, active fast names (including weekly Wednesday/Friday fasts), and written journal reflections with previous/next day stepping.
+
+### Changed
+- **Compact Journey Heatmap Layout.** Streamlined cell footprint from 16dp to 11dp (13dp column pitch), lowering grid height by ~40% and surfacing 5–6 months on screen simultaneously without crowding.
+
 ## [1.5.11] — 2026-10-05
 
 _versionCode 111 · Synaxarium Arke correction, Wudase Amlak prayer book, and English NKJV Bible integration_

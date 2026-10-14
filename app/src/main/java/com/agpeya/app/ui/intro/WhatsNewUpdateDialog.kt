@@ -96,27 +96,27 @@ fun WhatsNewUpdateDialog(
             ) {
                 WhatsNewItem(
                     numeral = if (isAmharic) "፩" else "1",
-                    title = if (isAmharic) "የስንክሳር አርኬ ተስተካክሏል" else "Synaxarium Arke Hymns Fixed",
+                    title = if (isAmharic) "የኢትዮጵያ ንብ ሰም ጧፍ (ቱዋፍ)" else "Ethiopian Beeswax Candle",
                     description = if (isAmharic)
-                        "በዓመቱ ሙሉ የሚገኙት ፩ሺህ፲፯ቱ የስንክሳር አርኬዎች ከትክክለኛ የቤተ ክርስቲያን የብራና ቅጂዎች ጋር ተገናዝበው ሙሉ በሙሉ ተስተካክለዋል።"
+                        "የዕለቱ የጸሎት ጧፍ በኢትዮጵያ ቤተ ክርስቲያን የንብ ሰም ተፈጥሯዊ ቀለም፣ የሰም ኩሬ እና በእርጋታ በሚወዛወዝ ህያው ነበልባል ተሻሽሏል።"
                     else
-                        "All 1,017 Synaxarium Arke strophes across the entire liturgical year have been audited and corrected to match authentic church manuscripts.",
+                        "Reimagined the daily prayer candle with authentic Ethiopian church beeswax (ቱዋፍ), glowing wick ember, and gentle stillness flame physics.",
                 )
                 WhatsNewItem(
                     numeral = if (isAmharic) "፪" else "2",
-                    title = if (isAmharic) "ውዳሴ አምላክ በአማርኛ ተካቷል" else "Wudase Amlak Prayer Book Added",
+                    title = if (isAmharic) "የብራና ሰሌዳ የጸሎት ግጻዌ" else "Sacred Manuscript Folio Heatmap",
                     description = if (isAmharic)
-                        "ከዘወትር እስከ እሑድ ያሉትን ፰ቱን የውዳሴ አምላክ የጸሎት ክፍሎች በቤተ ክርስቲያን መጻሕፍት (የጸሎት መጻሕፍት) ስር ያገኛሉ።"
+                        "የመነሻ እና የጉዞ የጸሎት ግጻዌ በባህላዊ የብራና ሰሌዳ ክፈፍ፣ የማዕዘን ፨ ምልክቶች፣ የጾም ነጥብ (●) እና የተበሳሱ ጠርዞች ተውቧል።"
                     else
-                        "The complete 8 daily prayer sections of Wudase Amlak (Praise of God) are now fully available under Church Books.",
+                        "Prayer heatmaps on Home and Journey are enclosed in a traditional manuscript folio with gold fillet framing, sacred dot (●), and perforated fasting edges.",
                 )
                 WhatsNewItem(
                     numeral = if (isAmharic) "፫" else "3",
-                    title = if (isAmharic) "የእንግሊዝኛ መጽሐፍ ቅዱስ (NKJV)" else "English Bible (NKJV) Wired",
+                    title = if (isAmharic) "የተሟላ የዕለታት መረጃና የታመቀ ግጻዌ" else "Compact Heatmap & Day Inspection",
                     description = if (isAmharic)
-                        "የእንግሊዝኛ መጽሐፍ ቅዱስ (NKJV) ተካቷል፤ በአማርኛና በእንግሊዝኛ ጎን ለጎን ለማንበብና ለማነጻጸር ያስችላል።"
+                        "የዓመቱን ግጻዌ ቁመት በማመቅ ፭-፮ ወራትን በአንድ ጊዜ ማሳየት ተችሏል፤ ማንኛውንም ቀን በመጫን የተጸለዩትን ጸሎታትና የጾም ስሞችን መመልከት ይቻላል።"
                     else
-                        "The English New King James Version (NKJV) is now wired with parallel reading toggles and search.",
+                        "Lowered Journey heatmap height by 40% showing 5–6 months at once; tap any day to inspect canonical hours, habits, and fast details.",
                 )
             }
         },
