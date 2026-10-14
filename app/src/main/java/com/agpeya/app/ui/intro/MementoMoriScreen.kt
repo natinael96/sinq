@@ -67,6 +67,7 @@ import kotlinx.coroutines.launch
 import com.agpeya.app.ui.theme.IconSize
 import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.Waldba
+import com.agpeya.app.ui.theme.sinqColors
 
 // The reminder writes itself, then rests a moment before the app opens. A tap
 // moves on early for anyone who doesn't want to wait.
@@ -128,6 +129,7 @@ fun MementoMoriScreen(onDone: () -> Unit) {
     )
 
     val gold = MaterialTheme.colorScheme.secondary
+    val arke = sinqColors.arke
     val textMeasurer = rememberTextMeasurer()
     val titleStyle = remember {
         TextStyle(
@@ -171,6 +173,18 @@ fun MementoMoriScreen(onDone: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
+            // 1. Animated widget logo at top
+            Icon(
+                painter = painterResource(R.drawable.widget_logo),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier
+                    .size(IconSize.large * 1.5f)
+                    .alpha(bloom),
+            )
+            Spacer(Modifier.height(Spacing.lg))
+
+            // 2. "Memento Mori" live calligraphy & rubricated knotwork underline
             Canvas(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -182,15 +196,12 @@ fun MementoMoriScreen(onDone: () -> Unit) {
                 // canvas; scale the whole hand down to fit rather than clip it.
                 val fit = ((size.width - 12.dp.toPx()) / w).coerceAtMost(1f)
                 scale(fit, fit, pivot = Offset(size.width / 2f, size.height / 2f)) {
-                    drawWriting(titleLayout, write.value, flourish.value, gold)
+                    drawWriting(titleLayout, write.value, flourish.value, gold, arke)
                 }
             }
 
             Spacer(Modifier.height(Spacing.xl))
-            // The gloss leads in the app language; its counterpart settles
-            // quietly beneath. Whichever of the two is the Amharic is set in
-            // ዋልድባ — the Latin above it is written by a nib, and the Amharic
-            // deserves a hand of its own rather than the interface's sans.
+            // 3. The gloss leads in the app language; its counterpart settles quietly beneath.
             Text(
                 text = s.mementoMoriGloss,
                 style = MaterialTheme.typography.bodyLarge.let {
@@ -214,32 +225,19 @@ fun MementoMoriScreen(onDone: () -> Unit) {
             )
         }
 
-        // The mark and the version, resting at the foot of the page. It arrives
-        // with the gloss rather than with the writing, so the hand is finished
-        // before anything else asks to be read.
-        Column(
+        // The version resting quietly at the foot of the page.
+        Text(
+            text = appVersion(),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontStyle = FontStyle.Italic,
+                fontWeight = FontWeight.Light,
+            ),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = Spacing.huge)
                 .alpha(subtitle.value),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.widget_logo),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.size(IconSize.large),
-            )
-            Spacer(Modifier.height(Spacing.xs))
-            Text(
-                text = appVersion(),
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontStyle = FontStyle.Italic,
-                    fontWeight = FontWeight.Light,
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+        )
     }
 }
 
@@ -266,10 +264,11 @@ private fun DrawScope.drawWriting(
     progress: Float,
     flourish: Float,
     gold: Color,
+    arke: Color,
 ) {
     val w = layout.size.width.toFloat()
     val h = layout.size.height.toFloat()
-    val underlineGap = 12.dp.toPx()
+    val underlineGap = 16.dp.toPx()
     val tx = (size.width - w) / 2f
     val ty = (size.height - h - underlineGap) / 2f
     val n = TITLE.length
@@ -320,23 +319,213 @@ private fun DrawScope.drawWriting(
         }
     }
 
-    // A hand-drawn underline with a gentle dip, revealed by the same
-    // left-to-right motion so it reads as one continuing stroke.
+    // Liturgical Rubrication Underline (ቀይ ሐረግ) with Lalibela Cross Knot
     if (flourish > 0f) {
-        val uy = ty + h + underlineGap * 0.4f
-        val x0 = tx - 6.dp.toPx()
-        val x1 = tx + w + 6.dp.toPx()
-        val path = Path().apply {
-            moveTo(x0, uy)
-            quadraticTo((x0 + x1) / 2f, uy + 5.dp.toPx(), x1, uy)
+        val uy = ty + h + underlineGap
+        val cx = size.width / 2f
+        val ribbonSpan = (w * 0.95f).coerceAtLeast(180.dp.toPx())
+        val xLeft = cx - ribbonSpan / 2f
+        val xRight = cx + ribbonSpan / 2f
+        val crossHalfWidth = 14.dp.toPx()
+
+        // 1. Left intertwined ribbons (from center outward or leftward)
+        val leftRedPath = Path().apply {
+            moveTo(cx - crossHalfWidth, uy)
+            cubicTo(
+                cx - crossHalfWidth - ribbonSpan * 0.12f, uy - 6.dp.toPx(),
+                cx - crossHalfWidth - ribbonSpan * 0.28f, uy + 6.dp.toPx(),
+                cx - crossHalfWidth - ribbonSpan * 0.40f, uy,
+            )
+            cubicTo(
+                cx - crossHalfWidth - ribbonSpan * 0.48f, uy - 6.dp.toPx(),
+                xLeft + ribbonSpan * 0.10f, uy + 5.dp.toPx(),
+                xLeft, uy,
+            )
         }
-        val measure = PathMeasure().apply { setPath(path, false) }
-        val drawn = Path()
-        measure.getSegment(0f, measure.length * flourish, drawn, true)
+        val leftGoldPath = Path().apply {
+            moveTo(cx - crossHalfWidth, uy)
+            cubicTo(
+                cx - crossHalfWidth - ribbonSpan * 0.12f, uy + 6.dp.toPx(),
+                cx - crossHalfWidth - ribbonSpan * 0.28f, uy - 6.dp.toPx(),
+                cx - crossHalfWidth - ribbonSpan * 0.40f, uy,
+            )
+            cubicTo(
+                cx - crossHalfWidth - ribbonSpan * 0.48f, uy + 6.dp.toPx(),
+                xLeft + ribbonSpan * 0.10f, uy - 5.dp.toPx(),
+                xLeft, uy,
+            )
+        }
+
+        // 2. Right intertwined ribbons
+        val rightRedPath = Path().apply {
+            moveTo(cx + crossHalfWidth, uy)
+            cubicTo(
+                cx + crossHalfWidth + ribbonSpan * 0.12f, uy - 6.dp.toPx(),
+                cx + crossHalfWidth + ribbonSpan * 0.28f, uy + 6.dp.toPx(),
+                cx + crossHalfWidth + ribbonSpan * 0.40f, uy,
+            )
+            cubicTo(
+                cx + crossHalfWidth + ribbonSpan * 0.48f, uy - 6.dp.toPx(),
+                xRight - ribbonSpan * 0.10f, uy + 5.dp.toPx(),
+                xRight, uy,
+            )
+        }
+        val rightGoldPath = Path().apply {
+            moveTo(cx + crossHalfWidth, uy)
+            cubicTo(
+                cx + crossHalfWidth + ribbonSpan * 0.12f, uy + 6.dp.toPx(),
+                cx + crossHalfWidth + ribbonSpan * 0.28f, uy - 6.dp.toPx(),
+                cx + crossHalfWidth + ribbonSpan * 0.40f, uy,
+            )
+            cubicTo(
+                cx + crossHalfWidth + ribbonSpan * 0.48f, uy + 6.dp.toPx(),
+                xRight - ribbonSpan * 0.10f, uy - 5.dp.toPx(),
+                xRight, uy,
+            )
+        }
+
+        // Draw Left ribbons with flourish progress
+        val leftMeasureRed = PathMeasure().apply { setPath(leftRedPath, false) }
+        val drawnLeftRed = Path()
+        leftMeasureRed.getSegment(0f, leftMeasureRed.length * flourish, drawnLeftRed, true)
         drawPath(
-            path = drawn,
-            color = gold.copy(alpha = 0.7f),
-            style = Stroke(width = 1.6.dp.toPx(), cap = StrokeCap.Round),
+            path = drawnLeftRed,
+            color = arke.copy(alpha = 0.95f),
+            style = Stroke(width = 2.2.dp.toPx(), cap = StrokeCap.Round),
         )
+
+        val leftMeasureGold = PathMeasure().apply { setPath(leftGoldPath, false) }
+        val drawnLeftGold = Path()
+        leftMeasureGold.getSegment(0f, leftMeasureGold.length * flourish, drawnLeftGold, true)
+        drawPath(
+            path = drawnLeftGold,
+            color = gold.copy(alpha = 0.85f),
+            style = Stroke(width = 1.4.dp.toPx(), cap = StrokeCap.Round),
+        )
+
+        // Draw Right ribbons with flourish progress
+        val rightMeasureRed = PathMeasure().apply { setPath(rightRedPath, false) }
+        val drawnRightRed = Path()
+        rightMeasureRed.getSegment(0f, rightMeasureRed.length * flourish, drawnRightRed, true)
+        drawPath(
+            path = drawnRightRed,
+            color = arke.copy(alpha = 0.95f),
+            style = Stroke(width = 2.2.dp.toPx(), cap = StrokeCap.Round),
+        )
+
+        val rightMeasureGold = PathMeasure().apply { setPath(rightGoldPath, false) }
+        val drawnRightGold = Path()
+        rightMeasureGold.getSegment(0f, rightMeasureGold.length * flourish, drawnRightGold, true)
+        drawPath(
+            path = drawnRightGold,
+            color = gold.copy(alpha = 0.85f),
+            style = Stroke(width = 1.4.dp.toPx(), cap = StrokeCap.Round),
+        )
+
+        // 3. Center Emblem: Geometric Lalibela Cross Knot (pops in as flourish matures)
+        val crossProgress = ((flourish - 0.25f) / 0.75f).coerceIn(0f, 1f)
+        if (crossProgress > 0f) {
+            val crossScale = crossProgress * crossProgress * (3f - 2f * crossProgress)
+            scale(crossScale, crossScale, pivot = Offset(cx, uy)) {
+                // Vertical notched bar
+                val vW = 5.dp.toPx()
+                val vH = 18.dp.toPx()
+                drawRect(
+                    color = arke,
+                    topLeft = Offset(cx - vW / 2f, uy - vH / 2f),
+                    size = androidx.compose.ui.geometry.Size(vW, vH),
+                )
+                // Notches on top/bottom
+                val notchW = 7.dp.toPx()
+                val notchH = 2.dp.toPx()
+                drawRect(
+                    color = arke,
+                    topLeft = Offset(cx - notchW / 2f, uy - vH / 2f),
+                    size = androidx.compose.ui.geometry.Size(notchW, notchH),
+                )
+                drawRect(
+                    color = arke,
+                    topLeft = Offset(cx - notchW / 2f, uy + vH / 2f - notchH),
+                    size = androidx.compose.ui.geometry.Size(notchW, notchH),
+                )
+
+                // Horizontal notched bar
+                val hW = 18.dp.toPx()
+                val hH = 5.dp.toPx()
+                drawRect(
+                    color = arke,
+                    topLeft = Offset(cx - hW / 2f, uy - hH / 2f),
+                    size = androidx.compose.ui.geometry.Size(hW, hH),
+                )
+                // Notches on left/right
+                val notchSideW = 2.dp.toPx()
+                val notchSideH = 7.dp.toPx()
+                drawRect(
+                    color = arke,
+                    topLeft = Offset(cx - hW / 2f, uy - notchSideH / 2f),
+                    size = androidx.compose.ui.geometry.Size(notchSideW, notchSideH),
+                )
+                drawRect(
+                    color = arke,
+                    topLeft = Offset(cx + hW / 2f - notchSideW, uy - notchSideH / 2f),
+                    size = androidx.compose.ui.geometry.Size(notchSideW, notchSideH),
+                )
+
+                // Gold border outline for the cross
+                val strokeW = 1.dp.toPx()
+                drawRect(
+                    color = gold,
+                    topLeft = Offset(cx - vW / 2f, uy - vH / 2f),
+                    size = androidx.compose.ui.geometry.Size(vW, vH),
+                    style = Stroke(strokeW),
+                )
+                drawRect(
+                    color = gold,
+                    topLeft = Offset(cx - hW / 2f, uy - hH / 2f),
+                    size = androidx.compose.ui.geometry.Size(hW, hH),
+                    style = Stroke(strokeW),
+                )
+
+                // Central gold diamond core
+                val diamondPath = Path().apply {
+                    moveTo(cx, uy - 5.dp.toPx())
+                    lineTo(cx + 5.dp.toPx(), uy)
+                    lineTo(cx, uy + 5.dp.toPx())
+                    lineTo(cx - 5.dp.toPx(), uy)
+                    close()
+                }
+                drawPath(diamondPath, color = gold)
+
+                // Ruby core center dot
+                drawCircle(
+                    color = arke,
+                    radius = 1.6.dp.toPx(),
+                    center = Offset(cx, uy),
+                )
+            }
+        }
+
+        // 4. Glint light sweep across the underline ribbon
+        if (flourish > 0.6f) {
+            val glintProgress = ((flourish - 0.6f) / 0.4f).coerceIn(0f, 1f)
+            val glintX = xLeft + ribbonSpan * glintProgress
+            val glintAlpha = (1f - ((glintProgress - 0.5f) * 2f).let { it * it }).coerceIn(0f, 1f)
+            if (glintAlpha > 0f) {
+                val glintRadius = 14.dp.toPx()
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.8f * glintAlpha),
+                            gold.copy(alpha = 0.4f * glintAlpha),
+                            Color.Transparent,
+                        ),
+                        center = Offset(glintX, uy),
+                        radius = glintRadius,
+                    ),
+                    radius = glintRadius,
+                    center = Offset(glintX, uy),
+                )
+            }
+        }
     }
 }

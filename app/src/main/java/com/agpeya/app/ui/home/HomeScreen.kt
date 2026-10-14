@@ -510,7 +510,7 @@ fun HomeScreen(
     }
     if (showWhatsNewDialog) {
         com.agpeya.app.ui.intro.WhatsNewUpdateDialog(
-            versionName = "1.5.11",
+            versionName = "1.5.12",
             onDismiss = {
                 showWhatsNewDialog = false
                 scope.launch {

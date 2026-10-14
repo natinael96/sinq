@@ -101,6 +101,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import com.agpeya.app.ui.settings.scheduleSummary
 
 private fun builtInName(id: String, s: Strings): String = when (id) {
@@ -522,22 +524,30 @@ private fun DayInspectionCard(
     val keptOtherHabits = remember(dayRecords, state, s) {
         dayRecords.filter { !it.startsWith("hour_") }.map { habitName(it, state, s) }
     }
-    val fasts = remember(date) {
-        val ecYear = EthiopianDate.from(date).year
-        runCatching { FastingCalendar.fastsOf(ecYear) }.getOrDefault(emptyList())
-    }
-    val fastName = remember(fasts, date) {
-        fasts.firstOrNull { it.contains(date) }?.nameAm
+    val fastName = remember(date) {
+        val seasonal = FastingCalendar.fastOn(date)
+        if (seasonal != null) {
+            seasonal.nameAm
+        } else if (FastingCalendar.isWeeklyFastDay(date)) {
+            if (date.dayOfWeek == java.time.DayOfWeek.WEDNESDAY) "ጾመ ድህነት (ረቡዕ)" else "ጾመ ድህነት (ዓርብ)"
+        } else {
+            null
+        }
     }
     val journalEntries by produceState<List<JournalEntry>>(emptyList(), date) {
         JournalRepository.onDate(context, date).collect { value = it }
     }
 
+    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.2f
+    val manuscriptCardBg = if (isDark) Color(0xFF0B2822) else Color(0xFFFAF7EF)
+    val manuscriptBorder = if (isDark) Color(0xFF235448) else Color(0xFFD6C7A1)
+
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        shape = RoundedCornerShape(16.dp),
+        color = manuscriptCardBg,
+        border = BorderStroke(1.5.dp, manuscriptBorder),
+        shadowElevation = if (isDark) 4.dp else 2.dp,
     ) {
         Column(
             modifier = Modifier.padding(Spacing.md),
@@ -556,9 +566,10 @@ private fun DayInspectionCard(
                     )
                     if (fastName != null) {
                         Text(
-                            text = fastName,
+                            text = "● $fastName",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = if (isDark) Color(0xFF7ECA96) else Color(0xFF35533F),
+                            fontWeight = FontWeight.SemiBold,
                         )
                     }
                 }
