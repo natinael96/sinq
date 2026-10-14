@@ -173,13 +173,14 @@ fun MementoMoriScreen(onDone: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            // 1. Animated widget logo at top
-            Icon(
-                painter = painterResource(R.drawable.widget_logo),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.secondary,
+            // 1. Ethiopian Church Beeswax (ቱዋፍ) Candle in Gentle Stillness
+            com.agpeya.app.ui.common.Candle(
+                lit = true,
+                contentDescription = s.mementoMoriGloss,
+                bodyColor = gold.copy(alpha = 0.75f),
+                flameColor = gold,
                 modifier = Modifier
-                    .size(IconSize.large * 1.5f)
+                    .size(width = 28.dp, height = 48.dp)
                     .alpha(bloom),
             )
             Spacer(Modifier.height(Spacing.lg))
