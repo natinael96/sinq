@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -94,7 +95,8 @@ fun MementoMoriScreen(onDone: () -> Unit) {
     var dismissed by remember { mutableStateOf(false) }
     var shown by remember { mutableStateOf(false) }
 
-    // 0..1 pen progress across the title; the underline stroke; the gloss fade.
+    // 0..1 dawn logo progress; pen progress across the title; underline; gloss fade.
+    val dawnAnim = remember { Animatable(0f) }
     val write = remember { Animatable(0f) }
     val flourish = remember { Animatable(0f) }
     val subtitle = remember { Animatable(0f) }
@@ -112,6 +114,9 @@ fun MementoMoriScreen(onDone: () -> Unit) {
 
     LaunchedEffect(Unit) {
         shown = true
+        launch {
+            dawnAnim.animateTo(1f, tween(motion.millis(850), easing = FastOutSlowInEasing))
+        }
         write.animateTo(1f, tween(motion.millis(WRITE_MS), easing = LinearEasing))
         // The flourish draws while the gloss rises, so the ending doesn't drag.
         launch {
@@ -173,17 +178,15 @@ fun MementoMoriScreen(onDone: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            // 1. Ethiopian Church Beeswax (ቱዋፍ) Candle in Gentle Stillness
-            com.agpeya.app.ui.common.Candle(
-                lit = true,
-                contentDescription = s.mementoMoriGloss,
-                bodyColor = gold.copy(alpha = 0.75f),
-                flameColor = gold,
+            // 1. Animated Dawn Horizon & Rising Cross Logo (matches loading_preview.html)
+            AnimatedDawnLogo(
+                progress = dawnAnim.value,
+                color = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier
-                    .size(width = 28.dp, height = 48.dp)
+                    .size(width = 82.dp, height = 70.dp)
                     .alpha(bloom),
             )
-            Spacer(Modifier.height(Spacing.lg))
+            Spacer(Modifier.height(Spacing.sm))
 
             // 2. "Memento Mori" live calligraphy & rubricated knotwork underline
             Canvas(
@@ -526,6 +529,116 @@ private fun DrawScope.drawWriting(
                     radius = glintRadius,
                     center = Offset(glintX, uy),
                 )
+            }
+        }
+    }
+}
+
+/**
+ * Animated dawn horizon logo: horizon line drawing outward, radiant sun dome
+ * rising, central cross springing upward, and 6 sun rays unfurling in sequence.
+ * Matches the liturgical mark from loading_preview.html.
+ */
+@Composable
+private fun AnimatedDawnLogo(
+    progress: Float,
+    color: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier = modifier) {
+        val vbW = 108f
+        val vbH = 92f
+        val scale = (size.width / vbW).coerceAtMost(size.height / vbH)
+        val tx = (size.width - vbW * scale) / 2f
+        val ty = (size.height - vbH * scale) / 2f
+
+        translate(left = tx, top = ty) {
+            scale(scale, scale, pivot = Offset.Zero) {
+                // 1. Horizon Line: x1 = 24, x2 = 84, y = 66 (length 60, center 54)
+                val horizProg = (progress / 0.45f).coerceIn(0f, 1f)
+                if (horizProg > 0f) {
+                    val halfLen = 30f * horizProg
+                    drawLine(
+                        color = color,
+                        start = Offset(54f - halfLen, 66f),
+                        end = Offset(54f + halfLen, 66f),
+                        strokeWidth = 2.8f,
+                        cap = StrokeCap.Round,
+                    )
+                }
+
+                // 2. Sun Dome: M 43.5,66 A 10.5,10.5 0 0 1 64.5,66 Z
+                val sunProg = ((progress - 0.15f) / 0.40f).coerceIn(0f, 1f)
+                if (sunProg > 0f) {
+                    val sunEase = sunProg * sunProg * (3f - 2f * sunProg)
+                    scale(sunEase, sunEase, pivot = Offset(54f, 66f)) {
+                        val sunPath = Path().apply {
+                            moveTo(43.5f, 66f)
+                            arcTo(
+                                rect = androidx.compose.ui.geometry.Rect(43.5f, 55.5f, 64.5f, 76.5f),
+                                startAngleDegrees = 180f,
+                                sweepAngleDegrees = 180f,
+                                forceMoveTo = false,
+                            )
+                            close()
+                        }
+                        drawPath(sunPath, color = color)
+                    }
+                }
+
+                // 3. Central Rising Cross
+                // M51.2,26 h5.6 v8 h9.2 v5.6 h-9.2 v12.4 h-5.6 v-12.4 h-9.2 v-5.6 h9.2 Z
+                val crossProg = ((progress - 0.25f) / 0.45f).coerceIn(0f, 1f)
+                if (crossProg > 0f) {
+                    val crossEase = crossProg * crossProg * (3f - 2f * crossProg)
+                    val yOffset = (1f - crossEase) * 16f
+                    val crossPath = Path().apply {
+                        moveTo(51.2f, 26f)
+                        lineTo(56.8f, 26f)
+                        lineTo(56.8f, 34f)
+                        lineTo(66.0f, 34f)
+                        lineTo(66.0f, 39.6f)
+                        lineTo(56.8f, 39.6f)
+                        lineTo(56.8f, 52.0f)
+                        lineTo(51.2f, 52.0f)
+                        lineTo(51.2f, 39.6f)
+                        lineTo(42.0f, 39.6f)
+                        lineTo(42.0f, 34f)
+                        lineTo(51.2f, 34f)
+                        close()
+                    }
+                    translate(top = yOffset) {
+                        scale(crossEase, crossEase, pivot = Offset(54f, 38f)) {
+                            drawPath(crossPath, color = color)
+                        }
+                    }
+                }
+
+                // 4. 6 Sun Rays unfurling in sequence
+                val rays = listOf(
+                    Triple(Offset(47.7f, 52.4f), Offset(45.1f, 47.0f), 0.30f),
+                    Triple(Offset(42.5f, 56.4f), Offset(37.9f, 52.5f), 0.35f),
+                    Triple(Offset(39.5f, 62.1f), Offset(33.7f, 60.6f), 0.40f),
+                    Triple(Offset(60.3f, 52.4f), Offset(62.9f, 47.0f), 0.45f),
+                    Triple(Offset(65.5f, 56.4f), Offset(70.1f, 52.5f), 0.50f),
+                    Triple(Offset(68.5f, 62.1f), Offset(74.3f, 60.6f), 0.55f),
+                )
+                rays.forEach { (startPt, endPt, startT) ->
+                    val rProg = ((progress - startT) / 0.35f).coerceIn(0f, 1f)
+                    if (rProg > 0f) {
+                        val curEnd = Offset(
+                            x = startPt.x + (endPt.x - startPt.x) * rProg,
+                            y = startPt.y + (endPt.y - startPt.y) * rProg,
+                        )
+                        drawLine(
+                            color = color,
+                            start = startPt,
+                            end = curEnd,
+                            strokeWidth = 2.5f,
+                            cap = StrokeCap.Round,
+                        )
+                    }
+                }
             }
         }
     }
