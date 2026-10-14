@@ -40,14 +40,12 @@ object BreathPrayerScheduler {
     /**
      * The one-breath prayers, drawn at random at fire time. Content, not
      * chrome: like every prayer text in the app they stay untranslated.
-     * እግዚኦ and Kyrie as the liturgy repeats them, the Jesus Prayer, and the
-     * ሰላም ለኪ greeting of the Theotokos.
+     * እግዚኦ and Kyrie as the liturgy repeats them, and the Jesus Prayer.
      */
     val PRAYERS = listOf(
         "እግዚኦ መሐረነ ክርስቶስ።",
         "ኪርያላይሶን፥ ኪርያላይሶን፥ ኪርያላይሶን።",
         "ጌታ ኢየሱስ ክርስቶስ የእግዚአብሔር ልጅ ሆይ፥ እኔን ኃጢአተኛውን ማረኝ።",
-        "ሰላም ለኪ ማርያም ምልዕተ ጸጋ፥ እግዚአብሔር ምስሌኪ።",
     )
 
     internal const val MIN_FROM_NOW_MIN = 15L

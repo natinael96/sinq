@@ -96,27 +96,27 @@ fun WhatsNewUpdateDialog(
             ) {
                 WhatsNewItem(
                     numeral = if (isAmharic) "፩" else "1",
-                    title = if (isAmharic) "የኢትዮጵያ ንብ ሰም ጧፍ (ቱዋፍ)" else "Ethiopian Beeswax Candle",
+                    title = if (isAmharic) "የታመቀ የጉዞ ገጽና የተሻሻለ ማስተካከያ" else "Compact Journey Layout & Controls",
                     description = if (isAmharic)
-                        "የዕለቱ የጸሎት ጧፍ በኢትዮጵያ ቤተ ክርስቲያን የንብ ሰም ተፈጥሯዊ ቀለም፣ የሰም ኩሬ እና በእርጋታ በሚወዛወዝ ህያው ነበልባል ተሻሽሏል።"
+                        "በጉዞ ገጽ ላይ የሰዓታት ጸሎትና የሥርዓታት ረድፎች ቁመትና ክፍተት ታምቋል፤ በዛሬው ክፍል ስር የሚገኘው 'ማስተካከያ' ቁልፍ ጎልቶ በሚታይና በሚያምር የአዝራር ቅርጽ ተሻሽሏል።"
                     else
-                        "Reimagined the daily prayer candle with authentic Ethiopian church beeswax (ቱዋፍ), glowing wick ember, and gentle stillness flame physics.",
+                        "Compacted prayer hours and habit rows to minimize vertical gaps, and upgraded the Today 'Manage' action into a subtle, noticeable button pill.",
                 )
                 WhatsNewItem(
                     numeral = if (isAmharic) "፪" else "2",
-                    title = if (isAmharic) "የብራና ሰሌዳ የጸሎት ግጻዌ" else "Sacred Manuscript Folio Heatmap",
+                    title = if (isAmharic) "ሞትን አስብ — የንጋት አርማና መስቀል" else "Animated Dawn Horizon & Cross",
                     description = if (isAmharic)
-                        "የመነሻ እና የጉዞ የጸሎት ግጻዌ በባህላዊ የብራና ሰሌዳ ክፈፍ፣ የማዕዘን ፨ ምልክቶች፣ የጾም ነጥብ (●) እና የተበሳሱ ጠርዞች ተውቧል።"
+                        "የመተግበሪያው መክፈቻ 'ሞትን አስብ' ገጽ በስንቅ የንጋት አድማስ፣ የፀሐይ መውጣት፣ የመስቀል ከፍታ እና የጨረሮች እንቅስቃሴ በሚያምር አኒሜሽን ተውቧል።"
                     else
-                        "Prayer heatmaps on Home and Journey are enclosed in a traditional manuscript folio with gold fillet framing, sacred dot (●), and perforated fasting edges.",
+                        "The opening Memento Mori splash now opens with the dynamic dawn horizon line, rising sun dome, central cross, and radiant rays matching the Sinq icon.",
                 )
                 WhatsNewItem(
                     numeral = if (isAmharic) "፫" else "3",
-                    title = if (isAmharic) "የተሟላ የዕለታት መረጃና የታመቀ ግጻዌ" else "Compact Heatmap & Day Inspection",
+                    title = if (isAmharic) "የብራና ሰሌዳ የጸሎት ግጻዌና የቀናት ዝርዝር" else "Manuscript Folio Heatmap & Day Inspector",
                     description = if (isAmharic)
-                        "የዓመቱን ግጻዌ ቁመት በማመቅ ፭-፮ ወራትን በአንድ ጊዜ ማሳየት ተችሏል፤ ማንኛውንም ቀን በመጫን የተጸለዩትን ጸሎታትና የጾም ስሞችን መመልከት ይቻላል።"
+                        "የዓመቱ ግጻዌ በባህላዊ የብራና ሰሌዳ ክፈፍ፣ የጾም ነጥብ (●) እና የተበሳሱ ጠርዞች ተውቦ ፭-፮ ወራትን በአንድ ጊዜ ያሳያል፤ ማንኛውንም ቀን በመጫን የተጸለዩትን ጸሎታት መመልከት ይቻላል።"
                     else
-                        "Lowered Journey heatmap height by 40% showing 5–6 months at once; tap any day to inspect canonical hours, habits, and fast details.",
+                        "Traditional manuscript folio heatmap showcasing 5–6 months simultaneously; tap any day to inspect kept prayers, fast names, and reflections.",
                 )
             }
         },
