@@ -53,6 +53,23 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.5.13",
+        title = "Compact Journey page prayer strips and habit rows, button-like Today manage control, and animated dawn horizon logo on Memento Mori",
+        titleAm = "የታመቀ የጉዞ ገጽ የሰዓታትና የሥርዓታት ረድፎች፣ ጎልቶ የሚታይ የማስተካከያ አዝራር፣ እና በሞትን አስብ ገጽ ላይ የተካተተ የንጋት አርማና መስቀል",
+        changes = listOf(
+            "Compacted prayer hour strips to a sleek 34dp height with tight vertical padding to reduce screen gaps.",
+            "Compacted habit rows to 36dp height with crisp 16dp status rings and tighter text margins.",
+            "Transformed the Today section 'Manage' text into a noticeable, subtle button pill with liturgical gold accent and bold typography.",
+            "Enhanced the Memento Mori opening breath with the animated dawn horizon line, rising sun dome, central cross, and 6 unfurling sun rays matching the Sinq emblem.",
+        ),
+        changesAm = listOf(
+            "በጉዞ ገጽ ላይ የሰዓታት ጸሎት ረድፎች ቁመት ወደ ፴፬ ዲፒ በመቀነስ አላስፈላጊ ክፍተቶች ታምቀዋል።",
+            "የዕለታዊ ሥርዓታት ረድፎች ቁመት ወደ ፴፮ ዲፒ እና ክብ መመልከቻው ወደ ፲፮ ዲፒ በመቀነስ ይበልጥ የታመቀ ሆኗል።",
+            "በዛሬው ክፍል ስር የሚገኘው 'ማስተካከያ' ጎልቶ በሚታይና በሚያምር የወርቅ ቃና ባለው የአዝራር ቅርጽ ተሻሽሏል።",
+            "የመክፈቻው 'ሞትን አስብ' ገጽ በስንቅ የንጋት አድማስ መስመር፣ የፀሐይ መውጣት፣ የመስቀል ከፍታ እና የጨረሮች እንቅስቃሴ በሚያምር አኒሜሽን ተውቧል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.5.12",
         title = "Ethiopian Beeswax candle in gentle stillness, Sacred Manuscript Folio heatmap plate with fasting dot and perforations, and compact interactive day inspection",
         titleAm = "የኢትዮጵያ ንብ ሰም ጧፍ በእርጋታ፣ የብራና ሰሌዳ የጸሎት ግጻዌ ከጾም ነጥብና ከተበሳሱ ጠርዞች ጋር፣ እና የተሟላ የዕለታት መረጃ",

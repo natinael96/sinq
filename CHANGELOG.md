@@ -5,6 +5,17 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.5.13] — 2026-10-15
+
+_versionCode 113 · Compact Journey page prayer strips and habit rows, button-like Today manage control, and animated dawn horizon logo on Memento Mori_
+
+### Added
+- **Animated Dawn Horizon & Cross on Memento Mori.** Reimagined the opening Memento Mori breath screen with the animated dawn horizon line, radiant rising sun dome, central cross, and 6 unfurling sun rays matching the Sinq icon.
+
+### Changed
+- **Compact Journey Prayer & Habit Strips.** Reduced prayer hour strips to a sleek 34dp height and daily habit rows to 36dp (with 16dp rings) to minimize empty vertical gaps and increase visible screen density.
+- **Button-Like Today Manage Action.** Redesigned the Today section "Manage" action into a subtle, noticeable button pill with liturgical gold accent and bold typography.
+
 ## [1.5.12] — 2026-10-14
 
 _versionCode 112 · Ethiopian Beeswax candle in gentle stillness, Sacred Manuscript Folio heatmap plate with fasting dot and perforations, and compact interactive day inspection_
