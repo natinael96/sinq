@@ -275,13 +275,13 @@ fun JourneyScreen(
                         modifier = Modifier.size(width = 26.dp, height = 44.dp),
                     )
                 }
-                Spacer(Modifier.height(Spacing.sm))
+                Spacer(Modifier.height(Spacing.xs))
                 val doneHours = hourItems.count { it.first in (state.records[todayKey] ?: emptySet()) }
                 val (keptHabits, dueHabits) = HabitsRepository.keptOfDue(state, today)
                 SectionHeader(s.todayLabel) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                     ) {
                         Text(
                             "$doneHours/${hourItems.size}  ·  $keptHabits/$dueHabits",
@@ -291,14 +291,17 @@ fun JourneyScreen(
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-                        TextButton(
+                        Surface(
                             onClick = onOpenManageHabits,
-                            contentPadding = PaddingValues(horizontal = Spacing.xs, vertical = 0.dp),
+                            shape = RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.38f)),
                         ) {
                             Text(
-                                s.manage,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary,
+                                text = s.manage,
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.padding(horizontal = Spacing.sm, vertical = 3.dp),
                             )
                         }
                     }
@@ -437,7 +440,7 @@ private fun HourStrips(
         SinqDivider()
         items.chunked(4).forEach { line ->
             Row(
-                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 34.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
@@ -452,7 +455,7 @@ private fun HourStrips(
                     Row(
                         modifier = Modifier
                             .weight(1f)
-                            .heightIn(min = 48.dp)
+                            .heightIn(min = 34.dp)
                             .clip(MaterialTheme.shapes.small)
                             .combinedClickable(
                                 role = Role.Checkbox,
@@ -466,7 +469,7 @@ private fun HourStrips(
                                 },
                                 onLongClickLabel = s.prayHour,
                             )
-                            .padding(horizontal = Spacing.xxs),
+                            .padding(horizontal = Spacing.xxs, vertical = 2.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
                     ) {
@@ -475,7 +478,7 @@ private fun HourStrips(
                                 Icons.Filled.Check,
                                 contentDescription = null,
                                 tint = tint,
-                                modifier = Modifier.size(14.dp),
+                                modifier = Modifier.size(12.dp),
                             )
                         }
                         Text(
@@ -729,7 +732,7 @@ private fun HabitRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 48.dp)
+            .heightIn(min = 36.dp)
             .clip(MaterialTheme.shapes.small)
             .toggleable(
                 value = done,
@@ -739,16 +742,16 @@ private fun HabitRow(
                     onToggle()
                 },
             )
-            .padding(vertical = Spacing.xxs),
+            .padding(vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
-                .size(20.dp)
+                .size(16.dp)
                 .clip(CircleShape)
                 .then(
                     if (done) Modifier.background(gold)
-                    else Modifier.border(2.dp, gold, CircleShape),
+                    else Modifier.border(1.5.dp, gold, CircleShape),
                 ),
             contentAlignment = Alignment.Center,
         ) {
@@ -757,14 +760,14 @@ private fun HabitRow(
                     Icons.Filled.Check,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSecondary,
-                    modifier = Modifier.size(14.dp),
+                    modifier = Modifier.size(11.dp),
                 )
             }
         }
-        Spacer(Modifier.width(Spacing.md))
+        Spacer(Modifier.width(Spacing.sm))
         Text(
             text = name,
-            style = MaterialTheme.typography.titleSmall,
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
             color = tint,
             modifier = Modifier.weight(1f),
             maxLines = 1,
