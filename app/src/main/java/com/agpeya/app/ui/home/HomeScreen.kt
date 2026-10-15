@@ -1101,8 +1101,8 @@ private fun TodayRowContent(
         CompactHeatmap(
             records = records,
             today = today,
-            weeks = 10,
-            maxCell = 10.dp * glyphScale,
+            weeks = 12,
+            maxCell = 11.dp * glyphScale,
         )
     }
 }

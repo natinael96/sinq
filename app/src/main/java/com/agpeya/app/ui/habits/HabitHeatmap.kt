@@ -310,6 +310,8 @@ fun CompactHeatmap(
                         val cellOffset = Offset(cellLeft, cellTop)
                         val cellSize = Size(cell, cell)
 
+                        val isToday = day.date == today
+
                         if (day.isFast) {
                             // Fasting background fill
                             val fill = if (day.level == 0) fastingWash else heatColor(day.level, empty, primary)
@@ -349,6 +351,28 @@ fun CompactHeatmap(
                                 topLeft = cellOffset,
                                 size = cellSize,
                                 cornerRadius = cellCorner,
+                            )
+                        }
+
+                        // Holy day of full devotion highlight (level 3+)
+                        if (day.level >= 3) {
+                            val cx = cellLeft + cell / 2f
+                            val cy = cellTop + cell / 2f
+                            val arm = (cell * 0.18f).coerceAtLeast(1.1f)
+                            val stroke = (cell * 0.10f).coerceAtLeast(0.8f)
+                            val markColor = Color.White.copy(alpha = 0.92f)
+                            drawLine(markColor, Offset(cx - arm, cy), Offset(cx + arm, cy), strokeWidth = stroke)
+                            drawLine(markColor, Offset(cx, cy - arm), Offset(cx, cy + arm), strokeWidth = stroke)
+                        }
+
+                        // Today distinct beacon ring
+                        if (isToday) {
+                            drawRoundRect(
+                                color = primary,
+                                topLeft = Offset(cellLeft - 0.5f, cellTop - 0.5f),
+                                size = Size(cell + 1f, cell + 1f),
+                                cornerRadius = CornerRadius(cellCorner.x + 0.5f),
+                                style = Stroke(width = (cell * 0.15f).coerceIn(1.1f, 1.8f)),
                             )
                         }
                     }

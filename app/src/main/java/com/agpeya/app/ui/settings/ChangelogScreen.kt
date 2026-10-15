@@ -53,6 +53,23 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.6.0",
+        title = "Unified manuscript heatmap plate, zero-gap Journey header, annual devotion progress, and liturgical micro-marks",
+        titleAm = "የተዋሃደ የብራና ሰሌዳ ሙቀት-ሰንጠረዥ፣ የተስተካከለ የጉዞ ርእስ፣ ዓመታዊ የጸሎት እድገትና የበዓላት ምልክቶች",
+        changes = listOf(
+            "Eliminated dead space in the Journey screen heatmap header by unifying the year switcher, date picker, and devotion count directly into the manuscript plate.",
+            "Added an annual devotion progress bar measuring completed prayer days against total eligible calendar days.",
+            "Enriched heatmap cells with sacred illumination micro-crosses (✦) for full prayer days (level 3+), today's radiant gold beacon ring, and subtle month boundary separators.",
+            "Expanded compact Home heatmap to 12 weeks with today beacon rings and holy day devotion indicators.",
+        ),
+        changesAm = listOf(
+            "በጉዞ ገጽ ላይ የነበረው ክፍተት ተወግዶ የዓመተ ምሕረት መቀያየሪያው፣ የቀን መምረጫውና የተጸለዩ ቀናት ቍጥር በብራና ሰሌዳው አናት ላይ በአንድነት ተካተዋል።",
+            "በዓመቱ ውስጥ ከተጸለዩት ቀናት አንጻር አጠቃላይ የጸሎት እድገትን የሚያሳይ የወርቅ መስመር ተካቷል።",
+            "በጸሎት ሰሌዳው ላይ ሙሉ የጸሎት ቀናትን የሚያመላክቱ የመስቀል ቅርጾች (✦)፣ የዛሬ ቀን ማድመቂያና የወራት መለያ መስመሮች ተጨምረዋል።",
+            "በዋናው ገጽ ላይ ያለው አጭር የጸሎት ሰሌዳ ወደ ፲፪ ሳምንታት አድጎ የዛሬና የሙሉ ጸሎት ቀናት መለያዎችን አካቷል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.5.14",
         title = "Comprehensive UI, design, and accessibility polish across home hero, habit heatmaps, reading, and search",
         titleAm = "የገጾች ቅርጽ፣ የተደራሽነት እና የውበት ማሻሻያ በዋናው፣ በጉዞ፣ በንባብና በፍለጋ ገጾች ላይ",

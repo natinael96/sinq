@@ -337,19 +337,16 @@ fun JourneyScreen(
             // The year heatmap is the historical view — the story is density
             // and return across the Church's year, not any one unbroken run.
             item {
-                Spacer(Modifier.height(Spacing.sm))
-                SectionHeader(s.yearJourneyHeader) {
-                    EthiopianYearSwitcher(displayedEcYear, today, earliestYear = state.records.keys.mapNotNull { runCatching { EthiopianDate.from(LocalDate.parse(it)).year }.getOrNull() }.minOrNull()?.coerceAtMost(APP_EPOCH_EC.year) ?: APP_EPOCH_EC.year) { year ->
-                        displayedEcYear = year
-                        selectedEpochDay = null
-                    }
+                Spacer(Modifier.height(Spacing.xs))
+                val earliestYear = remember(state.records) {
+                    state.records.keys.mapNotNull { runCatching { EthiopianDate.from(LocalDate.parse(it)).year }.getOrNull() }.minOrNull()?.coerceAtMost(APP_EPOCH_EC.year) ?: APP_EPOCH_EC.year
                 }
-                Spacer(Modifier.height(Spacing.xxs))
                 EthiopianYearHeatmap(
                     records = state.records,
                     today = today,
                     ecYear = displayedEcYear,
                     selectedDay = selectedDay,
+                    earliestYear = earliestYear,
                     modifier = Modifier.fillMaxWidth(),
                     onYearChange = { year ->
                         displayedEcYear = year
