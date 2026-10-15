@@ -675,7 +675,7 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
     ) { inner ->
         LazyColumn(
             Modifier.fillMaxSize().padding(inner),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.md),
         ) {
             item {
                 // Sacred Dynamic Manuscript Live Preview
@@ -1020,7 +1020,7 @@ fun CopyFormatScreen(onBack: () -> Unit) {
     ) { inner ->
         LazyColumn(
             Modifier.fillMaxSize().padding(inner),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.md),
         ) {
             item {
                 SinqCard(contentPadding = PaddingValues(16.dp), accented = true) {
@@ -1131,7 +1131,7 @@ fun PrayerSettingsScreen(onBack: () -> Unit, onOpenManageHours: () -> Unit, onOp
     ) { inner ->
         LazyColumn(
             Modifier.fillMaxSize().padding(inner),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.md),
         ) {
             item {
                 // Sacred intro card
@@ -1198,7 +1198,7 @@ fun PrayerSettingsScreen(onBack: () -> Unit, onOpenManageHours: () -> Unit, onOp
     }
     if (levelSheetOpen) {
         androidx.compose.material3.ModalBottomSheet(onDismissRequest = { levelSheetOpen = false }) {
-            Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 28.dp)) {
+            Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = Spacing.screen).padding(bottom = 28.dp)) {
                 Text(s.prayerLevelTitle, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
                 Spacer(Modifier.height(Spacing.sm))
                 Text(s.prayerLevelDescription, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -1275,7 +1275,7 @@ fun RemindersSettingsScreen(
     ) { inner ->
         LazyColumn(
             Modifier.fillMaxSize().padding(inner),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.md),
         ) {
             item {
                 if (!NotificationManagerCompat.from(context).areNotificationsEnabled() && remindersOn) {
@@ -1669,7 +1669,7 @@ private fun ReminderSoundSheetContent(
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { preview?.stop(); preview = null; lifecycleOwner.lifecycle.removeObserver(observer) }
     }
-    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 28.dp)) {
+    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = Spacing.screen).padding(bottom = 28.dp)) {
         Text(s.alarmSection, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
         Spacer(Modifier.height(Spacing.md))
         listOf(
@@ -1746,7 +1746,7 @@ fun ReadingFontScreen(onBack: () -> Unit) {
         containerColor = MaterialTheme.colorScheme.background,
         topBar = { com.agpeya.app.ui.common.SinqTopBar(s.readingFontTitle, onBack) },
     ) { inner ->
-        Column(Modifier.fillMaxSize().padding(inner).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 12.dp)) {
+        Column(Modifier.fillMaxSize().padding(inner).verticalScroll(rememberScrollState()).padding(horizontal = Spacing.screen, vertical = Spacing.md)) {
             ReadingFontPicker(selected) { scope.launch { SettingsRepository.setReadingFont(context, it) } }
         }
     }

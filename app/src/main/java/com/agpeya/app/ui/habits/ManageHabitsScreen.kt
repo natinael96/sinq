@@ -53,8 +53,8 @@ import com.agpeya.app.data.HabitsRepository
 import com.agpeya.app.model.HabitsState
 import com.agpeya.app.ui.common.SinqTopBar
 import com.agpeya.app.ui.strings.LocalStrings
-import kotlinx.coroutines.launch
 import com.agpeya.app.ui.theme.Spacing
+import kotlinx.coroutines.launch
 import com.agpeya.app.ui.theme.IconSize
 import androidx.compose.foundation.clickable
 import com.agpeya.app.model.HabitSchedule
@@ -93,7 +93,7 @@ fun ManageHabitsScreen(onBack: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.sm),
         ) {
             item {
                 Text(

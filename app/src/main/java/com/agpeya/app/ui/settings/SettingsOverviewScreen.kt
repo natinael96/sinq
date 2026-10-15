@@ -130,7 +130,7 @@ fun SettingsScreen(
     ) { inner ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(inner),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.md),
         ) {
             item {
                 Text(

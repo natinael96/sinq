@@ -48,6 +48,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,6 +57,7 @@ import com.agpeya.app.data.FastingCalendar
 import com.agpeya.app.data.HabitsRepository
 import com.agpeya.app.ui.common.EthiopianDate
 import com.agpeya.app.ui.common.EthiopianDatePickerDialog
+import com.agpeya.app.ui.common.formatEthiopian
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.sinqColors
@@ -241,6 +244,8 @@ fun EthiopianYearHeatmap(
     val cell = CELL * fontScale
     val gap = GAP * fontScale
     val columnWidth = COL * fontScale
+    val rowHeight = cell + gap * 2
+    val monthHeaderHeight = 20.dp
 
     LaunchedEffect(weeks.size, ecYear) {
         if (ecYear == currentEc && weeks.isNotEmpty()) {
@@ -316,11 +321,11 @@ fun EthiopianYearHeatmap(
                     verticalAlignment = Alignment.Top,
                 ) {
                     // Weekday labels (fixed), aligned under month header row
-                    Column(Modifier.padding(top = 18.dp)) {
+                    Column(Modifier.padding(top = monthHeaderHeight)) {
                         s.dayLabels.forEach { d ->
                             Box(
                                 modifier = Modifier
-                                    .height(columnWidth)
+                                    .height(rowHeight)
                                     .width(columnWidth),
                                 contentAlignment = Alignment.Center,
                             ) {
@@ -337,8 +342,8 @@ fun EthiopianYearHeatmap(
 
                     // Horizontally Scrollable Month Spans & Week Grid
                     Column(Modifier.horizontalScroll(scroll)) {
-                        // Month labels row (height 18dp)
-                        Row(Modifier.height(18.dp), verticalAlignment = Alignment.CenterVertically) {
+                        // Month labels row
+                        Row(Modifier.height(monthHeaderHeight), verticalAlignment = Alignment.CenterVertically) {
                             monthSpans.forEach { (m, cols) ->
                                 Text(
                                     text = if (m in 1..13) s.ethMonths[m - 1] else "",
@@ -365,6 +370,16 @@ fun EthiopianYearHeatmap(
                                         val isSelected = inRange && date == selectedDay
 
                                         val shape = RoundedCornerShape(2.5.dp)
+                                        val a11yDesc = remember(date, isFast, level, s) {
+                                            val ethDate = formatEthiopian(date, s)
+                                            val prayStatus = when {
+                                                level <= 0 -> if (s.isAmharic) "ያልተጸለየ" else "No prayers logged"
+                                                level == 1 -> if (s.isAmharic) "፩ ጸሎት" else "1 prayer"
+                                                else -> if (s.isAmharic) "$level ጸሎቶች" else "$level prayers"
+                                            }
+                                            val fastStatus = if (isFast) (if (s.isAmharic) "የጾም ቀን" else "Fasting day") else ""
+                                            listOf(ethDate, prayStatus, fastStatus).filter { it.isNotBlank() }.joinToString("፣ ")
+                                        }
 
                                         Box(
                                             modifier = Modifier
@@ -372,6 +387,7 @@ fun EthiopianYearHeatmap(
                                                 .size(cell)
                                                 .clip(shape)
                                                 .background(bg)
+                                                .semantics { contentDescription = a11yDesc }
                                                 .then(
                                                     if (inRange) Modifier.clickable(
                                                         role = Role.Button,

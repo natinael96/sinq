@@ -1228,36 +1228,7 @@ private fun AgpeyaNavHost(
             CustomizeHourScreen(hourId = hourId, onBack = { navController.popBackStack() })
         }
         composable("whatsNew") {
-            // Replays the newest tour whatever the stored version says, so
-            // skipping it on launch is never a decision you cannot undo.
-            val context = androidx.compose.ui.platform.LocalContext.current
-            // Nullable while the asset loads. Reading the empty default as "no
-            // tour" popped the screen on its first frame, which is why this row
-            // appeared to do nothing at all.
-            val content by androidx.compose.runtime.produceState<com.agpeya.app.model.TourContent?>(null) {
-                value = com.agpeya.app.data.TourRepository.content(context)
-            }
-            val loaded = content
-            val newest = loaded?.tours?.filter { it.pages.isNotEmpty() }?.maxByOrNull { it.versionCode }
-            when {
-                loaded == null -> com.agpeya.app.ui.common.LoadingPanel()
-                newest == null -> LaunchedEffect(Unit) { navController.popBackStack() }
-                else -> com.agpeya.app.ui.intro.WhatsNewTour(
-                    tour = newest,
-                    onOpenRoute = { route ->
-                        scope.launch { SettingsRepository.setLastTourVersion(context, newest.versionCode) }
-                        navController.popBackStack()
-                        val target = if (route == "synaxarium" || route == "synaxarium/today") {
-                            "synaxarium/${java.time.LocalDate.now().toEpochDay()}"
-                        } else route
-                        navController.navigate(target) { launchSingleTop = true }
-                    },
-                    onDone = {
-                        scope.launch { SettingsRepository.setLastTourVersion(context, newest.versionCode) }
-                        navController.popBackStack()
-                    },
-                )
-            }
+            ChangelogScreen(onBack = { navController.popBackStack() })
         }
         composable("tutorial") {
             com.agpeya.app.ui.intro.TutorialScreen(onDone = { navController.popBackStack() }, onOpenRoute = { route ->

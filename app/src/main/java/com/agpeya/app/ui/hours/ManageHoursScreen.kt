@@ -164,7 +164,7 @@ fun ManageHoursScreen(
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.sm),
         ) {
             item {
                 Text(

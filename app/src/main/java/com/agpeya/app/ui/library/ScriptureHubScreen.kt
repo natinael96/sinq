@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
-import androidx.compose.material.icons.outlined.LibraryMusic
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -140,7 +139,7 @@ fun ScriptureHubScreen(
             // ── መዝሙረ ዳዊት (150 Psalms + 15 Canticles) ──────────────────────
             item {
                 ScriptureCodexCard(
-                    icon = Icons.Outlined.LibraryMusic,
+                    icon = Icons.AutoMirrored.Outlined.MenuBook,
                     countGe = "፻፶",
                     countLabel = if (s.isAmharic) "፻፶ መዝሙራት" else "150 Psalms",
                     title = s.psalterTitle,

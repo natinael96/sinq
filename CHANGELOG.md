@@ -5,6 +5,21 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.5.14] — 2026-10-15
+
+_versionCode 114 · Comprehensive UI, design, and accessibility polish across home hero, habit heatmaps, reading, and search_
+
+### Changed
+- **Home Screen Visual Hierarchy.** Refactored the Gitsawe card from a hero card to an accented Sinq card, allowing the prayer Now card to reign as the singular visual hero on the page.
+- **Screen Margin Consistency.** Standardized horizontal page padding across all settings, habit management, hour management, and customization screens to the canonical `Spacing.screen` (24dp) design token.
+- **Heatmap Optical Polish.** Guarded center dots in the compact heatmap to prevent visual moiré on small cells while keeping the full 365-day layout compact and legible.
+- **Liturgical Iconography.** Replaced the generic heart icon on ውዳሴ ማርያም with a liturgical Church emblem, and updated the LXX Psalter with a sacred codex symbol.
+- **Reader & Search Smoothness.** Eliminated search result flicker during debounce typing, merged TalkBack announcements for Ge'ez numeral gutters and verses, and dynamically scaled section divider air at larger font sizes.
+
+### Fixed
+- **Heatmap Accessibility.** Added TalkBack summary descriptions to the compact heatmap and rich 365-day liturgical/prayer/fasting announcements to the year heatmap cells.
+- **Candle Aura Boundary.** Added a canvas edge guard to the beeswax candle's golden aura bloom to eliminate edge clipping on narrow displays.
+
 ## [1.5.13] — 2026-10-15
 
 _versionCode 113 · Compact Journey page prayer strips and habit rows, button-like Today manage control, and animated dawn horizon logo on Memento Mori_

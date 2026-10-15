@@ -66,7 +66,7 @@ fun RecordsScreen(
     ) { inner ->
         LazyColumn(
             Modifier.fillMaxSize().padding(inner),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.md),
         ) {
             item {
                 SectionHeader(s.remindersGroupGiving)

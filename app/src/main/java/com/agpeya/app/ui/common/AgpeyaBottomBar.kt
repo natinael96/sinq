@@ -76,9 +76,6 @@ enum class Tab(val route: String, val icon: ImageVector, val selectedIcon: Image
 /** Material's compact-to-rail breakpoint, evaluated from the current window width. */
 internal fun usesNavigationRail(width: Dp): Boolean = width >= 600.dp
 
-/** How much wider the tab you are on is than the three you are not. */
-private const val EXPANSION = 2.4f
-
 /**
  * A floating card of dark glass, with the tab you are on lit inside it.
  *

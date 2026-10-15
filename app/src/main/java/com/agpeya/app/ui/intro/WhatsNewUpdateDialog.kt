@@ -39,7 +39,7 @@ import com.agpeya.app.ui.theme.Spacing
 fun WhatsNewUpdateDialog(
     versionName: String,
     onDismiss: () -> Unit,
-    onOpenTour: () -> Unit,
+    onOpenTour: (() -> Unit)? = null,
 ) {
     val s = LocalStrings.current
     val isAmharic = s.isAmharic
@@ -96,27 +96,27 @@ fun WhatsNewUpdateDialog(
             ) {
                 WhatsNewItem(
                     numeral = if (isAmharic) "፩" else "1",
-                    title = if (isAmharic) "የታመቀ የጉዞ ገጽና የተሻሻለ ማስተካከያ" else "Compact Journey Layout & Controls",
+                    title = if (isAmharic) "የታመቀ የጸሎት ሰሌዳ እና የተሟላ ተደራሽነት" else "Accessible Heatmap & Day Inspector",
                     description = if (isAmharic)
-                        "በጉዞ ገጽ ላይ የሰዓታት ጸሎትና የሥርዓታት ረድፎች ቁመትና ክፍተት ታምቋል፤ በዛሬው ክፍል ስር የሚገኘው 'ማስተካከያ' ቁልፍ ጎልቶ በሚታይና በሚያምር የአዝራር ቅርጽ ተሻሽሏል።"
+                        "ለአይን ስውራን (TalkBack) በጸሎት ሰሌዳው ላይ የተሟላ የዕለታትና የጾም መረጃ ተካቷል፤ የቀናት መቀያየሪያ ቀስቶች ለመንካት ምቹ ሆነዋል።"
                     else
-                        "Compacted prayer hours and habit rows to minimize vertical gaps, and upgraded the Today 'Manage' action into a subtle, noticeable button pill.",
+                        "Full 365-day screen-reader announcements with fasting details, and enlarged inspection navigation chevrons for smooth day browsing.",
                 )
                 WhatsNewItem(
                     numeral = if (isAmharic) "፪" else "2",
-                    title = if (isAmharic) "ሞትን አስብ — የንጋት አርማና መስቀል" else "Animated Dawn Horizon & Cross",
+                    title = if (isAmharic) "የገጾች ቅርጽ እና የክፍተት ማስተካከያ" else "Screen Hierarchy & Margins",
                     description = if (isAmharic)
-                        "የመተግበሪያው መክፈቻ 'ሞትን አስብ' ገጽ በስንቅ የንጋት አድማስ፣ የፀሐይ መውጣት፣ የመስቀል ከፍታ እና የጨረሮች እንቅስቃሴ በሚያምር አኒሜሽን ተውቧል።"
+                        "በዋናው ገጽ ላይ የግጻዌ ካርድ ቅርጽ ተስተካክሎ የሰዓታት ካርዱ ዋነኛ ትኩረት እንዲሆን ተደርጓል፤ በሁሉም የማስተካከያ ገጾች ላይ የጎን ክፍተቶች በወጥ መልክ ወደ ፳፬ ዲፒ ተስተካክለዋል።"
                     else
-                        "The opening Memento Mori splash now opens with the dynamic dawn horizon line, rising sun dome, central cross, and radiant rays matching the Sinq icon.",
+                        "Refactored the Home Gitsawe card so prayer hours reign supreme, and standardized horizontal margins across all settings to 24dp.",
                 )
                 WhatsNewItem(
                     numeral = if (isAmharic) "፫" else "3",
-                    title = if (isAmharic) "የብራና ሰሌዳ የጸሎት ግጻዌና የቀናት ዝርዝር" else "Manuscript Folio Heatmap & Day Inspector",
+                    title = if (isAmharic) "የቤተ ክርስቲያን ሥርዓት ምልክቶችና የንባብ ማሻሻያ" else "Liturgical Symbols & Reading Polish",
                     description = if (isAmharic)
-                        "የዓመቱ ግጻዌ በባህላዊ የብራና ሰሌዳ ክፈፍ፣ የጾም ነጥብ (●) እና የተበሳሱ ጠርዞች ተውቦ ፭-፮ ወራትን በአንድ ጊዜ ያሳያል፤ ማንኛውንም ቀን በመጫን የተጸለዩትን ጸሎታት መመልከት ይቻላል።"
+                        "በውዳሴ ማርያምና በመዝሙረ ዳዊት ላይ የቤተክርስቲያንና የመጽሐፍ ቅዱስ ሥርዓት ምልክቶች ተተክተዋል፤ በፍለጋ እና በንባብ ገጽ ላይ ያሉ ክፍተቶች ተስተካክለዋል።"
                     else
-                        "Traditional manuscript folio heatmap showcasing 5–6 months simultaneously; tap any day to inspect kept prayers, fast names, and reflections.",
+                        "Replaced secular icons on Wudase Maryam and Psalter with liturgical Church and codex emblems, and smoothed search debounce typing.",
                 )
             }
         },
@@ -125,11 +125,13 @@ fun WhatsNewUpdateDialog(
                 Text(if (isAmharic) "እሺ / ተረድቻለሁ" else "Got It")
             }
         },
-        dismissButton = {
-            TextButton(onClick = onOpenTour) {
-                Text(s.whatsNewTour)
+        dismissButton = if (onOpenTour != null) {
+            {
+                TextButton(onClick = onOpenTour) {
+                    Text(s.whatsNewTour)
+                }
             }
-        },
+        } else null,
     )
 }
 

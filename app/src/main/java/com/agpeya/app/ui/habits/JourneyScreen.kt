@@ -579,33 +579,33 @@ private fun DayInspectionCard(
                 IconButton(
                     onClick = { onPreviousDay?.invoke() },
                     enabled = onPreviousDay != null,
-                    modifier = Modifier.size(36.dp),
+                    modifier = Modifier.size(44.dp),
                 ) {
                     Icon(
                         Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                         contentDescription = s.previousDay,
-                        modifier = Modifier.size(18.dp),
+                        modifier = Modifier.size(20.dp),
                     )
                 }
                 IconButton(
                     onClick = { onNextDay?.invoke() },
                     enabled = onNextDay != null,
-                    modifier = Modifier.size(36.dp),
+                    modifier = Modifier.size(44.dp),
                 ) {
                     Icon(
                         Icons.AutoMirrored.Filled.KeyboardArrowRight,
                         contentDescription = s.nextDay,
-                        modifier = Modifier.size(18.dp),
+                        modifier = Modifier.size(20.dp),
                     )
                 }
                 IconButton(
                     onClick = onClose,
-                    modifier = Modifier.size(36.dp),
+                    modifier = Modifier.size(44.dp),
                 ) {
                     Icon(
                         Icons.Outlined.Close,
                         contentDescription = s.cancel,
-                        modifier = Modifier.size(18.dp),
+                        modifier = Modifier.size(20.dp),
                     )
                 }
             }
