@@ -53,6 +53,27 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.5.14",
+        title = "Comprehensive UI, design, and accessibility polish across home hero, habit heatmaps, reading, and search",
+        titleAm = "የገጾች ቅርጽ፣ የተደራሽነት እና የውበት ማሻሻያ በዋናው፣ በጉዞ፣ በንባብና በፍለጋ ገጾች ላይ",
+        changes = listOf(
+            "Refactored Gitsawe card on Home to an accented Sinq card, allowing the prayer Now card to reign as the singular visual hero.",
+            "Standardized horizontal page margins across settings and customization screens to the canonical Spacing.screen (24dp) design token.",
+            "Added rich TalkBack accessibility descriptions to both compact and year heatmaps, and enlarged inspection chevrons to 44dp.",
+            "Replaced secular icons on Wudase Maryam and LXX Psalter with authentic liturgical Church and codex emblems.",
+            "Guarded center dots in the compact heatmap to eliminate visual moiré while keeping the full-year view compact.",
+            "Eliminated search result loading flicker during debounce typing, merged TalkBack announcements for Ge'ez numeral gutters, and scaled reading divider air dynamically.",
+        ),
+        changesAm = listOf(
+            "በዋናው ገጽ ላይ የግጻዌ ካርድ ቅርጽ ተስተካክሎ የሰዓታት ካርዱ ዋነኛ ትኩረት እንዲሆን ተደርጓል።",
+            "በሁሉም የማስተካከያ ገጾች ላይ የጎን ክፍተቶች በወጥ መልክ ወደ ፳፬ ዲፒ (Spacing.screen) ተስተካክለዋል።",
+            "ለአይን ስውራን ተጠቃሚዎች (TalkBack) በጸሎት ሰሌዳው ላይ የተሟላ የዕለታትና የጾም መረጃ ተካቷል፤ የቀናት መቀያየሪያ ቀስቶችም ለመንካት አመቺ ሆነዋል።",
+            "በውዳሴ ማርያምና በመዝሙረ ዳዊት ላይ የነበሩ ምልክቶች በቤተክርስቲያንና በመጽሐፍ ቅዱስ ሥርዓት ምልክቶች ተተክተዋል።",
+            "በታመቀው የዓመት የጸሎት ሰሌዳ ላይ የነጥቦች መደራረብ ተስተካክሎ ይበልጥ ጥርት ብሎ እንዲታይ ተደርጓል።",
+            "በፍለጋ ገጽ ላይ በሚተየብበት ወቅት የውጤቶች መጥፋት ተስተካክሏል፤ የንባብ ገጽ መስመር ክፍተቶችም በትልልቅ ፊደላት ላይ እንዲመጣጠኑ ተደርገዋል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.5.13",
         title = "Compact Journey page prayer strips and habit rows, button-like Today manage control, and animated dawn horizon logo on Memento Mori",
         titleAm = "የታመቀ የጉዞ ገጽ የሰዓታትና የሥርዓታት ረድፎች፣ ጎልቶ የሚታይ የማስተካከያ አዝራር፣ እና በሞትን አስብ ገጽ ላይ የተካተተ የንጋት አርማና መስቀል",
@@ -444,95 +465,9 @@ fun ChangelogScreen(onBack: () -> Unit, onOpenTour: () -> Unit = {}) {
             contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.md),
             verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
-            // ── Illuminated Hero What's New Tour Card ───────────────────────
-            item(key = "tour") {
-                Surface(
-                    onClick = onOpenTour,
-                    shape = RoundedCornerShape(18.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.45f)),
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(Spacing.lg),
-                        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)),
-                            modifier = Modifier.size(50.dp),
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.Outlined.NewReleases,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.secondary,
-                                    modifier = Modifier.size(24.dp),
-                                )
-                            }
-                        }
-
-                        Column(modifier = Modifier.weight(1f)) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-                            ) {
-                                Surface(
-                                    shape = RoundedCornerShape(4.dp),
-                                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f),
-                                ) {
-                                    Text(
-                                        text = if (isAmharic) "አዲስ እትም" else "Latest",
-                                        style = MaterialTheme.typography.labelSmall.inReadingFont(),
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                    )
-                                }
-                                Text(
-                                    text = "v1.5.12",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.secondary,
-                                )
-                            }
-
-                            Spacer(Modifier.height(Spacing.xxs))
-
-                            Text(
-                                text = s.whatsNewTour,
-                                style = MaterialTheme.typography.titleMedium.inReadingFont(),
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-
-                            Text(
-                                text = if (isAmharic)
-                                    "ዋና ዋና አዳዲስ ይዘቶችን በስዕላዊ ጉብኝት ይመልከቱ"
-                                else
-                                    "Visual walkthrough of new additions and fixes",
-                                style = MaterialTheme.typography.bodySmall.inReadingFont(),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.size(IconSize.medium),
-                        )
-                    }
-                }
-            }
-
             // ── Release History Cards ───────────────────────────────────────
             items(releaseHistory, key = { it.version }) { release ->
-                val isLatest = release.version == "1.5.12"
+                val isLatest = release.version == releaseHistory.first().version
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),

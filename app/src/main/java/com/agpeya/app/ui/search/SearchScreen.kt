@@ -87,18 +87,18 @@ fun SearchScreen(
     var expanded by remember(query) { mutableStateOf(emptySet<AmharicSearch.Source>()) }
 
     LaunchedEffect(query, attempt, s) {
-        results = emptyList()
-        reference = null
         failed = false
-        try {
-        if (query.trim().length < 2) {
+        val trimmed = query.trim()
+        if (trimmed.length < 2) {
             results = emptyList()
             reference = null
             searching = false
-        } else {
-            searching = true
+            return@LaunchedEffect
+        }
+        searching = true
+        try {
             delay(180) // debounce
-            reference = AmharicSearch.referenceMatch(
+            val newRef = AmharicSearch.referenceMatch(
                 context,
                 query,
                 AmharicSearch.Labels(
@@ -109,7 +109,7 @@ fun SearchScreen(
                     wudase = s.wudaseMariam,
                 ),
             )
-            results = AmharicSearch.search(
+            val newResults = AmharicSearch.search(
                 context,
                 query,
                 AmharicSearch.Labels(
@@ -120,10 +120,15 @@ fun SearchScreen(
                     wudase = s.wudaseMariam,
                 ),
             )
+            reference = newRef
+            results = newResults
+            searching = false
+        } catch (cancelled: kotlinx.coroutines.CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            failed = true
             searching = false
         }
-        } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
-        catch (_: Exception) { failed = true; searching = false }
     }
 
     fun open(result: AmharicSearch.Result) {

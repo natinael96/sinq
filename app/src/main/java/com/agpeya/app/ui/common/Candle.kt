@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import com.agpeya.app.ui.theme.LocalMotion
 import com.agpeya.app.ui.theme.Motion
 
@@ -170,10 +171,12 @@ fun Candle(
             val tipY = base - fh
             val midY = base - fh * 0.42f
 
-            // Radial golden aura
+            // Radial golden aura guarded with 2dp margin to prevent clipping on narrow canvases
+            val maxAuraRadius = (cx - 2.dp.toPx()).coerceAtLeast(0f)
+            val auraRadius = (fh * 0.85f).coerceAtMost(maxAuraRadius)
             drawCircle(
                 color = Color(0xFFFFB300).copy(alpha = auraPulse * flameTransition),
-                radius = fh * 0.85f,
+                radius = auraRadius,
                 center = Offset(cx, (tipY + base) / 2f),
             )
 

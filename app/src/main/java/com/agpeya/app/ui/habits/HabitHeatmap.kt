@@ -40,6 +40,8 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import com.agpeya.app.data.FastingCalendar
 import com.agpeya.app.data.HabitsRepository
 import com.agpeya.app.ui.strings.LocalStrings
@@ -240,9 +242,22 @@ fun CompactHeatmap(
         return (available / 8f).coerceAtMost(maxCellPx).coerceAtLeast(1f)
     }
 
+    val s = LocalStrings.current
+    val totalPrayedInWindow = remember(gridDays) {
+        gridDays.flatten().count { it.level > 0 }
+    }
+    val a11ySummary = remember(totalPrayedInWindow, weeks, s) {
+        if (s.isAmharic) {
+            "ባለፉት $weeks ሳምንታት ውስጥ $totalPrayedInWindow ቀናት ተጸልየዋል"
+        } else {
+            "$totalPrayedInWindow days prayed in the last $weeks weeks"
+        }
+    }
+
     Spacer(
         modifier
             .fillMaxHeight()
+            .semantics { contentDescription = a11ySummary }
             .layout { measurable, constraints ->
                 val height = if (constraints.hasBoundedHeight) constraints.maxHeight else 0
                 val cell = cellFor(height.toFloat())
@@ -317,14 +332,16 @@ fun CompactHeatmap(
                                     pathEffect = PathEffect.dashPathEffect(floatArrayOf(dash, dashGap)),
                                 ),
                             )
-                            // Fasting Sacred Center Dot (●)
-                            val dotRadius = (cell * 0.13f).coerceAtLeast(1.1f)
-                            val dotColor = if (day.level > 0) Color.White.copy(alpha = 0.92f) else fastingDot
-                            drawCircle(
-                                color = dotColor,
-                                radius = dotRadius,
-                                center = Offset(cellLeft + cell / 2f, cellTop + cell / 2f),
-                            )
+                            // Fasting Sacred Center Dot (●) only when cell has optical clearance
+                            if (cell >= with(density) { 12.dp.toPx() }) {
+                                val dotRadius = (cell * 0.13f).coerceAtLeast(1.1f)
+                                val dotColor = if (day.level > 0) Color.White.copy(alpha = 0.92f) else fastingDot
+                                drawCircle(
+                                    color = dotColor,
+                                    radius = dotRadius,
+                                    center = Offset(cellLeft + cell / 2f, cellTop + cell / 2f),
+                                )
+                            }
                         } else {
                             // Normal day rounded rect fill
                             drawRoundRect(

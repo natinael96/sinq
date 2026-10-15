@@ -510,20 +510,14 @@ fun HomeScreen(
     }
     if (showWhatsNewDialog) {
         com.agpeya.app.ui.intro.WhatsNewUpdateDialog(
-            versionName = "1.5.12",
+            versionName = com.agpeya.app.BuildConfig.VERSION_NAME,
             onDismiss = {
                 showWhatsNewDialog = false
                 scope.launch {
                     com.agpeya.app.data.SettingsRepository.setLastTourVersion(context, installedVersionCode)
                 }
             },
-            onOpenTour = {
-                showWhatsNewDialog = false
-                scope.launch {
-                    com.agpeya.app.data.SettingsRepository.setLastTourVersion(context, installedVersionCode)
-                }
-                onOpenTour()
-            },
+            onOpenTour = null,
         )
     }
     if (showReminderSetup) {
@@ -961,7 +955,6 @@ private fun EmptyHoursCard(onClick: () -> Unit) {
 @Composable
 private fun GitsaweCard(state: HomeReadingsState, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val s = LocalStrings.current
-    val sinq = sinqColors
     val readings = (state as? HomeReadingsState.Ready)?.readings
     val feast = readings?.feasts?.firstOrNull()?.amharicName
     val reading = readings?.daily?.title
@@ -970,35 +963,46 @@ private fun GitsaweCard(state: HomeReadingsState, onClick: () -> Unit, modifier:
         ?: readings?.sundayCycle?.firstOrNull()?.title
     val mezmur = readings?.sundayCycle?.firstNotNullOfOrNull { it.mezmur }
 
-    HeroCard(
+    SinqCard(
         onClick = onClick,
+        accented = true,
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.md),
     ) {
-        Icon(Icons.AutoMirrored.Outlined.MenuBook, contentDescription = null, tint = sinq.onHeroMuted, modifier = Modifier.size(IconSize.large))
-        Spacer(Modifier.width(Spacing.md))
-        Column(Modifier.weight(1f)) {
-            // The kicker said "today's ግጻዌ" directly above a title saying the
-            // same, and the citations below it — መዝ ፻፲፡፲–፲፩ · ሉቃስ ፲፡፩–፲፪ —
-            // are for the page this card opens, not for a glance at ቤት. What
-            // is left is the day's own name.
-            Text(s.gitsaweTitle, style = MaterialTheme.typography.titleMedium, color = sinq.onHero)
-            when (state) {
-                HomeReadingsState.Loading -> Text(s.loadingLabel, style = MaterialTheme.typography.bodySmall, color = sinq.onHeroMuted)
-                HomeReadingsState.Unavailable -> Text(s.contentMissingTitle, style = MaterialTheme.typography.bodySmall, color = sinq.onHeroMuted)
-                is HomeReadingsState.Ready -> {
-                    // The card grows down rather than cutting a feast off at
-                    // the edge. A day named "በዓለ ቅዱስ ገብርኤል ሊቀ መላእክት" was being
-                    // shown as much of itself as fitted and no more, on the one
-                    // card whose whole job is to name the day.
-                    (feast ?: reading)?.let {
-                        Text(it, style = MaterialTheme.typography.bodySmall, color = sinq.onHeroMuted)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                Icons.AutoMirrored.Outlined.MenuBook,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.size(IconSize.large),
+            )
+            Spacer(Modifier.width(Spacing.md))
+            Column(Modifier.weight(1f)) {
+                // The kicker said "today's ግጻዌ" directly above a title saying the
+                // same, and the citations below it — መዝ ፻፲፡፲–፲፩ · ሉቃስ ፲፡፩–፲፪ —
+                // are for the page this card opens, not for a glance at ቤት. What
+                // is left is the day's own name.
+                Text(s.gitsaweTitle, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+                when (state) {
+                    HomeReadingsState.Loading -> Text(s.loadingLabel, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    HomeReadingsState.Unavailable -> Text(s.contentMissingTitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    is HomeReadingsState.Ready -> {
+                        // The card grows down rather than cutting a feast off at
+                        // the edge. A day named "በዓለ ቅዱስ ገብርኤል ሊቀ መላእክት" was being
+                        // shown as much of itself as fitted and no more, on the one
+                        // card whose whole job is to name the day.
+                        (feast ?: reading)?.let {
+                            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        mezmur?.let { Text("${s.sundayMezmurTitle} · $it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary) }
                     }
-                    mezmur?.let { Text("${s.sundayMezmurTitle} · $it", style = MaterialTheme.typography.bodySmall, color = sinq.onHero) }
                 }
             }
+            Icon(Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Icon(Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = null, tint = sinq.onHeroMuted)
     }
 }
 /**

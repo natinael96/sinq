@@ -152,13 +152,14 @@ internal fun SectionView(
                 )
             }
         }
-        Spacer(Modifier.height(Spacing.sm))
+        val dividerGap = (bodyFontSp * 0.45f).coerceIn(8f, 16f).dp
+        Spacer(Modifier.height(dividerGap))
         HorizontalDivider(
             modifier = Modifier.width(32.dp),
             thickness = 1.dp,
             color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.55f),
         )
-        Spacer(Modifier.height(Spacing.lg))
+        Spacer(Modifier.height(dividerGap * 1.5f))
         VerseText(
             section = section,
             bodyFontSp = bodyFontSp,
@@ -200,7 +201,8 @@ internal fun VerseText(
 
                 Row(
                     Modifier.fillMaxWidth().padding(vertical = verseGap / 2)
-                        .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
+                        .padding(horizontal = Spacing.sm, vertical = Spacing.xs)
+                        .semantics(mergeDescendants = true) {},
                 ) {
                     Text(
                         geezNumeral(number),
