@@ -50,7 +50,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.agpeya.app.data.FastingCalendar
@@ -58,16 +60,17 @@ import com.agpeya.app.data.HabitsRepository
 import com.agpeya.app.ui.common.EthiopianDate
 import com.agpeya.app.ui.common.EthiopianDatePickerDialog
 import com.agpeya.app.ui.common.formatEthiopian
+import com.agpeya.app.ui.reading.geezNumeral
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.sinqColors
 import java.time.LocalDate
 
-// Compact dimensions: 11dp cell + 1.5dp gap = 13dp column.
-// Height drops to ~91dp for the 7 rows, allowing 5-6 months visible on screen.
-private val CELL = 11.dp
-private val GAP = 1.5.dp
-private val COL = 13.dp
+// Compact dimensions: 12dp cell + 2dp gap = 14dp column.
+// Height stays compact (~98dp for the 7 rows), allowing 5-6 months visible on screen.
+private val CELL = 12.dp
+private val GAP = 2.dp
+private val COL = 14.dp
 
 /** Nothing can be logged before Hamle 1, 2018 EC — the app's first day. */
 internal val APP_EPOCH_EC = EthiopianDate(2018, 11, 1)
@@ -93,38 +96,42 @@ fun EthiopianYearSwitcher(
     ecYear: Int,
     today: LocalDate,
     earliestYear: Int = APP_EPOCH_EC.year,
+    buttonSize: Dp = 32.dp,
+    modifier: Modifier = Modifier,
     onYearChange: (Int) -> Unit,
 ) {
     val s = LocalStrings.current
     val currentEc = remember(today) { EthiopianDate.from(today).year }
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         IconButton(
             onClick = { onYearChange(ecYear - 1) },
             enabled = ecYear > earliestYear,
-            modifier = Modifier.size(44.dp),
+            modifier = Modifier.size(buttonSize),
         ) {
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                 contentDescription = s.previousYear,
-                tint = if (ecYear > earliestYear) MaterialTheme.colorScheme.onSurface
-                else MaterialTheme.colorScheme.surfaceVariant,
+                tint = if (ecYear > earliestYear) MaterialTheme.colorScheme.secondary
+                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
+                modifier = Modifier.size(18.dp),
             )
         }
         Text(
             text = "$ecYear ${s.eraSuffix}",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.secondary,
         )
         IconButton(
             onClick = { onYearChange(ecYear + 1) },
             enabled = ecYear < currentEc,
-            modifier = Modifier.size(44.dp),
+            modifier = Modifier.size(buttonSize),
         ) {
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = s.nextYear,
-                tint = if (ecYear < currentEc) MaterialTheme.colorScheme.onSurface
-                else MaterialTheme.colorScheme.surfaceVariant,
+                tint = if (ecYear < currentEc) MaterialTheme.colorScheme.secondary
+                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
+                modifier = Modifier.size(18.dp),
             )
         }
     }
@@ -138,7 +145,6 @@ fun EthiopianYearSwitcher(
  * - Perforated/dashed border & centered dot (●) for fasting days (ዐቢይ ጾም, ጾመ ፍልሰታ, ረቡዕ/ዓርብ)
  * - Direct cell click interaction that displays that day's canonical hours, habits, and reflections.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun EthiopianYearHeatmap(
     records: Map<String, Set<String>>,
@@ -146,6 +152,7 @@ fun EthiopianYearHeatmap(
     ecYear: Int,
     selectedDay: LocalDate?,
     modifier: Modifier = Modifier,
+    earliestYear: Int = APP_EPOCH_EC.year,
     onYearChange: (Int) -> Unit,
     onDaySelect: (LocalDate) -> Unit,
 ) {
@@ -194,6 +201,23 @@ fun EthiopianYearHeatmap(
     }
     fun inFast(date: LocalDate): Boolean = fasts.any { it.contains(date) } || FastingCalendar.isWeeklyFastDay(date)
 
+    // Annual prayer & fast statistics
+    val yearStats = remember(records, start, end, today) {
+        var prayedDays = 0
+        var fastDays = 0
+        var totalEligible = 0
+        var cur = start
+        val limit = minOf(end, today)
+        while (!cur.isAfter(limit)) {
+            totalEligible++
+            val count = HabitsRepository.dayCount(records, cur)
+            if (count > 0) prayedDays++
+            if (inFast(cur)) fastDays++
+            cur = cur.plusDays(1)
+        }
+        Triple(prayedDays, fastDays, totalEligible)
+    }
+
     // Palette & Manuscript Folio Tokens
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.2f
     val manuscriptBg = if (isDark) Color(0xFF0B2822) else Color(0xFFFAF7EF)
@@ -213,9 +237,9 @@ fun EthiopianYearHeatmap(
         }
         return when (level) {
             0 -> if (isFast) fastingWash else empty
-            1 -> gold.copy(alpha = 0.30f)
-            2 -> gold.copy(alpha = 0.50f)
-            3 -> gold.copy(alpha = 0.75f)
+            1 -> gold.copy(alpha = 0.35f)
+            2 -> gold.copy(alpha = 0.65f)
+            3 -> gold.copy(alpha = 0.85f)
             else -> gold
         }
     }
@@ -245,7 +269,7 @@ fun EthiopianYearHeatmap(
     val gap = GAP * fontScale
     val columnWidth = COL * fontScale
     val rowHeight = cell + gap * 2
-    val monthHeaderHeight = 20.dp
+    val monthHeaderHeight = 16.dp
 
     LaunchedEffect(weeks.size, ecYear) {
         if (ecYear == currentEc && weeks.isNotEmpty()) {
@@ -266,48 +290,112 @@ fun EthiopianYearHeatmap(
         border = BorderStroke(1.5.dp, manuscriptBorder),
         shadowElevation = if (isDark) 4.dp else 2.dp,
     ) {
-        Column(Modifier.padding(Spacing.sm)) {
-            // Manuscript Folio Header with Corner Rosettes & Date Picker
+        Column(Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.sm)) {
+            // Consolidated Folio Header: Section Title, Stats Pill, Year Switcher & Date Picker
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Spacing.xxs, vertical = Spacing.xxs),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                // Left: Liturgical Rosette (፨), Title and Devotion Count Pill
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                ) {
                     Text(
                         text = "፨",
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.titleMedium,
                         color = goldFillet,
-                        modifier = Modifier.padding(end = 4.dp),
                     )
                     Text(
-                        text = "ሥርዓተ ጸሎት ወግጻዌ",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = goldFillet,
+                        text = s.yearJourneyHeader,
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.secondary,
                     )
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = if (isDark) Color(0x33E0BC65) else Color(0x227E5F1E),
+                    ) {
+                        Text(
+                            text = if (s.isAmharic) "${geezNumeral(yearStats.first)} ቀናት" else "${yearStats.first} days",
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
+                            color = goldFillet,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        )
+                    }
                 }
-                TextButton(
-                    onClick = { pickingDate = true },
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 2.dp),
-                ) {
-                    Icon(
-                        Icons.Outlined.CalendarMonth,
-                        contentDescription = null,
-                        tint = goldFillet,
-                        modifier = Modifier.size(14.dp),
+
+                // Right: Year Switcher Chevrons & Quick Calendar Picker
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    EthiopianYearSwitcher(
+                        ecYear = ecYear,
+                        today = today,
+                        earliestYear = earliestYear,
+                        buttonSize = 32.dp,
+                        onYearChange = onYearChange,
                     )
-                    Spacer(Modifier.width(4.dp))
+                    IconButton(
+                        onClick = { pickingDate = true },
+                        modifier = Modifier.size(32.dp),
+                    ) {
+                        Icon(
+                            Icons.Outlined.CalendarMonth,
+                            contentDescription = s.dateLabel,
+                            tint = goldFillet,
+                            modifier = Modifier.size(16.dp),
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(4.dp))
+
+            // Annual Spiritual Progress Strip
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = Spacing.xxs),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                val pct = if (yearStats.third > 0) (yearStats.first * 100 / yearStats.third) else 0
+                Text(
+                    text = if (s.isAmharic)
+                        "የዓመቱ የጸሎት ሽፋን፦ $pct% (ከ${yearStats.third} ቀናት ውስጥ ${yearStats.first} ተጸልየዋል)"
+                    else
+                        "Yearly prayer devotion: $pct% (${yearStats.first} of ${yearStats.third} days active)",
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (yearStats.second > 0) {
                     Text(
-                        s.dateLabel,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = goldFillet,
+                        text = if (s.isAmharic) "● ${yearStats.second} የጾም ቀናት" else "● ${yearStats.second} fast days",
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                        color = fastingBorder,
                     )
                 }
             }
 
-            Spacer(Modifier.height(Spacing.xxs))
+            Spacer(Modifier.height(4.dp))
+
+            // Gold Progress Hairline
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(2.dp)
+                    .padding(horizontal = Spacing.xxs),
+                shape = RoundedCornerShape(1.dp),
+                color = if (isDark) Color(0x33FFFFFF) else Color(0x1A000000),
+            ) {
+                val pct = if (yearStats.third > 0) (yearStats.first.toFloat() / yearStats.third.toFloat()).coerceIn(0f, 1f) else 0f
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(pct)
+                        .background(goldFillet)
+                )
+            }
+
+            Spacer(Modifier.height(Spacing.xs))
 
             // Debossed Inner Parchment Bed for Grid
             Surface(
@@ -347,7 +435,7 @@ fun EthiopianYearHeatmap(
                             monthSpans.forEach { (m, cols) ->
                                 Text(
                                     text = if (m in 1..13) s.ethMonths[m - 1] else "",
-                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.SemiBold),
                                     color = goldFillet,
                                     maxLines = 1,
                                     overflow = TextOverflow.Clip,
@@ -359,7 +447,22 @@ fun EthiopianYearHeatmap(
 
                         // Day Grid
                         Row {
-                            weeks.forEach { week ->
+                            var prevMonth = -1
+                            weeks.forEachIndexed { wIdx, week ->
+                                val curMonth = week.firstOrNull { !it.isBefore(start) && !it.isAfter(end) }
+                                    ?.let { EthiopianDate.from(it).month } ?: prevMonth
+                                val isNewMonth = wIdx > 0 && curMonth != prevMonth && curMonth > 0
+                                prevMonth = curMonth
+
+                                if (isNewMonth) {
+                                    Box(
+                                        modifier = Modifier
+                                            .width(1.dp)
+                                            .height(rowHeight * 7)
+                                            .background(goldFillet.copy(alpha = 0.25f))
+                                    )
+                                }
+
                                 Column {
                                     week.forEach { date ->
                                         val inRange = selectableRange?.contains(date) == true
@@ -368,6 +471,7 @@ fun EthiopianYearHeatmap(
                                         else HabitsRepository.level(HabitsRepository.dayCount(records, date))
                                         val bg = cellColor(date, isFast, level.coerceAtLeast(0))
                                         val isSelected = inRange && date == selectedDay
+                                        val isToday = date == today
 
                                         val shape = RoundedCornerShape(2.5.dp)
                                         val a11yDesc = remember(date, isFast, level, s) {
@@ -392,10 +496,11 @@ fun EthiopianYearHeatmap(
                                                     if (inRange) Modifier.clickable(
                                                         role = Role.Button,
                                                         onClick = { onDaySelect(date) },
-                                                    ) else Modifier
+                                                     ) else Modifier
                                                 )
                                                 .then(
-                                                    if (isSelected) Modifier.border(1.5.dp, MaterialTheme.colorScheme.secondary, shape)
+                                                    if (isSelected) Modifier.border(1.8.dp, MaterialTheme.colorScheme.secondary, shape)
+                                                    else if (isToday) Modifier.border(1.2.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.85f), shape)
                                                     else Modifier
                                                 )
                                                 .drawBehind {
@@ -404,7 +509,6 @@ fun EthiopianYearHeatmap(
 
                                                     // Fasting Day Styling: Perforated / Dashed Border + Sacred Center Dot (●)
                                                     if (isFast && !date.isBefore(start) && !date.isAfter(end)) {
-                                                        // Dashed / Perforated Border Outline
                                                         val dashPx = 2.4.dp.toPx()
                                                         val gapPx = 1.6.dp.toPx()
                                                         drawRoundRect(
@@ -418,12 +522,31 @@ fun EthiopianYearHeatmap(
                                                             ),
                                                         )
 
-                                                        // Sacred Center Dot (●)
                                                         val dotRadius = 1.4.dp.toPx()
                                                         val dotColor = if (level > 0) Color.White.copy(alpha = 0.92f) else fastingDot
                                                         drawCircle(
                                                             color = dotColor,
                                                             radius = dotRadius,
+                                                            center = Offset(cellWidth / 2f, cellHeight / 2f),
+                                                        )
+                                                    }
+
+                                                    // Level 3+ Sacred Illumination Mark (micro-cross)
+                                                    if (level >= 3 && !date.isBefore(start) && !date.isAfter(end)) {
+                                                        val cx = cellWidth / 2f
+                                                        val cy = cellHeight / 2f
+                                                        val arm = 1.6.dp.toPx()
+                                                        val stroke = 0.9.dp.toPx()
+                                                        val markColor = Color.White.copy(alpha = 0.92f)
+                                                        drawLine(markColor, Offset(cx - arm, cy), Offset(cx + arm, cy), strokeWidth = stroke)
+                                                        drawLine(markColor, Offset(cx, cy - arm), Offset(cx, cy + arm), strokeWidth = stroke)
+                                                    }
+
+                                                    // Today Beacon Center Dot when unprayed
+                                                    if (isToday && level <= 0) {
+                                                        drawCircle(
+                                                            color = gold,
+                                                            radius = 1.4.dp.toPx(),
                                                             center = Offset(cellWidth / 2f, cellHeight / 2f),
                                                         )
                                                     }
@@ -437,35 +560,35 @@ fun EthiopianYearHeatmap(
                 }
             }
 
-            // Legend Strip: Clear distinction between normal and fasting days
+            // Legend Strip: Intensity ladder + Fasting + Today + Full Prayer
             Spacer(Modifier.height(Spacing.xs))
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = Spacing.xxs),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
+                // Ladder
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-                    Text(s.less, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    listOf(empty, gold.copy(alpha = 0.30f), gold.copy(alpha = 0.50f), gold.copy(alpha = 0.75f), gold).forEach { c ->
+                    Text(s.less, style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    listOf(empty, gold.copy(alpha = 0.35f), gold.copy(alpha = 0.65f), gold).forEach { c ->
                         Box(
                             Modifier
                                 .size(CELL)
-                                .clip(RoundedCornerShape(2.dp))
+                                .clip(RoundedCornerShape(2.5.dp))
                                 .background(c)
                         )
                     }
-                    Text(s.more, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(s.more, style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
 
-                Spacer(Modifier.width(Spacing.xs))
-
+                // Fasting indicator
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Box(
                         Modifier
                             .size(CELL)
-                            .clip(RoundedCornerShape(2.dp))
+                            .clip(RoundedCornerShape(2.5.dp))
                             .background(fastingWash)
                             .drawBehind {
                                 val dashPx = 2.dp.toPx()
@@ -487,8 +610,54 @@ fun EthiopianYearHeatmap(
                             }
                     )
                     Text(
-                        text = "● የጾም ቀን (Fasting)",
-                        style = MaterialTheme.typography.labelSmall,
+                        text = if (s.isAmharic) "● ጾም" else "● Fasting",
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                // Today indicator
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Box(
+                        Modifier
+                            .size(CELL)
+                            .clip(RoundedCornerShape(2.5.dp))
+                            .background(empty)
+                            .border(1.2.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(2.5.dp))
+                            .drawBehind {
+                                drawCircle(
+                                    color = gold,
+                                    radius = 1.3.dp.toPx(),
+                                    center = Offset(size.width / 2f, size.height / 2f),
+                                )
+                            }
+                    )
+                    Text(
+                        text = if (s.isAmharic) "ዛሬ" else "Today",
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                // Full prayer indicator
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Box(
+                        Modifier
+                            .size(CELL)
+                            .clip(RoundedCornerShape(2.5.dp))
+                            .background(gold)
+                            .drawBehind {
+                                val cx = size.width / 2f
+                                val cy = size.height / 2f
+                                val arm = 1.6.dp.toPx()
+                                val stroke = 0.9.dp.toPx()
+                                drawLine(Color.White, Offset(cx - arm, cy), Offset(cx + arm, cy), strokeWidth = stroke)
+                                drawLine(Color.White, Offset(cx, cy - arm), Offset(cx, cy + arm), strokeWidth = stroke)
+                            }
+                    )
+                    Text(
+                        text = if (s.isAmharic) "✦ ሙሉ" else "✦ Full",
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }

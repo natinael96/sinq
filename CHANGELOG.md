@@ -5,6 +5,18 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.6.0] — 2026-10-16
+
+_versionCode 115 · Unified manuscript heatmap plate, zero-gap Journey header, annual devotion progress, and liturgical micro-marks_
+
+### Added
+- **Annual Devotion Progress Bar.** Integrated a gold hairline devotion progress bar on the year heatmap plate tracking completed prayer days against total calendar days.
+- **Liturgical Micro-Marks & Today Beacon.** Added sacred illumination micro-crosses (`✦`) for full devotion days (level 3+) and radiant beacon rings for today on both compact and full-year heatmaps.
+
+### Changed
+- **Zero-Gap Journey Screen Header.** Consolidated the year switcher (`< 2018 ዓ.ም. >`), date picker icon, and prayer counter pill directly into the manuscript plate header, eliminating redundant outer headers and dead vertical space.
+- **Compact Heatmap Horizon.** Expanded Home compact heatmap to 12 weeks with enriched cell touch targets and liturgical indicators.
+
 ## [1.5.14] — 2026-10-15
 
 _versionCode 114 · Comprehensive UI, design, and accessibility polish across home hero, habit heatmaps, reading, and search_
