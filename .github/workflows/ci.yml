@@ -37,6 +37,9 @@ jobs:
       - name: Validate bundled content
         run: python3 tools/validate_content.py
 
+      - name: Verify font glyph coverage
+        run: python3 tools/check_font_coverage.py
+
       - name: Unit tests
         run: |
           chmod +x gradlew

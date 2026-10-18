@@ -5,6 +5,27 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [2.0.0] — 2026-10-19
+
+_versionCode 117 · Major Architectural, Accessibility, Liturgical & Devotional System Upgrade_
+
+### Added
+- **Enhanced Search Engine & Exact Ranking.** Expanded homophone folding table to encompass all Ethiopic interchangeable families (ሀ/ሐ/ኀ, ሰ/ሠ, አ/ዐ, ጸ/ፀ, labialized velars, and Ge'ez numerals ፩-፼ to Arabic). Exact orthography matches now rank with top priority over folded variants.
+- **Accessible Journey List View.** Introduced a dedicated week-by-week scrollable List view as an accessible TalkBack alternative to the 53x7 year heatmap, selectable in Settings.
+- **Follow System Font Scale.** Added a Settings toggle allowing UI and reading text to dynamically follow system accessibility font scaling.
+- **Vigil Black OLED Theme & WCAG Contrast.** Full WCAG 2.1 AA/AAA compliance across all Light, Dark, and Vigil Black tokens with subtle gold card framing.
+- **Unified Backup Envelope (Schema v4).** SHA-256 integrity-verified export/import combining Room journal entries and DataStore preferences with atomic Merge/Replace options and 3 automatic safety backups. Private confession notes are permanently air-gapped from exports.
+- **Authentic Manuscript Card Generator.** Share scriptures and liturgical passages as illuminated vellum cards featuring golden fillets, corner rosettes `፨`, rubricated headings, and optional attribution watermarks.
+- **Sacred Manuscript Onboarding Flow.** A 3-step introductory setup for language, typography with live manuscript preview, and opt-in reminders.
+- **Adaptive Tablet Navigation & Two-Pane Reading.** Dynamic navigation rail for medium/expanded screens (≥ 600dp) and synchronized side-by-side parallel reading for expanded displays (≥ 840dp).
+- **Paged Leaf Reader Mode.** Scripture reading with horizontal swipe paging, 20% edge taps for page turning, middle 60% chrome toggle, and persistent verse-keyed anchoring across font size changes.
+- **Multi-OEM Battery Optimization Guide.** Step-by-step background battery guidance with direct system deep links for Tecno, Infinix, Xiaomi, Samsung, and Stock Android devices.
+
+### Changed
+- **Home Adaptive FillColumn.** Automatically falls back to proportional vertical scrolling on compact displays (< 640dp) or enlarged font scales (≥ 1.3x) without card clipping.
+- **Journey Screen Visual Density.** Floating Action Button now gracefully animates away while inspecting calendar days, with 120dp bottom padding preventing card overlap.
+- **Reminders Policy.** Exact alarms transitioned to Google Play compliant `SCHEDULE_EXACT_ALARM` with runtime verification and boot/timezone rescheduling.
+
 ## [1.7.0] — 2026-10-18
 
 _versionCode 116 · Tri-mode language configuration (Amharic, English, Bilingual), horizontal prayer scroll with shadow affordances, floating journal button, and comprehensive Amharic orthographic review_

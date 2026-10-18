@@ -23,7 +23,7 @@ android {
     // Where the Kotlin lives. Deliberately NOT renamed alongside applicationId:
     // it is invisible outside the source tree, and moving every file to say
     // com/sinq/app would be a diff the size of the app for no one's benefit.
-    namespace = "com.agpeya.app"
+    namespace = "com.sinq.app"
     compileSdk = 36
 
     defaultConfig {

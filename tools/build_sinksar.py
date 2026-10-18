@@ -257,6 +257,13 @@ def main():
     size = sum(f.stat().st_size for f in OUT.glob("*.json"))
     print(f"\nwrote {len(list(OUT.glob('*.json')))} files, {size / 1e6:.1f} MB")
 
+    try:
+        from build_corpus_db import build_corpus_database
+        build_corpus_database()
+    except Exception as e:
+        print(f"Notice: build_corpus_database: {e}")
+
 
 if __name__ == "__main__":
     main()
+

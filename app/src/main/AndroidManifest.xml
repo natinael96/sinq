@@ -5,13 +5,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <!-- Auto-granted on 13+; lets a prayer-alarm app fire exact alarms (setAlarmClock). -->
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
-    <!-- USE_EXACT_ALARM only exists from API 33; on 12/12L setAlarmClock needs
-         this companion (auto-granted there), or every alarm degrades to inexact. -->
-    <uses-permission
-        android:name="android.permission.SCHEDULE_EXACT_ALARM"
-        android:maxSdkVersion="32" />
+    <!-- Exact alarm permission under Google Play policy for prayer reminder schedule. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <!-- The app's ONLY network use: a once-a-day check of the GitHub releases
          page so a new version can be announced. Sinq is installed by hand, so an
          update nobody is told about is an update nobody gets — it is on by
@@ -167,6 +162,16 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_daily_quote_info" />
         </receiver>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

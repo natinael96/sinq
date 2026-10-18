@@ -495,6 +495,29 @@ def check_mahlet() -> None:
           f"{from_gitsawe} from the ግጻዌ), {parts} parts, {editions} editions")
 
 
+def check_corpus_db():
+    import sqlite3
+    db_path = os.path.join(ROOT, "app", "src", "main", "assets", "database", "sinq_corpus.db")
+    if not os.path.isfile(db_path):
+        fail("missing corpus database asset: app/src/main/assets/database/sinq_corpus.db (run tools/build_corpus_db.py)")
+        return
+    try:
+        conn = sqlite3.connect(db_path)
+        cur = conn.cursor()
+        cur.execute("SELECT count(*) FROM corpus_docs")
+        doc_count = cur.fetchone()[0]
+        cur.execute("SELECT count(*) FROM corpus_fts")
+        fts_count = cur.fetchone()[0]
+        conn.close()
+        if doc_count < 3000:
+            fail(f"corpus_docs has unexpectedly few documents: {doc_count}")
+        if fts_count < 3000:
+            fail(f"corpus_fts has unexpectedly few documents: {fts_count}")
+        print(f"corpus db: {doc_count} documents in corpus_docs and corpus_fts")
+    except Exception as e:
+        fail(f"failed to read sinq_corpus.db: {e}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument(
@@ -510,6 +533,7 @@ def main() -> int:
     check_wudase()
     check_books()
     check_mahlet()
+    check_corpus_db()
     check_id_stability(ids, args.update_snapshot)
 
     total_sections = sum(len(v) for v in ids.values())
