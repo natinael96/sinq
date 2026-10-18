@@ -157,9 +157,20 @@ fun SettingsScreen(
                     Spacer(Modifier.height(Spacing.xs))
                     CompactSegmented(
                         label = s.languageLabel,
-                        options = listOf(s.langSystem, s.langAmharic, s.langEnglish),
-                        selected = language.ordinal,
-                        onSelect = { scope.launch { SettingsRepository.setLanguage(context, Language.entries[it]) } },
+                        options = listOf(s.langBilingual, s.langEnglish, s.langAmharic),
+                        selected = when (language) {
+                            Language.AMH_ENG -> 0
+                            Language.ENGLISH -> 1
+                            Language.AMHARIC -> 2
+                        },
+                        onSelect = { index ->
+                            val chosen = when (index) {
+                                0 -> Language.AMH_ENG
+                                1 -> Language.ENGLISH
+                                else -> Language.AMHARIC
+                            }
+                            scope.launch { SettingsRepository.setLanguage(context, chosen) }
+                        },
                     )
                 }
 

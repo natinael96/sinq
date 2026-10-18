@@ -8,12 +8,18 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import com.agpeya.app.ui.common.PrayerDisplay
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CheckCircle
@@ -72,6 +78,8 @@ import com.agpeya.app.ui.theme.Spacing
 import com.agpeya.app.ui.theme.sinqColors
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -125,14 +133,16 @@ fun habitName(id: String, state: HabitsState, s: Strings): String =
 fun journeyLine(summary: PrayerJourney.Summary, s: Strings): String {
     val fast = summary.fast
     return if (fast != null && summary.fastDay != null) {
-        s.journeyFastLine(fast.nameAm, summary.fastDay, summary.daysPrayed)
+        val name = when (s.languageMode) {
+            com.agpeya.app.data.Language.ENGLISH -> fast.nameEn
+            com.agpeya.app.data.Language.AMHARIC -> fast.nameAm
+            com.agpeya.app.data.Language.AMH_ENG -> "${fast.nameAm} (${fast.nameEn})"
+        }
+        s.journeyFastLine(name, summary.fastDay, summary.daysPrayed)
     } else {
         s.journeyMonthLine(summary.daysPrayed)
     }
 }
-
-/** The journal button's list key: the FAB asks the list whether this is on screen. */
-private const val JOURNAL_ACTION = "journal_action"
 
 /**
  * ጉዞ — where have I walked?
@@ -160,8 +170,17 @@ fun JourneyScreen(
     }
     // Prayer hours group under a collapsible ጸሎት header; other habits are flat.
     // Hours hidden in Manage Hours are already filtered out by visibleHours.
-    val hourItems = remember(hours) {
-        hours.map { Triple(HabitsRepository.hourHabitId(it.id), it.id, it.name) }
+    val hourItems = remember(hours, s) {
+        hours.map { hour ->
+            val displayName = PrayerDisplay.hourName(
+                hourId = hour.id,
+                rawName = hour.name,
+                transliteration = hour.transliteration,
+                mode = s.languageMode,
+                compact = true,
+            )
+            Triple(HabitsRepository.hourHabitId(hour.id), hour.id, displayName)
+        }
     }
     // Only what today asks for. A habit kept on Wednesday and Friday is not a
     // thing missed on a Tuesday, so it is not on Tuesday's list at all.
@@ -181,40 +200,25 @@ fun JourneyScreen(
 
     val listState = rememberLazyListState()
     val motion = LocalMotion.current
-    // The floating copy is a stand-in for the real button, so it exists only
-    // while the real one cannot be reached. Any sliver counts as reached:
-    // visibleItemsInfo includes a partially shown item, which is the rule we
-    // want — a button half on screen is a button you can tap.
-    //
-    // Before the first layout there is nothing to go on, and guessing "hidden"
-    // would flash a FAB onto a screen short enough to show the button anyway.
-    val journalOnScreen by remember {
-        derivedStateOf {
-            val info = listState.layoutInfo
-            info.totalItemsCount == 0 ||
-                info.visibleItemsInfo.any { it.key == JOURNAL_ACTION }
-        }
-    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         // The bar belongs to the host that holds all four tabs, and it carries
         // its own navigation-bar padding; this page only insets for the status bar.
         contentWindowInsets = WindowInsets.statusBars,
+        floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
         floatingActionButton = {
-            AnimatedVisibility(
-                visible = !journalOnScreen,
-                enter = fadeIn(motion.spec()) + scaleIn(motion.spec(), initialScale = 0.85f),
-                exit = fadeOut(motion.spec()) + scaleOut(motion.spec(), targetScale = 0.85f),
-            ) {
-                ExtendedFloatingActionButton(
-                    onClick = onOpenJournal,
-                    icon = { Icon(Icons.Outlined.EditNote, contentDescription = null) },
-                    text = { Text(s.journalTitle) },
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary,
-                )
-            }
+            ExtendedFloatingActionButton(
+                onClick = onOpenJournal,
+                icon = { Icon(Icons.Outlined.EditNote, contentDescription = null) },
+                text = { Text(s.journalTitle) },
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary,
+                elevation = androidx.compose.material3.FloatingActionButtonDefaults.elevation(
+                    defaultElevation = 6.dp,
+                    pressedElevation = 10.dp,
+                ),
+            )
         },
     ) { innerPadding ->
         LazyColumn(
@@ -222,7 +226,7 @@ fun JourneyScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.xs),
+            contentPadding = PaddingValues(start = Spacing.screen, end = Spacing.screen, top = Spacing.xs, bottom = 84.dp),
         ) {
             item {
                 // The mark, not a page title: the tab beneath is already
@@ -243,9 +247,10 @@ fun JourneyScreen(
                         // Which hours, not just that some hour was prayed —
                         // the app knows their names and the reader knows what
                         // is still owed the day.
+                        val separator = if (s.languageMode == com.agpeya.app.data.Language.AMHARIC) "፣ " else ", "
                         val prayedNames = hourItems
                             .filter { it.first in (state.records[todayKey] ?: emptySet()) }
-                            .joinToString("፣ ") { it.third }
+                            .joinToString(separator) { it.third }
                         Text(
                             when {
                                 summary.returning -> s.welcomeBack
@@ -314,8 +319,9 @@ fun JourneyScreen(
             // list of seven 48 dp check rows, which is 336 dp to say what two
             // 28 dp lines say, and the page could not show a day's prayer and
             // a day's habits at the same time.
+            // The seven hours as a single horizontal scroll row.
             item(key = "hours") {
-                HourStrips(
+                HourHorizontalList(
                     items = hourItems,
                     done = state.records[todayKey] ?: emptySet(),
                     onToggle = { id -> scope.launch { HabitsRepository.toggle(context, todayKey, id) } },
@@ -337,7 +343,7 @@ fun JourneyScreen(
             // The year heatmap is the historical view — the story is density
             // and return across the Church's year, not any one unbroken run.
             item {
-                Spacer(Modifier.height(Spacing.xs))
+                Spacer(Modifier.height(Spacing.xxs))
                 val earliestYear = remember(state.records) {
                     state.records.keys.mapNotNull { runCatching { EthiopianDate.from(LocalDate.parse(it)).year }.getOrNull() }.minOrNull()?.coerceAtMost(APP_EPOCH_EC.year) ?: APP_EPOCH_EC.year
                 }
@@ -384,64 +390,42 @@ fun JourneyScreen(
                     )
                 }
             }
-
-            item(key = JOURNAL_ACTION) {
-                Spacer(Modifier.height(Spacing.xs))
-                // The journal sits with ጉዞ because both are the day looked back
-                // on — but it is never counted or scored alongside the habits.
-                //
-                // It is a button and not a row because it is the one thing on
-                // this screen you write rather than read, and it was being read
-                // as one more setting at the end of a long scroll.
-                Button(
-                    onClick = onOpenJournal,
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-                    shape = MaterialTheme.shapes.medium,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        contentColor = MaterialTheme.colorScheme.onSecondary,
-                    ),
-                ) {
-                    Icon(
-                        Icons.Outlined.EditNote,
-                        contentDescription = null,
-                        modifier = Modifier.size(IconSize.small),
-                    )
-                    Spacer(Modifier.width(Spacing.sm))
-                    Text(s.journalTitle)
-                }
-                Spacer(Modifier.height(Spacing.md))
-            }
         }
     }
 }
 
 /**
- * The seven hours, four to a line, on hairlines.
- *
- * Kept hours add a check as well as gold, so completion never depends on colour.
- * Each compact column still carries the platform's full 48 dp touch height.
+ * The canonical prayer hours arranged as a single-row horizontal scroll.
+ * Each hour is presented in a compact, non-wrapping chip/card with smooth scrolling.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun HourStrips(
+private fun HourHorizontalList(
     items: List<Triple<String, String, String>>,
     done: Set<String>,
     onToggle: (String) -> Unit,
     onOpenHour: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val motion = LocalMotion.current
     val haptics = LocalHapticFeedback.current
     val s = LocalStrings.current
-    Column(Modifier.fillMaxWidth()) {
+    val listState = rememberLazyListState()
+    val canScrollForward by remember { derivedStateOf { listState.canScrollForward } }
+    val canScrollBackward by remember { derivedStateOf { listState.canScrollBackward } }
+    val bgColor = MaterialTheme.colorScheme.background
+
+    Column(modifier.fillMaxWidth()) {
         SinqDivider()
-        items.chunked(4).forEach { line ->
-            Row(
-                modifier = Modifier.fillMaxWidth().heightIn(min = 34.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
+        Spacer(Modifier.height(Spacing.xs))
+        Box(modifier = Modifier.fillMaxWidth()) {
+            LazyRow(
+                state = listState,
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                contentPadding = PaddingValues(start = Spacing.xxs, end = Spacing.md, top = Spacing.xxs, bottom = Spacing.xxs),
             ) {
-                line.forEach { (id, rawHourId, name) ->
+                items(items, key = { it.first }) { (id, rawHourId, name) ->
                     val kept = id in done
                     val tint by animateColorAsState(
                         targetValue = if (kept) MaterialTheme.colorScheme.secondary
@@ -449,11 +433,23 @@ private fun HourStrips(
                         animationSpec = motion.spec(Motion.standard),
                         label = "hourTint",
                     )
-                    Row(
+                    val cardBg by animateColorAsState(
+                        targetValue = if (kept) MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f)
+                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                        animationSpec = motion.spec(Motion.standard),
+                        label = "cardBg",
+                    )
+                    val cardBorder by animateColorAsState(
+                        targetValue = if (kept) MaterialTheme.colorScheme.secondary.copy(alpha = 0.45f)
+                        else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                        animationSpec = motion.spec(Motion.standard),
+                        label = "cardBorder",
+                    )
+                    Surface(
                         modifier = Modifier
-                            .weight(1f)
-                            .heightIn(min = 34.dp)
-                            .clip(MaterialTheme.shapes.small)
+                            .heightIn(min = 38.dp)
+                            .defaultMinSize(minWidth = 96.dp)
+                            .clip(RoundedCornerShape(10.dp))
                             .combinedClickable(
                                 role = Role.Checkbox,
                                 onClick = {
@@ -465,34 +461,134 @@ private fun HourStrips(
                                     onOpenHour(rawHourId)
                                 },
                                 onLongClickLabel = s.prayHour,
-                            )
-                            .padding(horizontal = Spacing.xxs, vertical = 2.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
+                            ),
+                        shape = RoundedCornerShape(10.dp),
+                        color = cardBg,
+                        shadowElevation = if (kept) 2.dp else 1.dp,
+                        tonalElevation = if (kept) 2.dp else 0.dp,
+                        border = BorderStroke(1.dp, cardBorder),
                     ) {
-                        if (kept) {
-                            Icon(
-                                Icons.Filled.Check,
-                                contentDescription = null,
-                                tint = tint,
-                                modifier = Modifier.size(12.dp),
+                        Row(
+                            modifier = Modifier.padding(horizontal = Spacing.sm, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                        ) {
+                            if (kept) {
+                                Icon(
+                                    Icons.Filled.Check,
+                                    contentDescription = null,
+                                    tint = tint,
+                                    modifier = Modifier.size(14.dp),
+                                )
+                            } else {
+                                Icon(
+                                    Icons.Outlined.RadioButtonUnchecked,
+                                    contentDescription = null,
+                                    tint = tint.copy(alpha = 0.6f),
+                                    modifier = Modifier.size(14.dp),
+                                )
+                            }
+                            Text(
+                                text = name,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = if (kept) FontWeight.SemiBold else FontWeight.Normal,
+                                ),
+                                color = tint,
+                                maxLines = 1,
+                                softWrap = false,
+                                overflow = TextOverflow.Ellipsis,
                             )
                         }
-                        Text(
-                            text = name,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = tint,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f),
+                    }
+                }
+            }
+
+            // Left fading edge shadow with indicator when scrolled
+            val leftAlpha by animateFloatAsState(
+                targetValue = if (canScrollBackward) 1f else 0f,
+                animationSpec = motion.spec(Motion.standard),
+                label = "scrollLeftIndicator",
+            )
+            if (leftAlpha > 0.001f) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .matchParentSize()
+                        .graphicsLayer { alpha = leftAlpha },
+                    contentAlignment = Alignment.CenterStart,
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .width(42.dp)
+                            .background(
+                                Brush.horizontalGradient(
+                                    colors = listOf(
+                                        bgColor,
+                                        bgColor.copy(alpha = 0.85f),
+                                        bgColor.copy(alpha = 0.4f),
+                                        Color.Transparent,
+                                    )
+                                )
+                            ),
+                        contentAlignment = Alignment.CenterStart,
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.75f),
+                            modifier = Modifier
+                                .padding(start = 2.dp)
+                                .size(14.dp),
                         )
                     }
                 }
-                // A short last line keeps its columns rather than spreading.
-                repeat(4 - line.size) { Spacer(Modifier.weight(1f)) }
             }
-            SinqDivider()
+
+            // Right fading edge shadow with indicator when more items exist
+            val rightAlpha by animateFloatAsState(
+                targetValue = if (canScrollForward) 1f else 0f,
+                animationSpec = motion.spec(Motion.standard),
+                label = "scrollRightIndicator",
+            )
+            if (rightAlpha > 0.001f) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .matchParentSize()
+                        .graphicsLayer { alpha = rightAlpha },
+                    contentAlignment = Alignment.CenterEnd,
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .width(42.dp)
+                            .background(
+                                Brush.horizontalGradient(
+                                    colors = listOf(
+                                        Color.Transparent,
+                                        bgColor.copy(alpha = 0.4f),
+                                        bgColor.copy(alpha = 0.85f),
+                                        bgColor,
+                                    )
+                                )
+                            ),
+                        contentAlignment = Alignment.CenterEnd,
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.75f),
+                            modifier = Modifier
+                                .padding(end = 2.dp)
+                                .size(14.dp),
+                        )
+                    }
+                }
+            }
         }
+        Spacer(Modifier.height(Spacing.xs))
+        SinqDivider()
     }
 }
 
@@ -524,15 +620,8 @@ private fun DayInspectionCard(
     val keptOtherHabits = remember(dayRecords, state, s) {
         dayRecords.filter { !it.startsWith("hour_") }.map { habitName(it, state, s) }
     }
-    val fastName = remember(date) {
-        val seasonal = FastingCalendar.fastOn(date)
-        if (seasonal != null) {
-            seasonal.nameAm
-        } else if (FastingCalendar.isWeeklyFastDay(date)) {
-            if (date.dayOfWeek == java.time.DayOfWeek.WEDNESDAY) "ጾመ ድህነት (ረቡዕ)" else "ጾመ ድህነት (ዓርብ)"
-        } else {
-            null
-        }
+    val fastName = remember(date, s.languageMode) {
+        PrayerDisplay.fastName(date, s.languageMode)
     }
     val journalEntries by produceState<List<JournalEntry>>(emptyList(), date) {
         JournalRepository.onDate(context, date).collect { value = it }

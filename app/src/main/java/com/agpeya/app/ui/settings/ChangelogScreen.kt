@@ -53,6 +53,25 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.7.0",
+        title = "Tri-mode language configuration, horizontal prayer scroll with shadow affordances, floating journal button, and comprehensive Amharic orthographic review",
+        titleAm = "ባለ ሦስት ደረጃ የቋንቋ ምርጫ፣ ተንሸራታች የሰዓታት ጸሎት ሰሌዳ፣ ተንሳፋፊ የማስታወሻ አዝራርና የተሟላ የአማርኛ ፊደላት ማስተካከያ",
+        changes = listOf(
+            "Added explicit tri-mode language selection: Bilingual (Amharic + English), Strict English, and Strict Amharic across all screens.",
+            "Transformed Journey canonical hours list into a smooth horizontal scroll row with dynamic edge shadow gradients, chevrons, and tactile card elevation.",
+            "Introduced a persistent Floating Action Button (FAB) for the spiritual journal, accessible at all scroll positions on the Journey screen.",
+            "Enhanced manuscript heatmap density by streamlining percentage and fast metrics, moving the calendar view higher up the screen.",
+            "Conducted a comprehensive Amharic orthographic and liturgical review, correcting classical spellings and standardizing Ge'ez numerals in liturgical quotas.",
+        ),
+        changesAm = listOf(
+            "ሦስት የቋንቋ አማራጮች ተካተዋል፡ አማርኛና እንግሊዝኛ በአንድነት፣ እንግሊዝኛ ብቻ፣ እና አማርኛ ብቻ።",
+            "በጉዞ ገጽ ላይ የሰዓታት ጸሎት ዝርዝር ወደ አግድም ተንሸራታች ተቀይሮ የጥላና የመሸጋገሪያ ምልክቶች ተጨምረውለታል።",
+            "በጉዞ ገጽ ላይ በማንኛውም ቦታ በቀላሉ ማስታወሻ ለመጻፍ የሚያስችል ተንሳፋፊ አዝራር (FAB) ተዘጋጅቷል።",
+            "የዓመቱን የጸሎት ሰሌዳ ይበልጥ ጎልቶ እንዲታይ ለማድረግ አላስፈላጊ መረጃዎች ተነስተው ሰሌዳው ወደ ላይ ከፍ እንዲል ተደርጓል።",
+            "በመላው መተግበሪያ ላይ ትክክለኛ የሥርዓተ ቤተ ክርስቲያን ቃላትና የፊደላት አጻጻፍ ተስተካክለው በግእዝ ቍጥሮች ተደራጅተዋል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.6.0",
         title = "Unified manuscript heatmap plate, zero-gap Journey header, annual devotion progress, and liturgical micro-marks",
         titleAm = "የተዋሃደ የብራና ሰሌዳ ሙቀት-ሰንጠረዥ፣ የተስተካከለ የጉዞ ርእስ፣ ዓመታዊ የጸሎት እድገትና የበዓላት ምልክቶች",

@@ -92,7 +92,7 @@ object AlarmRinger {
         val sound = SettingsRepository.alarmSoundBlocking(app)
         val language = runCatching {
             runBlocking { SettingsRepository.language(app).first() }
-        }.getOrDefault(Language.SYSTEM)
+        }.getOrDefault(Language.AMH_ENG)
         val s = stringsFor(language)
 
         val nm = app.getSystemService(NotificationManager::class.java)
@@ -279,7 +279,7 @@ object AlarmRinger {
         val s = stringsFor(
             runCatching {
                 runBlocking { SettingsRepository.language(app).first() }
-            }.getOrDefault(Language.SYSTEM),
+            }.getOrDefault(Language.AMH_ENG),
         )
         val nm = app.getSystemService(NotificationManager::class.java)
         ensureFollowupChannel(app, nm)
@@ -320,7 +320,7 @@ object AlarmRinger {
         val s = stringsFor(
             runCatching {
                 runBlocking { SettingsRepository.language(app).first() }
-            }.getOrDefault(Language.SYSTEM),
+            }.getOrDefault(Language.AMH_ENG),
         )
         val nm = app.getSystemService(NotificationManager::class.java)
         ensureFollowupChannel(app, nm)

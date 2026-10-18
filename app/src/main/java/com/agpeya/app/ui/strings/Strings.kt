@@ -1,6 +1,7 @@
 package com.agpeya.app.ui.strings
 
 import androidx.compose.runtime.staticCompositionLocalOf
+import com.agpeya.app.data.Language
 import com.agpeya.app.ui.reading.geezNumeral
 
 /**
@@ -11,6 +12,7 @@ interface Strings {
     /** True for the Amharic chrome — lets bilingual UI (What's New, the memento
      *  mori gloss) pick the right member of a language pair. */
     val isAmharic: Boolean
+    val languageMode: Language get() = if (isAmharic) Language.AMHARIC else Language.ENGLISH
     val back: String
     val tabHome: String
     val tabSearch: String
@@ -352,6 +354,7 @@ interface Strings {
     val keepScreenOn: String
     val keepScreenOnDesc: String
     val languageLabel: String
+    val langBilingual: String
     val langSystem: String
     val langAmharic: String
     val langEnglish: String
@@ -1008,12 +1011,13 @@ interface Strings {
 
 object AmharicStrings : Strings {
     override val isAmharic = true
+    override val languageMode = Language.AMHARIC
     override val back = "ተመለስ"
     override val tabHome = "ቤት"
     override val tabSearch = "ፍለጋ"
     override val tabBookmarks = "ምልክቶች"
     override val tabJourney = "ጉዞ"
-    override val tabSettings = "ቅንብር"
+    override val tabSettings = "ቅንብሮች"
     override val tabLibrary = "መጻሕፍት"
 
     override val libraryTitle = "መጻሕፍት"
@@ -1034,7 +1038,7 @@ object AmharicStrings : Strings {
     override val sundayCycleSubtitle = "የዕለቱ የሰንበት ሥርዓት"
     override val sundayMezmurTitle = "የሰንበት መዝሙር"
     override val supplicationLabel = "መስተበቍዕ"
-    override fun memorialDay(day: Int) = "$day ቀን"
+    override fun memorialDay(day: Int) = "${geezNumeral(day)} ቀን"
     override val newTestamentLabel = "አዲስ ኪዳን"
     override val oldTestamentLabel = "ብሉይ ኪዳን"
     override fun canonSection(key: String) = when (key) {
@@ -1057,7 +1061,7 @@ object AmharicStrings : Strings {
     override val bookGroupActs = "ግብረ ሐዋርያት"
     override val bookGroupPaul = "መልእክታተ ጳውሎስ"
     override val bookGroupCatholic = "ማኅበራዊ መልእክታት"
-    override val bookGroupRevelation = "ራዕይ"
+    override val bookGroupRevelation = "ራእይ"
 
     override val gitsaweTitle = "የዕለቱ ግጻዌ"
     override val gitsaweKicker = "ግጻዌ ዘዕለት"
@@ -1065,7 +1069,7 @@ object AmharicStrings : Strings {
         "መጽሐፈ ግጻዌ ገጽ " + pages.joinToString("–") { com.agpeya.app.ui.reading.geezNumeral(it) }
     override val srcDaily = "ዕለታዊ"
     override val srcSeasonal = "ወቅታዊ"
-    override val srcMonthly = "ወርኃዊ"
+    override val srcMonthly = "ወርኀዊ"
     override val noGitsaweToday = "ለዛሬ የተመዘገበ ግጻዌ የለም"
     override val gitsaweOpenNotAvailable = "ይህ ምንባብ ገና የለም"
     override val gitsaweChangeDay = "ቀን ቀይር"
@@ -1080,7 +1084,7 @@ object AmharicStrings : Strings {
     override val synaxariumKicker = "የዕለቱ ስንክሳር"
     override fun synaxariumFor(dateLabel: String) = "የ$dateLabel ስንክሳር"
 
-    override val closingPrayerGeez = "ግዕዝ"
+    override val closingPrayerGeez = "ግእዝ"
     override val closingPrayerAmharic = "አማርኛ"
     override val closingPrayerSwitchHint = "ቋንቋ ለመቀየር ይንኩ"
 
@@ -1099,7 +1103,7 @@ object AmharicStrings : Strings {
     override val more = "የበዛ"
     override val manage = "አስተካክል"
     override val prayHour = "ጸሎቱን ክፈት"
-    override val viewDayJournalEntry = "የዕለቱን ማስታወሻ ተመልከት"
+    override val viewDayJournalEntry = "የዕለቱን ማስታወሻ ይመልከቱ"
     override val noRecordOnDay = "በዚህ ቀን የተመዘገበ ተግባር የለም"
     override val habitDailySuggestion = "ልምምዶች ለዕለታዊ መንፈሳዊ ግዴታዎች የተዘጋጁ ናቸው። ለተወሰነ ቀን ወይም አልፎ አልፎ ለሚሆኑ ተግባራት የቀን መዝገብ (የፍተሻ ዝርዝር) መጠቀም ይችላሉ።"
 
@@ -1114,7 +1118,7 @@ object AmharicStrings : Strings {
     override val welcomeBack = "ተመልሰዋል — ዛሬ ይጀምሩ"
     override fun keptOf(kept: Int, of: Int) =
         "${com.agpeya.app.ui.reading.geezNumeral(kept)}/${com.agpeya.app.ui.reading.geezNumeral(of)}"
-    override fun daysThisMonth(n: Int) = "በዚህ ወር $n ቀን"
+    override fun daysThisMonth(n: Int) = "በዚህ ወር ${geezNumeral(n)} ቀን"
     override val yearJourneyHeader = "የዓመቱ ጉዞ"
     override val fastLegendLabel = "ጾም"
 
@@ -1130,7 +1134,7 @@ object AmharicStrings : Strings {
     override val markAction = "ምልክት"
     override val crossRefsTitle = "የጥቅስ ማጣቀሻዎች"
     override fun crossRefsAction(n: Int) = "ማጣቀሻ ${com.agpeya.app.ui.reading.geezNumeral(n)}"
-    override val commentaryAction = "Catena"
+    override val commentaryAction = "የአበው ትርጓሜ (Catena)"
     override val catenaEarlyFathers = "የቀደሙት አበው"
     override val catenaOpenInBrowser = "በአሳሽ ክፈት"
     override val mahletTitle = "ሥርዓተ ማኅሌት"
@@ -1171,7 +1175,7 @@ object AmharicStrings : Strings {
         "prayer" -> "ጸሎት"
         else -> "ሥርዓት"
     }
-    override val mahletBookText = "እትም 0"
+    override val mahletBookText = "የመጽሐፉ ጽሑፍ"
     override fun mahletEdition(n: Int) = "እትም ${com.agpeya.app.ui.reading.geezNumeral(n)}"
     override val mahletOr = "ወይም"
     override fun mahletThisYearOn(date: String) = "ዘንድሮ $date"
@@ -1183,7 +1187,7 @@ object AmharicStrings : Strings {
     override val mahletSearchHint = "በዓል ፈልግ"
     override fun mahletEditionsNote(n: Int) =
         "${com.agpeya.app.ui.reading.geezNumeral(n)} እትም አለው። እያንዳንዱ የዚሁ ሥርዓት ሌላ ጽሑፍ ነው — በአንዱ ፈንታ ይደረሳል እንጂ አይከተልም።"
-    override val mahletBookTextPlain = "የመጽሐፉ"
+    override val mahletBookTextPlain = "የመጽሐፉ ጽሑፍ"
     override fun mahletOrders(n: Int) = "${com.agpeya.app.ui.reading.geezNumeral(n)} ሥርዓቶች"
     override val mahletToday = "የዛሬው ሥርዓት"
     override val mahletUndated = "ቀን ያልተወሰነላቸው"
@@ -1204,7 +1208,7 @@ object AmharicStrings : Strings {
     override val booksFullHymn = "ሙሉውን ክፍል ክፈት"
     override val readingModeVertical = "ማንሸራተት"
     override val readingModeHorizontal = "ገጽ በገጽ"
-    override fun readingChapterOfDay(done: Int, total: Int) = "የዛሬው ንባብ · $done ከ$total"
+    override fun readingChapterOfDay(done: Int, total: Int) = "የዛሬው ንባብ · ${geezNumeral(done)} ከ${geezNumeral(total)}"
     override val previousChapter = "ያለፈው ምዕራፍ"
     override val nextChapter = "ቀጣይ ምዕራፍ"
     override val marksTitle = "ምልክቶቼ"
@@ -1216,7 +1220,7 @@ object AmharicStrings : Strings {
     override val noMarksTitle = "ገና ምንም ምልክት የለም"
     override val noMarksBody = "ጥቅስ ነክተው ምልክት፣ ማድመቂያ ወይም ማስታወሻ ሲያኖሩ እዚህ ይሰበሰባሉ።"
     override val psalmName = "መዝሙር"
-    override val geezEdition = "ግዕዝ ፲፱፻፹"
+    override val geezEdition = "ግእዝ ፲፱፻፹"
     override val amharicEdition = "አማርኛ ፲፱፻፹"
     override val noteAction = "ማስታወሻ"
     override val copyFormatTitle = "ቅዳና አጋራ"
@@ -1241,7 +1245,7 @@ object AmharicStrings : Strings {
 
     override val searchHint = "በጸሎቶችና በመዝሙራት ውስጥ ይፈልጉ"
     override val noResults = "ምንም አልተገኘም"
-    override fun searchShowMore(remaining: Int) = "ሌሎቹን $remaining አሳይ"
+    override fun searchShowMore(remaining: Int) = "ሌሎቹን ${geezNumeral(remaining)} አሳይ"
     override val recentSearches = "የቅርብ ጊዜ ፍለጋዎች"
     override val clearAction = "አጽዳ"
     override val nightReminderTitle = "ሰርክ ደርሷል"
@@ -1269,7 +1273,7 @@ object AmharicStrings : Strings {
 
     override val bookmarksTitle = "ምልክቶች"
     override val noBookmarksTitle = "ገና ምልክት አላደረጉም"
-    override val noBookmarksBody = "በንባብ ገጹ ላይ ያለውን የምልክት ምልክት በመንካት ጸሎቶችን ያስቀምጡ"
+    override val noBookmarksBody = "በንባብ ገጹ ላይ ያለውን የምልክት ማድረጊያ አርማ በመንካት ጸሎቶችን ያስቀምጡ"
     override val removeAction = "አስወግድ"
     override val bookmarkGroupScripture = "ቅዱሳት መጻሕፍት"
     override val bookmarkGroupSynaxarium = "ስንክሳር"
@@ -1289,7 +1293,7 @@ object AmharicStrings : Strings {
     override val noBackupYet = "እስካሁን ምትኬ የለም"
     override val backedUpToday = "ዛሬ ምትኬ ተቀምጧል"
     override val backedUpYesterday = "ትናንት ምትኬ ተቀምጧል"
-    override fun backedUpDays(days: Long) = "ከ$days ቀናት በፊት ምትኬ ተቀምጧል"
+    override fun backedUpDays(days: Long) = "ከ${geezNumeral(days.toInt())} ቀን በፊት ምትኬ ተቀምጧል"
     override val fontSizeLabel = "የፊደል መጠን"
     override val lineSpacingLabel = "የመስመር ክፍተት"
     override val textAlignmentLabel = "የጽሑፍ አሰላለፍ"
@@ -1309,13 +1313,14 @@ object AmharicStrings : Strings {
     override val addName = "ስም ጨምር"
     override val addChristianName = "የክርስትና ስም ጨምር"
     override val appearance = "ገጽታ"
-    override val themeSystem = "ስርዓት"
+    override val themeSystem = "የስልኩ ምርጫ"
     override val themeLight = "ብርሃን"
     override val themeDark = "ጨለማ"
     override val keepScreenOn = "ማያ ገጽ እንዳይጠፋ"
     override val keepScreenOnDesc = "በንባብ ጊዜ ማያ ገጹ በርቶ ይቆያል"
     override val languageLabel = "ቋንቋ"
-    override val langSystem = "ስርዓት"
+    override val langBilingual = "አማ+Eng"
+    override val langSystem = "የስልኩ ቋንቋ"
     override val langAmharic = "አማርኛ"
     override val langEnglish = "English"
     override val customizePrayers = "ጸሎቶችን አስተካክል"
@@ -1349,11 +1354,11 @@ object AmharicStrings : Strings {
     override val startEmpty = "ባዶ ጀምር"
     override val remindersNotFiring = "ማንቂያ አይሰራም?"
     override val deleteModeTitle = "ሁነታውን ይሰረዝ?"
-    override fun deleteModeBody(name: String, count: Int) = "«$name» ከነ $count ማንቂያዎቹ ይሰረዛል።"
+    override fun deleteModeBody(name: String, count: Int) = "«$name» ከነ ${geezNumeral(count)} ማንቂያዎቹ ይሰረዛል።"
     override val delete = "ሰርዝ"
     override val cancel = "ተወው"
     override val builtInBadge = "ቋሚ ሁነታ"
-    override fun remindersOn(count: Int) = "$count ማንቂያ በርቷል"
+    override fun remindersOn(count: Int) = "${geezNumeral(count)} ማንቂያ በርቷል"
     override val newModeName = "አዲስ ሁነታ"
 
     override val modeNameLabel = "የሁነታው ስም"
@@ -1396,7 +1401,7 @@ object AmharicStrings : Strings {
     override val zewotrTselot = "ዘወትር ጸሎት"
     override val wudaseMariam = "ውዳሴ ማርያም"
     override val wudaseLangAmharic = "አማርኛ"
-    override val wudaseLangGeez = "ግዕዝ"
+    override val wudaseLangGeez = "ግእዝ"
     override fun psalterEditionSwitch(other: String) = "በ$other ያንብቡ"
     override val contentUnavailable = "ይዘቱን ማግኘት አልተቻለም"
     override val retryAction = "እንደገና ይሞክሩ"
@@ -1409,16 +1414,16 @@ object AmharicStrings : Strings {
     override val fastingWeekly = "ጾመ ድህነት (ረቡዕ/ዓርብ)"
     override val fastingWeeklyNote = "ረቡዕና ዓርብ ዓመቱን ሙሉ የጾም ቀናት ናቸው፤ ከትንሣኤ እስከ ጰራቅሊጦስ ባለው ሃምሳ ቀን ውስጥ ግን አይጾምም።"
     override fun fastingYearHeader(ethYear: Int) = "የ$ethYear ዓ.ም አጽዋማት"
-    override fun fastingDays(n: Int) = "$n ቀን"
-    override fun fastingDayOf(day: Int, total: Int) = "$day ኛ ቀን ከ$total"
+    override fun fastingDays(n: Int) = "${geezNumeral(n)} ቀን"
+    override fun fastingDayOf(day: Int, total: Int) = "${geezNumeral(day)}ኛ ቀን ከ${geezNumeral(total)}"
     override val restorePreviewTitle = "ከምትኬ መልስ?"
     override val restoreNothingNew = "አዲስ ነገር የለም — ሁሉም አስቀድሞ አለ።"
     override val restoreMergeNote = "መመለስ የነበረውን አያጠፋም፤ የሚጨምር ብቻ ነው።"
     override fun backupCreated(date: String) = "የተሠራበት፦ $date"
     override fun backupContains(days: Int, bookmarks: Int, highlights: Int) =
-        "$days ቀናት · $bookmarks ምልክቶች · $highlights ማድመቆች"
+        "${geezNumeral(days)} ቀን · ${geezNumeral(bookmarks)} ምልክት · ${geezNumeral(highlights)} ማድመቂያ"
     override fun restoreWillAdd(days: Int, bookmarks: Int) =
-        "$days ቀናትና $bookmarks ምልክቶች ይጨመራሉ።"
+        "${geezNumeral(days)} ቀንና ${geezNumeral(bookmarks)} ምልክት ይጨመራሉ።"
     override val backupTitle = "ምትኬ"
     override val backupExport = "ምትኬ አስቀምጥ"
     override val backupImport = "ከምትኬ መልስ"
@@ -1428,11 +1433,11 @@ object AmharicStrings : Strings {
     override val restoreFailed = "ፋይሉን ማንበብ አልተቻለም።"
     override val previousYear = "ያለፈው ዓመት"
     override val nextYear = "የሚቀጥለው ዓመት"
-    override val quietHours = "ጸጥታ ሰዓታት"
-    override val quietHoursDesc = "በሌሊት ማንኛውም ማስታወሻ ድምፅ አያሰማም"
+    override val quietHours = "የጸጥታ ሰዓታት"
+    override val quietHoursDesc = "በጸጥታ ሰዓት ማንኛውም ማንቂያ ድምፅ አያሰማም"
     override fun quietHoursRange(from: String, to: String) = "ከ$from እስከ $to ድምፅ የለም"
     override fun quietHoursConflict(count: Int) =
-        "$count ማስታወሻ በዚህ ክፍተት ውስጥ ተይዟል፤ በጸጥታው ጊዜ አይደርስዎትም።"
+        "${geezNumeral(count)} ማስታወሻ በዚህ ክፍተት ውስጥ ተይዟል፤ በጸጥታው ጊዜ አይደርስዎትም።"
     override val filterAll = "ሁሉም"
     override val doneLabel = "ተጠናቋል"
     override val currentHourBadge = "አሁን"
@@ -1468,7 +1473,7 @@ object AmharicStrings : Strings {
     override val readingFontTitle = "የንባብ ፊደል"
     override val readingFontSubtitle = "የጸሎት ጽሑፍ ፊደል"
     override val fontAbyssinica = "አቢሲኒካ"
-    override fun psalmRange(from: Int, to: Int) = "መዝሙር $from–$to"
+    override fun psalmRange(from: Int, to: Int) = "መዝሙር ${geezNumeral(from)}–${geezNumeral(to)}"
     override val snooze = "አሳድር"
     override val snoozeLengthTitle = "የማሳደሪያ ጊዜ"
     override fun snoozeMinutesLabel(n: Int) = "${com.agpeya.app.ui.reading.geezNumeral(n)} ደቂቃ"
@@ -1505,7 +1510,7 @@ object AmharicStrings : Strings {
     override val introJourneyTitle = "ጉዞ"
     override val introJourneyBody = "የጸሎት ሕይወትዎን ቀን በቀን ይመልከቱ — በቤተ ክርስቲያን ዓመት ውስጥ።"
     override val introPsalterTitle = "መዝሙረ ዳዊት"
-    override val introPsalterBody = "ሁሉም 150 መዝሙራት — በየቀኑ ተከፋፍለው፣ ሁልጊዜ ከመስመር ውጭ።"
+    override val introPsalterBody = "ሁሉም ፻፶ መዝሙራት — በየቀኑ ተከፋፍለው፣ ሁልጊዜ ከመስመር ውጭ።"
     override val tutorial = "እንዴት እንደሚሠራ"
     override val tutorialAskTitle = "አጭር ማብራሪያ ይፈልጋሉ?"
     override val tutorialAskBody = "ዋና ዋና ባህሪያትን በፍጥነት እናሳይዎ።"
@@ -1522,7 +1527,7 @@ object AmharicStrings : Strings {
     override val batteryStepUnrestrict = "የባትሪ ገደብ ያንሱ"
     override val batteryStepUnrestrictBody = "ቅንብሮች → ባትሪ → ይህን መተግበሪያ ያልተገደበ ያድርጉ (Unrestricted)።"
     override val batteryStepAutostart = "በራስ ማስጀመር ይፍቀዱ"
-    override val batteryStepAutostartBody = "Xiaomi/Samsung ላሉ ስልኮች Autostart ይፍቀዱ፤ ከ«የሚተኙ መተግበሪያዎች» ያስወግዱ።"
+    override val batteryStepAutostartBody = "Xiaomi/Samsung ላሉ ስልኮች በራስ ማስጀመር (Autostart) ይፍቀዱ፤ ከ«የሚተኙ መተግበሪያዎች» ያስወግዱ።"
     override val openSettings = "ቅንብሮችን ክፈት"
     override val remindersNotFiringTitle = "ማስታወሻ አይሰራም?"
     override val reminderSetupTitle = "የማስታወሻ ቅንብርን ያጠናቅቁ"
@@ -1577,9 +1582,9 @@ object AmharicStrings : Strings {
         "pagumen" -> "ጳጉሜን"
         else -> null
     }
-    override fun seasonWithWeek(name: String, week: Int) = "$name · $week ኛ ሳምንት"
+    override fun seasonWithWeek(name: String, week: Int) = "$name · ${geezNumeral(week)}ኛ ሳምንት"
 
-    override fun habitsCount(n: Int) = "$n ልማዶች"
+    override fun habitsCount(n: Int) = "${geezNumeral(n)} ልማዶች"
 
     override val expand = "ክፈት"
     override val collapse = "ዝጋ"
@@ -1589,9 +1594,9 @@ object AmharicStrings : Strings {
     override val prayerLevelTitle = "የጸሎት ደረጃ"
     override val prayerLevelDescription = "እንደ ጊዜዎና አቅምዎ የሚነበቡትን መዝሙራት ብዛት ይምረጡ፤ ወንጌል ሁልጊዜ ይነበባል።"
     override val prayerLevelPsalm50Description = "መዝሙር ፶ ብቻ፤ ከዚያ ሌሎች ጸሎቶችና ወንጌል"
-    override val prayerLevelBeginningDescription = "በእያንዳንዱ ሰዓት 3 መዝሙራት፤ በሌሊት 7"
-    override val prayerLevelGrowthDescription = "በእያንዳንዱ ሰዓት 7 መዝሙራት፤ በሌሊት 14"
-    override val prayerLevelSteadfastDescription = "በእያንዳንዱ ሰዓት 10 መዝሙራት፤ በሌሊት 24"
+    override val prayerLevelBeginningDescription = "በእያንዳንዱ ሰዓት ፫ መዝሙራት፤ በሌሊት ፯"
+    override val prayerLevelGrowthDescription = "በእያንዳንዱ ሰዓት ፯ መዝሙራት፤ በሌሊት ፲፬"
+    override val prayerLevelSteadfastDescription = "በእያንዳንዱ ሰዓት ፲ መዝሙራት፤ በሌሊት ፳፬"
     override val prayerLevelFullDescription = "ለእያንዳንዱ ሰዓት የተመደቡት መዝሙራት በሙሉ"
     override val settingsGroupData = "መረጃ"
     override val settingsGroupRecords = "መዝገብ"
@@ -1644,7 +1649,7 @@ object AmharicStrings : Strings {
     override val scheduleWeekly = "በሳምንት"
     override val scheduleEveryOtherDay = "በየሁለት ቀን"
     override val scheduleMonthly = "በየወሩ"
-    override fun monthlyOnDay(day: Int) = "በየወሩ በ$day ቀን"
+    override fun monthlyOnDay(day: Int) = "በየወሩ በ${geezNumeral(day)} ቀን"
     override val addSpecialReminder = "ማስታወሻ ጨምር"
     override val reminderNameLabel = "ስም (አማራጭ)"
     override val reminderNameHintAlms = "ለምሳሌ፦ ለቤተ ክርስቲያን"
@@ -1663,13 +1668,13 @@ object AmharicStrings : Strings {
     override val journalKindConfessionNote =
         "ይህ ከመሣሪያዎ አይወጣም፤ በምትኬም ውስጥ አይገባም። ንስሐ ከገቡ በኋላ ይሰረዛል።"
     override val journalFilterAll = "ሁሉም"
-    override fun journalWrittenDays(written: String, total: String) = "$written/$total ቀናት"
+    override fun journalWrittenDays(written: String, total: String) = "$written/$total ቀን"
     override val journalNewEntryPrompt = "አዲስ ማስታወሻ መዝግብ"
     override val journalFutureDateNotice = "የወደፊት ዕለት · ተግባራትና ማሳሰቢያዎች ብቻ"
     override val journalKindReflectionDesc = "የዕለቱ የግል ጸሎትና መንፈሳዊ ማሰላሰያ"
     override val journalKindChecklistDesc = "የዕለት ተግባራት፣ ሰዓታትና የደወል ማስታወሻዎች"
     override val journalKindPassageDesc = "ከዕለቱ ምንባብ ወይም ከቅዱሳት መጻሕፍት ማስታወሻ"
-    override val journalKindConfessionDesc = "ለንስሐ አባትህ የምትናገረውን ለመዘከር (ምስጢራዊ)"
+    override val journalKindConfessionDesc = "ለንስሐ አባትዎ የሚነግሩትን ለማስታወስ (ምሥጢራዊ)"
     override val checklistProgress = "የተከናወኑ ተግባራት"
     override val checklistAddItemHint = "አዲስ ተግባር ያክሉ..."
     override val checklistNotesHint = "ተጨማሪ ማስታወሻ ወይም ሐሳብ..."
@@ -1679,12 +1684,12 @@ object AmharicStrings : Strings {
     override val checklistReminderSwitch = "የደወል ማስታወሻ አብራ"
     override val checklistReminderTitle = "የዕለት የፍተሻ ማስታወሻ"
     override val checklistChannelName = "የዕለት የፍተሻ ማስታወሻዎች"
-    override val checklistHourMorning = "ነግህ (6:00 AM)"
-    override val checklistHourTerce = "ሠለስት (9:00 AM)"
-    override val checklistHourNoon = "ቀትር (12:00 PM)"
-    override val checklistHourNone = "ተሰዓቱ (3:00 PM)"
-    override val checklistHourVespers = "ሠርክ (6:00 PM)"
-    override val checklistHourCompline = "ነዋም (9:00 PM)"
+    override val checklistHourMorning = "ነግህ (ጧት 12:00)"
+    override val checklistHourTerce = "ሠለስት (ረፋድ 3:00)"
+    override val checklistHourNoon = "ቀትር (ቀን 6:00)"
+    override val checklistHourNone = "ተሰዓት (ከሰዓት 9:00)"
+    override val checklistHourVespers = "ሰርክ (ምሽት 12:00)"
+    override val checklistHourCompline = "ንዋም (ማታ 3:00)"
     override val checklistHourAnytime = "ማንኛውም ሰዓት"
     override val checklistAlarmOn = "ደወል በርቷል"
     override val checklistAlarmOff = "ደወል ጠፍቷል"
@@ -1709,7 +1714,7 @@ object AmharicStrings : Strings {
     override val passphraseConfirmLabel = "እንደገና ያስገቡ"
     override val passphraseMismatch = "ሁለቱ አይመሳሰሉም"
     override val passphraseWrong = "የይለፍ ቃሉ ተሳስቷል"
-    override val passphraseTooShort = "ቢያንስ 4 ፊደል ይሁን"
+    override val passphraseTooShort = "ቢያንስ ፬ ፊደላት ይሁኑ"
     override val passphraseNoRecovery =
         "ይህን የይለፍ ቃል ከረሱት የሚመልስበት መንገድ የለም። ማስታወሻዎችዎም አይከፈቱም።"
     override val unlockAction = "ክፈት"
@@ -1766,7 +1771,7 @@ object AmharicStrings : Strings {
     override val noTitheEntries = "ገና ምንም አልተመዘገበም።"
     override val titheRemindersRow = "የአስራት ማስታወሻዎች"
     override fun remindersOnCount(count: Int) =
-        if (count == 0) "ማስታወሻ የለም" else "$count ማስታወሻ በሥራ ላይ"
+        if (count == 0) "ማስታወሻ የለም" else "${geezNumeral(count)} ማንቂያ በርቷል"
     override val previousPeriod = "ያለፈው"
     override val nextPeriod = "ቀጣዩ"
 
@@ -1790,9 +1795,9 @@ object AmharicStrings : Strings {
 
     override val scheduleYearly = "በዓመት"
     override val scheduleFeast = "በበዓል"
-    override fun yearlyOn(month: String, day: Int) = "በየዓመቱ $month $day"
+    override fun yearlyOn(month: String, day: Int) = "በየዓመቱ $month ${geezNumeral(day)} ቀን"
     override val chooseFeast = "በዓል ይምረጡ"
-    override val feastMovableNote = "በባሕረ ሓሳብ በየዓመቱ ይሰላል"
+    override val feastMovableNote = "በባሕረ ሐሳብ በየዓመቱ ይሰላል"
     override fun monthlyFeastOf(name: String) = "የዕለቱ በዓል፦ $name"
     override val noSpecialReminders = "ገና ማስታወሻ አልተጨመረም።"
     override val tomorrowLabel = "ነገ"
@@ -1804,7 +1809,7 @@ object AmharicStrings : Strings {
     override val comingSoonBody = "ይህ ክፍል በዝግጅት ላይ ነው። ጽሑፉ ሲዘጋጅ ይታያል።"
     override val confessionPrepTitle = "የንስሐ ዝግጅት"
     override val confessionPrepDesc = "የግል የንስሐ ማስታወሻ"
-    override fun confessionPrepStepOf(step: Int, total: Int) = "$step / $total"
+    override fun confessionPrepStepOf(step: Int, total: Int) = "${geezNumeral(step)} / ${geezNumeral(total)}"
     override val confessionPrepStart = "መመርመር ጀምር"
     override val confessionPrepNoteHint = "የሚያስታውሱት ካለ ይጻፉ (አማራጭ)"
     override val confessionPrepReviewHeader = "የተጻፈባቸው ክፍሎች"
@@ -1875,9 +1880,9 @@ object AmharicStrings : Strings {
     override val readingMarkChapterDone = "ይህን ምዕራፍ አንብቤዋለሁ"
     override val readingMarkDone = "አነበብኩ"
     override val readingUnread = "አልተነበበም"
-    override val readingDone = "ተነቧል"
+    override val readingDone = "ተነብቧል"
     override val readingAllDays = "ሁሉንም ቀናት"
-    override fun readingDaysRead(count: Int) = "$count ቀናት ተነብቧል"
+    override fun readingDaysRead(count: Int) = "${geezNumeral(count)} ቀን ተነብቧል"
     override val readingBehindTitle = "ያልተነበቡ ቀናት አሉ"
     override val readingBehindBody = "ንባቡን እንዴት ይቀጥሉ?"
     override val readingCatchOldest = "ካልተነበበው ቀጥል"
@@ -1885,7 +1890,7 @@ object AmharicStrings : Strings {
     override val readingRedistribute = "ቀሪውን አከፋፍል"
     override val readingRedistributeDesc = "ቀሪው በቀሩት ቀናት ይከፋፈላል፤ በጊዜው ይጠናቀቃል።"
     override val readingCatchMeUp = "ቀኑን አስተካክል"
-    override fun readingCatchReadFrom(day: String) = "ከቀን $day አንብብ"
+    override fun readingCatchReadFrom(day: String) = "ከቀን $day ያንብቡ"
     override val readingStudyReflection = "የዕለቱ ማሰላሰያ"
     override val fathersCommentary = "የአበው ትርጓሜ"
     override fun readingPlanMeta(days: String, perDay: String) = "$days ቀን · በቀን $perDay ምዕራፍ"
@@ -1901,8 +1906,8 @@ object AmharicStrings : Strings {
     override fun readingSectionLeft(section: String, left: String) = "${section}ን ለመጨረስ $left ምዕራፍ ቀርቷል"
     override fun readingWeekDays(days: String) = "በዚህ ሳምንት $days ቀን"
     override val readingMap = "ካርታው"
-    override val readingCompleteTitle = "መጽሐፍ ቅዱስን ጨረሱ"
-    override fun readingCompleteBody(days: String) = "በ$days ቀን። ያነበቡት ተጠብቆ ይቀራል።"
+    override val readingCompleteTitle = "መጽሐፍ ቅዱስን አጠናቀቁ"
+    override fun readingCompleteBody(days: String) = "በ$days ቀን አጠናቀዋል። ያነበቡት ተጠብቆ ይቀራል።"
     override val readingRestart = "እንደገና ጀምር"
     override val readingNothingToday = "ዛሬ የተመደበ ንባብ የለም"
     override fun readingBookChapters(read: String, total: String) = "$read ከ $total ምዕራፍ"
@@ -1949,6 +1954,7 @@ object AmharicStrings : Strings {
 
 object EnglishStrings : Strings {
     override val isAmharic = false
+    override val languageMode = Language.ENGLISH
     override val back = "Back"
     override val tabHome = "Home"
     override val tabSearch = "Search"
@@ -2247,6 +2253,7 @@ object EnglishStrings : Strings {
     override val keepScreenOn = "Keep screen on"
     override val keepScreenOnDesc = "The screen stays on while reading"
     override val languageLabel = "Language"
+    override val langBilingual = "Amh+Eng"
     override val langSystem = "System"
     override val langAmharic = "አማርኛ"
     override val langEnglish = "English"
@@ -2890,4 +2897,13 @@ object EnglishStrings : Strings {
     override val widgetRolloverOff = "The widget always shows today"
 }
 
-val LocalStrings = staticCompositionLocalOf<Strings> { AmharicStrings }
+object BilingualStrings : Strings by AmharicStrings {
+    override val isAmharic = true
+    override val languageMode = Language.AMH_ENG
+    override val langBilingual = "አማ+Eng"
+    override val langEnglish = "English"
+    override val langAmharic = "አማርኛ"
+    override val commentaryAction = "የአበው ትርጓሜ (Catena)"
+}
+
+val LocalStrings = staticCompositionLocalOf<Strings> { BilingualStrings }

@@ -330,8 +330,9 @@ internal fun TourScaffold(
                 horizontalArrangement = Arrangement.End,
             ) {
                 if (languageChoice) {
-                    TextButton(onClick = { scope.launch { SettingsRepository.setLanguage(context, com.agpeya.app.data.Language.AMHARIC) } }) { Text("አማርኛ") }
+                    TextButton(onClick = { scope.launch { SettingsRepository.setLanguage(context, com.agpeya.app.data.Language.AMH_ENG) } }) { Text("አማ+Eng") }
                     TextButton(onClick = { scope.launch { SettingsRepository.setLanguage(context, com.agpeya.app.data.Language.ENGLISH) } }) { Text("English") }
+                    TextButton(onClick = { scope.launch { SettingsRepository.setLanguage(context, com.agpeya.app.data.Language.AMHARIC) } }) { Text("አማርኛ") }
                     Spacer(Modifier.weight(1f))
                 }
                 TextButton(onClick = onSkip) { Text(s.skip) }
