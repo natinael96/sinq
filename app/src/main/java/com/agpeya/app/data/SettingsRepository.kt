@@ -17,7 +17,20 @@ private val Context.settingsDataStore by preferencesDataStore(name = "settings")
 
 enum class ReadingMode { VERTICAL, HORIZONTAL }
 enum class ThemeChoice { SYSTEM, LIGHT, DARK }
-enum class Language { SYSTEM, AMHARIC, ENGLISH }
+enum class Language {
+    AMH_ENG,
+    ENGLISH,
+    AMHARIC;
+
+    companion object {
+        fun fromString(value: String?): Language = when (value?.trim()?.uppercase()) {
+            "ENGLISH" -> ENGLISH
+            "AMHARIC" -> AMHARIC
+            "AMH_ENG", "BILINGUAL", "SYSTEM", "MIXED" -> AMH_ENG
+            else -> AMH_ENG
+        }
+    }
+}
 enum class PrayerLevel { PSALM_50, BEGINNING, GROWTH, STEADFAST, FULL }
 enum class ReadingLineSpacing(val multiplier: Float) { COMPACT(1.3f), NORMAL(1.5f), RELAXED(1.75f) }
 enum class ReadingAlignment { JUSTIFIED, LEFT, RIGHT, CENTER }
@@ -215,7 +228,7 @@ object SettingsRepository {
             lineSpacing = prefs[KEY_READING_LINE_SPACING] ?: ReadingLineSpacing.NORMAL.name,
             readingAlignment = prefs[KEY_READING_ALIGNMENT] ?: ReadingAlignment.JUSTIFIED.name,
             keepScreenOn = prefs[KEY_KEEP_SCREEN_ON] ?: true,
-            language = prefs[KEY_LANGUAGE] ?: Language.SYSTEM.name,
+            language = prefs[KEY_LANGUAGE] ?: DEFAULT_LANGUAGE.name,
             prayerLevel = prefs[KEY_PRAYER_LEVEL] ?: PrayerLevel.FULL.name,
             alarmAlert = prefs[KEY_ALARM_ALERT] ?: AlarmAlert.VIBRATE_ONLY.name,
             alarmSound = prefs[KEY_ALARM_SOUND] ?: AlarmSound.ALARM.name,
@@ -258,7 +271,7 @@ object SettingsRepository {
             prefs[KEY_READING_LINE_SPACING] = runCatching { ReadingLineSpacing.valueOf(value.lineSpacing) }.getOrDefault(ReadingLineSpacing.NORMAL).name
             prefs[KEY_READING_ALIGNMENT] = runCatching { ReadingAlignment.valueOf(value.readingAlignment) }.getOrDefault(ReadingAlignment.JUSTIFIED).name
             prefs[KEY_KEEP_SCREEN_ON] = value.keepScreenOn
-            prefs[KEY_LANGUAGE] = runCatching { Language.valueOf(value.language) }.getOrDefault(Language.SYSTEM).name
+            prefs[KEY_LANGUAGE] = Language.fromString(value.language).name
             prefs[KEY_PRAYER_LEVEL] = runCatching { PrayerLevel.valueOf(value.prayerLevel) }.getOrDefault(PrayerLevel.FULL).name
             prefs[KEY_ALARM_ALERT] = runCatching { AlarmAlert.valueOf(value.alarmAlert) }.getOrDefault(AlarmAlert.VIBRATE_ONLY).name
             prefs[KEY_ALARM_SOUND] = runCatching { AlarmSound.valueOf(value.alarmSound) }.getOrDefault(AlarmSound.ALARM).name
@@ -480,19 +493,10 @@ object SettingsRepository {
 
     fun language(context: Context): Flow<Language> =
         context.settingsDataStore.data.map {
-            runCatching { Language.valueOf(it[KEY_LANGUAGE] ?: "") }.getOrDefault(DEFAULT_LANGUAGE)
+            Language.fromString(it[KEY_LANGUAGE])
         }
 
-    /**
-     * The language a fresh install starts in: the device's own.
-     *
-     * An Amharic phone opens the app in Amharic and everything else opens in
-     * English. Forcing English on everyone would be a promise the app does not
-     * keep — the Ge'ez numerals, the book names and ባሕረ ሓሳብ are Amharic
-     * whatever this is set to, so an English-first launch shows a half
-     * translated app rather than an English one.
-     */
-    val DEFAULT_LANGUAGE = Language.SYSTEM
+    val DEFAULT_LANGUAGE = Language.AMH_ENG
 
     suspend fun setLanguage(context: Context, value: Language) {
         context.settingsDataStore.edit { it[KEY_LANGUAGE] = value.name }

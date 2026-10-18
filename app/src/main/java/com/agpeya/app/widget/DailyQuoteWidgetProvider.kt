@@ -77,7 +77,7 @@ class DailyQuoteWidgetProvider : AppWidgetProvider() {
         val quote = DailyQuoteRepository.quoteForBlocking(context, today)
         val lang = runCatching {
             runBlocking { SettingsRepository.language(context).first() }
-        }.getOrDefault(Language.SYSTEM)
+        }.getOrDefault(Language.AMH_ENG)
         val s = stringsFor(lang)
 
         val author = if (lang == Language.ENGLISH) {

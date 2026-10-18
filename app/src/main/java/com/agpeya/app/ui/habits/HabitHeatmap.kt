@@ -248,7 +248,7 @@ fun CompactHeatmap(
     }
     val a11ySummary = remember(totalPrayedInWindow, weeks, s) {
         if (s.isAmharic) {
-            "ባለፉት $weeks ሳምንታት ውስጥ $totalPrayedInWindow ቀናት ተጸልየዋል"
+            "ባለፉት ${com.agpeya.app.ui.reading.geezNumeral(weeks)} ሳምንታት ውስጥ ${com.agpeya.app.ui.reading.geezNumeral(totalPrayedInWindow)} ቀን ተጸልየዋል"
         } else {
             "$totalPrayedInWindow days prayed in the last $weeks weeks"
         }

@@ -106,6 +106,7 @@ import com.agpeya.app.ui.common.HeroCard
 import com.agpeya.app.ui.common.SinqCard
 import com.agpeya.app.ui.common.SinqDivider
 import com.agpeya.app.ui.common.Tab
+import com.agpeya.app.ui.common.PrayerDisplay
 import com.agpeya.app.ui.common.liturgicalSeasonLabel
 import com.agpeya.app.ui.habits.CompactHeatmap
 import com.agpeya.app.ui.habits.journeyLine
@@ -844,9 +845,16 @@ private fun NowCard(
                     Text(if (s.isAmharic) "በዕለቱ ሰዓት የሚመከር ጸሎት" else "Suggested by time of day",
                         style = MaterialTheme.typography.labelMedium, color = sinq.onHeroMuted)
                     Spacer(Modifier.height(Spacing.xs))
+                    val hourDisplayName = PrayerDisplay.hourName(
+                        hour.id,
+                        rawName = hour.name,
+                        transliteration = hour.transliteration,
+                        mode = s.languageMode,
+                        compact = false,
+                    )
                     Text(
                         buildAnnotatedString {
-                            append(hour.name)
+                            append(hourDisplayName)
                             if (hour.timeHint.isNotBlank()) {
                                 withStyle(SpanStyle(color = sinq.onHeroMuted)) { append("  ·  ${hour.timeHint}") }
                             }
@@ -913,7 +921,14 @@ private fun HoursLine(next: Hour?, onOpenAll: () -> Unit, modifier: Modifier = M
             )
             Text(
                 text = next?.let {
-                    listOf("${s.hoursNext} ${it.name}", it.timeHint)
+                    val nextName = PrayerDisplay.hourName(
+                        it.id,
+                        rawName = it.name,
+                        transliteration = it.transliteration,
+                        mode = s.languageMode,
+                        compact = true,
+                    )
+                    listOf("${s.hoursNext} $nextName", it.timeHint)
                         .filter { part -> part.isNotBlank() }.joinToString("  ·  ")
                 }.orEmpty(),
                 style = MaterialTheme.typography.bodySmall,
@@ -1188,7 +1203,14 @@ private fun AllHoursSheet(hours: List<Hour>, currentHourId: String?, onOpenHour:
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-                        Text(hour.name, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
+                        val hourTitle = PrayerDisplay.hourName(
+                            hour.id,
+                            rawName = hour.name,
+                            transliteration = hour.transliteration,
+                            mode = s.languageMode,
+                            compact = false,
+                        )
+                        Text(hourTitle, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
                         if (hour.id == currentHourId) {
                             Spacer(Modifier.width(Spacing.sm))
                             Text(

@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import com.agpeya.app.data.Language
 import com.agpeya.app.ui.strings.AmharicStrings
+import com.agpeya.app.ui.strings.BilingualStrings
 import com.agpeya.app.ui.strings.EnglishStrings
 import com.agpeya.app.ui.strings.LocalStrings
 import com.agpeya.app.ui.strings.Strings
@@ -283,7 +284,7 @@ class MainActivity : ComponentActivity() {
 fun stringsFor(language: Language): Strings = when (language) {
     Language.AMHARIC -> AmharicStrings
     Language.ENGLISH -> EnglishStrings
-    Language.SYSTEM -> if (Locale.getDefault().language == "am") AmharicStrings else EnglishStrings
+    Language.AMH_ENG -> BilingualStrings
 }
 
 /** Switch bottom-nav tabs preserving each tab's state. */

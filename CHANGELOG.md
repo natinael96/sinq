@@ -5,6 +5,20 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.7.0] — 2026-10-18
+
+_versionCode 116 · Tri-mode language configuration (Amharic, English, Bilingual), horizontal prayer scroll with shadow affordances, floating journal button, and comprehensive Amharic orthographic review_
+
+### Added
+- **Tri-Mode Language Selector.** Expanded language preferences to support three explicit options: Bilingual (`አማ + Eng`), Strict English (`English`), and Strict Amharic (`አማርኛ`). Applied dynamically across the entire app with dedicated bilingual display components.
+- **Scroll Affordances & Elevation for Prayer Hours.** Embedded dynamic edge shadow gradient overlays with directional chevrons on the horizontal prayer hours carousel, accompanied by tactile card drop shadows and tonal elevation.
+- **Persistent Floating Action Button for Journal.** Replaced the static in-list journal button with a persistent, elevated Floating Action Button (FAB) on the Journey page for fast access across scroll depths.
+
+### Changed
+- **Horizontal Prayer Carousel.** Refactored canonical prayer hour chips into a smooth horizontal scrolling row on the Journey page, freeing vertical screen real estate for habit tracking.
+- **High-Density Devotion Heatmap.** Streamlined the devotional manuscript plate by removing redundant percentage and fast metrics, shifting the calendar upward for improved information density.
+- **Amharic Liturgical & Orthographic Overhaul.** Corrected classical liturgical spellings (e.g., `ግእዝ`, `ራእይ`, `ወርኀዊ`, `በዓለ ሃምሳ`), standardized Ge'ez numerals in liturgical quotas, and enriched translations across reading and habit screens.
+
 ## [1.6.0] — 2026-10-16
 
 _versionCode 115 · Unified manuscript heatmap plate, zero-gap Journey header, annual devotion progress, and liturgical micro-marks_

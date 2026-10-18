@@ -116,8 +116,13 @@ fun EthiopianYearSwitcher(
                 modifier = Modifier.size(18.dp),
             )
         }
+        val eraText = when (s.languageMode) {
+            com.agpeya.app.data.Language.ENGLISH -> "$ecYear E.C."
+            com.agpeya.app.data.Language.AMHARIC -> "$ecYear ዓ.ም"
+            com.agpeya.app.data.Language.AMH_ENG -> "$ecYear ዓ.ም"
+        }
         Text(
-            text = "$ecYear ${s.eraSuffix}",
+            text = eraText,
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.secondary,
         )
@@ -290,7 +295,7 @@ fun EthiopianYearHeatmap(
         border = BorderStroke(1.5.dp, manuscriptBorder),
         shadowElevation = if (isDark) 4.dp else 2.dp,
     ) {
-        Column(Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.sm)) {
+        Column(Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs)) {
             // Consolidated Folio Header: Section Title, Stats Pill, Year Switcher & Date Picker
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -317,7 +322,11 @@ fun EthiopianYearHeatmap(
                         color = if (isDark) Color(0x33E0BC65) else Color(0x227E5F1E),
                     ) {
                         Text(
-                            text = if (s.isAmharic) "${geezNumeral(yearStats.first)} ቀናት" else "${yearStats.first} days",
+                            text = when (s.languageMode) {
+                                com.agpeya.app.data.Language.AMHARIC -> "${geezNumeral(yearStats.first)} ቀናት"
+                                com.agpeya.app.data.Language.ENGLISH -> "${yearStats.first} days"
+                                com.agpeya.app.data.Language.AMH_ENG -> "${geezNumeral(yearStats.first)} ቀናት (${yearStats.first}d)"
+                            },
                             style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
                             color = goldFillet,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
@@ -348,35 +357,7 @@ fun EthiopianYearHeatmap(
                 }
             }
 
-            Spacer(Modifier.height(4.dp))
-
-            // Annual Spiritual Progress Strip
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Spacing.xxs),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                val pct = if (yearStats.third > 0) (yearStats.first * 100 / yearStats.third) else 0
-                Text(
-                    text = if (s.isAmharic)
-                        "የዓመቱ የጸሎት ሽፋን፦ $pct% (ከ${yearStats.third} ቀናት ውስጥ ${yearStats.first} ተጸልየዋል)"
-                    else
-                        "Yearly prayer devotion: $pct% (${yearStats.first} of ${yearStats.third} days active)",
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                if (yearStats.second > 0) {
-                    Text(
-                        text = if (s.isAmharic) "● ${yearStats.second} የጾም ቀናት" else "● ${yearStats.second} fast days",
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                        color = fastingBorder,
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(Spacing.xxs))
 
             // Gold Progress Hairline
             Surface(
@@ -395,7 +376,7 @@ fun EthiopianYearHeatmap(
                 )
             }
 
-            Spacer(Modifier.height(Spacing.xs))
+            Spacer(Modifier.height(Spacing.xxs))
 
             // Debossed Inner Parchment Bed for Grid
             Surface(
@@ -610,7 +591,11 @@ fun EthiopianYearHeatmap(
                             }
                     )
                     Text(
-                        text = if (s.isAmharic) "● ጾም" else "● Fasting",
+                        text = when (s.languageMode) {
+                            com.agpeya.app.data.Language.AMHARIC -> "● ጾም"
+                            com.agpeya.app.data.Language.ENGLISH -> "● Fasting"
+                            com.agpeya.app.data.Language.AMH_ENG -> "● ጾም (Fast)"
+                        },
                         style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -633,7 +618,11 @@ fun EthiopianYearHeatmap(
                             }
                     )
                     Text(
-                        text = if (s.isAmharic) "ዛሬ" else "Today",
+                        text = when (s.languageMode) {
+                            com.agpeya.app.data.Language.AMHARIC -> "ዛሬ"
+                            com.agpeya.app.data.Language.ENGLISH -> "Today"
+                            com.agpeya.app.data.Language.AMH_ENG -> "ዛሬ (Today)"
+                        },
                         style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -656,7 +645,11 @@ fun EthiopianYearHeatmap(
                             }
                     )
                     Text(
-                        text = if (s.isAmharic) "✦ ሙሉ" else "✦ Full",
+                        text = when (s.languageMode) {
+                            com.agpeya.app.data.Language.AMHARIC -> "✦ ሙሉ"
+                            com.agpeya.app.data.Language.ENGLISH -> "✦ Full"
+                            com.agpeya.app.data.Language.AMH_ENG -> "✦ ሙሉ (Full)"
+                        },
                         style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
