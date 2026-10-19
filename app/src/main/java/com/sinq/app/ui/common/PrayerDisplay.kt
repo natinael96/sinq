@@ -43,8 +43,8 @@ object PrayerDisplay {
         }
         return when (mode) {
             Language.ENGLISH -> english
-            Language.AMHARIC,
-            Language.AMH_ENG -> amharic
+            Language.AMHARIC -> amharic
+            Language.AMH_ENG -> if (compact) "$english ($amharic)" else "$english · $amharic"
         }
     }
 
@@ -59,22 +59,22 @@ object PrayerDisplay {
             val en = seasonalNameEn ?: seasonalNameAm
             return when (mode) {
                 Language.ENGLISH -> en
-                Language.AMHARIC,
-                Language.AMH_ENG -> seasonalNameAm
+                Language.AMHARIC -> seasonalNameAm
+                Language.AMH_ENG -> if (seasonalNameEn != null && seasonalNameEn != seasonalNameAm) "$seasonalNameEn ($seasonalNameAm)" else seasonalNameAm
             }
         }
         if (isWeeklyWednesday) {
             return when (mode) {
                 Language.ENGLISH -> "Wednesday Fast"
-                Language.AMHARIC,
-                Language.AMH_ENG -> "ጾመ ድህነት (ረቡዕ)"
+                Language.AMHARIC -> "ጾመ ድህነት (ረቡዕ)"
+                Language.AMH_ENG -> "Wednesday Fast (ጾመ ድህነት · ረቡዕ)"
             }
         }
         if (isWeeklyFriday) {
             return when (mode) {
                 Language.ENGLISH -> "Friday Fast"
-                Language.AMHARIC,
-                Language.AMH_ENG -> "ጾመ ድህነት (ዓርብ)"
+                Language.AMHARIC -> "ጾመ ድህነት (ዓርብ)"
+                Language.AMH_ENG -> "Friday Fast (ጾመ ድህነት · ዓርብ)"
             }
         }
         return null

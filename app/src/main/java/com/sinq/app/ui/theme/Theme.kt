@@ -207,7 +207,7 @@ internal val VigilBlackColors = darkColorScheme(
     surfaceTint = Color(0xFF86CBB1),
 
     surfaceContainerLowest = Color(0xFF000000),
-    surfaceContainerLow = Color(0xFF040D0B),
+    surfaceContainerLow = Color(0xFF000000),
     surfaceContainer = VigilBlackSurface,
     surfaceContainerHigh = Color(0xFF0C1F1B),
     surfaceContainerHighest = Color(0xFF112A24),

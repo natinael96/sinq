@@ -558,6 +558,7 @@ private fun AgpeyaNavHost(
                         androidx.compose.foundation.pager.HorizontalPager(
                             state = tabPager,
                             modifier = Modifier.fillMaxSize().weight(1f),
+                            userScrollEnabled = false,
                             // The next page is composed before it is reached, so a swipe
                             // uncovers a page rather than a blank that fills in late.
                             beyondViewportPageCount = 1,

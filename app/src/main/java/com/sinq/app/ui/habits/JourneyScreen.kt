@@ -136,7 +136,7 @@ fun journeyLine(summary: PrayerJourney.Summary, s: Strings): String {
         val name = when (s.languageMode) {
             com.sinq.app.data.Language.ENGLISH -> fast.nameEn
             com.sinq.app.data.Language.AMHARIC -> fast.nameAm
-            com.sinq.app.data.Language.AMH_ENG -> "${fast.nameAm} (${fast.nameEn})"
+            com.sinq.app.data.Language.AMH_ENG -> "${fast.nameEn} (${fast.nameAm})"
         }
         s.journeyFastLine(name, summary.fastDay, summary.daysPrayed)
     } else {
@@ -392,6 +392,11 @@ fun JourneyScreen(
                 val selectableRange = remember(displayedEcYear, today) {
                     val earliest = state.records.keys.mapNotNull { runCatching { EthiopianDate.from(LocalDate.parse(it)).toGregorian() }.getOrNull() }.minOrNull() ?: APP_EPOCH_EC.toGregorian()
                     journeyYearSelectableRange(displayedEcYear, today, earliest)
+                }
+                androidx.compose.runtime.LaunchedEffect(selectedEpochDay) {
+                    if (selectedEpochDay != null) {
+                        listState.animateScrollToItem(listState.layoutInfo.totalItemsCount - 1)
+                    }
                 }
                 if (selectedDay != null) {
                     Spacer(Modifier.height(Spacing.sm))
@@ -671,7 +676,7 @@ private fun DayInspectionCard(
                 IconButton(
                     onClick = { onPreviousDay?.invoke() },
                     enabled = onPreviousDay != null,
-                    modifier = Modifier.size(44.dp),
+                    modifier = Modifier.size(48.dp),
                 ) {
                     Icon(
                         Icons.AutoMirrored.Filled.KeyboardArrowLeft,
@@ -682,7 +687,7 @@ private fun DayInspectionCard(
                 IconButton(
                     onClick = { onNextDay?.invoke() },
                     enabled = onNextDay != null,
-                    modifier = Modifier.size(44.dp),
+                    modifier = Modifier.size(48.dp),
                 ) {
                     Icon(
                         Icons.AutoMirrored.Filled.KeyboardArrowRight,
@@ -692,7 +697,7 @@ private fun DayInspectionCard(
                 }
                 IconButton(
                     onClick = onClose,
-                    modifier = Modifier.size(44.dp),
+                    modifier = Modifier.size(48.dp),
                 ) {
                     Icon(
                         Icons.Outlined.Close,

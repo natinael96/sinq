@@ -149,18 +149,18 @@ fun JourneyListView(
                         ecYear = ecYear,
                         today = today,
                         earliestYear = earliestYear,
-                        buttonSize = 32.dp,
+                        buttonSize = 48.dp,
                         onYearChange = onYearChange,
                     )
                     IconButton(
                         onClick = { pickingDate = true },
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(48.dp),
                     ) {
                         Icon(
                             Icons.Outlined.CalendarMonth,
                             contentDescription = s.dateLabel,
                             tint = goldFillet,
-                            modifier = Modifier.size(16.dp),
+                            modifier = Modifier.size(20.dp),
                         )
                     }
                 }

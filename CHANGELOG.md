@@ -5,7 +5,7 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
-## [2.0.0] — 2026-10-19
+## [1.7.5] — 2026-10-19
 
 _versionCode 117 · Major Architectural, Accessibility, Liturgical & Devotional System Upgrade_
 

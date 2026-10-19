@@ -101,7 +101,7 @@ fun EthiopianYearSwitcher(
     ecYear: Int,
     today: LocalDate,
     earliestYear: Int = APP_EPOCH_EC.year,
-    buttonSize: Dp = 32.dp,
+    buttonSize: Dp = 48.dp,
     modifier: Modifier = Modifier,
     onYearChange: (Int) -> Unit,
 ) {
@@ -118,13 +118,13 @@ fun EthiopianYearSwitcher(
                 contentDescription = s.previousYear,
                 tint = if (ecYear > earliestYear) MaterialTheme.colorScheme.secondary
                 else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
-                modifier = Modifier.size(18.dp),
+                modifier = Modifier.size(20.dp),
             )
         }
         val eraText = when (s.languageMode) {
             com.sinq.app.data.Language.ENGLISH -> "$ecYear E.C."
             com.sinq.app.data.Language.AMHARIC -> "$ecYear ዓ.ም"
-            com.sinq.app.data.Language.AMH_ENG -> "$ecYear ዓ.ም"
+            com.sinq.app.data.Language.AMH_ENG -> "$ecYear E.C. ($ecYear ዓ.ም)"
         }
         Text(
             text = eraText,
@@ -141,7 +141,7 @@ fun EthiopianYearSwitcher(
                 contentDescription = s.nextYear,
                 tint = if (ecYear < currentEc) MaterialTheme.colorScheme.secondary
                 else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
-                modifier = Modifier.size(18.dp),
+                modifier = Modifier.size(20.dp),
             )
         }
     }
@@ -333,7 +333,7 @@ fun EthiopianYearHeatmap(
                             text = when (s.languageMode) {
                                 com.sinq.app.data.Language.AMHARIC -> "${geezNumeral(yearStats.first)} ቀናት"
                                 com.sinq.app.data.Language.ENGLISH -> "${yearStats.first} days"
-                                com.sinq.app.data.Language.AMH_ENG -> "${geezNumeral(yearStats.first)} ቀናት (${yearStats.first}d)"
+                                com.sinq.app.data.Language.AMH_ENG -> "${yearStats.first} days (${geezNumeral(yearStats.first)} ቀናት)"
                             },
                             style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
                             color = goldFillet,
@@ -348,29 +348,29 @@ fun EthiopianYearHeatmap(
                         ecYear = ecYear,
                         today = today,
                         earliestYear = earliestYear,
-                        buttonSize = 32.dp,
+                        buttonSize = 48.dp,
                         onYearChange = onYearChange,
                     )
                     IconButton(
                         onClick = { viewByMonth = !(viewByMonth ?: false) },
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(48.dp),
                     ) {
                         Icon(
                             if (viewByMonth == true) Icons.Outlined.ViewWeek else Icons.Outlined.ViewModule,
                             contentDescription = if (viewByMonth == true) "Switch to grid" else "Switch to month view",
                             tint = goldFillet,
-                            modifier = Modifier.size(16.dp),
+                            modifier = Modifier.size(20.dp),
                         )
                     }
                     IconButton(
                         onClick = { pickingDate = true },
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(48.dp),
                     ) {
                         Icon(
                             Icons.Outlined.CalendarMonth,
                             contentDescription = s.dateLabel,
                             tint = goldFillet,
-                            modifier = Modifier.size(16.dp),
+                            modifier = Modifier.size(20.dp),
                         )
                     }
                 }
@@ -496,7 +496,7 @@ fun EthiopianYearHeatmap(
                                                     val isToday = date == today
 
                                                     val shape = RoundedCornerShape(2.5.dp)
-                                                    val a11yDesc = remember(date, isFast, level, s) {
+                                                    val a11yDesc = run {
                                                         val ethDate = formatEthiopian(date, s)
                                                         val prayStatus = when {
                                                             level <= 0 -> if (s.isAmharic) "ያልተጸለየ" else "No prayers logged"
@@ -701,7 +701,7 @@ fun EthiopianYearHeatmap(
                         text = when (s.languageMode) {
                             com.sinq.app.data.Language.AMHARIC -> "● ጾም"
                             com.sinq.app.data.Language.ENGLISH -> "● Fasting"
-                            com.sinq.app.data.Language.AMH_ENG -> "● ጾም (Fast)"
+                            com.sinq.app.data.Language.AMH_ENG -> "● Fasting (ጾም)"
                         },
                         style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -728,7 +728,7 @@ fun EthiopianYearHeatmap(
                         text = when (s.languageMode) {
                             com.sinq.app.data.Language.AMHARIC -> "ዛሬ"
                             com.sinq.app.data.Language.ENGLISH -> "Today"
-                            com.sinq.app.data.Language.AMH_ENG -> "ዛሬ (Today)"
+                            com.sinq.app.data.Language.AMH_ENG -> "Today (ዛሬ)"
                         },
                         style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -755,7 +755,7 @@ fun EthiopianYearHeatmap(
                         text = when (s.languageMode) {
                             com.sinq.app.data.Language.AMHARIC -> "✦ ሙሉ"
                             com.sinq.app.data.Language.ENGLISH -> "✦ Full"
-                            com.sinq.app.data.Language.AMH_ENG -> "✦ ሙሉ (Full)"
+                            com.sinq.app.data.Language.AMH_ENG -> "✦ Full (ሙሉ)"
                         },
                         style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -786,6 +786,7 @@ private fun EthiopianMonthGroupedContent(
     onDaySelect: (LocalDate) -> Unit,
 ) {
     val s = LocalStrings.current
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     fun inFast(date: LocalDate): Boolean = fasts.any { it.contains(date) } || FastingCalendar.isWeeklyFastDay(date)
 
     Column(
@@ -825,7 +826,7 @@ private fun EthiopianMonthGroupedContent(
                         val isToday = date == today
                         val shape = RoundedCornerShape(2.5.dp)
 
-                        val a11yDesc = remember(date, isFast, level, s) {
+                        val a11yDesc = run {
                             val ethDate = formatEthiopian(date, s)
                             val prayStatus = when {
                                 level <= 0 -> if (s.isAmharic) "ያልተጸለየ" else "No prayers logged"
@@ -846,16 +847,20 @@ private fun EthiopianMonthGroupedContent(
                             else -> gold
                         }
 
+                        val monthCellSize = 24.dp.coerceAtLeast(cell)
                         Box(
                             modifier = Modifier
-                                .size(cell)
+                                .size(monthCellSize)
                                 .clip(shape)
                                 .background(cellBg)
                                 .semantics { contentDescription = a11yDesc }
                                 .then(
                                     if (inRange) Modifier.clickable(
                                         role = Role.Button,
-                                        onClick = { onDaySelect(date) },
+                                        onClick = {
+                                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+                                            onDaySelect(date)
+                                        },
                                     ) else Modifier
                                 )
                                 .then(
@@ -880,35 +885,24 @@ private fun EthiopianMonthGroupedContent(
                                                 pathEffect = PathEffect.dashPathEffect(floatArrayOf(dashPx, gapPx)),
                                             ),
                                         )
-
-                                        val dotRadius = 1.4.dp.toPx()
-                                        val dotColor = if (level > 0) Color.White.copy(alpha = 0.92f) else fastingDot
-                                        drawCircle(
-                                            color = dotColor,
-                                            radius = dotRadius,
-                                            center = Offset(cellWidth / 2f, cellHeight / 2f),
-                                        )
-                                    }
-
-                                    if (level >= 3) {
-                                        val cx = cellWidth / 2f
-                                        val cy = cellHeight / 2f
-                                        val arm = 1.6.dp.toPx()
-                                        val stroke = 0.9.dp.toPx()
-                                        val markColor = Color.White.copy(alpha = 0.92f)
-                                        drawLine(markColor, Offset(cx - arm, cy), Offset(cx + arm, cy), strokeWidth = stroke)
-                                        drawLine(markColor, Offset(cx, cy - arm), Offset(cx, cy + arm), strokeWidth = stroke)
-                                    }
-
-                                    if (isToday && level <= 0) {
-                                        drawCircle(
-                                            color = gold,
-                                            radius = 1.4.dp.toPx(),
-                                            center = Offset(cellWidth / 2f, cellHeight / 2f),
-                                        )
                                     }
                                 },
-                        )
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = geezNumeral(d),
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 8.5.sp,
+                                    fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Medium,
+                                ),
+                                color = when {
+                                    level >= 2 -> if (isDark) Color(0xFF06231D) else Color(0xFF2A1C00)
+                                    level == 1 -> if (isDark) MaterialTheme.colorScheme.onBackground else Color(0xFF3B2D08)
+                                    date.isAfter(today) -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+                                    else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f)
+                                },
+                            )
+                        }
                     }
                 }
             }

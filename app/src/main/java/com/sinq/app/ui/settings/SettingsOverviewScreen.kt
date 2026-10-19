@@ -420,7 +420,7 @@ private fun alarmAlertLabel(alert: AlarmAlert, s: com.sinq.app.ui.strings.String
 private fun CompactSegmented(label: String, options: List<String>, selected: Int, onSelect: (Int) -> Unit) {
     if (LocalDensity.current.fontScale <= 1.5f) {
         Row(
-            Modifier.fillMaxWidth().heightIn(min = 44.dp),
+            Modifier.fillMaxWidth().heightIn(min = 48.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {

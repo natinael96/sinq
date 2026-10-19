@@ -136,6 +136,7 @@ fun ScriptureReaderScreen(
 ) {
     com.sinq.app.ui.common.ReaderAwake()
     val context = LocalContext.current
+    val haptics = LocalHapticFeedback.current
     val s = LocalStrings.current
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     val hasEnglish = remember(bookKey) { ScriptureRepository.hasEnglish(bookKey) }
@@ -314,8 +315,20 @@ fun ScriptureReaderScreen(
     )
     val isImmersive = distractionFree.isImmersive
 
-    val pages = remember(current.verses, bodyFontSp) {
-        com.sinq.app.ui.reading.ScripturePagination.paginate(current.verses, bodyFontSp)
+    val pages by androidx.compose.runtime.produceState(
+        initialValue = remember(current.verses, bodyFontSp) {
+            com.sinq.app.ui.reading.ScripturePagination.paginate(current.verses, bodyFontSp)
+        },
+        key1 = current.verses,
+        key2 = bodyFontSp,
+    ) {
+        if (current.verses.size > 50) {
+            value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+                com.sinq.app.ui.reading.ScripturePagination.paginate(current.verses, bodyFontSp)
+            }
+        } else {
+            value = com.sinq.app.ui.reading.ScripturePagination.paginate(current.verses, bodyFontSp)
+        }
     }
     val pagerState = rememberPagerState(pageCount = { pages.size.coerceAtLeast(1) })
     var lastVisibleVerse by remember(bookKey, chapter) {
@@ -576,6 +589,7 @@ fun ScriptureReaderScreen(
                         .semantics { selected = verse.n in selRange }
                         .heightIn(min = 48.dp)
                         .clickable {
+                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                             val (a, bSel) = com.sinq.app.ui.reading.advanceFlatSelection(selA, verse.n)
                             selA = a
                             selB = bSel

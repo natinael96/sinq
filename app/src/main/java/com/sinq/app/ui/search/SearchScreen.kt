@@ -162,10 +162,14 @@ fun SearchScreen(
                 leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
                 trailingIcon = {
                     if (query.isNotEmpty()) {
-                        androidx.compose.material3.IconButton(onClick = { query = "" }) {
+                        androidx.compose.material3.IconButton(
+                            onClick = { query = "" },
+                            modifier = Modifier.size(48.dp),
+                        ) {
                             Icon(
                                 Icons.Outlined.Close,
                                 contentDescription = s.cancel,
+                                modifier = Modifier.size(com.sinq.app.ui.theme.IconSize.medium),
                             )
                         }
                     }

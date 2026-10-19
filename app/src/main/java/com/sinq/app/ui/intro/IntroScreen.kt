@@ -244,8 +244,8 @@ private fun LanguageStep(
     Spacer(Modifier.height(Spacing.xl))
 
     val options = listOf(
-        Triple(Language.AMH_ENG, "አማርኛ + English", "Bilingual interface · Amharic liturgical terms with English explanations"),
-        Triple(Language.ENGLISH, "English", "Complete English interface for all prayers, readings, and settings"),
+        Triple(Language.AMH_ENG, "English + አማርኛ", "Bilingual interface · English first with traditional Amharic terms"),
+        Triple(Language.ENGLISH, "English", "Strict English interface for all prayers, readings, and settings"),
         Triple(Language.AMHARIC, "አማርኛ", "ሙሉ የአማርኛ በይነገጽ ለጸሎታት፣ ንባባትና ማብራሪያዎች"),
     )
 

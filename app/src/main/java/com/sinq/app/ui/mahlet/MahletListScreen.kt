@@ -442,10 +442,10 @@ private fun MonthPill(
 
     Row(
         modifier = modifier
-            .heightIn(min = 44.dp)
-            .clip(RoundedCornerShape(22.dp))
+            .heightIn(min = 48.dp)
+            .clip(RoundedCornerShape(24.dp))
             .background(background)
-            .border(1.dp, border, RoundedCornerShape(22.dp))
+            .border(1.dp, border, RoundedCornerShape(24.dp))
             .selectable(selected = selected, onClick = onClick)
             .padding(start = Spacing.md, end = Spacing.sm, top = Spacing.xs, bottom = Spacing.xs),
         verticalAlignment = Alignment.CenterVertically,

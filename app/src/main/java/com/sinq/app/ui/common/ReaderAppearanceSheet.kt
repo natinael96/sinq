@@ -84,10 +84,11 @@ fun ReaderAppearanceSheet(
     val fontSteps = SettingsRepository.FONT_STEPS_SP
     val currentSp = fontSteps[fontStep.coerceIn(fontSteps.indices)]
 
+    val isVigilBlack = MaterialTheme.colorScheme.background == androidx.compose.ui.graphics.Color(0xFF000000)
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        containerColor = if (isVigilBlack) androidx.compose.ui.graphics.Color.Black else MaterialTheme.colorScheme.surfaceContainerLow,
     ) {
         Column(
             modifier = Modifier
@@ -127,7 +128,7 @@ fun ReaderAppearanceSheet(
 
             // ── Section 1: Font Size Stepper ─────────────────────────────────
             Text(
-                text = "${s.readingFontTitle} · መጠን",
+                text = s.fontSizeLabel,
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.secondary,
             )
@@ -160,7 +161,7 @@ fun ReaderAppearanceSheet(
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
-                        text = "መጠን ${geezNumeral(currentSp)}",
+                        text = s.fontStepLabel(currentSp),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.secondary,
                     )
@@ -207,7 +208,7 @@ fun ReaderAppearanceSheet(
 
             // ── Section 2: Font Family ───────────────────────────────────────
             Text(
-                text = "የፊደል ቅርጽ (Typeface)",
+                text = s.fontFamilyLabel,
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.secondary,
             )
@@ -222,7 +223,7 @@ fun ReaderAppearanceSheet(
                     val family = readingFontFamily(fontChoice)
                     Surface(
                         modifier = Modifier
-                            .heightIn(min = 44.dp)
+                            .heightIn(min = 48.dp)
                             .selectable(
                                 selected = isSelected,
                                 onClick = { onFontChange(fontChoice) },

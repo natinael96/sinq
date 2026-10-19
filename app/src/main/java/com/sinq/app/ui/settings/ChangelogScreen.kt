@@ -53,7 +53,7 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
-        version = "2.0.0",
+        version = "1.7.5",
         title = "Major Architectural, Accessibility, Liturgical & Devotional System Upgrade",
         titleAm = "ዋነኛ የመተግበሪያው መዋቅር፣ የተደራሽነት፣ የሥርዓተ ቤተ ክርስቲያንና የጸሎት ሕይወት ማሻሻያ",
         changes = listOf(
