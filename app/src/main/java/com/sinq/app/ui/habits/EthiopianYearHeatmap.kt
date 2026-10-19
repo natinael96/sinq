@@ -38,11 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.material.icons.outlined.ViewModule
-import androidx.compose.material.icons.outlined.ViewWeek
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
@@ -185,7 +181,6 @@ fun EthiopianYearHeatmap(
     }
 
     val currentEc = remember(today) { EthiopianDate.from(today).year }
-    var viewByMonth by rememberSaveable { mutableStateOf<Boolean?>(null) }
 
     // The whole Ethiopian year, መስከረም 1 → ጳጉሜን end.
     val start = remember(ecYear) { EthiopianDate(ecYear, 1, 1).toGregorian() }
@@ -342,7 +337,7 @@ fun EthiopianYearHeatmap(
                     }
                 }
 
-                // Right: Year Switcher Chevrons, View Mode Toggle & Calendar Picker
+                // Right: Year Switcher Chevrons & Calendar Picker
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     EthiopianYearSwitcher(
                         ecYear = ecYear,
@@ -351,17 +346,6 @@ fun EthiopianYearHeatmap(
                         buttonSize = 48.dp,
                         onYearChange = onYearChange,
                     )
-                    IconButton(
-                        onClick = { viewByMonth = !(viewByMonth ?: false) },
-                        modifier = Modifier.size(48.dp),
-                    ) {
-                        Icon(
-                            if (viewByMonth == true) Icons.Outlined.ViewWeek else Icons.Outlined.ViewModule,
-                            contentDescription = if (viewByMonth == true) "Switch to grid" else "Switch to month view",
-                            tint = goldFillet,
-                            modifier = Modifier.size(20.dp),
-                        )
-                    }
                     IconButton(
                         onClick = { pickingDate = true },
                         modifier = Modifier.size(48.dp),
@@ -397,246 +381,227 @@ fun EthiopianYearHeatmap(
 
             Spacer(Modifier.height(Spacing.xs))
 
-            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                val isMonthLayout = viewByMonth ?: (maxWidth < 420.dp)
-                if (isMonthLayout) {
-                    EthiopianMonthGroupedContent(
-                        records = records,
-                        today = today,
-                        ecYear = ecYear,
-                        selectedDay = selectedDay,
-                        selectableRange = selectableRange,
-                        fasts = fasts,
-                        cell = cell,
-                        gap = gap,
-                        goldFillet = goldFillet,
-                        fastingBorder = fastingBorder,
-                        fastingDot = fastingDot,
-                        fastingWash = fastingWash,
-                        empty = empty,
-                        gold = gold,
-                        isDark = isDark,
-                        onDaySelect = onDaySelect,
-                    )
-                } else {
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = if (isDark) Color(0x28000000) else Color(0x08000000),
-                        border = BorderStroke(1.dp, manuscriptBorder.copy(alpha = 0.45f)),
-                        modifier = Modifier.fillMaxWidth(),
+            val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = if (isDark) Color(0x28000000) else Color(0x08000000),
+                border = BorderStroke(1.dp, manuscriptBorder.copy(alpha = 0.45f)),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.sm),
+                        verticalAlignment = Alignment.Top,
                     ) {
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.sm),
-                                verticalAlignment = Alignment.Top,
-                            ) {
-                                // Weekday labels (fixed), aligned under month header row
-                                Column(Modifier.padding(top = monthHeaderHeight)) {
-                                    s.dayLabels.forEach { d ->
+                        // Weekday labels (fixed), aligned under month header row
+                        Column(Modifier.padding(top = monthHeaderHeight)) {
+                            s.dayLabels.forEach { d ->
+                                Box(
+                                    modifier = Modifier
+                                        .height(rowHeight)
+                                        .width(columnWidth),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Text(
+                                        text = d,
+                                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(Modifier.width(Spacing.xxs))
+
+                        // Horizontally Scrollable Month Spans & Week Grid
+                        Column(Modifier.horizontalScroll(scroll)) {
+                            // Month labels row
+                            Row(Modifier.height(monthHeaderHeight), verticalAlignment = Alignment.CenterVertically) {
+                                monthSpans.forEach { (m, cols) ->
+                                    Text(
+                                        text = if (m in 1..13) s.ethMonths[m - 1] else "",
+                                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.SemiBold),
+                                        color = goldFillet,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Clip,
+                                        softWrap = false,
+                                        modifier = Modifier.width(columnWidth * cols),
+                                    )
+                                }
+                            }
+
+                            // Day Grid
+                            Row {
+                                var prevMonth = -1
+                                weeks.forEachIndexed { wIdx, week ->
+                                    val curMonth = week.firstOrNull { !it.isBefore(start) && !it.isAfter(end) }
+                                        ?.let { EthiopianDate.from(it).month } ?: prevMonth
+                                    val isNewMonth = wIdx > 0 && curMonth != prevMonth && curMonth > 0
+                                    prevMonth = curMonth
+
+                                    if (isNewMonth) {
                                         Box(
                                             modifier = Modifier
-                                                .height(rowHeight)
-                                                .width(columnWidth),
-                                            contentAlignment = Alignment.Center,
-                                        ) {
-                                            Text(
-                                                text = d,
-                                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                                            )
-                                        }
-                                    }
-                                }
-
-                                Spacer(Modifier.width(Spacing.xxs))
-
-                                // Horizontally Scrollable Month Spans & Week Grid
-                                Column(Modifier.horizontalScroll(scroll)) {
-                                    // Month labels row
-                                    Row(Modifier.height(monthHeaderHeight), verticalAlignment = Alignment.CenterVertically) {
-                                        monthSpans.forEach { (m, cols) ->
-                                            Text(
-                                                text = if (m in 1..13) s.ethMonths[m - 1] else "",
-                                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.SemiBold),
-                                                color = goldFillet,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Clip,
-                                                softWrap = false,
-                                                modifier = Modifier.width(columnWidth * cols),
-                                            )
-                                        }
+                                                .width(1.dp)
+                                                .height(rowHeight * 7)
+                                                .background(goldFillet.copy(alpha = 0.25f))
+                                        )
                                     }
 
-                                    // Day Grid
-                                    Row {
-                                        var prevMonth = -1
-                                        weeks.forEachIndexed { wIdx, week ->
-                                            val curMonth = week.firstOrNull { !it.isBefore(start) && !it.isAfter(end) }
-                                                ?.let { EthiopianDate.from(it).month } ?: prevMonth
-                                            val isNewMonth = wIdx > 0 && curMonth != prevMonth && curMonth > 0
-                                            prevMonth = curMonth
+                                    Column {
+                                        week.forEach { date ->
+                                            val inRange = selectableRange?.contains(date) == true
+                                            val isFast = inFast(date)
+                                            val level = if (date.isAfter(today)) -1
+                                            else HabitsRepository.level(HabitsRepository.dayCount(records, date))
+                                            val bg = cellColor(date, isFast, level.coerceAtLeast(0))
+                                            val isSelected = inRange && date == selectedDay
+                                            val isToday = date == today
 
-                                            if (isNewMonth) {
-                                                Box(
-                                                    modifier = Modifier
-                                                        .width(1.dp)
-                                                        .height(rowHeight * 7)
-                                                        .background(goldFillet.copy(alpha = 0.25f))
-                                                )
-                                            }
-
-                                            Column {
-                                                week.forEach { date ->
-                                                    val inRange = selectableRange?.contains(date) == true
-                                                    val isFast = inFast(date)
-                                                    val level = if (date.isAfter(today)) -1
-                                                    else HabitsRepository.level(HabitsRepository.dayCount(records, date))
-                                                    val bg = cellColor(date, isFast, level.coerceAtLeast(0))
-                                                    val isSelected = inRange && date == selectedDay
-                                                    val isToday = date == today
-
-                                                    val shape = RoundedCornerShape(2.5.dp)
-                                                    val a11yDesc = run {
-                                                        val ethDate = formatEthiopian(date, s)
-                                                        val prayStatus = when {
-                                                            level <= 0 -> if (s.isAmharic) "ያልተጸለየ" else "No prayers logged"
-                                                            level == 1 -> if (s.isAmharic) "፩ ጸሎት" else "1 prayer"
-                                                            else -> if (s.isAmharic) "$level ጸሎቶች" else "$level prayers"
-                                                        }
-                                                        val fastStatus = if (isFast) (if (s.isAmharic) "የጾም ቀን" else "Fasting day") else ""
-                                                        listOf(ethDate, prayStatus, fastStatus).filter { it.isNotBlank() }.joinToString("፣ ")
-                                                    }
-
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .padding(gap)
-                                                            .size(cell)
-                                                            .clip(shape)
-                                                            .background(bg)
-                                                            .semantics { contentDescription = a11yDesc }
-                                                            .then(
-                                                                if (inRange) Modifier.clickable(
-                                                                    role = Role.Button,
-                                                                    onClick = { onDaySelect(date) },
-                                                                ) else Modifier
-                                                            )
-                                                            .then(
-                                                                if (isSelected) Modifier.border(1.8.dp, MaterialTheme.colorScheme.secondary, shape)
-                                                                else if (isToday) Modifier.border(1.2.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.85f), shape)
-                                                                else Modifier
-                                                            )
-                                                            .drawBehind {
-                                                                val cellWidth = size.width
-                                                                val cellHeight = size.height
-
-                                                                // Fasting Day Styling: Perforated / Dashed Border + Sacred Center Dot (●)
-                                                                if (isFast && !date.isBefore(start) && !date.isAfter(end)) {
-                                                                    val dashPx = 2.4.dp.toPx()
-                                                                    val gapPx = 1.6.dp.toPx()
-                                                                    drawRoundRect(
-                                                                        color = fastingBorder,
-                                                                        topLeft = Offset(0.5f, 0.5f),
-                                                                        size = Size(cellWidth - 1f, cellHeight - 1f),
-                                                                        cornerRadius = CornerRadius(2.dp.toPx()),
-                                                                        style = Stroke(
-                                                                            width = 1.1.dp.toPx(),
-                                                                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(dashPx, gapPx)),
-                                                                        ),
-                                                                    )
-
-                                                                    val dotRadius = 1.4.dp.toPx()
-                                                                    val dotColor = if (level > 0) Color.White.copy(alpha = 0.92f) else fastingDot
-                                                                    drawCircle(
-                                                                        color = dotColor,
-                                                                        radius = dotRadius,
-                                                                        center = Offset(cellWidth / 2f, cellHeight / 2f),
-                                                                    )
-                                                                }
-
-                                                                // Level 3+ Sacred Illumination Mark (micro-cross)
-                                                                if (level >= 3 && !date.isBefore(start) && !date.isAfter(end)) {
-                                                                    val cx = cellWidth / 2f
-                                                                    val cy = cellHeight / 2f
-                                                                    val arm = 1.6.dp.toPx()
-                                                                    val stroke = 0.9.dp.toPx()
-                                                                    val markColor = Color.White.copy(alpha = 0.92f)
-                                                                    drawLine(markColor, Offset(cx - arm, cy), Offset(cx + arm, cy), strokeWidth = stroke)
-                                                                    drawLine(markColor, Offset(cx, cy - arm), Offset(cx, cy + arm), strokeWidth = stroke)
-                                                                }
-
-                                                                // Today Beacon Center Dot when unprayed
-                                                                if (isToday && level <= 0) {
-                                                                    drawCircle(
-                                                                        color = gold,
-                                                                        radius = 1.4.dp.toPx(),
-                                                                        center = Offset(cellWidth / 2f, cellHeight / 2f),
-                                                                    )
-                                                                }
-                                                            },
-                                                    )
+                                            val shape = RoundedCornerShape(2.5.dp)
+                                            val a11yDesc = run {
+                                                val ethDate = formatEthiopian(date, s)
+                                                val prayStatus = when {
+                                                    level <= 0 -> if (s.isAmharic) "ያልተጸለየ" else "No prayers logged"
+                                                    level == 1 -> if (s.isAmharic) "፩ ጸሎት" else "1 prayer"
+                                                    else -> if (s.isAmharic) "$level ጸሎቶች" else "$level prayers"
                                                 }
+                                                val fastStatus = if (isFast) (if (s.isAmharic) "የጾም ቀን" else "Fasting day") else ""
+                                                listOf(ethDate, prayStatus, fastStatus).filter { it.isNotBlank() }.joinToString("፣ ")
                                             }
+
+                                            Box(
+                                                modifier = Modifier
+                                                    .padding(gap)
+                                                    .size(cell)
+                                                    .clip(shape)
+                                                    .background(bg)
+                                                    .semantics { contentDescription = a11yDesc }
+                                                    .then(
+                                                        if (inRange) Modifier.clickable(
+                                                            role = Role.Button,
+                                                            onClick = {
+                                                                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+                                                                onDaySelect(date)
+                                                            },
+                                                        ) else Modifier
+                                                    )
+                                                    .then(
+                                                        if (isSelected) Modifier.border(1.8.dp, MaterialTheme.colorScheme.secondary, shape)
+                                                        else if (isToday) Modifier.border(1.2.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.85f), shape)
+                                                        else Modifier
+                                                    )
+                                                    .drawBehind {
+                                                        val cellWidth = size.width
+                                                        val cellHeight = size.height
+
+                                                        // Fasting Day Styling: Perforated / Dashed Border + Sacred Center Dot (●)
+                                                        if (isFast && !date.isBefore(start) && !date.isAfter(end)) {
+                                                            val dashPx = 2.4.dp.toPx()
+                                                            val gapPx = 1.6.dp.toPx()
+                                                            drawRoundRect(
+                                                                color = fastingBorder,
+                                                                topLeft = Offset(0.5f, 0.5f),
+                                                                size = Size(cellWidth - 1f, cellHeight - 1f),
+                                                                cornerRadius = CornerRadius(2.dp.toPx()),
+                                                                style = Stroke(
+                                                                    width = 1.1.dp.toPx(),
+                                                                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(dashPx, gapPx)),
+                                                                ),
+                                                            )
+
+                                                            val dotRadius = 1.4.dp.toPx()
+                                                            val dotColor = if (level > 0) Color.White.copy(alpha = 0.92f) else fastingDot
+                                                            drawCircle(
+                                                                color = dotColor,
+                                                                radius = dotRadius,
+                                                                center = Offset(cellWidth / 2f, cellHeight / 2f),
+                                                            )
+                                                        }
+
+                                                        // Level 3+ Sacred Illumination Mark (micro-cross)
+                                                        if (level >= 3 && !date.isBefore(start) && !date.isAfter(end)) {
+                                                            val cx = cellWidth / 2f
+                                                            val cy = cellHeight / 2f
+                                                            val arm = 1.6.dp.toPx()
+                                                            val stroke = 0.9.dp.toPx()
+                                                            val markColor = Color.White.copy(alpha = 0.92f)
+                                                            drawLine(markColor, Offset(cx - arm, cy), Offset(cx + arm, cy), strokeWidth = stroke)
+                                                            drawLine(markColor, Offset(cx, cy - arm), Offset(cx, cy + arm), strokeWidth = stroke)
+                                                        }
+
+                                                        // Today Beacon Center Dot when unprayed
+                                                        if (isToday && level <= 0) {
+                                                            drawCircle(
+                                                                color = gold,
+                                                                radius = 1.4.dp.toPx(),
+                                                                center = Offset(cellWidth / 2f, cellHeight / 2f),
+                                                            )
+                                                        }
+                                                    },
+                                            )
                                         }
                                     }
                                 }
                             }
+                        }
+                    }
 
-                            // Left edge fade shadow
-                            if (scroll.value > 0) {
-                                Box(
-                                    modifier = Modifier
-                                        .align(Alignment.CenterStart)
-                                        .padding(start = columnWidth + Spacing.xs)
-                                        .fillMaxHeight()
-                                        .width(36.dp)
-                                        .background(
-                                            Brush.horizontalGradient(
-                                                colors = listOf(
-                                                    manuscriptBg,
-                                                    manuscriptBg.copy(alpha = 0.85f),
-                                                    manuscriptBg.copy(alpha = 0.35f),
-                                                    Color.Transparent,
-                                                )
-                                            )
-                                        ),
-                                    contentAlignment = Alignment.CenterStart,
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                                        contentDescription = null,
-                                        tint = goldFillet.copy(alpha = 0.75f),
-                                        modifier = Modifier.padding(start = 2.dp).size(14.dp),
+                    // Left edge fade shadow
+                    if (scroll.value > 0) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.CenterStart)
+                                .padding(start = columnWidth + Spacing.xs)
+                                .fillMaxHeight()
+                                .width(36.dp)
+                                .background(
+                                    Brush.horizontalGradient(
+                                        colors = listOf(
+                                            manuscriptBg,
+                                            manuscriptBg.copy(alpha = 0.85f),
+                                            manuscriptBg.copy(alpha = 0.35f),
+                                            Color.Transparent,
+                                        )
                                     )
-                                }
-                            }
+                                ),
+                            contentAlignment = Alignment.CenterStart,
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                contentDescription = null,
+                                tint = goldFillet.copy(alpha = 0.75f),
+                                modifier = Modifier.padding(start = 2.dp).size(14.dp),
+                            )
+                        }
+                    }
 
-                            // Right edge fade shadow
-                            if (scroll.value < scroll.maxValue) {
-                                Box(
-                                    modifier = Modifier
-                                        .align(Alignment.CenterEnd)
-                                        .fillMaxHeight()
-                                        .width(36.dp)
-                                        .background(
-                                            Brush.horizontalGradient(
-                                                colors = listOf(
-                                                    Color.Transparent,
-                                                    manuscriptBg.copy(alpha = 0.35f),
-                                                    manuscriptBg.copy(alpha = 0.85f),
-                                                    manuscriptBg,
-                                                )
-                                            )
-                                        ),
-                                    contentAlignment = Alignment.CenterEnd,
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                        contentDescription = null,
-                                        tint = goldFillet.copy(alpha = 0.75f),
-                                        modifier = Modifier.padding(end = 2.dp).size(14.dp),
+                    // Right edge fade shadow
+                    if (scroll.value < scroll.maxValue) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd)
+                                .fillMaxHeight()
+                                .width(36.dp)
+                                .background(
+                                    Brush.horizontalGradient(
+                                        colors = listOf(
+                                            Color.Transparent,
+                                            manuscriptBg.copy(alpha = 0.35f),
+                                            manuscriptBg.copy(alpha = 0.85f),
+                                            manuscriptBg,
+                                        )
                                     )
-                                }
-                            }
+                                ),
+                            contentAlignment = Alignment.CenterEnd,
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                contentDescription = null,
+                                tint = goldFillet.copy(alpha = 0.75f),
+                                modifier = Modifier.padding(end = 2.dp).size(14.dp),
+                            )
                         }
                     }
                 }
@@ -766,146 +731,3 @@ fun EthiopianYearHeatmap(
     }
 }
 
-@Composable
-private fun EthiopianMonthGroupedContent(
-    records: Map<String, Set<String>>,
-    today: LocalDate,
-    ecYear: Int,
-    selectedDay: LocalDate?,
-    selectableRange: ClosedRange<LocalDate>?,
-    fasts: List<FastingCalendar.Fast>,
-    cell: Dp,
-    gap: Dp,
-    goldFillet: Color,
-    fastingBorder: Color,
-    fastingDot: Color,
-    fastingWash: Color,
-    empty: Color,
-    gold: Color,
-    isDark: Boolean,
-    onDaySelect: (LocalDate) -> Unit,
-) {
-    val s = LocalStrings.current
-    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
-    fun inFast(date: LocalDate): Boolean = fasts.any { it.contains(date) } || FastingCalendar.isWeeklyFastDay(date)
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
-    ) {
-        for (m in 1..13) {
-            val monthDaysCount = if (m == 13) EthiopianDate.pagumeLength(ecYear) else 30
-            val monthName = if (m in 1..13) s.ethMonths[m - 1] else ""
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(if (isDark) Color(0x18000000) else Color(0x06000000))
-                    .padding(Spacing.xs),
-            ) {
-                Text(
-                    text = monthName,
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp, fontWeight = FontWeight.Bold),
-                    color = goldFillet,
-                    modifier = Modifier.padding(bottom = Spacing.xxs, start = Spacing.xxs),
-                )
-
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(gap),
-                    verticalArrangement = Arrangement.spacedBy(gap),
-                ) {
-                    for (d in 1..monthDaysCount) {
-                        val date = runCatching { EthiopianDate(ecYear, m, d).toGregorian() }.getOrNull() ?: continue
-                        val inRange = selectableRange?.contains(date) == true
-                        val isFast = inFast(date)
-                        val level = if (date.isAfter(today)) -1
-                        else HabitsRepository.level(HabitsRepository.dayCount(records, date))
-                        val isSelected = inRange && date == selectedDay
-                        val isToday = date == today
-                        val shape = RoundedCornerShape(2.5.dp)
-
-                        val a11yDesc = run {
-                            val ethDate = formatEthiopian(date, s)
-                            val prayStatus = when {
-                                level <= 0 -> if (s.isAmharic) "ያልተጸለየ" else "No prayers logged"
-                                level == 1 -> if (s.isAmharic) "፩ ጸሎት" else "1 prayer"
-                                else -> if (s.isAmharic) "$level ጸሎቶች" else "$level prayers"
-                            }
-                            val fastStatus = if (isFast) (if (s.isAmharic) "የጾም ቀን" else "Fasting day") else ""
-                            listOf(ethDate, prayStatus, fastStatus).filter { it.isNotBlank() }.joinToString("፣ ")
-                        }
-
-                        val cellBg = if (date.isAfter(today)) {
-                            if (isFast) fastingWash.copy(alpha = 0.08f) else empty.copy(alpha = 0.35f)
-                        } else when (level) {
-                            0 -> if (isFast) fastingWash else empty
-                            1 -> if (isDark) gold.copy(alpha = 0.28f) else gold.copy(alpha = 0.30f)
-                            2 -> if (isDark) gold.copy(alpha = 0.55f) else gold.copy(alpha = 0.58f)
-                            3 -> if (isDark) gold.copy(alpha = 0.80f) else gold.copy(alpha = 0.82f)
-                            else -> gold
-                        }
-
-                        val monthCellSize = 24.dp.coerceAtLeast(cell)
-                        Box(
-                            modifier = Modifier
-                                .size(monthCellSize)
-                                .clip(shape)
-                                .background(cellBg)
-                                .semantics { contentDescription = a11yDesc }
-                                .then(
-                                    if (inRange) Modifier.clickable(
-                                        role = Role.Button,
-                                        onClick = {
-                                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
-                                            onDaySelect(date)
-                                        },
-                                    ) else Modifier
-                                )
-                                .then(
-                                    if (isSelected) Modifier.border(1.8.dp, MaterialTheme.colorScheme.secondary, shape)
-                                    else if (isToday) Modifier.border(1.2.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.85f), shape)
-                                    else Modifier
-                                )
-                                .drawBehind {
-                                    val cellWidth = size.width
-                                    val cellHeight = size.height
-
-                                    if (isFast) {
-                                        val dashPx = 2.4.dp.toPx()
-                                        val gapPx = 1.6.dp.toPx()
-                                        drawRoundRect(
-                                            color = fastingBorder,
-                                            topLeft = Offset(0.5f, 0.5f),
-                                            size = Size(cellWidth - 1f, cellHeight - 1f),
-                                            cornerRadius = CornerRadius(2.dp.toPx()),
-                                            style = Stroke(
-                                                width = 1.1.dp.toPx(),
-                                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(dashPx, gapPx)),
-                                            ),
-                                        )
-                                    }
-                                },
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Text(
-                                text = geezNumeral(d),
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontSize = 8.5.sp,
-                                    fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Medium,
-                                ),
-                                color = when {
-                                    level >= 2 -> if (isDark) Color(0xFF06231D) else Color(0xFF2A1C00)
-                                    level == 1 -> if (isDark) MaterialTheme.colorScheme.onBackground else Color(0xFF3B2D08)
-                                    date.isAfter(today) -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
-                                    else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f)
-                                },
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}

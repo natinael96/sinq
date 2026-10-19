@@ -53,6 +53,27 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.7.6",
+        title = "Kenona Spiritual Rules in Journal, Desert Fathers Sayings Hub, and Devotional Heatmap Polish",
+        titleAm = "የቀኖና ጸሎትና የሥርዓት ክፍል በማስታወሻ፣ የአበው ምክር ማዕከል እና የጸሎት ጉዞ ካርታ ማሻሻያ",
+        changes = listOf(
+            "Added dedicated ቀኖና (Kenona) section to Journal with filter chips and 6 authentic devotional presets.",
+            "Created Desert Fathers Sayings Hub screen for browsing all 844 patristic sayings with search and prayer reflection.",
+            "Added opt-in randomize daily quote reminder setting in Settings and Desert Fathers Hub.",
+            "Polished homepage Desert Fathers row with a 1-line quote preview and direct Hub button.",
+            "Renamed Prayer List to የጸሎት መዝገብ while preserving the single-column diptych layout.",
+            "Restored horizontal 366-day devotional year heatmap grid and classic reader layout.",
+        ),
+        changesAm = listOf(
+            "በማስታወሻ ውስጥ የቀኖና ጸሎትና የትሩፋት ክፍል ከ ፮ የጸሎት ምርጫዎች ጋር (ስግደት፣ ውዳሴ ማርያም፣ መጽሐፈ ሰዓታት ወዘተ) ተካቷል።",
+            "ሁሉንም ፰፻፵፬ቱን የአበው ምክሮች ለማንበብ፣ ለመፈለግና ለማሰላሰል የሚያስችል ልዩ የአበው ምክር ማዕከል ተዘጋጅቷል።",
+            "የየዕለቱን የአበው ምክር ማስታወሻ በዘፈቀደ የመላክ አማራጭ በቅንብሮች ውስጥ ተጨምሯል።",
+            "በመነሻ ገጽ ላይ የአበው ምክር በአንድ መስመር ብቻ እንዲታይና በቀጥታ ወደ ማዕከሉ የሚያደርስ አዝራር ተዘጋጅቷል።",
+            "የጸሎት ስሞች ማስታወሻ «የጸሎት መዝገብ» ተብሎ በአንድ አምድ አቀራረብ ተስተካክሏል።",
+            "አግድም የሚዘረጋው የ ፫፻፷፮ቱ ቀናት የጸሎት ጉዞ ሰንጠረዥና የቀደመው የንባብ ገጽ ገጽታ ተመልሷል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.7.5",
         title = "Major Architectural, Accessibility, Liturgical & Devotional System Upgrade",
         titleAm = "ዋነኛ የመተግበሪያው መዋቅር፣ የተደራሽነት፣ የሥርዓተ ቤተ ክርስቲያንና የጸሎት ሕይወት ማሻሻያ",

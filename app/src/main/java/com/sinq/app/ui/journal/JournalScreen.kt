@@ -293,6 +293,7 @@ private fun JournalScreenContent(
                 // Kind Filter Chips
                 val filterOptions = listOf(
                     null to s.journalFilterAll,
+                    JournalKind.KENONA to s.journalKindKenona,
                     JournalKind.CHECKLIST to s.journalKindChecklist,
                     JournalKind.REFLECTION to s.journalKindReflection,
                     JournalKind.PASSAGE to s.journalKindPassage,
@@ -614,6 +615,26 @@ private fun EntryRow(entry: JournalEntry, s: Strings, onClick: () -> Unit) {
                 }
             }
             when (entry.kind) {
+                JournalKind.KENONA -> {
+                    val (items, _) = com.sinq.app.model.ChecklistParser.parse(entry.body)
+                    val done = items.count { it.isDone }
+                    val total = items.size
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                    ) {
+                        Text(
+                            if (total > 0) "☩ ${s.journalKindKenona} · ${geezNumeral(done)}/${geezNumeral(total)}"
+                            else "☩ ${s.journalKindKenona}",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.secondary,
+                        )
+                    }
+                }
                 JournalKind.CHECKLIST -> {
                     val (items, _) = com.sinq.app.model.ChecklistParser.parse(entry.body)
                     if (items.isNotEmpty()) {
@@ -789,6 +810,12 @@ private fun NewEntryBottomSheet(
             }
             val allOptions = listOf(
                 EntryKindOption(
+                    kind = JournalKind.KENONA,
+                    icon = Icons.Outlined.Checklist,
+                    title = s.journalKindKenona,
+                    desc = s.journalKindKenonaDesc,
+                ),
+                EntryKindOption(
                     kind = JournalKind.CHECKLIST,
                     icon = Icons.Outlined.Checklist,
                     title = s.journalKindChecklist,
@@ -814,7 +841,7 @@ private fun NewEntryBottomSheet(
                 ),
             )
             val options = if (isFutureDate) {
-                allOptions.filter { it.kind == JournalKind.CHECKLIST }
+                allOptions.filter { it.kind == JournalKind.CHECKLIST || it.kind == JournalKind.KENONA }
             } else {
                 allOptions
             }

@@ -161,6 +161,7 @@ object SettingsRepository {
 
     private val KEY_GITSAWE_REMINDER = booleanPreferencesKey("gitsawe_reminder")
     private val KEY_DAILY_QUOTE_LOCKSCREEN = booleanPreferencesKey("daily_quote_lockscreen")
+    private val KEY_RANDOMIZE_DAILY_QUOTE = booleanPreferencesKey("randomize_daily_quote")
     private val KEY_DAILY_QUOTE_TIME = intPreferencesKey("daily_quote_reminder_min")
     private val KEY_WIDGET_ROLLOVER = booleanPreferencesKey("widget_evening_rollover")
     private val KEY_WIDGET_ROLLOVER_TIME = intPreferencesKey("widget_evening_rollover_time")
@@ -686,6 +687,18 @@ object SettingsRepository {
     fun dailyQuoteLockscreenBlocking(context: Context): Boolean =
         kotlinx.coroutines.runBlocking {
             runCatching { dailyQuoteLockscreen(context).first() }.getOrDefault(true)
+        }
+
+    fun randomizeDailyQuote(context: Context): Flow<Boolean> =
+        context.settingsDataStore.data.map { it[KEY_RANDOMIZE_DAILY_QUOTE] ?: false }
+
+    suspend fun setRandomizeDailyQuote(context: Context, value: Boolean) {
+        context.settingsDataStore.edit { it[KEY_RANDOMIZE_DAILY_QUOTE] = value }
+    }
+
+    fun randomizeDailyQuoteBlocking(context: Context): Boolean =
+        kotlinx.coroutines.runBlocking {
+            runCatching { randomizeDailyQuote(context).first() }.getOrDefault(false)
         }
 
     fun dailyQuoteTime(context: Context): Flow<Int> =

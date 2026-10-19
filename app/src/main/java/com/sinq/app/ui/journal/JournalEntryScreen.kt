@@ -274,9 +274,10 @@ private fun JournalEntryScreenContent(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                     ) {
                         val options = listOf(
+                            JournalKind.KENONA to s.journalKindKenona,
+                            JournalKind.CHECKLIST to s.journalKindChecklist,
                             JournalKind.REFLECTION to s.journalKindReflection,
                             JournalKind.PASSAGE to s.journalKindPassage,
-                            JournalKind.CHECKLIST to s.journalKindChecklist,
                             JournalKind.CONFESSION_DRAFT to s.journalKindConfession,
                         )
                         items(options) { (choice, label) ->
@@ -286,6 +287,7 @@ private fun JournalEntryScreenContent(
                                 label = { Text(label, maxLines = 1) },
                                 leadingIcon = {
                                     val icon = when (choice) {
+                                        JournalKind.KENONA -> Icons.Outlined.Checklist
                                         JournalKind.REFLECTION -> Icons.Outlined.EditNote
                                         JournalKind.PASSAGE -> Icons.Outlined.AutoStories
                                         JournalKind.CHECKLIST -> Icons.Outlined.Checklist
@@ -347,13 +349,14 @@ private fun JournalEntryScreenContent(
                 TextButton(onClick = { saveAttempt++ }) { Text(s.retryAction) }
             } else Text(if (saved || body == loaded.body) s.entrySaved else s.entrySaving,
                 style = MaterialTheme.typography.labelMedium)
-            if (!confessionOnly && kind == JournalKind.CHECKLIST) {
+            if (!confessionOnly && (kind == JournalKind.CHECKLIST || kind == JournalKind.KENONA)) {
                 ChecklistEditor(
                     body = body,
                     onBodyChange = { body = it },
                     s = s,
                     entryId = entryId ?: loaded.id,
                     entryDate = loaded.localDate ?: targetDate ?: LocalDate.now(),
+                    isKenona = kind == JournalKind.KENONA,
                 )
             } else {
                 OutlinedTextField(
@@ -460,6 +463,7 @@ private fun ChecklistEditor(
     s: Strings,
     entryId: String,
     entryDate: LocalDate = LocalDate.now(),
+    isKenona: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -495,7 +499,7 @@ private fun ChecklistEditor(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = s.checklistProgress,
+                    text = if (isKenona) "☩ ${s.journalKindKenona}" else s.checklistProgress,
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -706,10 +710,52 @@ private fun ChecklistEditor(
                 }
             }
 
+            if (isKenona) {
+                val kenonaPresets = listOf(
+                    s.kenonaPresetMetanias,
+                    s.kenonaPresetWudase,
+                    s.kenonaPresetPsalter,
+                    s.kenonaPresetHours,
+                    s.kenonaPresetKirielayson,
+                    s.kenonaPresetSynaxarium,
+                )
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                ) {
+                    items(kenonaPresets) { preset ->
+                        FilterChip(
+                            selected = false,
+                            onClick = {
+                                val task = ChecklistItem(
+                                    text = preset,
+                                    isDone = false,
+                                    scheduledHour = selectedHour,
+                                    hasReminder = hasReminder,
+                                )
+                                val updated = items + task
+                                onBodyChange(ChecklistParser.serialize(updated, note))
+                            },
+                            label = { Text("+ $preset", style = MaterialTheme.typography.labelSmall) },
+                            shape = RoundedCornerShape(8.dp),
+                            colors = FilterChipDefaults.filterChipColors(
+                                containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f),
+                                labelColor = MaterialTheme.colorScheme.secondary,
+                            ),
+                            border = FilterChipDefaults.filterChipBorder(
+                                enabled = true,
+                                selected = false,
+                                borderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.35f),
+                            ),
+                        )
+                    }
+                }
+            }
+
             OutlinedTextField(
                 value = newTaskText,
                 onValueChange = { newTaskText = it },
-                placeholder = { Text(s.checklistAddItemHint) },
+                placeholder = { Text(if (isKenona) s.journalKindKenonaDesc else s.checklistAddItemHint) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { onAddTask() }),

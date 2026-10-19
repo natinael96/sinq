@@ -87,6 +87,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -146,6 +147,7 @@ fun HomeScreen(
     onOpenGitsawe: () -> Unit,
     onOpenBatteryHelp: () -> Unit,
     onSelectTab: (Tab) -> Unit,
+    onOpenDesertFathersHub: () -> Unit = {},
     onReflectQuote: ((com.sinq.app.model.DailyQuote) -> Unit)? = null,
     openDailyQuote: Boolean = false,
     onDailyQuoteConsumed: (() -> Unit)? = null,
@@ -421,6 +423,7 @@ fun HomeScreen(
                     }
                 },
                 onOpenDailyQuote = { showDailyQuoteSheet = true },
+                onOpenDesertFathersHub = onOpenDesertFathersHub,
             )
         }
       }
@@ -671,6 +674,7 @@ private fun HomeDashboard(
     isDailyQuoteBookmarked: Boolean = false,
     onToggleDailyQuoteBookmark: () -> Unit = {},
     onOpenDailyQuote: () -> Unit = {},
+    onOpenDesertFathersHub: () -> Unit = {},
 ) {
     val cardScale = LocalDensity.current.fontScale.coerceAtLeast(1f)
     // The ceilings rise with the type size, so a page set large can still use
@@ -725,6 +729,7 @@ private fun HomeDashboard(
             isDailyQuoteBookmarked = isDailyQuoteBookmarked,
             onToggleDailyQuoteBookmark = onToggleDailyQuoteBookmark,
             onOpenDailyQuote = onOpenDailyQuote,
+            onOpenDesertFathersHub = onOpenDesertFathersHub,
             modifier = Modifier.grow(1f, max = (if (dailyQuote != null) 126.dp else TODAY_CEILING) * room),
         )
         ShortcutsRow(stackReadingCards, today, onOpenPsalter, onOpenZewotr)
@@ -1087,6 +1092,7 @@ private fun TodayAndQuoteSection(
     isDailyQuoteBookmarked: Boolean,
     onToggleDailyQuoteBookmark: () -> Unit,
     onOpenDailyQuote: () -> Unit,
+    onOpenDesertFathersHub: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -1110,6 +1116,7 @@ private fun TodayAndQuoteSection(
                 isBookmarked = isDailyQuoteBookmarked,
                 onToggleBookmark = onToggleDailyQuoteBookmark,
                 onClick = onOpenDailyQuote,
+                onOpenHub = onOpenDesertFathersHub,
             )
         }
         SinqDivider()
@@ -1308,6 +1315,7 @@ private fun DailyQuoteRowContent(
     isBookmarked: Boolean = false,
     onToggleBookmark: () -> Unit = {},
     onClick: () -> Unit,
+    onOpenHub: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val s = LocalStrings.current
@@ -1358,6 +1366,28 @@ private fun DailyQuoteRowContent(
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(gold.copy(alpha = 0.14f))
+                        .clickable(onClick = onOpenHub)
+                        .padding(horizontal = 8.dp, vertical = 3.dp),
+                ) {
+                    Text(
+                        text = s.desertFathersViewAll,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = gold,
+                    )
+                    Spacer(Modifier.width(2.dp))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+                        contentDescription = null,
+                        tint = gold,
+                        modifier = Modifier.size(10.dp),
+                    )
+                }
                 IconButton(
                     onClick = onToggleBookmark,
                     modifier = Modifier.size(32.dp),
@@ -1384,7 +1414,7 @@ private fun DailyQuoteRowContent(
                 text = "“$quoteText”",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
         }

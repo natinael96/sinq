@@ -31,19 +31,19 @@ class LibraryStringsTest {
         assertFalse(EnglishStrings.fontSizeLabel.contains(ethiopicRegex))
         assertFalse(EnglishStrings.fontFamilyLabel.contains(ethiopicRegex))
 
-        // 2. Bilingual (Amh+Eng): English first with Amharic
-        assertEquals("Rite of Mahlet (ሥርዓተ ማኅሌት)", com.sinq.app.ui.strings.BilingualStrings.mahletTitle)
-        assertEquals("Psalter (መዝሙረ ዳዊት)", com.sinq.app.ui.strings.BilingualStrings.psalterTitle)
-        assertEquals("Other Books (ሌሎች መጻሕፍት)", com.sinq.app.ui.strings.BilingualStrings.booksTitle)
-        assertEquals("Synaxarium (ስንክሳር)", com.sinq.app.ui.strings.BilingualStrings.synaxariumTitle)
-        assertEquals("Today's Lectionary (የዕለቱ ግጻዌ)", com.sinq.app.ui.strings.BilingualStrings.gitsaweTitle)
-        assertEquals("Daily Prayer (ዘወትር ጸሎት)", com.sinq.app.ui.strings.BilingualStrings.zewotrTselot)
-        assertEquals("Praises of Mary (ውዳሴ ማርያም)", com.sinq.app.ui.strings.BilingualStrings.wudaseMariam)
-        assertEquals("Text Size (የፊደል መጠን)", com.sinq.app.ui.strings.BilingualStrings.fontSizeLabel)
-        assertEquals("Typeface (የፊደል ቅርጽ)", com.sinq.app.ui.strings.BilingualStrings.fontFamilyLabel)
-        assertEquals("Size 18 (፲፰)", com.sinq.app.ui.strings.BilingualStrings.fontStepLabel(18))
-        org.junit.Assert.assertTrue(com.sinq.app.ui.strings.BilingualStrings.psalterTitle.startsWith("Psalter"))
+        // 2. Hybrid (Amh+Eng): UI controls/navigation in English, liturgical/prayer titles in pure Amharic
+        assertEquals("ሥርዓተ ማኅሌት", com.sinq.app.ui.strings.BilingualStrings.mahletTitle)
+        assertEquals("መዝሙረ ዳዊት", com.sinq.app.ui.strings.BilingualStrings.psalterTitle)
+        assertEquals("ሌሎች መጻሕፍት", com.sinq.app.ui.strings.BilingualStrings.booksTitle)
+        assertEquals("ስንክሳር", com.sinq.app.ui.strings.BilingualStrings.synaxariumTitle)
+        assertEquals("የዕለቱ ግጻዌ", com.sinq.app.ui.strings.BilingualStrings.gitsaweTitle)
+        assertEquals("ዘወትር ጸሎት", com.sinq.app.ui.strings.BilingualStrings.zewotrTselot)
+        assertEquals("ውዳሴ ማርያም", com.sinq.app.ui.strings.BilingualStrings.wudaseMariam)
+        assertEquals("Text Size", com.sinq.app.ui.strings.BilingualStrings.fontSizeLabel)
+        assertEquals("Typeface", com.sinq.app.ui.strings.BilingualStrings.fontFamilyLabel)
+        assertEquals("Size 18", com.sinq.app.ui.strings.BilingualStrings.fontStepLabel(18))
         org.junit.Assert.assertTrue(com.sinq.app.ui.strings.BilingualStrings.psalterTitle.contains(ethiopicRegex))
+        assertFalse(com.sinq.app.ui.strings.BilingualStrings.fontSizeLabel.contains(ethiopicRegex))
 
         // 3. Strict Amharic
         assertEquals("ሥርዓተ ማኅሌት", AmharicStrings.mahletTitle)

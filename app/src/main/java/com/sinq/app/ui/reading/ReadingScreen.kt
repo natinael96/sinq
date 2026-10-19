@@ -231,29 +231,6 @@ fun ReadingScreen(
         }
     }
 
-    androidx.compose.runtime.DisposableEffect(readingMode, pagerState) {
-        if (readingMode == ReadingMode.HORIZONTAL) {
-            com.sinq.app.MainActivity.volumeKeyListener = { isVolumeDown ->
-                if (isVolumeDown) {
-                    if (pagerState.currentPage < pagerState.pageCount - 1) {
-                        scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
-                        true
-                    } else false
-                } else {
-                    if (pagerState.currentPage > 0) {
-                        scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
-                        true
-                    } else false
-                }
-            }
-        } else {
-            com.sinq.app.MainActivity.volumeKeyListener = null
-        }
-        onDispose {
-            com.sinq.app.MainActivity.volumeKeyListener = null
-        }
-    }
-
     val readingProgress by remember(sections.size, listState, pagerState, readingMode) {
         derivedStateOf {
             if (sections.size <= 1) 0f

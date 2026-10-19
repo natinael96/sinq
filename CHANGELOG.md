@@ -5,6 +5,20 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.7.6] — 2026-10-19
+
+_versionCode 118 · Kenona spiritual rules in Journal, Desert Fathers sayings hub, devotional heatmap layout, and prayer list polish_
+
+### Added
+- **ቀኖና (Kenona) in Journal.** Dedicated spiritual rule and ascetic discipline section within the prayer journal, featuring filter chips, entry kind sheet option, and 6 authentic Orthodox devotional presets (+ ፵፩ ስግደት, + ውዳሴ ማርያም, + ፯ቱ መሐረኒ ዳዊት, + መጽሐፈ ሰዓታት, + ፻ ጊዜ ኪርያላይሶን, + የዕለቱ ስንክሳር ንባብ).
+- **Desert Fathers Sayings Hub.** Dedicated screen (`desert_fathers`) to browse, search, bookmark, copy, share, and reflect upon all 844 sayings from the early Desert Fathers in the personal prayer journal.
+- **Randomized Desert Fathers Reminders.** Opt-in preference in Settings and Desert Fathers Hub allowing the daily reminder notification to randomly pick from the complete 844 patristic sayings collection.
+
+### Changed
+- **Home Desert Fathers Row.** Polished quote card with 1-line quote preview, ellipsis overflow, and a dedicated «ሁሉንም እይ ➔» pill button leading directly to the Hub.
+- **Prayer List (`የጸሎት መዝገብ`).** Updated screen and header title to «የጸሎት መዝገብ» while preserving the clean, single-column diptych layout.
+- **Devotional Year Heatmap & Reader Layout.** Restored the horizontal 366-day grid layout on the Journey screen and classic reading view configuration.
+
 ## [1.7.5] — 2026-10-19
 
 _versionCode 117 · Major Architectural, Accessibility, Liturgical & Devotional System Upgrade_

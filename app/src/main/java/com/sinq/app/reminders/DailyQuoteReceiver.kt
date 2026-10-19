@@ -75,7 +75,12 @@ class DailyQuoteReceiver : BroadcastReceiver() {
             val lang = runBlocking { SettingsRepository.language(context).first() }
             val s = stringsFor(lang)
             val today = java.time.LocalDate.now()
-            val dailyQuote = com.sinq.app.data.DailyQuoteRepository.quoteForBlocking(context, today)
+            val randomize = SettingsRepository.randomizeDailyQuoteBlocking(context)
+            val dailyQuote = if (randomize) {
+                com.sinq.app.data.DailyQuoteRepository.randomQuoteBlocking(context)
+            } else {
+                com.sinq.app.data.DailyQuoteRepository.quoteForBlocking(context, today)
+            }
             val author = if (lang == com.sinq.app.data.Language.ENGLISH) dailyQuote.authorEn else dailyQuote.authorAm
             val title = "${s.dailyQuoteTitle}  ·  $author"
             val body = "«${dailyQuote.quote}»"

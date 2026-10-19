@@ -79,15 +79,6 @@ class MainActivity : ComponentActivity() {
     private val pendingOpenDailyQuote = mutableStateOf(false)
     private val pendingShortcutRoute = mutableStateOf<String?>(null)
 
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-            if (volumeKeyListener?.invoke(true) == true) return true
-        } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-            if (volumeKeyListener?.invoke(false) == true) return true
-        }
-        return super.onKeyDown(keyCode, event)
-    }
-
     // Play's own consent dialog for an update. Registered unconditionally —
     // registerForActivityResult must run before the activity is started — but
     // only ever launched by PlayUpdateRepository, which is dark in the
@@ -184,8 +175,6 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
-        var volumeKeyListener: ((isVolumeDown: Boolean) -> Boolean)? = null
-
         /**
          * Which offering page a fired አስራት / ስዕለት reminder wants opened —
          * the [com.sinq.app.reminders.SpecialHabit] name.
@@ -588,6 +577,7 @@ private fun AgpeyaNavHost(
                                                 onOpenGitsawe = { navController.navigate("gitsawe") { launchSingleTop = true } },
                                                 onOpenBatteryHelp = { navController.navigate("battery") { launchSingleTop = true } },
                                                 onSelectTab = goToTab,
+                                                onOpenDesertFathersHub = { navController.navigate("desert_fathers") { launchSingleTop = true } },
                                                 onReflectQuote = { quote ->
                                                     val author = quote.authorAm.ifBlank { quote.authorEn }
                                                     val label = "የአበው ምክር · $author"
@@ -647,6 +637,20 @@ private fun AgpeyaNavHost(
         }
         composable("fasting") {
             com.sinq.app.ui.fasting.FastingScreen(onBack = { navController.popBackStack() })
+        }
+        composable("desert_fathers") {
+            com.sinq.app.ui.home.DesertFathersHubScreen(
+                onBack = { navController.popBackStack() },
+                onReflectInJournal = { quote ->
+                    val author = quote.authorAm.ifBlank { quote.authorEn }
+                    val label = "የአበው ምክር · $author"
+                    navController.navigate(
+                        "journal/entry?kind=${com.sinq.app.model.JournalKind.REFLECTION.name}&label=${android.net.Uri.encode(label)}"
+                    ) {
+                        launchSingleTop = true
+                    }
+                },
+            )
         }
         composable("search") {
             SearchScreen(

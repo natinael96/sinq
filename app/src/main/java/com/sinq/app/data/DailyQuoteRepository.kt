@@ -87,4 +87,16 @@ object DailyQuoteRepository {
         val index = quoteIndexFor(date, list.size)
         return list[index]
     }
+
+    suspend fun randomQuote(context: Context): DailyQuote {
+        val list = quotes(context)
+        if (list.isEmpty()) return FALLBACK_QUOTE
+        return list.random()
+    }
+
+    fun randomQuoteBlocking(context: Context): DailyQuote {
+        val list = quotesBlocking(context)
+        if (list.isEmpty()) return FALLBACK_QUOTE
+        return list.random()
+    }
 }

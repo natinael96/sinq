@@ -306,6 +306,11 @@ interface Strings {
     val dailyQuoteSample: String
     val dailyQuoteLockscreenPrompt: String
     val dailyQuoteSettingsAction: String
+    val desertFathersHubTitle: String
+    val desertFathersHubSubtitle: String
+    val desertFathersViewAll: String
+    val randomizeDailyQuoteTitle: String
+    val randomizeDailyQuoteDesc: String
     val notifDisabledTitle: String
     val notifDisabledBody: String
 
@@ -751,6 +756,7 @@ interface Strings {
     val journalKindReflection: String
     val journalKindPassage: String
     val journalKindChecklist: String
+    val journalKindKenona: String
     val journalKindConfession: String
     val journalKindConfessionNote: String
     val journalFilterAll: String
@@ -759,8 +765,15 @@ interface Strings {
     val journalFutureDateNotice: String
     val journalKindReflectionDesc: String
     val journalKindChecklistDesc: String
+    val journalKindKenonaDesc: String
     val journalKindPassageDesc: String
     val journalKindConfessionDesc: String
+    val kenonaPresetMetanias: String
+    val kenonaPresetWudase: String
+    val kenonaPresetPsalter: String
+    val kenonaPresetHours: String
+    val kenonaPresetKirielayson: String
+    val kenonaPresetSynaxarium: String
     val checklistProgress: String
     val checklistAddItemHint: String
     val checklistNotesHint: String
@@ -1332,6 +1345,11 @@ object AmharicStrings : Strings {
     override val dailyQuoteSample = "«ቅዱስ አባ እንጦንስ በበረሃ ሳለ በስንፍናና በክፉ ሐሳቦች ተፈተነ... "
     override val dailyQuoteLockscreenPrompt = "የአበው ምክር በመቆለፊያ ገጽ ላይ እንዲታይ የስልክዎን የመቆለፊያ ገጽ ፈቃድ ለስንቅ ያብሩ"
     override val dailyQuoteSettingsAction = "በቅንብሮች ያብሩ"
+    override val desertFathersHubTitle = "የአበው ምክር"
+    override val desertFathersHubSubtitle = "Apophthegmata Patrum · ፰፻፵፬ቱ የአበው ቃላት"
+    override val desertFathersViewAll = "ሁሉንም እይ"
+    override val randomizeDailyQuoteTitle = "በዘፈቀደ የሚላክ የአበው ምክር"
+    override val randomizeDailyQuoteDesc = "ዕለታዊ የአበው ምክር ማሳወቂያ ከ ፰፻፵፬ቱ የአበው ቃላት በዘፈቀደ እንዲመረጥ ያደርጋል"
     override val notifDisabledTitle = "ማሳወቂያዎች ጠፍተዋል"
     override val notifDisabledBody = "ማንቂያዎችዎ እንዲደርሱዎት የመተግበሪያውን ማሳወቂያዎች ከቅንብሮች ያብሩ።"
 
@@ -1716,7 +1734,7 @@ object AmharicStrings : Strings {
 
     override val shareFailed = "ማጋራት አልተቻለም። እንደገና ይሞክሩ።"
 
-    override val prayerListTitle = "የጸሎት ዝርዝር"
+    override val prayerListTitle = "የጸሎት መዝገብ"
     override val addPerson = "ሰው ጨምር"
     override val editPerson = "አስተካክል"
     override val personAddHint = "ማስታወሻ ለመጨመር ወይም በነፍሳተ ሙታን ለመመዝገብ ስሙን ይንኩ።"
@@ -1767,6 +1785,7 @@ object AmharicStrings : Strings {
     override val journalKindReflection = "ሐሳብ"
     override val journalKindPassage = "ከምንባብ"
     override val journalKindChecklist = "የፍተሻ ዝርዝር"
+    override val journalKindKenona = "ቀኖና"
     override val journalKindConfession = "የንስሐ መዘጋጃ"
     override val journalKindConfessionNote =
         "ይህ ከመሣሪያዎ አይወጣም፤ በምትኬም ውስጥ አይገባም። ንስሐ ከገቡ በኋላ ይሰረዛል።"
@@ -1776,8 +1795,15 @@ object AmharicStrings : Strings {
     override val journalFutureDateNotice = "የወደፊት ዕለት · ተግባራትና ማሳሰቢያዎች ብቻ"
     override val journalKindReflectionDesc = "የዕለቱ የግል ጸሎትና መንፈሳዊ ማሰላሰያ"
     override val journalKindChecklistDesc = "የዕለት ተግባራት፣ ሰዓታትና የደወል ማስታወሻዎች"
+    override val journalKindKenonaDesc = "የግል ጸሎት ቀኖና፣ ስግደት፣ የዳዊትና የውዳሴ ማርያም ክፍሎች"
     override val journalKindPassageDesc = "ከዕለቱ ምንባብ ወይም ከቅዱሳት መጻሕፍት ማስታወሻ"
     override val journalKindConfessionDesc = "ለንስሐ አባትዎ የሚነግሩትን ለማስታወስ (ምሥጢራዊ)"
+    override val kenonaPresetMetanias = "፵፩ ስግደት (በስመ አብ ወወልድ ወመንፈስ ቅዱስ)"
+    override val kenonaPresetWudase = "ውዳሴ ማርያም (የዕለቱ ምስጋና)"
+    override val kenonaPresetPsalter = "፯ቱ መሐረኒ ዳዊት"
+    override val kenonaPresetHours = "መጽሐፈ ሰዓታት"
+    override val kenonaPresetKirielayson = "፻ ጊዜ ኪርያላይሶን"
+    override val kenonaPresetSynaxarium = "የዕለቱ ስንክሳር ንባብ"
     override val checklistProgress = "የተከናወኑ ተግባራት"
     override val checklistAddItemHint = "አዲስ ተግባር ያክሉ..."
     override val checklistNotesHint = "ተጨማሪ ማስታወሻ ወይም ሐሳብ..."
@@ -2326,6 +2352,11 @@ object EnglishStrings : Strings {
     override val dailyQuoteSample = "\"When the holy Abba Anthony lived in the desert he was beset by accidie...\""
     override val dailyQuoteLockscreenPrompt = "To display the saying while locked, allow lock screen notifications for Sinq"
     override val dailyQuoteSettingsAction = "Enable in Settings"
+    override val desertFathersHubTitle = "Sayings of the Desert Fathers"
+    override val desertFathersHubSubtitle = "Apophthegmata Patrum · 844 Patristic Sayings"
+    override val desertFathersViewAll = "View All"
+    override val randomizeDailyQuoteTitle = "Randomize Daily Sayings"
+    override val randomizeDailyQuoteDesc = "Picks a random saying from the 844 Desert Fathers corpus for your lock screen & reminders"
     override val notifDisabledTitle = "Notifications are off"
     override val notifDisabledBody = "Turn on notifications in settings so your reminders can reach you."
 
@@ -2784,6 +2815,7 @@ object EnglishStrings : Strings {
     override val journalKindReflection = "Reflection"
     override val journalKindPassage = "From a reading"
     override val journalKindChecklist = "Checklist"
+    override val journalKindKenona = "Kenona (Rule)"
     override val journalKindConfession = "Preparing for confession"
     override val journalKindConfessionNote =
         "This never leaves your device and is never put in a backup. It is deleted once you have confessed."
@@ -2793,8 +2825,15 @@ object EnglishStrings : Strings {
     override val journalFutureDateNotice = "Future date · Checklists and reminders only"
     override val journalKindReflectionDesc = "Personal prayer & spiritual contemplation"
     override val journalKindChecklistDesc = "Day-to-day checklist, hours & alarms"
+    override val journalKindKenonaDesc = "Personal prayer rule, prostrations, psalter & praises"
     override val journalKindPassageDesc = "Notes from daily lectionary or scriptures"
     override val journalKindConfessionDesc = "Preparation for your father confessor (confidential)"
+    override val kenonaPresetMetanias = "41 Prostrations (In the Name of the Trinity)"
+    override val kenonaPresetWudase = "Praises of Mary (Daily)"
+    override val kenonaPresetPsalter = "7 Penitential Psalms"
+    override val kenonaPresetHours = "Canonical Hours"
+    override val kenonaPresetKirielayson = "100 Kyrie Eleisons"
+    override val kenonaPresetSynaxarium = "Daily Synaxarium Reading"
     override val checklistProgress = "Completed Tasks"
     override val checklistAddItemHint = "Add a task..."
     override val checklistNotesHint = "Additional notes or reflections..."
@@ -3094,48 +3133,46 @@ object StrictEnglishStrings : Strings by EnglishStrings {
 object BilingualStrings : Strings by EnglishStrings {
     override val isAmharic = false
     override val languageMode = Language.AMH_ENG
-    override val langBilingual = "Eng+አማ"
+    override val langBilingual = "Amh+Eng"
     override val langEnglish = "English"
     override val langAmharic = "አማርኛ"
-    override val libraryTitle = "Books (መጻሕፍት)"
-    override val scripturesTitle = "Scriptures (ቅዱሳት መጻሕፍት)"
-    override val bibleTitle = "Holy Bible (መጽሐፍ ቅዱስ)"
-    override val synaxariumTitle = "Synaxarium (ስንክሳር)"
-    override val gitsaweTitle = "Today's Lectionary (የዕለቱ ግጻዌ)"
-    override val bahreHasabTitle = "Bahre Hasab (ባሕረ ሐሳብ)"
-    override val mahletTitle = "Rite of Mahlet (ሥርዓተ ማኅሌት)"
-    override val booksTitle = "Other Books (ሌሎች መጻሕፍት)"
-    override val psalterTitle = "Psalter (መዝሙረ ዳዊት)"
-    override val zewotrTselot = "Daily Prayer (ዘወትር ጸሎት)"
-    override val wudaseMariam = "Praises of Mary (ውዳሴ ማርያም)"
-    override val psalmName = "Psalm (መዝሙር)"
-    override val sinksarAmharic = "Amharic (አማርኛ)"
-    override val sinksarGeez = "Ge'ez (ግእዝ)"
-    override val sinksarAnnualFeasts = "Annual Feasts (ዓመታዊ በዓላት)"
-    override val sinksarMonthlyFeasts = "Monthly Feasts (ወርኀዊ በዓላት)"
-    override val mahletVigil = "Vigil (ዋዜማ)"
-    override val mahletDawn = "Dawn (ነግሥ)"
-    override val mahletTsige = "Season of Tsige (ዘመነ ጽጌ)"
-    override val commentaryAction = "Catena Commentary (የአበው ትርጓሜ)"
-    override val wazemaBadge = "Vigil (ዋዜማ)"
-    override fun wazemaEveOf(name: String) = "Eve of $name (የ$name ዋዜማ)"
-    override val wazemaRolloverTitle = "Liturgical Day Rollover (የዋዜማ ቀን መግቢያ)"
-    override val andemtaSummaryTitle = "Andemta Commentary (የአንድምታ ትርጓሜ)"
-    override val confessionAbsolveAction = "Absolved (ተናዝዣለሁ)"
-    override val desertFatherWisdomTitle = "Desert Fathers (የአበው ምክር)"
-    override val themeVigilBlack = "Vigil Black (ትጋት)"
-    override val journeyViewTitle = "Journey view (የጉዞ እይታ)"
-    override val journeyViewGrid = "Grid (ሰንጠረዥ)"
-    override val journeyViewList = "List (ዝርዝር)"
-    override val followSystemFontScaleTitle = "Follow system font scale (የስርዓቱን መጠን ተከተል)"
-    override val followSystemFontScaleSubtitle = "Scale reading text with system font setting (የስልኩን መጠን ተከተል)"
-    override val fastingDayLabel = "Fasting day (የጾም ቀን)"
-    override fun hoursPrayedCount(done: Int, total: Int) = "$done / $total hours prayed (የተጸለዩ)"
-    override fun pageOfTotal(current: Int, total: Int) = "p. $current of $total (${com.sinq.app.ui.reading.geezNumeral(current)} / ${com.sinq.app.ui.reading.geezNumeral(total)})"
-    override val jumpToPage = "Jump to page (ወደ ገጽ ሂድ)"
-    override val fontSizeLabel = "Text Size (የፊደል መጠን)"
-    override val fontFamilyLabel = "Typeface (የፊደል ቅርጽ)"
-    override fun fontStepLabel(sp: Int) = "Size $sp (${com.sinq.app.ui.reading.geezNumeral(sp)})"
+
+    // ── Liturgical corpus, prayer names, lectionary & book titles in Amharic ──
+    override val synaxariumTitle = "ስንክሳር"
+    override val gitsaweTitle = "የዕለቱ ግጻዌ"
+    override val psalterTitle = "መዝሙረ ዳዊት"
+    override val zewotrTselot = "ዘወትር ጸሎት"
+    override val wudaseMariam = "ውዳሴ ማርያም"
+    override val mahletTitle = "ሥርዓተ ማኅሌት"
+    override val bahreHasabTitle = "ባሕረ ሐሳብ"
+    override val scripturesTitle = "ቅዱሳት መጻሕፍት"
+    override val bibleTitle = "መጽሐፍ ቅዱስ"
+    override val booksTitle = "ሌሎች መጻሕፍት"
+    override val psalmName = "መዝሙር"
+    override val sinksarAmharic = "አማርኛ"
+    override val sinksarGeez = "ግእዝ"
+    override val sinksarAnnualFeasts = "ዓመታዊ በዓላት"
+    override val sinksarMonthlyFeasts = "ወርኀዊ በዓላት"
+    override val mahletVigil = "ዋዜማ"
+    override val mahletDawn = "ነግሥ"
+    override val mahletTsige = "ማኅሌተ ጽጌ"
+    override val wazemaBadge = "ዋዜማ"
+    override fun wazemaEveOf(name: String) = "የ$name ዋዜማ"
+    override val andemtaSummaryTitle = "የአንድምታ ትርጓሜ"
+    override val commentaryAction = "የአበው ትርጓሜ"
+    override val desertFatherWisdomTitle = "የአበው ምክር"
+    override val prayerListTitle = "የጸሎት መዝገብ"
+    override val journalKindKenona = "ቀኖና"
+    override val journalKindKenonaDesc = "የግል ጸሎት ቀኖና፣ ስግደት፣ የዳዊትና የውዳሴ ማርያም ክፍሎች"
+    override val kenonaPresetMetanias = "፵፩ ስግደት (በስመ አብ ወወልድ ወመንፈስ ቅዱስ)"
+    override val kenonaPresetWudase = "ውዳሴ ማርያም (የዕለቱ ምስጋና)"
+    override val kenonaPresetPsalter = "፯ቱ መሐረኒ ዳዊት"
+    override val kenonaPresetHours = "መጽሐፈ ሰዓታት"
+    override val kenonaPresetKirielayson = "፻ ጊዜ ኪርያላይሶን"
+    override val kenonaPresetSynaxarium = "የዕለቱ ስንክሳር ንባብ"
+    override val desertFathersHubTitle = "የአበው ምክር"
+    override val desertFathersHubSubtitle = "Apophthegmata Patrum · ፰፻፵፬ቱ የአበው ቃላት"
+    override val desertFathersViewAll = "ሁሉንም እይ"
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { BilingualStrings }

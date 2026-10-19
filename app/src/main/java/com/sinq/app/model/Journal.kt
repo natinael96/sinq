@@ -35,6 +35,12 @@ enum class JournalKind {
      * or vows with an optional reflection note.
      */
     CHECKLIST,
+
+    /**
+     * Personal spiritual rule / canon (ቀኖና) — daily prayers, prostrations (ስግደት),
+     * psalms, praises, or penance assigned by one's spiritual father.
+     */
+    KENONA,
 }
 
 /**
@@ -110,7 +116,7 @@ data class JournalEntry(
     val preview: String
         get() = when {
             isDraft -> ""
-            kind == JournalKind.CHECKLIST -> {
+            kind == JournalKind.CHECKLIST || kind == JournalKind.KENONA -> {
                 val (items, note) = ChecklistParser.parse(body)
                 if (items.isNotEmpty()) {
                     val done = items.count { it.isDone }

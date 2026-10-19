@@ -5,11 +5,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,17 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.VerticalDivider
-import com.sinq.app.ui.theme.ReadingMaxWidth
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
-import com.sinq.app.ui.reading.readerEdgeTaps
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -60,9 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
@@ -136,7 +120,6 @@ fun ScriptureReaderScreen(
 ) {
     com.sinq.app.ui.common.ReaderAwake()
     val context = LocalContext.current
-    val haptics = LocalHapticFeedback.current
     val s = LocalStrings.current
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     val hasEnglish = remember(bookKey) { ScriptureRepository.hasEnglish(bookKey) }
@@ -157,8 +140,6 @@ fun ScriptureReaderScreen(
         } else null
     }
     val fontStep by SettingsRepository.fontStep(context).collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
-    val readingMode by SettingsRepository.readingMode(context).collectAsState(initial = com.sinq.app.data.ReadingMode.VERTICAL)
-    val twoPaneReading by SettingsRepository.twoPaneReading(context).collectAsState(initial = true)
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
 
     val highlights by HighlightRepository.highlights(context).collectAsState(initial = emptyMap())
@@ -308,93 +289,6 @@ fun ScriptureReaderScreen(
     val selRoute = "scripture/$bookKey/$chapter" +
         if (selRange.isEmpty()) "" else "?start=${selRange.first}&end=${selRange.last}"
 
-    val motion = com.sinq.app.ui.theme.LocalMotion.current
-    var jumpSheetOpen by remember { mutableStateOf(false) }
-    val distractionFree = com.sinq.app.ui.common.rememberDistractionFreeState(
-        pauseAutoImmersion = chaptersOpen || jumpSheetOpen,
-    )
-    val isImmersive = distractionFree.isImmersive
-
-    val pages by androidx.compose.runtime.produceState(
-        initialValue = remember(current.verses, bodyFontSp) {
-            com.sinq.app.ui.reading.ScripturePagination.paginate(current.verses, bodyFontSp)
-        },
-        key1 = current.verses,
-        key2 = bodyFontSp,
-    ) {
-        if (current.verses.size > 50) {
-            value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
-                com.sinq.app.ui.reading.ScripturePagination.paginate(current.verses, bodyFontSp)
-            }
-        } else {
-            value = com.sinq.app.ui.reading.ScripturePagination.paginate(current.verses, bodyFontSp)
-        }
-    }
-    val pagerState = rememberPagerState(pageCount = { pages.size.coerceAtLeast(1) })
-    var lastVisibleVerse by remember(bookKey, chapter) {
-        mutableIntStateOf(if (initialStart > 0) initialStart else 1)
-    }
-
-    androidx.compose.runtime.LaunchedEffect(bookKey, chapter) {
-        val savedKey = com.sinq.app.data.UserDataRepository.scripturePosition(context, bookKey, chapter)
-        val savedVerse = com.sinq.app.ui.reading.ScripturePagination.parseVerseNumber(savedKey)
-            ?: (if (initialStart > 0) initialStart else 1)
-        lastVisibleVerse = savedVerse
-        val targetPage = com.sinq.app.ui.reading.ScripturePagination.findPageIndexForVerse(pages, savedVerse)
-        if (targetPage in pages.indices && pagerState.currentPage != targetPage) {
-            pagerState.scrollToPage(targetPage)
-        }
-    }
-
-    androidx.compose.runtime.LaunchedEffect(pages) {
-        val targetPage = com.sinq.app.ui.reading.ScripturePagination.findPageIndexForVerse(pages, lastVisibleVerse)
-        if (targetPage in pages.indices && pagerState.currentPage != targetPage) {
-            pagerState.scrollToPage(targetPage)
-        }
-    }
-
-    androidx.compose.runtime.LaunchedEffect(pagerState.currentPage, readingMode) {
-        if (readingMode == com.sinq.app.data.ReadingMode.HORIZONTAL) {
-            pages.getOrNull(pagerState.currentPage)?.startVerse?.let { v ->
-                lastVisibleVerse = v
-                com.sinq.app.data.UserDataRepository.saveScripturePosition(context, bookKey, chapter, v, activeEdition)
-            }
-        }
-    }
-
-    androidx.compose.runtime.LaunchedEffect(listState.firstVisibleItemIndex, readingMode) {
-        if (readingMode == com.sinq.app.data.ReadingMode.VERTICAL) {
-            val idx = (listState.firstVisibleItemIndex - 1).coerceAtLeast(0)
-            rows.getOrNull(idx)?.firstOrNull()?.n?.let { v ->
-                lastVisibleVerse = v
-                com.sinq.app.data.UserDataRepository.saveScripturePosition(context, bookKey, chapter, v, activeEdition)
-            }
-        }
-    }
-
-    androidx.compose.runtime.DisposableEffect(readingMode, pagerState) {
-        if (readingMode == com.sinq.app.data.ReadingMode.HORIZONTAL) {
-            com.sinq.app.MainActivity.volumeKeyListener = { isVolumeDown ->
-                if (isVolumeDown) {
-                    if (pagerState.currentPage < pagerState.pageCount - 1) {
-                        scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
-                        true
-                    } else false
-                } else {
-                    if (pagerState.currentPage > 0) {
-                        scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
-                        true
-                    } else false
-                }
-            }
-        }
-        onDispose {
-            if (readingMode == com.sinq.app.data.ReadingMode.HORIZONTAL) {
-                com.sinq.app.MainActivity.volumeKeyListener = null
-            }
-        }
-    }
-
     // Land on the cited verse when opened from a reading link — once. Without the
     // guard, paging away and back to this chapter re-ran the jump mid-reading.
     var landed by rememberSaveable(bookKey) { mutableStateOf(false) }
@@ -409,87 +303,72 @@ fun ScriptureReaderScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            AnimatedVisibility(
-                visible = !isImmersive,
-                enter = slideInVertically(motion.spec(com.sinq.app.ui.theme.Motion.standard)) { -it } + fadeIn(motion.spec(com.sinq.app.ui.theme.Motion.fast)),
-                exit = slideOutVertically(motion.spec(com.sinq.app.ui.theme.Motion.standard)) { -it } + fadeOut(motion.spec(com.sinq.app.ui.theme.Motion.fast)),
-            ) {
-                SinqTopBar(
-                    title = displayBookName,
-                    onBack = onBack,
-                    titleContent = {
-                        com.sinq.app.ui.common.ReaderTitleBar(
-                            title = displayBookName,
-                            chapterLabel = "$chapterUnitLabel $chapterNumStr",
-                            pickable = b.chapters.size > 1,
-                            onPick = { chaptersOpen = true },
-                        )
-                    },
-                    actions = {
-                        val gold = MaterialTheme.colorScheme.secondary
-                        if (hasEnglish) {
-                            Box(
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .background(gold.copy(alpha = 0.12f))
-                                    .border(1.dp, gold.copy(alpha = 0.45f), CircleShape)
-                                    .clickable(
-                                        onClickLabel = "ቀይር",
-                                        onClick = { translationMode = translationMode.next() },
-                                    )
-                                    .heightIn(min = 48.dp)
-                                    .padding(horizontal = 14.dp, vertical = 6.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                val editionText = when (effectiveMode) {
-                                    ScriptureTranslationMode.AMHARIC -> s.wudaseLangAmharic
-                                    ScriptureTranslationMode.ENGLISH -> "English"
-                                    ScriptureTranslationMode.PARALLEL_AMH_ENG -> "አማ + Eng"
-                                }
-                                Text(
-                                    text = editionText,
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = gold,
-                                    maxLines = 1,
+            SinqTopBar(
+                title = displayBookName,
+                onBack = onBack,
+                titleContent = {
+                    com.sinq.app.ui.common.ReaderTitleBar(
+                        title = displayBookName,
+                        chapterLabel = "$chapterUnitLabel $chapterNumStr",
+                        pickable = b.chapters.size > 1,
+                        onPick = { chaptersOpen = true },
+                    )
+                },
+                actions = {
+                    val gold = MaterialTheme.colorScheme.secondary
+                    if (hasEnglish) {
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(gold.copy(alpha = 0.12f))
+                                .border(1.dp, gold.copy(alpha = 0.45f), CircleShape)
+                                .clickable(
+                                    onClickLabel = "ቀይር",
+                                    onClick = { translationMode = translationMode.next() },
+                                )
+                                .heightIn(min = 48.dp)
+                                .padding(horizontal = 14.dp, vertical = 6.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            val editionText = when (effectiveMode) {
+                                ScriptureTranslationMode.AMHARIC -> s.wudaseLangAmharic
+                                ScriptureTranslationMode.ENGLISH -> "English"
+                                ScriptureTranslationMode.PARALLEL_AMH_ENG -> "አማ + Eng"
+                            }
+                            Text(
+                                text = editionText,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = gold,
+                                maxLines = 1,
+                            )
+                        }
+                        Spacer(Modifier.width(Spacing.xs))
+                    }
+                    com.sinq.app.ui.common.ReaderToolsMenu(
+                        fontStep = fontStep,
+                        maxFontStep = FONT_STEPS_SP.lastIndex,
+                        onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
+                        onWriteNote = {
+                            if (selRange.isEmpty()) {
+                                onWriteNote("scripture/$bookKey/$chapter", chapterTitle)
+                            } else {
+                                onWriteNote(
+                                    "scripture/$bookKey/$chapter?start=${selRange.first}&end=${selRange.last}",
+                                    "$chapterTitle፥${geezNumeral(selRange.first)}" +
+                                        (if (selRange.last != selRange.first) "–${geezNumeral(selRange.last)}" else ""),
                                 )
                             }
-                            Spacer(Modifier.width(Spacing.xs))
-                        }
-                        com.sinq.app.ui.common.ReaderToolsMenu(
-                            fontStep = fontStep,
-                            maxFontStep = FONT_STEPS_SP.lastIndex,
-                            onFontChange = { step -> scope.launch { SettingsRepository.setFontStep(context, step) } },
-                            readingMode = readingMode,
-                            onToggleReadingMode = {
-                                val nextMode = if (readingMode == com.sinq.app.data.ReadingMode.VERTICAL) {
-                                    com.sinq.app.data.ReadingMode.HORIZONTAL
-                                } else {
-                                    com.sinq.app.data.ReadingMode.VERTICAL
-                                }
-                                scope.launch { SettingsRepository.setReadingMode(context, nextMode) }
-                            },
-                            onWriteNote = {
-                                if (selRange.isEmpty()) {
-                                    onWriteNote("scripture/$bookKey/$chapter", chapterTitle)
-                                } else {
-                                    onWriteNote(
-                                        "scripture/$bookKey/$chapter?start=${selRange.first}&end=${selRange.last}",
-                                        "$chapterTitle፥${geezNumeral(selRange.first)}" +
-                                            (if (selRange.last != selRange.first) "–${geezNumeral(selRange.last)}" else ""),
-                                    )
-                                }
-                            },
-                            sharePayload = {
-                                com.sinq.app.ui.common.SharePayload(
-                                    body = current.verses.joinToString("\n") { "${geezNumeral(it.n)}  ${it.text}" },
-                                    kicker = s.scripturesTitle,
-                                    title = "${b.nameAm} ${s.chapterUnit} ${geezNumeral(chapter)}",
-                                )
-                            },
-                        )
-                    },
-                )
-            }
+                        },
+                        sharePayload = {
+                            com.sinq.app.ui.common.SharePayload(
+                                body = current.verses.joinToString("\n") { "${geezNumeral(it.n)}  ${it.text}" },
+                                kicker = s.scripturesTitle,
+                                title = "${b.nameAm} ${s.chapterUnit} ${geezNumeral(chapter)}",
+                            )
+                        },
+                    )
+                },
+            )
         },
         bottomBar = {
             com.sinq.app.ui.reading.SelectionBar(
@@ -516,15 +395,9 @@ fun ScriptureReaderScreen(
                         .distinctBy { it.route }
                 },
                 onOpenRef = { route -> selA = -1; selB = -1; onOpenRoute(route) },
-                // The Fathers on the first verse of the selection. Null for the
-                // seventeen books Catena's canon does not reach, which hides
-                // the action rather than offering a page that is not there.
                 commentaryUrl = selRange.firstOrNull()?.let {
                     com.sinq.app.data.CatenaLink.url(bookKey, chapter, it)
                 },
-                // The bar is the only bookmark control now, so a bookmark is
-                // made at the grain the reader chose rather than always at the
-                // chapter — the route has carried a verse range all along.
                 onBookmark = selPassage?.let { passage ->
                     {
                         scope.launch {
@@ -553,235 +426,145 @@ fun ScriptureReaderScreen(
             )
         },
     ) { innerPadding ->
-        BoxWithConstraints(Modifier.fillMaxSize()) {
-            val isWide = maxWidth >= 840.dp
-            val showTwoPane = isWide && twoPaneReading && effectiveMode == ScriptureTranslationMode.PARALLEL_AMH_ENG
-
-            val body = @Composable { verse: com.sinq.app.model.ScriptureVerse ->
-                val isEnglishMode = effectiveMode == ScriptureTranslationMode.ENGLISH
-                val marker = if (isEnglishMode) "${verse.n}" else geezNumeral(verse.n)
-                val annotated = buildAnnotatedString {
-                    withStyle(
-                        SpanStyle(
-                            color = MaterialTheme.colorScheme.secondary,
-                            fontSize = scaledReadingSp(bodyFontSp) * 0.58f,
-                            baselineShift = BaselineShift.Superscript,
-                        )
-                    ) { append(marker) }
-                    append("  ")
-                    append(verse.text)
-                }
-                val secondaryVerseText = if (effectiveMode == ScriptureTranslationMode.PARALLEL_AMH_ENG) {
-                    parallelVersesMap[verse.n]?.text
-                } else null
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = verseGap / 2)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(when {
-                            verse.n in selRange -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.28f)
-                            else -> sinq.highlight(
-                                highlights[HighlightRepository.verseKey(highlightSectionId, verse.n)]
-                            ).takeUnless { it == Color.Transparent } ?: Color.Transparent
-                        })
-                        .semantics { selected = verse.n in selRange }
-                        .heightIn(min = 48.dp)
-                        .clickable {
-                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            val (a, bSel) = com.sinq.app.ui.reading.advanceFlatSelection(selA, verse.n)
-                            selA = a
-                            selB = bSel
-                        }
-                        .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
-                ) {
-                    if (showTwoPane && secondaryVerseText != null) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .widthIn(max = ReadingMaxWidth),
-                            ) {
-                                Text(
-                                    text = annotated,
-                                    style = readingBodyStyle(bodyFontSp),
-                                    color = MaterialTheme.colorScheme.onBackground,
+        Box(Modifier.fillMaxSize()) {
+            ReadingColumn(state = listState, innerPadding = innerPadding) {
+                items(rows, key = { it.first().n }) { row ->
+                    val tinted = row.first().n in highlightRange
+                    val body = @Composable { verse: com.sinq.app.model.ScriptureVerse ->
+                        val isEnglishMode = effectiveMode == ScriptureTranslationMode.ENGLISH
+                        val marker = if (isEnglishMode) "${verse.n}" else geezNumeral(verse.n)
+                        val annotated = buildAnnotatedString {
+                            withStyle(
+                                SpanStyle(
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    fontSize = scaledReadingSp(bodyFontSp) * 0.58f,
+                                    baselineShift = BaselineShift.Superscript,
                                 )
-                            }
-                            VerticalDivider(
-                                modifier = Modifier.padding(vertical = 4.dp),
-                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                            ) { append(marker) }
+                            append("  ")
+                            append(verse.text)
+                        }
+                        val secondaryVerseText = if (effectiveMode == ScriptureTranslationMode.PARALLEL_AMH_ENG) {
+                            parallelVersesMap[verse.n]?.text
+                        } else null
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = verseGap / 2)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(when {
+                                    verse.n in selRange -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.28f)
+                                    else -> sinq.highlight(
+                                        highlights[HighlightRepository.verseKey(highlightSectionId, verse.n)]
+                                    ).takeUnless { it == Color.Transparent } ?: Color.Transparent
+                                })
+                                .semantics { selected = verse.n in selRange }
+                                .heightIn(min = 48.dp)
+                                .clickable {
+                                    val (a, bSel) = com.sinq.app.ui.reading.advanceFlatSelection(selA, verse.n)
+                                    selA = a
+                                    selB = bSel
+                                }
+                                .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
+                        ) {
+                            Text(
+                                text = annotated,
+                                style = readingBodyStyle(bodyFontSp),
+                                color = MaterialTheme.colorScheme.onBackground,
                             )
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .widthIn(max = ReadingMaxWidth),
-                            ) {
+                            if (secondaryVerseText != null) {
+                                Spacer(Modifier.height(Spacing.xs))
                                 Text(
-                                    text = "${verse.n}  $secondaryVerseText",
+                                    text = secondaryVerseText,
                                     style = readingBodyStyle(bodyFontSp).copy(
-                                        fontSize = readingBodyStyle(bodyFontSp).fontSize * 0.95f,
+                                        fontSize = readingBodyStyle(bodyFontSp).fontSize * 0.94f,
                                         color = MaterialTheme.colorScheme.secondary,
                                     ),
+                                    modifier = Modifier.padding(start = Spacing.md),
                                 )
                             }
                         }
-                    } else {
-                        Text(
-                            text = annotated,
-                            style = readingBodyStyle(bodyFontSp),
-                            color = MaterialTheme.colorScheme.onBackground,
-                        )
-                        if (secondaryVerseText != null) {
-                            Spacer(Modifier.height(Spacing.xs))
+                    }
+
+                    val verseBlock = @Composable { verse: com.sinq.app.model.ScriptureVerse ->
+                        current.headings[verse.n]?.let { heading ->
                             Text(
-                                text = secondaryVerseText,
-                                style = readingBodyStyle(bodyFontSp).copy(
-                                    fontSize = readingBodyStyle(bodyFontSp).fontSize * 0.94f,
-                                    color = MaterialTheme.colorScheme.secondary,
-                                ),
-                                modifier = Modifier.padding(start = Spacing.md),
-                            )
-                        }
-                    }
-                }
-            }
-
-            val verseBlock = @Composable { verse: com.sinq.app.model.ScriptureVerse ->
-                current.headings[verse.n]?.let { heading ->
-                    Text(
-                        heading,
-                        style = MaterialTheme.typography.titleSmall.inReadingFont(),
-                        color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = Spacing.md, bottom = Spacing.xs, start = Spacing.sm, end = Spacing.sm),
-                    )
-                }
-                body(verse)
-            }
-
-            if (readingMode == com.sinq.app.data.ReadingMode.HORIZONTAL) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
-                ) {
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier
-                            .weight(1f)
-                            .readerEdgeTaps(
-                                onPreviousPage = {
-                                    if (pagerState.currentPage > 0) {
-                                        scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
-                                    }
-                                },
-                                onNextPage = {
-                                    if (pagerState.currentPage < pagerState.pageCount - 1) {
-                                        scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
-                                    }
-                                },
-                                onToggleChrome = { distractionFree.toggle() },
-                            ),
-                        key = { it },
-                    ) { pageIndex ->
-                        val page = pages.getOrNull(pageIndex) ?: return@HorizontalPager
-                        ReadingColumn(
-                            innerPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.sm),
-                            onTap = { distractionFree.toggle() },
-                        ) {
-                            items(page.verses, key = { it.n }) { verse ->
-                                verseBlock(verse)
-                            }
-                        }
-                    }
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { jumpSheetOpen = true }
-                            .padding(vertical = Spacing.sm),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = s.pageOfTotal(pagerState.currentPage + 1, pages.size.coerceAtLeast(1)),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-            } else {
-                ReadingColumn(state = listState, innerPadding = innerPadding) {
-                    items(rows, key = { it.first().n }) { row ->
-                        val tinted = row.first().n in highlightRange
-                        if (tinted) {
-                            Column(
-                                Modifier
+                                heading,
+                                style = MaterialTheme.typography.titleSmall.inReadingFont(),
+                                color = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = Spacing.xxs)
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.22f))
-                                    .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.75f), RoundedCornerShape(10.dp))
-                                    .padding(vertical = Spacing.xs),
-                            ) { row.forEach { verseBlock(it) } }
-                        } else {
-                            Column(Modifier.fillMaxWidth()) { row.forEach { verseBlock(it) } }
-                        }
-                    }
-                    item {
-                        planDays.forEach { (plan, day) ->
-                            val dayChapters = day.r.flatMap { r -> r.chapters.map { r.b to it } }
-                            val here = dayChapters.indexOf(bookKey to chapter)
-                            if (here < 0) return@forEach
-                            val chapterKey = com.sinq.app.data.ReadingPlanRepository.chapterKey(bookKey, chapter)
-                            val read = chapterKey in planState.readFor(plan.id)
-                            ListRow(
-                                title = plan.title,
-                                subtitle = "${if (read) s.readingDone + " · " else ""}${s.readingDayLabel(com.sinq.app.ui.reading.geezNumeral(day.d))} · ${s.readingChapterOfDay(here + 1, dayChapters.size)}",
-                                leadingIcon = if (read) Icons.Outlined.Check else Icons.AutoMirrored.Outlined.MenuBook,
-                                leadingTint = if (read) MaterialTheme.colorScheme.secondary else null,
+                                    .padding(top = Spacing.md, bottom = Spacing.xs, start = Spacing.sm, end = Spacing.sm),
                             )
-                            dayChapters.getOrNull(here + 1)?.takeUnless { it.first == bookKey && it.second == chapter + 1 }?.let { (nextBook, nextChapter) ->
-                                if (nextBook == bookKey) {
-                                    com.sinq.app.ui.common.ChapterStepper(
-                                        previousLabel = null,
-                                        nextLabel = "${s.chapterUnit} ${com.sinq.app.ui.reading.geezNumeral(nextChapter)}",
-                                        onPrevious = null,
-                                        onNext = { chapter = nextChapter; scope.launch { listState.scrollToItem(0) } },
-                                    )
-                                } else {
-                                    ListRow(
-                                        title = s.nextChapter,
-                                        subtitle = bookNames[nextBook] ?: nextBook,
-                                        onClick = {
-                                            onOpenRoute(
-                                                com.sinq.app.ui.reading.planReadingRoute(nextBook, nextChapter, selectedPlanId.takeIf { it.isNotBlank() }, day.d),
-                                            )
-                                        },
-                                    )
-                                }
+                        }
+                        body(verse)
+                    }
+
+                    if (tinted) {
+                        Column(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = Spacing.xxs)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.22f))
+                                .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.75f), RoundedCornerShape(10.dp))
+                                .padding(vertical = Spacing.xs),
+                        ) { row.forEach { verseBlock(it) } }
+                    } else {
+                        Column(Modifier.fillMaxWidth()) { row.forEach { verseBlock(it) } }
+                    }
+                }
+
+                item {
+                    planDays.forEach { (plan, day) ->
+                        val dayChapters = day.r.flatMap { r -> r.chapters.map { r.b to it } }
+                        val here = dayChapters.indexOf(bookKey to chapter)
+                        if (here < 0) return@forEach
+                        val chapterKey = com.sinq.app.data.ReadingPlanRepository.chapterKey(bookKey, chapter)
+                        val read = chapterKey in planState.readFor(plan.id)
+                        ListRow(
+                            title = plan.title,
+                            subtitle = "${if (read) s.readingDone + " · " else ""}${s.readingDayLabel(com.sinq.app.ui.reading.geezNumeral(day.d))} · ${s.readingChapterOfDay(here + 1, dayChapters.size)}",
+                            leadingIcon = if (read) Icons.Outlined.Check else Icons.AutoMirrored.Outlined.MenuBook,
+                            leadingTint = if (read) MaterialTheme.colorScheme.secondary else null,
+                        )
+                        dayChapters.getOrNull(here + 1)?.takeUnless { it.first == bookKey && it.second == chapter + 1 }?.let { (nextBook, nextChapter) ->
+                            if (nextBook == bookKey) {
+                                com.sinq.app.ui.common.ChapterStepper(
+                                    previousLabel = null,
+                                    nextLabel = "${s.chapterUnit} ${com.sinq.app.ui.reading.geezNumeral(nextChapter)}",
+                                    onPrevious = null,
+                                    onNext = { chapter = nextChapter; scope.launch { listState.scrollToItem(0) } },
+                                )
+                            } else {
+                                ListRow(
+                                    title = s.nextChapter,
+                                    subtitle = bookNames[nextBook] ?: nextBook,
+                                    onClick = {
+                                        onOpenRoute(
+                                            com.sinq.app.ui.reading.planReadingRoute(nextBook, nextChapter, selectedPlanId.takeIf { it.isNotBlank() }, day.d),
+                                        )
+                                    },
+                                )
                             }
                         }
-                        com.sinq.app.ui.common.ChapterStepper(
-                            previousLabel = "$chapterUnitLabel ${com.sinq.app.ui.reading.geezNumeral(chapter - 1)}",
-                            nextLabel = "$chapterUnitLabel ${com.sinq.app.ui.reading.geezNumeral(chapter + 1)}",
-                            onPrevious = { chapter -= 1; scope.launch { listState.scrollToItem(0) }; Unit }.takeIf { chapter > 1 },
-                            onNext = { chapter += 1; scope.launch { listState.scrollToItem(0) }; Unit }.takeIf { chapter < b.chapters.size },
-                        )
-                        Spacer(Modifier.height(Spacing.huge))
                     }
-                }
-                if (rows.size > 1) {
-                    com.sinq.app.ui.common.ReadingProgressBar(
-                        progress = com.sinq.app.ui.common.rememberLazyListProgress(listState),
-                        topPadding = innerPadding.calculateTopPadding(),
-                        modifier = Modifier.align(Alignment.TopCenter),
+                    com.sinq.app.ui.common.ChapterStepper(
+                        previousLabel = "$chapterUnitLabel ${com.sinq.app.ui.reading.geezNumeral(chapter - 1)}",
+                        nextLabel = "$chapterUnitLabel ${com.sinq.app.ui.reading.geezNumeral(chapter + 1)}",
+                        onPrevious = { chapter -= 1; scope.launch { listState.scrollToItem(0) }; Unit }.takeIf { chapter > 1 },
+                        onNext = { chapter += 1; scope.launch { listState.scrollToItem(0) }; Unit }.takeIf { chapter < b.chapters.size },
                     )
+                    Spacer(Modifier.height(Spacing.huge))
                 }
+            }
+            if (rows.size > 1) {
+                com.sinq.app.ui.common.ReadingProgressBar(
+                    progress = com.sinq.app.ui.common.rememberLazyListProgress(listState),
+                    topPadding = innerPadding.calculateTopPadding(),
+                    modifier = Modifier.align(Alignment.TopCenter),
+                )
             }
         }
         if (chaptersOpen) {
@@ -793,30 +576,5 @@ fun ScriptureReaderScreen(
                 labelFor = { i -> if (isPsalms) "$chapterUnitLabel ${com.sinq.app.ui.reading.geezNumeral(i + 1)}" else null },
             )
         }
-        if (jumpSheetOpen) {
-            com.sinq.app.ui.common.ChapterSheet(
-                count = pages.size,
-                current = pagerState.currentPage,
-                onPick = { pageIndex ->
-                    jumpSheetOpen = false
-                    scope.launch { pagerState.scrollToPage(pageIndex) }
-                },
-                onDismiss = { jumpSheetOpen = false },
-                labelFor = { i ->
-                    val p = pages.getOrNull(i)
-                    if (p != null) {
-                        "${s.pageOfTotal(i + 1, pages.size)} (${geezNumeral(p.startVerse)}–${geezNumeral(p.endVerse)})"
-                    } else null
-                },
-            )
-        }
     }
 }
-
-/**
- * The two ends of a chapter.
- *
- * Reading to the foot of ኦሪት ዘፍጥረት ፩ and wanting ፪ meant scrolling back to the
- * top and finding it in the strip. Every other reader in the app steps from
- * where the reading ends; this one did not.
- */
