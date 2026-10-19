@@ -68,6 +68,176 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
 <!-- releases:start -->
 <article class="release">
   <header>
+    <h2>1.7.6 <span class="date">19 October 2026</span></h2>
+    <p class="motto"><span>Kenona spiritual rules in Journal, Desert Fathers sayings hub, devotional heatmap layout, and prayer list polish</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>ቀኖና (Kenona) in Journal.</b> Dedicated spiritual rule and ascetic discipline section within the prayer journal, featuring filter chips, entry kind sheet option, and 6 authentic Orthodox devotional presets (+ ፵፩ ስግደት, + ውዳሴ ማርያም, + ፯ቱ መሐረኒ ዳዊት, + መጽሐፈ ሰዓታት, + ፻ ጊዜ ኪርያላይሶን, + የዕለቱ ስንክሳር ንባብ).</span></li>
+    <li><span><b>Desert Fathers Sayings Hub.</b> Dedicated screen (<code>desert_fathers</code>) to browse, search, bookmark, copy, share, and reflect upon all 844 sayings from the early Desert Fathers in the personal prayer journal.</span></li>
+    <li><span><b>Randomized Desert Fathers Reminders.</b> Opt-in preference in Settings and Desert Fathers Hub allowing the daily reminder notification to randomly pick from the complete 844 patristic sayings collection.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Home Desert Fathers Row.</b> Polished quote card with 1-line quote preview, ellipsis overflow, and a dedicated «ሁሉንም እይ ➔» pill button leading directly to the Hub.</span></li>
+    <li><span>**Prayer List (<code>የጸሎት መዝገብ</code>).** Updated screen and header title to «የጸሎት መዝገብ» while preserving the clean, single-column diptych layout.</span></li>
+    <li><span><b>Devotional Year Heatmap &amp; Reader Layout.</b> Restored the horizontal 366-day grid layout on the Journey screen and classic reading view configuration.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.7.5 <span class="date">19 October 2026</span></h2>
+    <p class="motto"><span>Major Architectural, Accessibility, Liturgical &amp; Devotional System Upgrade</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Enhanced Search Engine &amp; Exact Ranking.</b> Expanded homophone folding table to encompass all Ethiopic interchangeable families (ሀ/ሐ/ኀ, ሰ/ሠ, አ/ዐ, ጸ/ፀ, labialized velars, and Ge&#x27;ez numerals ፩-፼ to Arabic). Exact orthography matches now rank with top priority over folded variants.</span></li>
+    <li><span><b>Accessible Journey List View.</b> Introduced a dedicated week-by-week scrollable List view as an accessible TalkBack alternative to the 53x7 year heatmap, selectable in Settings.</span></li>
+    <li><span><b>Follow System Font Scale.</b> Added a Settings toggle allowing UI and reading text to dynamically follow system accessibility font scaling.</span></li>
+    <li><span><b>Vigil Black OLED Theme &amp; WCAG Contrast.</b> Full WCAG 2.1 AA/AAA compliance across all Light, Dark, and Vigil Black tokens with subtle gold card framing.</span></li>
+    <li><span><b>Unified Backup Envelope (Schema v4).</b> SHA-256 integrity-verified export/import combining Room journal entries and DataStore preferences with atomic Merge/Replace options and 3 automatic safety backups. Private confession notes are permanently air-gapped from exports.</span></li>
+    <li><span><b>Authentic Manuscript Card Generator.</b> Share scriptures and liturgical passages as illuminated vellum cards featuring golden fillets, corner rosettes <code>፨</code>, rubricated headings, and optional attribution watermarks.</span></li>
+    <li><span><b>Sacred Manuscript Onboarding Flow.</b> A 3-step introductory setup for language, typography with live manuscript preview, and opt-in reminders.</span></li>
+    <li><span><b>Adaptive Tablet Navigation &amp; Two-Pane Reading.</b> Dynamic navigation rail for medium/expanded screens (≥ 600dp) and synchronized side-by-side parallel reading for expanded displays (≥ 840dp).</span></li>
+    <li><span><b>Paged Leaf Reader Mode.</b> Scripture reading with horizontal swipe paging, 20% edge taps for page turning, middle 60% chrome toggle, and persistent verse-keyed anchoring across font size changes.</span></li>
+    <li><span><b>Multi-OEM Battery Optimization Guide.</b> Step-by-step background battery guidance with direct system deep links for Tecno, Infinix, Xiaomi, Samsung, and Stock Android devices.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Home Adaptive FillColumn.</b> Automatically falls back to proportional vertical scrolling on compact displays (&lt; 640dp) or enlarged font scales (≥ 1.3x) without card clipping.</span></li>
+    <li><span><b>Journey Screen Visual Density.</b> Floating Action Button now gracefully animates away while inspecting calendar days, with 120dp bottom padding preventing card overlap.</span></li>
+    <li><span><b>Reminders Policy.</b> Exact alarms transitioned to Google Play compliant <code>SCHEDULE_EXACT_ALARM</code> with runtime verification and boot/timezone rescheduling.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.7.0 <span class="date">18 October 2026</span></h2>
+    <p class="motto"><span>Tri-mode language configuration (Amharic, English, Bilingual), horizontal prayer scroll with shadow affordances, floating journal button, and comprehensive Amharic orthographic review</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Tri-Mode Language Selector.</b> Expanded language preferences to support three explicit options: Bilingual (<code>አማ + Eng</code>), Strict English (<code>English</code>), and Strict Amharic (<code>አማርኛ</code>). Applied dynamically across the entire app with dedicated bilingual display components.</span></li>
+    <li><span><b>Scroll Affordances &amp; Elevation for Prayer Hours.</b> Embedded dynamic edge shadow gradient overlays with directional chevrons on the horizontal prayer hours carousel, accompanied by tactile card drop shadows and tonal elevation.</span></li>
+    <li><span><b>Persistent Floating Action Button for Journal.</b> Replaced the static in-list journal button with a persistent, elevated Floating Action Button (FAB) on the Journey page for fast access across scroll depths.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Horizontal Prayer Carousel.</b> Refactored canonical prayer hour chips into a smooth horizontal scrolling row on the Journey page, freeing vertical screen real estate for habit tracking.</span></li>
+    <li><span><b>High-Density Devotion Heatmap.</b> Streamlined the devotional manuscript plate by removing redundant percentage and fast metrics, shifting the calendar upward for improved information density.</span></li>
+    <li><span><b>Amharic Liturgical &amp; Orthographic Overhaul.</b> Corrected classical liturgical spellings (e.g., <code>ግእዝ</code>, <code>ራእይ</code>, <code>ወርኀዊ</code>, <code>በዓለ ሃምሳ</code>), standardized Ge&#x27;ez numerals in liturgical quotas, and enriched translations across reading and habit screens.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.6.0 <span class="date">16 October 2026</span></h2>
+    <p class="motto"><span>Unified manuscript heatmap plate, zero-gap Journey header, annual devotion progress, and liturgical micro-marks</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Annual Devotion Progress Bar.</b> Integrated a gold hairline devotion progress bar on the year heatmap plate tracking completed prayer days against total calendar days.</span></li>
+    <li><span><b>Liturgical Micro-Marks &amp; Today Beacon.</b> Added sacred illumination micro-crosses (<code>✦</code>) for full devotion days (level 3+) and radiant beacon rings for today on both compact and full-year heatmaps.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Zero-Gap Journey Screen Header.</b> Consolidated the year switcher (<code>&lt; 2018 ዓ.ም. &gt;</code>), date picker icon, and prayer counter pill directly into the manuscript plate header, eliminating redundant outer headers and dead vertical space.</span></li>
+    <li><span><b>Compact Heatmap Horizon.</b> Expanded Home compact heatmap to 12 weeks with enriched cell touch targets and liturgical indicators.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.5.14 <span class="date">15 October 2026</span></h2>
+    <p class="motto"><span>Comprehensive UI, design, and accessibility polish across home hero, habit heatmaps, reading, and search</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Home Screen Visual Hierarchy.</b> Refactored the Gitsawe card from a hero card to an accented Sinq card, allowing the prayer Now card to reign as the singular visual hero on the page.</span></li>
+    <li><span><b>Screen Margin Consistency.</b> Standardized horizontal page padding across all settings, habit management, hour management, and customization screens to the canonical <code>Spacing.screen</code> (24dp) design token.</span></li>
+    <li><span><b>Heatmap Optical Polish.</b> Guarded center dots in the compact heatmap to prevent visual moiré on small cells while keeping the full 365-day layout compact and legible.</span></li>
+    <li><span><b>Liturgical Iconography.</b> Replaced the generic heart icon on ውዳሴ ማርያም with a liturgical Church emblem, and updated the LXX Psalter with a sacred codex symbol.</span></li>
+    <li><span><b>Reader &amp; Search Smoothness.</b> Eliminated search result flicker during debounce typing, merged TalkBack announcements for Ge&#x27;ez numeral gutters and verses, and dynamically scaled section divider air at larger font sizes.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>Heatmap Accessibility.</b> Added TalkBack summary descriptions to the compact heatmap and rich 365-day liturgical/prayer/fasting announcements to the year heatmap cells.</span></li>
+    <li><span><b>Candle Aura Boundary.</b> Added a canvas edge guard to the beeswax candle&#x27;s golden aura bloom to eliminate edge clipping on narrow displays.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.5.13 <span class="date">15 October 2026</span></h2>
+    <p class="motto"><span>Compact Journey page prayer strips and habit rows, button-like Today manage control, and animated dawn horizon logo on Memento Mori</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Animated Dawn Horizon &amp; Cross on Memento Mori.</b> Reimagined the opening Memento Mori breath screen with the animated dawn horizon line, radiant rising sun dome, central cross, and 6 unfurling sun rays matching the Sinq icon.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Compact Journey Prayer &amp; Habit Strips.</b> Reduced prayer hour strips to a sleek 34dp height and daily habit rows to 36dp (with 16dp rings) to minimize empty vertical gaps and increase visible screen density.</span></li>
+    <li><span><b>Button-Like Today Manage Action.</b> Redesigned the Today section &quot;Manage&quot; action into a subtle, noticeable button pill with liturgical gold accent and bold typography.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.5.12 <span class="date">14 October 2026</span></h2>
+    <p class="motto"><span>Ethiopian Beeswax candle in gentle stillness, Sacred Manuscript Folio heatmap plate with fasting dot and perforations, and compact interactive day inspection</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Ethiopian Church Beeswax Candle (ቱዋፍ).</b> Reimagined the daily prayer candle with natural shaded beeswax depth, crater pool, glowing wick ember, and gentle stillness harmonic sway and convection breathing.</span></li>
+    <li><span><b>Sacred Manuscript Folio (የብራና ሰሌዳ) Heatmap Plate.</b> Enclosed both Home and Journey prayer heatmaps in a traditional Ethiopian manuscript folio with gold fillet framing, corner rosettes (፨), center sacred dot (●), and perforated/dashed fasting edges.</span></li>
+    <li><span><b>Interactive Heatmap Day Inspection.</b> Tapping any day on the Journey year heatmap immediately opens the day inspection card showing canonical hours prayed, habits completed, active fast names (including weekly Wednesday/Friday fasts), and written journal reflections with previous/next day stepping.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Compact Journey Heatmap Layout.</b> Streamlined cell footprint from 16dp to 11dp (13dp column pitch), lowering grid height by ~40% and surfacing 5–6 months on screen simultaneously without crowding.</span></li>
+  </ul>
+  </div>
+</article>
+
+<details class="more-releases">
+  <summary><span>21 earlier releases, 1.5.11 back to 1.0.0</span></summary>
+  <div class="more-body">
+<article class="release">
+  <header>
+    <h2>1.5.11 <span class="date">5 October 2026</span></h2>
+    <p class="motto"><span>Synaxarium Arke correction, Wudase Amlak prayer book, and English NKJV Bible integration</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Wudase Amlak (ውዳሴ አምላክ በአማርኛ) Prayer Book.</b> Added the complete 8 canonical daily sections (የዘወትር, ሰኞ, ማክሰኞ, ረቡዕ, ሐሙስ, ዓርብ, ቅዳሜ, እሑድ) under the Church Books (የጸሎት መጻሕፍት) shelf.</span></li>
+    <li><span><b>English Bible (NKJV) Translation.</b> Fully wired English New King James Version (NKJV) Bible with parallel Amharic/English reader toggles, verse selection, and global search.</span></li>
+    <li><span><b>What&#x27;s New Update Dialog.</b> Added a launch update dialog presenting headline liturgical additions and fixes upon updating to a new version.</span></li>
+  </ul>
+  <h3><span>Fixed</span></h3>
+  <ul>
+    <li><span><b>Synaxarium Arke Strophes.</b> Audited, verified, and corrected all 1,017 Synaxarium Arke strophes across the entire 366-day liturgical year against authentic Ethiopian Orthodox Tewahedo Church manuscripts.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
     <h2>1.5.10 <span class="date">4 October 2026</span></h2>
     <p class="motto"><span>Future date checklist reminders &amp; deep linking, Scripture Psalms reader with highlights, and web guide styling</span></p>
   </header>
@@ -76,7 +246,7 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   <ul>
     <li><span><b>Future Date Journal Checklist Restriction.</b> Browsing to future dates in the Journal now permits checklist-only entries with an informative liturgical notice banner, reserving prayer reflections and freeform text for the present day while supporting advance task and discipline planning.</span></li>
     <li><span><b>Checklist Reminder Deep Linking.</b> Tapping a checklist reminder notification directly opens the target entry and date in the Journal, bypassing onboarding screens.</span></li>
-    <li><span><b>Scripture Psalms in Library Codex.</b> Accessing Psalms (<code>መዝሙረ ዳዊት</code>) from the Books &amp; Scripture hub now opens the full 150-psalm Scripture Reader with verse selection, 4-color highlighting, bookmarks, personal notes, and verse copying, while keeping the dedicated prayer psalter for devotional hours and Home screen reading.</span></li>
+    <li><span><b>Scripture Psalms in Library Codex.</b> Accessing Psalms (መዝሙረ ዳዊት) from the Books &amp; Scripture hub now opens the full 150-psalm Scripture Reader with verse selection, 4-color highlighting, bookmarks, personal notes, and verse copying, while keeping the dedicated prayer psalter for devotional hours and Home screen reading.</span></li>
   </ul>
   <h3><span>Changed</span></h3>
   <ul>
@@ -191,9 +361,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   </div>
 </article>
 
-<details class="more-releases">
-  <summary><span>13 earlier releases, 1.5.3 back to 1.0.0</span></summary>
-  <div class="more-body">
 <article class="release">
   <header>
     <h2>1.5.3 <span class="date">2 October 2026</span></h2>
