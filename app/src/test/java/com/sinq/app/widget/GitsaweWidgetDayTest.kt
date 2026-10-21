@@ -81,4 +81,22 @@ class GitsaweWidgetDayTest {
         assertEquals(tue, widgetDayFor(at(mon, 12), 0))
         assertEquals(tue, widgetDayFor(at(mon, 23, 59), 0))
     }
+
+    @Test
+    fun `isWidgetEve identifies the evening rollover window`() {
+        // Before rollover: not Eve
+        assertEquals(false, isWidgetEve(at(mon, 6), evening))
+        assertEquals(false, isWidgetEve(at(mon, 19, 59), evening))
+
+        // On and after rollover: Eve
+        assertEquals(true, isWidgetEve(at(mon, 20), evening))
+        assertEquals(true, isWidgetEve(at(mon, 23, 59), evening))
+
+        // Midnight and next morning: not Eve (now today)
+        assertEquals(false, isWidgetEve(at(tue, 0, 30), evening))
+        assertEquals(false, isWidgetEve(at(tue, 10, 0), evening))
+
+        // Rollover disabled: never Eve
+        assertEquals(false, isWidgetEve(at(mon, 21), null))
+    }
 }

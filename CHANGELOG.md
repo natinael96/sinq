@@ -5,6 +5,17 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.7.8] — 2026-10-21
+
+_versionCode 120 · Liturgical Eve on Gitsawe Widget, Database Optimization, and JSON Minification_
+
+### Added
+- **Liturgical Eve (ዋዜማ) on Gitsawe Widget.** The home screen Gitsawe widget now prominently displays the Eve (ዋዜማ) designation in its header and status line when rolled over in the evening, highlighting feast attribution and upcoming commemorations.
+
+### Changed
+- **Optimized Corpus Database.** Rebuilt `sinq_corpus.db` with SQLite page size tuning (1024-byte pages) and FTS index defragmentation, reducing uncompressed database size by ~1.9 MB without altering any search schemas or query contracts.
+- **Minified Lectionary & Patristic JSONs.** Stripped unnecessary whitespace and structural formatting overhead across `daily-gitsawe.json`, `sunday-cycle-gitsawe.json`, `daily_quotes.json`, and seasonal lectionary assets, saving ~500 KB.
+
 ## [1.7.7] — 2026-10-21
 
 _versionCode 119 · Liturgical Purity, Live Card Sharing, Notification Retention, Reader Double-Tap, and Journal Integration_

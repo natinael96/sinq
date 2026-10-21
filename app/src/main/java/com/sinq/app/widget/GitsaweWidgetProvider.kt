@@ -103,27 +103,36 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
 
     private fun buildCard(context: Context): Card = runBlocking {
         val s = stringsFor(SettingsRepository.language(context).first())
+        val now = java.time.LocalDateTime.now()
+        val rolloverMin = SettingsRepository.widgetRolloverMinuteBlocking(context)
+        val isEve = isWidgetEve(now, rolloverMin)
         // Not always today: from the chosen hour the card looks to tomorrow,
         // because the Church's day turns in the evening and a reader checking
         // the widget after supper is looking at what they will pray at dawn.
-        val date = widgetDayFor(
-            java.time.LocalDateTime.now(),
-            SettingsRepository.widgetRolloverMinuteBlocking(context),
-        )
+        val date = widgetDayFor(now, rolloverMin)
         val readings = GitsaweRepository.readingsFor(context, date)
         // Prefer the ቅዳሴ (liturgy) service, falling back to ነግህ (matins).
         val entry = readings.daily
         val service = entry?.kidassie ?: entry?.negh
-        val realTitle = entry?.title?.takeIf { it.isNotBlank() }
-            ?: readings.feasts.firstOrNull()?.amharicName
+        val feastName = readings.feasts.firstOrNull()?.let { if (s.isAmharic) it.amharicName else it.name }
+        val realTitle = entry?.title?.takeIf { it.isNotBlank() } ?: feastName
         val rows = service?.let { allRows(it) }.orEmpty()
+
+        val dateStr = formatEthiopian(date, s)
+        val header = if (isEve) "${s.wazemaBadge}  ·  $dateStr" else dateStr
+        val title = if (isEve && feastName != null) {
+            if (s.isAmharic) "የ$feastName ዋዜማ" else "Eve of $feastName"
+        } else {
+            realTitle ?: s.gitsaweTitle
+        }
+
         Card(
             // The date now owns its line, so it can be the whole date: it used
             // to share a row with the wordmark and get ellipsized on a 4×2.
-            header = formatEthiopian(date, s),
-            title = realTitle ?: s.gitsaweTitle,
+            header = header,
+            title = title,
             rows = rows,
-            status = statusLine(s, date, service),
+            status = statusLine(s, date, service, isEve),
             emptyText = s.noGitsaweToday,
             hasContent = rows.isNotEmpty() || realTitle != null,
             epochDay = date.toEpochDay(),
@@ -256,13 +265,15 @@ class GitsaweWidgetProvider : AppWidgetProvider() {
      * the fast in effect. Both are things a person wants before deciding
      * anything about the day, and neither reached the widget before.
      */
-    private fun statusLine(s: Strings, date: LocalDate, service: GitsaweService?): String? {
+    private fun statusLine(s: Strings, date: LocalDate, service: GitsaweService?, isEve: Boolean = false): String? {
         val anaphora = service?.kidassie?.firstOrNull { it.isNotBlank() }?.trim()
         val fast = FastingCalendar.fastOn(date)?.let { if (s.isAmharic) it.nameAm else it.nameEn }
             ?: s.fastingWeekly.takeIf { FastingCalendar.isWeeklyFastDay(date) }
-        return listOfNotNull(anaphora?.let { "ቅዳሴ $it" }, fast)
-            .joinToString("  ·  ")
-            .ifBlank { null }
+        val parts = mutableListOf<String>()
+        if (isEve) parts += s.wazemaBadge
+        anaphora?.let { parts += "ቅዳሴ $it" }
+        fast?.let { parts += it }
+        return parts.joinToString("  ·  ").ifBlank { null }
     }
 
     private fun summarize(reading: GitsaweReading): String =
