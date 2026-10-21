@@ -12,6 +12,7 @@ import com.sinq.app.MainActivity
 import com.sinq.app.R
 import com.sinq.app.data.GitsaweRepository
 import com.sinq.app.data.SettingsRepository
+import com.sinq.app.data.applyNotificationTimeout
 import com.sinq.app.stringsFor
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -59,6 +60,7 @@ class GitsaweReminderReceiver : BroadcastReceiver() {
                         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                         .setAutoCancel(true)
                         .setContentIntent(tap)
+                        .applyNotificationTimeout(context)
                         .build()
                     ReminderDispatchGate.locked {
                         // The switch may have changed while content was being

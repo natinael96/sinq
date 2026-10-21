@@ -11,6 +11,7 @@ import androidx.core.app.NotificationCompat
 import com.sinq.app.MainActivity
 import com.sinq.app.R
 import com.sinq.app.data.SettingsRepository
+import com.sinq.app.data.applyNotificationTimeout
 import com.sinq.app.stringsFor
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -64,6 +65,7 @@ class ChecklistReminderReceiver : BroadcastReceiver() {
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
                     .setContentIntent(tap)
                     .setAutoCancel(true)
+                    .applyNotificationTimeout(context)
                     .build()
 
                 val notifId = NotificationIds.inFamily(NotificationIds.CHECKLIST_BASE, taskId)

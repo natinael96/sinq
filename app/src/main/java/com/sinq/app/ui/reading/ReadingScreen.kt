@@ -13,7 +13,9 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -171,8 +173,7 @@ fun ReadingScreen(
                     .filter { it.type == "gospel" || it.id !in layout.hidden },
                 effectivePrayerLevel,
             )
-            val withGospel = ContentRepository.withDynamicGospel(context, hourId, base, today)
-            HoursRepository.withSeasonalAdaptation(context, hourId, withGospel, today)
+            ContentRepository.withDynamicGospel(context, hourId, base, today)
         }
     }
     val sections = sectionLoad.value.orEmpty()
@@ -220,16 +221,8 @@ fun ReadingScreen(
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
     val s = com.sinq.app.ui.strings.LocalStrings.current
     val motion = LocalMotion.current
-    val distractionFree = com.sinq.app.ui.common.rememberDistractionFreeState(
-        pauseAutoImmersion = hourMenu || showContents,
-    )
+    val distractionFree = com.sinq.app.ui.common.rememberDistractionFreeState()
     val isImmersive = distractionFree.isImmersive
-
-    LaunchedEffect(listState.isScrollInProgress, pagerState.isScrollInProgress) {
-        if ((listState.isScrollInProgress || pagerState.isScrollInProgress) && !isImmersive && !hourMenu && !showContents) {
-            distractionFree.hide()
-        }
-    }
 
     val readingProgress by remember(sections.size, listState, pagerState, readingMode) {
         derivedStateOf {
@@ -499,7 +492,7 @@ private fun VerticalReader(
     ReadingColumn(
         state = listState,
         innerPadding = innerPadding,
-        onTap = onToggleImmersive,
+        onDoubleTap = onToggleImmersive,
     ) {
         items(sections.size, key = { sections[it].id }) { index ->
             val section = sections[index]
@@ -562,7 +555,7 @@ private fun PagedReader(
             ReadingColumn(
                 state = pageList,
                 innerPadding = PaddingValues(0.dp),
-                onTap = onToggleImmersive,
+                onDoubleTap = onToggleImmersive,
             ) {
                 item {
                     section.part?.let { part ->
@@ -616,7 +609,7 @@ internal fun PageIndicator(current: Int, total: Int) {
 internal fun ReadingColumn(
     innerPadding: PaddingValues,
     state: androidx.compose.foundation.lazy.LazyListState = rememberLazyListState(),
-    onTap: (() -> Unit)? = null,
+    onDoubleTap: (() -> Unit)? = null,
     content: androidx.compose.foundation.lazy.LazyListScope.() -> Unit,
 ) {
     Box(
@@ -630,12 +623,12 @@ internal fun ReadingColumn(
                 .fillMaxSize()
                 .widthIn(max = ReadingMaxWidth)
                 .then(
-                    if (onTap != null) {
-                        Modifier.clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = onTap,
-                        )
+                    if (onDoubleTap != null) {
+                        Modifier.pointerInput(Unit) {
+                            detectTapGestures(
+                                onDoubleTap = { onDoubleTap() },
+                            )
+                        }
                     } else Modifier
                 ),
         ) {

@@ -13,6 +13,7 @@ import com.sinq.app.R
 import com.sinq.app.data.ReadingPlanRepository
 import com.sinq.app.data.ScriptureRepository
 import com.sinq.app.data.SettingsRepository
+import com.sinq.app.data.applyNotificationTimeout
 import com.sinq.app.model.PlanDay
 import com.sinq.app.stringsFor
 import com.sinq.app.ui.strings.Strings
@@ -128,6 +129,7 @@ class ReadingReminderReceiver : BroadcastReceiver() {
             .setVisibility(NotificationCompat.VISIBILITY_SECRET)
             .setAutoCancel(true)
             .setContentIntent(tap)
+            .applyNotificationTimeout(context)
             .build()
         context.getSystemService(NotificationManager::class.java)
             .notify(NotificationIds.READING, notification)

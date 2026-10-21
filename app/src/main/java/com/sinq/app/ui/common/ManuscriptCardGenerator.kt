@@ -26,6 +26,11 @@ import java.io.FileOutputStream
  * - App attribution watermark ("— ስንቅ") is governed by the Settings toggle (on by default),
  *   while the source reference remains always present.
  */
+enum class CardAspectRatio(val label: String, val width: Int, val height: Int) {
+    SQUARE("Square (1:1)", 1080, 1080),
+    STORY("Story (9:16)", 1080, 1920);
+}
+
 object ManuscriptCardGenerator {
 
     private const val TAG = "ManuscriptCardGenerator"
@@ -43,20 +48,22 @@ object ManuscriptCardGenerator {
     fun renderBitmap(
         passage: Passage,
         format: CopyFormat,
+        ratio: CardAspectRatio = CardAspectRatio.SQUARE,
     ): Bitmap {
-        val contentWidth = CARD_WIDTH - (PADDING * 2)
+        val cardWidth = ratio.width
+        val contentWidth = cardWidth - (PADDING * 2)
 
         // 1. Text paints
         val rubricPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             color = COLOR_RUBRIC
-            textSize = 38f
+            textSize = if (ratio == CardAspectRatio.STORY) 42f else 38f
             typeface = Typeface.DEFAULT_BOLD
             textAlign = Paint.Align.CENTER
         }
 
         val bodyPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             color = COLOR_INK
-            textSize = 42f
+            textSize = if (ratio == CardAspectRatio.STORY) 46f else 42f
             typeface = Typeface.DEFAULT
             textAlign = Paint.Align.LEFT
         }
@@ -83,16 +90,31 @@ object ManuscriptCardGenerator {
         val bodyLayout = StaticLayout.Builder.obtain(
             bodyText, 0, bodyText.length, bodyPaint, contentWidth
         ).setAlignment(Layout.Alignment.ALIGN_NORMAL)
-            .setLineSpacing(14f, 1.25f)
+            .setLineSpacing(16f, 1.3f)
             .setIncludePad(false)
             .build()
 
-        val headerHeight = if (headingText.isNotBlank()) 120 else 40
+        val headerHeight = if (headingText.isNotBlank()) 130 else 40
         val footerHeight = 140
-        val contentHeight = headerHeight + bodyLayout.height + footerHeight + (PADDING * 2)
-        val cardHeight = maxOf(MIN_CARD_HEIGHT, contentHeight)
+        val totalBlockHeight = headerHeight + bodyLayout.height + footerHeight
 
-        val bitmap = Bitmap.createBitmap(CARD_WIDTH, cardHeight, Bitmap.Config.ARGB_8888)
+        val cardHeight = when (ratio) {
+            CardAspectRatio.SQUARE -> maxOf(MIN_CARD_HEIGHT, totalBlockHeight + (PADDING * 2))
+            CardAspectRatio.STORY -> ratio.height
+        }
+
+        val startY = when (ratio) {
+            CardAspectRatio.STORY -> ((cardHeight - totalBlockHeight) / 2f).coerceAtLeast(PADDING.toFloat())
+            CardAspectRatio.SQUARE -> {
+                if (cardHeight > totalBlockHeight + (PADDING * 2)) {
+                    ((cardHeight - totalBlockHeight) / 2f).coerceAtLeast(PADDING.toFloat())
+                } else {
+                    PADDING.toFloat()
+                }
+            }
+        }
+
+        val bitmap = Bitmap.createBitmap(cardWidth, cardHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
         // Draw parchment background
@@ -106,11 +128,11 @@ object ManuscriptCardGenerator {
 
         // Outer border
         borderPaint.strokeWidth = 6f
-        canvas.drawRect(28f, 28f, CARD_WIDTH - 28f, cardHeight - 28f, borderPaint)
+        canvas.drawRect(28f, 28f, cardWidth - 28f, cardHeight - 28f, borderPaint)
 
         // Inner border
         borderPaint.strokeWidth = 2f
-        canvas.drawRect(42f, 42f, CARD_WIDTH - 42f, cardHeight - 42f, borderPaint)
+        canvas.drawRect(42f, 42f, cardWidth - 42f, cardHeight - 42f, borderPaint)
 
         // Draw ornamental corner rosettes (፨)
         val rosettePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -119,14 +141,14 @@ object ManuscriptCardGenerator {
             textAlign = Paint.Align.CENTER
         }
         canvas.drawText("፨", 35f, 48f, rosettePaint)
-        canvas.drawText("፨", CARD_WIDTH - 35f, 48f, rosettePaint)
+        canvas.drawText("፨", cardWidth - 35f, 48f, rosettePaint)
         canvas.drawText("፨", 35f, cardHeight - 34f, rosettePaint)
-        canvas.drawText("፨", CARD_WIDTH - 35f, cardHeight - 34f, rosettePaint)
+        canvas.drawText("፨", cardWidth - 35f, cardHeight - 34f, rosettePaint)
 
         // Draw Header / Heading
-        var currentY = PADDING + 30f
+        var currentY = startY + 30f
         if (headingText.isNotBlank()) {
-            canvas.drawText("✦  $headingText  ✦", CARD_WIDTH / 2f, currentY + 30f, rubricPaint)
+            canvas.drawText("✦  $headingText  ✦", cardWidth / 2f, currentY + 30f, rubricPaint)
             currentY += headerHeight
         } else {
             currentY += 40f
@@ -139,14 +161,19 @@ object ManuscriptCardGenerator {
         canvas.restore()
 
         // Draw Footer: source reference is ALWAYS present
-        val footerY = cardHeight - PADDING.toFloat()
+        val footerY = if (ratio == CardAspectRatio.STORY) {
+            maxOf(cardHeight - PADDING.toFloat(), currentY + bodyLayout.height + 80f)
+                .coerceAtMost(cardHeight - 40f)
+        } else {
+            cardHeight - PADDING.toFloat()
+        }
         if (referenceText.isNotBlank()) {
             canvas.drawText(referenceText, PADDING.toFloat(), footerY, referencePaint)
         }
 
         // Draw Watermark attribution if enabled by settings toggle
         if (attributionText != null) {
-            canvas.drawText(attributionText, CARD_WIDTH - PADDING.toFloat(), footerY, watermarkPaint)
+            canvas.drawText(attributionText, cardWidth - PADDING.toFloat(), footerY, watermarkPaint)
         }
 
         return bitmap
@@ -159,10 +186,11 @@ object ManuscriptCardGenerator {
         context: Context,
         passage: Passage,
         format: CopyFormat,
+        ratio: CardAspectRatio = CardAspectRatio.SQUARE,
         strings: Strings? = null,
     ): Boolean {
         return runCatching {
-            val bitmap = renderBitmap(passage, format)
+            val bitmap = renderBitmap(passage, format, ratio)
             val shareDir = File(context.cacheDir, "shares").apply { mkdirs() }
             val imageFile = File(shareDir, "manuscript_card.png")
 

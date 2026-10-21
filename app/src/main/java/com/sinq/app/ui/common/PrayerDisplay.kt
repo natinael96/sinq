@@ -15,7 +15,7 @@ object PrayerDisplay {
         hourId: String,
         rawName: String = "",
         transliteration: String = "",
-        mode: Language = Language.AMH_ENG,
+        mode: Language = Language.AMHARIC,
         compact: Boolean = false,
     ): String {
         val cleanId = hourId.removePrefix("hour_")
@@ -44,7 +44,6 @@ object PrayerDisplay {
         return when (mode) {
             Language.ENGLISH -> english
             Language.AMHARIC -> amharic
-            Language.AMH_ENG -> if (compact) "$english ($amharic)" else "$english · $amharic"
         }
     }
 
@@ -53,28 +52,25 @@ object PrayerDisplay {
         seasonalNameEn: String?,
         isWeeklyWednesday: Boolean,
         isWeeklyFriday: Boolean,
-        mode: Language = Language.AMH_ENG,
+        mode: Language = Language.AMHARIC,
     ): String? {
         if (seasonalNameAm != null) {
             val en = seasonalNameEn ?: seasonalNameAm
             return when (mode) {
                 Language.ENGLISH -> en
                 Language.AMHARIC -> seasonalNameAm
-                Language.AMH_ENG -> if (seasonalNameEn != null && seasonalNameEn != seasonalNameAm) "$seasonalNameEn ($seasonalNameAm)" else seasonalNameAm
             }
         }
         if (isWeeklyWednesday) {
             return when (mode) {
                 Language.ENGLISH -> "Wednesday Fast"
                 Language.AMHARIC -> "ጾመ ድህነት (ረቡዕ)"
-                Language.AMH_ENG -> "Wednesday Fast (ጾመ ድህነት · ረቡዕ)"
             }
         }
         if (isWeeklyFriday) {
             return when (mode) {
                 Language.ENGLISH -> "Friday Fast"
                 Language.AMHARIC -> "ጾመ ድህነት (ዓርብ)"
-                Language.AMH_ENG -> "Friday Fast (ጾመ ድህነት · ዓርብ)"
             }
         }
         return null
@@ -82,7 +78,7 @@ object PrayerDisplay {
 
     fun fastName(
         date: java.time.LocalDate,
-        mode: Language = Language.AMH_ENG,
+        mode: Language = Language.AMHARIC,
     ): String? {
         val seasonal = com.sinq.app.data.FastingCalendar.fastOn(date)
         val isWed = date.dayOfWeek == java.time.DayOfWeek.WEDNESDAY && com.sinq.app.data.FastingCalendar.isWeeklyFastDay(date)

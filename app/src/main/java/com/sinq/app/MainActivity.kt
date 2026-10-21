@@ -30,9 +30,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import com.sinq.app.data.Language
 import com.sinq.app.ui.strings.AmharicStrings
-import com.sinq.app.ui.strings.BilingualStrings
 import com.sinq.app.ui.strings.EnglishStrings
-import com.sinq.app.ui.strings.StrictEnglishStrings
 import com.sinq.app.ui.strings.LocalStrings
 import com.sinq.app.ui.strings.Strings
 import java.util.Locale
@@ -288,8 +286,7 @@ class MainActivity : ComponentActivity() {
 
 fun stringsFor(language: Language): Strings = when (language) {
     Language.AMHARIC -> AmharicStrings
-    Language.ENGLISH -> StrictEnglishStrings
-    Language.AMH_ENG -> BilingualStrings
+    Language.ENGLISH -> EnglishStrings
 }
 
 /** Switch bottom-nav tabs preserving each tab's state. */

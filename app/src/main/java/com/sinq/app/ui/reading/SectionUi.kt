@@ -345,11 +345,21 @@ internal fun SelectionBar(
                     var refsOpen by androidx.compose.runtime.saveable.rememberSaveable {
                         androidx.compose.runtime.mutableStateOf(false)
                     }
+                    var previewCardOpen by androidx.compose.runtime.saveable.rememberSaveable {
+                        androidx.compose.runtime.mutableStateOf(false)
+                    }
                     if (refsOpen && crossRefs.isNotEmpty()) {
                         CrossRefSheet(
                             refs = crossRefs,
                             onDismiss = { refsOpen = false },
                             onOpen = { route -> refsOpen = false; onDismiss(); onOpenRef(route) },
+                        )
+                    }
+                    if (previewCardOpen) {
+                        com.sinq.app.ui.common.ManuscriptCardPreviewSheet(
+                            passage = passage,
+                            format = format,
+                            onDismiss = { previewCardOpen = false },
                         )
                     }
                     SelectionActions(
@@ -402,8 +412,7 @@ internal fun SelectionBar(
                             )
                             add(
                                 SelectionAct(s.shareCardAction, Icons.Outlined.Image) {
-                                    com.sinq.app.ui.common.ManuscriptCardGenerator.shareCard(ctx, passage, format, s)
-                                    onDismiss()
+                                    previewCardOpen = true
                                 },
                             )
                         },

@@ -13,6 +13,7 @@ import androidx.core.app.NotificationCompat
 import com.sinq.app.MainActivity
 import com.sinq.app.R
 import com.sinq.app.data.SettingsRepository
+import com.sinq.app.data.applyNotificationTimeout
 import com.sinq.app.stringsFor
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -104,9 +105,10 @@ class DailyQuoteReceiver : BroadcastReceiver() {
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setSound(null)
                 .setVibrate(null)
-                .setOngoing(true)
-                .setAutoCancel(false)
+                .setOngoing(false)
+                .setAutoCancel(true)
                 .setContentIntent(tap)
+                .applyNotificationTimeout(context)
                 .build()
 
             ReminderDispatchGate.locked {

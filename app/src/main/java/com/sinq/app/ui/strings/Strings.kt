@@ -306,6 +306,10 @@ interface Strings {
     val dailyQuoteSample: String
     val dailyQuoteLockscreenPrompt: String
     val dailyQuoteSettingsAction: String
+    val dailyQuoteTimeTitle: String
+    val notificationTimeoutTitle: String
+    val notificationTimeoutSubtitle: String
+    fun notificationTimeoutOption(minutes: Int): String
     val desertFathersHubTitle: String
     val desertFathersHubSubtitle: String
     val desertFathersViewAll: String
@@ -1345,6 +1349,17 @@ object AmharicStrings : Strings {
     override val dailyQuoteSample = "«ቅዱስ አባ እንጦንስ በበረሃ ሳለ በስንፍናና በክፉ ሐሳቦች ተፈተነ... "
     override val dailyQuoteLockscreenPrompt = "የአበው ምክር በመቆለፊያ ገጽ ላይ እንዲታይ የስልክዎን የመቆለፊያ ገጽ ፈቃድ ለስንቅ ያብሩ"
     override val dailyQuoteSettingsAction = "በቅንብሮች ያብሩ"
+    override val dailyQuoteTimeTitle = "የማሳሰቢያ ሰዓት (በቀን አንድ ጊዜ)"
+    override val notificationTimeoutTitle = "ማሳሰቢያ በራሱ የሚጠፋበት ጊዜ"
+    override val notificationTimeoutSubtitle = "ያልተነበቡ ማሳሰቢያዎች ከስልክዎ ማሳወቂያ ክፍል በራሳቸው የሚጠፉበት ጊዜ"
+    override fun notificationTimeoutOption(minutes: Int): String = when (minutes) {
+        30 -> "30 ደቂቃ"
+        60 -> "1 ሰዓት"
+        120 -> "2 ሰዓት (የተመረጠ)"
+        240 -> "4 ሰዓት"
+        360 -> "6 ሰዓት"
+        else -> "እስኪነሳ ድረስ (አይጥፋ)"
+    }
     override val desertFathersHubTitle = "የአበው ምክር"
     override val desertFathersHubSubtitle = "Apophthegmata Patrum · ፰፻፵፬ቱ የአበው ቃላት"
     override val desertFathersViewAll = "ሁሉንም እይ"
@@ -2112,7 +2127,7 @@ object EnglishStrings : Strings {
     override val librarySubtitle = "Prayers and holy scriptures"
     override val scripturesTitle = "Scriptures"
     override val scripturesSubtitle = "The New Testament"
-    override val bahreHasabTitle = "Bahre Hasab"
+    override val bahreHasabTitle = "ባሕረ ሐሳብ"
     override val bahreHasabSubtitle = "Annual feasts and fasts table"
     override val bahreHasabRange = "Current year and the next 25 years"
     override val bahreHasabCurrentYear = "Current Ethiopian year"
@@ -2166,7 +2181,7 @@ object EnglishStrings : Strings {
     override val goToChapter = "Open the chapter"
     override val goToPsalm = "Open the psalm"
     override val ok = "OK"
-    override val synaxariumTitle = "Synaxarium"
+    override val synaxariumTitle = "ስንክሳር"
     override val synaxariumKicker = "Today's Synaxarium"
     override fun synaxariumFor(dateLabel: String) = "Synaxarium for $dateLabel"
 
@@ -2226,7 +2241,7 @@ object EnglishStrings : Strings {
     override val commentaryAction = "Catena"
     override val catenaEarlyFathers = "Early Fathers"
     override val catenaOpenInBrowser = "Open in browser"
-    override val mahletTitle = "Rite of Mahlet"
+    override val mahletTitle = "ሥርዓተ ማኅሌት"
     override val synaxariumLibrarySubtitle = "The year's commemorations"
     override val sinksarAmharic = "Amharic"
     override val sinksarGeez = "Ge'ez"
@@ -2282,7 +2297,7 @@ object EnglishStrings : Strings {
     override val mahletTsigeThisYearBody = "The dates that fall on a Sunday this year"
     override val mahletTsigeOtherYears = "Other dates"
     override val mahletTsigeOtherYearsBody = "Sung in the years these fall on a Sunday"
-    override val booksTitle = "Other Books"
+    override val booksTitle = "ሌሎች መጻሕፍት"
     override val booksSubtitle = "Books of the Church"
     override fun booksCount(n: Int) = "$n books"
     override fun booksChapters(n: Int) = if (n == 1) "1 chapter" else "$n chapters"
@@ -2352,6 +2367,17 @@ object EnglishStrings : Strings {
     override val dailyQuoteSample = "\"When the holy Abba Anthony lived in the desert he was beset by accidie...\""
     override val dailyQuoteLockscreenPrompt = "To display the saying while locked, allow lock screen notifications for Sinq"
     override val dailyQuoteSettingsAction = "Enable in Settings"
+    override val dailyQuoteTimeTitle = "Daily Reminder Time"
+    override val notificationTimeoutTitle = "Notification Retention"
+    override val notificationTimeoutSubtitle = "Auto-dismiss reminder notifications if not interacted with"
+    override fun notificationTimeoutOption(minutes: Int): String = when (minutes) {
+        30 -> "30 minutes"
+        60 -> "1 hour"
+        120 -> "2 hours (Recommended)"
+        240 -> "4 hours"
+        360 -> "6 hours"
+        else -> "Keep until dismissed"
+    }
     override val desertFathersHubTitle = "Sayings of the Desert Fathers"
     override val desertFathersHubSubtitle = "Apophthegmata Patrum · 844 Patristic Sayings"
     override val desertFathersViewAll = "View All"
@@ -2514,7 +2540,7 @@ object EnglishStrings : Strings {
     override val sundayCanticlesBody = "The Psalter is divided over six days; Sunday is given the prayers of the prophets and the Song of Songs instead."
     override val loadingLabel = "Loading…"
     override val zewotrTselot = "Daily Prayer"
-    override val wudaseMariam = "Praises of Mary"
+    override val wudaseMariam = "ውዳሴ ማርያም"
     override val wudaseLangAmharic = "Amharic"
     override val wudaseLangGeez = "Ge'ez"
     override fun psalterEditionSwitch(other: String) = "Read in $other"
@@ -3111,68 +3137,5 @@ object EnglishStrings : Strings {
     override val desertFatherWisdomTitle = "Sayings of the Desert Fathers"
 }
 
-object StrictEnglishStrings : Strings by EnglishStrings {
-    override val languageMode = Language.ENGLISH
-    override val psalterTitle = "Psalter"
-    override val zewotrTselot = "Daily Prayer"
-    override val wudaseMariam = "Praises of Mary"
-    override val mahletTitle = "Rite of Mahlet"
-    override val booksTitle = "Other Books"
-    override val psalmName = "Psalm"
-    override val sinksarAmharic = "Amharic"
-    override val sinksarGeez = "Ge'ez"
-    override val sinksarAnnualFeasts = "Annual Feasts"
-    override val sinksarMonthlyFeasts = "Monthly Feasts"
-    override val mahletVigil = "Vigil"
-    override val mahletDawn = "Dawn"
-    override val mahletTsige = "Season of Tsige"
-    override val mahletNone = "No Mahlet appointed for this month"
-    override val gitsaweTitle = "Today's Lectionary"
-}
+val LocalStrings = staticCompositionLocalOf<Strings> { AmharicStrings }
 
-object BilingualStrings : Strings by EnglishStrings {
-    override val isAmharic = false
-    override val languageMode = Language.AMH_ENG
-    override val langBilingual = "Amh+Eng"
-    override val langEnglish = "English"
-    override val langAmharic = "አማርኛ"
-
-    // ── Liturgical corpus, prayer names, lectionary & book titles in Amharic ──
-    override val synaxariumTitle = "ስንክሳር"
-    override val gitsaweTitle = "የዕለቱ ግጻዌ"
-    override val psalterTitle = "መዝሙረ ዳዊት"
-    override val zewotrTselot = "ዘወትር ጸሎት"
-    override val wudaseMariam = "ውዳሴ ማርያም"
-    override val mahletTitle = "ሥርዓተ ማኅሌት"
-    override val bahreHasabTitle = "ባሕረ ሐሳብ"
-    override val scripturesTitle = "ቅዱሳት መጻሕፍት"
-    override val bibleTitle = "መጽሐፍ ቅዱስ"
-    override val booksTitle = "ሌሎች መጻሕፍት"
-    override val psalmName = "መዝሙር"
-    override val sinksarAmharic = "አማርኛ"
-    override val sinksarGeez = "ግእዝ"
-    override val sinksarAnnualFeasts = "ዓመታዊ በዓላት"
-    override val sinksarMonthlyFeasts = "ወርኀዊ በዓላት"
-    override val mahletVigil = "ዋዜማ"
-    override val mahletDawn = "ነግሥ"
-    override val mahletTsige = "ማኅሌተ ጽጌ"
-    override val wazemaBadge = "ዋዜማ"
-    override fun wazemaEveOf(name: String) = "የ$name ዋዜማ"
-    override val andemtaSummaryTitle = "የአንድምታ ትርጓሜ"
-    override val commentaryAction = "የአበው ትርጓሜ"
-    override val desertFatherWisdomTitle = "የአበው ምክር"
-    override val prayerListTitle = "የጸሎት መዝገብ"
-    override val journalKindKenona = "ቀኖና"
-    override val journalKindKenonaDesc = "የግል ጸሎት ቀኖና፣ ስግደት፣ የዳዊትና የውዳሴ ማርያም ክፍሎች"
-    override val kenonaPresetMetanias = "፵፩ ስግደት (በስመ አብ ወወልድ ወመንፈስ ቅዱስ)"
-    override val kenonaPresetWudase = "ውዳሴ ማርያም (የዕለቱ ምስጋና)"
-    override val kenonaPresetPsalter = "፯ቱ መሐረኒ ዳዊት"
-    override val kenonaPresetHours = "መጽሐፈ ሰዓታት"
-    override val kenonaPresetKirielayson = "፻ ጊዜ ኪርያላይሶን"
-    override val kenonaPresetSynaxarium = "የዕለቱ ስንክሳር ንባብ"
-    override val desertFathersHubTitle = "የአበው ምክር"
-    override val desertFathersHubSubtitle = "Apophthegmata Patrum · ፰፻፵፬ቱ የአበው ቃላት"
-    override val desertFathersViewAll = "ሁሉንም እይ"
-}
-
-val LocalStrings = staticCompositionLocalOf<Strings> { BilingualStrings }

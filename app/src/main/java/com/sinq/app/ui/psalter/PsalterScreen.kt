@@ -219,16 +219,8 @@ fun PsalterScreen(
     val pagerState = rememberPagerState(pageCount = { shown.size })
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val motion = com.sinq.app.ui.theme.LocalMotion.current
-    val distractionFree = com.sinq.app.ui.common.rememberDistractionFreeState(
-        pauseAutoImmersion = showContents,
-    )
+    val distractionFree = com.sinq.app.ui.common.rememberDistractionFreeState()
     val isImmersive = distractionFree.isImmersive
-
-    LaunchedEffect(listState.isScrollInProgress, pagerState.isScrollInProgress) {
-        if ((listState.isScrollInProgress || pagerState.isScrollInProgress) && !isImmersive && !showContents) {
-            distractionFree.hide()
-        }
-    }
 
     // Psalm index (into `shown`) to land on; -1 = none. Set from a bookmark and
     // when switching reading mode, so the position carries over.
@@ -429,7 +421,7 @@ fun PsalterScreen(
                     ReadingColumn(
                         state = listState,
                         innerPadding = contentPadding,
-                        onTap = { distractionFree.toggle() },
+                        onDoubleTap = { distractionFree.toggle() },
                     ) {
                         if (daily && range != null) {
                             item {
@@ -469,7 +461,7 @@ fun PsalterScreen(
                             val section = shown.getOrNull(page) ?: return@HorizontalPager
                             ReadingColumn(
                                 innerPadding = PaddingValues(0.dp),
-                                onTap = { distractionFree.toggle() },
+                                onDoubleTap = { distractionFree.toggle() },
                             ) {
                                 item {
                                     SectionView(

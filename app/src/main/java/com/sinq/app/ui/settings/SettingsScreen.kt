@@ -1485,6 +1485,8 @@ fun RemindersSettingsScreen(
                     )
                     SinqDivider()
                     QuietHoursRow(s)
+                    SinqDivider()
+                    NotificationTimeoutRow(s)
                 }
                 Spacer(Modifier.height(Spacing.lg))
                 DayTimeline()
@@ -1730,7 +1732,7 @@ private fun DailyQuoteTimeRow(s: com.sinq.app.ui.strings.Strings) {
     var picking by remember { mutableStateOf(false) }
 
     com.sinq.app.ui.common.ListRow(
-        title = s.timeLabel,
+        title = s.dailyQuoteTimeTitle,
         subtitle = "%02d:%02d".format(minute / 60, minute % 60),
         onClick = { picking = true },
     )
@@ -1759,6 +1761,60 @@ private fun DailyQuoteTimeRow(s: com.sinq.app.ui.strings.Strings) {
                 state = timeState,
                 colors = com.sinq.app.ui.common.sinqTimePickerColors(),
             )
+        }
+    }
+}
+
+/** Controls how long notifications linger before being automatically dismissed. */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun NotificationTimeoutRow(s: com.sinq.app.ui.strings.Strings) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val timeoutMinutes by SettingsRepository.notificationTimeoutMinutes(context)
+        .collectAsState(initial = SettingsRepository.DEFAULT_NOTIFICATION_TIMEOUT_MINUTES)
+    var sheetOpen by remember { mutableStateOf(false) }
+
+    NavRow(
+        title = s.notificationTimeoutTitle,
+        subtitle = s.notificationTimeoutOption(timeoutMinutes),
+        onClick = { sheetOpen = true },
+        leadingIcon = Icons.Outlined.Schedule,
+    )
+
+    if (sheetOpen) {
+        androidx.compose.material3.ModalBottomSheet(onDismissRequest = { sheetOpen = false }) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = Spacing.screen)
+                    .padding(bottom = 28.dp),
+            ) {
+                Text(
+                    s.notificationTimeoutTitle,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                Spacer(Modifier.height(Spacing.xs))
+                Text(
+                    s.notificationTimeoutSubtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.secondary,
+                )
+                Spacer(Modifier.height(Spacing.md))
+                SettingsRepository.NOTIFICATION_TIMEOUT_CHOICES.forEach { choice ->
+                    SettingsRadioRow(
+                        label = s.notificationTimeoutOption(choice),
+                        selected = choice == timeoutMinutes,
+                    ) {
+                        scope.launch {
+                            SettingsRepository.setNotificationTimeoutMinutes(context, choice)
+                        }
+                        sheetOpen = false
+                    }
+                }
+            }
         }
     }
 }

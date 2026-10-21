@@ -53,6 +53,27 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.7.7",
+        title = "Liturgical Purity, Live Card Sharing, Notification Retention, and Journal Integration",
+        titleAm = "የሰዓታት ንባባት ሥርዓት፣ የቀጥታ የብራና ካርድ ማጋሪያ፣ የማንቂያ ሰዓት ቆይታ እና የማስታወሻ ማሻሻያ",
+        changes = listOf(
+            "Restored canonical prayer hours strictly to Biblical canon (Psalms and Gospel) and locked Amharic liturgical titles in English view.",
+            "Added live WYSIWYG card sharing preview with Square (1:1) and Story (9:16) aspect ratios, centered layouts, and authentic illuminated manuscript borders.",
+            "Ensured Desert Fathers sayings reminder notifies strictly once per day at user-configured times.",
+            "Added customizable notification retention timeout (30m, 1h, 2h, 4h, 6h, Never) with automatic system dismissal.",
+            "Replaced reader auto-hiding timer with deliberate double-tap immersion, permanently fixing the Appearance bottom sheet dismissal.",
+            "De-boxed annual devotional heatmap on the Journey page and integrated Journal into the header and feed.",
+        ),
+        changesAm = listOf(
+            "የሰዓታት ጸሎት ንባባት ሙሉ በሙሉ በቀኖናዊው የመዝሙርና የወንጌል ሥርዓት ብቻ እንዲሆኑ ተስተካክለው በውጭ ቋንቋም የሥርዓተ ቤተ ክርስቲያን መጻሕፍት መጠሪያዎች በአማርኛ እንዲቆዩ ተደርጓል።",
+            "ጥቅሶችን በብራና ካርድ ሲያጋሩ የቀጥታ ቅድመ እይታ (Square 1:1 እና Story 9:16)፣ የተስተካከለ ማዕከላዊ አቀማመጥ እና ከስሜት ገላጭ ምስል (emoji) የጸዳ ቅዱስ ውበት ተካቷል።",
+            "የአበው ምክር ማንቂያ በቀን አንድ ጊዜ በተጠቃሚው በተመረጠው ሰዓት ብቻ እንዲደርስ ተስተካክሏል።",
+            "የማንቂያ መልእክቶች ከስክሪን ላይ በራሳቸው የሚጠፉበትን የጊዜ ገደብ (30ደ፣ 1ሰ፣ 2ሰ፣ 4ሰ፣ 6ሰ፣ አይጥፋ) በምርጫ ማዘጋጀት ተችሏል።",
+            "የንባብ ገጾች በድንገት እንዳይደበቁና ቅንብሮች እንዳይዘጉ በባለሁለት መታ (double-tap) ብቻ እንዲገለጡ ተደርጓል።",
+            "የጉዞ ገጽ ዓመታዊ ካርታ ክፍት ሆኖ እንዲታይ እንዲሁም የማስታወሻው ክፍል ከላይና በመሃል ምቹ በሆነ መንገድ እንዲዋቀር ተደርጓል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.7.6",
         title = "Kenona Spiritual Rules in Journal, Desert Fathers Sayings Hub, and Devotional Heatmap Polish",
         titleAm = "የቀኖና ጸሎትና የሥርዓት ክፍል በማስታወሻ፣ የአበው ምክር ማዕከል እና የጸሎት ጉዞ ካርታ ማሻሻያ",

@@ -78,14 +78,5 @@ fun rememberDistractionFreeState(
         }
     }
 
-    // Auto-immersion timer: after initial delay or when controls become visible,
-    // automatically immerse after [initialDelayMs] unless paused by an active sheet or menu.
-    LaunchedEffect(state.isImmersive, pauseAutoImmersion, state.interactionCount) {
-        if (!state.isImmersive && !pauseAutoImmersion) {
-            delay(initialDelayMs)
-            state.hide()
-        }
-    }
-
     return state
 }

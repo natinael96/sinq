@@ -15,6 +15,7 @@ import com.sinq.app.data.GitsaweRepository
 import com.sinq.app.data.HabitsRepository
 import com.sinq.app.model.HabitsState
 import com.sinq.app.data.SettingsRepository
+import com.sinq.app.data.applyNotificationTimeout
 import com.sinq.app.stringsFor
 import com.sinq.app.ui.strings.Strings
 import kotlinx.coroutines.flow.first
@@ -74,6 +75,7 @@ class StreakReminderReceiver : BroadcastReceiver() {
                         .setVisibility(NotificationCompat.VISIBILITY_SECRET)
                         .setAutoCancel(true)
                         .setContentIntent(tap)
+                        .applyNotificationTimeout(context)
                         .build()
                     ReminderDispatchGate.locked {
                         if (SettingsRepository.streakReminderBlocking(context) &&

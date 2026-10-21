@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -20,7 +21,6 @@ enum class ThemeChoice { SYSTEM, LIGHT, DARK, VIGIL_BLACK }
 enum class HomeHorizonMode { DEVOTIONAL_HEATMAP, LITURGICAL_SEASON_HORIZON }
 enum class JourneyViewMode { GRID, LIST }
 enum class Language {
-    AMH_ENG,
     ENGLISH,
     AMHARIC;
 
@@ -28,8 +28,7 @@ enum class Language {
         fun fromString(value: String?): Language = when (value?.trim()?.uppercase()) {
             "ENGLISH" -> ENGLISH
             "AMHARIC" -> AMHARIC
-            "AMH_ENG", "BILINGUAL", "SYSTEM", "MIXED" -> AMH_ENG
-            else -> AMH_ENG
+            else -> AMHARIC
         }
     }
 }
@@ -113,6 +112,7 @@ object SettingsRepository {
         val almsReminders: List<com.sinq.app.model.SpecialReminder> = emptyList(),
         val titheReminders: List<com.sinq.app.model.SpecialReminder> = emptyList(),
         val repentanceReminders: List<com.sinq.app.model.SpecialReminder> = emptyList(),
+        val notificationTimeoutMinutes: Int = DEFAULT_NOTIFICATION_TIMEOUT_MINUTES,
     )
 
     private val KEY_READING_MODE = stringPreferencesKey("reading_mode")
@@ -230,6 +230,9 @@ object SettingsRepository {
     private val KEY_QUIET_ENABLED = booleanPreferencesKey("quiet_enabled")
     private val KEY_QUIET_START = intPreferencesKey("quiet_start_min")
     private val KEY_QUIET_END = intPreferencesKey("quiet_end_min")
+    private val KEY_NOTIFICATION_TIMEOUT_MINUTES = intPreferencesKey("notification_timeout_minutes")
+    const val DEFAULT_NOTIFICATION_TIMEOUT_MINUTES = 120 // 2 hours
+    val NOTIFICATION_TIMEOUT_CHOICES = listOf(30, 60, 120, 240, 360, 0)
 
     suspend fun backupSettings(context: Context): BackupSettings {
         val prefs = context.settingsDataStore.data.first()
@@ -272,6 +275,7 @@ object SettingsRepository {
                 KEY_REPENTANCE_REMINDER_TIME, DEFAULT_REPENTANCE_REMINDER_MIN,
                 KEY_REPENTANCE_SCHEDULE, com.sinq.app.model.HabitSchedule.DEFAULT_REPENTANCE,
             ),
+            notificationTimeoutMinutes = prefs[KEY_NOTIFICATION_TIMEOUT_MINUTES] ?: DEFAULT_NOTIFICATION_TIMEOUT_MINUTES,
         )
     }
 
@@ -303,6 +307,7 @@ object SettingsRepository {
             prefs[KEY_ALMS_REMINDERS] = scheduleJson.encodeToString(sanitizeReminders(value.almsReminders))
             prefs[KEY_TITHE_REMINDERS] = scheduleJson.encodeToString(sanitizeReminders(value.titheReminders))
             prefs[KEY_REPENTANCE_REMINDERS] = scheduleJson.encodeToString(sanitizeReminders(value.repentanceReminders))
+            prefs[KEY_NOTIFICATION_TIMEOUT_MINUTES] = value.notificationTimeoutMinutes.takeIf { it in NOTIFICATION_TIMEOUT_CHOICES } ?: DEFAULT_NOTIFICATION_TIMEOUT_MINUTES
         }
     }
 
@@ -535,7 +540,7 @@ object SettingsRepository {
             Language.fromString(it[KEY_LANGUAGE])
         }
 
-    val DEFAULT_LANGUAGE = Language.AMH_ENG
+    val DEFAULT_LANGUAGE = Language.AMHARIC
 
     suspend fun setLanguage(context: Context, value: Language) {
         context.settingsDataStore.edit { it[KEY_LANGUAGE] = value.name }
@@ -608,6 +613,27 @@ object SettingsRepository {
         runCatching {
             kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) { snoozeMinutes(context).first() }
         }.getOrDefault(DEFAULT_SNOOZE_MINUTES)
+
+    fun notificationTimeoutMinutes(context: Context): Flow<Int> =
+        context.settingsDataStore.data.map {
+            it[KEY_NOTIFICATION_TIMEOUT_MINUTES]?.takeIf { m -> m in NOTIFICATION_TIMEOUT_CHOICES }
+                ?: DEFAULT_NOTIFICATION_TIMEOUT_MINUTES
+        }
+
+    suspend fun setNotificationTimeoutMinutes(context: Context, value: Int) {
+        context.settingsDataStore.edit {
+            it[KEY_NOTIFICATION_TIMEOUT_MINUTES] =
+                value.takeIf { m -> m in NOTIFICATION_TIMEOUT_CHOICES } ?: DEFAULT_NOTIFICATION_TIMEOUT_MINUTES
+        }
+    }
+
+    /** Blocking read for use inside reminder broadcast receivers. */
+    fun notificationTimeoutMinutesBlocking(context: Context): Int =
+        runCatching {
+            kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) {
+                notificationTimeoutMinutes(context).first()
+            }
+        }.getOrDefault(DEFAULT_NOTIFICATION_TIMEOUT_MINUTES)
 
     fun lastBackupAt(context: Context): Flow<Long> =
         context.settingsDataStore.data.map { it[KEY_LAST_BACKUP_AT] ?: 0L }
@@ -1109,4 +1135,13 @@ object SettingsRepository {
     suspend fun dismissAlarmSoundNotice(context: Context) {
         context.settingsDataStore.edit { it[KEY_SHOW_ALARM_SOUND_NOTICE] = false }
     }
+}
+
+/** Automatically cancel reminder notifications after the user's chosen retention period. */
+fun NotificationCompat.Builder.applyNotificationTimeout(context: Context): NotificationCompat.Builder {
+    val minutes = SettingsRepository.notificationTimeoutMinutesBlocking(context)
+    if (minutes > 0) {
+        setTimeoutAfter(minutes * 60_000L)
+    }
+    return this
 }

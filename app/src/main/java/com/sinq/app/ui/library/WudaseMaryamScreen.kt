@@ -11,6 +11,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -198,12 +200,6 @@ fun WudaseMaryamScreen(
     val distractionFree = com.sinq.app.ui.common.rememberDistractionFreeState()
     val isImmersive = distractionFree.isImmersive
 
-    LaunchedEffect(pager.isScrollInProgress) {
-        if (pager.isScrollInProgress && !isImmersive) {
-            distractionFree.hide()
-        }
-    }
-
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -310,19 +306,14 @@ fun WudaseMaryamScreen(
             ) { page ->
                 val pageItem = pages.getOrNull(page) ?: return@HorizontalPager
                 val listState = androidx.compose.foundation.lazy.rememberLazyListState()
-                LaunchedEffect(listState.isScrollInProgress) {
-                    if (listState.isScrollInProgress && !isImmersive) {
-                        distractionFree.hide()
-                    }
-                }
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = { distractionFree.toggle() },
-                        ),
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onDoubleTap = { distractionFree.toggle() },
+                            )
+                        },
                     contentAlignment = Alignment.TopCenter,
                 ) {
                     LazyColumn(

@@ -120,7 +120,6 @@ fun EthiopianYearSwitcher(
         val eraText = when (s.languageMode) {
             com.sinq.app.data.Language.ENGLISH -> "$ecYear E.C."
             com.sinq.app.data.Language.AMHARIC -> "$ecYear ዓ.ም"
-            com.sinq.app.data.Language.AMH_ENG -> "$ecYear E.C. ($ecYear ዓ.ም)"
         }
         Text(
             text = eraText,
@@ -290,16 +289,14 @@ fun EthiopianYearHeatmap(
         }
     }
 
-    // Manuscript Folio Plate Container
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
-        color = manuscriptBg,
-        border = BorderStroke(1.5.dp, manuscriptBorder),
-        shadowElevation = if (isDark) 4.dp else 2.dp,
+    // Open Folio Heatmap Display (unboxed)
+    val pageBg = MaterialTheme.colorScheme.background
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.xxs, vertical = Spacing.xs),
     ) {
-        Column(Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm)) {
-            // Consolidated Folio Header: Section Title, Stats Pill, Year Switcher & Date Picker
+        // Consolidated Folio Header: Section Title, Stats Pill, Year Switcher & Date Picker
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -328,7 +325,6 @@ fun EthiopianYearHeatmap(
                             text = when (s.languageMode) {
                                 com.sinq.app.data.Language.AMHARIC -> "${geezNumeral(yearStats.first)} ቀናት"
                                 com.sinq.app.data.Language.ENGLISH -> "${yearStats.first} days"
-                                com.sinq.app.data.Language.AMH_ENG -> "${yearStats.first} days (${geezNumeral(yearStats.first)} ቀናት)"
                             },
                             style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
                             color = goldFillet,
@@ -559,9 +555,9 @@ fun EthiopianYearHeatmap(
                                 .background(
                                     Brush.horizontalGradient(
                                         colors = listOf(
-                                            manuscriptBg,
-                                            manuscriptBg.copy(alpha = 0.85f),
-                                            manuscriptBg.copy(alpha = 0.35f),
+                                            pageBg,
+                                            pageBg.copy(alpha = 0.85f),
+                                            pageBg.copy(alpha = 0.35f),
                                             Color.Transparent,
                                         )
                                     )
@@ -588,9 +584,9 @@ fun EthiopianYearHeatmap(
                                     Brush.horizontalGradient(
                                         colors = listOf(
                                             Color.Transparent,
-                                            manuscriptBg.copy(alpha = 0.35f),
-                                            manuscriptBg.copy(alpha = 0.85f),
-                                            manuscriptBg,
+                                            pageBg.copy(alpha = 0.35f),
+                                            pageBg.copy(alpha = 0.85f),
+                                            pageBg,
                                         )
                                     )
                                 ),
@@ -666,7 +662,6 @@ fun EthiopianYearHeatmap(
                         text = when (s.languageMode) {
                             com.sinq.app.data.Language.AMHARIC -> "● ጾም"
                             com.sinq.app.data.Language.ENGLISH -> "● Fasting"
-                            com.sinq.app.data.Language.AMH_ENG -> "● Fasting (ጾም)"
                         },
                         style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -693,7 +688,6 @@ fun EthiopianYearHeatmap(
                         text = when (s.languageMode) {
                             com.sinq.app.data.Language.AMHARIC -> "ዛሬ"
                             com.sinq.app.data.Language.ENGLISH -> "Today"
-                            com.sinq.app.data.Language.AMH_ENG -> "Today (ዛሬ)"
                         },
                         style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -720,7 +714,6 @@ fun EthiopianYearHeatmap(
                         text = when (s.languageMode) {
                             com.sinq.app.data.Language.AMHARIC -> "✦ ሙሉ"
                             com.sinq.app.data.Language.ENGLISH -> "✦ Full"
-                            com.sinq.app.data.Language.AMH_ENG -> "✦ Full (ሙሉ)"
                         },
                         style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -729,5 +722,4 @@ fun EthiopianYearHeatmap(
             }
         }
     }
-}
 

@@ -225,7 +225,7 @@ private fun LanguageStep(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val s = LocalStrings.current
-    val currentLang by SettingsRepository.language(context).collectAsState(initial = Language.AMH_ENG)
+    val currentLang by SettingsRepository.language(context).collectAsState(initial = Language.AMHARIC)
 
     Text(
         text = s.onboardingStepLanguageTitle,
@@ -244,9 +244,8 @@ private fun LanguageStep(
     Spacer(Modifier.height(Spacing.xl))
 
     val options = listOf(
-        Triple(Language.AMH_ENG, "English + አማርኛ", "Bilingual interface · English first with traditional Amharic terms"),
-        Triple(Language.ENGLISH, "English", "Strict English interface for all prayers, readings, and settings"),
         Triple(Language.AMHARIC, "አማርኛ", "ሙሉ የአማርኛ በይነገጽ ለጸሎታት፣ ንባባትና ማብራሪያዎች"),
+        Triple(Language.ENGLISH, "English", "English interface for all prayers, readings, and settings"),
     )
 
     options.forEach { (lang, label, desc) ->

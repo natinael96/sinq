@@ -11,6 +11,7 @@ import androidx.core.app.NotificationCompat
 import com.sinq.app.MainActivity
 import com.sinq.app.R
 import com.sinq.app.data.SettingsRepository
+import com.sinq.app.data.applyNotificationTimeout
 import com.sinq.app.stringsFor
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -70,6 +71,7 @@ class BreathPrayerReceiver : BroadcastReceiver() {
                         .setVisibility(NotificationCompat.VISIBILITY_SECRET)
                         .setAutoCancel(true)
                         .setContentIntent(tap)
+                        .applyNotificationTimeout(context)
                         .build()
                     ReminderDispatchGate.locked {
                         if (SettingsRepository.breathReminderBlocking(context)) {

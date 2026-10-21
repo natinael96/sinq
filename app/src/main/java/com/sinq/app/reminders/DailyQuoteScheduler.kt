@@ -20,7 +20,6 @@ object DailyQuoteScheduler {
 
     fun sync(context: Context, enabled: Boolean) {
         if (enabled) {
-            DailyQuoteReceiver.postNow(context)
             schedule(context)
         } else {
             cancel(context)

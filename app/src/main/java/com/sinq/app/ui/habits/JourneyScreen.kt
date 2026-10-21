@@ -136,7 +136,6 @@ fun journeyLine(summary: PrayerJourney.Summary, s: Strings): String {
         val name = when (s.languageMode) {
             com.sinq.app.data.Language.ENGLISH -> fast.nameEn
             com.sinq.app.data.Language.AMHARIC -> fast.nameAm
-            com.sinq.app.data.Language.AMH_ENG -> "${fast.nameEn} (${fast.nameAm})"
         }
         s.journeyFastLine(name, summary.fastDay, summary.daysPrayed)
     } else {
@@ -176,7 +175,7 @@ fun JourneyScreen(
                 hourId = hour.id,
                 rawName = hour.name,
                 transliteration = hour.transliteration,
-                mode = s.languageMode,
+                mode = com.sinq.app.data.Language.AMHARIC,
                 compact = true,
             )
             Triple(HabitsRepository.hourHabitId(hour.id), hour.id, displayName)
@@ -188,6 +187,7 @@ fun JourneyScreen(
         HabitsRepository.dueHabitIds(state, today).map { it to habitName(it, state, s) }
     }
     val summary = remember(state, today) { PrayerJourney.summarize(state.records, today) }
+    val journalCount by JournalRepository.count(context).collectAsState(initial = 0)
     // Per-habit summaries always count the Ethiopian month, even during a fast:
     // the hero speaks the period's language, the private records stay steady.
     val monthStart = remember(today) {
@@ -207,40 +207,47 @@ fun JourneyScreen(
         // The bar belongs to the host that holds all four tabs, and it carries
         // its own navigation-bar padding; this page only insets for the status bar.
         contentWindowInsets = WindowInsets.statusBars,
-        floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
-        floatingActionButton = {
-            androidx.compose.animation.AnimatedVisibility(
-                visible = selectedEpochDay == null,
-                enter = androidx.compose.animation.fadeIn(),
-                exit = androidx.compose.animation.fadeOut(),
-            ) {
-                ExtendedFloatingActionButton(
-                    onClick = onOpenJournal,
-                    icon = { Icon(Icons.Outlined.EditNote, contentDescription = null) },
-                    text = { Text(s.journalTitle) },
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary,
-                    elevation = androidx.compose.material3.FloatingActionButtonDefaults.elevation(
-                        defaultElevation = 6.dp,
-                        pressedElevation = 10.dp,
-                    ),
-                    modifier = Modifier.semantics { contentDescription = s.journalTitle },
-                )
-            }
-        },
     ) { innerPadding ->
         LazyColumn(
             state = listState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(start = Spacing.screen, end = Spacing.screen, top = Spacing.xs, bottom = 120.dp),
+            contentPadding = PaddingValues(start = Spacing.screen, end = Spacing.screen, top = Spacing.xs, bottom = Spacing.xxl),
         ) {
             item {
-                // The mark, not a page title: the tab beneath is already
-                // labelled ጉዞ, so the name of the app is what belongs here —
-                // and without it the page read as content jammed to the top.
-                com.sinq.app.ui.common.SinqWordmark()
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    com.sinq.app.ui.common.SinqWordmark()
+                    Surface(
+                        onClick = onOpenJournal,
+                        shape = RoundedCornerShape(20.dp),
+                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.35f)),
+                        modifier = Modifier.semantics { contentDescription = s.journalTitle },
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = Spacing.md, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                        ) {
+                            Icon(
+                                Icons.Outlined.EditNote,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.secondary,
+                            )
+                            Text(
+                                text = s.journalTitle,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.secondary,
+                            )
+                        }
+                    }
+                }
                 Spacer(Modifier.height(Spacing.xs))
                 //
                 // The one hero on this screen: today's candle and the period's
@@ -348,6 +355,15 @@ fun JourneyScreen(
                 )
             }
             item(key = "habits_end") { SinqDivider() }
+
+            item(key = "journal_inline") {
+                Spacer(Modifier.height(Spacing.xs))
+                JournalInlineCard(
+                    entryCount = journalCount,
+                    s = s,
+                    onClick = onOpenJournal,
+                )
+            }
 
             // The year heatmap is the historical view — the story is density
             // and return across the Church's year, not any one unbroken run.
@@ -909,3 +925,71 @@ private fun habitDetail(
 
 private fun daysBetweenInclusive(start: LocalDate, end: LocalDate): Int =
     (end.toEpochDay() - start.toEpochDay()).toInt() + 1
+
+@Composable
+private fun JournalInlineCard(
+    entryCount: Int,
+    s: Strings,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Outlined.EditNote,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
+            Spacer(Modifier.width(Spacing.md))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = s.journalTitle,
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    text = if (entryCount > 0) {
+                        if (s.languageMode == com.sinq.app.data.Language.AMHARIC) {
+                            "${com.sinq.app.ui.reading.geezNumeral(entryCount)} ማስታወሻዎች ተመዝግበዋል"
+                        } else {
+                            "$entryCount entries recorded"
+                        }
+                    } else {
+                        s.journalKindReflectionDesc
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                )
+            }
+            Spacer(Modifier.width(Spacing.xs))
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                modifier = Modifier.size(20.dp),
+            )
+        }
+    }
+}

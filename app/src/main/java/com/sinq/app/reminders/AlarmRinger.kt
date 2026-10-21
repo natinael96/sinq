@@ -20,6 +20,7 @@ import com.sinq.app.data.AlarmAlert
 import com.sinq.app.data.AlarmSound
 import com.sinq.app.data.Language
 import com.sinq.app.data.SettingsRepository
+import com.sinq.app.data.applyNotificationTimeout
 import com.sinq.app.stringsFor
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -92,7 +93,7 @@ object AlarmRinger {
         val sound = SettingsRepository.alarmSoundBlocking(app)
         val language = runCatching {
             runBlocking { SettingsRepository.language(app).first() }
-        }.getOrDefault(Language.AMH_ENG)
+        }.getOrDefault(Language.AMHARIC)
         val s = stringsFor(language)
 
         val nm = app.getSystemService(NotificationManager::class.java)
@@ -279,7 +280,7 @@ object AlarmRinger {
         val s = stringsFor(
             runCatching {
                 runBlocking { SettingsRepository.language(app).first() }
-            }.getOrDefault(Language.AMH_ENG),
+            }.getOrDefault(Language.AMHARIC),
         )
         val nm = app.getSystemService(NotificationManager::class.java)
         ensureFollowupChannel(app, nm)
@@ -320,7 +321,7 @@ object AlarmRinger {
         val s = stringsFor(
             runCatching {
                 runBlocking { SettingsRepository.language(app).first() }
-            }.getOrDefault(Language.AMH_ENG),
+            }.getOrDefault(Language.AMHARIC),
         )
         val nm = app.getSystemService(NotificationManager::class.java)
         ensureFollowupChannel(app, nm)
@@ -342,6 +343,7 @@ object AlarmRinger {
             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
             .setAutoCancel(true)
             .addAction(0, s.yesAction, yes)
+            .applyNotificationTimeout(app)
             .build()
         nm.notify(notifId, notification)
     }

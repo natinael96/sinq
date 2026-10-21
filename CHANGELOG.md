@@ -5,6 +5,22 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.7.7] — 2026-10-21
+
+_versionCode 119 · Liturgical Purity, Live Card Sharing, Notification Retention, Reader Double-Tap, and Journal Integration_
+
+### Added
+- **Live Manuscript Card Sharing & WYSIWYG Preview.** Interactive bottom sheet for passage sharing with live preview, aspect ratio selector for «Square (1:1)» and «Story (9:16)», centered typography, authentic Ge'ez ornamental framing, and zero emojis.
+- **Configurable Notification Retention Timeout.** System setting allowing users to customize notification auto-dismissal durations (30m, 1h, 2h, 4h, 6h, Never) using Android native `setTimeoutAfter`.
+- **Deliberate Reader Immersion via Double-Tap.** Full-screen distraction-free immersion is now engaged strictly via deliberate double-tap rather than automatic timing, fixing the rapid bottom sheet dismissal glitch.
+- **Enhanced Spiritual Journal Access.** Added an elegant top-header pill button and an inline feed reflection card on the Journey screen, removing bottom FAB screen occlusion.
+
+### Changed
+- **Pure Canonical Hours Restored.** Removed all seasonal and saint prayer interpolations from the seven canonical hours, strictly preserving the traditional pure Psalms and Gospel canon.
+- **Liturgical Book Titles in English View.** Preserved traditional Amharic liturgical designations («ስንክሳር», «ውዳሴ ማርያም», «ሥርዓተ ማኅሌት», «ባሕረ ሐሳብ») across English interface views.
+- **Desert Fathers Notification Frequency.** Enforced single-daily notification delivery at user-selected times, eliminating duplicate notification bursts on app resume.
+- **De-boxed Devotional Heatmap.** Removed outer border and shadow cards on the Journey page heatmap for an open, unconstrained liturgical manuscript layout.
+
 ## [1.7.6] — 2026-10-19
 
 _versionCode 118 · Kenona spiritual rules in Journal, Desert Fathers sayings hub, devotional heatmap layout, and prayer list polish_

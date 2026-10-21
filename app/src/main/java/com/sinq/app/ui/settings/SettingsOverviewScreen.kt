@@ -157,18 +157,10 @@ fun SettingsScreen(
                     Spacer(Modifier.height(Spacing.xs))
                     CompactSegmented(
                         label = s.languageLabel,
-                        options = listOf(s.langBilingual, s.langEnglish, s.langAmharic),
-                        selected = when (language) {
-                            Language.AMH_ENG -> 0
-                            Language.ENGLISH -> 1
-                            Language.AMHARIC -> 2
-                        },
+                        options = listOf(s.langEnglish, s.langAmharic),
+                        selected = if (language == Language.ENGLISH) 0 else 1,
                         onSelect = { index ->
-                            val chosen = when (index) {
-                                0 -> Language.AMH_ENG
-                                1 -> Language.ENGLISH
-                                else -> Language.AMHARIC
-                            }
+                            val chosen = if (index == 0) Language.ENGLISH else Language.AMHARIC
                             scope.launch { SettingsRepository.setLanguage(context, chosen) }
                         },
                     )

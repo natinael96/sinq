@@ -13,6 +13,7 @@ import com.sinq.app.R
 import com.sinq.app.data.OfferingRepository
 import com.sinq.app.data.PenanceRepository
 import com.sinq.app.data.SettingsRepository
+import com.sinq.app.data.applyNotificationTimeout
 import com.sinq.app.model.Penance
 import com.sinq.app.model.ScheduledReminder
 import com.sinq.app.model.Vow
@@ -115,6 +116,7 @@ class SpecialHabitReminderReceiver : BroadcastReceiver() {
                         .setVisibility(NotificationCompat.VISIBILITY_SECRET)
                         .setAutoCancel(true)
                         .setContentIntent(tap)
+                        .applyNotificationTimeout(context)
                         .build()
                     ReminderDispatchGate.locked {
                         if (SpecialHabitReminderScheduler.isCurrentArmable(
