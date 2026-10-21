@@ -8,8 +8,8 @@
         android:shortcutLongLabel="@string/shortcut_gitsawe_long">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetPackage="com.agpeya.app"
-            android:targetClass="com.agpeya.app.MainActivity">
+            android:targetPackage="com.sinq.app"
+            android:targetClass="com.sinq.app.MainActivity">
             <extra android:name="route" android:value="gitsawe" />
         </intent>
     </shortcut>
@@ -21,8 +21,8 @@
         android:shortcutLongLabel="@string/shortcut_sinksar_long">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetPackage="com.agpeya.app"
-            android:targetClass="com.agpeya.app.MainActivity">
+            android:targetPackage="com.sinq.app"
+            android:targetClass="com.sinq.app.MainActivity">
             <extra android:name="route" android:value="sinksar" />
         </intent>
     </shortcut>
@@ -34,8 +34,8 @@
         android:shortcutLongLabel="@string/shortcut_psalter_long">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetPackage="com.agpeya.app"
-            android:targetClass="com.agpeya.app.MainActivity">
+            android:targetPackage="com.sinq.app"
+            android:targetClass="com.sinq.app.MainActivity">
             <extra android:name="route" android:value="psalter" />
         </intent>
     </shortcut>
@@ -47,8 +47,8 @@
         android:shortcutLongLabel="@string/shortcut_confession_long">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetPackage="com.agpeya.app"
-            android:targetClass="com.agpeya.app.MainActivity">
+            android:targetPackage="com.sinq.app"
+            android:targetClass="com.sinq.app.MainActivity">
             <extra android:name="route" android:value="confessionPrep" />
         </intent>
     </shortcut>

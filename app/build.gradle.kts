@@ -23,7 +23,7 @@ android {
     // Where the Kotlin lives. Deliberately NOT renamed alongside applicationId:
     // it is invisible outside the source tree, and moving every file to say
     // com/sinq/app would be a diff the size of the app for no one's benefit.
-    namespace = "com.agpeya.app"
+    namespace = "com.sinq.app"
     compileSdk = 36
 
     defaultConfig {
@@ -40,8 +40,8 @@ android {
         // Versioning policy (semver-style):
         //   MINOR for features, PATCH for fixes/small tweaks.
         //   versionCode increments by 1 on EVERY update, no exceptions.
-        versionCode = 116
-        versionName = "1.7.0"
+        versionCode = 119
+        versionName = "1.7.7"
 
         // ስንቅ ships two ways, and only one of them may mention GitHub.
         //

@@ -442,6 +442,13 @@ def main():
     print("\n%d books, %d chapters, %d chars, %.1f MB on disk" %
           (len(books), sum(b["meta"]["chapterCount"] for b in books), total_chars, size / 1e6))
 
+    try:
+        from build_corpus_db import build_corpus_database
+        build_corpus_database()
+    except Exception as e:
+        print(f"Notice: build_corpus_database: {e}")
+
 
 if __name__ == "__main__":
     main()
+

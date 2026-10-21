@@ -46,3 +46,6 @@ brag-output/
 tools/extract_catena_patristics.py
 sources/patristics/
 
+# Ephemeral scratch maps and previews
+PROJECT_MAP.html
+

@@ -5,6 +5,57 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.7.7] — 2026-10-21
+
+_versionCode 119 · Liturgical Purity, Live Card Sharing, Notification Retention, Reader Double-Tap, and Journal Integration_
+
+### Added
+- **Live Manuscript Card Sharing & WYSIWYG Preview.** Interactive bottom sheet for passage sharing with live preview, aspect ratio selector for «Square (1:1)» and «Story (9:16)», centered typography, authentic Ge'ez ornamental framing, and zero emojis.
+- **Configurable Notification Retention Timeout.** System setting allowing users to customize notification auto-dismissal durations (30m, 1h, 2h, 4h, 6h, Never) using Android native `setTimeoutAfter`.
+- **Deliberate Reader Immersion via Double-Tap.** Full-screen distraction-free immersion is now engaged strictly via deliberate double-tap rather than automatic timing, fixing the rapid bottom sheet dismissal glitch.
+- **Enhanced Spiritual Journal Access.** Added an elegant top-header pill button and an inline feed reflection card on the Journey screen, removing bottom FAB screen occlusion.
+
+### Changed
+- **Pure Canonical Hours Restored.** Removed all seasonal and saint prayer interpolations from the seven canonical hours, strictly preserving the traditional pure Psalms and Gospel canon.
+- **Liturgical Book Titles in English View.** Preserved traditional Amharic liturgical designations («ስንክሳር», «ውዳሴ ማርያም», «ሥርዓተ ማኅሌት», «ባሕረ ሐሳብ») across English interface views.
+- **Desert Fathers Notification Frequency.** Enforced single-daily notification delivery at user-selected times, eliminating duplicate notification bursts on app resume.
+- **De-boxed Devotional Heatmap.** Removed outer border and shadow cards on the Journey page heatmap for an open, unconstrained liturgical manuscript layout.
+
+## [1.7.6] — 2026-10-19
+
+_versionCode 118 · Kenona spiritual rules in Journal, Desert Fathers sayings hub, devotional heatmap layout, and prayer list polish_
+
+### Added
+- **ቀኖና (Kenona) in Journal.** Dedicated spiritual rule and ascetic discipline section within the prayer journal, featuring filter chips, entry kind sheet option, and 6 authentic Orthodox devotional presets (+ ፵፩ ስግደት, + ውዳሴ ማርያም, + ፯ቱ መሐረኒ ዳዊት, + መጽሐፈ ሰዓታት, + ፻ ጊዜ ኪርያላይሶን, + የዕለቱ ስንክሳር ንባብ).
+- **Desert Fathers Sayings Hub.** Dedicated screen (`desert_fathers`) to browse, search, bookmark, copy, share, and reflect upon all 844 sayings from the early Desert Fathers in the personal prayer journal.
+- **Randomized Desert Fathers Reminders.** Opt-in preference in Settings and Desert Fathers Hub allowing the daily reminder notification to randomly pick from the complete 844 patristic sayings collection.
+
+### Changed
+- **Home Desert Fathers Row.** Polished quote card with 1-line quote preview, ellipsis overflow, and a dedicated «ሁሉንም እይ ➔» pill button leading directly to the Hub.
+- **Prayer List (`የጸሎት መዝገብ`).** Updated screen and header title to «የጸሎት መዝገብ» while preserving the clean, single-column diptych layout.
+- **Devotional Year Heatmap & Reader Layout.** Restored the horizontal 366-day grid layout on the Journey screen and classic reading view configuration.
+
+## [1.7.5] — 2026-10-19
+
+_versionCode 117 · Major Architectural, Accessibility, Liturgical & Devotional System Upgrade_
+
+### Added
+- **Enhanced Search Engine & Exact Ranking.** Expanded homophone folding table to encompass all Ethiopic interchangeable families (ሀ/ሐ/ኀ, ሰ/ሠ, አ/ዐ, ጸ/ፀ, labialized velars, and Ge'ez numerals ፩-፼ to Arabic). Exact orthography matches now rank with top priority over folded variants.
+- **Accessible Journey List View.** Introduced a dedicated week-by-week scrollable List view as an accessible TalkBack alternative to the 53x7 year heatmap, selectable in Settings.
+- **Follow System Font Scale.** Added a Settings toggle allowing UI and reading text to dynamically follow system accessibility font scaling.
+- **Vigil Black OLED Theme & WCAG Contrast.** Full WCAG 2.1 AA/AAA compliance across all Light, Dark, and Vigil Black tokens with subtle gold card framing.
+- **Unified Backup Envelope (Schema v4).** SHA-256 integrity-verified export/import combining Room journal entries and DataStore preferences with atomic Merge/Replace options and 3 automatic safety backups. Private confession notes are permanently air-gapped from exports.
+- **Authentic Manuscript Card Generator.** Share scriptures and liturgical passages as illuminated vellum cards featuring golden fillets, corner rosettes `፨`, rubricated headings, and optional attribution watermarks.
+- **Sacred Manuscript Onboarding Flow.** A 3-step introductory setup for language, typography with live manuscript preview, and opt-in reminders.
+- **Adaptive Tablet Navigation & Two-Pane Reading.** Dynamic navigation rail for medium/expanded screens (≥ 600dp) and synchronized side-by-side parallel reading for expanded displays (≥ 840dp).
+- **Paged Leaf Reader Mode.** Scripture reading with horizontal swipe paging, 20% edge taps for page turning, middle 60% chrome toggle, and persistent verse-keyed anchoring across font size changes.
+- **Multi-OEM Battery Optimization Guide.** Step-by-step background battery guidance with direct system deep links for Tecno, Infinix, Xiaomi, Samsung, and Stock Android devices.
+
+### Changed
+- **Home Adaptive FillColumn.** Automatically falls back to proportional vertical scrolling on compact displays (< 640dp) or enlarged font scales (≥ 1.3x) without card clipping.
+- **Journey Screen Visual Density.** Floating Action Button now gracefully animates away while inspecting calendar days, with 120dp bottom padding preventing card overlap.
+- **Reminders Policy.** Exact alarms transitioned to Google Play compliant `SCHEDULE_EXACT_ALARM` with runtime verification and boot/timezone rescheduling.
+
 ## [1.7.0] — 2026-10-18
 
 _versionCode 116 · Tri-mode language configuration (Amharic, English, Bilingual), horizontal prayer scroll with shadow affordances, floating journal button, and comprehensive Amharic orthographic review_

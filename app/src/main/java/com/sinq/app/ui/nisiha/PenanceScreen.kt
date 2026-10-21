@@ -1,0 +1,337 @@
+package com.sinq.app.ui.nisiha
+
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.ui.text.input.KeyboardType
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import com.sinq.app.ui.common.SinqDestructiveButton
+import com.sinq.app.ui.common.SinqOutlinedButton
+import com.sinq.app.ui.common.SinqPrimaryButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import com.sinq.app.data.JournalLock
+import com.sinq.app.data.PenanceRepository
+import com.sinq.app.model.HabitSchedule
+import com.sinq.app.model.Penance
+import com.sinq.app.model.PenanceKind
+import com.sinq.app.model.PenanceProgress
+import com.sinq.app.reminders.SpecialHabit
+import com.sinq.app.reminders.SpecialHabitReminderScheduler
+import com.sinq.app.ui.common.SinqTopBar
+import com.sinq.app.ui.common.formatEthiopian
+import com.sinq.app.ui.common.formatEthiopianShort
+import com.sinq.app.ui.journal.JournalLockGate
+import com.sinq.app.ui.journal.SecureScreen
+import com.sinq.app.ui.settings.ScheduleRow
+import com.sinq.app.ui.settings.TimeRow
+import com.sinq.app.ui.strings.LocalStrings
+import com.sinq.app.ui.strings.Strings
+import com.sinq.app.ui.theme.Spacing
+import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.util.UUID
+
+/** Private penance summaries; configuration is a local draft until Save. */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun PenanceScreenContent(onBack: () -> Unit) {
+    val context = LocalContext.current
+    val s = LocalStrings.current
+    val action = com.sinq.app.ui.common.rememberUserAction()
+    val load = com.sinq.app.ui.common.rememberFlowLoad { PenanceRepository.penances(context) }
+    if (com.sinq.app.ui.common.contentLoadScreen(load, s.penanceTitle, onBack)) return
+    val penances = load.value ?: return
+    val today by com.sinq.app.ui.common.rememberCurrentDate()
+    var editing by remember { mutableStateOf<Penance?>(null) }
+    var recording by remember { mutableStateOf<Penance?>(null) }
+    var deleting by remember { mutableStateOf<Penance?>(null) }
+    var removeRecord by remember { mutableStateOf<Pair<Penance, String>?>(null) }
+    var permissionDenied by remember { mutableStateOf(false) }
+    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+        permissionDenied = !it
+    }
+    fun persist(next: List<Penance>, done: () -> Unit = {}) = action.run {
+        PenanceRepository.setPenances(context, next)
+        SpecialHabitReminderScheduler.sync(context, SpecialHabit.PENANCE)
+        done()
+    }
+    fun update(value: Penance, done: () -> Unit = {}) = persist(
+        if (penances.any { it.id == value.id }) penances.map { if (it.id == value.id) value else it }
+        else penances + value, done,
+    )
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = { SinqTopBar(s.penanceTitle, onBack) },
+    ) { padding ->
+        LazyColumn(Modifier.fillMaxSize().padding(padding),
+            contentPadding = PaddingValues(Spacing.screen), verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+            item {
+                Text(s.penanceIntro, style = MaterialTheme.typography.bodyMedium)
+                Text(s.penancePrivacyNote, style = MaterialTheme.typography.bodySmall)
+                if (permissionDenied) {
+                    Text(s.notifDisabledBody, color = MaterialTheme.colorScheme.error)
+                    TextButton(onClick = { com.sinq.app.ui.common.openNotificationSettings(context) }) { Text(s.openSettings) }
+                }
+                if (penances.isEmpty()) Text(s.noPenances)
+            }
+            items(penances, key = { it.id }) { penance ->
+                var history by remember(penance.id) { mutableStateOf(false) }
+                Card {
+                    Column(Modifier.padding(Spacing.md)) {
+                        com.sinq.app.ui.common.ToggleRow(
+                            title = penance.label.ifBlank { s.penanceTitle },
+                            checked = penance.enabled,
+                            subtitle = kindName(penance.kind, s),
+                            onCheckedChange = { enabled ->
+                                if (!action.busy) {
+                                    if (enabled && Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(
+                                        context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
+                                        permission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                    update(penance.copy(enabled = enabled))
+                                }
+                            },
+                        )
+                        Text(if (penance.settled) s.penanceSettled else if (penance.quota == 0) "${s.penanceQuotaLabel} —" else
+                            "${s.penanceDone} ${penance.done} · ${s.penanceRemaining} ${penance.remaining}",
+                            style = MaterialTheme.typography.titleSmall)
+                        Text(com.sinq.app.ui.settings.scheduleSummary(penance.schedule, s, context),
+                            style = MaterialTheme.typography.bodySmall)
+                        Text("%02d:%02d".format(penance.minute / 60, penance.minute % 60))
+                        if (penance.remindsStill) penance.schedule.nextDueOnOrAfter(today)?.let {
+                            Text(s.nextDue(formatEthiopian(it, s)), style = MaterialTheme.typography.bodySmall)
+                        }
+                        androidx.compose.foundation.layout.FlowRow {
+                            TextButton(enabled = !action.busy, onClick = { recording = penance }) { Text(s.penanceLogProgress) }
+                            TextButton(enabled = !action.busy, onClick = { editing = penance }) { Text(s.editPerson) }
+                            SinqDestructiveButton(enabled = !action.busy, onClick = { deleting = penance }) { Text(s.delete) }
+                            if (penance.progress.isNotEmpty()) TextButton(onClick = { history = !history }) {
+                                Text("${s.penanceProgressHeader} (${penance.progress.size})")
+                            }
+                        }
+                        if (history) penance.progress.sortedByDescending { it.date }.forEach { progress ->
+                            Text(listOfNotNull(progress.localDate?.let { formatEthiopianShort(it, s) } ?: progress.date,
+                                progress.amount.takeIf { it > 0 }?.toString(), progress.note.takeIf { it.isNotBlank() })
+                                .joinToString(" · "), style = MaterialTheme.typography.bodySmall)
+                            SinqDestructiveButton(enabled = !action.busy, onClick = { removeRecord = penance to progress.id }) { Text(s.delete) }
+                        }
+                    }
+                }
+            }
+            item {
+                SinqOutlinedButton(enabled = !action.busy, onClick = {
+                    editing = Penance(UUID.randomUUID().toString(), enabled = false,
+                        schedule = HabitSchedule(kind = HabitSchedule.Kind.WEEKLY, days = (1..7).toSet()),
+                        assignedDate = today.toString())
+                }, leadingIcon = Icons.Outlined.Add) { Text(s.penanceAdd) }
+                Spacer(Modifier.height(Spacing.huge))
+            }
+        }
+    }
+    editing?.let { value ->
+        PenanceEditor(value, action.busy, onDismiss = { editing = null }, onSave = {
+            update(it) { editing = null }
+        })
+    }
+    recording?.let { value ->
+        ProgressDialog(s, action.busy, onDismiss = { if (!action.busy) recording = null }, onSave = { amount, note ->
+            update(value.copy(progress = value.progress + PenanceProgress(UUID.randomUUID().toString(),
+                today.toString(), amount, note))) { recording = null }
+        })
+    }
+    deleting?.let { value ->
+        AlertDialog(onDismissRequest = { if (!action.busy) deleting = null },
+            title = { Text(value.label.ifBlank { s.penanceTitle }) }, text = { Text(s.deletePenanceConfirm) },
+            confirmButton = { SinqDestructiveButton(enabled = !action.busy, onClick = {
+                persist(penances.filterNot { it.id == value.id }) { deleting = null }
+            }) { Text(s.delete) } },
+            dismissButton = { TextButton(enabled = !action.busy, onClick = { deleting = null }) { Text(s.cancel) } })
+    }
+    removeRecord?.let { (value, id) ->
+        AlertDialog(onDismissRequest = { if (!action.busy) removeRecord = null },
+            title = { Text(s.delete) }, text = { Text(s.deleteEntryConfirm) },
+            confirmButton = { SinqDestructiveButton(enabled = !action.busy, onClick = {
+                update(value.copy(progress = value.progress.filterNot { it.id == id })) { removeRecord = null }
+            }) { Text(s.delete) } },
+            dismissButton = { TextButton(enabled = !action.busy, onClick = { removeRecord = null }) { Text(s.cancel) } })
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PenanceEditor(value: Penance, busy: Boolean, onDismiss: () -> Unit, onSave: (Penance) -> Unit) {
+    val s = LocalStrings.current
+    var draft by remember(value.id) { mutableStateOf(value) }
+    ModalBottomSheet(onDismissRequest = { if (!busy) onDismiss() }) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = Spacing.screen)
+                .padding(bottom = Spacing.lg)
+                .imePadding()
+                .verticalScroll(rememberScrollState()),
+        ) {
+            Text(
+                s.penanceTitle,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Spacer(Modifier.height(Spacing.md))
+            OutlinedTextField(
+                value = draft.label,
+                onValueChange = { draft = draft.copy(label = it) },
+                enabled = !busy,
+                label = { Text(s.penanceNameLabel) },
+                placeholder = { Text(s.penanceNameHint) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(Spacing.sm))
+            androidx.compose.foundation.layout.FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+            ) {
+                PenanceKind.entries.forEach { kind ->
+                    FilterChip(
+                        selected = draft.kind == kind,
+                        enabled = !busy,
+                        onClick = { draft = draft.copy(kind = kind) },
+                        label = { Text(kindName(kind, s)) },
+                    )
+                }
+            }
+            Spacer(Modifier.height(Spacing.sm))
+            OutlinedTextField(
+                value = if (draft.quota > 0) draft.quota.toString() else "",
+                onValueChange = { input ->
+                    val digits = input.filter { it.isDigit() }
+                    draft = draft.copy(quota = digits.toIntOrNull() ?: 0)
+                },
+                enabled = !busy,
+                label = { Text(s.penanceQuotaLabel) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(Spacing.sm))
+            ScheduleRow(draft.schedule, s, { if (!busy) draft = draft.copy(schedule = it) })
+            TimeRow(draft.minute, s, { if (!busy) draft = draft.copy(minute = it) })
+            Spacer(Modifier.height(Spacing.lg))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm, Alignment.End),
+            ) {
+                TextButton(enabled = !busy, onClick = onDismiss) { Text(s.cancel) }
+                SinqPrimaryButton(enabled = !busy, onClick = { onSave(draft) }) { Text(s.save) }
+            }
+        }
+    }
+}
+
+private fun kindName(kind: PenanceKind, s: Strings): String = when (kind) {
+    PenanceKind.PROSTRATIONS -> s.penanceKindProstrations
+    PenanceKind.FASTING_DAYS -> s.penanceKindFastingDays
+    PenanceKind.ALMS -> s.penanceKindAlms
+    PenanceKind.PRAYERS -> s.penanceKindPrayers
+    PenanceKind.OTHER -> s.penanceKindOther
+}
+
+/** One session performed today: a count and, if wanted, a word about it. */
+@Composable
+private fun ProgressDialog(
+    s: Strings,
+    busy: Boolean,
+    onDismiss: () -> Unit,
+    onSave: (Int, String) -> Unit,
+) {
+    var amountText by remember { mutableStateOf("") }
+    var note by remember { mutableStateOf("") }
+    val parsed = amountText.trim().toIntOrNull()?.takeIf { it > 0 }
+    // An unmeasured penance is recorded by the date alone, so blank is allowed.
+    val valid = amountText.isBlank() || parsed != null
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(s.penanceLogProgress) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
+                OutlinedTextField(
+                    value = amountText,
+                    onValueChange = { amountText = it },
+                    singleLine = true,
+                    label = { Text(s.penanceQuotaLabel) },
+                    isError = !valid,
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                        keyboardType = androidx.compose.ui.text.input.KeyboardType.Number,
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(Modifier.height(Spacing.sm))
+                OutlinedTextField(
+                    value = note,
+                    onValueChange = { note = it },
+                    singleLine = true,
+                    label = { Text(s.noteLabel) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        },
+        confirmButton = {
+            SinqPrimaryButton(enabled = valid && !busy, onClick = { onSave(parsed ?: 0, note.trim()) }) {
+                Text(s.save)
+            }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(s.cancel) } },
+    )
+}
+
+@Composable
+fun PenanceScreen(onBack: () -> Unit) {
+    com.sinq.app.ui.journal.JournalAccess(onBack) { PenanceScreenContent(onBack) }
+}

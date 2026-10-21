@@ -936,6 +936,13 @@ def main():
     if report["empty"]:
         print("  (%d orders had no parts and were dropped)" % report["empty"])
 
+    try:
+        from build_corpus_db import build_corpus_database
+        build_corpus_database()
+    except Exception as e:
+        print(f"Notice: build_corpus_database: {e}")
+
 
 if __name__ == "__main__":
     main()
+
