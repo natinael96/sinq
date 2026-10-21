@@ -36,6 +36,15 @@ internal fun widgetDayFor(now: LocalDateTime, rolloverMinute: Int?): LocalDate {
 }
 
 /**
+ * Whether the card is currently in its evening rollover window showing the coming day's eve (ዋዜማ).
+ */
+internal fun isWidgetEve(now: LocalDateTime, rolloverMinute: Int?): Boolean {
+    if (rolloverMinute == null) return false
+    val minuteOfDay = now.hour * 60 + now.minute
+    return minuteOfDay >= rolloverMinute
+}
+
+/**
  * When the card next shows something different.
  *
  * With a rollover there is exactly one such moment a day, and it is the

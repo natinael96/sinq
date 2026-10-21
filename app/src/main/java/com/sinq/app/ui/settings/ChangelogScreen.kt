@@ -53,6 +53,21 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.7.8",
+        title = "Liturgical Eve on Gitsawe Widget, Database Optimization, and JSON Minification",
+        titleAm = "የዋዜማ ምልክት በግጻዌ ዊጅት፣ የፍለጋ ዳታቤዝ እና የፋይል ማመቅ ማሻሻያ",
+        changes = listOf(
+            "Gitsawe home widget now prominently displays Eve (ዋዜማ) with date and feast attribution during the liturgical evening rollover.",
+            "Optimized SQLite full-text search corpus database with index defragmentation and page tuning, saving ~2 MB.",
+            "Minified bundled lectionary and daily quotes JSON files, eliminating redundant whitespace overhead.",
+        ),
+        changesAm = listOf(
+            "የዕለቱ ግጻዌ ዊጅት በምሽቱ የዋዜማ መግቢያ ወቅት የዕለቱንና የበዓሉን ዋዜማ በጉልህ እንዲያሳይ ተደርጓል።",
+            "የፍለጋ ዳታቤዙን (sinq_corpus.db) ገጾች በማመቅና ክፍተቶችን በማጥበብ መጠኑ በ ~2 ሜጋባይት እንዲቀንስ ተደርጓል።",
+            "የግጻዌና የአበው ምክር JSON ፋይሎች ያለ አላስፈላጊ ክፍተት እንዲታመቁ ተደርጓል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.7.7",
         title = "Liturgical Purity, Live Card Sharing, Notification Retention, and Journal Integration",
         titleAm = "የሰዓታት ንባባት ሥርዓት፣ የቀጥታ የብራና ካርድ ማጋሪያ፣ የማንቂያ ሰዓት ቆይታ እና የማስታወሻ ማሻሻያ",

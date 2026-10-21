@@ -138,7 +138,7 @@ def build_corpus_database():
     conn = sqlite3.connect(str(DB_PATH))
     cur = conn.cursor()
 
-    cur.execute("PRAGMA page_size = 4096;")
+    cur.execute("PRAGMA page_size = 1024;")
     cur.execute("PRAGMA journal_mode = OFF;")
     cur.execute("PRAGMA synchronous = OFF;")
 
@@ -380,6 +380,8 @@ def build_corpus_database():
     INSERT INTO corpus_fts (docid, title, folded)
     SELECT id, title, folded FROM corpus_docs;
     """)
+
+    cur.execute("INSERT INTO corpus_fts(corpus_fts) VALUES('optimize');")
 
     cur.execute("CREATE INDEX idx_corpus_source ON corpus_docs(source);")
     cur.execute("CREATE INDEX idx_corpus_target ON corpus_docs(target_id);")
