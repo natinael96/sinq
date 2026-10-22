@@ -17,7 +17,7 @@ Welcome to the **Sinq (ስንቅ)** repository. This document serves as the prim
 
 ## 2. Technology Stack & Platform Targets
 
-- **Operating System / Target**: Android 6.0+ (API 23+) up to **Android 16 (compileSdk 36, targetSdk 36)**.
+- **Operating System / Target**: Android 7.0+ (API 24+) up to **Android 16 (compileSdk 36, targetSdk 36)**.
 - **Language**: Kotlin 2.1+ (configured in `gradle/libs.versions.toml`).
 - **UI Toolkit**: 100% **Jetpack Compose** with **Material 3**.
 - **Architecture**: Single `ComponentActivity` (`MainActivity.kt`) with Compose Navigation (`androidx.navigation.compose`). **NO Android Fragments** (Compose throughout).

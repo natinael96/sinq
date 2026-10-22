@@ -53,6 +53,17 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.7.9",
+        title = "Google Play Protection Compatibility (API 24+)",
+        titleAm = "የጉግል ፕሌይ ጥበቃና ዝቅተኛ የአንድሮይድ ስሪት (API 24+) ማሻሻያ",
+        changes = listOf(
+            "Raised minimum supported Android version to Android 7.0 Nougat (API 24) to satisfy Google Play Automatic App Protection requirements.",
+        ),
+        changesAm = listOf(
+            "የጉግል ፕሌይ ራስ-ሰር የመተግበሪያ ጥበቃ ደንብን ለማሟላት ዝቅተኛው የአንድሮይድ ስሪት ወደ አንድሮይድ 7.0 (API 24) ከፍ እንዲል ተደርጓል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.7.8",
         title = "Liturgical Eve on Gitsawe Widget, Database Optimization, and JSON Minification",
         titleAm = "የዋዜማ ምልክት በግጻዌ ዊጅት፣ የፍለጋ ዳታቤዝ እና የፋይል ማመቅ ማሻሻያ",
