@@ -74,24 +74,19 @@ fun LicensesScreen(onBack: () -> Unit) {
             }
             item {
                 LicSection("Scripture text")
-                LicenseLink("80-weahadu", "https://github.com/EOTCOpenSource/80-weahadu")
+                LicenseLink("Ethiopian Bible Digitization", "https://github.com/EOTCOpenSource/80-weahadu")
                 LicenseLink("CC BY-NC-ND 4.0", "https://creativecommons.org/licenses/by-nc-nd/4.0/")
                 LicPara(
-                    "All bundled scripture — the Bible books readable in the Library, the Psalter " +
-                        "in Amharic and Ge'ez, and the psalms and gospels arranged into the hours " +
-                        "of prayer — is drawn from 80-weahadu, the open-source Ethiopian Orthodox " +
-                        "Tewahedo Bible published by the EOTCOpenSource community " +
-                        "(github.com/EOTCOpenSource/80-weahadu), used under the Creative Commons " +
-                        "Attribution-NonCommercial-NoDerivatives 4.0 International licence " +
-                        "(creativecommons.org/licenses/by-nc-nd/4.0).",
+                    "The Old and New Testament books readable in the Library were digitized and " +
+                        "extracted from available publication PDFs, carefully formatted, and proofread. " +
+                        "The Psalter (መዝሙረ ዳዊት) in Amharic and Ge'ez, as well as the psalms and " +
+                        "gospels arranged throughout the canonical hours of prayer, are preserved from " +
+                        "the traditional Ethiopian Orthodox Tewahedo LXX edition.",
                 )
                 LicPara(
-                    "The verse text is reproduced unchanged, with two disclosed exceptions: the " +
-                        "acrostic letters of Psalm 118, which the source encodes at the end of " +
-                        "stanza-final verses, are shown as stanza headings; and psalm chapter " +
-                        "labels follow the Ge'ez (LXX) numbering used by the Ethiopian tradition. " +
-                        "Provided as-is, without warranties. A copy of the licence is bundled with " +
-                        "the app at content/bible/LICENSE.",
+                    "Psalm chapter labels follow the traditional Ge'ez (LXX) numbering used by the " +
+                        "Ethiopian tradition. Provided as-is, without warranties. A copy of the licence " +
+                        "is bundled with the app at content/bible/LICENSE.",
                 )
             }
             item {

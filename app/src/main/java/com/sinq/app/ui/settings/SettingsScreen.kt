@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,8 +28,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Alarm
+import androidx.compose.material.icons.outlined.AutoStories
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.ExpandLess
@@ -77,7 +81,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.style.TextOverflow
@@ -526,54 +532,6 @@ private fun ExportPickerDialog(
 }
 
 /**
- * When the nightly streak nudge fires. The same Material clock the prayer-mode
- * editor uses, in a dialog; saving re-arms the alarm immediately, so the change
- * takes effect tonight rather than after the old time fires once more.
- */
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
-@Composable
-private fun StreakReminderTimeRow(s: com.sinq.app.ui.strings.Strings) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val minute by SettingsRepository.streakReminderTime(context)
-        .collectAsState(initial = SettingsRepository.DEFAULT_STREAK_REMINDER_MIN)
-    var picking by remember { mutableStateOf(false) }
-
-    com.sinq.app.ui.common.ListRow(
-        title = s.timeLabel,
-        subtitle = "%02d:%02d".format(minute / 60, minute % 60),
-        onClick = { picking = true },
-    )
-
-    if (picking) {
-        val timeState = androidx.compose.material3.rememberTimePickerState(
-            initialHour = minute / 60,
-            initialMinute = minute % 60,
-            is24Hour = true,
-        )
-        com.sinq.app.ui.common.SinqTimePickerDialog(
-            title = s.timeLabel,
-            onDismiss = { picking = false },
-            onConfirm = {
-                picking = false
-                scope.launch {
-                    SettingsRepository.setStreakReminderTime(
-                        context,
-                        timeState.hour * 60 + timeState.minute,
-                    )
-                    com.sinq.app.reminders.StreakReminderScheduler.sync(context, true)
-                }
-            },
-        ) {
-            androidx.compose.material3.TimePicker(
-                state = timeState,
-                colors = com.sinq.app.ui.common.sinqTimePickerColors(),
-            )
-        }
-    }
-}
-
-/**
  * A nightly window in which every reminder stays silent.
  *
  * Because the silence is now total — the ringing prayer alarms and all the
@@ -668,6 +626,137 @@ private fun QuietHoursRow(s: com.sinq.app.ui.strings.Strings) {
                 state = state,
                 colors = com.sinq.app.ui.common.sinqTimePickerColors(),
             )
+        }
+    }
+}
+
+/**
+ * Split reminder card featuring an interactive configuration side on the left
+ * (showing icon, title, description, and time badge) and an independent toggle switch
+ * on the right separated by a clean vertical divider.
+ */
+@Composable
+fun ReminderSplitCard(
+    title: String,
+    checked: Boolean,
+    onToggle: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    icon: ImageVector? = null,
+    timeBadge: String? = null,
+    onClickConfig: (() -> Unit)? = null,
+) {
+    SinqCard(
+        modifier = modifier.fillMaxWidth(),
+        accented = checked,
+        contentPadding = PaddingValues(0.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .then(
+                        if (onClickConfig != null) {
+                            Modifier.clickable(onClick = onClickConfig)
+                        } else {
+                            Modifier
+                        }
+                    )
+                    .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (icon != null) {
+                    Surface(
+                        shape = CircleShape,
+                        color = if (checked) MaterialTheme.colorScheme.secondary.copy(alpha = 0.14f)
+                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        modifier = Modifier.size(38.dp),
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                tint = if (checked) MaterialTheme.colorScheme.secondary
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp),
+                            )
+                        }
+                    }
+                    Spacer(Modifier.width(Spacing.md))
+                }
+                Column(Modifier.weight(1f)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                    ) {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                        if (timeBadge != null && checked) {
+                            Surface(
+                                shape = MaterialTheme.shapes.small,
+                                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.14f),
+                                contentColor = MaterialTheme.colorScheme.secondary,
+                            ) {
+                                Text(
+                                    text = timeBadge,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                )
+                            }
+                        }
+                    }
+                    if (subtitle != null) {
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            text = subtitle,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            lineHeight = 16.sp,
+                        )
+                    }
+                }
+                if (onClickConfig != null) {
+                    Spacer(Modifier.width(Spacing.xs))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
+                        modifier = Modifier.size(IconSize.small),
+                    )
+                }
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(1.dp)
+                    .padding(vertical = Spacing.sm)
+                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(horizontal = Spacing.md),
+                contentAlignment = Alignment.Center,
+            ) {
+                androidx.compose.material3.Switch(
+                    checked = checked,
+                    onCheckedChange = onToggle,
+                )
+            }
         }
     }
 }
@@ -1250,32 +1339,23 @@ fun PrayerSettingsScreen(onBack: () -> Unit, onOpenManageHours: () -> Unit, onOp
 
                 Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(s.wazemaRolloverTitle)
-                SinqCard(
-                    contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs),
-                ) {
-                    ToggleRow(
-                        title = s.wazemaRolloverTitle,
-                        subtitle = s.wazemaRolloverSubtitle,
-                        checked = wazemaRollover,
-                        onCheckedChange = { scope.launch { SettingsRepository.setWazemaRollover(context, it) } },
-                    )
-                    if (wazemaRollover) {
-                        SinqDivider()
-                        val hours = wazemaRolloverTime / 60
-                        val mins = wazemaRolloverTime % 60
-                        val timeStr = String.format("%02d:%02d", hours, mins)
-                        NavRow(
-                            title = s.wazemaRolloverTimeLabel,
-                            subtitle = "$timeStr (18:00 / 12:00 ምሽት)",
-                            onClick = {
-                                scope.launch {
-                                    val nextTime = if (wazemaRolloverTime == 18 * 60) 0 else 18 * 60
-                                    SettingsRepository.setWazemaRolloverTime(context, nextTime)
-                                }
-                            },
-                        )
-                    }
-                }
+                val wazemaHours = wazemaRolloverTime / 60
+                val wazemaMins = wazemaRolloverTime % 60
+                val wazemaTimeStr = String.format("%02d:%02d", wazemaHours, wazemaMins)
+                ReminderSplitCard(
+                    title = s.wazemaRolloverTitle,
+                    subtitle = s.wazemaRolloverSubtitle,
+                    icon = Icons.Outlined.Schedule,
+                    timeBadge = "$wazemaTimeStr (18:00)",
+                    checked = wazemaRollover,
+                    onClickConfig = {
+                        scope.launch {
+                            val nextTime = if (wazemaRolloverTime == 18 * 60) 0 else 18 * 60
+                            SettingsRepository.setWazemaRolloverTime(context, nextTime)
+                        }
+                    },
+                    onToggle = { scope.launch { SettingsRepository.setWazemaRollover(context, it) } },
+                )
 
                 Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(if (s.isAmharic) "የመነሻ ገጽ እይታ" else "Home Horizon Mode")
@@ -1360,10 +1440,20 @@ fun RemindersSettingsScreen(
     val scope = rememberCoroutineScope()
     val s = com.sinq.app.ui.strings.LocalStrings.current
     val streak by SettingsRepository.streakReminder(context).collectAsState(initial = true)
+    val streakTime by SettingsRepository.streakReminderTime(context)
+        .collectAsState(initial = SettingsRepository.DEFAULT_STREAK_REMINDER_MIN)
     val gitsawe by SettingsRepository.gitsaweReminder(context).collectAsState(initial = true)
+    val gitsaweTime by SettingsRepository.gitsaweReminderTime(context)
+        .collectAsState(initial = SettingsRepository.DEFAULT_GITSAWE_REMINDER_MIN)
     val breath by SettingsRepository.breathReminder(context).collectAsState(initial = true)
     val reading by SettingsRepository.readingReminder(context).collectAsState(initial = true)
     val dailyQuote by SettingsRepository.dailyQuoteLockscreen(context).collectAsState(initial = true)
+    val dailyQuoteTime by SettingsRepository.dailyQuoteTime(context)
+        .collectAsState(initial = SettingsRepository.DEFAULT_DAILY_QUOTE_MIN)
+
+    var pickingStreakTime by remember { mutableStateOf(false) }
+    var pickingGitsaweTime by remember { mutableStateOf(false) }
+    var pickingDailyQuoteTime by remember { mutableStateOf(false) }
     var showLockscreenPrompt by remember { mutableStateOf(false) }
     val almsEntries by SettingsRepository.almsReminders(context).collectAsState(initial = emptyList())
     val repentanceEntries by SettingsRepository.repentanceReminders(context).collectAsState(initial = emptyList())
@@ -1492,135 +1582,127 @@ fun RemindersSettingsScreen(
                 DayTimeline()
                 Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(s.remindersGroupDaily)
-                SinqCard(contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs)) {
-                    ToggleRow(s.settingsNightReminder, streak, { on ->
+
+                // 1. Nightly reminder (Streak)
+                ReminderSplitCard(
+                    title = s.settingsNightReminder,
+                    subtitle = s.settingsNightReminderDesc,
+                    icon = Icons.Outlined.Schedule,
+                    timeBadge = "%02d:%02d".format(streakTime / 60, streakTime % 60),
+                    checked = streak,
+                    onClickConfig = { pickingStreakTime = true },
+                    onToggle = { on ->
                         if (on) requestNotifications()
                         scope.launch {
                             SettingsRepository.setStreakReminder(context, on)
                             com.sinq.app.reminders.StreakReminderScheduler.sync(context, on)
                         }
-                    }, subtitle = s.settingsNightReminderDesc)
-                    if (streak) {
-                        SinqDivider()
-                        StreakReminderTimeRow(s)
-                    }
-                    SinqDivider()
-                    ToggleRow(s.settingsGitsaweReminder, gitsawe, { on ->
+                    },
+                )
+                Spacer(Modifier.height(Spacing.sm))
+
+                // 2. Gitsawe daily reminder
+                ReminderSplitCard(
+                    title = s.settingsGitsaweReminder,
+                    subtitle = s.settingsGitsaweReminderDesc,
+                    icon = Icons.Outlined.AutoStories,
+                    timeBadge = "%02d:%02d".format(gitsaweTime / 60, gitsaweTime % 60),
+                    checked = gitsawe,
+                    onClickConfig = { pickingGitsaweTime = true },
+                    onToggle = { on ->
                         if (on) requestNotifications()
                         scope.launch {
                             SettingsRepository.setGitsaweReminder(context, on)
                             com.sinq.app.reminders.GitsaweReminderScheduler.sync(context, on)
                         }
-                    }, subtitle = s.settingsGitsaweReminderDesc)
-                    if (gitsawe) {
-                        SinqDivider()
-                        GitsaweReminderTimeRow(s)
-                    }
-                    SinqDivider()
-                    ToggleRow(s.settingsBreathReminder, breath, { on ->
-                        if (on) requestNotifications()
-                        scope.launch {
-                            SettingsRepository.setBreathReminder(context, on)
-                            com.sinq.app.reminders.BreathPrayerScheduler.sync(context, on)
+                    },
+                )
+                Spacer(Modifier.height(Spacing.sm))
+
+                // 3. Desert Fathers lockscreen quote
+                ReminderSplitCard(
+                    title = if (s.isAmharic) "የአበው ምክር በመቆለፊያ ገጽ" else "Desert Fathers Lockscreen Quote",
+                    subtitle = s.dailyQuoteLockscreenDesc,
+                    icon = Icons.Outlined.FormatQuote,
+                    timeBadge = "%02d:%02d".format(dailyQuoteTime / 60, dailyQuoteTime % 60),
+                    checked = dailyQuote,
+                    onClickConfig = { pickingDailyQuoteTime = true },
+                    onToggle = { on ->
+                        if (on) {
+                            requestNotifications()
+                            if (!com.sinq.app.reminders.DailyQuoteReceiver.isLockscreenVisible(context)) {
+                                showLockscreenPrompt = true
+                            }
                         }
-                    }, subtitle = s.settingsBreathReminderDesc)
-                    SinqDivider()
-                    ToggleRow(s.settingsReadingReminder, reading, { on ->
+                        scope.launch {
+                            SettingsRepository.setDailyQuoteLockscreen(context, on)
+                            com.sinq.app.reminders.DailyQuoteScheduler.sync(context, on)
+                        }
+                    },
+                )
+                if (dailyQuote) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.sm),
+                        horizontalArrangement = Arrangement.End,
+                    ) {
+                        TextButton(
+                            onClick = {
+                                com.sinq.app.reminders.DailyQuoteReceiver.postNow(context)
+                                android.widget.Toast.makeText(
+                                    context,
+                                    if (s.isAmharic) "የአበው ምክር ማሳሰቢያ ተልኳል (በመቆለፊያ ገጽ ላይ ይመልከቱ)"
+                                    else "Quote notification sent (check lock screen)",
+                                    android.widget.Toast.LENGTH_SHORT,
+                                ).show()
+                            },
+                        ) {
+                            Icon(
+                                Icons.Outlined.NotificationsActive,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.secondary,
+                            )
+                            Spacer(Modifier.width(Spacing.xs))
+                            Text(
+                                if (s.isAmharic) "የሙከራ ማሳሰቢያ ላክ" else "Send test notification",
+                                color = MaterialTheme.colorScheme.secondary,
+                                style = MaterialTheme.typography.labelSmall,
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.height(Spacing.sm))
+
+                // 4. Daily Scripture Reading reminder
+                ReminderSplitCard(
+                    title = s.settingsReadingReminder,
+                    subtitle = s.settingsReadingReminderDesc,
+                    icon = Icons.AutoMirrored.Outlined.MenuBook,
+                    checked = reading,
+                    onToggle = { on ->
                         if (on) requestNotifications()
                         scope.launch {
                             SettingsRepository.setReadingReminder(context, on)
                             com.sinq.app.reminders.ReadingReminderScheduler.sync(context, on)
                         }
-                    }, subtitle = s.settingsReadingReminderDesc)
-                }
+                    },
+                )
+                Spacer(Modifier.height(Spacing.sm))
 
-                Spacer(Modifier.height(Spacing.lg))
-                SectionHeader(if (s.isAmharic) "የአበው ምክር በመቆለፊያ ገጽ" else "Desert Fathers Lockscreen Quote")
-                SinqCard(
-                    contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md),
-                    accented = dailyQuote,
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-                    ) {
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.14f),
-                            modifier = Modifier.size(36.dp),
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    Icons.Outlined.FormatQuote,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.secondary,
-                                    modifier = Modifier.size(20.dp),
-                                )
-                            }
+                // 5. Breath prayer (Prayer of the heart)
+                ReminderSplitCard(
+                    title = s.settingsBreathReminder,
+                    subtitle = s.settingsBreathReminderDesc,
+                    icon = Icons.Outlined.VolunteerActivism,
+                    checked = breath,
+                    onToggle = { on ->
+                        if (on) requestNotifications()
+                        scope.launch {
+                            SettingsRepository.setBreathReminder(context, on)
+                            com.sinq.app.reminders.BreathPrayerScheduler.sync(context, on)
                         }
-                        Column(Modifier.weight(1f)) {
-                            Text(
-                                s.dailyQuoteLockscreen,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onBackground,
-                            )
-                            Text(
-                                s.dailyQuoteLockscreenDesc,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        androidx.compose.material3.Switch(
-                            checked = dailyQuote,
-                            onCheckedChange = { on ->
-                                if (on) {
-                                    requestNotifications()
-                                    if (!com.sinq.app.reminders.DailyQuoteReceiver.isLockscreenVisible(context)) {
-                                        showLockscreenPrompt = true
-                                    }
-                                }
-                                scope.launch {
-                                    SettingsRepository.setDailyQuoteLockscreen(context, on)
-                                    com.sinq.app.reminders.DailyQuoteScheduler.sync(context, on)
-                                }
-                            },
-                        )
-                    }
-                    if (dailyQuote) {
-                        SinqDivider(modifier = Modifier.padding(vertical = Spacing.xs))
-                        DailyQuoteTimeRow(s)
-                        SinqDivider(modifier = Modifier.padding(vertical = Spacing.xs))
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(top = Spacing.xs),
-                            horizontalArrangement = Arrangement.End,
-                        ) {
-                            TextButton(
-                                onClick = {
-                                    com.sinq.app.reminders.DailyQuoteReceiver.postNow(context)
-                                    android.widget.Toast.makeText(
-                                        context,
-                                        if (s.isAmharic) "የአበው ምክር ማሳሰቢያ ተልኳል (በመቆለፊያ ገጽ ላይ ይመልከቱ)"
-                                        else "Quote notification sent (check lock screen)",
-                                        android.widget.Toast.LENGTH_SHORT,
-                                    ).show()
-                                },
-                            ) {
-                                Icon(
-                                    Icons.Outlined.NotificationsActive,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp),
-                                    tint = MaterialTheme.colorScheme.secondary,
-                                )
-                                Spacer(Modifier.width(Spacing.xs))
-                                Text(
-                                    if (s.isAmharic) "የሙከራ ማሳሰቢያ ላክ" else "Send test notification",
-                                    color = MaterialTheme.colorScheme.secondary,
-                                )
-                            }
-                        }
-                    }
-                }
+                    },
+                )
 
                 Spacer(Modifier.height(Spacing.lg))
                 SectionHeader(s.remindersGroupGiving)
@@ -1675,35 +1757,43 @@ fun RemindersSettingsScreen(
             )
         }
     }
-}
-
-/** The daily Gitsawe nudge time; saving immediately replaces the pending alarm. */
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
-@Composable
-private fun GitsaweReminderTimeRow(s: com.sinq.app.ui.strings.Strings) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val minute by SettingsRepository.gitsaweReminderTime(context)
-        .collectAsState(initial = SettingsRepository.DEFAULT_GITSAWE_REMINDER_MIN)
-    var picking by remember { mutableStateOf(false) }
-
-    com.sinq.app.ui.common.ListRow(
-        title = s.timeLabel,
-        subtitle = "%02d:%02d".format(minute / 60, minute % 60),
-        onClick = { picking = true },
-    )
-
-    if (picking) {
+    if (pickingStreakTime) {
         val timeState = androidx.compose.material3.rememberTimePickerState(
-            initialHour = minute / 60,
-            initialMinute = minute % 60,
+            initialHour = streakTime / 60,
+            initialMinute = streakTime % 60,
+            is24Hour = true,
+        )
+        com.sinq.app.ui.common.SinqTimePickerDialog(
+            title = s.settingsNightReminder,
+            onDismiss = { pickingStreakTime = false },
+            onConfirm = {
+                pickingStreakTime = false
+                scope.launch {
+                    SettingsRepository.setStreakReminderTime(
+                        context,
+                        timeState.hour * 60 + timeState.minute,
+                    )
+                    com.sinq.app.reminders.StreakReminderScheduler.sync(context, true)
+                }
+            },
+        ) {
+            androidx.compose.material3.TimePicker(
+                state = timeState,
+                colors = com.sinq.app.ui.common.sinqTimePickerColors(),
+            )
+        }
+    }
+    if (pickingGitsaweTime) {
+        val timeState = androidx.compose.material3.rememberTimePickerState(
+            initialHour = gitsaweTime / 60,
+            initialMinute = gitsaweTime % 60,
             is24Hour = true,
         )
         com.sinq.app.ui.common.SinqTimePickerDialog(
             title = s.settingsGitsaweReminder,
-            onDismiss = { picking = false },
+            onDismiss = { pickingGitsaweTime = false },
             onConfirm = {
-                picking = false
+                pickingGitsaweTime = false
                 scope.launch {
                     SettingsRepository.setGitsaweReminderTime(
                         context,
@@ -1719,35 +1809,17 @@ private fun GitsaweReminderTimeRow(s: com.sinq.app.ui.strings.Strings) {
             )
         }
     }
-}
-
-/** The daily Desert Fathers quote posting time; saving immediately reschedules the alarm. */
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
-@Composable
-private fun DailyQuoteTimeRow(s: com.sinq.app.ui.strings.Strings) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val minute by SettingsRepository.dailyQuoteTime(context)
-        .collectAsState(initial = SettingsRepository.DEFAULT_DAILY_QUOTE_MIN)
-    var picking by remember { mutableStateOf(false) }
-
-    com.sinq.app.ui.common.ListRow(
-        title = s.dailyQuoteTimeTitle,
-        subtitle = "%02d:%02d".format(minute / 60, minute % 60),
-        onClick = { picking = true },
-    )
-
-    if (picking) {
+    if (pickingDailyQuoteTime) {
         val timeState = androidx.compose.material3.rememberTimePickerState(
-            initialHour = minute / 60,
-            initialMinute = minute % 60,
+            initialHour = dailyQuoteTime / 60,
+            initialMinute = dailyQuoteTime % 60,
             is24Hour = true,
         )
         com.sinq.app.ui.common.SinqTimePickerDialog(
             title = s.dailyQuoteTitle,
-            onDismiss = { picking = false },
+            onDismiss = { pickingDailyQuoteTime = false },
             onConfirm = {
-                picking = false
+                pickingDailyQuoteTime = false
                 scope.launch {
                     SettingsRepository.setDailyQuoteTime(
                         context,

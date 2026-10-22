@@ -124,12 +124,9 @@ class CanonGroupingTest {
     }
 
     @Test
-    fun `the books of church order are the eight of ፍትሐ ነገሥት`() {
+    fun `the books of church order are not bundled in this edition`() {
         assertEquals(
-            setOf(
-                "didascalia", "1-clement", "abtilis", "sirate-tsion",
-                "tizaz", "1-covenant", "2-covenant", "gitsew",
-            ),
+            emptySet<String>(),
             bundled.filter { canonSectionKey(it) == "ChurchOrder" }.mapTo(mutableSetOf()) { it.key },
         )
     }

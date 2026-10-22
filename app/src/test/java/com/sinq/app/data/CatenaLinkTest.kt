@@ -99,7 +99,7 @@ class CatenaLinkTest {
             o["id"]!!.jsonPrimitive.content in bundled &&
                 CatenaLink.covers(o["slug"]!!.jsonPrimitive.content)
         }
-        assertEquals("books mapped to Catena", 76, mapped)
+        assertEquals("books mapped to Catena", 66, mapped)
         // Every mapped book must produce a URL for its own first verse.
         canon.forEach { c ->
             val o = c.jsonObject

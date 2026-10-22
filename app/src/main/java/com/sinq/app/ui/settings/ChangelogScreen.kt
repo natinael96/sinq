@@ -53,6 +53,25 @@ private data class ReleaseNote(
 
 private val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.8.0",
+        title = "Complete 1962 Amharic Bible, Settings UI Redesign, and Streamlined Support",
+        titleAm = "የ፲፱፻፶፬ቱ የአማርኛ መጽሐፍ ቅዱስ፣ የተስተካከለ የቅንብሮች ገጽ እና አዲስ የእርዳታ ክፍል",
+        changes = listOf(
+            "Integrated digitized 1962 publication Bible text proofread and formatted with traditional Ge'ez chapter headings and numerals.",
+            "Standalone Psalter and canonical Horologium prayer hours preserve traditional Ethiopian Orthodox LXX translation.",
+            "Redesigned reminder settings with split-action cards: tap the card to change times via time picker, switch toggles independently.",
+            "De-cluttered Settings with streamlined 'About Sinq' and 'Help & Feedback' support sheet.",
+            "Updated reading plans (360-day, 180-day, and 150-day psalter) aligned with the digitized text.",
+        ),
+        changesAm = listOf(
+            "በመጻሕፍት ክፍል የሚገኘው የአማርኛ መጽሐፍ ቅዱስ ከታተመው የ፲፱፻፶፬ ዓ.ም ቅጂ በዲጂታል መንገድ ተጣርቶ፣ በግእዝ ቁጥሮችና ምዕራፎች ተስተካክሎ ቀርቧል።",
+            "ለብቻው ለሚነበበው መዝሙረ ዳዊትና ለሰባቱ ሰዓታት ጸሎት የቀደመው የ፹፩ዱ የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ የትርጉም ቅጂ እንዲጠበቅ ተደርጓል።",
+            "የማስታወሻዎች ገጽ በአዲስ የተከፈለ ካርድ (Split Card) ተሻሽሏል፤ ካርዱን በመጫን ሰዓት በቀጥታ መምረጥ፣ ማብሪያ/ማጥፊያውን በመጫን ማስታወሻዎችን ማብራትና ማጥፋት ይቻላል።",
+            "የቅንብሮች የታችኛው ክፍል ከውዝግብ በጸዳ መልኩ ወደ 'ስለ ስንቅ' እና 'እርዳታና ድጋፍ' ተጠቃሏል።",
+            "የመጽሐፍ ቅዱስ ንባብ ዕቅዶች (የ፫፻፷ ቀን፣ የ፩፻፹ ቀን እና የ፩፻፶ ቀን የመዝሙር ንባብ) ከአዲሱ ጽሑፍ ጋር ተጣጥመው ተዘጋጅተዋል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.7.9",
         title = "Google Play Protection Compatibility (API 24+)",
         titleAm = "የጉግል ፕሌይ ጥበቃና ዝቅተኛ የአንድሮይድ ስሪት (API 24+) ማሻሻያ",

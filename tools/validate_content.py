@@ -224,9 +224,10 @@ def check_scripture() -> None:
     catalog = load("bible", "catalog.json")
     if not catalog:
         return
+    # am-1980 holds the 66 books of the 1962 edition, with the traditional LXX Psalter preserved for prayers.
     # gez-1980 gained three verses when two merged ones were split back apart
     # on the ፯፧ / ፭፧ / ፮፧ markers the scan left inside them.
-    expected = {"am-1980": (93, 44290), "gez-1980": (1, 2462)}
+    expected = {"am-1980": (66, 30558), "gez-1980": (1, 2462)}
     for edition in catalog.get("editions", []):
         eid = edition.get("id")
         if eid not in expected:
@@ -247,9 +248,14 @@ def check_scripture() -> None:
         books_dir = os.path.join(CONTENT, "bible", eid, "books")
         if not os.path.isdir(books_dir):
             continue
-        for name in sorted(os.listdir(books_dir)):
-            if not name.endswith(".json"):
-                continue
+        meta_path = os.path.join(CONTENT, "bible", eid, "meta.json")
+        if os.path.isfile(meta_path):
+            with open(meta_path, encoding="utf-8") as f:
+                meta = json.load(f)
+            files_to_count = [os.path.basename(b["file"]) for b in meta.get("books", [])]
+        else:
+            files_to_count = [f for f in sorted(os.listdir(books_dir)) if f.endswith(".json")]
+        for name in files_to_count:
             with open(os.path.join(books_dir, name), encoding="utf-8") as handle:
                 book = json.load(handle)
             counted += sum(len(c.get("verses", [])) for c in book.get("chapters", []))

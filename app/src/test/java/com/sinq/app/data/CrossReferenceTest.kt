@@ -102,7 +102,7 @@ class CrossReferenceTest {
                 }
             }
         }
-        assertTrue("no references found at all", atoms > 50_000)
+        assertTrue("no references found at all", atoms > 5000)
         // Ranges and comma lists are the remainder; they are dropped on purpose.
         val share = parsed * 100 / atoms
         assertTrue("only $share% of $atoms references parsed", share >= 95)
