@@ -5,6 +5,13 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.7.9] — 2026-10-22
+
+_versionCode 121 · Google Play Automatic App Protection Compliance (API 24+)_
+
+### Changed
+- **Minimum SDK Bumped to API 24.** Raised `minSdkVersion` to 24 (Android 7.0 Nougat) to fully satisfy Google Play Console's automatic integrity and app protection requirements.
+
 ## [1.7.8] — 2026-10-21
 
 _versionCode 120 · Liturgical Eve on Gitsawe Widget, Database Optimization, and JSON Minification_

@@ -31,17 +31,15 @@ android {
         // that can never be changed again once a listing exists. Sinq is the
         // app's name, so this is the name it registers under.
         applicationId = "com.sinq.app"
-        // Android 6.0. Below this the alarm architecture loses the APIs it is
-        // built on (setAndAllowWhileIdle, FLAG_IMMUTABLE, the battery-optimisation
-        // settings screen), all of which arrived in 23. java.time and
-        // java.util.Base64 are carried down from 26 by desugaring, below.
-        minSdk = 23
+        // Android 7.0 (API 24). Required by Google Play Automatic App Protection.
+        // java.time and java.util.Base64 are carried down from 26 by desugaring, below.
+        minSdk = 24
         targetSdk = 36
         // Versioning policy (semver-style):
         //   MINOR for features, PATCH for fixes/small tweaks.
         //   versionCode increments by 1 on EVERY update, no exceptions.
-        versionCode = 120
-        versionName = "1.7.8"
+        versionCode = 121
+        versionName = "1.7.9"
 
         // ስንቅ ships two ways, and only one of them may mention GitHub.
         //
