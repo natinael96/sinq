@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.sinq.app.ui.common.SectionHeader
@@ -61,12 +62,19 @@ fun ScriptureHubScreen(
     onOpenPsalms: () -> Unit,
 ) {
     val s = LocalStrings.current
+    val context = LocalContext.current
+    val booksLoad = com.sinq.app.ui.common.rememberContentLoad { com.sinq.app.data.ScriptureRepository.books(context) }
+    val books = booksLoad.value.orEmpty()
+    val otCount = books.count { canonTestament(it) == "old" }.takeIf { it > 0 } ?: 39
+    val ntCount = books.count { canonTestament(it) == "new" }.takeIf { it > 0 } ?: 27
+    val totalCount = otCount + ntCount
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             SinqTopBar(
                 title = s.scripturesTitle,
-                subtitle = if (s.isAmharic) "፹፩ዱ ቅዱሳት መጻሕፍት" else "The 81 Books of Holy Scripture",
+                subtitle = if (s.isAmharic) "${geezNumeral(totalCount)}ቱ ቅዱሳት መጻሕፍት" else "$totalCount Books of Holy Scripture",
                 onBack = onBack,
                 actions = {
                     IconButton(onClick = onSearch) {
@@ -94,36 +102,36 @@ fun ScriptureHubScreen(
                 )
             }
 
-            // ── ብሉይ ኪዳን (46 Books) ──────────────────────────────────────────
+            // ── ብሉይ ኪዳን (Old Testament) ──────────────────────────────────────────
             item {
                 ScriptureCodexCard(
                     icon = Icons.AutoMirrored.Outlined.MenuBook,
-                    countGe = "፵፮",
-                    countLabel = if (s.isAmharic) "፵፮ መጻሕፍት" else "46 Books",
+                    countGe = geezNumeral(otCount),
+                    countLabel = if (s.isAmharic) "${geezNumeral(otCount)} መጻሕፍት" else "$otCount Books",
                     title = s.oldTestamentLabel,
                     subtitle = if (s.isAmharic) {
-                        "ኦሪት፣ ታሪክ፣ መክብብ፣ ኩፋሌና ሄኖክን ጨምሮ"
+                        "ኦሪት፣ የታሪክ፣ የጥበብና የትንቢት መጻሕፍት"
                     } else {
-                        "Torah, Historical Books, Jubilees & Enoch"
+                        "Law, History, Poetry & Prophets"
                     },
-                    editionTag = "${s.langAmharic} 1980",
+                    editionTag = "${s.langAmharic} 1962",
                     onClick = onOpenOldTestament,
                 )
             }
 
-            // ── ሐዲስ ኪዳን (35 Books) ──────────────────────────────────────────
+            // ── ሐዲስ ኪዳን (New Testament) ──────────────────────────────────────────
             item {
                 ScriptureCodexCard(
                     icon = Icons.AutoMirrored.Outlined.MenuBook,
-                    countGe = "፴፭",
-                    countLabel = if (s.isAmharic) "፴፭ መጻሕፍት" else "35 Books",
+                    countGe = geezNumeral(ntCount),
+                    countLabel = if (s.isAmharic) "${geezNumeral(ntCount)} መጻሕፍት" else "$ntCount Books",
                     title = s.newTestamentLabel,
                     subtitle = if (s.isAmharic) {
-                        "፬ቱ ወንጌላት፣ መልእክታት፣ ራእይና የቀሌምንጦስ መጻሕፍት"
+                        "፬ቱ ወንጌላት፣ የሐዋርያት ሥራ፣ መልእክታትና ራእይ"
                     } else {
-                        "Four Gospels, Epistles, Revelation & Clement"
+                        "Four Gospels, Acts, Epistles & Revelation"
                     },
-                    editionTag = "${s.langAmharic} 1980",
+                    editionTag = "${s.langAmharic} 1962",
                     onClick = onOpenNewTestament,
                 )
             }
@@ -274,9 +282,9 @@ private fun CanonNoticeCard(isAmharic: Boolean) {
             )
             Text(
                 text = if (isAmharic) {
-                    "የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተ ክርስቲያን ቀኖና ፹፩ (81) ቅዱሳት መጻሕፍትን ያካትታል፤ ይህም ፵፮ የብሉይ ኪዳን እና ፴፭ የሐዲስ ኪዳን መጻሕፍት ናቸው።"
+                    "የመጽሐፍ ቅዱስ ጽሑፍ ከ፲፱፻፶፬ቱ የአማርኛ ቅጂ የተዘጋጀ ሲሆን፣ ፴፱ የብሉይ ኪዳን እና ፳፯ የሐዲስ ኪዳን በድምሩ ፷፮ መጻሕፍትን ያካትታል። መዝሙረ ዳዊት ደግሞ ከቀደመው የ፹፩ዱ ቀኖና ተጠብቆ ይገኛል።"
                 } else {
-                    "The Ethiopian Orthodox Tewahedo Church canon comprises 81 canonical books: 46 books of the Old Testament and 35 of the New Testament."
+                    "Holy Scripture is drawn from the 1962 publication, comprising 66 books: 39 books of the Old Testament and 27 of the New Testament. The Psalter is preserved from the traditional LXX canon."
                 },
                 style = MaterialTheme.typography.bodySmall.inReadingFont(),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

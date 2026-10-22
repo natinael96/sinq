@@ -136,6 +136,8 @@ object SettingsRepository {
     private val KEY_SINKSAR_PUNCTUATION = booleanPreferencesKey("sinksar_punctuation")
     // Master switch for the automatic morning, afternoon and night reading reminders.
     private val KEY_READING_REMINDER = booleanPreferencesKey("reading_reminder")
+    private val KEY_READING_REMINDER_TIMES = stringPreferencesKey("reading_reminder_times")
+    val DEFAULT_READING_REMINDER_TIMES: List<Int> = listOf(6 * 60 + 30, 14 * 60, 20 * 60)
     // What travels with a copied verse, and what the four highlight colours
     // are called. Both belong to the reader, not to the app.
     private val KEY_COPY_VERSE_NUMBERS = booleanPreferencesKey("copy_verse_numbers")
@@ -231,7 +233,7 @@ object SettingsRepository {
     private val KEY_QUIET_START = intPreferencesKey("quiet_start_min")
     private val KEY_QUIET_END = intPreferencesKey("quiet_end_min")
     private val KEY_NOTIFICATION_TIMEOUT_MINUTES = intPreferencesKey("notification_timeout_minutes")
-    const val DEFAULT_NOTIFICATION_TIMEOUT_MINUTES = 120 // 2 hours
+    const val DEFAULT_NOTIFICATION_TIMEOUT_MINUTES = 240 // 4 hours
     val NOTIFICATION_TIMEOUT_CHOICES = listOf(30, 60, 120, 240, 360, 0)
 
     suspend fun backupSettings(context: Context): BackupSettings {
@@ -451,6 +453,36 @@ object SettingsRepository {
                 readingReminder(context).first()
             }
         }.getOrDefault(true)
+
+    internal fun parseReminderTimes(raw: String?): List<Int> {
+        if (raw.isNullOrBlank()) return DEFAULT_READING_REMINDER_TIMES
+        val parsed = raw.split(",")
+            .mapNotNull { it.trim().toIntOrNull() }
+            .filter { it in 0 until 1440 }
+            .distinct()
+            .sorted()
+        return if (parsed.isEmpty()) DEFAULT_READING_REMINDER_TIMES else parsed
+    }
+
+    /** The custom times (minute of the day) when reading plan nudges fire. */
+    fun readingReminderTimes(context: Context): Flow<List<Int>> =
+        context.settingsDataStore.data.map { prefs ->
+            parseReminderTimes(prefs[KEY_READING_REMINDER_TIMES])
+        }
+
+    suspend fun setReadingReminderTimes(context: Context, times: List<Int>) {
+        val sanitized = times.filter { it in 0 until 1440 }.distinct().sorted()
+        context.settingsDataStore.edit { prefs ->
+            prefs[KEY_READING_REMINDER_TIMES] = sanitized.joinToString(",")
+        }
+    }
+
+    fun readingReminderTimesBlocking(context: Context): List<Int> =
+        runCatching {
+            kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) {
+                readingReminderTimes(context).first()
+            }
+        }.getOrDefault(DEFAULT_READING_REMINDER_TIMES)
 
     fun synaxariumEdition(context: Context): Flow<String> =
         context.settingsDataStore.data.map {
@@ -769,12 +801,12 @@ object SettingsRepository {
         com.sinq.app.widget.GitsaweWidgetProvider.refreshAll(context)
     }
 
-    /** The rollover as the widget wants it: the minute, or null when it is off. */
+    /** The rollover as the widget wants it: the eve (ዋዜማ) minute, or null when it is off. */
     fun widgetRolloverMinuteBlocking(context: Context): Int? = runCatching {
         kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) {
-            if (widgetRollover(context).first()) widgetRolloverTime(context).first() else null
+            if (wazemaRollover(context).first()) wazemaRolloverTime(context).first() else null
         }
-    }.getOrDefault(com.sinq.app.widget.DEFAULT_WIDGET_ROLLOVER_MIN)
+    }.getOrDefault(DEFAULT_WAZEMA_ROLLOVER_MIN)
 
     /**
      * Liturgical Day Rollover (ዋዜማ). In EOTC tradition, the day rolls over at

@@ -551,7 +551,13 @@ fun HomeScreen(
                     com.sinq.app.data.SettingsRepository.setLastTourVersion(context, installedVersionCode)
                 }
             },
-            onOpenTour = null,
+            onOpenTour = {
+                showWhatsNewDialog = false
+                scope.launch {
+                    com.sinq.app.data.SettingsRepository.setLastTourVersion(context, installedVersionCode)
+                }
+                onOpenTour()
+            },
         )
     }
     if (showReminderSetup) {
@@ -1366,28 +1372,6 @@ private fun DailyQuoteRowContent(
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(gold.copy(alpha = 0.14f))
-                        .clickable(onClick = onOpenHub)
-                        .padding(horizontal = 8.dp, vertical = 3.dp),
-                ) {
-                    Text(
-                        text = s.desertFathersViewAll,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = gold,
-                    )
-                    Spacer(Modifier.width(2.dp))
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
-                        contentDescription = null,
-                        tint = gold,
-                        modifier = Modifier.size(10.dp),
-                    )
-                }
                 IconButton(
                     onClick = onToggleBookmark,
                     modifier = Modifier.size(32.dp),
@@ -1409,14 +1393,43 @@ private fun DailyQuoteRowContent(
         }
         val quoteText = quote.quote.trim()
         if (quoteText.isNotBlank()) {
-            Spacer(Modifier.height(Spacing.xxs))
+            Spacer(Modifier.height(Spacing.xs))
             Text(
                 text = "“$quoteText”",
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodySmall.copy(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic),
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+        }
+        Spacer(Modifier.height(Spacing.xs))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(gold.copy(alpha = 0.12f))
+                    .clickable(onClick = onOpenHub)
+                    .padding(horizontal = 8.dp, vertical = 3.dp),
+            ) {
+                Text(
+                    text = s.desertFathersViewAll,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = gold,
+                )
+                Spacer(Modifier.width(2.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+                    contentDescription = null,
+                    tint = gold,
+                    modifier = Modifier.size(10.dp),
+                )
+            }
         }
     }
 }

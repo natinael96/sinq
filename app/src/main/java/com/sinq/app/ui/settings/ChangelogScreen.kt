@@ -43,7 +43,7 @@ import com.sinq.app.ui.theme.Spacing
 import com.sinq.app.ui.theme.inReadingFont
 
 /** One release, carrying both languages; the screen picks by [Strings.isAmharic]. */
-private data class ReleaseNote(
+internal data class ReleaseNote(
     val version: String,
     val title: String,
     val titleAm: String,
@@ -51,7 +51,26 @@ private data class ReleaseNote(
     val changesAm: List<String>,
 )
 
-private val releaseHistory = listOf(
+internal val releaseHistory = listOf(
+    ReleaseNote(
+        version = "1.8.1",
+        title = "Custom Reading Reminders, Quiet Hours Split Card, and Reading Plan Fixes",
+        titleAm = "የማንበቢያ ማስታወሻዎች ሰዓትና ድግግሞሽ ማስተካከያ፣ የጸጥታ ሰዓታት ካርድ እና የንባብ ዕቅዶች ማሻሻያ",
+        changes = listOf(
+            "Customizable reading reminders: configure daily frequency (1x, 2x, or 3x daily) and set custom reminder times via a dedicated time picker sheet.",
+            "Extended default notification auto-dismissal retention to 4 hours.",
+            "Unified Quiet Hours card with direct time range selection and dual-tab start/end picker.",
+            "Fixed yearly reading plan progress tracking so readers falling behind are properly guided to their due day with catch-up options.",
+            "Polished Desert Fathers card layout, removed redundant widget settings, streamlined Journey header, and resolved hymn title duplications.",
+        ),
+        changesAm = listOf(
+            "የማንበቢያ ማስታወሻዎች ሰዓትና ድግግሞሽ ማስተካከያ፤ በዕለት ስንት ጊዜ (፩፣ ፪ ወይም ፫ ጊዜ) እንደሚደወልና ሰዓቶቹንም በሰዓት መምረጫው አማካኝነት መወሰን ይቻላል።",
+            "የማሳወቂያዎች ቆይታ በነባሪነት ወደ ፬ ሰዓታት እንዲራዘም ተደርጓል።",
+            "ጸጥታ የሚጠበቅባቸው ሰዓታት ካርድ ከሌሎች ማስታወሻዎች ጋር ወጥ ሆኖ በአንድ ጊዜ መጀመሪያና መጨረሻ ሰዓትን ለመምረጥ ተስተካክሏል።",
+            "የዓመታዊ ንባብ ዕቅዶች ወደ ኋላ ለቀረ አንባቢ ቀጥሎ የሚገባውን ዕለት በትክክል እንዲያመለክትና እንዲያካክስ ተስተካክሏል።",
+            "በዋናው ገጽ የአበው ምክር አቀራረብ፣ በጉዞ ገጽና በውዳሴ ማርያም የመልክዕ ርዕሶች ላይ የታዩ ድግግሞሾች ተስተካክለዋል።",
+        ),
+    ),
     ReleaseNote(
         version = "1.8.0",
         title = "Complete 1962 Amharic Bible, Settings UI Redesign, and Streamlined Support",

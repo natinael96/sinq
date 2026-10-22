@@ -83,7 +83,6 @@ fun DesertFathersHubScreen(
 
     val allQuotes = remember { DailyQuoteRepository.quotesBlocking(context) }
     val bookmarks by UserDataRepository.bookmarks(context).collectAsState(initial = emptyList())
-    val randomize by SettingsRepository.randomizeDailyQuote(context).collectAsState(initial = false)
 
     var searchQuery by remember { mutableStateOf("") }
 
@@ -116,51 +115,7 @@ fun DesertFathersHubScreen(
                 .padding(innerPadding),
             contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.sm),
         ) {
-            // ── 1. Randomized Daily Reminder Toggle ──
-            item(key = "header_settings") {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
-                        .border(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-                            shape = RoundedCornerShape(12.dp),
-                        )
-                        .padding(14.dp),
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
-                            Text(
-                                text = s.randomizeDailyQuoteTitle,
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = gold,
-                            )
-                            Spacer(Modifier.height(2.dp))
-                            Text(
-                                text = s.randomizeDailyQuoteDesc,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        Switch(
-                            checked = randomize,
-                            onCheckedChange = { next ->
-                                scope.launch { SettingsRepository.setRandomizeDailyQuote(context, next) }
-                            },
-                        )
-                    }
-                }
-                Spacer(Modifier.height(Spacing.md))
-            }
-
-            // ── 2. Search Field ──
+            // ── 1. Search Field ──
             item(key = "header_search") {
                 OutlinedTextField(
                     value = searchQuery,

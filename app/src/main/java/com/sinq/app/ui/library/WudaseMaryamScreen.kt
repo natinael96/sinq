@@ -326,14 +326,16 @@ fun WudaseMaryamScreen(
                             bottom = Spacing.huge,
                         ),
                     ) {
-                    item(key = "title") {
-                        Text(
-                            text = if (geez) pageItem.titleGe else pageItem.titleAm,
-                            style = MaterialTheme.typography.titleMedium.inReadingFont(),
-                            color = MaterialTheme.colorScheme.secondary,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 14.dp),
-                        )
+                    if (pageItem is WudasePage.Portioned) {
+                        item(key = "title") {
+                            Text(
+                                text = if (geez) pageItem.titleGe else pageItem.titleAm,
+                                style = MaterialTheme.typography.titleMedium.inReadingFont(),
+                                color = MaterialTheme.colorScheme.secondary,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 14.dp),
+                            )
+                        }
                     }
 
                     when (pageItem) {

@@ -5,6 +5,20 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.8.1] — 2026-10-22
+
+_versionCode 123 · Custom Reading Reminders, Quiet Hours Split Card, Dynamic What's New, and Reading Plan Fixes_
+
+### Added
+- **Customizable Reading Reminders.** Configure reading reminder frequency (1x, 2x, or 3x daily) with customizable time slots via a bottom sheet picker.
+- **Dynamic What's New Dialog.** Re-engineered launch update announcement dialog to pull release highlights dynamically from release notes, ensuring update details always match the installed version.
+
+### Changed
+- **Extended Notification Retention Default.** Raised default notification auto-dismissal timeout from 2 hours to 4 hours (240 minutes) across prayer hours and reading nudges.
+- **Quiet Hours Split Card.** Unified Quiet Hours with the modern split card pattern (`22:00 – 06:00` badge) and single dual-tab start/end time picker dialog.
+- **Reading Plan Catch-Up Fix.** Fixed yearly reading plan progress tracking so readers falling behind are properly handed their due day with clear catch-up options.
+- **Home & Liturgical UI Polish.** Formatted Desert Fathers quote preview to single-line italic with internal "View all" navigation, bound widget evening rollover directly to liturgical Eve (ዋዜማ), removed duplicate hymn titles in Wudase Maryam, and streamlined Journey screen header.
+
 ## [1.8.0] — 2026-10-22
 
 _versionCode 122 · Complete 1962 Amharic Bible, Settings UI Redesign, and Streamlined Support_

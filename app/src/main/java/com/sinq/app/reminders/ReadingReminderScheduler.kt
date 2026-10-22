@@ -27,14 +27,22 @@ object ReadingReminderScheduler {
     )
 
     /** Strictly future: never replay earlier slots after launch or a clock change. */
-    internal fun nextReminder(now: ZonedDateTime): ZonedDateTime =
-        (0L..1L).flatMap { offset ->
-            REMINDER_TIMES.map { time -> now.toLocalDate().plusDays(offset).atTime(time).atZone(now.zone) }
+    internal fun nextReminder(
+        now: ZonedDateTime,
+        timesMinutes: List<Int> = SettingsRepository.DEFAULT_READING_REMINDER_TIMES,
+    ): ZonedDateTime {
+        val slots = timesMinutes.ifEmpty { SettingsRepository.DEFAULT_READING_REMINDER_TIMES }
+            .map { LocalTime.of(it / 60, it % 60) }
+            .sorted()
+        return (0L..1L).flatMap { offset ->
+            slots.map { time -> now.toLocalDate().plusDays(offset).atTime(time).atZone(now.zone) }
         }.first { it.isAfter(now) }
+    }
 
     fun schedule(context: Context) = ReminderDispatchGate.locked {
         if (!SettingsRepository.readingReminderBlocking(context)) return@locked cancel(context)
-        val triggerAt = nextReminder(ZonedDateTime.now()).toInstant().toEpochMilli()
+        val times = SettingsRepository.readingReminderTimesBlocking(context)
+        val triggerAt = nextReminder(ZonedDateTime.now(), times).toInstant().toEpochMilli()
         // Doze-exempt, like the nightly nudge. Android may still delay delivery;
         // the receiver always schedules the next future slot, not a catch-up burst.
         context.getSystemService(AlarmManager::class.java)
