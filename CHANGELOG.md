@@ -5,6 +5,18 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.8.2] — 2026-10-22
+
+_versionCode 124 · Sayings of the Desert Fathers in Books Tab, Unboxed Manuscript Hub, and Android 6.0 (API 23+) Restoration_
+
+### Added
+- **Dedicated Desert Fathers Section in Books.** Added a permanent "የአበው ምክር (Sayings of the Desert Fathers)" entry to the Church Books tab, providing immediate access to the 844 Patristic sayings corpus.
+- **Unboxed Manuscript Hub.** Redesigned the Desert Fathers Sayings Hub to follow the app's authentic liturgical manuscript styling, replacing card boxes with delicate hairline dividers, live search, and filter chips by prominent monastic fathers and saved bookmarks.
+
+### Changed
+- **Restored Android 6.0 (API 23+) Compatibility.** Lowered `minSdkVersion` back to 23, restoring full device compatibility for 1,158 legacy device models on Google Play.
+- **Streamlined Home Row.** Removed the redundant "View all" button on the Desert Fathers card on the Home screen.
+
 ## [1.8.1] — 2026-10-22
 
 _versionCode 123 · Custom Reading Reminders, Quiet Hours Split Card, Dynamic What's New, and Reading Plan Fixes_

@@ -605,6 +605,7 @@ private fun AgpeyaNavHost(
                                                 },
                                                 onOpenReading = { navController.navigate("reading") { launchSingleTop = true } },
                                                 onOpenMarks = { navController.navigate("bookmarks") { launchSingleTop = true } },
+                                                onOpenDesertFathersHub = { navController.navigate("desert_fathers") { launchSingleTop = true } },
                                             )
                                         Tab.SETTINGS ->
                                             SettingsScreen(

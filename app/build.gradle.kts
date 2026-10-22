@@ -31,15 +31,14 @@ android {
         // that can never be changed again once a listing exists. Sinq is the
         // app's name, so this is the name it registers under.
         applicationId = "com.sinq.app"
-        // Android 7.0 (API 24). Required by Google Play Automatic App Protection.
-        // java.time and java.util.Base64 are carried down from 26 by desugaring, below.
-        minSdk = 24
+        // Android 6.0 (API 23). Supported with coreLibraryDesugaring for java.time.
+        minSdk = 23
         targetSdk = 36
         // Versioning policy (semver-style):
         //   MINOR for features, PATCH for fixes/small tweaks.
         //   versionCode increments by 1 on EVERY update, no exceptions.
-        versionCode = 123
-        versionName = "1.8.1"
+        versionCode = 124
+        versionName = "1.8.2"
 
         // ስንቅ ships two ways, and only one of them may mention GitHub.
         //

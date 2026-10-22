@@ -53,6 +53,23 @@ internal data class ReleaseNote(
 
 internal val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.8.2",
+        title = "Sayings of the Desert Fathers in Books Tab, Unboxed Manuscript Hub, and Android 6.0 (API 23+) Restoration",
+        titleAm = "የአበው ምክር በመጻሕፍት ክፍል፣ የተስተካከለ የበረሃ አባቶች ገጽ እና የአንድሮይድ 6.0 (API 23+) ድጋፍ",
+        changes = listOf(
+            "Restored Android 6.0 (API 23+) compatibility, reinstating full device support across 1,158 legacy device models on Google Play.",
+            "Added dedicated Sayings of the Desert Fathers (የአበው ምክር) section to the Church Books tab.",
+            "Redesigned Desert Fathers Sayings Hub with authentic unboxed manuscript layout, hairline dividers, search, and father/bookmark filter chips.",
+            "Streamlined Home screen Desert Fathers card by removing the redundant 'View all' action.",
+        ),
+        changesAm = listOf(
+            "የአንድሮይድ 6.0 (API 23+) ተኳሃኝነት እንዲመለስ ተደርጓል፤ በጉግል ፕሌይ ላይ ያሉ ከ፩ሺህ፩፻፶ በላይ የቀደሙ ስልኮች ሙሉ ድጋፍ እንዲያገኙ ተደርጓል።",
+            "በመጻሕፍት ክፍል ስር ፬ተኛ ሆኖ ራሱን የቻለ የአበው ምክር (ዜና አበው) ክፍል ተካቷል።",
+            "የአበው ምክር መመልከቻ ገጽ ከሳጥን በጸዳ መልኩ፣ በስስ መስመሮች (Hairline Dividers)፣ በፍለጋና በአበው ስም ማጣሪያዎች ተዘጋጅቷል።",
+            "በዋናው ገጽ ላይ ባለው የአበው ምክር ካርድ ስር የነበረው 'ሁሉንም እይ' አዝራር እንዲነሳ ተደርጓል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.8.1",
         title = "Custom Reading Reminders, Quiet Hours Split Card, and Reading Plan Fixes",
         titleAm = "የማንበቢያ ማስታወሻዎች ሰዓትና ድግግሞሽ ማስተካከያ፣ የጸጥታ ሰዓታት ካርድ እና የንባብ ዕቅዶች ማሻሻያ",

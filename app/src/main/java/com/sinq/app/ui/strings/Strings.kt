@@ -315,6 +315,7 @@ interface Strings {
     fun notificationTimeoutOption(minutes: Int): String
     val desertFathersHubTitle: String
     val desertFathersHubSubtitle: String
+    val desertFathersLibrarySubtitle: String
     val desertFathersViewAll: String
     val randomizeDailyQuoteTitle: String
     val randomizeDailyQuoteDesc: String
@@ -1371,6 +1372,7 @@ object AmharicStrings : Strings {
     }
     override val desertFathersHubTitle = "የአበው ምክር"
     override val desertFathersHubSubtitle = "Apophthegmata Patrum · ፰፻፵፬ቱ የአበው ቃላት"
+    override val desertFathersLibrarySubtitle = "የገዳማውያን አበው ጥበብና ምክር · ዜና አበው"
     override val desertFathersViewAll = "ሁሉንም እይ"
     override val randomizeDailyQuoteTitle = "በዘፈቀደ የሚላክ የአበው ምክር"
     override val randomizeDailyQuoteDesc = "ዕለታዊ የአበው ምክር ማሳወቂያ ከ ፰፻፵፬ቱ የአበው ቃላት በዘፈቀደ እንዲመረጥ ያደርጋል"
@@ -2395,6 +2397,7 @@ object EnglishStrings : Strings {
     }
     override val desertFathersHubTitle = "Sayings of the Desert Fathers"
     override val desertFathersHubSubtitle = "Apophthegmata Patrum · 844 Patristic Sayings"
+    override val desertFathersLibrarySubtitle = "Wisdom of the Desert Monks · Apophthegmata Patrum"
     override val desertFathersViewAll = "View All"
     override val randomizeDailyQuoteTitle = "Randomize Daily Sayings"
     override val randomizeDailyQuoteDesc = "Picks a random saying from the 844 Desert Fathers corpus for your lock screen & reminders"

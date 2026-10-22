@@ -1402,34 +1402,5 @@ private fun DailyQuoteRowContent(
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        Spacer(Modifier.height(Spacing.xs))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(gold.copy(alpha = 0.12f))
-                    .clickable(onClick = onOpenHub)
-                    .padding(horizontal = 8.dp, vertical = 3.dp),
-            ) {
-                Text(
-                    text = s.desertFathersViewAll,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = gold,
-                )
-                Spacer(Modifier.width(2.dp))
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
-                    contentDescription = null,
-                    tint = gold,
-                    modifier = Modifier.size(10.dp),
-                )
-            }
-        }
     }
 }

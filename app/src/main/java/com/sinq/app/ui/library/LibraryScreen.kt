@@ -20,6 +20,7 @@ import androidx.compose.material.icons.outlined.AutoStories
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Church
+import androidx.compose.material.icons.outlined.FormatQuote
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,6 +49,7 @@ fun LibraryScreen(
     onOpenSynaxarium: () -> Unit,
     onOpenReading: () -> Unit,
     onOpenMarks: () -> Unit,
+    onOpenDesertFathersHub: () -> Unit = {},
 ) {
     val s = LocalStrings.current
     Scaffold(
@@ -146,6 +148,14 @@ fun LibraryScreen(
                     title = s.bahreHasabTitle,
                     subtitle = s.bahreHasabSubtitle,
                     onClick = onOpenBahreHasab,
+                )
+            }
+            item {
+                LibraryCard(
+                    icon = Icons.Outlined.FormatQuote,
+                    title = s.desertFathersHubTitle,
+                    subtitle = s.desertFathersLibrarySubtitle,
+                    onClick = onOpenDesertFathersHub,
                 )
             }
 
