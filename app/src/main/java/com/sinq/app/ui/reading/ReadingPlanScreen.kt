@@ -193,24 +193,27 @@ fun ReadingPlanScreen(
                 // ── then each plan's own ────────────────────────────────────
                 kept.forEach { (active, plan) ->
                     val days = ReadingPlanRepository.effectiveDays(plan, state)
-                    val day = ReadingPlanRepository.dayOn(active.startedOn, today, plan.days)
-                    val todayDay = days.firstOrNull { it.d == day }
+                    val calendarDay = ReadingPlanRepository.dayOn(active.startedOn, today, plan.days)
+                    val dueDay = ReadingPlanRepository.dueDay(state, plan.id, days, active.startedOn, today, plan.days)
+                    val todayDay = days.firstOrNull { it.d == dueDay }
                     val (read, total) = ReadingPlanRepository.chapterProgress(state, plan.id, days)
                     val complete = ReadingPlanRepository.isComplete(state, plan.id, days)
-                    val oldest = ReadingPlanRepository.oldestUnread(state, plan.id, days, day)
+                    val oldest = ReadingPlanRepository.oldestUnread(state, plan.id, days, calendarDay)
+                    val isBehind = !complete && oldest != null && oldest < calendarDay
 
                     item(key = "head_${plan.id}") {
                         PlanHeading(
                             plan = plan,
-                            day = day,
+                            day = dueDay,
                             read = read,
                             total = total,
                             only = kept.size == 1,
+                            calendarDay = calendarDay.takeIf { isBehind },
                         )
                     }
 
                     // Offered, never insisted on: missed days can be caught up sequentially or rebased forward.
-                    if (!complete && oldest != null && oldest < day) {
+                    if (isBehind) {
                         val oldestDay = days.firstOrNull { it.d == oldest }
                         item(key = "behind_${plan.id}") {
                             CatchUpBanner(
@@ -278,12 +281,12 @@ fun ReadingPlanScreen(
                                         )
                                     }
                                 },
-                                onOpen = { onOpenRoute(planReadingRoute(r.b, r.c, plan.id, day)) },
+                                onOpen = { onOpenRoute(planReadingRoute(r.b, r.c, plan.id, dueDay)) },
                             )
                         }
 
                         // ── Bible study and reflection anchor ────────────────────────────
-                        item(key = "study_${plan.id}_$day") {
+                        item(key = "study_${plan.id}_$dueDay") {
                             val firstR = todayDay.r.firstOrNull()
                             if (firstR != null) {
                                 val catenaUrl = remember(firstR) {
@@ -303,8 +306,8 @@ fun ReadingPlanScreen(
                                     onWriteNote = onWriteNote?.let { writer ->
                                         {
                                             writer(
-                                                planReadingRoute(firstR.b, firstR.c, plan.id, day),
-                                                "${plan.title} · ${s.readingDayLabel(geezNumeral(day))}",
+                                                planReadingRoute(firstR.b, firstR.c, plan.id, dueDay),
+                                                "${plan.title} · ${s.readingDayLabel(geezNumeral(dueDay))}",
                                             )
                                         }
                                     },
@@ -414,12 +417,24 @@ private fun ChooserIntro(intro: String) {
  * been read — which the screen never used to say at all.
  */
 @Composable
-private fun PlanHeading(plan: ReadingPlan, day: Int, read: Int, total: Int, only: Boolean) {
+private fun PlanHeading(
+    plan: ReadingPlan,
+    day: Int,
+    read: Int,
+    total: Int,
+    only: Boolean,
+    calendarDay: Int? = null,
+) {
     val s = LocalStrings.current
     Column(Modifier.fillMaxWidth().padding(top = if (only) 0.dp else Spacing.md)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
+            val label = if (calendarDay != null && calendarDay > day) {
+                "${s.readingDayLabel(geezNumeral(day))} (${if (s.isAmharic) "የቀን መቁጠሪያ፡ ዕለት ${geezNumeral(calendarDay)}" else "Calendar: Day $calendarDay"})"
+            } else {
+                s.readingDayLabel(geezNumeral(day))
+            }
             Text(
-                s.readingDayLabel(geezNumeral(day)),
+                label,
                 style = if (only) MaterialTheme.typography.headlineSmall
                 else MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,

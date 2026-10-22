@@ -10,8 +10,9 @@ import org.junit.Test
 class NotificationRetentionTest {
 
     @Test
-    fun `default notification timeout is 2 hours (120 minutes)`() {
-        assertEquals(120, SettingsRepository.DEFAULT_NOTIFICATION_TIMEOUT_MINUTES)
+    fun `default notification timeout is 4 hours (240 minutes)`() {
+        assertEquals(240, SettingsRepository.DEFAULT_NOTIFICATION_TIMEOUT_MINUTES)
+        assertTrue(SettingsRepository.NOTIFICATION_TIMEOUT_CHOICES.contains(240))
         assertTrue(SettingsRepository.NOTIFICATION_TIMEOUT_CHOICES.contains(120))
         assertTrue(SettingsRepository.NOTIFICATION_TIMEOUT_CHOICES.contains(0))
         assertTrue(SettingsRepository.NOTIFICATION_TIMEOUT_CHOICES.contains(30))
@@ -23,16 +24,16 @@ class NotificationRetentionTest {
         // Amharic labels
         assertEquals("30 ደቂቃ", AmharicStrings.notificationTimeoutOption(30))
         assertEquals("1 ሰዓት", AmharicStrings.notificationTimeoutOption(60))
-        assertEquals("2 ሰዓት (የተመረጠ)", AmharicStrings.notificationTimeoutOption(120))
-        assertEquals("4 ሰዓት", AmharicStrings.notificationTimeoutOption(240))
+        assertEquals("2 ሰዓት", AmharicStrings.notificationTimeoutOption(120))
+        assertEquals("4 ሰዓት (የተመረጠ)", AmharicStrings.notificationTimeoutOption(240))
         assertEquals("6 ሰዓት", AmharicStrings.notificationTimeoutOption(360))
         assertEquals("እስኪነሳ ድረስ (አይጥፋ)", AmharicStrings.notificationTimeoutOption(0))
 
         // English labels
         assertEquals("30 minutes", EnglishStrings.notificationTimeoutOption(30))
         assertEquals("1 hour", EnglishStrings.notificationTimeoutOption(60))
-        assertEquals("2 hours (Recommended)", EnglishStrings.notificationTimeoutOption(120))
-        assertEquals("4 hours", EnglishStrings.notificationTimeoutOption(240))
+        assertEquals("2 hours", EnglishStrings.notificationTimeoutOption(120))
+        assertEquals("4 hours (Recommended)", EnglishStrings.notificationTimeoutOption(240))
         assertEquals("6 hours", EnglishStrings.notificationTimeoutOption(360))
         assertEquals("Keep until dismissed", EnglishStrings.notificationTimeoutOption(0))
     }

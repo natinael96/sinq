@@ -184,6 +184,9 @@ interface Strings {
     fun readingResumePlain(day: Int): String
     val settingsReadingReminder: String
     val settingsReadingReminderDesc: String
+    val readingFrequencyTitle: String
+    val addReminderTime: String
+    fun readingTimeSlot(index: Int): String
     /** ሥርዓተ ማኅሌት — the orders of service sung on a feast. */
     val mahletTitle: String
     val mahletSubtitle: String
@@ -1238,7 +1241,10 @@ object AmharicStrings : Strings {
     override fun readingResumePlain(day: Int) =
         "ዕለት ${com.sinq.app.ui.reading.geezNumeral(day)} ላይ ቆመዋል"
     override val settingsReadingReminder = "የንባብ ማስታወሻ"
-    override val settingsReadingReminderDesc = "የዛሬው ንባብ እስኪጠናቀቅ ጠዋት ፲፪፡፴፣ ከሰዓት ፰ እና ማታ ፪ ሰዓት በራሱ ያስታውሳል። የዝምታ ሰዓትን ያከብራል።"
+    override val settingsReadingReminderDesc = "የዛሬው ንባብ እስኪጠናቀቅ በተመረጡት ሰዓታት ያስታውሳል። የዝምታ ሰዓትን ያከብራል።"
+    override val readingFrequencyTitle = "ድግግሞሽ"
+    override val addReminderTime = "ሰዓት ጨምር"
+    override fun readingTimeSlot(index: Int) = "${com.sinq.app.ui.reading.geezNumeral(index)}ኛ ሰዓት"
     override val mahletSubtitle = "የበዓላት ማኅሌትና ዋዜማ"
     override val mahletVigil = "ዋዜማ"
     override val mahletMovable = "የወር ቀን የሌላቸው"
@@ -1358,8 +1364,8 @@ object AmharicStrings : Strings {
     override fun notificationTimeoutOption(minutes: Int): String = when (minutes) {
         30 -> "30 ደቂቃ"
         60 -> "1 ሰዓት"
-        120 -> "2 ሰዓት (የተመረጠ)"
-        240 -> "4 ሰዓት"
+        120 -> "2 ሰዓት"
+        240 -> "4 ሰዓት (የተመረጠ)"
         360 -> "6 ሰዓት"
         else -> "እስኪነሳ ድረስ (አይጥፋ)"
     }
@@ -2017,7 +2023,7 @@ object AmharicStrings : Strings {
     override val aboutLicenceBody = "የመተግበሪያው ኮድ በ Apache License 2.0 ይሰጣል። የተካተቱት መጻሕፍት የራሳቸው ፈቃዶች አሏቸው።"
     override val readingTitle = "ንባብ"
     override val readingIntro =
-        "መጽሐፍ ቅዱስን ከዳር እስከ ዳር፤ ፹፩ቱንም መጻሕፍት። የዕለቱ ግጻዌ ከንባቡ በላይ ይታያል።"
+        "መጽሐፍ ቅዱስን ከዳር እስከ ዳር፤ ሙሉውን መጻሕፍት። የዕለቱ ግጻዌ ከንባቡ በላይ ይታያል።"
     override val readingChoose = "ንባብ ይምረጡ"
     override val readingStart = "ጀምር"
     override val readingStop = "አቁም"
@@ -2267,7 +2273,10 @@ object EnglishStrings : Strings {
     override fun readingResumeBody(day: Int, passages: String) = "You stopped at day $day · $passages"
     override fun readingResumePlain(day: Int) = "You stopped at day $day"
     override val settingsReadingReminder = "Reading reminder"
-    override val settingsReadingReminderDesc = "Automatically at 6:30 AM, 2 PM and 8 PM while today’s readings are unfinished. Quiet hours apply."
+    override val settingsReadingReminderDesc = "Reminds at scheduled times while today’s readings are unfinished. Quiet hours apply."
+    override val readingFrequencyTitle = "Frequency"
+    override val addReminderTime = "Add time"
+    override fun readingTimeSlot(index: Int) = "Slot $index"
     override val mahletSubtitle = "Orders of service for the feasts"
     override val mahletVigil = "Vigil"
     override val mahletMovable = "Movable feasts"
@@ -2379,8 +2388,8 @@ object EnglishStrings : Strings {
     override fun notificationTimeoutOption(minutes: Int): String = when (minutes) {
         30 -> "30 minutes"
         60 -> "1 hour"
-        120 -> "2 hours (Recommended)"
-        240 -> "4 hours"
+        120 -> "2 hours"
+        240 -> "4 hours (Recommended)"
         360 -> "6 hours"
         else -> "Keep until dismissed"
     }
@@ -3047,7 +3056,7 @@ object EnglishStrings : Strings {
 
     override val readingTitle = "Reading"
     override val readingIntro =
-        "The whole Bible, all 81 books. The day's Gitsawe is shown above the plan's own reading."
+        "The whole Bible from Genesis to Revelation. The day's Gitsawe is shown above the plan's own reading."
     override val readingChoose = "Choose a reading"
     override val readingStart = "Begin"
     override val readingStop = "Stop"

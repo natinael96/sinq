@@ -32,7 +32,9 @@ import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material.icons.outlined.AutoStories
+import androidx.compose.material.icons.outlined.Bedtime
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
@@ -533,97 +535,298 @@ private fun ExportPickerDialog(
 
 /**
  * A nightly window in which every reminder stays silent.
- *
- * Because the silence is now total — the ringing prayer alarms and all the
- * notification nudges alike — a reminder timed inside the window simply never
- * arrives. That is what was asked for, but it must not be invisible, so the row
- * counts the reminders it is swallowing and says so.
+ * Configured directly on the split button/card without expanding sub-rows.
  */
 @Composable
-private fun QuietHoursRow(s: com.sinq.app.ui.strings.Strings) {
+private fun QuietHoursCard(s: com.sinq.app.ui.strings.Strings) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val quiet by SettingsRepository.quietHours(context)
         .collectAsState(initial = com.sinq.app.data.QuietHours())
-    var editingStart by remember { mutableStateOf<Boolean?>(null) }
+    var editingQuietHours by remember { mutableStateOf(false) }
 
     fun fmt(minute: Int) = "%02d:%02d".format(minute / 60, minute % 60)
-
-    // Every reminder whose firing time is known in advance. The ሕሊና prayer is
-    // left out on purpose: its moment is drawn at random inside a daytime
-    // window and it already defers itself to tomorrow when silenced, so there
-    // is no single time to warn about.
-    val streakOn by SettingsRepository.streakReminder(context).collectAsState(initial = true)
-    val streakMinute by SettingsRepository.streakReminderTime(context)
-        .collectAsState(initial = SettingsRepository.DEFAULT_STREAK_REMINDER_MIN)
-    val gitsaweOn by SettingsRepository.gitsaweReminder(context).collectAsState(initial = true)
-    val alms by SettingsRepository.almsReminders(context).collectAsState(initial = emptyList())
-    val repentance by SettingsRepository.repentanceReminders(context).collectAsState(initial = emptyList())
-    val tithe by SettingsRepository.titheReminders(context).collectAsState(initial = emptyList())
-    val vows by com.sinq.app.data.OfferingRepository.vows(context).collectAsState(initial = emptyList())
-    val modes by com.sinq.app.data.ModesRepository.state(context)
-        .collectAsState(initial = null as com.sinq.app.model.ModesState?)
 
     val today by com.sinq.app.ui.common.rememberCurrentDate()
     val schedule by remember(today) { com.sinq.app.data.DaySchedule.observe(context, today) }
         .collectAsState(initial = emptyList())
     val swallowed = schedule.count { it.today && it.silenced }
 
-    // The shared ToggleRow, not a hand-rolled Row+Switch: the whole width
-    // toggles, and TalkBack announces one switch with its state instead of an
-    // unlabelled row followed by a stray control.
-    ToggleRow(
+    ReminderSplitCard(
         title = s.quietHours,
-        subtitle = if (quiet.enabled) s.quietHoursRange(fmt(quiet.startMinute), fmt(quiet.endMinute))
-        else s.quietHoursDesc,
+        subtitle = if (quiet.enabled && swallowed > 0) s.quietHoursConflict(swallowed) else s.quietHoursDesc,
+        icon = Icons.Outlined.Bedtime,
+        timeBadge = "${fmt(quiet.startMinute)} – ${fmt(quiet.endMinute)}",
         checked = quiet.enabled,
-        onCheckedChange = { on ->
+        onClickConfig = { editingQuietHours = true },
+        onToggle = { on ->
             scope.launch { SettingsRepository.setQuietHours(context, quiet.copy(enabled = on)) }
         },
     )
-    if (quiet.enabled) {
-        com.sinq.app.ui.common.ListRow(
-            title = s.startTimeLabel,
-            subtitle = fmt(quiet.startMinute),
-            onClick = { editingStart = true },
-        )
-        com.sinq.app.ui.common.ListRow(
-            title = s.endTimeLabel,
-            subtitle = fmt(quiet.endMinute),
-            onClick = { editingStart = false },
-        )
-        if (swallowed > 0) {
-            Text(
-                s.quietHoursConflict(swallowed),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(vertical = Spacing.xs),
-            )
-        }
-    }
-    editingStart?.let { isStart ->
-        val minute = if (isStart) quiet.startMinute else quiet.endMinute
-        val state = androidx.compose.material3.rememberTimePickerState(
-            initialHour = minute / 60,
-            initialMinute = minute % 60,
+
+    if (editingQuietHours) {
+        var activeTab by remember { mutableIntStateOf(0) }
+        val startPickerState = androidx.compose.material3.rememberTimePickerState(
+            initialHour = quiet.startMinute / 60,
+            initialMinute = quiet.startMinute % 60,
             is24Hour = true,
         )
+        val endPickerState = androidx.compose.material3.rememberTimePickerState(
+            initialHour = quiet.endMinute / 60,
+            initialMinute = quiet.endMinute % 60,
+            is24Hour = true,
+        )
+
         com.sinq.app.ui.common.SinqTimePickerDialog(
-            title = if (isStart) s.startTimeLabel else s.endTimeLabel,
-            onDismiss = { editingStart = null },
+            title = s.quietHours,
+            onDismiss = { editingQuietHours = false },
             onConfirm = {
-                val selected = state.hour * 60 + state.minute
-                editingStart = null
+                val startMinute = startPickerState.hour * 60 + startPickerState.minute
+                val endMinute = endPickerState.hour * 60 + endPickerState.minute
+                editingQuietHours = false
                 scope.launch {
                     SettingsRepository.setQuietHours(
                         context,
-                        if (isStart) quiet.copy(startMinute = selected) else quiet.copy(endMinute = selected),
+                        quiet.copy(startMinute = startMinute, endMinute = endMinute),
                     )
                 }
             },
         ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = Spacing.md),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                ) {
+                    androidx.compose.material3.FilterChip(
+                        selected = activeTab == 0,
+                        onClick = { activeTab = 0 },
+                        label = {
+                            Text("${s.startTimeLabel}: %02d:%02d".format(startPickerState.hour, startPickerState.minute))
+                        },
+                        modifier = Modifier.weight(1f),
+                    )
+                    androidx.compose.material3.FilterChip(
+                        selected = activeTab == 1,
+                        onClick = { activeTab = 1 },
+                        label = {
+                            Text("${s.endTimeLabel}: %02d:%02d".format(endPickerState.hour, endPickerState.minute))
+                        },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+                if (activeTab == 0) {
+                    androidx.compose.material3.TimePicker(
+                        state = startPickerState,
+                        colors = com.sinq.app.ui.common.sinqTimePickerColors(),
+                    )
+                } else {
+                    androidx.compose.material3.TimePicker(
+                        state = endPickerState,
+                        colors = com.sinq.app.ui.common.sinqTimePickerColors(),
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Bottom sheet to configure reading reminder frequency and individual time slots.
+ */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun ReadingScheduleSheet(
+    initialTimes: List<Int>,
+    onDismiss: () -> Unit,
+    onSave: (List<Int>) -> Unit,
+) {
+    val s = com.sinq.app.ui.strings.LocalStrings.current
+    var times by remember { mutableStateOf(initialTimes.ifEmpty { SettingsRepository.DEFAULT_READING_REMINDER_TIMES }) }
+    var editingSlotIndex by remember { mutableStateOf<Int?>(null) }
+
+    fun fmt(minute: Int) = "%02d:%02d".format(minute / 60, minute % 60)
+
+    androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = Spacing.screen)
+                .padding(bottom = 32.dp),
+        ) {
+            Text(
+                text = s.settingsReadingReminder,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            Spacer(Modifier.height(Spacing.xs))
+            Text(
+                text = s.settingsReadingReminderDesc,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.secondary,
+            )
+
+            Spacer(Modifier.height(Spacing.lg))
+            Text(
+                text = s.readingFrequencyTitle,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(Spacing.xs))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            ) {
+                listOf(
+                    1 to listOf(6 * 60 + 30),
+                    2 to listOf(6 * 60 + 30, 20 * 60),
+                    3 to listOf(6 * 60 + 30, 14 * 60, 20 * 60),
+                ).forEach { (count, presetTimes) ->
+                    val isSelected = times.size == count && (count != 3 || times == presetTimes)
+                    androidx.compose.material3.FilterChip(
+                        selected = isSelected,
+                        onClick = { times = presetTimes },
+                        label = {
+                            Text(
+                                if (s.isAmharic) "${com.sinq.app.ui.reading.geezNumeral(count)} ጊዜ"
+                                else "${count}x daily"
+                            )
+                        },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(Spacing.lg))
+            Text(
+                text = if (s.isAmharic) "የማስታወሻ ሰዓታት" else "Reminder Times",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(Spacing.xs))
+
+            times.forEachIndexed { index, minute ->
+                androidx.compose.material3.Surface(
+                    shape = MaterialTheme.shapes.medium,
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.clickable { editingSlotIndex = index },
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Schedule,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(20.dp),
+                            )
+                            Spacer(Modifier.width(Spacing.sm))
+                            Text(
+                                text = s.readingTimeSlot(index + 1),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onBackground,
+                            )
+                        }
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            androidx.compose.material3.SuggestionChip(
+                                onClick = { editingSlotIndex = index },
+                                label = {
+                                    Text(
+                                        fmt(minute),
+                                        fontWeight = FontWeight.Bold,
+                                        style = MaterialTheme.typography.labelLarge,
+                                    )
+                                },
+                            )
+                            if (times.size > 1) {
+                                Spacer(Modifier.width(Spacing.xs))
+                                androidx.compose.material3.IconButton(
+                                    onClick = {
+                                        times = times.filterIndexed { i, _ -> i != index }
+                                    },
+                                    modifier = Modifier.size(36.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Delete,
+                                        contentDescription = s.delete,
+                                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
+                                        modifier = Modifier.size(18.dp),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (times.size < 5) {
+                Spacer(Modifier.height(Spacing.xs))
+                androidx.compose.material3.TextButton(
+                    onClick = {
+                        val nextDefault = when (times.size) {
+                            1 -> 20 * 60
+                            2 -> 14 * 60
+                            else -> ((times.lastOrNull() ?: 720) + 180) % 1440
+                        }
+                        times = (times + nextDefault).distinct().sorted()
+                    },
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                ) {
+                    Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(Spacing.xs))
+                    Text(s.addReminderTime)
+                }
+            }
+
+            Spacer(Modifier.height(Spacing.lg))
+            com.sinq.app.ui.common.SinqPrimaryButton(
+                onClick = { onSave(times.distinct().sorted()) },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(if (s.isAmharic) "አስቀምጥ" else "Save Schedule")
+            }
+        }
+    }
+
+    editingSlotIndex?.let { slotIdx ->
+        val currentMin = times.getOrElse(slotIdx) { 720 }
+        val timePickerState = androidx.compose.material3.rememberTimePickerState(
+            initialHour = currentMin / 60,
+            initialMinute = currentMin % 60,
+            is24Hour = true,
+        )
+        com.sinq.app.ui.common.SinqTimePickerDialog(
+            title = s.readingTimeSlot(slotIdx + 1),
+            onDismiss = { editingSlotIndex = null },
+            onConfirm = {
+                val newMin = timePickerState.hour * 60 + timePickerState.minute
+                times = times.mapIndexed { i, m -> if (i == slotIdx) newMin else m }.distinct().sorted()
+                editingSlotIndex = null
+            },
+        ) {
             androidx.compose.material3.TimePicker(
-                state = state,
+                state = timePickerState,
                 colors = com.sinq.app.ui.common.sinqTimePickerColors(),
             )
         }
@@ -780,9 +983,6 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
         .collectAsState(initial = com.sinq.app.data.ReadingMode.VERTICAL)
     val misbak by SettingsRepository.misbakLanguage(context)
         .collectAsState(initial = com.sinq.app.data.MisbakLanguage.GEEZ)
-    val rollover by SettingsRepository.widgetRollover(context).collectAsState(initial = true)
-    val rolloverMinute by SettingsRepository.widgetRolloverTime(context)
-        .collectAsState(initial = com.sinq.app.widget.DEFAULT_WIDGET_ROLLOVER_MIN)
     val sinksarpunctuation by SettingsRepository.sinksarPunctuation(context).collectAsState(initial = true)
     val size = SettingsRepository.FONT_STEPS_SP[step.coerceIn(0, SettingsRepository.FONT_STEPS_SP.lastIndex)]
     Scaffold(
@@ -1022,8 +1222,8 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
 
                 Spacer(Modifier.height(Spacing.lg))
 
-                // Group 3: Sharing & Widget
-                SectionHeader(if (s.isAmharic) "ማጋራትና ንዑስ ፕሮግራም" else "Sharing & Widget")
+                // Group 3: Sharing
+                SectionHeader(if (s.isAmharic) "ማጋራት" else "Sharing")
                 SinqCard(
                     contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs),
                 ) {
@@ -1033,17 +1233,6 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
                         onClick = onOpenCopyFormat,
                         leadingIcon = Icons.Outlined.ContentCopy,
                     )
-                    SinqDivider()
-                    ToggleRow(
-                        s.widgetRolloverTitle,
-                        rollover,
-                        { action.run { SettingsRepository.setWidgetRollover(context, it) } },
-                        subtitle = if (rollover) s.widgetRolloverBody else s.widgetRolloverOff,
-                    )
-                    if (rollover) {
-                        SinqDivider()
-                        WidgetRolloverTimeRow(s, rolloverMinute)
-                    }
                 }
 
                 Spacer(Modifier.height(Spacing.lg))
@@ -1072,53 +1261,6 @@ fun ReadingSettingsScreen(onBack: () -> Unit, onOpenFonts: () -> Unit, onOpenCop
                 }
                 Spacer(Modifier.height(Spacing.xl))
             }
-        }
-    }
-}
-
-/**
- * The hour the ግጻዌ widget turns to the next day.
- *
- * Saving re-renders every placed widget and re-arms its refresh, so the new
- * hour takes effect on the home screen at once rather than after the old one
- * has come round a last time.
- */
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
-@Composable
-private fun WidgetRolloverTimeRow(s: com.sinq.app.ui.strings.Strings, minute: Int) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    var picking by remember { mutableStateOf(false) }
-
-    com.sinq.app.ui.common.ListRow(
-        title = s.widgetRolloverTimeTitle,
-        subtitle = "%02d:%02d".format(minute / 60, minute % 60),
-        onClick = { picking = true },
-    )
-
-    if (picking) {
-        val timeState = androidx.compose.material3.rememberTimePickerState(
-            initialHour = minute / 60,
-            initialMinute = minute % 60,
-            is24Hour = true,
-        )
-        com.sinq.app.ui.common.SinqTimePickerDialog(
-            title = s.widgetRolloverTimeTitle,
-            onDismiss = { picking = false },
-            onConfirm = {
-                picking = false
-                scope.launch {
-                    SettingsRepository.setWidgetRolloverTime(
-                        context,
-                        timeState.hour * 60 + timeState.minute,
-                    )
-                }
-            },
-        ) {
-            androidx.compose.material3.TimePicker(
-                state = timeState,
-                colors = com.sinq.app.ui.common.sinqTimePickerColors(),
-            )
         }
     }
 }
@@ -1450,10 +1592,13 @@ fun RemindersSettingsScreen(
     val dailyQuote by SettingsRepository.dailyQuoteLockscreen(context).collectAsState(initial = true)
     val dailyQuoteTime by SettingsRepository.dailyQuoteTime(context)
         .collectAsState(initial = SettingsRepository.DEFAULT_DAILY_QUOTE_MIN)
+    val readingTimes by SettingsRepository.readingReminderTimes(context)
+        .collectAsState(initial = SettingsRepository.DEFAULT_READING_REMINDER_TIMES)
 
     var pickingStreakTime by remember { mutableStateOf(false) }
     var pickingGitsaweTime by remember { mutableStateOf(false) }
     var pickingDailyQuoteTime by remember { mutableStateOf(false) }
+    var pickingReadingSchedule by remember { mutableStateOf(false) }
     var showLockscreenPrompt by remember { mutableStateOf(false) }
     val almsEntries by SettingsRepository.almsReminders(context).collectAsState(initial = emptyList())
     val repentanceEntries by SettingsRepository.repentanceReminders(context).collectAsState(initial = emptyList())
@@ -1574,10 +1719,10 @@ fun RemindersSettingsScreen(
                         leadingIcon = Icons.AutoMirrored.Outlined.VolumeUp,
                     )
                     SinqDivider()
-                    QuietHoursRow(s)
-                    SinqDivider()
                     NotificationTimeoutRow(s)
                 }
+                Spacer(Modifier.height(Spacing.sm))
+                QuietHoursCard(s)
                 Spacer(Modifier.height(Spacing.lg))
                 DayTimeline()
                 Spacer(Modifier.height(Spacing.lg))
@@ -1674,11 +1819,18 @@ fun RemindersSettingsScreen(
                 Spacer(Modifier.height(Spacing.sm))
 
                 // 4. Daily Scripture Reading reminder
+                fun fmtTime(min: Int) = "%02d:%02d".format(min / 60, min % 60)
                 ReminderSplitCard(
                     title = s.settingsReadingReminder,
                     subtitle = s.settingsReadingReminderDesc,
                     icon = Icons.AutoMirrored.Outlined.MenuBook,
+                    timeBadge = if (readingTimes.size == 1) {
+                        fmtTime(readingTimes[0])
+                    } else {
+                        "${readingTimes.size}x · " + readingTimes.joinToString(", ") { fmtTime(it) }
+                    },
                     checked = reading,
+                    onClickConfig = { pickingReadingSchedule = true },
                     onToggle = { on ->
                         if (on) requestNotifications()
                         scope.launch {
@@ -1834,6 +1986,19 @@ fun RemindersSettingsScreen(
                 colors = com.sinq.app.ui.common.sinqTimePickerColors(),
             )
         }
+    }
+    if (pickingReadingSchedule) {
+        ReadingScheduleSheet(
+            initialTimes = readingTimes,
+            onDismiss = { pickingReadingSchedule = false },
+            onSave = { updatedTimes ->
+                pickingReadingSchedule = false
+                scope.launch {
+                    SettingsRepository.setReadingReminderTimes(context, updatedTimes)
+                    com.sinq.app.reminders.ReadingReminderScheduler.sync(context, true)
+                }
+            },
+        )
     }
 }
 

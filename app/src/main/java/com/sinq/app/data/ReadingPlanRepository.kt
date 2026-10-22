@@ -313,6 +313,7 @@ object ReadingPlanRepository {
         update(context) { st ->
             st.copy(
                 active = st.plansKept.map { if (it.planId == planId) it.copy(startedOn = began) else it },
+                redistributed = st.redistributed - planId,
                 activePlanId = "",
                 startedOn = "",
             )

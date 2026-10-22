@@ -218,35 +218,9 @@ fun JourneyScreen(
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     com.sinq.app.ui.common.SinqWordmark()
-                    Surface(
-                        onClick = onOpenJournal,
-                        shape = RoundedCornerShape(20.dp),
-                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.35f)),
-                        modifier = Modifier.semantics { contentDescription = s.journalTitle },
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = Spacing.md, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-                        ) {
-                            Icon(
-                                Icons.Outlined.EditNote,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp),
-                                tint = MaterialTheme.colorScheme.secondary,
-                            )
-                            Text(
-                                text = s.journalTitle,
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                                color = MaterialTheme.colorScheme.secondary,
-                            )
-                        }
-                    }
                 }
                 Spacer(Modifier.height(Spacing.xs))
                 //

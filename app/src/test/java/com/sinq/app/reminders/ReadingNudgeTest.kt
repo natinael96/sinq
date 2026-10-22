@@ -98,4 +98,47 @@ class ReadingNudgeTest {
             assertEquals(ZonedDateTime.parse(expected), ReadingReminderScheduler.nextReminder(ZonedDateTime.parse(now)))
         }
     }
+
+    @Test fun `custom schedule with single time moves to next day after elapsed`() {
+        val customTimes = listOf(9 * 60) // 09:00 AM only (1x daily)
+        val before = ZonedDateTime.parse("2026-09-16T08:00:00+03:00")
+        assertEquals(
+            ZonedDateTime.parse("2026-09-16T09:00:00+03:00"),
+            ReadingReminderScheduler.nextReminder(before, customTimes),
+        )
+        val after = ZonedDateTime.parse("2026-09-16T09:30:00+03:00")
+        assertEquals(
+            ZonedDateTime.parse("2026-09-17T09:00:00+03:00"),
+            ReadingReminderScheduler.nextReminder(after, customTimes),
+        )
+    }
+
+    @Test fun `custom schedule with twice daily moves through morning and evening`() {
+        val customTimes = listOf(7 * 60, 21 * 60) // 07:00 and 21:00 (2x daily)
+        val morning = ZonedDateTime.parse("2026-09-16T06:00:00+03:00")
+        assertEquals(
+            ZonedDateTime.parse("2026-09-16T07:00:00+03:00"),
+            ReadingReminderScheduler.nextReminder(morning, customTimes),
+        )
+        val midday = ZonedDateTime.parse("2026-09-16T12:00:00+03:00")
+        assertEquals(
+            ZonedDateTime.parse("2026-09-16T21:00:00+03:00"),
+            ReadingReminderScheduler.nextReminder(midday, customTimes),
+        )
+    }
+
+    @Test fun `parsing reminder times sanitizes and sorts input`() {
+        assertEquals(
+            com.sinq.app.data.SettingsRepository.DEFAULT_READING_REMINDER_TIMES,
+            com.sinq.app.data.SettingsRepository.parseReminderTimes(null),
+        )
+        assertEquals(
+            com.sinq.app.data.SettingsRepository.DEFAULT_READING_REMINDER_TIMES,
+            com.sinq.app.data.SettingsRepository.parseReminderTimes(""),
+        )
+        assertEquals(
+            listOf(420, 1260),
+            com.sinq.app.data.SettingsRepository.parseReminderTimes("1260, 420, invalid"),
+        )
+    }
 }

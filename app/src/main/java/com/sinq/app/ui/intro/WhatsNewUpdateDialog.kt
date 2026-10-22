@@ -26,14 +26,19 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.sinq.app.ui.reading.geezNumeral
+import com.sinq.app.ui.settings.releaseHistory
 import com.sinq.app.ui.strings.LocalStrings
 import com.sinq.app.ui.theme.IconSize
 import com.sinq.app.ui.theme.Spacing
+import com.sinq.app.ui.theme.inReadingFont
 
 /**
  * Pop-up update dialog shown once on launch when a new version is installed.
- * Summarizes headline improvements (Arke fix, Wudase Amlak, English Bible).
+ * Displays headline improvements dynamically from the latest release notes in [releaseHistory].
  */
 @Composable
 fun WhatsNewUpdateDialog(
@@ -43,6 +48,9 @@ fun WhatsNewUpdateDialog(
 ) {
     val s = LocalStrings.current
     val isAmharic = s.isAmharic
+
+    val currentRelease = releaseHistory.firstOrNull { it.version == versionName }
+        ?: releaseHistory.firstOrNull()
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -94,30 +102,21 @@ fun WhatsNewUpdateDialog(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(Spacing.md),
             ) {
-                WhatsNewItem(
-                    numeral = if (isAmharic) "፩" else "1",
-                    title = if (isAmharic) "የታመቀ የጸሎት ሰሌዳ እና የተሟላ ተደራሽነት" else "Accessible Heatmap & Day Inspector",
-                    description = if (isAmharic)
-                        "ለአይን ስውራን (TalkBack) በጸሎት ሰሌዳው ላይ የተሟላ የዕለታትና የጾም መረጃ ተካቷል፤ የቀናት መቀያየሪያ ቀስቶች ለመንካት ምቹ ሆነዋል።"
-                    else
-                        "Full 365-day screen-reader announcements with fasting details, and enlarged inspection navigation chevrons for smooth day browsing.",
-                )
-                WhatsNewItem(
-                    numeral = if (isAmharic) "፪" else "2",
-                    title = if (isAmharic) "የገጾች ቅርጽ እና የክፍተት ማስተካከያ" else "Screen Hierarchy & Margins",
-                    description = if (isAmharic)
-                        "በዋናው ገጽ ላይ የግጻዌ ካርድ ቅርጽ ተስተካክሎ የሰዓታት ካርዱ ዋነኛ ትኩረት እንዲሆን ተደርጓል፤ በሁሉም የማስተካከያ ገጾች ላይ የጎን ክፍተቶች በወጥ መልክ ወደ ፳፬ ዲፒ ተስተካክለዋል።"
-                    else
-                        "Refactored the Home Gitsawe card so prayer hours reign supreme, and standardized horizontal margins across all settings to 24dp.",
-                )
-                WhatsNewItem(
-                    numeral = if (isAmharic) "፫" else "3",
-                    title = if (isAmharic) "የቤተ ክርስቲያን ሥርዓት ምልክቶችና የንባብ ማሻሻያ" else "Liturgical Symbols & Reading Polish",
-                    description = if (isAmharic)
-                        "በውዳሴ ማርያምና በመዝሙረ ዳዊት ላይ የቤተክርስቲያንና የመጽሐፍ ቅዱስ ሥርዓት ምልክቶች ተተክተዋል፤ በፍለጋ እና በንባብ ገጽ ላይ ያሉ ክፍተቶች ተስተካክለዋል።"
-                    else
-                        "Replaced secular icons on Wudase Maryam and Psalter with liturgical Church and codex emblems, and smoothed search debounce typing.",
-                )
+                if (currentRelease != null) {
+                    Text(
+                        text = if (isAmharic) currentRelease.titleAm else currentRelease.title,
+                        style = MaterialTheme.typography.titleSmall.inReadingFont(),
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    val changes = if (isAmharic) currentRelease.changesAm else currentRelease.changes
+                    changes.forEachIndexed { index, change ->
+                        WhatsNewItem(
+                            numeral = if (isAmharic) geezNumeral(index + 1) else "${index + 1}",
+                            description = change,
+                        )
+                    }
+                }
             }
         },
         confirmButton = {
@@ -138,7 +137,6 @@ fun WhatsNewUpdateDialog(
 @Composable
 private fun WhatsNewItem(
     numeral: String,
-    title: String,
     description: String,
 ) {
     Row(
@@ -159,18 +157,14 @@ private fun WhatsNewItem(
                 )
             }
         }
-        Column(Modifier.weight(1f)) {
-            Text(
-                title,
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Spacer(Modifier.height(Spacing.xxs))
-            Text(
-                description,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+        Text(
+            text = description,
+            style = MaterialTheme.typography.bodySmall.inReadingFont(),
+            color = MaterialTheme.colorScheme.onSurface,
+            lineHeight = 20.sp,
+            modifier = Modifier
+                .weight(1f)
+                .padding(top = 3.dp),
+        )
     }
 }
