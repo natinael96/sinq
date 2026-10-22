@@ -383,6 +383,9 @@ interface Strings {
     val feedbackSubtitle: String
     val feedbackCta: String
     val about: String
+    val aboutSinq: String
+    val helpAndFeedback: String
+    val helpAndFeedbackSubtitle: String
     val alarmSection: String
     /** The one-time notice that an arriving hour vibrates rather than rings. */
     val alarmVibratesTitle: String
@@ -1431,6 +1434,9 @@ object AmharicStrings : Strings {
     override val feedbackSubtitle = "በጽሑፉ ላይ ስሕተት፣ የተበላሸ ነገር፣ ወይም ሐሳብ"
     override val feedbackCta = "ሐሳብዎን ያካፍሉን"
     override val about = "ስለ መተግበሪያው"
+    override val aboutSinq = "ስለ ስንቅ"
+    override val helpAndFeedback = "እርዳታና ድጋፍ"
+    override val helpAndFeedbackSubtitle = "የአጠቃቀም መመሪያ፣ አጋዥ ጉብኝት፣ አዳዲስ ለውጦችና አስተያየት"
     override val alarmSection = "ማንቂያ"
     override val alarmVibratesTitle = "ማንቂያው ይነዝራል"
     override val alarmVibratesBody =
@@ -1997,7 +2003,7 @@ object AmharicStrings : Strings {
 
     override val aboutTagline = "የኦርቶዶክስ ተዋሕዶ ጸሎትና ንባብ፤ የተካተቱት መጻሕፍት ያለ በይነ መረብ ይነበባሉ።"
     override val aboutSourceTitle = "የጽሑፍ ምንጭ"
-    override val aboutSourceBody = "የመጽሐፍ ቅዱስ ጽሑፍ ከ EOTCOpenSource 80-weahadu ተወስዷል። የሁሉም መጻሕፍት ምንጮችና ፈቃዶች በፈቃዶች ገጽ ይገኛሉ።"
+    override val aboutSourceBody = "የመጽሐፍ ቅዱስ ጽሑፍ ከተገኙ የፒዲኤፍ (PDF) ቅጂዎች በዲጂታል መንገድ ተመርምሮና ተጣርቶ የተዘጋጀ ነው። መዝሙረ ዳዊትና የሰዓታት ጸሎት ምንባባት ደግሞ ከቀደመው የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ትውፊት የተጠበቁ ናቸው። የሁሉም መጻሕፍት ምንጮች በፈቃዶች ገጽ ይገኛሉ።"
     override val aboutFontTitle = "ቅርጸ ፊደላት"
     override val aboutFontBody = "Abyssinica SIL፣ Noto Sans Ethiopic እና ከ Font.et የመጡ ቅርጸ ፊደላት በ SIL Open Font License 1.1 ይቀርባሉ።"
     override val aboutPrivacyTitle = "ግላዊነት"
@@ -2447,6 +2453,9 @@ object EnglishStrings : Strings {
     override val feedbackSubtitle = "A mistake in the text, something broken, or an idea"
     override val feedbackCta = "Share your thoughts"
     override val about = "About"
+    override val aboutSinq = "About Sinq"
+    override val helpAndFeedback = "Help & Feedback"
+    override val helpAndFeedbackSubtitle = "User guide, tutorial, changelog & feedback"
     override val alarmSection = "Alarm"
     override val alarmVibratesTitle = "The alarm vibrates"
     override val alarmVibratesBody =
@@ -2470,9 +2479,9 @@ object EnglishStrings : Strings {
     override val aboutTagline = "The Orthodox Tewahedo hours of prayer — fully offline."
     override val aboutSourceTitle = "Text source"
     override val aboutSourceBody =
-        "Psalms and gospels come from the 80-weahadu Amharic Bible by EOTCOpenSource, under " +
-            "CC BY-NC-ND 4.0. Verse text is unchanged; Psalm 118's acrostic letters are shown as " +
-            "stanza headings. Provided as-is."
+        "The Bible text was digitized and extracted from available publication PDFs, carefully formatted and proofread. " +
+            "The Psalter and liturgical hours prayer readings preserve the traditional Ethiopian Orthodox LXX translation. " +
+            "Full source details are available on the licenses page."
     override val aboutFontTitle = "Fonts"
     override val aboutFontBody =
         "Abyssinica SIL and Noto Sans Ethiopic, under the SIL Open Font License 1.1. The " +

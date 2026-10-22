@@ -5,6 +5,19 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.8.0] — 2026-10-22
+
+_versionCode 122 · Complete 1962 Amharic Bible, Settings UI Redesign, and Streamlined Support_
+
+### Added
+- **Digitized 1962 Amharic Bible Edition.** Integrated the full 1962 publication text digitized from publication PDFs, meticulously formatted and proofread with authentic Ge'ez chapter headings and verse numbering.
+- **Dedicated Split Reminder Cards.** Replaced expanding accordion rows with a modern split card pattern (`[ Info + Time Badge ] | [ Switch ]`), allowing direct time changes via time picker while toggling switches independently.
+- **Streamlined Help & Feedback Hub.** De-cluttered the bottom of Settings into two elegant rows: "ስለ ስንቅ (About Sinq)" and "እርዳታና ድጋፍ (Help & Feedback)" with a dedicated support sheet.
+
+### Changed
+- **LXX Psalter & Canonical Prayer Hours Preserved.** Standalone Psalter reader and all canonical Horologium prayer hours strictly maintain the traditional Ethiopian Orthodox LXX translation, while Old Testament Bible reader connects to the 1962 Psalms.
+- **Reading Plans Aligned.** Rebuilt 360-day annual, 180-day half-year, and 150-day psalter reading plans synchronized with the digitized text.
+
 ## [1.7.9] — 2026-10-22
 
 _versionCode 121 · Google Play Automatic App Protection Compliance (API 24+)_

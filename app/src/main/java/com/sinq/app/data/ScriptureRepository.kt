@@ -118,8 +118,9 @@ object ScriptureRepository {
             CacheTrimmer.ensureRegistered(context)
             runCatching {
                 val meta = books(context.applicationContext).first { it.key == key }
+                val filename = if (meta.number == 19 && edition == BIBLE_EDITION) "19-psalms-1962.json" else "${meta.number.toString().padStart(2, '0')}-$key.json"
                 val raw = context.applicationContext.assets
-                    .open("$DIR/$edition/books/${meta.number.toString().padStart(2, '0')}-$key.json")
+                    .open("$DIR/$edition/books/$filename")
                     .readBytes().decodeToString()
                 parseBook(json.parseToJsonElement(raw).jsonObject, meta)
             }.onFailure { Log.e(TAG, "Failed to load book $key from $edition", it) }
@@ -207,7 +208,10 @@ object ScriptureRepository {
     private fun JsonObject.text(key: String): String? =
         this[key]?.takeIf { it !is JsonNull }?.jsonPrimitive?.content
 
-    private fun slug(file: String): String = file.substringAfter('/').substringAfter('-').removeSuffix(".json")
+    private fun slug(file: String): String {
+        val s = file.substringAfter('/').substringAfter('-').removeSuffix(".json")
+        return if (s.startsWith("psalms")) "psalms" else s
+    }
 
     private fun parseBook(raw: JsonObject, meta: ScriptureBookMeta): ScriptureBook = ScriptureBook(
         number = meta.number,

@@ -80,7 +80,7 @@ class ReadingPlanDataTest {
             val dupes = seen.groupingBy { it }.eachCount().filterValues { it > 1 }
             assertTrue("${plan.id} repeats ${dupes.keys.take(3)}", dupes.isEmpty())
             // The ዳዊት track reads the Psalter; the others read the whole canon.
-            val expected = if (plan.id == "psalter") 150 else 1610
+            val expected = if (plan.id == "psalter") 150 else 1188
             assertEquals("${plan.id} chapter total", expected, seen.size)
         }
     }

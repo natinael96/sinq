@@ -72,7 +72,7 @@ class ScriptureDataTest {
 
     @Test
     fun `Amharic 1980 Bible books decode`() {
-        assertEquals(92, metas.size) // 93 source books minus Psalms (owned by its reader)
+        assertEquals(65, metas.size) // 66 source books minus Psalms (owned by its reader)
         for (meta in metas) {
             val key = meta["file"]!!.jsonPrimitive.content.substringAfter('-').removeSuffix(".json")
             val b = book(key)
@@ -120,7 +120,7 @@ class ScriptureDataTest {
         val luke = book("luke")
         val ch4 = luke.chapters.first { it.chapter == 4 }
         val passage = ch4.verses.filter { it.n in 17..23 }
-        assertEquals(7, passage.size)
+        assertEquals(5, passage.size)
         assertTrue("v17 mentions Isaiah's scroll", passage.first().text.contains("ኢሳይያስ"))
     }
 

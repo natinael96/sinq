@@ -38,8 +38,10 @@ import androidx.compose.material.icons.outlined.MailOutline
 import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.material.icons.outlined.StarOutline
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -49,8 +51,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -93,6 +97,7 @@ import kotlinx.coroutines.launch
  * 4. Data, Profile & Backup (Christian name, Backup & Restore)
  * Followed by About & Help.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     onOpenReading: () -> Unit,
@@ -108,6 +113,8 @@ fun SettingsScreen(
     val s = LocalStrings.current
     val gold = MaterialTheme.colorScheme.secondary
     val primary = MaterialTheme.colorScheme.primary
+
+    var helpSheetOpen by remember { mutableStateOf(false) }
 
     val theme by SettingsRepository.theme(context).collectAsState(initial = ThemeChoice.LIGHT)
     val language by SettingsRepository.language(context).collectAsState(initial = SettingsRepository.DEFAULT_LANGUAGE)
@@ -218,53 +225,24 @@ fun SettingsScreen(
 
                 Spacer(Modifier.height(Spacing.xl))
 
-                // Bold, Unique Feedback Card
-                FeedbackCard(
-                    title = s.feedbackTitle,
-                    subtitle = s.feedbackSubtitle,
-                    cta = s.feedbackCta,
-                    onClick = { com.sinq.app.ui.common.openUrl(context, com.sinq.app.ui.common.FEEDBACK_URL) },
-                )
-
-                Spacer(Modifier.height(Spacing.xl))
-
-                // About & Help Card
-                SectionHeader(s.about)
+                // About & Support Section (Consolidated 2-row layout)
+                SectionHeader(s.aboutSinq)
                 SinqCard(
                     contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     NavRow(
-                        title = s.whatsNew,
-                        subtitle = "v${appVersion(context)}",
-                        leadingIcon = Icons.Outlined.NewReleases,
-                        onClick = onOpenChangelog,
-                    )
-                    SinqDivider()
-                    NavRow(
-                        title = s.userGuide,
-                        subtitle = s.userGuideSubtitle,
-                        leadingIcon = Icons.Outlined.AutoStories,
-                        onClick = { com.sinq.app.ui.common.openUrl(context, com.sinq.app.ui.common.GUIDE_URL) },
-                    )
-                    SinqDivider()
-                    NavRow(
-                        title = s.tutorial,
-                        leadingIcon = Icons.AutoMirrored.Outlined.HelpOutline,
-                        onClick = onOpenTutorial,
-                    )
-                    SinqDivider()
-                    NavRow(
-                        title = s.rateAppTitle,
-                        subtitle = s.rateAppSubtitle,
-                        leadingIcon = Icons.Outlined.StarOutline,
-                        onClick = { com.sinq.app.ui.common.openPlayStore(context) },
-                    )
-                    SinqDivider()
-                    NavRow(
-                        title = s.about,
+                        title = s.aboutSinq,
+                        subtitle = "v${appVersion(context)} · ${s.aboutTagline}",
                         leadingIcon = Icons.Outlined.Info,
                         onClick = onOpenAbout,
+                    )
+                    SinqDivider()
+                    NavRow(
+                        title = s.helpAndFeedback,
+                        subtitle = s.helpAndFeedbackSubtitle,
+                        leadingIcon = Icons.AutoMirrored.Outlined.HelpOutline,
+                        onClick = { helpSheetOpen = true },
                     )
                 }
 
@@ -277,6 +255,87 @@ fun SettingsScreen(
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(Modifier.height(Spacing.md))
+            }
+        }
+    }
+
+    if (helpSheetOpen) {
+        ModalBottomSheet(
+            onDismissRequest = { helpSheetOpen = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = Spacing.screen)
+                    .padding(bottom = Spacing.xxl),
+            ) {
+                Text(
+                    text = s.helpAndFeedback,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                Spacer(Modifier.height(Spacing.xxs))
+                Text(
+                    text = s.helpAndFeedbackSubtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(Spacing.md))
+                SinqCard(
+                    contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    NavRow(
+                        title = s.whatsNew,
+                        subtitle = "v${appVersion(context)}",
+                        leadingIcon = Icons.Outlined.NewReleases,
+                        onClick = {
+                            helpSheetOpen = false
+                            onOpenChangelog()
+                        },
+                    )
+                    SinqDivider()
+                    NavRow(
+                        title = s.userGuide,
+                        subtitle = s.userGuideSubtitle,
+                        leadingIcon = Icons.Outlined.AutoStories,
+                        onClick = {
+                            helpSheetOpen = false
+                            com.sinq.app.ui.common.openUrl(context, com.sinq.app.ui.common.GUIDE_URL)
+                        },
+                    )
+                    SinqDivider()
+                    NavRow(
+                        title = s.tutorial,
+                        leadingIcon = Icons.AutoMirrored.Outlined.HelpOutline,
+                        onClick = {
+                            helpSheetOpen = false
+                            onOpenTutorial()
+                        },
+                    )
+                    SinqDivider()
+                    NavRow(
+                        title = s.rateAppTitle,
+                        subtitle = s.rateAppSubtitle,
+                        leadingIcon = Icons.Outlined.StarOutline,
+                        onClick = {
+                            helpSheetOpen = false
+                            com.sinq.app.ui.common.openPlayStore(context)
+                        },
+                    )
+                    SinqDivider()
+                    NavRow(
+                        title = s.feedbackTitle,
+                        subtitle = s.feedbackSubtitle,
+                        leadingIcon = Icons.Outlined.RateReview,
+                        onClick = {
+                            helpSheetOpen = false
+                            com.sinq.app.ui.common.openUrl(context, com.sinq.app.ui.common.FEEDBACK_URL)
+                        },
+                    )
+                }
             }
         }
     }
@@ -339,60 +398,6 @@ private fun SettingsHubCard(
                 modifier = Modifier.size(IconSize.medium),
             )
         }
-    }
-}
-
-/**
- * Prominent feedback card matching the exact HeroCard design of the Home screen buttons (Gitsawe).
- */
-@Composable
-private fun FeedbackCard(
-    title: String,
-    subtitle: String,
-    cta: String,
-    onClick: () -> Unit,
-) {
-    val haptics = LocalHapticFeedback.current
-    val sinq = sinqColors
-
-    HeroCard(
-        onClick = {
-            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-            onClick()
-        },
-        contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.md),
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.RateReview,
-            contentDescription = null,
-            tint = sinq.onHeroMuted,
-            modifier = Modifier.size(IconSize.large),
-        )
-        Spacer(Modifier.width(Spacing.md))
-        Column(Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = sinq.onHero,
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = sinq.onHeroMuted,
-            )
-            Spacer(Modifier.height(Spacing.xxs))
-            Text(
-                text = cta,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                color = sinq.onHeroGold,
-            )
-        }
-        Icon(
-            imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
-            contentDescription = null,
-            tint = sinq.onHeroMuted,
-        )
     }
 }
 
