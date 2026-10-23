@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -233,14 +235,20 @@ private fun JournalEntryScreenContent(
             ) else com.sinq.app.ui.common.LoadingPanel(Modifier.padding(inner))
             return@Scaffold
         }
-        Column(
-            Modifier
+        Box(
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(inner)
-                .imePadding()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = Spacing.screen, vertical = Spacing.md),
+                .padding(inner),
+            contentAlignment = Alignment.TopCenter,
         ) {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .widthIn(max = 840.dp)
+                    .imePadding()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = Spacing.screen, vertical = Spacing.md),
+            ) {
             val isFutureDate = (loaded.localDate ?: targetDate ?: LocalDate.now()).isAfter(LocalDate.now())
             if (!confessionOnly) {
                 if (isFutureDate) {
@@ -370,6 +378,7 @@ private fun JournalEntryScreenContent(
             Spacer(Modifier.height(Spacing.huge))
         }
     }
+}
 
     if (deleting) {
         AlertDialog(
@@ -578,13 +587,13 @@ private fun ChecklistEditor(
                                 }
                                 onBodyChange(ChecklistParser.serialize(updated, note))
                             },
-                            modifier = Modifier.size(36.dp),
+                            modifier = Modifier.size(44.dp),
                         ) {
                             Icon(
                                 imageVector = if (item.isDone) Icons.Outlined.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
-                                contentDescription = null,
+                                contentDescription = if (item.isDone) s.checklistTaskDone else s.checklistTaskPending,
                                 tint = if (item.isDone) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(20.dp),
+                                modifier = Modifier.size(22.dp),
                             )
                         }
                         Column(modifier = Modifier.weight(1f).padding(horizontal = 4.dp)) {
@@ -639,14 +648,14 @@ private fun ChecklistEditor(
                                     )
                                 }
                             },
-                            modifier = Modifier.size(32.dp),
+                            modifier = Modifier.size(44.dp),
                         ) {
                             Icon(
                                 imageVector = if (item.hasReminder) Icons.Outlined.NotificationsActive else Icons.Outlined.Notifications,
                                 contentDescription = if (item.hasReminder) s.checklistAlarmOn else s.checklistAlarmOff,
                                 tint = if (item.hasReminder) MaterialTheme.colorScheme.secondary
                                 else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
-                                modifier = Modifier.size(18.dp),
+                                modifier = Modifier.size(20.dp),
                             )
                         }
                         IconButton(
@@ -655,13 +664,13 @@ private fun ChecklistEditor(
                                 val updated = items.filterIndexed { i, _ -> i != index }
                                 onBodyChange(ChecklistParser.serialize(updated, note))
                             },
-                            modifier = Modifier.size(32.dp),
+                            modifier = Modifier.size(44.dp),
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.Close,
                                 contentDescription = s.delete,
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                modifier = Modifier.size(16.dp),
+                                modifier = Modifier.size(18.dp),
                             )
                         }
                     }

@@ -3,6 +3,7 @@ package com.sinq.app.ui.common
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -130,36 +132,41 @@ fun ChapterSheet(
     val listState = rememberLazyListState()
     LaunchedEffect(current) { listState.scrollToItem((current - 2).coerceAtLeast(0)) }
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        LazyColumn(state = listState, modifier = Modifier.fillMaxWidth().heightIn(max = 420.dp)) {
-            items(count) { i ->
-                val selected = i == current
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .selectable(selected = selected, onClick = { onPick(i) })
-                        .background(
-                            if (selected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.14f)
-                            else Color.Transparent,
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.TopCenter,
+        ) {
+            LazyColumn(state = listState, modifier = Modifier.fillMaxWidth().widthIn(max = 640.dp).heightIn(max = 420.dp)) {
+                items(count) { i ->
+                    val selected = i == current
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .selectable(selected = selected, onClick = { onPick(i) })
+                            .background(
+                                if (selected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.14f)
+                                else Color.Transparent,
+                            )
+                            .padding(horizontal = Spacing.screen, vertical = Spacing.md),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            geezNumeral(i + 1),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.width(48.dp),
                         )
-                        .padding(horizontal = Spacing.screen, vertical = Spacing.md),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        geezNumeral(i + 1),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.width(48.dp),
-                    )
-                    Text(
-                        labelFor(i).orEmpty(),
-                        style = MaterialTheme.typography.bodyMedium.inReadingFont(),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+                        Text(
+                            labelFor(i).orEmpty(),
+                            style = MaterialTheme.typography.bodyMedium.inReadingFont(),
+                            color = MaterialTheme.colorScheme.onBackground,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                 }
+                item { Spacer(Modifier.height(Spacing.huge)) }
             }
-            item { Spacer(Modifier.height(Spacing.huge)) }
         }
     }
 }

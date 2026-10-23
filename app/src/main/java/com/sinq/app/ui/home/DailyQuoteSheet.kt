@@ -112,8 +112,11 @@ fun DailyQuoteSheet(
                         color = gold,
                     )
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = toggle, modifier = Modifier.size(36.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
+                ) {
+                    IconButton(onClick = toggle, modifier = Modifier.size(44.dp)) {
                         Icon(
                             imageVector = if (bookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
                             contentDescription = s.bookmarkAction,
@@ -121,7 +124,7 @@ fun DailyQuoteSheet(
                             modifier = Modifier.size(IconSize.small),
                         )
                     }
-                    IconButton(onClick = onDismiss, modifier = Modifier.size(36.dp)) {
+                    IconButton(onClick = onDismiss, modifier = Modifier.size(44.dp)) {
                         Icon(
                             imageVector = Icons.Outlined.Close,
                             contentDescription = s.dismiss,

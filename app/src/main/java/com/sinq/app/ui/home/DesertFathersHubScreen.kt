@@ -16,9 +16,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -97,7 +99,10 @@ fun DesertFathersHubScreen(
     val gold = MaterialTheme.colorScheme.secondary
     val keyboard = LocalSoftwareKeyboardController.current
 
-    val allQuotes = remember { DailyQuoteRepository.quotesBlocking(context) }
+    val quotesLoad = com.sinq.app.ui.common.rememberContentLoad {
+        DailyQuoteRepository.quotes(context)
+    }
+    val allQuotes = quotesLoad.value.orEmpty()
     val bookmarks by UserDataRepository.bookmarks(context).collectAsState(initial = emptyList())
 
     var searchQuery by remember { mutableStateOf("") }
@@ -142,12 +147,19 @@ fun DesertFathersHubScreen(
             )
         },
     ) { innerPadding ->
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(bottom = Spacing.xxl),
+            contentAlignment = Alignment.TopCenter,
         ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .widthIn(max = 840.dp)
+                    .imePadding(),
+                contentPadding = PaddingValues(bottom = Spacing.xxl),
+            ) {
             // ── Header Controls: Search & Monastic Filter Chips ──────────────
             item(key = "header_controls") {
                 Column(
@@ -174,7 +186,7 @@ fun DesertFathersHubScreen(
                                 IconButton(onClick = { searchQuery = "" }) {
                                     Icon(
                                         imageVector = Icons.Filled.Clear,
-                                        contentDescription = null,
+                                        contentDescription = s.cancel,
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.size(18.dp),
                                     )
@@ -218,7 +230,7 @@ fun DesertFathersHubScreen(
                                 ),
                             )
                         }
-                        items(PROMINENT_FATHERS_AM) { authorName ->
+                        items(PROMINENT_FATHERS_AM, key = { it }) { authorName ->
                             val isSelected = selectedAuthor == authorName
                             FilterChip(
                                 selected = isSelected,
@@ -320,7 +332,10 @@ fun DesertFathersHubScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                         )
 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
+                        ) {
                             // Bookmark Button
                             IconButton(
                                 onClick = {
@@ -331,7 +346,7 @@ fun DesertFathersHubScreen(
                                         )
                                     }
                                 },
-                                modifier = Modifier.size(36.dp),
+                                modifier = Modifier.size(44.dp),
                             ) {
                                 Icon(
                                     imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
@@ -351,7 +366,7 @@ fun DesertFathersHubScreen(
                                     }
                                     context.startActivity(Intent.createChooser(sendIntent, s.shareAction))
                                 },
-                                modifier = Modifier.size(36.dp),
+                                modifier = Modifier.size(44.dp),
                             ) {
                                 Icon(
                                     imageVector = Icons.Outlined.Share,
@@ -372,7 +387,7 @@ fun DesertFathersHubScreen(
                                     cm.setPrimaryClip(clip)
                                     Toast.makeText(context, s.copyAction, Toast.LENGTH_SHORT).show()
                                 },
-                                modifier = Modifier.size(36.dp),
+                                modifier = Modifier.size(44.dp),
                             ) {
                                 Icon(
                                     imageVector = Icons.Outlined.ContentCopy,
@@ -385,7 +400,7 @@ fun DesertFathersHubScreen(
                             // Reflect in Journal
                             IconButton(
                                 onClick = { onReflectInJournal(quote) },
-                                modifier = Modifier.size(36.dp),
+                                modifier = Modifier.size(44.dp),
                             ) {
                                 Icon(
                                     imageVector = Icons.Outlined.EditNote,
@@ -401,4 +416,5 @@ fun DesertFathersHubScreen(
             }
         }
     }
+}
 }

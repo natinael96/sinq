@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -74,36 +75,45 @@ fun FastingScreen(onBack: () -> Unit) {
             )
         },
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = Spacing.screen),
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentAlignment = Alignment.TopCenter,
         ) {
-            item {
-                Spacer(Modifier.height(Spacing.sm))
-                TodayCard(activeFast, weeklyFast, today, s)
-                fasts.filter { it.start.isAfter(today) }.minByOrNull { it.start }?.let { next ->
-                    Text("${s.fastingUpcoming}: ${next.nameAm} · ${formatEthiopianShortSafe(next.start, s)}",
-                        modifier = Modifier.padding(vertical = Spacing.sm), style = MaterialTheme.typography.bodyMedium)
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .widthIn(max = 840.dp),
+                contentPadding = PaddingValues(horizontal = Spacing.screen),
+            ) {
+                item {
+                    Spacer(Modifier.height(Spacing.sm))
+                    TodayCard(activeFast, weeklyFast, today, s)
+                    fasts.filter { it.start.isAfter(today) }.minByOrNull { it.start }?.let { next ->
+                        Text("${s.fastingUpcoming}: ${next.nameAm} · ${formatEthiopianShortSafe(next.start, s)}",
+                            modifier = Modifier.padding(vertical = Spacing.sm), style = MaterialTheme.typography.bodyMedium)
+                    }
+                    Spacer(Modifier.height(Spacing.xxl))
+                    Text(
+                        s.fastingYearHeader(ethYear),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
+                    Spacer(Modifier.height(Spacing.sm))
                 }
-                Spacer(Modifier.height(Spacing.xxl))
-                Text(
-                    s.fastingYearHeader(ethYear),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                )
-                Spacer(Modifier.height(Spacing.sm))
-            }
-            items(fasts.size, key = { fasts[it].key }) { i ->
-                FastRow(fasts[i], today, s)
-            }
-            item {
-                Spacer(Modifier.height(Spacing.xl))
-                Text(
-                    s.fastingWeeklyNote,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.height(Spacing.huge))
+                items(fasts.size, key = { fasts[it].key }) { i ->
+                    FastRow(fasts[i], today, s)
+                }
+                item {
+                    Spacer(Modifier.height(Spacing.xl))
+                    Text(
+                        s.fastingWeeklyNote,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(Spacing.huge))
+                }
             }
         }
     }

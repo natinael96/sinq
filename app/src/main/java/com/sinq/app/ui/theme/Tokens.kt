@@ -163,6 +163,13 @@ data class SinqColors(
     val highlightGreen: Color,
     val highlightBlue: Color,
     val highlightPink: Color,
+    /** Manuscript plate tokens. */
+    val manuscriptBg: Color,
+    val manuscriptBorder: Color,
+    val goldFillet: Color,
+    val fastingBorder: Color,
+    val fastingDot: Color,
+    val fastingWash: Color,
 ) {
     fun highlight(key: String?): Color = when (key) {
         "yellow" -> highlightYellow
