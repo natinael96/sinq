@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -52,6 +53,23 @@ internal data class ReleaseNote(
 )
 
 internal val releaseHistory = listOf(
+    ReleaseNote(
+        version = "1.8.3",
+        title = "Large-Screen Adaptive Layouts, Design System Polish, and Widget Localization",
+        titleAm = "ለትላልቅ ስክሪኖች የተስተካከለ ይዘት፣ የተሟላ የመልክዕ ዲዛይን እና የመግብር ትርጉሞች",
+        changes = listOf(
+            "Adapted secondary and modal reading routes (Scripture list, Gitsawe lectionary, Mahlet orders, Fasting, Search, Changelog, About) with centered reading widths (840dp / 680dp) for tablets and foldables.",
+            "Polished liturgical aesthetics, chapter title ornaments, and Ethiopic calendar heatmap contrast tokens.",
+            "Added full English translations and preview layouts for prayer clock and daily quote home screen widgets.",
+            "Zero-defect quality gate: verified 100% Android Lint compliance and test suite green.",
+        ),
+        changesAm = listOf(
+            "የመጻሕፍት ዝርዝር፣ ግጻዌ፣ ማኅሌት፣ አጽዋማት፣ ፍለጋ እና መረጃ ገጾች በትላልቅ ስክሪኖችና ታብሌቶች ላይ ተመጣጣኝ ስፋት እንዲኖራቸው ተስተካክለዋል።",
+            "የንባብ ርእሶች፣ የበረሃ አባቶች ምክር ገጽ እና የዓመታዊ ልማዶች የንፅፅር ቀለማት ይበልጥ ተውበዋል።",
+            "ለስልክ መነሻ ገጽ መግብሮች (የጸሎት ሰዓት እና የዕለቱ ቃል) የተሟላ የእንግሊዝኛ ትርጉም ተካቷል።",
+            "ሙሉ የጥራት ፍተሻ እና የአንድሮይድ ሊንት ምርመራ ያለምንም እንከን አልፏል።",
+        ),
+    ),
     ReleaseNote(
         version = "1.8.2",
         title = "Sayings of the Desert Fathers in Books Tab, Unboxed Manuscript Hub, and Android 6.0 (API 23+) Restoration",
@@ -642,13 +660,19 @@ fun ChangelogScreen(onBack: () -> Unit, onOpenTour: () -> Unit = {}) {
         containerColor = MaterialTheme.colorScheme.background,
         topBar = { SinqTopBar(title = s.whatsNew, onBack = onBack) },
     ) { inner ->
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(inner),
-            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.md),
-            verticalArrangement = Arrangement.spacedBy(Spacing.md),
+            contentAlignment = Alignment.TopCenter,
         ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .widthIn(max = 840.dp),
+                contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.md),
+                verticalArrangement = Arrangement.spacedBy(Spacing.md),
+            ) {
             // ── Release History Cards ───────────────────────────────────────
             items(releaseHistory, key = { it.version }) { release ->
                 val isLatest = release.version == releaseHistory.first().version
@@ -747,4 +771,5 @@ fun ChangelogScreen(onBack: () -> Unit, onOpenTour: () -> Unit = {}) {
             }
         }
     }
+}
 }

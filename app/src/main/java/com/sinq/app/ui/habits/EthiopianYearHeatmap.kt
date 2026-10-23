@@ -225,12 +225,13 @@ fun EthiopianYearHeatmap(
 
     // Palette & Manuscript Folio Tokens
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.2f
-    val manuscriptBg = if (isDark) Color(0xFF0B2822) else Color(0xFFFAF7EF)
-    val manuscriptBorder = if (isDark) Color(0xFF235448) else Color(0xFFD6C7A1)
-    val goldFillet = if (isDark) Color(0xFFE0BC65) else Color(0xFF7E5F1E)
-    val fastingBorder = if (isDark) Color(0xFF529467) else Color(0xFF4D785B)
-    val fastingDot = if (isDark) Color(0xFF7ECA96) else Color(0xFF35533F)
-    val fastingWash = if (isDark) Color(0x3362A478) else Color(0x243E5A47)
+    val sinq = com.sinq.app.ui.theme.sinqColors
+    val manuscriptBg = sinq.manuscriptBg
+    val manuscriptBorder = sinq.manuscriptBorder
+    val goldFillet = sinq.goldFillet
+    val fastingBorder = sinq.fastingBorder
+    val fastingDot = sinq.fastingDot
+    val fastingWash = sinq.fastingWash
 
     val empty = MaterialTheme.colorScheme.surfaceVariant
     val gold = MaterialTheme.colorScheme.secondary

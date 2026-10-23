@@ -4,6 +4,7 @@
   Tapping opens the Daily Contemplation Sheet inside Sinq.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/widget_quote_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -26,7 +27,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="☩ የአበው ምክር"
+            tools:text="☩ የአበው ምክር"
             android:textColor="#E5BE5E"
             android:textSize="11sp"
             android:letterSpacing="0.04"
@@ -35,7 +36,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="→"
+            tools:text="→"
             android:textColor="#A9C1B6"
             android:textSize="13sp" />
     </LinearLayout>
@@ -46,7 +47,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:text="አባ እንጦንስ ዓቢይ"
+        tools:text="አባ እንጦንስ ዓቢይ"
         android:textColor="#F2EDDE"
         android:textSize="15sp"
         android:textStyle="bold"
@@ -69,7 +70,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:text="«ቅዱስ አባ እንጦንስ በበረሃ ሳለ...»"
+        tools:text="«ቅዱስ አባ እንጦንስ በበረሃ ሳለ...»"
         android:textColor="#D9D3C2"
         android:textSize="12.5sp"
         android:lineSpacingExtra="2dp"

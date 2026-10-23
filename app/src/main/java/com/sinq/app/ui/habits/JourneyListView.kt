@@ -114,9 +114,12 @@ fun JourneyListView(
     fun inFast(date: LocalDate): Boolean = fasts.any { it.contains(date) } || FastingCalendar.isWeeklyFastDay(date)
 
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.2f
-    val manuscriptBg = if (isDark) Color(0xFF0B2822) else Color(0xFFFAF7EF)
-    val manuscriptBorder = if (isDark) Color(0xFF235448) else Color(0xFFD6C7A1)
-    val goldFillet = if (isDark) Color(0xFFE0BC65) else Color(0xFF7E5F1E)
+    val sinq = com.sinq.app.ui.theme.sinqColors
+    val manuscriptBg = sinq.manuscriptBg
+    val manuscriptBorder = sinq.manuscriptBorder
+    val goldFillet = sinq.goldFillet
+    val fastingBorder = sinq.fastingBorder
+    val fastingDot = sinq.fastingDot
 
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -295,7 +298,7 @@ fun JourneyListView(
                                                                 else MaterialTheme.colorScheme.outlineVariant
                                                             )
                                                             .then(
-                                                                if (isFast) Modifier.border(1.dp, Color(0xFF4D785B), CircleShape)
+                                                                if (isFast) Modifier.border(1.dp, fastingBorder, CircleShape)
                                                                 else Modifier
                                                             )
                                                     )
@@ -314,7 +317,7 @@ fun JourneyListView(
                                                         Text(
                                                             text = s.fastingDayLabel,
                                                             style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                                                            color = if (isDark) Color(0xFF7ECA96) else Color(0xFF35533F),
+                                                            color = fastingDot,
                                                             fontWeight = FontWeight.SemiBold,
                                                         )
                                                     }

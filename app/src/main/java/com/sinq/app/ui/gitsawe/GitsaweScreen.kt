@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -183,25 +184,31 @@ fun GitsaweScreen(
         if (data == null) {
             LoadingPanel(Modifier.padding(innerPadding))
         } else {
-            LazyColumn(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
-                    // Sliding the page horizontally turns to the neighbouring
-                    // day, mirroring the arrows in the day navigator.
-                    .pointerInput(Unit) {
-                        var drag = 0f
-                        detectHorizontalDragGestures(
-                            onDragStart = { drag = 0f },
-                            onDragEnd = {
-                                val threshold = 48.dp.toPx()
-                                if (drag <= -threshold) epochDay++
-                                else if (drag >= threshold) epochDay--
-                            },
-                        ) { _, amount -> drag += amount }
-                    },
-                contentPadding = PaddingValues(horizontal = Spacing.screen),
+                    .padding(innerPadding),
+                contentAlignment = androidx.compose.ui.Alignment.TopCenter,
             ) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .widthIn(max = 840.dp)
+                        // Sliding the page horizontally turns to the neighbouring
+                        // day, mirroring the arrows in the day navigator.
+                        .pointerInput(Unit) {
+                            var drag = 0f
+                            detectHorizontalDragGestures(
+                                onDragStart = { drag = 0f },
+                                onDragEnd = {
+                                    val threshold = 48.dp.toPx()
+                                    if (drag <= -threshold) epochDay++
+                                    else if (drag >= threshold) epochDay--
+                                },
+                            ) { _, amount -> drag += amount }
+                        },
+                    contentPadding = PaddingValues(horizontal = Spacing.screen),
+                ) {
                 item(key = "day") {
                     DayNavigator(
                         date = date,
@@ -318,6 +325,7 @@ fun GitsaweScreen(
                 item { Spacer(Modifier.height(Spacing.xl)) }
             }
         }
+    }
     }
 
     if (showPicker) {

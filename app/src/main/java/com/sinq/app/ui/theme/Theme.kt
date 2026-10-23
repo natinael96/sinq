@@ -151,6 +151,12 @@ internal val LightSinq = SinqColors(
     highlightGreen = Color(0x554CAF50),
     highlightBlue = Color(0x552196F3),
     highlightPink = Color(0x55E0529C),
+    manuscriptBg = Color(0xFFFAF7EF),
+    manuscriptBorder = Color(0xFFD6C7A1),
+    goldFillet = Color(0xFF7E5F1E),
+    fastingBorder = Color(0xFF4D785B),
+    fastingDot = Color(0xFF35533F),
+    fastingWash = Color(0x243E5A47),
 )
 
 internal val DarkSinq = SinqColors(
@@ -167,6 +173,12 @@ internal val DarkSinq = SinqColors(
     highlightGreen = Color(0x5981E884),
     highlightBlue = Color(0x597EC4FF),
     highlightPink = Color(0x59FF88BE),
+    manuscriptBg = Color(0xFF0B2822),
+    manuscriptBorder = Color(0xFF235448),
+    goldFillet = Color(0xFFE0BC65),
+    fastingBorder = Color(0xFF529467),
+    fastingDot = Color(0xFF7ECA96),
+    fastingWash = Color(0x3362A478),
 )
 
 // ── OLED Vigil Black: pure pitch black ground for zero backlight bleed at night vigils
@@ -231,6 +243,12 @@ internal val VigilBlackSinq = SinqColors(
     highlightGreen = Color(0x5981E884),
     highlightBlue = Color(0x597EC4FF),
     highlightPink = Color(0x59FF88BE),
+    manuscriptBg = Color(0xFF071411),
+    manuscriptBorder = Color(0xFF1A3830),
+    goldFillet = VigilBlackGold,
+    fastingBorder = Color(0xFF3B6B4C),
+    fastingDot = Color(0xFF6B9C82),
+    fastingWash = Color(0x333B6B4C),
 )
 
 @Composable

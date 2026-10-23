@@ -5,6 +5,18 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.8.3] — 2026-10-23
+
+_versionCode 125 · Large-Screen Adaptive Layouts, Design System Polish, and Widget Localization_
+
+### Added
+- **Large-Screen & Foldable Adaptations.** Adapted secondary and modal reading routes (Scripture list, Gitsawe lectionary, Mahlet orders, Fasting details, Global search, Changelog, and About) with centered maximum readable content width (840dp for grids/lists, 680dp for prose) to eliminate awkward stretched layouts on tablets and foldables.
+- **Widget Localization & Previews.** Added full bilingual string resources and preview bindings for home screen widgets (Prayer Clock & Daily Monastic Quote).
+
+### Changed
+- **Liturgical Aesthetic & Contrast Polish.** Enhanced Desert Fathers Sayings Hub, Reading title chapter ornaments, Ethiopic calendar heatmap contrast tokens, and Home screen hero card typography.
+- **Quality & Lint Audit.** Resolved all Android lint issues and updated Settings time formatting to use fixed locale conventions.
+
 ## [1.8.2] — 2026-10-22
 
 _versionCode 124 · Sayings of the Desert Fathers in Books Tab, Unboxed Manuscript Hub, and Android 6.0 (API 23+) Restoration_

@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -238,67 +239,74 @@ fun MahletListScreen(
             }
         },
     ) { inner ->
-        Column(
-            Modifier
+        Box(
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(inner),
+            contentAlignment = androidx.compose.ui.Alignment.TopCenter,
         ) {
-            if (isSearching) {
-                if (query.isNotBlank()) {
-                    SearchResults(hits, onOpen)
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .widthIn(max = 840.dp),
+            ) {
+                if (isSearching) {
+                    if (query.isNotBlank()) {
+                        SearchResults(hits, onOpen)
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(Spacing.screen),
+                            contentAlignment = Alignment.TopCenter,
+                        ) {
+                            Text(
+                                text = s.mahletSearchHint,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = Spacing.xxl),
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    }
                 } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(Spacing.screen),
-                        contentAlignment = Alignment.TopCenter,
-                    ) {
-                        Text(
-                            text = s.mahletSearchHint,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = Spacing.xxl),
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                }
-            } else {
-                MonthStrip(
-                    months = pages,
-                    selected = pager.currentPage,
-                    onJump = { i -> scope.launch { pager.animateScrollToPage(i) } },
-                )
-                HorizontalPager(
-                    state = pager,
-                    modifier = Modifier.fillMaxSize(),
-                ) { page ->
-                    val m = pages[page]
-                    val groups = remember(m) {
-                        groupByFeast(m.orders.filter { it.season != MahletSeason.TSIGE })
-                    }
-                    LazyColumn(
-                        Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.xs),
-                    ) {
-                        if (today.isNotEmpty() && m.month == EthiopianDate.from(LocalDate.now()).month) {
-                            item(key = "today") {
-                                TodayOrder(today, onOpen)
-                                Spacer(Modifier.height(Spacing.xs))
+                    MonthStrip(
+                        months = pages,
+                        selected = pager.currentPage,
+                        onJump = { i -> scope.launch { pager.animateScrollToPage(i) } },
+                    )
+                    HorizontalPager(
+                        state = pager,
+                        modifier = Modifier.fillMaxSize(),
+                    ) { page ->
+                        val m = pages[page]
+                        val groups = remember(m) {
+                            groupByFeast(m.orders.filter { it.season != MahletSeason.TSIGE })
+                        }
+                        LazyColumn(
+                            Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.xs),
+                        ) {
+                            if (today.isNotEmpty() && m.month == EthiopianDate.from(LocalDate.now()).month) {
+                                item(key = "today") {
+                                    TodayOrder(today, onOpen)
+                                    Spacer(Modifier.height(Spacing.xs))
+                                }
                             }
-                        }
-                        if (m.month == TSIGE_HOME && tsigeCount > 0) {
-                            item(key = "tsige") {
-                                SeasonRow(tsigeCount, onOpenSeason)
-                                Spacer(Modifier.height(Spacing.xs))
+                            if (m.month == TSIGE_HOME && tsigeCount > 0) {
+                                item(key = "tsige") {
+                                    SeasonRow(tsigeCount, onOpenSeason)
+                                    Spacer(Modifier.height(Spacing.xs))
+                                }
                             }
+                            items(groups.size, key = { groups[it].first().id }) { i ->
+                                FeastRow(groups[i], onOpen)
+                            }
+                            if (groups.isEmpty()) {
+                                item(key = "none") { MonthHasNothing(s.mahletNone) }
+                            }
+                            item { Spacer(Modifier.height(Spacing.huge)) }
                         }
-                        items(groups.size, key = { groups[it].first().id }) { i ->
-                            FeastRow(groups[i], onOpen)
-                        }
-                        if (groups.isEmpty()) {
-                            item(key = "none") { MonthHasNothing(s.mahletNone) }
-                        }
-                        item { Spacer(Modifier.height(Spacing.huge)) }
                     }
                 }
             }

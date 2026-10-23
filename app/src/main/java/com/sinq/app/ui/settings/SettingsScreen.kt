@@ -765,7 +765,7 @@ private fun ReadingScheduleSheet(
                                     onClick = {
                                         times = times.filterIndexed { i, _ -> i != index }
                                     },
-                                    modifier = Modifier.size(36.dp),
+                                    modifier = Modifier.size(44.dp),
                                 ) {
                                     Icon(
                                         imageVector = Icons.Outlined.Delete,
@@ -1483,7 +1483,7 @@ fun PrayerSettingsScreen(onBack: () -> Unit, onOpenManageHours: () -> Unit, onOp
                 SectionHeader(s.wazemaRolloverTitle)
                 val wazemaHours = wazemaRolloverTime / 60
                 val wazemaMins = wazemaRolloverTime % 60
-                val wazemaTimeStr = String.format("%02d:%02d", wazemaHours, wazemaMins)
+                val wazemaTimeStr = String.format(java.util.Locale.US, "%02d:%02d", wazemaHours, wazemaMins)
                 ReminderSplitCard(
                     title = s.wazemaRolloverTitle,
                     subtitle = s.wazemaRolloverSubtitle,

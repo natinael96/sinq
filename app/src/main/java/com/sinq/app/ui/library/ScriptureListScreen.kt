@@ -2,6 +2,7 @@ package com.sinq.app.ui.library
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -142,26 +144,33 @@ fun ScriptureListScreen(
             )
         },
     ) { innerPadding ->
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.sm),
+            contentAlignment = Alignment.TopCenter,
         ) {
-            groups.forEach { (label, groupBooks) ->
-                if (groupBooks.isEmpty()) return@forEach
-                item(key = "h_$label") {
-                    SectionHeader(
-                        text = s.canonSection(label),
-                        modifier = Modifier.padding(top = Spacing.xl, bottom = Spacing.xs),
-                    )
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .widthIn(max = 840.dp),
+                contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.sm),
+            ) {
+                groups.forEach { (label, groupBooks) ->
+                    if (groupBooks.isEmpty()) return@forEach
+                    item(key = "h_$label") {
+                        SectionHeader(
+                            text = s.canonSection(label),
+                            modifier = Modifier.padding(top = Spacing.xl, bottom = Spacing.xs),
+                        )
+                    }
+                    items(groupBooks, key = { it.key }) { book ->
+                        BookRow(book = book, unit = s.chapterUnit, onClick = { onOpenBook(book.key) })
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
+                    }
                 }
-                items(groupBooks, key = { it.key }) { book ->
-                    BookRow(book = book, unit = s.chapterUnit, onClick = { onOpenBook(book.key) })
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
-                }
+                item { Spacer(Modifier.height(Spacing.screen)) }
             }
-            item { Spacer(Modifier.height(Spacing.screen)) }
         }
     }
 }

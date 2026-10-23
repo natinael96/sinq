@@ -7,7 +7,10 @@
     <string name="widget_memento_label">Remember death</string>
     <string name="widget_memento_description">Memento mori, on your home screen.</string>
     <string name="widget_prayer_clock_label">Prayer clock</string>
+    <string name="widget_prayer_clock_description">Displays the seven canonical prayer hours. Tap to open current prayer.</string>
     <string name="widget_prayer_clock_caption">Canonical hours</string>
+    <string name="widget_daily_quote_label">Sayings of the Fathers</string>
+    <string name="widget_daily_quote_description">View daily wisdom from the Desert Fathers on your home screen or lock screen.</string>
     <string name="external_link_unavailable">Could not open this link. Check that a browser or compatible app is installed and enabled.</string>
 
     <!-- App Shortcuts (Launcher Quick Actions) -->

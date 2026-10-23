@@ -803,6 +803,8 @@ interface Strings {
     val checklistHourAnytime: String
     val checklistAlarmOn: String
     val checklistAlarmOff: String
+    val checklistTaskDone: String
+    val checklistTaskPending: String
     val confessedAction: String
     val confessedConfirm: String
     val deleteEntryConfirm: String
@@ -1851,6 +1853,8 @@ object AmharicStrings : Strings {
     override val checklistHourAnytime = "ማንኛውም ሰዓት"
     override val checklistAlarmOn = "ደወል በርቷል"
     override val checklistAlarmOff = "ደወል ጠፍቷል"
+    override val checklistTaskDone = "ተጠናቋል"
+    override val checklistTaskPending = "አልተጠናቀቀም"
     override val confessedAction = "ንስሐ ገብቻለሁ"
     override val confessedConfirm = "ሁሉም የንስሐ መዘጋጃዎች ይሰረዛሉ። ይህ አይመለስም።"
     override val deleteEntryConfirm = "ይህ ማስታወሻ ይሰረዛል።"
@@ -2899,6 +2903,8 @@ object EnglishStrings : Strings {
     override val checklistHourAnytime = "Anytime"
     override val checklistAlarmOn = "Alarm On"
     override val checklistAlarmOff = "Alarm Off"
+    override val checklistTaskDone = "Completed"
+    override val checklistTaskPending = "Pending"
     override val confessedAction = "I have confessed"
     override val confessedConfirm = "Every confession draft will be deleted. This cannot be undone."
     override val deleteEntryConfirm = "This entry will be deleted."
