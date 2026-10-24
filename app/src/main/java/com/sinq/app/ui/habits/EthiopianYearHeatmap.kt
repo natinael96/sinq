@@ -615,8 +615,16 @@ fun EthiopianYearHeatmap(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
                 // Ladder
+                val lessLabel = when (s.languageMode) {
+                    com.sinq.app.data.Language.AMHARIC -> "ትንሽ"
+                    com.sinq.app.data.Language.ENGLISH -> "Less"
+                }
+                val moreLabel = when (s.languageMode) {
+                    com.sinq.app.data.Language.AMHARIC -> "፫+ ጸሎት"
+                    com.sinq.app.data.Language.ENGLISH -> "3+ prayers"
+                }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-                    Text("Level 0", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(lessLabel, style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     listOf(
                         0 to empty,
                         1 to (if (isDark) gold.copy(alpha = 0.28f) else gold.copy(alpha = 0.30f)),
@@ -631,7 +639,7 @@ fun EthiopianYearHeatmap(
                                 .semantics { contentDescription = "Level $lvl" }
                         )
                     }
-                    Text("3+", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(moreLabel, style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
 
                 // Fasting indicator
@@ -671,20 +679,14 @@ fun EthiopianYearHeatmap(
                 }
 
                 // Today indicator
+                val todayBorder = if (isDark) Color.White else Color(0xFF0D6B4F)
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Box(
                         Modifier
                             .size(CELL)
                             .clip(RoundedCornerShape(2.5.dp))
-                            .background(empty)
-                            .border(1.2.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(2.5.dp))
-                            .drawBehind {
-                                drawCircle(
-                                    color = gold,
-                                    radius = 1.3.dp.toPx(),
-                                    center = Offset(size.width / 2f, size.height / 2f),
-                                )
-                            }
+                            .background(if (isDark) Color.White.copy(alpha = 0.12f) else Color(0xFF0D6B4F).copy(alpha = 0.12f))
+                            .border(1.6.dp, todayBorder, RoundedCornerShape(2.5.dp))
                     )
                     Text(
                         text = when (s.languageMode) {

@@ -54,6 +54,27 @@ internal data class ReleaseNote(
 
 internal val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.8.5",
+        title = "Ge'ez Scripture Reader, Cleaned Monastic Sayings, Mahlet Polish, and Dense Book Cards",
+        titleAm = "የግእዝ መጽሐፍ ቅዱስ ንባብ፣ የበረሃ አባቶች ምክር እርማት፣ የማኅሌት ማስተካከያ እና የተመጠኑ የመጻሕፍት ካርዶች",
+        changes = listOf(
+            "Enabled Ge'ez and side-by-side Amharic-Ge'ez parallel reading across all 66 canonical books in the Scripture reader.",
+            "Unified prayer journey heatmap legends with localized ladder labels, fasting markers, high-contrast today beacons, and full prayer indicators.",
+            "Restored authentic liturgical formatting in Mahlete Tsige and Segokwaw Dengel, eliminating duplicate stanza numbering.",
+            "Sanitized the Desert Fathers corpus, stripping scanned page headers, footnote intrusions, and OCR artifacts.",
+            "Pinned today's Mahlet order card directly to the top of the Mahlet screen, eliminating the need to scroll.",
+            "Compressed Church Books cards into a sleek, refined profile while preserving full prominence for the daily reading hero card.",
+        ),
+        changesAm = listOf(
+            "በመጽሐፍ ቅዱስ ንባብ ላይ በሁሉም 66ቱ መጻሕፍት የግእዝ እንዲሁም የአማርኛና የግእዝ ትይዩ ንባብ ተካቷል።",
+            "የጸሎት ጉዞ ሰሌዳ መመሪያዎች በሙሉ በአማርኛና በእንግሊዝኛ ተስተካክለው የጾም፣ የዛሬ እና የሙሉ ጸሎት ምልክቶች ተሟልተዋል።",
+            "በማኅሌተ ጽጌ እና በሰቆቃወ ድንግል ላይ የነበረው የቁጥር ድግግሞሽ ተስተካክሎ ትክክለኛ የሥርዓተ ዜማ አከፋፈል ተይዟል።",
+            "በበረሃ አባቶች ምክርና በዕለታዊ ጥቅሶች ውስጥ የነበሩ የኦሲአር የቁምፊ ስህተቶችና የተቆራረጡ የግርጌ ማስታወሻዎች ጸድተዋል።",
+            "በማኅሌት ገጽ ላይ የዛሬው በዓል ካርድ ወዲያውኑ ከላይ እንዲታይ ተደርጓል፤ ወደ ታች ማሸብለል አያስፈልግም።",
+            "በመጻሕፍት ገጽ ላይ ያሉ ካርዶች ይበልጥ ተመጥነው እንዲታዩ ተደርጓል፤ የዕለት ንባብ ካርዱ ግን በጉልህነቱ እንደቀጠለ ነው።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.8.4",
         title = "English Synaxarium, Direct Gitsawe Rollover, Desert Fathers Hub, and App Size Optimization",
         titleAm = "የእንግሊዝኛ ስንክሳር፣ የቀጥታ የነገ ግጻዌ ዳሰሳ፣ የበረሃ አባቶች ምክር ማዕከል እና የመተግበሪያ መጠን ቅነሳ",

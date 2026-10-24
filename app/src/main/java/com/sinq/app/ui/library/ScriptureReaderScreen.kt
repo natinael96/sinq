@@ -88,12 +88,16 @@ private val FONT_STEPS_SP = com.sinq.app.data.SettingsRepository.FONT_STEPS_SP
 
 enum class ScriptureTranslationMode {
     AMHARIC,
+    GEEZ,
     ENGLISH,
+    PARALLEL_AMH_GEEZ,
     PARALLEL_AMH_ENG;
 
-    fun next(): ScriptureTranslationMode = when (this) {
-        AMHARIC -> ENGLISH
-        ENGLISH -> PARALLEL_AMH_ENG
+    fun next(hasEnglish: Boolean): ScriptureTranslationMode = when (this) {
+        AMHARIC -> GEEZ
+        GEEZ -> if (hasEnglish) ENGLISH else PARALLEL_AMH_GEEZ
+        ENGLISH -> PARALLEL_AMH_GEEZ
+        PARALLEL_AMH_GEEZ -> if (hasEnglish) PARALLEL_AMH_ENG else AMHARIC
         PARALLEL_AMH_ENG -> AMHARIC
     }
 }
@@ -124,20 +128,26 @@ fun ScriptureReaderScreen(
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     val hasEnglish = remember(bookKey) { ScriptureRepository.hasEnglish(bookKey) }
     var translationMode by rememberSaveable(bookKey) { mutableStateOf(ScriptureTranslationMode.AMHARIC) }
-    val effectiveMode = if (hasEnglish) translationMode else ScriptureTranslationMode.AMHARIC
-    val activeEdition = if (effectiveMode == ScriptureTranslationMode.ENGLISH) {
-        ScriptureRepository.BIBLE_ENGLISH_EDITION
-    } else {
-        ScriptureRepository.BIBLE_EDITION
+    val effectiveMode = translationMode
+    val activeEdition = when (effectiveMode) {
+        ScriptureTranslationMode.GEEZ -> ScriptureRepository.PSALMS_GEEZ_EDITION
+        ScriptureTranslationMode.ENGLISH -> ScriptureRepository.BIBLE_ENGLISH_EDITION
+        else -> ScriptureRepository.BIBLE_EDITION
     }
     var loadAttempt by rememberSaveable(bookKey, activeEdition) { mutableIntStateOf(0) }
     val bookResult by produceState<Result<ScriptureBook?>?>(initialValue = null, bookKey, activeEdition, loadAttempt) {
         value = runCatching { ScriptureRepository.book(context, bookKey, activeEdition) }
     }
     val parallelBookResult by produceState<ScriptureBook?>(initialValue = null, bookKey, effectiveMode) {
-        value = if (effectiveMode == ScriptureTranslationMode.PARALLEL_AMH_ENG && hasEnglish) {
-            ScriptureRepository.book(context, bookKey, ScriptureRepository.BIBLE_ENGLISH_EDITION)
-        } else null
+        value = when (effectiveMode) {
+            ScriptureTranslationMode.PARALLEL_AMH_ENG -> {
+                if (hasEnglish) ScriptureRepository.book(context, bookKey, ScriptureRepository.BIBLE_ENGLISH_EDITION) else null
+            }
+            ScriptureTranslationMode.PARALLEL_AMH_GEEZ -> {
+                ScriptureRepository.book(context, bookKey, ScriptureRepository.PSALMS_GEEZ_EDITION)
+            }
+            else -> null
+        }
     }
     val fontStep by SettingsRepository.fontStep(context).collectAsState(initial = SettingsRepository.DEFAULT_FONT_STEP)
     val bodyFontSp = FONT_STEPS_SP[fontStep.coerceIn(0, FONT_STEPS_SP.lastIndex)]
@@ -316,34 +326,34 @@ fun ScriptureReaderScreen(
                 },
                 actions = {
                     val gold = MaterialTheme.colorScheme.secondary
-                    if (hasEnglish) {
-                        Box(
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .background(gold.copy(alpha = 0.12f))
-                                .border(1.dp, gold.copy(alpha = 0.45f), CircleShape)
-                                .clickable(
-                                    onClickLabel = "ቀይር",
-                                    onClick = { translationMode = translationMode.next() },
-                                )
-                                .heightIn(min = 48.dp)
-                                .padding(horizontal = 14.dp, vertical = 6.dp),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            val editionText = when (effectiveMode) {
-                                ScriptureTranslationMode.AMHARIC -> s.wudaseLangAmharic
-                                ScriptureTranslationMode.ENGLISH -> "English"
-                                ScriptureTranslationMode.PARALLEL_AMH_ENG -> "አማ + Eng"
-                            }
-                            Text(
-                                text = editionText,
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                color = gold,
-                                maxLines = 1,
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(gold.copy(alpha = 0.12f))
+                            .border(1.dp, gold.copy(alpha = 0.45f), CircleShape)
+                            .clickable(
+                                onClickLabel = "ቀይር",
+                                onClick = { translationMode = translationMode.next(hasEnglish) },
                             )
+                            .heightIn(min = 48.dp)
+                            .padding(horizontal = 14.dp, vertical = 6.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        val editionText = when (effectiveMode) {
+                            ScriptureTranslationMode.AMHARIC -> s.wudaseLangAmharic
+                            ScriptureTranslationMode.GEEZ -> s.wudaseLangGeez
+                            ScriptureTranslationMode.ENGLISH -> "English"
+                            ScriptureTranslationMode.PARALLEL_AMH_GEEZ -> "አማ + ግእዝ"
+                            ScriptureTranslationMode.PARALLEL_AMH_ENG -> "አማ + Eng"
                         }
-                        Spacer(Modifier.width(Spacing.xs))
+                        Text(
+                            text = editionText,
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = gold,
+                            maxLines = 1,
+                        )
                     }
+                    Spacer(Modifier.width(Spacing.xs))
                     com.sinq.app.ui.common.ReaderToolsMenu(
                         fontStep = fontStep,
                         maxFontStep = FONT_STEPS_SP.lastIndex,
@@ -444,7 +454,7 @@ fun ScriptureReaderScreen(
                             append("  ")
                             append(verse.text)
                         }
-                        val secondaryVerseText = if (effectiveMode == ScriptureTranslationMode.PARALLEL_AMH_ENG) {
+                        val secondaryVerseText = if (effectiveMode == ScriptureTranslationMode.PARALLEL_AMH_ENG || effectiveMode == ScriptureTranslationMode.PARALLEL_AMH_GEEZ) {
                             parallelVersesMap[verse.n]?.text
                         } else null
 
