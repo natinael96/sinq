@@ -68,6 +68,164 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
 <!-- releases:start -->
 <article class="release">
   <header>
+    <h2>1.8.4 <span class="date">25 October 2026</span></h2>
+    <p class="motto"><span>English Synaxarium, Direct Gitsawe Rollover, Desert Fathers Hub, and App Size Optimization</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Full English Synaxarium (መጽሐፈ ስንክሳር).</b> Added English translations across all 13 months of the Ethiopian year, enabling bilingual and trilingual reading alongside Amharic and Ge&#x27;ez text with Arke hymns.</span></li>
+    <li><span><b>Dedicated Desert Fathers Hub &amp; Glossary.</b> Expanded Sayings of the Desert Fathers with per-father browsing, topic exploration, and a dedicated monastic glossary.</span></li>
+    <li><span><b>Zema and Mahlet Literature.</b> Added Segokwaw Dengel (ሰቆቃወ ድንግል) and Mahlete Tsige (ማኅሌተ ጽጌ) to the spiritual library with Ge&#x27;ez liturgical typography.</span></li>
+    <li><span><b>High-Contrast Today Beacons in Heatmaps.</b> Highlighted today&#x27;s date in both annual and compact prayer journey heatmaps with vivid emerald green in light mode and bright crisp white in dark mode.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Direct Gitsawe Rollover Navigation.</b> Tapping the home screen Gitsawe card when displaying tomorrow&#x27;s evening lectionary now routes directly to tomorrow&#x27;s date.</span></li>
+    <li><span><b>Gitsawe Home Card Lectionary Title Prominence.</b> Decoupled feast banners from lectionary titles so that daily, seasonal, and evening lectionary reading titles are prominently displayed with eve designations cleanly positioned in the upper gold accent kicker.</span></li>
+    <li><span><b>App Size Reduction by ~30%.</b> Shrank APK size from 18.00 MB to 12.71 MB by pruning redundant font files, deduplicating Ge&#x27;ez scripture, replacing the bundled 16MB pre-built database with on-the-fly runtime indexing (<code>CorpusIndexer</code>), and enabling R8 full mode.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.8.3 <span class="date">23 October 2026</span></h2>
+    <p class="motto"><span>Large-Screen Adaptive Layouts, Design System Polish, and Widget Localization</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Large-Screen &amp; Foldable Adaptations.</b> Adapted secondary and modal reading routes (Scripture list, Gitsawe lectionary, Mahlet orders, Fasting details, Global search, Changelog, and About) with centered maximum readable content width (840dp for grids/lists, 680dp for prose) to eliminate awkward stretched layouts on tablets and foldables.</span></li>
+    <li><span><b>Widget Localization &amp; Previews.</b> Added full bilingual string resources and preview bindings for home screen widgets (Prayer Clock &amp; Daily Monastic Quote).</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Liturgical Aesthetic &amp; Contrast Polish.</b> Enhanced Desert Fathers Sayings Hub, Reading title chapter ornaments, Ethiopic calendar heatmap contrast tokens, and Home screen hero card typography.</span></li>
+    <li><span><b>Quality &amp; Lint Audit.</b> Resolved all Android lint issues and updated Settings time formatting to use fixed locale conventions.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.8.2 <span class="date">22 October 2026</span></h2>
+    <p class="motto"><span>Sayings of the Desert Fathers in Books Tab, Unboxed Manuscript Hub, and Android 6.0 (API 23+) Restoration</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Dedicated Desert Fathers Section in Books.</b> Added a permanent &quot;የአበው ምክር (Sayings of the Desert Fathers)&quot; entry to the Church Books tab, providing immediate access to the 844 Patristic sayings corpus.</span></li>
+    <li><span><b>Unboxed Manuscript Hub.</b> Redesigned the Desert Fathers Sayings Hub to follow the app&#x27;s authentic liturgical manuscript styling, replacing card boxes with delicate hairline dividers, live search, and filter chips by prominent monastic fathers and saved bookmarks.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Restored Android 6.0 (API 23+) Compatibility.</b> Lowered <code>minSdkVersion</code> back to 23, restoring full device compatibility for 1,158 legacy device models on Google Play.</span></li>
+    <li><span><b>Streamlined Home Row.</b> Removed the redundant &quot;View all&quot; button on the Desert Fathers card on the Home screen.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.8.1 <span class="date">22 October 2026</span></h2>
+    <p class="motto"><span>Custom Reading Reminders, Quiet Hours Split Card, Dynamic What&#x27;s New, and Reading Plan Fixes</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Customizable Reading Reminders.</b> Configure reading reminder frequency (1x, 2x, or 3x daily) with customizable time slots via a bottom sheet picker.</span></li>
+    <li><span><b>Dynamic What&#x27;s New Dialog.</b> Re-engineered launch update announcement dialog to pull release highlights dynamically from release notes, ensuring update details always match the installed version.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Extended Notification Retention Default.</b> Raised default notification auto-dismissal timeout from 2 hours to 4 hours (240 minutes) across prayer hours and reading nudges.</span></li>
+    <li><span><b>Quiet Hours Split Card.</b> Unified Quiet Hours with the modern split card pattern (<code>22:00 – 06:00</code> badge) and single dual-tab start/end time picker dialog.</span></li>
+    <li><span><b>Reading Plan Catch-Up Fix.</b> Fixed yearly reading plan progress tracking so readers falling behind are properly handed their due day with clear catch-up options.</span></li>
+    <li><span><b>Home &amp; Liturgical UI Polish.</b> Formatted Desert Fathers quote preview to single-line italic with internal &quot;View all&quot; navigation, bound widget evening rollover directly to liturgical Eve (ዋዜማ), removed duplicate hymn titles in Wudase Maryam, and streamlined Journey screen header.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.8.0 <span class="date">22 October 2026</span></h2>
+    <p class="motto"><span>Complete 1962 Amharic Bible, Settings UI Redesign, and Streamlined Support</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Digitized 1962 Amharic Bible Edition.</b> Integrated the full 1962 publication text digitized from publication PDFs, meticulously formatted and proofread with authentic Ge&#x27;ez chapter headings and verse numbering.</span></li>
+    <li><span><b>Dedicated Split Reminder Cards.</b> Replaced expanding accordion rows with a modern split card pattern (<code>[ Info + Time Badge ] | [ Switch ]</code>), allowing direct time changes via time picker while toggling switches independently.</span></li>
+    <li><span><b>Streamlined Help &amp; Feedback Hub.</b> De-cluttered the bottom of Settings into two elegant rows: &quot;ስለ ስንቅ (About Sinq)&quot; and &quot;እርዳታና ድጋፍ (Help &amp; Feedback)&quot; with a dedicated support sheet.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>LXX Psalter &amp; Canonical Prayer Hours Preserved.</b> Standalone Psalter reader and all canonical Horologium prayer hours strictly maintain the traditional Ethiopian Orthodox LXX translation, while Old Testament Bible reader connects to the 1962 Psalms.</span></li>
+    <li><span><b>Reading Plans Aligned.</b> Rebuilt 360-day annual, 180-day half-year, and 150-day psalter reading plans synchronized with the digitized text.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.7.9 <span class="date">22 October 2026</span></h2>
+    <p class="motto"><span>Google Play Automatic App Protection Compliance (API 24+)</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Minimum SDK Bumped to API 24.</b> Raised <code>minSdkVersion</code> to 24 (Android 7.0 Nougat) to fully satisfy Google Play Console&#x27;s automatic integrity and app protection requirements.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
+    <h2>1.7.8 <span class="date">21 October 2026</span></h2>
+    <p class="motto"><span>Liturgical Eve on Gitsawe Widget, Database Optimization, and JSON Minification</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Liturgical Eve (ዋዜማ) on Gitsawe Widget.</b> The home screen Gitsawe widget now prominently displays the Eve (ዋዜማ) designation in its header and status line when rolled over in the evening, highlighting feast attribution and upcoming commemorations.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Optimized Corpus Database.</b> Rebuilt <code>sinq_corpus.db</code> with SQLite page size tuning (1024-byte pages) and FTS index defragmentation, reducing uncompressed database size by ~1.9 MB without altering any search schemas or query contracts.</span></li>
+    <li><span><b>Minified Lectionary &amp; Patristic JSONs.</b> Stripped unnecessary whitespace and structural formatting overhead across <code>daily-gitsawe.json</code>, <code>sunday-cycle-gitsawe.json</code>, <code>daily_quotes.json</code>, and seasonal lectionary assets, saving ~500 KB.</span></li>
+  </ul>
+  </div>
+</article>
+
+<details class="more-releases">
+  <summary><span>29 earlier releases, 1.7.7 back to 1.0.0</span></summary>
+  <div class="more-body">
+<article class="release">
+  <header>
+    <h2>1.7.7 <span class="date">21 October 2026</span></h2>
+    <p class="motto"><span>Liturgical Purity, Live Card Sharing, Notification Retention, Reader Double-Tap, and Journal Integration</span></p>
+  </header>
+  <div class="body">
+  <h3><span>Added</span></h3>
+  <ul>
+    <li><span><b>Live Manuscript Card Sharing &amp; WYSIWYG Preview.</b> Interactive bottom sheet for passage sharing with live preview, aspect ratio selector for «Square (1:1)» and «Story (9:16)», centered typography, authentic Ge&#x27;ez ornamental framing, and zero emojis.</span></li>
+    <li><span><b>Configurable Notification Retention Timeout.</b> System setting allowing users to customize notification auto-dismissal durations (30m, 1h, 2h, 4h, 6h, Never) using Android native <code>setTimeoutAfter</code>.</span></li>
+    <li><span><b>Deliberate Reader Immersion via Double-Tap.</b> Full-screen distraction-free immersion is now engaged strictly via deliberate double-tap rather than automatic timing, fixing the rapid bottom sheet dismissal glitch.</span></li>
+    <li><span><b>Enhanced Spiritual Journal Access.</b> Added an elegant top-header pill button and an inline feed reflection card on the Journey screen, removing bottom FAB screen occlusion.</span></li>
+  </ul>
+  <h3><span>Changed</span></h3>
+  <ul>
+    <li><span><b>Pure Canonical Hours Restored.</b> Removed all seasonal and saint prayer interpolations from the seven canonical hours, strictly preserving the traditional pure Psalms and Gospel canon.</span></li>
+    <li><span><b>Liturgical Book Titles in English View.</b> Preserved traditional Amharic liturgical designations («ስንክሳር», «ውዳሴ ማርያም», «ሥርዓተ ማኅሌት», «ባሕረ ሐሳብ») across English interface views.</span></li>
+    <li><span><b>Desert Fathers Notification Frequency.</b> Enforced single-daily notification delivery at user-selected times, eliminating duplicate notification bursts on app resume.</span></li>
+    <li><span><b>De-boxed Devotional Heatmap.</b> Removed outer border and shadow cards on the Journey page heatmap for an open, unconstrained liturgical manuscript layout.</span></li>
+  </ul>
+  </div>
+</article>
+
+<article class="release">
+  <header>
     <h2>1.7.6 <span class="date">19 October 2026</span></h2>
     <p class="motto"><span>Kenona spiritual rules in Journal, Desert Fathers sayings hub, devotional heatmap layout, and prayer list polish</span></p>
   </header>
@@ -214,9 +372,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   </div>
 </article>
 
-<details class="more-releases">
-  <summary><span>21 earlier releases, 1.5.11 back to 1.0.0</span></summary>
-  <div class="more-body">
 <article class="release">
   <header>
     <h2>1.5.11 <span class="date">5 October 2026</span></h2>
