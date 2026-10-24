@@ -32,6 +32,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import com.sinq.app.ui.common.SectionHeader
 import com.sinq.app.ui.common.SinqCard
 import com.sinq.app.ui.strings.LocalStrings
@@ -60,11 +62,11 @@ fun LibraryScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = Spacing.screen),
-            verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.sm),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             item {
-                Spacer(Modifier.height(Spacing.xl))
+                Spacer(Modifier.height(Spacing.lg))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -89,14 +91,14 @@ fun LibraryScreen(
                         )
                     }
                 }
-                Spacer(Modifier.height(Spacing.sm))
+                Spacer(Modifier.height(Spacing.xs))
             }
 
             // ── ፩. ቅዱሳት መጻሕፍትና ጸሎት ───────────────────────────────────
             item {
                 SectionHeader(
                     text = if (s.isAmharic) "ቅዱሳት መጻሕፍትና ጸሎት" else "Scriptures & Devotion",
-                    modifier = Modifier.padding(top = Spacing.sm, bottom = Spacing.xs),
+                    modifier = Modifier.padding(top = Spacing.xs, bottom = Spacing.xxs),
                 )
             }
             item {
@@ -123,7 +125,7 @@ fun LibraryScreen(
             item {
                 SectionHeader(
                     text = if (s.isAmharic) "የቤተ ክርስቲያን መጻሕፍት" else "Church Tradition",
-                    modifier = Modifier.padding(top = Spacing.lg, bottom = Spacing.xs),
+                    modifier = Modifier.padding(top = Spacing.md, bottom = Spacing.xxs),
                 )
             }
             item {
@@ -163,7 +165,7 @@ fun LibraryScreen(
             item {
                 SectionHeader(
                     text = if (s.isAmharic) "የግል ምልክቶች" else "Reader's Marks",
-                    modifier = Modifier.padding(top = Spacing.lg, bottom = Spacing.xs),
+                    modifier = Modifier.padding(top = Spacing.md, bottom = Spacing.xxs),
                 )
             }
             item {
@@ -176,7 +178,7 @@ fun LibraryScreen(
             }
 
             item {
-                Spacer(Modifier.height(Spacing.xxl))
+                Spacer(Modifier.height(Spacing.xl))
             }
         }
     }
@@ -193,7 +195,8 @@ private fun LibraryCard(
     SinqCard(
         onClick = onClick,
         enabled = enabled,
-        contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md),
+        shape = MaterialTheme.shapes.medium,
+        contentPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.sm),
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(Spacing.md),
@@ -203,13 +206,18 @@ private fun LibraryCard(
                 icon,
                 contentDescription = null,
                 tint = if (enabled) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(IconSize.large),
+                modifier = Modifier.size(IconSize.medium),
             )
-            Column(Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(1.dp),
+            ) {
                 Text(
                     title,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     color = if (enabled) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     subtitle,
@@ -217,13 +225,15 @@ private fun LibraryCard(
                         fontStyle = if (enabled) FontStyle.Normal else FontStyle.Italic,
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
             Icon(
                 Icons.AutoMirrored.Outlined.ArrowForward,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.outlineVariant,
-                modifier = Modifier.size(IconSize.small),
+                modifier = Modifier.size(16.dp),
             )
         }
     }

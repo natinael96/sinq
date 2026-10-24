@@ -5,6 +5,20 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.8.5] — 2026-10-25
+
+_versionCode 127 · Ge'ez Scripture Reader, Cleaned Monastic Sayings, Mahlet & Zema Polish, and Dense Book Cards_
+
+### Added
+- **Full Ge'ez Scripture & Parallel Mode (ግእዝና አማርኛ-ግእዝ ትይዩ ንባብ).** Enabled Ge'ez and side-by-side Amharic-Ge'ez parallel reading across all 66 canonical books in the Scripture reader.
+- **Unified Heatmap Legend Reference.** Updated prayer journey heatmap legends with localized labels ("ትንሽ" / "Less", "፫+ ጸሎት" / "3+ prayers"), fasting indicators ("● ጾም" / "● Fasting"), high-contrast today beacons ("ዛሬ" / "Today"), and full prayer markers ("✦ ሙሉ" / "✦ Full").
+
+### Changed
+- **Pristine Mahlete Tsige & Segokwaw Dengel.** Restored authentic Ge'ez liturgical formatting, eliminated duplicate numbering in hymn stanzas, and unified hemistich punctuation (`።`).
+- **Sanitized Desert Fathers Corpus.** Removed scanned running headers, spliced footnote fragments, and OCR artifacts across the Sayings of the Desert Fathers and daily quotes.
+- **Hoisted Mahlet Today Card.** Positioned today's appointed Mahlet feast card directly at the top of the Mahlet screen, eliminating the need to scroll.
+- **Compressed Church Books Cards.** Streamlined book cards in the Books tab into a compact, refined profile while preserving full sacred styling and prominence for the daily reading card.
+
 ## [1.8.4] — 2026-10-25
 
 _versionCode 126 · English Synaxarium, Direct Gitsawe Rollover, Desert Fathers Hub, and App Size Optimization_

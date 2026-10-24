@@ -305,6 +305,7 @@ fun SinqCard(
         androidx.compose.foundation.layout.PaddingValues(horizontal = Spacing.xl, vertical = Spacing.lg),
     fillMaxHeight: Boolean = false,
     verticalArrangement: Arrangement.Vertical = if (fillMaxHeight) Arrangement.Center else Arrangement.Top,
+    shape: androidx.compose.ui.graphics.Shape = MaterialTheme.shapes.large,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val motion = LocalMotion.current
@@ -329,7 +330,7 @@ fun SinqCard(
             onClick = onClick,
             enabled = enabled,
             modifier = modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.large,
+            shape = shape,
             color = MaterialTheme.colorScheme.surface,
             border = BorderStroke(1.dp, border),
             content = body,
@@ -337,7 +338,7 @@ fun SinqCard(
     } else {
         Surface(
             modifier = modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.large,
+            shape = shape,
             color = MaterialTheme.colorScheme.surface,
             border = BorderStroke(1.dp, border),
             content = body,

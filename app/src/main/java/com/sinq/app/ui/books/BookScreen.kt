@@ -406,6 +406,10 @@ private fun BookBlockRow(
             remember(block.text, block.red, block.index, scope, red, secondary, markerSize) {
                 buildAnnotatedString {
                     val n = block.index
+                    val rawText = block.text
+                    val cleanedText = if (n != null && n > 0) {
+                        rawText.replaceFirst(Regex("^[፩-፼]+[፡\\s]*"), "")
+                    } else rawText
                     if (n != null && n > 0) {
                         withStyle(
                             SpanStyle(
@@ -419,9 +423,9 @@ private fun BookBlockRow(
                         append(" ")
                     }
                     val startOffset = length
-                    append(block.text)
+                    append(cleanedText)
                     val spans = block.redRanges.ifEmpty {
-                        Rubrication.redRanges(block.text, scope)
+                        Rubrication.redRanges(cleanedText, scope)
                     }
                     spans.forEach {
                         addStyle(SpanStyle(color = red), startOffset + it.first, startOffset + it.last + 1)

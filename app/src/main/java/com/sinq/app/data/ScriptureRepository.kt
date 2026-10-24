@@ -123,8 +123,10 @@ object ScriptureRepository {
                     context.applicationContext.assets.open("$DIR/$edition/books/$filename")
                 }.getOrElse {
                     val match = context.applicationContext.assets.list("$DIR/$edition/books")
-                        ?.firstOrNull { f -> f.endsWith("-$key.json") }
-                        ?: throw it
+                        ?.firstOrNull { f ->
+                            val slug = f.substringAfter('-').removeSuffix(".json")
+                            slug == key || (key.startsWith("psalms") && slug.startsWith("psalms"))
+                        } ?: throw it
                     context.applicationContext.assets.open("$DIR/$edition/books/$match")
                 }.readBytes().decodeToString()
                 parseBook(json.parseToJsonElement(raw).jsonObject, meta)

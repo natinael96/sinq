@@ -2,6 +2,7 @@ package com.sinq.app.ui.habits
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -84,6 +85,8 @@ fun HabitHeatmap(
 
     val empty = MaterialTheme.colorScheme.surfaceVariant
     val primary = MaterialTheme.colorScheme.secondary
+    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.2f
+    val todayBorderColor = if (isDark) Color.White else Color(0xFF0D6B4F)
 
     fun cellColor(date: LocalDate, isFast: Boolean, level: Int): Color {
         if (date.isAfter(today)) return Color.Transparent
@@ -112,6 +115,7 @@ fun HabitHeatmap(
                         week.forEach { date ->
                             val tappable = onDayTap != null && !date.isAfter(today)
                             val isFast = FastingCalendar.isWeeklyFastDay(date) || FastingCalendar.fastOn(date) != null
+                            val isToday = date == today
                             val level = if (date.isAfter(today)) -1 else HabitsRepository.level(HabitsRepository.dayCount(records, date))
                             val shape = RoundedCornerShape(2.5.dp)
 
@@ -122,6 +126,7 @@ fun HabitHeatmap(
                                     .clip(shape)
                                     .background(cellColor(date, isFast, level.coerceAtLeast(0)))
                                     .then(if (tappable) Modifier.clickable { onDayTap!!(date) } else Modifier)
+                                    .then(if (isToday) Modifier.border(1.8.dp, todayBorderColor, shape) else Modifier)
                                     .drawBehind {
                                         if (isFast && !date.isAfter(today)) {
                                             val dashPx = 2.4.dp.toPx()
@@ -151,40 +156,94 @@ fun HabitHeatmap(
             if (showLegend) {
                 Spacer(Modifier.height(Spacing.xs))
                 val s = LocalStrings.current
+                val lessLabel = if (s.isAmharic) "ትንሽ" else "Less"
+                val moreLabel = if (s.isAmharic) "፫+ ጸሎት" else "3+ prayers"
+                val fastLabel = if (s.isAmharic) "● ጾም" else "● Fasting"
+                val todayLabel = if (s.isAmharic) "ዛሬ" else "Today"
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 ) {
-                    Text(s.less, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    listOf(0, 1, 2, 3, 4).forEach { level ->
-                        val c = heatColor(level, empty, primary)
-                        Box(Modifier.size(cell).clip(RoundedCornerShape(2.dp)).background(c))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Text(lessLabel, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        listOf(0, 1, 2, 3, 4).forEach { level ->
+                            val c = heatColor(level, empty, primary)
+                            Box(Modifier.size(cell).clip(RoundedCornerShape(2.dp)).background(c))
+                        }
+                        Text(moreLabel, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    Text(s.more, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(Modifier.width(Spacing.xs))
-                    Box(
-                        Modifier
-                            .size(cell)
-                            .clip(RoundedCornerShape(2.dp))
-                            .background(fastingWash)
-                            .drawBehind {
-                                drawRoundRect(
-                                    color = fastingBorder,
-                                    size = size,
-                                    cornerRadius = CornerRadius(2.dp.toPx()),
-                                    style = Stroke(
-                                        width = 1.dp.toPx(),
-                                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(2.dp.toPx(), 1.5.dp.toPx())),
-                                    ),
-                                )
-                                drawCircle(
-                                    color = fastingDot,
-                                    radius = 1.2.dp.toPx(),
-                                    center = Offset(size.width / 2f, size.height / 2f),
-                                )
-                            }
-                    )
-                    Text("● የጾም ቀን", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Box(
+                            Modifier
+                                .size(cell)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(fastingWash)
+                                .drawBehind {
+                                    drawRoundRect(
+                                        color = fastingBorder,
+                                        size = size,
+                                        cornerRadius = CornerRadius(2.dp.toPx()),
+                                        style = Stroke(
+                                            width = 1.dp.toPx(),
+                                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(2.dp.toPx(), 1.5.dp.toPx())),
+                                        ),
+                                    )
+                                    drawCircle(
+                                        color = fastingDot,
+                                        radius = 1.2.dp.toPx(),
+                                        center = Offset(size.width / 2f, size.height / 2f),
+                                    )
+                                }
+                        )
+                        Text(fastLabel, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Box(
+                            Modifier
+                                .size(cell)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(if (isDark) Color.White.copy(alpha = 0.12f) else Color(0xFF0D6B4F).copy(alpha = 0.12f))
+                                .border(1.6.dp, todayBorderColor, RoundedCornerShape(2.dp))
+                        )
+                        Text(todayLabel, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Box(
+                            Modifier
+                                .size(cell)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(primary)
+                                .drawBehind {
+                                    val cx = size.width / 2f
+                                    val cy = size.height / 2f
+                                    val arm = 1.4.dp.toPx()
+                                    val stroke = 0.8.dp.toPx()
+                                    drawLine(Color.White, Offset(cx - arm, cy), Offset(cx + arm, cy), strokeWidth = stroke)
+                                    drawLine(Color.White, Offset(cx, cy - arm), Offset(cx, cy + arm), strokeWidth = stroke)
+                                }
+                        )
+                        Text(
+                            text = if (s.isAmharic) "✦ ሙሉ" else "✦ Full",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             }
         }

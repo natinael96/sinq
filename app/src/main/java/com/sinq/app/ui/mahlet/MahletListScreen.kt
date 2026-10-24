@@ -270,6 +270,15 @@ fun MahletListScreen(
                         }
                     }
                 } else {
+                    if (today.isNotEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = Spacing.screen, vertical = Spacing.xs),
+                        ) {
+                            TodayOrder(today, onOpen)
+                        }
+                    }
                     MonthStrip(
                         months = pages,
                         selected = pager.currentPage,
@@ -287,12 +296,6 @@ fun MahletListScreen(
                             Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.xs),
                         ) {
-                            if (today.isNotEmpty() && m.month == EthiopianDate.from(LocalDate.now()).month) {
-                                item(key = "today") {
-                                    TodayOrder(today, onOpen)
-                                    Spacer(Modifier.height(Spacing.xs))
-                                }
-                            }
                             if (m.month == TSIGE_HOME && tsigeCount > 0) {
                                 item(key = "tsige") {
                                     SeasonRow(tsigeCount, onOpenSeason)
