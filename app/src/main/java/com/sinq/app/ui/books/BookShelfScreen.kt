@@ -202,7 +202,7 @@ private fun BookRow(book: BookMeta, onOpen: (String) -> Unit) {
                 overflow = TextOverflow.Ellipsis,
             )
             Spacer(Modifier.height(Spacing.xxs))
-            if (book.comingSoon || book.id == "f9217f008c" || book.id == "7b38e5fa56") {
+            if (book.comingSoon) {
                 Text(
                     s.comingSoon,
                     style = MaterialTheme.typography.bodySmall,

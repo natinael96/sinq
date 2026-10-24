@@ -137,19 +137,41 @@ fun DailyQuoteSheet(
 
             Spacer(Modifier.height(Spacing.xs))
 
-            // Author name
-            Text(
-                text = quote.authorAm.ifBlank { quote.authorEn },
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            if (quote.authorEn.isNotBlank() && quote.authorAm.isNotBlank()) {
-                Text(
-                    text = quote.authorEn,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            // Author name & Saying Badge
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = quote.authorAm.ifBlank { quote.authorEn },
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    if (quote.authorEn.isNotBlank() && quote.authorAm.isNotBlank()) {
+                        Text(
+                            text = quote.authorEn,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                if (!quote.sayingNumberGeez.isNullOrBlank()) {
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = gold.copy(alpha = 0.12f),
+                    ) {
+                        Text(
+                            text = if (s.isAmharic) "ምክር ${quote.sayingNumberGeez}" else "Saying #${quote.sayingNumber ?: quote.sayingNumberGeez}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = gold,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                }
             }
 
             Spacer(Modifier.height(Spacing.md))
@@ -174,25 +196,27 @@ fun DailyQuoteSheet(
                             .padding(horizontal = Spacing.md, vertical = Spacing.md)
                             .verticalScroll(rememberScrollState()),
                     ) {
+                        val annotated = rememberAnnotatedQuote(
+                            rawQuote = quote.quote.trim(),
+                            textColor = MaterialTheme.colorScheme.onSurface,
+                            glossColor = gold,
+                        )
                         Text(
-                            text = "«${quote.quote}»",
+                            text = annotated,
                             style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
-                            color = MaterialTheme.colorScheme.onSurface,
                         )
                         Spacer(Modifier.height(Spacing.sm))
+                        val sectionLabel = quote.sectionGeez ?: quote.section ?: ""
                         Text(
-                            text = "Apophthegmata Patrum  ·  የአበው ምክር",
+                            text = if (sectionLabel.isNotBlank()) "Apophthegmata Patrum · $sectionLabel" else "Apophthegmata Patrum · የአበው ምክር",
                             style = MaterialTheme.typography.labelSmall,
                             color = gold,
                         )
                         Spacer(Modifier.height(2.dp))
                         Text(
-                            text = if (s.isAmharic) "ምንጭ፦ catenabible.com" else "Source: catenabible.com",
+                            text = if (s.isAmharic) "ዜና አበው (Apophthegmata Patrum)" else "The Sayings of the Desert Fathers",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.clickable {
-                                com.sinq.app.ui.common.openUrl(context, "https://catenabible.com")
-                            },
                         )
                     }
                 }

@@ -129,6 +129,7 @@ object BackupRepository {
         if (key.startsWith("scripture:") ||
             key.startsWith("sinksar:") ||
             key.startsWith("am-1980:") ||
+            key.startsWith("gez:") ||
             key.startsWith("gez-1980:") ||
             key.contains(":") ||
             key == "sinksar_verse"

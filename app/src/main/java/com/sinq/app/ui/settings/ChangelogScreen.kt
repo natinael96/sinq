@@ -54,6 +54,27 @@ internal data class ReleaseNote(
 
 internal val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.8.4",
+        title = "English Synaxarium, Direct Gitsawe Rollover, Desert Fathers Hub, and App Size Optimization",
+        titleAm = "የእንግሊዝኛ ስንክሳር፣ የቀጥታ የነገ ግጻዌ ዳሰሳ፣ የበረሃ አባቶች ምክር ማዕከል እና የመተግበሪያ መጠን ቅነሳ",
+        changes = listOf(
+            "Added full English Synaxarium translations across all 13 months with bilingual and trilingual reading support.",
+            "Tapping the home screen Gitsawe card during evening hours now navigates directly to tomorrow's lectionary reading.",
+            "Introduced dedicated Desert Fathers Hub with per-father navigation, topic filtering, and monastic glossary.",
+            "Added Segokwaw Dengel and Mahlete Tsige to the spiritual library.",
+            "Optimized app footprint by ~30% (from 18 MB down to 12.7 MB) via font consolidation, on-the-fly corpus indexing, and R8 full mode.",
+            "Decoupled feast banners from lectionary titles for clear reading prominence, and added high-contrast heatmap today beacons.",
+        ),
+        changesAm = listOf(
+            "በሁሉም 13ቱ ወራት የተሟላ የእንግሊዝኛ ስንክሳር ትርጉም ተካቷል፤ በአማርኛ፣ በግእዝና በእንግሊዝኛ ጎን ለጎን ማንበብ ይቻላል።",
+            "በምሽት ሰዓት የመነሻ ገጹን የግጻዌ ካርድ ሲጫኑ በቀጥታ ወደ ነገው ንባብ እንዲወስድ ተደርጓል።",
+            "የበረሃ አባቶች ምክር ማዕከልን በየአባቱ፣ በርእሰ ጉዳይና በገዳማዊ ቃላት መፍቻ የተሟላ አዲስ እይታ ተዘጋጅቷል።",
+            "ሰቆቃወ ድንግል እና ማኅሌተ ጽጌ በመንፈሳዊ መጻሕፍት ማዕድ ውስጥ ተካተዋል።",
+            "የፊደላት ፋይሎችን በማስተካከል፣ የፍለጋ ማውጫውን በስልክ ላይ በማዘጋጀትና ኮዱን በማሳነስ የመተግበሪያውን መጠን በ30 በመቶ (ከ18 ሜባ ወደ 12.7 ሜባ) ቀንሷል።",
+            "የግጻዌ ንባብ ርእሶች ጉልህ ሆነው እንዲታዩና በጸሎት ጉዞ ሰሌዳ ላይ የዛሬው ቀን በደማቁ እንዲበራ ተደርጓል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.8.3",
         title = "Large-Screen Adaptive Layouts, Design System Polish, and Widget Localization",
         titleAm = "ለትላልቅ ስክሪኖች የተስተካከለ ይዘት፣ የተሟላ የመልክዕ ዲዛይን እና የመግብር ትርጉሞች",

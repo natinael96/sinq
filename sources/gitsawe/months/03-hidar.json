@@ -1721,22 +1721,22 @@
           "epistles_and_acts": [
             {
               "reading_type": "ቆር ፪",
-              "chapter_verse": "ም· ፯ ቍ· ፩ – ፭",
+              "chapter_verse": "ም· ፱ ቍ· ፴፮ – ፍ፡ም፡",
               "incipit": "ዘንተ እንከ ተስፉ ።"
             },
             {
               "reading_type": "ያዕቆብ ፩",
-              "chapter_verse": "ም· ቍ· ፪ – ፲፯",
+              "chapter_verse": "ም· ፱ ቍ· ፴፮ – ፍ፡ም፡",
               "incipit": "አአኃው ኩኑ በኵሉ ፍሥሓ ።"
             },
             {
               "reading_type": "ግብ፡ ሐዋ፡",
-              "chapter_verse": "ም· ፲፯ ቍ· ፪ – ፲፫",
+              "chapter_verse": "ም· ፱ ቍ· ፴፮ – ፍ፡ም፡",
               "incipit": "ወቦአ ጳውሎስ ።"
             },
             {
               "reading_type": "ዓዲ",
-              "chapter_verse": "ም· ፱ ቍ· ፵፯ – ፍ፡ም፡",
+              "chapter_verse": "ም· ፱ ቍ· ፴፮ – ፍ፡ም፡",
               "incipit": "ወበሀገረ ኢዮጴ ሀለወት አሐቲ ።"
             }
           ],
@@ -2082,7 +2082,7 @@
           },
           "ወንጌል": {
             "book": "ማቴዎስ",
-            "chapter_verse": "ም· ፲፬ ቍ· ፴፯ – ፴፱",
+            "chapter_verse": "ም· ፲፬ ቍ· ፲፱ – ፳፩",
             "incipit": "ወይእተ ጊዜ አእኰተ ወፈተተ ።"
           }
         }

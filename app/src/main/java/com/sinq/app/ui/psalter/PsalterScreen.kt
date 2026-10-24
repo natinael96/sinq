@@ -108,14 +108,14 @@ fun dailyRange(day: DayOfWeek): IntRange? = when (day) {
 
 enum class PsalterMode {
     AMHARIC,
-    ENGLISH,
     GEEZ,
+    ENGLISH,
     PARALLEL_AMH_GEEZ;
 
     fun next(): PsalterMode = when (this) {
-        AMHARIC -> ENGLISH
-        ENGLISH -> GEEZ
-        GEEZ -> PARALLEL_AMH_GEEZ
+        AMHARIC -> GEEZ
+        GEEZ -> ENGLISH
+        ENGLISH -> PARALLEL_AMH_GEEZ
         PARALLEL_AMH_GEEZ -> AMHARIC
     }
 }
@@ -145,8 +145,8 @@ fun PsalterScreen(
     val geez = psalterMode == PsalterMode.GEEZ
     val activeEdition = when (psalterMode) {
         PsalterMode.AMHARIC -> ScriptureRepository.PSALMS_AMHARIC_EDITION
-        PsalterMode.ENGLISH -> ScriptureRepository.PSALMS_ENGLISH_EDITION
         PsalterMode.GEEZ -> ScriptureRepository.PSALMS_GEEZ_EDITION
+        PsalterMode.ENGLISH -> ScriptureRepository.PSALMS_ENGLISH_EDITION
         PsalterMode.PARALLEL_AMH_GEEZ -> ScriptureRepository.PSALMS_AMHARIC_EDITION
     }
     val psalmsLoad = com.sinq.app.ui.common.rememberContentLoad(activeEdition) {
@@ -317,8 +317,8 @@ fun PsalterScreen(
                         ) {
                             val editionText = when (psalterMode) {
                                 PsalterMode.AMHARIC -> s.wudaseLangAmharic
-                                PsalterMode.ENGLISH -> "English"
                                 PsalterMode.GEEZ -> s.wudaseLangGeez
+                                PsalterMode.ENGLISH -> "English"
                                 PsalterMode.PARALLEL_AMH_GEEZ -> "አማ + ግእዝ"
                             }
                             Text(

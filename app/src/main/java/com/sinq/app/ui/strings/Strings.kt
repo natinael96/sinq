@@ -168,6 +168,7 @@ interface Strings {
     val synaxariumLibrarySubtitle: String
     val sinksarAmharic: String
     val sinksarGeez: String
+    val sinksarEnglish: String
     val sinksarAnnualFeasts: String
     val sinksarMonthlyFeasts: String
     val sinksarReading: String
@@ -317,6 +318,8 @@ interface Strings {
     val desertFathersHubSubtitle: String
     val desertFathersLibrarySubtitle: String
     val desertFathersViewAll: String
+    val monasticGlossaryTitle: String
+    val monasticGlossarySubtitle: String
     val randomizeDailyQuoteTitle: String
     val randomizeDailyQuoteDesc: String
     val notifDisabledTitle: String
@@ -1226,6 +1229,7 @@ object AmharicStrings : Strings {
     override val synaxariumLibrarySubtitle = "የዓመቱ የቅዱሳን መታሰቢያ"
     override val sinksarAmharic = "አማርኛ"
     override val sinksarGeez = "ግእዝ"
+    override val sinksarEnglish = "English"
     override val sinksarAnnualFeasts = "ዓመታዊ በዓላት"
     override val sinksarMonthlyFeasts = "ወርኀዊ በዓላት"
     override val sinksarReading = "የዕለቱ ንባብ"
@@ -1373,11 +1377,13 @@ object AmharicStrings : Strings {
         else -> "እስኪነሳ ድረስ (አይጥፋ)"
     }
     override val desertFathersHubTitle = "የአበው ምክር"
-    override val desertFathersHubSubtitle = "Apophthegmata Patrum · ፰፻፵፬ቱ የአበው ቃላት"
+    override val desertFathersHubSubtitle = "Apophthegmata Patrum · ፱፻፺፱ኙ የአበው ቃላት"
     override val desertFathersLibrarySubtitle = "የገዳማውያን አበው ጥበብና ምክር · ዜና አበው"
     override val desertFathersViewAll = "ሁሉንም እይ"
+    override val monasticGlossaryTitle = "የገዳማውያን ቃላት መፍቻ"
+    override val monasticGlossarySubtitle = "መንፈሳዊና ገዳማዊ ቃላት ፍቺ"
     override val randomizeDailyQuoteTitle = "በዘፈቀደ የሚላክ የአበው ምክር"
-    override val randomizeDailyQuoteDesc = "ዕለታዊ የአበው ምክር ማሳወቂያ ከ ፰፻፵፬ቱ የአበው ቃላት በዘፈቀደ እንዲመረጥ ያደርጋል"
+    override val randomizeDailyQuoteDesc = "ዕለታዊ የአበው ምክር ማሳወቂያ ከ ፱፻፺፱ኙ የአበው ቃላት በዘፈቀደ እንዲመረጥ ያደርጋል"
     override val notifDisabledTitle = "ማሳወቂያዎች ጠፍተዋል"
     override val notifDisabledBody = "ማንቂያዎችዎ እንዲደርሱዎት የመተግበሪያውን ማሳወቂያዎች ከቅንብሮች ያብሩ።"
 
@@ -2263,6 +2269,7 @@ object EnglishStrings : Strings {
     override val synaxariumLibrarySubtitle = "The year's commemorations"
     override val sinksarAmharic = "Amharic"
     override val sinksarGeez = "Ge'ez"
+    override val sinksarEnglish = "English"
     // The Church's own words for these, in both languages: they name a kind of
     // feast, not a frequency, and "monthly feasts" is not what they are called.
     override val sinksarAnnualFeasts = "Annual Feasts"
@@ -2400,11 +2407,13 @@ object EnglishStrings : Strings {
         else -> "Keep until dismissed"
     }
     override val desertFathersHubTitle = "Sayings of the Desert Fathers"
-    override val desertFathersHubSubtitle = "Apophthegmata Patrum · 844 Patristic Sayings"
+    override val desertFathersHubSubtitle = "Apophthegmata Patrum · 999 Patristic Sayings"
     override val desertFathersLibrarySubtitle = "Wisdom of the Desert Monks · Apophthegmata Patrum"
     override val desertFathersViewAll = "View All"
+    override val monasticGlossaryTitle = "Monastic Glossary"
+    override val monasticGlossarySubtitle = "Ascetic & Liturgical Terms of the Desert Fathers"
     override val randomizeDailyQuoteTitle = "Randomize Daily Sayings"
-    override val randomizeDailyQuoteDesc = "Picks a random saying from the 844 Desert Fathers corpus for your lock screen & reminders"
+    override val randomizeDailyQuoteDesc = "Picks a random saying from the 999 Desert Fathers corpus for your lock screen & reminders"
     override val notifDisabledTitle = "Notifications are off"
     override val notifDisabledBody = "Turn on notifications in settings so your reminders can reach you."
 

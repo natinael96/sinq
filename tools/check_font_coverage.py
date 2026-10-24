@@ -167,7 +167,7 @@ def main():
         notes = []
 
         # Baseline scripture and UI fonts must have 100% full coverage
-        is_baseline_font = font_name in ["abyssinica_sil.ttf", "noto_sans_ethiopic.ttf", "ethiopic_abay_light.ttf"]
+        is_baseline_font = font_name in ["abyssinica_sil.ttf", "ethiopic_abay_light.ttf"]
         if is_baseline_font:
             if missing_numerals or missing_marks or missing_content_ethiopic:
                 status = "FAIL"

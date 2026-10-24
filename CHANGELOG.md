@@ -5,6 +5,21 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.8.4] — 2026-10-25
+
+_versionCode 126 · English Synaxarium, Direct Gitsawe Rollover, Desert Fathers Hub, and App Size Optimization_
+
+### Added
+- **Full English Synaxarium (መጽሐፈ ስንክሳር).** Added English translations across all 13 months of the Ethiopian year, enabling bilingual and trilingual reading alongside Amharic and Ge'ez text with Arke hymns.
+- **Dedicated Desert Fathers Hub & Glossary.** Expanded Sayings of the Desert Fathers with per-father browsing, topic exploration, and a dedicated monastic glossary.
+- **Zema and Mahlet Literature.** Added Segokwaw Dengel (ሰቆቃወ ድንግል) and Mahlete Tsige (ማኅሌተ ጽጌ) to the spiritual library with Ge'ez liturgical typography.
+- **High-Contrast Today Beacons in Heatmaps.** Highlighted today's date in both annual and compact prayer journey heatmaps with vivid emerald green in light mode and bright crisp white in dark mode.
+
+### Changed
+- **Direct Gitsawe Rollover Navigation.** Tapping the home screen Gitsawe card when displaying tomorrow's evening lectionary now routes directly to tomorrow's date.
+- **Gitsawe Home Card Lectionary Title Prominence.** Decoupled feast banners from lectionary titles so that daily, seasonal, and evening lectionary reading titles are prominently displayed with eve designations cleanly positioned in the upper gold accent kicker.
+- **App Size Reduction by ~30%.** Shrank APK size from 18.00 MB to 12.71 MB by pruning redundant font files, deduplicating Ge'ez scripture, replacing the bundled 16MB pre-built database with on-the-fly runtime indexing (`CorpusIndexer`), and enabling R8 full mode.
+
 ## [1.8.3] — 2026-10-23
 
 _versionCode 125 · Large-Screen Adaptive Layouts, Design System Polish, and Widget Localization_

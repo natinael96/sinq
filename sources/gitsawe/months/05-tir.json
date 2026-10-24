@@ -112,17 +112,17 @@
           "epistles_and_acts": [
             {
               "reading_type": "ዕብራ",
-              "chapter_verse": "ም·፲፩ ቍ·፴፪–ፍ፡ም",
+              "chapter_verse": "ም· ፯ ቍ· ፶፩ – ም· ፰ ቍ· ፫",
               "incipit": "ወምንተ እንከ እብል ።"
             },
             {
               "reading_type": "ጴጥ ፩",
-              "chapter_verse": "ም· ፬ ቍ· ፲፱ –ፍ፡ም",
+              "chapter_verse": "ም· ፯ ቍ· ፶፩ – ም· ፰ ቍ· ፫",
               "incipit": "አኃዊነ ኢታንክርዋ ።"
             },
             {
               "reading_type": "ግብ፡ሐዋ፡",
-              "chapter_verse": "ም·፯ ቍ· ፶፩ ም·፰ ቍ·፫",
+              "chapter_verse": "ም· ፯ ቍ· ፶፩ – ም· ፰ ቍ· ፫",
               "incipit": "አጽኑዓነ ክሣድ ።"
             }
           ],
@@ -1395,7 +1395,7 @@
           },
           "ወንጌል": {
             "book": "ሉቃስ",
-            "chapter_verse": "ም· ፲፭ ቍ· ፴፭ – ፴፯",
+            "chapter_verse": "ም· ፲፩ ቍ· ፴፩ – ፴፮",
             "incipit": "ንግሥተ አዜብ ትትነሣእ ምስለ ዛቲ ትውልድ ።"
           }
         }
@@ -1420,7 +1420,7 @@
           },
           "ወንጌል": {
             "book": "ዮሐንስ",
-            "chapter_verse": "ም· ፲፭ ቍ· ፲፱ – ፴፫",
+            "chapter_verse": "ም· ፲፩ ቍ· ፲፱ – ፳፯",
             "incipit": "ወብዙኃን እምነ አይሁድ ።"
           }
         },
@@ -1428,17 +1428,17 @@
           "epistles_and_acts": [
             {
               "reading_type": "ሮሜ",
-              "chapter_verse": "ም· ፯ ቍ·፴፭–ፍ፡ም፡",
+              "chapter_verse": "ም· ፰ ቍ· ፴፭ – ፍ፡ም፡",
               "incipit": "መኑ የነድገን ፍቅሮ ለክርስቶስ ።"
             },
             {
               "reading_type": "ጴጥ ፩",
-              "chapter_verse": "ም· ፫ ቍ· ፩ – ፯",
+              "chapter_verse": "ም· ፰ ቍ· ፴፭ – ፍ፡ም፡",
               "incipit": "ወከማሁ አንትንሂ አንስት ተኰነና ።"
             },
             {
               "reading_type": "ግብ፣ ሐዋ፣",
-              "chapter_verse": "ም· ፲፫ ቍ· ፶–ፍ፡ም፡",
+              "chapter_verse": "ም· ፰ ቍ· ፴፭ – ፍ፡ም፡",
               "incipit": "ወዘቀዲሙሰ መዋዕለ ኢያእምሮ ።"
             }
           ],
@@ -1503,22 +1503,22 @@
           "epistles_and_acts": [
             {
               "reading_type": "ጌላ",
-              "chapter_verse": "ም· ፩ ቍ·· ፴፫–ፍ፡ም",
+              "chapter_verse": "ም· ፩ ቍ· ፳፮ – ፍ፡ም፡",
               "incipit": "ወይእዜሰ አስተርአዮሙ ለቅዱሳኒሁ ።"
             },
             {
               "reading_type": "ዮሐ ፩",
-              "chapter_verse": "ም· ፭ ቍ· ፲፬ – ፍ፡ም",
+              "chapter_verse": "ም· ፩ ቍ· ፳፮ – ፍ፡ም፡",
               "incipit": "ወዛቲ ይእቲ እንተ ብነ ገጽ ።"
             },
             {
               "reading_type": "ግብ፣ ሐዋ፣",
-              "chapter_verse": "ም· ፬ ቍ· ፴፪ – ፴፯",
+              "chapter_verse": "ም· ፩ ቍ· ፳፮ – ፍ፡ም፡",
               "incipit": "ወኵሎሙ እለ አምኑ ።"
             },
             {
               "reading_type": "ዓዲ",
-              "chapter_verse": "ም· ፲፫ ቍ· ፬ – ፲",
+              "chapter_verse": "ም· ፩ ቍ· ፳፮ – ፍ፡ም፡",
               "incipit": "ወቀንዑ አይሁድ ።"
             }
           ],
@@ -1593,17 +1593,17 @@
           "epistles_and_acts": [
             {
               "reading_type": "ቆሮ ፩",
-              "chapter_verse": "ም·፲፪ ቍ·፴፯–ፍ፡ም፡",
+              "chapter_verse": "ም· ፲፪ ቍ· ፳፰ – ፍ፡ም፡",
               "incipit": "ወለእለሰ ሤሞሙ እግዚአብሔር"
             },
             {
               "reading_type": "ይሁዳ",
-              "chapter_verse": "ም· ፩ ቍ· ፲፯ – ፍ፡ም፡",
+              "chapter_verse": "ም· ፲፪ ቍ· ፳፰ – ፍ፡ም፡",
               "incipit": "ወአንትሙስ አኃዊነ ተዘከሩ ።"
             },
             {
               "reading_type": "ግብ፣ ሐዋ፣",
-              "chapter_verse": "ም· ፪ ቍ· ፩ – ፴፱",
+              "chapter_verse": "ም· ፲፪ ቍ· ፳፰ – ፍ፡ም፡",
               "incipit": "ወአመ ተፈጸመ መዋዕለ ጰንጠቄስጤ ።"
             }
           ],
@@ -1661,7 +1661,7 @@
           },
           "ወንጌል": {
             "book": "ሉቃስ",
-            "chapter_verse": "ም· ፪ ቍ· ፴፯ – ፴፫",
+            "chapter_verse": "ም· ፪ ቍ· ፰ – ፳",
             "incipit": "ወሀለው ኖሎት ውስተ ውእቱ ብሔር ።"
           }
         },
@@ -1710,7 +1710,7 @@
           },
           "ወንጌል": {
             "book": "ማርቆስ",
-            "chapter_verse": "ም· ፯ ቍ· ፶፬ና፶፯",
+            "chapter_verse": "ም· ፮ ቍ· ፵፭ – ፶፪",
             "incipit": "ወአገበሮሙ ሶቤሃ ለአርዳኢሁ ።"
           }
         }
@@ -1745,22 +1745,22 @@
           "epistles_and_acts": [
             {
               "reading_type": "ኤፌ",
-              "chapter_verse": "ም· ፯ ቍ· ፳ – ፍ፡ም፡",
+              "chapter_verse": "ም· ፫ ቍ· ፲፬ – ፍ፡ም፡",
               "incipit": "እንከሰ ጽንዑ በእግዚአብሔር ።"
             },
             {
               "reading_type": "ጴጥ ፩",
-              "chapter_verse": "ም· ፭ ቍ· ፭ – ፲፱",
+              "chapter_verse": "ም· ፫ ቍ· ፲፬ – ፍ፡ም፡",
               "incipit": "ዑቁ እንከ ውስተ ዝንቱ ምግባር ።"
             },
             {
               "reading_type": "ግብ፣ ሐዋ፣",
-              "chapter_verse": "ም· ፲፭ ቍ· ፩ – ፭",
+              "chapter_verse": "ም· ፫ ቍ· ፲፬ – ፍ፡ም፡",
               "incipit": "ወቦ እለ ወረዱ እምብሔረ ይሁዳ ።"
             },
             {
               "reading_type": "ዓዲ",
-              "chapter_verse": "ም· ፴፯ ቍ· ፩ – ፲፩",
+              "chapter_verse": "ም· ፫ ቍ· ፲፬ – ፍ፡ም፡",
               "incipit": "ወእምድኅረዝ አእመርነ ከመ ይእቲ ደሴት።"
             }
           ],
@@ -1791,7 +1791,7 @@
           },
           "ወንጌል": {
             "book": "ዮሐንስ",
-            "chapter_verse": "ም· ፫ ቍ· ፶፬ – ፶፯",
+            "chapter_verse": "ም· ፫ ቍ· ፴፬ – ፴፮",
             "incipit": "ወዘእግዚአብሔር ፈነዎ ቃለ እግዚአብሔር ።"
           }
         }
@@ -2201,17 +2201,17 @@
           "epistles_and_acts": [
             {
               "reading_type": "ዕብራ",
-              "chapter_verse": "ም· ፲፩ ቄ· ፰ – ፲፯",
+              "chapter_verse": "ም· ፪ ቍ· ፴፪ – ፵",
               "incipit": "በተአምኖ ሰብእ ዘተሰምየ አብርሃም ።"
             },
             {
               "reading_type": "ጴጥ ፩",
-              "chapter_verse": "ም· ፬ ቍ· ፲፪ – ፍ፡ም፡",
+              "chapter_verse": "ም· ፪ ቍ· ፴፪ – ፵",
               "incipit": "አኃዊነ ኢታንክርዋ ።"
             },
             {
               "reading_type": "ግብ፡ ሐዋ፡",
-              "chapter_verse": "ም· ፪ ቍ· ፴፪ – ፴",
+              "chapter_verse": "ም· ፪ ቍ· ፴፪ – ፵",
               "incipit": "ሎቱ ለኢየሱስ አንሥአ እግዚአብሔር ።"
             }
           ],

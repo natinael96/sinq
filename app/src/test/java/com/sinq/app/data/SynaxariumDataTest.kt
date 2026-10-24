@@ -23,7 +23,7 @@ class SynaxariumDataTest {
         val manifest: SynaxariumManifest =
             json.decodeFromString(manifestFile.readText())
         assertEquals(13, manifest.months.size)
-        assertEquals(listOf("am", "ge"), manifest.editions.map { it.code })
+        assertEquals(listOf("am", "ge", "en"), manifest.editions.map { it.code })
 
         var days = 0
         var entries = 0
@@ -56,6 +56,17 @@ class SynaxariumDataTest {
         }
         assertEquals(366, geezDays)
         assertEquals(1242, geezEntries)
+
+        // The English edition covers all 366 days
+        var enDays = 0
+        var enEntries = 0
+        for (m in 1..13) {
+            val month: SynaxariumMonth = json.decodeFromString(File(dir, "en-$m.json").readText())
+            enDays += month.days.size
+            enEntries += month.days.sumOf { it.entries.size }
+        }
+        assertEquals(366, enDays)
+        assertEquals(1390, enEntries)
     }
 
     /**
@@ -65,7 +76,7 @@ class SynaxariumDataTest {
     @Test
     fun `entry ids are unique within their day`() {
         org.junit.Assume.assumeTrue(dir != null && File(dir, "manifest.json").exists())
-        for (edition in listOf("am", "ge")) {
+        for (edition in listOf("am", "ge", "en")) {
             for (m in 1..13) {
                 val month: SynaxariumMonth =
                     json.decodeFromString(File(dir!!, "$edition-$m.json").readText())

@@ -10,7 +10,10 @@ import androidx.room.RawQuery
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SimpleSQLiteQuery
+import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteQuery
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 @Entity(tableName = "corpus_docs")
 data class CorpusDocEntity(
@@ -36,7 +39,7 @@ interface CorpusDao {
         queryDocs(
             SimpleSQLiteQuery(
                 "SELECT * FROM corpus_docs WHERE id IN (SELECT docid FROM corpus_fts WHERE corpus_fts MATCH ?) LIMIT ?",
-                arrayOf(query, limit),
+                arrayOf<Any>(query, limit),
             ),
         )
 
@@ -58,6 +61,21 @@ interface CorpusDao {
 abstract class CorpusDatabase : RoomDatabase() {
     abstract fun corpusDao(): CorpusDao
 
+    private val populateMutex = Mutex()
+
+    /**
+     * Checks if the search corpus database is populated. If empty (e.g. on first launch),
+     * indexes bundled JSON assets into SQLite Room & FTS tables in the background.
+     */
+    suspend fun ensurePopulated(context: Context) {
+        if (corpusDao().count() > 0) return
+        populateMutex.withLock {
+            if (corpusDao().count() == 0) {
+                CorpusIndexer.populate(context, this)
+            }
+        }
+    }
+
     companion object {
         private const val NAME = "sinq_corpus.db"
 
@@ -71,10 +89,33 @@ abstract class CorpusDatabase : RoomDatabase() {
                     CorpusDatabase::class.java,
                     NAME,
                 )
-                .createFromAsset("database/sinq_corpus.db")
-                .fallbackToDestructiveMigration()
+                .addCallback(object : Callback() {
+                    override fun onCreate(db: SupportSQLiteDatabase) {
+                        super.onCreate(db)
+                        createFtsAndIndexes(db)
+                    }
+                    override fun onOpen(db: SupportSQLiteDatabase) {
+                        super.onOpen(db)
+                        createFtsAndIndexes(db)
+                    }
+                })
+                .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
                 .also { instance = it }
             }
+
+        private fun createFtsAndIndexes(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE VIRTUAL TABLE IF NOT EXISTS corpus_fts USING fts4(
+                    content="corpus_docs",
+                    title,
+                    folded
+                );
+                """.trimIndent(),
+            )
+            db.execSQL("CREATE INDEX IF NOT EXISTS idx_corpus_source ON corpus_docs(source);")
+            db.execSQL("CREATE INDEX IF NOT EXISTS idx_corpus_target ON corpus_docs(target_id);")
+        }
     }
 }

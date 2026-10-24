@@ -266,20 +266,42 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: Str
                                     )
                                 }
                             }
-                            com.sinq.app.ui.common.EditionToggle(
-                                geez = edition == SynaxariumEdition.GEEZ,
-                                amharicLabel = s.sinksarAmharic,
-                                geezLabel = s.sinksarGeez,
-                                onToggle = {
-                                    scope.launch {
-                                        SettingsRepository.setSynaxariumEdition(
-                                            context,
-                                            if (edition == SynaxariumEdition.GEEZ) SynaxariumEdition.AMHARIC
-                                            else SynaxariumEdition.GEEZ,
-                                        )
-                                    }
-                                },
-                            )
+                            val gold = MaterialTheme.colorScheme.secondary
+                            val editionLabel = when (edition) {
+                                SynaxariumEdition.AMHARIC -> s.sinksarAmharic
+                                SynaxariumEdition.GEEZ -> s.sinksarGeez
+                                SynaxariumEdition.ENGLISH -> s.sinksarEnglish
+                                else -> s.sinksarAmharic
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(gold.copy(alpha = 0.12f))
+                                    .border(1.dp, gold.copy(alpha = 0.45f), CircleShape)
+                                    .clickable(
+                                        onClickLabel = "ቀይር",
+                                        onClick = {
+                                            val next = when (edition) {
+                                                SynaxariumEdition.AMHARIC -> SynaxariumEdition.GEEZ
+                                                SynaxariumEdition.GEEZ -> SynaxariumEdition.ENGLISH
+                                                else -> SynaxariumEdition.AMHARIC
+                                            }
+                                            scope.launch {
+                                                SettingsRepository.setSynaxariumEdition(context, next)
+                                            }
+                                        },
+                                    )
+                                    .heightIn(min = 48.dp)
+                                    .padding(horizontal = 14.dp, vertical = 6.dp),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    text = editionLabel,
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = gold,
+                                    maxLines = 1,
+                                )
+                            }
                             com.sinq.app.ui.common.ReaderToolsMenu(
                                 fontStep = fontStep,
                                 maxFontStep = FONT_STEPS_SP.lastIndex,
@@ -367,6 +389,7 @@ fun SynaxariumScreen(epochDay: Long, initialEntry: Int = -1, initialSection: Str
                                     text = formatSinksarText(para.text, sinksarpunctuation),
                                     fontSp = bodyFontSp,
                                     liturgicalPunctuation = sinksarpunctuation,
+                                    isEnglish = edition == SynaxariumEdition.ENGLISH,
                                     selected = key in selRange,
                                     onTap = { tapAt(key) },
                                     // The bookmark sits on the paragraph that
@@ -579,6 +602,7 @@ private fun NarrativePara(
     text: String,
     fontSp: Int,
     liturgicalPunctuation: Boolean = true,
+    isEnglish: Boolean = false,
     selected: Boolean = false,
     onTap: (() -> Unit)? = null,
     /** Null on every paragraph but a commemoration's first, which carries it. */
@@ -597,20 +621,28 @@ private fun NarrativePara(
                                 fontSize = scaledReadingSp(fontSp) * 0.85f,
                             ),
                         ) {
-                            append(geezNumeral(number))
-                            if (liturgicalPunctuation) {
-                                append("፡")
+                            if (isEnglish) {
+                                append("$number. ")
+                            } else {
+                                append(geezNumeral(number))
+                                if (liturgicalPunctuation) {
+                                    append("፡")
+                                }
                             }
                         }
-                        append(" ")
+                        if (!isEnglish) append(" ")
                     }
-                    // SINKSAR: the day's whole subject is the saint, so the
-                    // saint's name reddens here as it does in a መልክእ.
-                    appendRubricated(
-                        text,
-                        sinqColors.arke,
-                        com.sinq.app.ui.books.Rubrication.Scope.SINKSAR,
-                    )
+                    if (isEnglish) {
+                        append(text)
+                    } else {
+                        // SINKSAR: the day's whole subject is the saint, so the
+                        // saint's name reddens here as it does in a መልክእ.
+                        appendRubricated(
+                            text,
+                            sinqColors.arke,
+                            com.sinq.app.ui.books.Rubrication.Scope.SINKSAR,
+                        )
+                    }
                 },
                 style = readingBodyStyle(fontSp),
                 color = MaterialTheme.colorScheme.onBackground,

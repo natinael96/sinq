@@ -28,6 +28,10 @@ object DailyQuoteRepository {
         authorAm = "አባ እንጦንስ ዓቢይ",
         quote = "Lord, I want to be saved but these thoughts do not leave me alone; what shall I do in my affliction? How can I be saved? ... Do this and you will be saved.",
         quoteId = "1",
+        sayingNumber = 1,
+        sayingNumberGeez = "፩",
+        section = "ALPHA",
+        sectionGeez = "አልፋ (ALPHA)",
     )
 
     suspend fun quotes(context: Context): List<DailyQuote> =
@@ -98,5 +102,22 @@ object DailyQuoteRepository {
         val list = quotesBlocking(context)
         if (list.isEmpty()) return FALLBACK_QUOTE
         return list.random()
+    }
+
+    private const val GLOSSARY_PATH = "content/desert_fathers_glossary.json"
+
+    @Volatile
+    private var glossaryCache: List<com.sinq.app.model.DesertFatherGlossaryTerm>? = null
+
+    fun glossary(context: Context): List<com.sinq.app.model.DesertFatherGlossaryTerm> {
+        glossaryCache?.let { return it }
+        return synchronized(this) {
+            glossaryCache ?: runCatching {
+                val raw = context.applicationContext.assets.open(GLOSSARY_PATH).bufferedReader().use { it.readText() }
+                json.decodeFromString<List<com.sinq.app.model.DesertFatherGlossaryTerm>>(raw)
+            }.onFailure { Log.e(TAG, "Failed to load glossary from $GLOSSARY_PATH", it) }
+                .getOrDefault(emptyList())
+                .also { glossaryCache = it }
+        }
     }
 }

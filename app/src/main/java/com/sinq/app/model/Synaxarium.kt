@@ -74,17 +74,16 @@ data class SynaxariumMonth(
     val days: List<SynaxariumDay> = emptyList(),
 )
 
-/** Which of the two editions is being read. */
+/** Which of the editions is being read. */
 object SynaxariumEdition {
     const val AMHARIC = "am"
     const val GEEZ = "ge"
+    const val ENGLISH = "en"
 
     /**
-     * The two are parallel editions, not a parallel text: only 30 of 366 days
-     * have the same paragraph count in both, so they are read one at a time and
-     * never set side by side, which would pair the wrong paragraphs.
+     * Parallel editions read one at a time.
      */
-    val all = listOf(AMHARIC, GEEZ)
+    val all = listOf(AMHARIC, GEEZ, ENGLISH)
 }
 
 @Serializable

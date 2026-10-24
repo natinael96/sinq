@@ -137,7 +137,7 @@
           },
           "ወንጌል": {
             "book": "ዮሐንስ",
-            "chapter_verse": "ም· ፲፭ ቍ· ፳፮ – ፲፯",
+            "chapter_verse": "ም· ፲፭ ቍ· ፳፮ – ም· ፲፮ ቍ· ፲፯",
             "incipit": "ወሶበ መጽአ ጰራቅሊጦስ ።"
           },
           "ቅዳሴ": "ዘ፻፶ (ግሩም) ።"
@@ -1035,17 +1035,17 @@
           "epistles_and_acts": [
             {
               "reading_type": "ቆሮ ፪",
-              "chapter_verse": "ም· ፲፪ ቍ· ፩ – ፲፩",
+              "chapter_verse": "ም· ፲፭ ቍ· ፮ – ፲፪",
               "incipit": "ወናሁ ኢይረትዕ ሊተ ተመክሐ ።"
             },
             {
               "reading_type": "ጴጥ ፩",
-              "chapter_verse": "ም· ፩ ቍ· ፮ – ፲",
+              "chapter_verse": "ም· ፲፭ ቍ· ፮ – ፲፪",
               "incipit": "ወባሕቱ ጐዳጠ ይእዜ ሀለውክሙ ትተክዙ ።"
             },
             {
               "reading_type": "ግብ፡ ሐዋ፡",
-              "chapter_verse": "ም· ፲፬ ቍ· ፳፩ – ፴፮",
+              "chapter_verse": "ም· ፲፭ ቍ· ፮ – ፲፪",
               "incipit": "ወእምዝ ጐብኡ ሐዋርያት ።"
             }
           ],
@@ -1959,7 +1959,7 @@
           },
           "ወንጌል": {
             "book": "ሉቃስ",
-            "chapter_verse": "ም· ፬ ቍ· ፶፫ – ፶፭",
+            "chapter_verse": "ም· ፩ ቍ· ፵፫ – ፶፩",
             "incipit": "ወእምዝ በሳኒታ ዕለት ።"
           }
         },
@@ -2044,12 +2044,12 @@
           "epistles_and_acts": [
             {
               "reading_type": "ሮሜ",
-              "chapter_verse": "ም· ፬ ቍ· ፳፬ – ፶",
+              "chapter_verse": "ም· ፱ ቍ· ፳፬ – ፴፫",
               "incipit": "ወንሕነ እሙንቱ እለ ፀወዐነ ።"
             },
             {
               "reading_type": "ጴጥ ፪",
-              "chapter_verse": "ም· ፩ ቍ· ፲፱ – ፍ፡ም፡",
+              "chapter_verse": "ም· ፱ ቍ· ፳፬ – ፴፫",
               "incipit": "ወብነ ዓዲ ዘእምዝኒ ይቀድም ።"
             }
           ],

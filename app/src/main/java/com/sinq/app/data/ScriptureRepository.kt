@@ -21,7 +21,7 @@ object ScriptureRepository {
     const val BIBLE_EDITION = "am-1980"
     const val BIBLE_ENGLISH_EDITION = "en-nkjv"
     const val PSALMS_AMHARIC_EDITION = "am-1980"
-    const val PSALMS_GEEZ_EDITION = "gez-1980"
+    const val PSALMS_GEEZ_EDITION = "gez"
     const val PSALMS_ENGLISH_EDITION = "en-nkjv"
 
     private val json = Json { ignoreUnknownKeys = true }
@@ -119,9 +119,14 @@ object ScriptureRepository {
             runCatching {
                 val meta = books(context.applicationContext).first { it.key == key }
                 val filename = if (meta.number == 19 && edition == BIBLE_EDITION) "19-psalms-1962.json" else "${meta.number.toString().padStart(2, '0')}-$key.json"
-                val raw = context.applicationContext.assets
-                    .open("$DIR/$edition/books/$filename")
-                    .readBytes().decodeToString()
+                val raw = runCatching {
+                    context.applicationContext.assets.open("$DIR/$edition/books/$filename")
+                }.getOrElse {
+                    val match = context.applicationContext.assets.list("$DIR/$edition/books")
+                        ?.firstOrNull { f -> f.endsWith("-$key.json") }
+                        ?: throw it
+                    context.applicationContext.assets.open("$DIR/$edition/books/$match")
+                }.readBytes().decodeToString()
                 parseBook(json.parseToJsonElement(raw).jsonObject, meta)
             }.onFailure { Log.e(TAG, "Failed to load book $key from $edition", it) }
                 .getOrNull()?.also { if (cache) bookCache.put(cacheKey, it) }
@@ -137,8 +142,13 @@ object ScriptureRepository {
         psalmCache[edition] ?: withContext(Dispatchers.IO) {
             CacheTrimmer.ensureRegistered(context)
             runCatching {
-                val raw = context.applicationContext.assets
-                    .open("$DIR/$edition/books/19-psalms.json").readBytes().decodeToString()
+                val raw = runCatching {
+                    context.applicationContext.assets
+                        .open("$DIR/$edition/books/19-psalms.json").readBytes().decodeToString()
+                }.getOrElse {
+                    context.applicationContext.assets
+                        .open("$DIR/gez/books/19-psalms.json").readBytes().decodeToString()
+                }
                 json.parseToJsonElement(raw).jsonObject["chapters"]!!.jsonArray
                     .mapNotNull { chapter ->
                         val c = chapter.jsonObject
