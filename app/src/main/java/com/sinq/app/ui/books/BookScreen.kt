@@ -111,7 +111,7 @@ fun BookScreen(
     val bookLoad = com.sinq.app.ui.common.rememberContentLoad(bookId) { BookRepository.book(context, bookId) to BookRepository.meta(context, bookId) }
     val book = bookLoad.value?.first
     val meta = bookLoad.value?.second
-    val isComingSoon = meta?.comingSoon == true || bookId == "f9217f008c" || bookId == "7b38e5fa56"
+    val isComingSoon = meta?.comingSoon == true
     if (com.sinq.app.ui.common.contentLoadScreen(bookLoad, meta?.title ?: s.booksTitle, onBack, book?.chapters.isNullOrEmpty(), comingSoon = isComingSoon)) return
     val chapters = book?.chapters.orEmpty()
 

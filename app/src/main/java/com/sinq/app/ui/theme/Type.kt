@@ -13,10 +13,9 @@ import androidx.compose.ui.unit.TextUnit
 import com.sinq.app.R
 import com.sinq.app.data.ReadingFont
 
-// Bundled Ethiopic fonts — never rely on device fonts for Amharic (PLAN.md §2.6).
-// Noto Sans Ethiopic for UI chrome; Abyssinica SIL (scripture-grade serif) for prayer text.
-val Ethiopic = FontFamily(Font(R.font.noto_sans_ethiopic))
+// Bundled Ethiopic fonts — Abyssinica SIL (scripture-grade serif) for UI chrome and prayer text.
 val Abyssinica = FontFamily(Font(R.font.abyssinica_sil))
+val Ethiopic = Abyssinica
 
 // Reader faces the user can pick between (Settings → font). All are bundled and
 // cover the full Ethiopic block including the Ge'ez numerals the readers render.
@@ -25,11 +24,7 @@ val BelaBereka = FontFamily(Font(R.font.bela_bereka), Font(R.font.abyssinica_sil
 val Zemenay = FontFamily(Font(R.font.zemenay), Font(R.font.abyssinica_sil))
 val AbbaGarima = FontFamily(Font(R.font.abba_garima), Font(R.font.abyssinica_sil))
 
-// ዋልድባ (ይገዙ ብሥራት ጎፈር) — a display hand, not a reading face. It is deliberately
-// absent from ReadingFont: a manuscript hand is a pleasure for four words and a
-// punishment for a psalm, and the reader's four faces are all chosen for length.
-// This is for ሞትን አስብ on the splash and on the widget, and nothing else.
-val Waldba = FontFamily(Font(R.font.waldba))
+val Waldba = Abyssinica
 
 fun readingFontFamily(choice: ReadingFont): FontFamily = when (choice) {
     ReadingFont.ABYSSINICA -> Abyssinica

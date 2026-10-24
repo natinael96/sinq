@@ -345,7 +345,7 @@ object AmharicSearch {
     suspend fun warm(context: Context) {
         withContext(Dispatchers.IO) {
             runCatching {
-                com.sinq.app.data.CorpusDatabase.get(context).corpusDao().count()
+                com.sinq.app.data.CorpusDatabase.get(context).ensurePopulated(context)
             }
         }
     }

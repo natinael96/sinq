@@ -154,7 +154,7 @@ object MarksRepository {
         }
         is Ref.Psalm -> {
             val verses = runCatching {
-                ScriptureRepository.psalms(context, ref.edition == HighlightRepository.GEEZ_PSALTER_NAMESPACE)
+                ScriptureRepository.psalms(context, ref.edition == HighlightRepository.GEEZ_PSALTER_NAMESPACE || ref.edition == "gez-1980")
                     .firstOrNull { it.number == ref.psalm }
                     ?.let { section -> run.mapNotNull { section.verses.getOrNull(it - section.firstVerse) } }
                     .orEmpty()

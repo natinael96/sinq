@@ -126,6 +126,9 @@ class MainActivity : ComponentActivity() {
                     // the notice is only ever read with the app open, so this is
                     // the moment it can matter.
                     LaunchedEffect(Unit) {
+                        launch(kotlinx.coroutines.Dispatchers.IO) {
+                            com.sinq.app.search.AmharicSearch.warm(applicationContext)
+                        }
                         com.sinq.app.data.UpdateRepository.check(this@MainActivity)
                         // Its Play counterpart. Only one of the two does
                         // anything in a given build.
@@ -571,7 +574,10 @@ private fun AgpeyaNavHost(
                                                 onOpenPrayerList = { navController.navigate("prayerlist") { launchSingleTop = true } },
                                                 onOpenPsalter = { navController.navigate("psalter") { launchSingleTop = true } },
                                                 onOpenZewotr = { navController.navigate("wudase?sec=daily&lang=am") { launchSingleTop = true } },
-                                                onOpenGitsawe = { navController.navigate("gitsawe") { launchSingleTop = true } },
+                                                onOpenGitsawe = { epochDay ->
+                                                    val route = epochDay?.let { "gitsawe?epochDay=$it" } ?: "gitsawe"
+                                                    navController.navigate(route) { launchSingleTop = true }
+                                                },
                                                 onOpenBatteryHelp = { navController.navigate("battery") { launchSingleTop = true } },
                                                 onSelectTab = goToTab,
                                                 onOpenDesertFathersHub = { navController.navigate("desert_fathers") { launchSingleTop = true } },

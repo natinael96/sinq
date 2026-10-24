@@ -233,6 +233,8 @@ fun CompactHeatmap(
 
     val empty = MaterialTheme.colorScheme.surfaceVariant
     val primary = MaterialTheme.colorScheme.secondary
+    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.2f
+    val todayBorderColor = if (isDark) Color.White else Color(0xFF00875A)
     val density = LocalDensity.current
     val maxCellPx = with(density) { maxCell.toPx() }
 
@@ -368,11 +370,11 @@ fun CompactHeatmap(
                         // Today distinct beacon ring
                         if (isToday) {
                             drawRoundRect(
-                                color = primary,
-                                topLeft = Offset(cellLeft - 0.5f, cellTop - 0.5f),
-                                size = Size(cell + 1f, cell + 1f),
+                                color = todayBorderColor,
+                                topLeft = Offset(cellLeft - 0.6f, cellTop - 0.6f),
+                                size = Size(cell + 1.2f, cell + 1.2f),
                                 cornerRadius = CornerRadius(cellCorner.x + 0.5f),
-                                style = Stroke(width = (cell * 0.15f).coerceIn(1.1f, 1.8f)),
+                                style = Stroke(width = (cell * 0.18f).coerceIn(1.3f, 2.0f)),
                             )
                         }
                     }

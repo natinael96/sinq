@@ -235,6 +235,7 @@ fun EthiopianYearHeatmap(
 
     val empty = MaterialTheme.colorScheme.surfaceVariant
     val gold = MaterialTheme.colorScheme.secondary
+    val todayBorderColor = if (isDark) Color.White else Color(0xFF00875A)
 
     fun cellColor(date: LocalDate, isFast: Boolean, level: Int): Color {
         if (date.isBefore(start) || date.isAfter(end)) return Color.Transparent
@@ -486,7 +487,7 @@ fun EthiopianYearHeatmap(
                                                     )
                                                     .then(
                                                         if (isSelected) Modifier.border(1.8.dp, MaterialTheme.colorScheme.secondary, shape)
-                                                        else if (isToday) Modifier.border(1.2.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.85f), shape)
+                                                        else if (isToday) Modifier.border(1.8.dp, todayBorderColor, shape)
                                                         else Modifier
                                                     )
                                                     .drawBehind {
@@ -531,7 +532,7 @@ fun EthiopianYearHeatmap(
                                                         // Today Beacon Center Dot when unprayed
                                                         if (isToday && level <= 0) {
                                                             drawCircle(
-                                                                color = gold,
+                                                                color = todayBorderColor,
                                                                 radius = 1.4.dp.toPx(),
                                                                 center = Offset(cellWidth / 2f, cellHeight / 2f),
                                                             )

@@ -808,7 +808,7 @@
           },
           "ወንጌል": {
             "book": "ማርቆስ",
-            "chapter_verse": "ም· ፲፫ ቍ ፴፪",
+            "chapter_verse": "ም· ፲፫ ቍ· ፱ – ፲፫",
             "incipit": "ወአንትሙሰ ዑቁ ርእሰክሙ ።"
           },
           "ቅዳሴ": "ዘ፫፻ (ግሩም) ።"
@@ -855,17 +855,17 @@
           "epistles_and_acts": [
             {
               "reading_type": "ጢሞ ፩",
-              "chapter_verse": "ም· ፬ ቍ· ፲፱ – ፍ፡ም፡",
+              "chapter_verse": "ም· ፬ ቍ· ፱ – ፍ፡ም፡",
               "incipit": "እሙን ነገሩ ወርቱዕ ይትወከፍዎ ።"
             },
             {
               "reading_type": "ያዕቆብ",
-              "chapter_verse": "ም· ፫ ቍ· ፩ – ፮",
+              "chapter_verse": "ም· ፬ ቍ· ፱ – ፍ፡ም፡",
               "incipit": "ወኢይኩኑ እምውስቴትክሙ ።"
             },
             {
               "reading_type": "ግብ፡ ሐዋ፡",
-              "chapter_verse": "ም· ፰ ቍ· ፳፰ – ፴፩",
+              "chapter_verse": "ም· ፬ ቍ· ፱ – ፍ፡ም፡",
               "incipit": "ወይእዜኒ ዕቀቡ ርእሰክሙ ።"
             }
           ],
@@ -1032,7 +1032,7 @@
           },
           "ወንጌል": {
             "book": "ሉቃስ",
-            "chapter_verse": "ም· ፲፪ ቍ· ፴፯ – ፶፪",
+            "chapter_verse": "ም· ፲፪ ቍ· ፳፯ – ፴፪",
             "incipit": "ናሁ ጽጌያተ ገዳም ርእዩ ።"
           },
           "ቅዳሴ": "ዮሐንስ አፈወርቅ (ናሁ ንዜኑ) ።"
@@ -1161,17 +1161,17 @@
           "epistles_and_acts": [
             {
               "reading_type": "ሮሜ",
-              "chapter_verse": "ም· ፯ ቍ· ፶፩ – ፶፬",
+              "chapter_verse": "ም· ፯ ቍ· ፯ – ፲፪",
               "incipit": "ምንተ እንከ እብል ።"
             },
             {
               "reading_type": "ይሁዳ",
-              "chapter_verse": "ም· ፩ ቍ· ፲፯ – ፳፪",
+              "chapter_verse": "ም· ፯ ቍ· ፯ – ፲፪",
               "incipit": "ወአንትሙሰ አኃዊነ ተዘከሩ ።"
             },
             {
               "reading_type": "ግብ፡ ሐዋ፡",
-              "chapter_verse": "ም· ፲፭ ቍ· ፳፪ – ፴",
+              "chapter_verse": "ም· ፯ ቍ· ፯ – ፲፪",
               "incipit": "ወእምዝ ኀብሩ ሐዋርያት ።"
             }
           ],
@@ -1230,7 +1230,7 @@
           },
           "ወንጌል": {
             "book": "ማቴዎስ",
-            "chapter_verse": "ም· ፲፪ ቍ· ፶፬ – ፍ፡ም፡",
+            "chapter_verse": "ም· ፲፪ ቍ· ፵፫ – ፍ፡ም፡",
             "incipit": "ወእምከመ ወጽአ መንፈስ ።"
           }
         },
@@ -1401,17 +1401,17 @@
           "epistles_and_acts": [
             {
               "reading_type": "ቲቶ",
-              "chapter_verse": "ም· ፩ ቍ· ፯ – ፲፪",
+              "chapter_verse": "ም· ፳ ቍ· ፳፰ – ፍ፡ም፡",
               "incipit": "ወርቱዕሰ ይሠየም ጳጳስ ።"
             },
             {
               "reading_type": "ጴጥ ፩",
-              "chapter_verse": "ም· ፩ ቍ· ፯ – ፲",
+              "chapter_verse": "ም· ፳ ቍ· ፳፰ – ፍ፡ም፡",
               "incipit": "ወባሕቱ ኅዳጠ ይእዜ ።"
             },
             {
               "reading_type": "ግብ፡ ሐዋ፡",
-              "chapter_verse": "ም· ፰ ቍ· ፶፬ – ፍ፡ም፡",
+              "chapter_verse": "ም· ፳ ቍ· ፳፰ – ፍ፡ም፡",
               "incipit": "ወይእዜኒ ትግሁ ወተዘከሩ ።"
             }
           ],
@@ -1478,17 +1478,17 @@
           "epistles_and_acts": [
             {
               "reading_type": "ቲቶ",
-              "chapter_verse": "ም· ፫ ቍ· ፯ – ፲፱",
+              "chapter_verse": "ም· ፪ ቍ· ፳፪ – ፍ፡ም፡",
               "incipit": "እሙን ነገር"
             },
             {
               "reading_type": "ዮሐ ፩",
-              "chapter_verse": "ም· ፬ ቍ· ፴፱ – ፍ፡ም፡",
+              "chapter_verse": "ም· ፪ ቍ· ፳፪ – ፍ፡ም፡",
               "incipit": "ወመኑ ውእቱ ሐሳዊ ።"
             },
             {
               "reading_type": "ግብ፡ ሐዋ፡",
-              "chapter_verse": "ም· ፰ ቍ· ፳፰ – ፴፩",
+              "chapter_verse": "ም· ፪ ቍ· ፳፪ – ፍ፡ም፡",
               "incipit": "ወይእዜኒ ዕቀቡ ርእሰክሙ ።"
             }
           ],
@@ -1657,7 +1657,7 @@
           },
           "ወንጌል": {
             "book": "ዮሐንስ",
-            "chapter_verse": "ም· ፲፭ ቍ· ፶፫ – ፶፭",
+            "chapter_verse": "ም· ፲፮ ቍ· ፮ – ፳፪",
             "incipit": "ወካዕበ ተከዘ በልቡ ።"
           },
           "ቅዳሴ": "ዘወልደ ነጐድጓድ ። አው ዘእግዝእትነ ።"
@@ -2013,17 +2013,17 @@
           "epistles_and_acts": [
             {
               "reading_type": "ገላትያ",
-              "chapter_verse": "ም· ፩ ቍ· ፲፭ – ፍ፡ም፡",
+              "chapter_verse": "ም· ፪ ቍ· ፳፰ – ም· ፫ ቍ· ፲",
               "incipit": "ወአመ ሠምረ እግዚአብሔር ዘፈለጠኒ ።"
             },
             {
               "reading_type": "ዮሐ፡ ፩",
-              "chapter_verse": "ም· ፪ ቍ· ፳፰ – ፲",
+              "chapter_verse": "ም· ፪ ቍ· ፳፰ – ም· ፫ ቍ· ፲",
               "incipit": "ወይእዜኒ ደቂቅየ ንበሩ ባቲ ።"
             },
             {
               "reading_type": "ግብ፡ ሐዋ፡",
-              "chapter_verse": "ም· ፮ ቍ· ፩ – ፲",
+              "chapter_verse": "ም· ፪ ቍ· ፳፰ – ም· ፫ ቍ· ፲",
               "incipit": "ወውእቱ ዓሚረ በዝኁ ሕዝብ ።"
             }
           ],
@@ -2264,7 +2264,7 @@
           },
           "ወንጌል": {
             "book": "ማር",
-            "chapter_verse": "ም· ፰ ቍ· ፴፬ – ም ፱ ቍ· ፩ – ፪",
+            "chapter_verse": "ም· ፰ ቍ· ፴፬ – ም· ፱ ቍ· ፪",
             "incipit": "ወጸውዖሙ ለሕዝብ ምስለ አርዳኢሁ ።"
           },
           "ቅዳሴ": "ዘእግዝእትነ ። (ጐሥዓ)"

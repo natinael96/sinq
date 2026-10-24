@@ -331,17 +331,17 @@
           "epistles_and_acts": [
             {
               "reading_type": "ቆር ፪",
-              "chapter_verse": "ም· ፲፩ ቍ· ፳፩ – ፍ፡ም፡",
+              "chapter_verse": "ም· ፬ ቍ· ፳፱ – ፍ፡ም፡",
               "incipit": "እብል ዘንተ ።"
             },
             {
               "reading_type": "ይሁዳ",
-              "chapter_verse": "ም· ፩ ቍ· ፲፯ – ፳፫",
+              "chapter_verse": "ም· ፬ ቍ· ፳፱ – ፍ፡ም፡",
               "incipit": "እሉ እሙንቱ እለ ያንጐረጕሩ ።"
             },
             {
               "reading_type": "ግብ፡ ሐዋ፡",
-              "chapter_verse": "ም· ፩ ቍ· ፳፱ – ፍ፡ም፡",
+              "chapter_verse": "ም· ፬ ቍ· ፳፱ – ፍ፡ም፡",
               "incipit": "ወይእዜኒ እግዚአ ርኢ ።"
             }
           ],
@@ -2240,7 +2240,7 @@
           },
           "ወንጌል": {
             "book": "ሉቃስ",
-            "chapter_verse": "ም· ፩ ቍ· ፳፮ – ፻፯",
+            "chapter_verse": "ም· ፩ ቍ· ፳፮ – ፴፰",
             "incipit": "ወበሳድስ ወርኅ ተፈነወ ።"
           }
         },

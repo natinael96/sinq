@@ -23,7 +23,7 @@ object HighlightRepository {
 
     val COLOR_KEYS = listOf("yellow", "green", "blue", "pink")
     const val AMHARIC_PSALTER_NAMESPACE = "am-1980"
-    const val GEEZ_PSALTER_NAMESPACE = "gez-1980"
+    const val GEEZ_PSALTER_NAMESPACE = "gez"
 
     private val KEY = stringPreferencesKey("highlights_json")
     private val json = Json { ignoreUnknownKeys = true }

@@ -21,12 +21,12 @@ class DailyQuoteRepositoryTest {
             .map(::File).firstOrNull { it.isFile }
 
     @Test
-    fun `all 844 daily quotes decode cleanly with valid authors and texts`() {
+    fun `all 999 daily quotes decode cleanly with valid authors and texts`() {
         assertNotNull("daily_quotes.json must exist in assets", file)
         val raw = file!!.readText()
         val quotes: List<DailyQuote> = json.decodeFromString(raw)
 
-        assertEquals("Must contain all 844 Desert Fathers quotes", 844, quotes.size)
+        assertEquals("Must contain all 999 Desert Fathers quotes", 999, quotes.size)
 
         val seenDays = mutableSetOf<Int>()
         quotes.forEachIndexed { index, quote ->
@@ -42,7 +42,7 @@ class DailyQuoteRepositoryTest {
 
     @Test
     fun `multi-year rotation provides distinct quotes across consecutive years without repeating`() {
-        val totalQuotes = 844
+        val totalQuotes = 999
 
         val y2026Jan1 = DailyQuoteRepository.quoteIndexFor(LocalDate.of(2026, 1, 1), totalQuotes)
         val y2026Jan2 = DailyQuoteRepository.quoteIndexFor(LocalDate.of(2026, 1, 2), totalQuotes)

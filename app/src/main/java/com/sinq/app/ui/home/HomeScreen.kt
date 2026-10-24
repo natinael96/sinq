@@ -144,7 +144,7 @@ fun HomeScreen(
     onOpenPrayerList: () -> Unit,
     onOpenPsalter: () -> Unit,
     onOpenZewotr: () -> Unit,
-    onOpenGitsawe: () -> Unit,
+    onOpenGitsawe: (Long?) -> Unit = {},
     onOpenBatteryHelp: () -> Unit,
     onSelectTab: (Tab) -> Unit,
     onOpenDesertFathersHub: () -> Unit = {},
@@ -406,7 +406,7 @@ fun HomeScreen(
                 onOpenBookmarks = onOpenBookmarks,
                 onOpenPrayerList = onOpenPrayerList,
                 onOpenAllHours = { showHours = true },
-                onOpenGitsawe = onOpenGitsawe,
+                onOpenGitsawe = { onOpenGitsawe(if (isWazema) effectiveDate.toEpochDay() else null) },
                 onOpenJourney = { onSelectTab(Tab.JOURNEY) },
                 onOpenPsalter = onOpenPsalter,
                 onOpenZewotr = onOpenZewotr,
@@ -1029,6 +1029,12 @@ private fun GitsaweCard(
         ?: readings?.monthly?.firstOrNull()?.let { it.title ?: it.raw }
         ?: readings?.sundayCycle?.firstOrNull()?.title
     val mezmur = readings?.sundayCycle?.firstNotNullOfOrNull { it.mezmur }
+    val lectionaryTitle = reading ?: feast
+    val kickerText = when {
+        isWazema -> if (feast != null) s.wazemaEveOf(feast) else s.wazemaBadge
+        feast != null && reading != null -> feast
+        else -> null
+    }
 
     SinqCard(
         onClick = onClick,
@@ -1053,9 +1059,9 @@ private fun GitsaweCard(
                 )
                 Spacer(Modifier.width(Spacing.md))
                 Column(Modifier.weight(1f)) {
-                    if (isWazema) {
+                    if (kickerText != null) {
                         Text(
-                            text = if (feast != null) s.wazemaEveOf(feast) else s.wazemaBadge,
+                            text = kickerText,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.secondary,
                             maxLines = 1,
@@ -1068,8 +1074,14 @@ private fun GitsaweCard(
                         HomeReadingsState.Loading -> Text(s.loadingLabel, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         HomeReadingsState.Unavailable -> Text(s.contentMissingTitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         is HomeReadingsState.Ready -> {
-                            (feast ?: reading)?.let {
-                                Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            lectionaryTitle?.let {
+                                Text(
+                                    text = it,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
                             }
                             mezmur?.let { Text("${s.sundayMezmurTitle} · $it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary) }
                         }

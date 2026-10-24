@@ -450,7 +450,7 @@
         "ዘሠርክ": {
           "ምስባክ": {
             "book": "መዝ·",
-            "chapter_verse": "፶፬ ቍ· ፲፯ – ፲፫",
+            "chapter_verse": "፶፬ ቍ· ፲፯ – ፲፰",
             "verses": [
               "አድኅንና በሰላም ለነፍስየ እምእለ ይትቃረኑኒ ።",
               "እስመ ይበዝኁ እምእለ ምስሌየ ።",
@@ -2089,17 +2089,17 @@
           "epistles_and_acts": [
             {
               "reading_type": "ቆሮ ፩",
-              "chapter_verse": "ም· ፲፪ ቍ· ፳፯ – ፍ፣ም፣",
+              "chapter_verse": "ም· ፪ ቍ· ፳፯ – ም· ፫ ቍ· ፱",
               "incipit": "ወእምዝ ዘትእምርት ወኃይል ።"
             },
             {
               "reading_type": "ዮሐ ፩",
-              "chapter_verse": "ም· ፪ ቍ· ፳፯ – ፱",
+              "chapter_verse": "ም· ፪ ቍ· ፳፯ – ም· ፫ ቍ· ፱",
               "incipit": "ወአንትሙሰ ቅብዐት ብክሙ ።"
             },
             {
               "reading_type": "ግብ፣ ሐዋ፣",
-              "chapter_verse": "ም· ፱ ቍ· ፲ – ፳",
+              "chapter_verse": "ም· ፪ ቍ· ፳፯ – ም· ፫ ቍ· ፱",
               "incipit": "ወሀሎ ፩ ብእሲ በሀገረ ደማስቆ ።"
             }
           ],

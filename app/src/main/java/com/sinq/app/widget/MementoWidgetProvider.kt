@@ -128,7 +128,7 @@ class MementoWidgetProvider : AppWidgetProvider() {
      * diagnose it, and the phrase in plain type still says what it says.
      */
     private fun displayTypeface(context: Context): Typeface =
-        runCatching { ResourcesCompat.getFont(context, R.font.waldba) }
+        runCatching { ResourcesCompat.getFont(context, R.font.abyssinica_sil) }
             .onFailure { Log.d(TAG, "ዋልድባ unavailable, using default: ${it.message}") }
             .getOrNull() ?: Typeface.DEFAULT
 

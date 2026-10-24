@@ -14,6 +14,10 @@ data class DailyQuote(
     @SerialName("author_am") val authorAm: String,
     val quote: String,
     @SerialName("quote_id") val quoteId: String,
+    @SerialName("saying_number") val sayingNumber: Int? = null,
+    @SerialName("saying_number_geez") val sayingNumberGeez: String? = null,
+    val section: String? = null,
+    @SerialName("section_geez") val sectionGeez: String? = null,
 )
 
 /**
@@ -27,4 +31,14 @@ fun DailyQuote.toBookmark(channelName: String): Bookmark = Bookmark(
     title = authorAm.ifBlank { authorEn },
     subtitle = quote,
     route = "daily_quote?id=$quoteId",
+)
+
+/**
+ * One technical ascetic or liturgical term from the Desert Fathers glossary.
+ */
+@Serializable
+data class DesertFatherGlossaryTerm(
+    val term: String,
+    @SerialName("meaning_en") val meaningEn: String,
+    @SerialName("meaning_am") val meaningAm: String,
 )

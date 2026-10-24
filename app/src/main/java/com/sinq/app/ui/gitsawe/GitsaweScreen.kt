@@ -130,7 +130,12 @@ fun GitsaweScreen(
     val misbakLanguage by SettingsRepository.misbakLanguage(context)
         .collectAsState(initial = MisbakLanguage.GEEZ)
     // The day being viewed, as an epoch-day so it survives rotation.
-    var epochDay by rememberSaveable { mutableLongStateOf(initialEpochDay ?: LocalDate.now().toEpochDay()) }
+    var epochDay by rememberSaveable(initialEpochDay) { mutableLongStateOf(initialEpochDay ?: LocalDate.now().toEpochDay()) }
+    androidx.compose.runtime.LaunchedEffect(initialEpochDay) {
+        if (initialEpochDay != null && epochDay != initialEpochDay) {
+            epochDay = initialEpochDay
+        }
+    }
     var showPicker by rememberSaveable { mutableStateOf(false) }
     val currentDay by rememberCurrentDate()
     val date = LocalDate.ofEpochDay(epochDay)

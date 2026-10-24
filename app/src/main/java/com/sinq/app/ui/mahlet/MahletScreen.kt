@@ -155,7 +155,7 @@ fun MahletScreen(
                     ?: shown?.source,
                 onBack = onBack,
                 actions = {
-                    if (parts.size > 6) {
+                    if (parts.size > 2) {
                         androidx.compose.material3.IconButton(onClick = { contentsOpen = true }) {
                             Icon(
                                 androidx.compose.material.icons.Icons.Outlined.Menu,
@@ -210,13 +210,11 @@ fun MahletScreen(
                     onPick = { i ->
                         contentsOpen = false
                         // The parts do not start at index 0. Counted exactly
-                        // the way the list is built, which is the only way the
-                        // two stay in step: the kind tabs, the edition pills,
-                        // the title, and the reference block — one item each.
+                        // the way the list is built: the kind tabs, the edition pills,
+                        // and the title — one item each. References are at the foot of the chant.
                         val before = (if (orders.size > 1) 1 else 0) +
                             (if (editions.isNotEmpty()) 2 else 0) +
-                            1 +
-                            (if (shown?.let { telegramReferences(it, s) }.orEmpty().isNotEmpty()) 1 else 0)
+                            1
                         scope.launch { listState.animateScrollToItem(before + i) }
                     },
                     onDismiss = { contentsOpen = false },
@@ -306,27 +304,41 @@ fun MahletScreen(
                     }
                 }
                 item(key = "title") {
-                    Text(
-                        shown?.feast.orEmpty(),
-                        style = MaterialTheme.typography.titleMedium.inReadingFont(),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.padding(bottom = Spacing.xs),
-                    )
-                    Text(
-                        s.mahletParts(parts.size),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.padding(bottom = Spacing.md),
-                    )
-                }
-                // Where the order's texts came from, post by post — the one
-                // the text is, the ones folded into it, each edition's. An
-                // order the channel never posted has no list, and says
-                // nothing: the book is the book.
-                val references = shown?.let { telegramReferences(it, s) }.orEmpty()
-                if (references.isNotEmpty()) {
-                    item(key = "references") {
-                        MahletReferences(references, s.mahletReferences)
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = Spacing.md, bottom = Spacing.lg),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text(
+                            shown?.feast.orEmpty(),
+                            style = MaterialTheme.typography.headlineSmall.inReadingFont(),
+                            color = sinqColors.arke,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        Spacer(Modifier.height(Spacing.xs))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            Text(
+                                s.mahletParts(parts.size),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            val sourceLabel = editions.getOrNull(edition)?.let { it.title ?: s.mahletEdition(edition + 1) }
+                                ?: shown?.source
+                            if (!sourceLabel.isNullOrBlank()) {
+                                Text(
+                                    "  ·  $sourceLabel",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                        }
                     }
                 }
                 items(parts.size, key = { "$tab:$edition:$it" }) { index ->
@@ -344,6 +356,17 @@ fun MahletScreen(
                             selB = b
                         },
                     )
+                }
+                // Where the order's texts came from, post by post — the one
+                // the text is, the ones folded into it, each edition's. An
+                // order the channel never posted has no list, and says
+                // nothing: the book is the book. Kept as a quiet footnote
+                // at the end of the chant rather than interrupting the reading.
+                val references = shown?.let { telegramReferences(it, s) }.orEmpty()
+                if (references.isNotEmpty()) {
+                    item(key = "references") {
+                        MahletReferences(references, s.mahletReferences)
+                    }
                 }
                 item { Spacer(Modifier.height(Spacing.huge)) }
             }
@@ -390,25 +413,29 @@ private fun telegramReferences(order: MahletOrder, s: com.sinq.app.ui.strings.St
 @Composable
 private fun MahletReferences(references: List<MahletReference>, heading: String) {
     val uriHandler = LocalUriHandler.current
-    Column(Modifier.fillMaxWidth().padding(bottom = Spacing.md)) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(top = Spacing.xxl, bottom = Spacing.md)
+    ) {
         Text(
             heading,
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.padding(bottom = Spacing.xs),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        Spacer(Modifier.height(Spacing.xs))
         references.forEach { r ->
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 48.dp)
+                    .heightIn(min = 36.dp)
                     .clickable { uriHandler.openUri(r.url) }
-                    .padding(vertical = Spacing.xs),
+                    .padding(vertical = Spacing.xxs),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     r.label,
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -416,8 +443,8 @@ private fun MahletReferences(references: List<MahletReference>, heading: String)
                 Spacer(Modifier.width(Spacing.sm))
                 Text(
                     r.url.removePrefix("https://"),
-                    style = MaterialTheme.typography.labelMedium.copy(textDecoration = TextDecoration.Underline),
-                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelSmall.copy(textDecoration = TextDecoration.Underline),
+                    color = MaterialTheme.colorScheme.secondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -459,26 +486,27 @@ private fun PartsSheet(
         ) {
             items(parts.size) { i ->
                 val part = parts[i]
+                val refrain = part.key.isNotBlank() && REFRAINS.containsMatchIn(part.key)
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 48.dp)
+                        .heightIn(min = 44.dp)
                         .clickable { onPick(i) }
-                        .padding(vertical = Spacing.sm),
+                        .padding(vertical = Spacing.xs),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         geezNumeral(i + 1),
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.secondary,
                         textAlign = TextAlign.End,
-                        modifier = Modifier.width(30.dp),
+                        modifier = Modifier.width(28.dp),
                     )
                     Spacer(Modifier.width(Spacing.md))
                     Text(
                         part.key.ifBlank { part.verse.take(40) },
                         style = MaterialTheme.typography.titleSmall.inReadingFont(),
-                        color = MaterialTheme.colorScheme.onBackground,
+                        color = if (refrain) MaterialTheme.colorScheme.onSurfaceVariant else sinqColors.arke,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -533,8 +561,8 @@ private fun MahletPartRow(
                 else Color.Transparent,
             )
             .padding(
-                start = if (refrain) Spacing.lg else Spacing.sm,
-                end = Spacing.sm,
+                start = if (refrain) Spacing.lg else 0.dp,
+                end = 0.dp,
                 top = if (refrain) Spacing.xs else Spacing.md,
                 bottom = Spacing.xs,
             ),
@@ -550,30 +578,33 @@ private fun MahletPartRow(
             )
         }
         if (part.key.isNotBlank()) {
-            Row(verticalAlignment = Alignment.Bottom) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+            ) {
                 Text(
                     part.key,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = sinqColors.arke,
+                    style = if (refrain) MaterialTheme.typography.labelMedium.inReadingFont()
+                    else MaterialTheme.typography.titleSmall.inReadingFont(),
+                    color = if (refrain) MaterialTheme.colorScheme.onSurfaceVariant else sinqColors.arke,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Spacer(Modifier.width(Spacing.sm))
                 Text(
-                    s.mahletNth(ordinal, total),
+                    "·  ${s.mahletNth(ordinal, total)}",
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     maxLines = 1,
                 )
                 if (location != null) {
-                    Spacer(Modifier.width(Spacing.sm))
+                    Spacer(Modifier.width(Spacing.xs))
                     Text(
                         s.booksFullHymn,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.secondary,
                         maxLines = 1,
                         modifier = Modifier
-                            .heightIn(min = 48.dp)
+                            .heightIn(min = 40.dp)
                             .clickable {
                                 onOpenBook(location.book.id, location.chapter, location.block)
                             }
@@ -581,7 +612,7 @@ private fun MahletPartRow(
                     )
                 }
             }
-            Spacer(Modifier.height(Spacing.xxs))
+            Spacer(Modifier.height(Spacing.xs))
         }
         // MAHLET: an order is sung about the saint whose feast it is, so the
         // saint's name reddens with the Name of God. A rubric is left plain —
