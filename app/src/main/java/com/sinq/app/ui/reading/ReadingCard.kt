@@ -143,9 +143,11 @@ fun CandleProgress(
 
     val trackColor = sinq.onHeroMuted.copy(alpha = 0.25f)
     val fillColor = sinq.onHeroGold
-    val orangeWarm = lerp(sinq.onHeroGold, sinq.arke, 0.70f)
-    val amberBase = sinq.arke
-    val paleYellow = lerp(sinq.onHeroGold, Color.White, 0.82f)
+    val flameTip = Color(0xFFFFFDE7)
+    val flameGold = sinq.onHeroGold
+    val flameOrange = Color(0xFFFF9800)
+    val flameAmber = Color(0xFFE64A19)
+    val paleYellow = Color(0xFFFFF9C4)
 
     Canvas(
         modifier = modifier
@@ -200,10 +202,10 @@ fun CandleProgress(
         val flameMidY = (tipY + baselineY) / 2f
         drawCircle(
             brush = Brush.radialGradient(
-                0.0f to orangeWarm.copy(alpha = 0.22f),
-                0.45f to orangeWarm.copy(alpha = 0.12f),
-                0.80f to orangeWarm.copy(alpha = 0.03f),
-                1.0f to Color.Transparent,
+                0.0f to flameOrange.copy(alpha = 0.22f),
+                0.45f to flameOrange.copy(alpha = 0.12f),
+                0.80f to flameOrange.copy(alpha = 0.03f),
+                1.0f to flameOrange.copy(alpha = 0f),
                 center = Offset(flameX, flameMidY),
                 radius = glowRadius,
             ),
@@ -236,7 +238,7 @@ fun CandleProgress(
         drawPath(
             path = outerPath,
             brush = Brush.verticalGradient(
-                colors = listOf(fillColor, orangeWarm, amberBase),
+                colors = listOf(flameTip, flameGold, flameOrange, flameAmber),
                 startY = tipY,
                 endY = baselineY,
             ),
@@ -270,7 +272,7 @@ fun CandleProgress(
         drawPath(
             path = innerPath,
             brush = Brush.radialGradient(
-                colors = listOf(paleYellow, paleYellow.copy(alpha = 0.40f), Color.Transparent),
+                colors = listOf(Color.White, paleYellow, paleYellow.copy(alpha = 0f)),
                 center = Offset(flameX, baselineY - (baselineY - coreTipY) * 0.45f),
                 radius = (baselineY - coreTipY) * 0.75f,
             ),

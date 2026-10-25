@@ -321,7 +321,7 @@ fun CandleFlame(
                 0.48f to accentColor.copy(alpha = glowPulse * 0.20f),
                 0.72f to accentColor.copy(alpha = glowPulse * 0.04f),
                 0.90f to accentColor.copy(alpha = glowPulse * 0.01f),
-                1.0f to Color.Transparent,
+                1.0f to accentColor.copy(alpha = 0f),
                 center = Offset(cx, flameMidY),
                 radius = glowRadius,
             ),
@@ -369,8 +369,8 @@ fun CandleFlame(
         )
         outerPath.close()
 
-        val warmOrange = lerp(accentColor, arke, 0.45f)
-        val deepAmber = lerp(accentColor, arke, 0.85f)
+        val warmOrange = Color(0xFFFF9800)
+        val deepAmber = Color(0xFFE64A19)
         drawPath(
             path = outerPath,
             brush = Brush.verticalGradient(
@@ -413,7 +413,7 @@ fun CandleFlame(
         drawPath(
             path = innerPath,
             brush = Brush.radialGradient(
-                colors = listOf(coreCenter, coreYellow, Color.Transparent),
+                colors = listOf(coreCenter, coreYellow, coreYellow.copy(alpha = 0f)),
                 center = Offset(cx, baseY - (baseY - coreTipY) * 0.45f),
                 radius = (baseY - coreTipY) * 0.75f,
             ),
@@ -426,7 +426,7 @@ fun CandleFlame(
         val baseRadiusH = 3.2.dp.toPx()
         drawOval(
             brush = Brush.radialGradient(
-                colors = listOf(coolBlue, deepBlue, Color.Transparent),
+                colors = listOf(coolBlue, deepBlue, deepBlue.copy(alpha = 0f)),
                 center = Offset(cx, baseY),
                 radius = baseRadiusW,
             ),

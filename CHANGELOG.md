@@ -13,6 +13,7 @@ _versionCode 130 · Sunday Canticles Liturgical Redesign, Typographic Correction
 - **Sunday Canticles (ጸሎተ ነቢያት) Liturgical Redesign.** Revamped Sunday Canticles with Ge'ez numeral emblem badges (፩–፳), parsed dual-line titles separating canticle names from scripture references, 0.5dp hairline dividers, and an elevated full Psalter action card.
 
 ### Changed
+- **Luminous Candle Flame Palette.** Switched flame body, core, and glow rendering to emissive gold-orange-amber gradients with clean alpha falloffs, ensuring the candle flames on the Reading card and floating bottom bar remain bright and luminous in both Light and Dark modes.
 - **Adaptive ReadingCard Layout.** Removed rigid height and width constraints in favor of responsive `wrapContentHeight` and `heightIn(min = 140.dp)`, capped local fontScale at 1.3x, unified typography under `LocalReadingFont`, and introduced adaptive vertical stacking for narrow devices (<360dp) or high font scales.
 - **Card Layout Responsiveness.** Hardened card wrapping with `FlowRow` in Mahlet today chant orders and Reading study reflections, updated manuscript share preview to adapt to system font scales, expanded library card subtitle allowance to 2 lines, and prevented scripture codex title/count collisions.
 - **Textual & Typographic Corrections.** Corrected split words, typos, missing spaces, and standardized Ge'ez numerals across Amharic and Ge'ez editions of ጸሎት ነቢያት (`39a66aaa6b.json` and `d46f2d9514.json`).
