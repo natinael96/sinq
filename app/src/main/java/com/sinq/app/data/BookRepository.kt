@@ -130,14 +130,49 @@ object BookRepository {
     suspend fun byPartVerse(context: Context, partName: String, verse: String): BookLocation? {
         val meta = byPartName(context, partName) ?: return null
         val top = BookLocation(meta, 0, -1)
-        val needle = fold(verse).trim(' ', '\u1362', '\u1361')
-        if (needle.length < 8) return top
-        val probe = needle.take(14)
+        val clean = verse.replace(Regex("\\(.*?\\)"), "")
+        val lines = clean.split(Regex("[\r\n\u1362\u1364]+")).map { it.trim() }.filter { it.isNotEmpty() }
         val book = book(context, meta.id) ?: return top
-        for (chapter in book.chapters) {
-            val i = chapter.blocks.indexOfFirst { probe in fold(it.text) }
-            if (i >= 0) return BookLocation(meta, chapter.number, i)
+        val probes = lines.take(5).mapNotNull { line ->
+            val needle = fold(line).trim(' ', '\u1361', '\u1362', '\u1363', '\u1364')
+            if (needle.length >= 8) needle.take(14) else null
         }
+        val allProbes = if (probes.isNotEmpty()) probes else {
+            val needle = fold(verse).trim(' ', '\u1361', '\u1362', '\u1363', '\u1364')
+            if (needle.length >= 8) listOf(needle.take(14)) else emptyList()
+        }
+        if (allProbes.isEmpty()) return top
+
+        for (probe in allProbes) {
+            for (chapter in book.chapters) {
+                val i = chapter.blocks.indexOfFirst { probe in fold(it.text) }
+                if (i >= 0) return BookLocation(meta, chapter.number, i)
+            }
+        }
+
+        // Sister book fallback for Mahlete Tsige / Sekokawe Dingil:
+        // When a part is categorized under ማኅሌተ ጽጌ but quotes ሰቆቃወ ድንግል (or vice-versa),
+        // try the sister book before falling back to the top of the named book.
+        val altName = when (meta.key) {
+            "ማህሌተ ጽጌ" -> "ሰቆቃወ ድንግል"
+            "ሰቆቃወ ድንግል" -> "ማህሌተ ጽጌ"
+            else -> null
+        }
+        if (altName != null) {
+            val altMeta = byPartName(context, altName)
+            if (altMeta != null) {
+                val altBook = book(context, altMeta.id)
+                if (altBook != null) {
+                    for (probe in allProbes) {
+                        for (chapter in altBook.chapters) {
+                            val i = chapter.blocks.indexOfFirst { probe in fold(it.text) }
+                            if (i >= 0) return BookLocation(altMeta, chapter.number, i)
+                        }
+                    }
+                }
+            }
+        }
+
         return top
     }
 

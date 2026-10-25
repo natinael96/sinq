@@ -3,6 +3,9 @@ package com.sinq.app.ui.library
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -326,32 +329,92 @@ fun ScriptureReaderScreen(
                 },
                 actions = {
                     val gold = MaterialTheme.colorScheme.secondary
-                    Box(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(gold.copy(alpha = 0.12f))
-                            .border(1.dp, gold.copy(alpha = 0.45f), CircleShape)
-                            .clickable(
-                                onClickLabel = "ቀይር",
-                                onClick = { translationMode = translationMode.next(hasEnglish) },
+                    var langMenuOpen by remember { mutableStateOf(false) }
+                    Box {
+                        Row(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(gold.copy(alpha = 0.12f))
+                                .border(1.dp, gold.copy(alpha = 0.40f), CircleShape)
+                                .clickable(
+                                    onClickLabel = "የትርጉም ምርጫ",
+                                    onClick = { langMenuOpen = true },
+                                )
+                                .heightIn(min = 36.dp)
+                                .padding(start = 12.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(2.dp),
+                        ) {
+                            val editionText = when (effectiveMode) {
+                                ScriptureTranslationMode.AMHARIC -> s.wudaseLangAmharic
+                                ScriptureTranslationMode.GEEZ -> s.wudaseLangGeez
+                                ScriptureTranslationMode.ENGLISH -> "English"
+                                ScriptureTranslationMode.PARALLEL_AMH_GEEZ -> "አማ + ግእዝ"
+                                ScriptureTranslationMode.PARALLEL_AMH_ENG -> "አማ + Eng"
+                            }
+                            Text(
+                                text = editionText,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = gold,
+                                maxLines = 1,
                             )
-                            .heightIn(min = 48.dp)
-                            .padding(horizontal = 14.dp, vertical = 6.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        val editionText = when (effectiveMode) {
-                            ScriptureTranslationMode.AMHARIC -> s.wudaseLangAmharic
-                            ScriptureTranslationMode.GEEZ -> s.wudaseLangGeez
-                            ScriptureTranslationMode.ENGLISH -> "English"
-                            ScriptureTranslationMode.PARALLEL_AMH_GEEZ -> "አማ + ግእዝ"
-                            ScriptureTranslationMode.PARALLEL_AMH_ENG -> "አማ + Eng"
+                            Icon(
+                                Icons.Outlined.ArrowDropDown,
+                                contentDescription = null,
+                                tint = gold,
+                                modifier = Modifier.size(18.dp),
+                            )
                         }
-                        Text(
-                            text = editionText,
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = gold,
-                            maxLines = 1,
-                        )
+
+                        DropdownMenu(
+                            expanded = langMenuOpen,
+                            onDismissRequest = { langMenuOpen = false },
+                        ) {
+                            val modes = if (hasEnglish) {
+                                listOf(
+                                    ScriptureTranslationMode.AMHARIC to s.wudaseLangAmharic,
+                                    ScriptureTranslationMode.GEEZ to s.wudaseLangGeez,
+                                    ScriptureTranslationMode.ENGLISH to "English",
+                                    ScriptureTranslationMode.PARALLEL_AMH_GEEZ to "${s.wudaseLangAmharic} + ${s.wudaseLangGeez}",
+                                    ScriptureTranslationMode.PARALLEL_AMH_ENG to "${s.wudaseLangAmharic} + English",
+                                )
+                            } else {
+                                listOf(
+                                    ScriptureTranslationMode.AMHARIC to s.wudaseLangAmharic,
+                                    ScriptureTranslationMode.GEEZ to s.wudaseLangGeez,
+                                    ScriptureTranslationMode.PARALLEL_AMH_GEEZ to "${s.wudaseLangAmharic} + ${s.wudaseLangGeez}",
+                                )
+                            }
+
+                            modes.forEach { (mode, label) ->
+                                val isSelected = effectiveMode == mode
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            label,
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                            ),
+                                            color = if (isSelected) gold else MaterialTheme.colorScheme.onSurface,
+                                        )
+                                    },
+                                    trailingIcon = if (isSelected) {
+                                        {
+                                            Icon(
+                                                Icons.Outlined.Check,
+                                                contentDescription = null,
+                                                tint = gold,
+                                                modifier = Modifier.size(IconSize.small),
+                                            )
+                                        }
+                                    } else null,
+                                    onClick = {
+                                        translationMode = mode
+                                        langMenuOpen = false
+                                    },
+                                )
+                            }
+                        }
                     }
                     Spacer(Modifier.width(Spacing.xs))
                     com.sinq.app.ui.common.ReaderToolsMenu(

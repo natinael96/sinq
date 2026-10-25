@@ -58,6 +58,9 @@ internal val releaseHistory = listOf(
         title = "Ge'ez Scripture Reader, Cleaned Monastic Sayings, Mahlet Polish, and Dense Book Cards",
         titleAm = "የግእዝ መጽሐፍ ቅዱስ ንባብ፣ የበረሃ አባቶች ምክር እርማት፣ የማኅሌት ማስተካከያ እና የተመጠኑ የመጻሕፍት ካርዶች",
         changes = listOf(
+            "Replaced the scripture translation toggle with an elegant, subtle dropdown menu showing all available translation and parallel modes.",
+            "Expanded Mahlete Tsige chant matching across all 5 stanza lines with seamless Segokwaw Dengel sister-hymn cross-linking.",
+            "Enabled direct language toggling when viewing or opening Misbak lectionary passages, falling back automatically to the Amharic Psalter translation.",
             "Enabled Ge'ez and side-by-side Amharic-Ge'ez parallel reading across all 66 canonical books in the Scripture reader.",
             "Unified prayer journey heatmap legends with localized ladder labels, fasting markers, high-contrast today beacons, and full prayer indicators.",
             "Restored authentic liturgical formatting in Mahlete Tsige and Segokwaw Dengel, eliminating duplicate stanza numbering.",
@@ -66,6 +69,9 @@ internal val releaseHistory = listOf(
             "Compressed Church Books cards into a sleek, refined profile while preserving full prominence for the daily reading hero card.",
         ),
         changesAm = listOf(
+            "በመጽሐፍ ቅዱስ ንባብ ላይ የነበረው የትርጉም መቀያየሪያ ይበልጥ በረቀቀና ምቹ በሆነ ተቆልቋይ ዝርዝር (Dropdown) ተተክቷል።",
+            "ማኅሌተ ጽጌን ከዜማ መጻሕፍት ጋር የማስተሳሰር ሂደቱ በሙሉ አምስቱ ስንኞች ላይ እንዲሠራ ተደርጎ ከሰቆቃወ ድንግል ጋር ተጣጥሟል።",
+            "በግጻዌ ውስጥ ምስባክ ሲከፈት ቋንቋን በቀላሉ በግእዝና በአማርኛ መቀያየር እንዲቻል ተደርጓል።",
             "በመጽሐፍ ቅዱስ ንባብ ላይ በሁሉም 66ቱ መጻሕፍት የግእዝ እንዲሁም የአማርኛና የግእዝ ትይዩ ንባብ ተካቷል።",
             "የጸሎት ጉዞ ሰሌዳ መመሪያዎች በሙሉ በአማርኛና በእንግሊዝኛ ተስተካክለው የጾም፣ የዛሬ እና የሙሉ ጸሎት ምልክቶች ተሟልተዋል።",
             "በማኅሌተ ጽጌ እና በሰቆቃወ ድንግል ላይ የነበረው የቁጥር ድግግሞሽ ተስተካክሎ ትክክለኛ የሥርዓተ ዜማ አከፋፈል ተይዟል።",

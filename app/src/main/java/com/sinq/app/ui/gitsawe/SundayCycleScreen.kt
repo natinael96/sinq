@@ -39,6 +39,13 @@ import com.sinq.app.ui.common.SinqTopBar
 import com.sinq.app.ui.strings.LocalStrings
 import com.sinq.app.ui.theme.Spacing
 import com.sinq.app.ui.theme.inReadingFont
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import com.sinq.app.data.MisbakLanguage
+import com.sinq.app.data.SettingsRepository
+import com.sinq.app.ui.common.SelectPill
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 /** Optional Sunday/mezmur material opened from the end of the dated Gitsawe. */
@@ -107,6 +114,10 @@ private fun SundayReading(
     onOpenBook: (String, Int) -> Unit,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
+    val scope = rememberCoroutineScope()
+    val s = LocalStrings.current
+    val misbakLanguage by SettingsRepository.misbakLanguage(context)
+        .collectAsState(initial = MisbakLanguage.GEEZ)
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.lg),
@@ -142,12 +153,21 @@ private fun SundayReading(
         entry.rubric?.let { item { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) } }
         items(entry.labeledReadings()) { (role, reading) ->
             val target = reading.verse?.let(GitsaweLinks::target)
+            val isMisbak = role == "ምስባክ"
+            val textToShow = if (isMisbak && misbakLanguage == MisbakLanguage.AMHARIC) {
+                reading.text?.amharic ?: reading.text?.geez
+            } else {
+                reading.text?.geez ?: reading.text?.amharic
+            }
             Column(
                 Modifier.fillMaxWidth().then(
                     if (target != null) Modifier.clickable { onOpenReading(target, role, reading) } else Modifier,
                 ).padding(vertical = Spacing.xs),
             ) {
-                Row(Modifier.fillMaxWidth()) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Text(role, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
                     Spacer(Modifier.width(Spacing.sm))
                     Text(
@@ -157,8 +177,22 @@ private fun SundayReading(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
+                    if (isMisbak) {
+                        SelectPill(
+                            label = if (misbakLanguage == MisbakLanguage.GEEZ) s.wudaseLangGeez else s.wudaseLangAmharic,
+                            selected = true,
+                            onClick = {
+                                scope.launch {
+                                    SettingsRepository.setMisbakLanguage(
+                                        context,
+                                        if (misbakLanguage == MisbakLanguage.GEEZ) MisbakLanguage.AMHARIC else MisbakLanguage.GEEZ,
+                                    )
+                                }
+                            },
+                        )
+                    }
                 }
-                reading.text?.geez?.let { Text(it, style = MaterialTheme.typography.bodyLarge.inReadingFont()) }
+                textToShow?.let { Text(it, style = MaterialTheme.typography.bodyLarge.inReadingFont()) }
                 reading.citation?.let { Text(it, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             }
         }
