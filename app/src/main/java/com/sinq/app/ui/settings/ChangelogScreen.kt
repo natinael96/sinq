@@ -54,6 +54,21 @@ internal data class ReleaseNote(
 
 internal val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.8.7",
+        title = "Books Candle Reading Card, Floating Bottom Bar Cradle Polish, and Update Check Fix",
+        titleAm = "የንባብ ካርድ በሻማ ሂደት ጠቋሚ፣ የተጣራ የታችኛው መቃኛ እና የቀጥታ ማዘመኛ ማስተካከያ",
+        changes = listOf(
+            "Redesigned the 'continue reading' card with an authentic animated candle flame progress indicator, 1dp/2dp gold track, and accessibility-merged action states.",
+            "Sunk the candle flame base 2.5dp inside a deeper 13dp notch cradle, tightened icon gaps, and made container backgrounds transparent so content scrolls behind.",
+            "Configured update checks to run on every app resume with session-scoped dismissals.",
+        ),
+        changesAm = listOf(
+            "በመጻሕፍት ገጽ አናት ላይ የሚገኘውን የንባብ ካርድ በሻማ ነበልባል እና በወርቃማ መስመር በሚያሳይ ውብ የንባብ ሂደት ጠቋሚ አደስን።",
+            "የሻማው መሠረት በታችኛው መቃኛ ጎድጓዳ ስንጥቅ ውስጥ 2.5dp ገባ ብሎ እንዲቀመጥ ተደርጎ፣ ይዘቱ ከመቃኛው ጀርባ እንዲንሸራተት ተስተካክሏል።",
+            "መተግበሪያው በተከፈተ ቁጥር አዳዲስ ስሪቶች መኖራቸውን በቅጽበት እንዲያጣራ ተደርጓል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.8.6",
         title = "Notched Bottom Bar Redesign, Organic Candle Flame Indicator, and Scoped Tab Swiping",
         titleAm = "የተቀረጸ የታችኛው መቃኛ፣ የሻማ ነበልባል ጠቋሚ እና የተስተካከለ የገጾች ማንሸራተቻ",

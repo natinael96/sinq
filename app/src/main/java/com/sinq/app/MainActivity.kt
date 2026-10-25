@@ -202,6 +202,9 @@ class MainActivity : ComponentActivity() {
      */
     override fun onResume() {
         super.onResume()
+        lifecycleScope.launch {
+            com.sinq.app.data.UpdateRepository.check(applicationContext)
+        }
         if (!com.sinq.app.data.PlayUpdateRepository.handlesUpdates) return
         lifecycleScope.launch {
             com.sinq.app.data.PlayUpdateRepository.check(this@MainActivity) { manager, info ->
@@ -536,9 +539,18 @@ private fun AgpeyaNavHost(
                         }
                     },
                 ) { inner ->
-                    androidx.compose.foundation.layout.Row(
-                        Modifier.fillMaxSize().padding(inner),
+                    val bottomBarPadding = if (expanded) 0.dp else 100.dp
+                    androidx.compose.runtime.CompositionLocalProvider(
+                        com.sinq.app.ui.common.LocalBottomBarPadding provides bottomBarPadding,
                     ) {
+                        androidx.compose.foundation.layout.Row(
+                            Modifier
+                                .fillMaxSize()
+                                .padding(
+                                    top = inner.calculateTopPadding(),
+                                    bottom = if (expanded) inner.calculateBottomPadding() else 0.dp,
+                                ),
+                        ) {
                         if (expanded) {
                             com.sinq.app.ui.common.AgpeyaNavigationRail(
                                 current = page,
@@ -631,6 +643,7 @@ private fun AgpeyaNavHost(
                         }
                     }
                 }
+            }
             }
             // Back from any other tab returns to ቤት before it leaves the app,
             // which is what four separate destinations used to do for free.

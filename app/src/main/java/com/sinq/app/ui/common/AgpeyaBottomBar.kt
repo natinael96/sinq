@@ -48,6 +48,7 @@ import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -106,17 +107,20 @@ enum class Tab(val route: String, val icon: ImageVector, val selectedIcon: Image
 /** Material's compact-to-rail breakpoint, evaluated from the current window width. */
 internal fun usesNavigationRail(width: Dp): Boolean = width >= 600.dp
 
+/** Extra bottom padding applied to scrollable content when the floating bottom bar is present. */
+val LocalBottomBarPadding = compositionLocalOf { 0.dp }
+
 /**
  * A custom bar background Shape: rounded rectangle with a smooth concave dip in
  * the top edge centered at [notchCenterX].
  *
- * Uses cubic Beziers with eased shoulders for continuous, kink-free transitions.
+ * Uses cubic Beziers with steeper eased shoulders so the dip reads as a clear cradle.
  */
 class NotchedBarShape(
     val notchCenterX: Float,
     val cornerRadius: Dp = 24.dp,
-    val notchWidth: Dp = 60.dp,
-    val notchDepth: Dp = 9.dp,
+    val notchWidth: Dp = 52.dp,
+    val notchDepth: Dp = 13.dp,
 ) : Shape {
     override fun createOutline(
         size: Size,
@@ -157,15 +161,15 @@ class NotchedBarShape(
             // Top edge to the start of the notch
             lineTo(left, 0f)
 
-            // Smooth concave dip using cubic Beziers with eased shoulders
+            // Smooth concave dip using cubic Beziers with steeper eased shoulders
             cubicTo(
-                x1 = left + nw * 0.22f, y1 = 0f,
-                x2 = cx - nw * 0.16f, y2 = nd,
+                x1 = left + nw * 0.12f, y1 = 0f,
+                x2 = cx - nw * 0.20f, y2 = nd,
                 x3 = cx, y3 = nd,
             )
             cubicTo(
-                x1 = cx + nw * 0.16f, y1 = nd,
-                x2 = right - nw * 0.22f, y2 = 0f,
+                x1 = cx + nw * 0.20f, y1 = nd,
+                x2 = right - nw * 0.12f, y2 = 0f,
                 x3 = right, y3 = 0f,
             )
 
@@ -269,18 +273,19 @@ fun CandleFlame(
 
     Canvas(
         modifier = modifier
-            .size(width = 14.dp, height = 20.dp)
+            .size(width = 48.dp, height = 52.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
                 this.alpha = alpha
+                clip = false
             },
     ) {
         val w = size.width
         val h = size.height
         val cx = w / 2f
-        val flameW = 10.dp.toPx()
-        val flameH = 14.dp.toPx()
+        val flameW = 14.dp.toPx()
+        val flameH = 22.dp.toPx()
 
         // Multi-frequency sine waves
         val t = time.toDouble()
@@ -297,23 +302,22 @@ fun CandleFlame(
         val leanRad = Math.toRadians(leanAngle.toDouble()).toFloat()
         val leanTipOffset = (flameH * tan(leanRad.toDouble())).toFloat()
 
-        // Give the top of the canvas 3dp headroom so flame tip and glow never clip
-        val baseY = h - 2.5.dp.toPx()
+        val baseY = 38.dp.toPx()
         val tipX = cx + tipSwayPx + leanTipOffset
-        val tipY = (baseY - (flameH - 1.5.dp.toPx()) * stretch).coerceAtLeast(2.dp.toPx())
+        val tipY = (baseY - flameH * stretch).coerceAtLeast(2.dp.toPx())
 
         // 1. Outer glow: cubic ease-out radial gradient behind flame in accent color
         val glowPulse = if (motionEnabled) {
-            (0.22f + 0.04f * (0.6f * s1 + 0.4f * s3)).coerceIn(0.12f, 0.30f)
+            (0.24f + 0.05f * (0.6f * s1 + 0.4f * s3)).coerceIn(0.14f, 0.32f)
         } else {
-            0.22f
+            0.24f
         }
-        val glowRadius = 15.dp.toPx()
+        val glowRadius = 24.dp.toPx()
         val flameMidY = (tipY + baseY) / 2f
         drawCircle(
             brush = Brush.radialGradient(
                 0.0f to accentColor.copy(alpha = glowPulse),
-                0.22f to accentColor.copy(alpha = glowPulse * 0.55f),
+                0.24f to accentColor.copy(alpha = glowPulse * 0.55f),
                 0.48f to accentColor.copy(alpha = glowPulse * 0.20f),
                 0.72f to accentColor.copy(alpha = glowPulse * 0.04f),
                 0.90f to accentColor.copy(alpha = glowPulse * 0.01f),
@@ -326,7 +330,23 @@ fun CandleFlame(
             blendMode = BlendMode.Plus,
         )
 
-        // 2. Outer flame body: teardrop with asymmetric tip and vertical gradient
+        // 2. Wick: 1dp curved line, mostly hidden inside the flame base
+        val wickColor = heroColor.copy(alpha = 0.90f)
+        wickPath.reset()
+        wickPath.moveTo(cx, baseY + 1.2.dp.toPx())
+        wickPath.quadraticTo(
+            cx + 0.3.dp.toPx(),
+            baseY - 0.8.dp.toPx(),
+            cx + 0.1.dp.toPx(),
+            baseY - 2.8.dp.toPx(),
+        )
+        drawPath(
+            path = wickPath,
+            color = wickColor,
+            style = Stroke(width = 1.dp.toPx(), cap = StrokeCap.Round),
+        )
+
+        // 3. Outer flame body: 14dp x 22dp asymmetric teardrop with vertical gold-orange-amber gradient
         outerPath.reset()
         outerPath.moveTo(cx, baseY)
         // Left belly
@@ -350,7 +370,7 @@ fun CandleFlame(
         outerPath.close()
 
         val warmOrange = lerp(accentColor, arke, 0.45f)
-        val deepAmber = lerp(accentColor, arke, 0.80f)
+        val deepAmber = lerp(accentColor, arke, 0.85f)
         drawPath(
             path = outerPath,
             brush = Brush.verticalGradient(
@@ -360,13 +380,13 @@ fun CandleFlame(
             ),
         )
 
-        // 3. Inner core: smaller teardrop inside, brighter center fading to edges
+        // 4. Inner core: smaller teardrop inside, brighter center fading to edges
         val coreS1 = sin(2.1 * 2 * PI * t + 0.85).toFloat()
         val coreS2 = sin(3.7 * 2 * PI * t + 1.25).toFloat()
         val coreSway = if (motionEnabled) (0.55f * coreS1 + 0.45f * coreS2) else 0f
         val coreTipX = cx + coreSway * 1.0.dp.toPx() + leanTipOffset * 0.65f
-        val coreTipY = baseY - (baseY - tipY) * 0.62f
-        val coreW = flameW * 0.48f * widthFactor
+        val coreTipY = baseY - (baseY - tipY) * 0.60f
+        val coreW = flameW * 0.50f * widthFactor
 
         innerPath.reset()
         innerPath.moveTo(cx, baseY - 0.5.dp.toPx())
@@ -388,8 +408,8 @@ fun CandleFlame(
         )
         innerPath.close()
 
-        val coreCenter = lerp(accentColor, Color.White, 0.85f)
-        val coreYellow = lerp(accentColor, Color.White, 0.40f).copy(alpha = 0.35f)
+        val coreCenter = lerp(accentColor, Color.White, 0.88f)
+        val coreYellow = lerp(accentColor, Color.White, 0.40f).copy(alpha = 0.40f)
         drawPath(
             path = innerPath,
             brush = Brush.radialGradient(
@@ -399,33 +419,19 @@ fun CandleFlame(
             ),
         )
 
-        // 4. Base cooler region: translucent blue-ish region at very bottom of flame
-        val coolBlue = highlightBlue.copy(alpha = 0.45f)
-        val baseRadius = flameW * 0.42f
+        // 5. Base cooler region: translucent blue-ish region at very bottom of flame
+        val coolBlue = highlightBlue.copy(alpha = 0.55f)
+        val deepBlue = lerp(highlightBlue, sinq.hero, 0.40f).copy(alpha = 0.35f)
+        val baseRadiusW = flameW * 0.45f
+        val baseRadiusH = 3.2.dp.toPx()
         drawOval(
             brush = Brush.radialGradient(
-                colors = listOf(coolBlue, Color.Transparent),
+                colors = listOf(coolBlue, deepBlue, Color.Transparent),
                 center = Offset(cx, baseY),
-                radius = baseRadius,
+                radius = baseRadiusW,
             ),
-            topLeft = Offset(cx - baseRadius, baseY - 2.dp.toPx()),
-            size = Size(baseRadius * 2f, 3.5.dp.toPx()),
-        )
-
-        // 5. Wick: tiny dark 1dp vertical line at the base, slightly curved
-        val wickColor = heroColor.copy(alpha = 0.85f)
-        wickPath.reset()
-        wickPath.moveTo(cx, h)
-        wickPath.quadraticTo(
-            cx + 0.4.dp.toPx(),
-            h - 1.5.dp.toPx(),
-            cx + 0.1.dp.toPx(),
-            baseY,
-        )
-        drawPath(
-            path = wickPath,
-            color = wickColor,
-            style = Stroke(width = 1.dp.toPx(), cap = StrokeCap.Round),
+            topLeft = Offset(cx - baseRadiusW, baseY - baseRadiusH * 0.65f),
+            size = Size(baseRadiusW * 2f, baseRadiusH * 1.3f),
         )
     }
 }
@@ -435,7 +441,11 @@ fun CandleFlame(
  * and a realistic animated candle flame active indicator.
  */
 @Composable
-fun AgpeyaBottomBar(current: Tab, onSelect: (Tab) -> Unit) {
+fun AgpeyaBottomBar(
+    current: Tab,
+    onSelect: (Tab) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val s = LocalStrings.current
     val sinq = sinqColors
     val motion = LocalMotion.current
@@ -450,10 +460,9 @@ fun AgpeyaBottomBar(current: Tab, onSelect: (Tab) -> Unit) {
         }
     }
 
-    val flameCanvasWidth = 14.dp
-    val flameCanvasHeight = 20.dp
-    val notchDepth = 9.dp
-    val notchWidth = 60.dp
+    val canvasWidth = 48.dp
+    val notchDepth = 13.dp
+    val notchWidth = 52.dp
     val cornerRadius = 24.dp
     val barSurfaceHeight = 60.dp
     val flameOverlap = 12.dp
@@ -549,16 +558,18 @@ fun AgpeyaBottomBar(current: Tab, onSelect: (Tab) -> Unit) {
     }
 
     Box(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.background)
+        modifier = modifier
+            .fillMaxWidth()
+            .graphicsLayer(clip = false)
             .navigationBarsPadding()
             .padding(horizontal = Spacing.md)
-            .padding(bottom = Spacing.sm, top = Spacing.xs),
+            .padding(bottom = Spacing.sm),
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(totalBarHeight),
+                .height(totalBarHeight)
+                .graphicsLayer(clip = false),
         ) {
             // 1. Notched bar surface with tabs
             Box(
@@ -588,19 +599,23 @@ fun AgpeyaBottomBar(current: Tab, onSelect: (Tab) -> Unit) {
             }
 
             // 2. Active Indicator: Candle Flame (unclipped in parent Box)
+            // Flame base is at flameOverlap + 2.5dp (inside the dip).
+            // In CandleFlame Canvas, baseY is at 38dp.
+            // Translation places baseY at (flameOverlap + 2.5dp).
             if (barWidthPx > 0f) {
-                val flameWidthPx = with(density) { flameCanvasWidth.toPx() }
-                val flameTopYPx = with(density) { (flameOverlap + notchDepth - 19.5.dp).toPx() }
+                val canvasWidthPx = with(density) { canvasWidth.toPx() }
+                val flameTopYPx = with(density) { (flameOverlap + 2.5.dp - 38.dp).toPx() }
 
                 CandleFlame(
                     modifier = Modifier
                         .align(Alignment.TopStart)
                         .graphicsLayer {
-                            translationX = notchXAnim.value - flameWidthPx / 2f
+                            translationX = notchXAnim.value - canvasWidthPx / 2f
                             translationY = flameTopYPx
                             scaleX = igniteScale.value
                             scaleY = igniteScale.value
                             this.alpha = igniteAlpha.value
+                            clip = false
                         },
                     leanAngle = leanAngleAnim.value,
                     accentColor = sinq.onHeroGold,
@@ -702,9 +717,9 @@ private fun RowScope.TabSlot(
                 onClick = onSelect,
             )
             .semantics { contentDescription = label }
-            .padding(top = 10.dp, bottom = 6.dp, start = 4.dp, end = 4.dp),
+            .padding(top = 6.5.dp, bottom = 6.dp, start = 4.dp, end = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Top,
     ) {
         // Active icon with warm flame glow, scale pop, and crossfade
         Box(
@@ -744,7 +759,7 @@ private fun RowScope.TabSlot(
             }
         }
 
-        Spacer(Modifier.height(3.dp))
+        Spacer(Modifier.height(2.dp))
 
         Text(
             text = label,

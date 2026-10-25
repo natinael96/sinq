@@ -58,11 +58,17 @@ fun LibraryScreen(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets.statusBars,
     ) { innerPadding ->
+        val bottomBarPadding = com.sinq.app.ui.common.LocalBottomBarPadding.current
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.sm),
+            contentPadding = PaddingValues(
+                start = Spacing.screen,
+                end = Spacing.screen,
+                top = Spacing.sm,
+                bottom = Spacing.sm + bottomBarPadding,
+            ),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             item {

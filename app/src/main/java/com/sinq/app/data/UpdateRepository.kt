@@ -8,6 +8,8 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.sinq.app.BuildConfig
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -26,17 +28,8 @@ private val Context.updateDataStore by preferencesDataStore(name = "updates")
  * downloads or installs anything: the line opens the release page in the
  * browser, the same way [com.sinq.app.ui.settings.AboutScreen] opens a link.
  *
- * Because the only outcome is a line the person reads when the app is open,
- * there is no background worker and no scheduler. The check runs at launch, at
- * most once a day, and fails silently — an update notice is not worth an error
- * message, and a person praying offline should never learn that from ስንቅ.
- *
- * All of that is for the hand-installed build alone. A build from Play compiles
- * with `BuildConfig.UPDATE_NOTICE` false and this object goes dark: no request,
- * no stored release, no line — because pointing a Play install at a page of
- * APKs is exactly what the store forbids, and Play already updates itself. The
- * gate sits here rather than at the two call sites so there is one place to be
- * right about, and every caller is right by construction.
+ * Checks whenever the app is opened, without permanent dismiss suppression,
+ * so available updates are always announced unless dismissed for the current session.
  */
 object UpdateRepository {
 
@@ -49,27 +42,33 @@ object UpdateRepository {
     private val KEY_DISMISSED = stringPreferencesKey("dismissed_version")
     private val KEY_ETAG = stringPreferencesKey("etag")
 
+    // In-memory dismissal scoped only to the current app session.
+    // Resetting when the app opens ensures the user is always informed of updates.
+    private val sessionDismissed = MutableStateFlow<String?>(null)
+
     /** What the line needs to draw itself, or null when there is nothing to say. */
     data class Available(val version: String, val url: String)
 
     /**
-     * The release to announce: newer than what is installed, and not one the
-     * person has already waved away. Null the rest of the time — which is most
-     * of the time, and draws nothing.
+     * The release to announce: newer than what is installed, and not dismissed
+     * for the current app session. Null the rest of the time.
      */
     fun available(context: Context): Flow<Available?> =
         if (!BuildConfig.UPDATE_NOTICE) flowOf(null)
-        else context.updateDataStore.data.map { prefs ->
+        else combine(context.updateDataStore.data, sessionDismissed) { prefs, dismissedVersion ->
             val latest = prefs[KEY_LATEST_VERSION].orEmpty()
-            if (latest.isBlank()) return@map null
-            if (prefs[KEY_DISMISSED] == latest) return@map null
-            if (!isNewer(latest, installedVersion(context))) return@map null
+            if (latest.isBlank()) return@combine null
+            if (dismissedVersion == latest) return@combine null
+            if (!isNewer(latest, installedVersion(context))) return@combine null
             Available(latest, prefs[KEY_LATEST_URL]?.ifBlank { null } ?: RELEASES_PAGE)
         }
 
-    /** Hide THIS version for good; the next one will raise the line again. */
+    /** Dismiss for the current session only; reopening the app will check and show it again. */
     suspend fun dismiss(context: Context, version: String) {
-        context.updateDataStore.edit { it[KEY_DISMISSED] = version }
+        sessionDismissed.value = version
+        runCatching {
+            context.updateDataStore.edit { it.remove(KEY_DISMISSED) }
+        }
     }
 
     /** The running app's own versionName, e.g. "1.6.1". */
@@ -80,36 +79,33 @@ object UpdateRepository {
     }.getOrDefault("")
 
     /**
-     * Ask GitHub, once per app launch, if [enabled].
+     * Ask GitHub for the latest release whenever the app is opened.
      *
-     * Not throttled to a day: the answer is only ever read while the app is
-     * open, so checking when it opens is the one moment it can matter, and a
-     * release published this morning should not wait until tomorrow to be
-     * announced. The stored ETag makes the repeat cheap — an unchanged release
-     * answers 304 with no body.
-     *
-     * Every failure — no network, no GitHub, a rate limit, a body that does not
-     * parse — is swallowed: the line simply does not appear.
+     * Stored ETag makes the check cheap (304 Not Modified).
+     * All failures are swallowed silently.
      */
     suspend fun check(context: Context) {
-        // The only switch that matters is the build's own: the .aab for Play is
-        // built without UPDATE_NOTICE, because a Play build pointing at a page
-        // of APKs is a policy breach. The hand-installed APK is the one that
-        // checks, and someone who installed it that way wants to know.
         if (!BuildConfig.UPDATE_NOTICE) return
         val prefs = context.updateDataStore.data.first()
+        val latest = prefs[KEY_LATEST_VERSION].orEmpty()
         val etag = prefs[KEY_ETAG].orEmpty()
+
+        // Clean up legacy persistent dismissal so users aren't locked out
+        if (prefs[KEY_DISMISSED] != null) {
+            runCatching { context.updateDataStore.edit { it.remove(KEY_DISMISSED) } }
+        }
+
         withContext(Dispatchers.IO) {
             runCatching {
                 val conn = (URL(LATEST).openConnection() as HttpURLConnection).apply {
                     connectTimeout = 15_000
                     readTimeout = 15_000
                     setRequestProperty("Accept", "application/vnd.github+json")
-                    // Identifies the app to GitHub; they ask for a User-Agent.
                     setRequestProperty("User-Agent", "Sinq-Android")
-                    // An unchanged release answers 304 with no body, which costs
-                    // nothing against the unauthenticated rate limit.
-                    if (etag.isNotBlank()) setRequestProperty("If-None-Match", etag)
+                    // Only send If-None-Match if we already hold a valid latest version
+                    if (etag.isNotBlank() && latest.isNotBlank()) {
+                        setRequestProperty("If-None-Match", etag)
+                    }
                 }
                 try {
                     when (conn.responseCode) {
@@ -128,7 +124,6 @@ object UpdateRepository {
                                 if (newEtag.isNotBlank()) it[KEY_ETAG] = newEtag
                             }
                         }
-                        // Anything else (rate limit, 5xx) — try again next launch.
                         else -> Unit
                     }
                 } finally {
@@ -137,7 +132,6 @@ object UpdateRepository {
             }.onFailure { Log.d(TAG, "update check skipped: ${it.message}") }
         }
     }
-
 
     /** "v1.7.0" and "1.7.0" are the same release. */
     fun normalise(tag: String): String = tag.trim().removePrefix("v").removePrefix("V")
