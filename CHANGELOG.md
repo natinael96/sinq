@@ -5,6 +5,18 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.8.8] — 2026-10-25
+
+_versionCode 130 · Sunday Canticles Liturgical Redesign, Typographic Corrections, and Adaptive Card Layouts_
+
+### Added
+- **Sunday Canticles (ጸሎተ ነቢያት) Liturgical Redesign.** Revamped Sunday Canticles with Ge'ez numeral emblem badges (፩–፳), parsed dual-line titles separating canticle names from scripture references, 0.5dp hairline dividers, and an elevated full Psalter action card.
+
+### Changed
+- **Adaptive ReadingCard Layout.** Removed rigid height and width constraints in favor of responsive `wrapContentHeight` and `heightIn(min = 140.dp)`, capped local fontScale at 1.3x, unified typography under `LocalReadingFont`, and introduced adaptive vertical stacking for narrow devices (<360dp) or high font scales.
+- **Card Layout Responsiveness.** Hardened card wrapping with `FlowRow` in Mahlet today chant orders and Reading study reflections, updated manuscript share preview to adapt to system font scales, expanded library card subtitle allowance to 2 lines, and prevented scripture codex title/count collisions.
+- **Textual & Typographic Corrections.** Corrected split words, typos, missing spaces, and standardized Ge'ez numerals across Amharic and Ge'ez editions of ጸሎት ነቢያት (`39a66aaa6b.json` and `d46f2d9514.json`).
+
 ## [1.8.7] — 2026-10-25
 
 _versionCode 129 · Books Candle Reading Card, Floating Bottom Bar Cradle Polish, and Update Check Fix_
