@@ -54,6 +54,23 @@ internal data class ReleaseNote(
 
 internal val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.8.6",
+        title = "Notched Bottom Bar Redesign, Organic Candle Flame Indicator, and Scoped Tab Swiping",
+        titleAm = "የተቀረጸ የታችኛው መቃኛ፣ የሻማ ነበልባል ጠቋሚ እና የተስተካከለ የገጾች ማንሸራተቻ",
+        changes = listOf(
+            "Designed a realistic, animated 5-layer candle flame active indicator with multi-frequency organic flicker, travel lean, and damped spring upright settling.",
+            "Crafted a custom NotchedBarShape with smooth cubic bezier eased shoulders sliding behind the active tab.",
+            "Re-enabled horizontal gesture swipe navigation across all four tabs with scoped touch isolation on the Journey year heatmap.",
+            "Polished active tab states with subtle warm flame illumination, spring scale pops, and smooth icon crossfades.",
+        ),
+        changesAm = listOf(
+            "በ5 ንብርብሮች የተዋቀረ፣ በተፈጥሯዊ የሞገድ እንቅስቃሴ የሚወዛወዝ እና ሲንሸራተት ዘንበል የሚል ውብ የሻማ ነበልባል ጠቋሚ ተዘጋጅቷል።",
+            "በመረጡት ገጽ ሥር በተቀላጠፈ መልኩ የሚንሸራተት ማራኪ የተቀረጸ የታችኛው መቃኛ ቅርጽ (NotchedBarShape) ተካቷል።",
+            "በመነሻ፣ በጉዞ፣ በመጻሕፍት እና በማስተካከያ ገጾች መካከል በእጅ በማንሸራተት መዘዋወር እንዲቻል ተደርጎ በጉዞ ሰሌዳ ላይ ያለውን ዳሰሳ ለይቶ እንዲያውቅ ተስተካክሏል።",
+            "የነቃው ገጽ ምልክት በሻማው ብርሃን በለስላሳ ሁኔታ ደምቆ እንዲበራና በስሱ ተስቦ እንዲገባ ተደርጓል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.8.5",
         title = "Ge'ez Scripture Reader, Cleaned Monastic Sayings, Mahlet Polish, and Dense Book Cards",
         titleAm = "የግእዝ መጽሐፍ ቅዱስ ንባብ፣ የበረሃ አባቶች ምክር እርማት፣ የማኅሌት ማስተካከያ እና የተመጠኑ የመጻሕፍት ካርዶች",

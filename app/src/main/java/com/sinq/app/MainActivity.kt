@@ -340,6 +340,7 @@ private fun AgpeyaNavHost(
     val tabPager = androidx.compose.foundation.pager.rememberPagerState(
         pageCount = { Tab.entries.size },
     )
+    var tabSwipeEnabled by remember { mutableStateOf(true) }
     val goToTab: (Tab) -> Unit = { tab ->
         navController.showTabs()
         scope.launch { tabPager.animateScrollToPage(tab.ordinal) }
@@ -547,7 +548,7 @@ private fun AgpeyaNavHost(
                         androidx.compose.foundation.pager.HorizontalPager(
                             state = tabPager,
                             modifier = Modifier.fillMaxSize().weight(1f),
-                            userScrollEnabled = false,
+                            userScrollEnabled = tabSwipeEnabled,
                             // The next page is composed before it is reached, so a swipe
                             // uncovers a page rather than a blank that fills in late.
                             beyondViewportPageCount = 1,
@@ -598,6 +599,7 @@ private fun AgpeyaNavHost(
                                                 onOpenEntry = { id -> navController.navigate("journal/entry?id=$id") { launchSingleTop = true } },
                                                 onOpenManageHabits = { navController.navigate("habits") { launchSingleTop = true } },
                                                 onOpenHour = { hourId -> navController.navigate("reading/$hourId") { launchSingleTop = true } },
+                                                onInteractingHeatmap = { interacting -> tabSwipeEnabled = !interacting },
                                             )
                                         Tab.LIBRARY ->
                                             com.sinq.app.ui.library.LibraryScreen(
