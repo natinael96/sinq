@@ -12,8 +12,11 @@ _versionCode 127 · Ge'ez Scripture Reader, Cleaned Monastic Sayings, Mahlet & Z
 ### Added
 - **Full Ge'ez Scripture & Parallel Mode (ግእዝና አማርኛ-ግእዝ ትይዩ ንባብ).** Enabled Ge'ez and side-by-side Amharic-Ge'ez parallel reading across all 66 canonical books in the Scripture reader.
 - **Unified Heatmap Legend Reference.** Updated prayer journey heatmap legends with localized labels ("ትንሽ" / "Less", "፫+ ጸሎት" / "3+ prayers"), fasting indicators ("● ጾም" / "● Fasting"), high-contrast today beacons ("ዛሬ" / "Today"), and full prayer markers ("✦ ሙሉ" / "✦ Full").
+- **Misbak Language Toggling in Lectionary.** Added direct language toggling (`ግእዝ` / `አማርኛ`) in the top bar when viewing or opening Misbak passages in Gitsawe and Sunday lectionaries, with fallback to the Amharic Psalter text.
 
 ### Changed
+- **Subtle Scripture Translation Dropdown.** Replaced the cycling translation button in the Scripture reader with an impeccable, subtle dropdown menu displaying all available translations (`አማርኛ`, `ግእዝ`, `English`, `አማርኛ + ግእዝ`, `አማርኛ + English`) with active selection checkmarks.
+- **Comprehensive 5-Line Stanza Matching in Mahlet.** Expanded hymn movement resolution across all 5 poetic lines of each stanza with sister-hymn cross-linking (`ማኅሌተ ጽጌ` and `ሰቆቃወ ድንግል`), resolving 218 out of 226 movements directly to their verses.
 - **Pristine Mahlete Tsige & Segokwaw Dengel.** Restored authentic Ge'ez liturgical formatting, eliminated duplicate numbering in hymn stanzas, and unified hemistich punctuation (`።`).
 - **Sanitized Desert Fathers Corpus.** Removed scanned running headers, spliced footnote fragments, and OCR artifacts across the Sayings of the Desert Fathers and daily quotes.
 - **Hoisted Mahlet Today Card.** Positioned today's appointed Mahlet feast card directly at the top of the Mahlet screen, eliminating the need to scroll.

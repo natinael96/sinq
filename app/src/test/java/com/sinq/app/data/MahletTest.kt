@@ -214,4 +214,33 @@ class MahletTest {
         )
         assertTrue("an order has a kind the app cannot label", orders.all { it.kind in known })
     }
+
+    @Test
+    fun `mahlete tsige stanzas match across all five lines and sister book fallback`() {
+        val booksDir = listOf("src/main/assets/content/books", "app/src/main/assets/content/books")
+            .map(::File).first { it.isDirectory }
+        val tsigeText = File(booksDir, "f9217f008c.json").readText()
+        val sekokawText = File(booksDir, "7b38e5fa56.json").readText()
+        val tsigeBook = json.decodeFromString<com.sinq.app.model.Book>(tsigeText)
+        val sekokawBook = json.decodeFromString<com.sinq.app.model.Book>(sekokawText)
+
+        val tsigeBlocks = tsigeBook.chapters.flatMap { it.blocks }.map { BookRepository.fold(it.text) }
+        val sekokawBlocks = sekokawBook.chapters.flatMap { it.blocks }.map { BookRepository.fold(it.text) }
+
+        val tsigeParts = orders.flatMap { it.parts + it.versions.flatMap { v -> v.parts } }
+            .filter { it.key == "ማኅሌተ ጽጌ" }
+
+        var matched = 0
+        for (part in tsigeParts) {
+            val clean = part.verse.replace(Regex("\\(.*?\\)"), "")
+            val lines = clean.split(Regex("[\r\n\u1362\u1364]+")).map { it.trim() }.filter { it.isNotEmpty() }
+            val probes = lines.take(5).mapNotNull { line ->
+                val needle = BookRepository.fold(line).trim(' ', '\u1361', '\u1362', '\u1363', '\u1364')
+                if (needle.length >= 8) needle.take(14) else null
+            }
+            val found = probes.any { p -> tsigeBlocks.any { b -> p in b } || sekokawBlocks.any { b -> p in b } }
+            if (found) matched++
+        }
+        assertTrue("Expected >= 210 matched Mahlete Tsige stanzas, got $matched / ${tsigeParts.size}", matched >= 210)
+    }
 }

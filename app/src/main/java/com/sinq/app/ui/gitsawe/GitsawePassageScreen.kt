@@ -21,6 +21,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import com.sinq.app.ui.theme.IconSize
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -140,7 +142,7 @@ fun GitsawePassageScreen(
         // Only the ምስባክ. The ወንጌል and the deacons' readings print an incipit —
         // one opening phrase — and for those the cited range really is the text.
         val printed = if (role == MSBAK_ROLE) {
-            if (misbakLanguage == MisbakLanguage.GEEZ) chant else chantAmharic ?: chant
+            if (misbakLanguage == MisbakLanguage.GEEZ) chant else chantAmharic
         } else null
         value = true to (
             printed?.takeIf { it.isNotBlank() }?.let { text ->
@@ -160,6 +162,7 @@ fun GitsawePassageScreen(
     }
     val (loaded, passage) = state
     val isPsalm = psalm >= 1
+    val isMisbakOrPsalm = isPsalm || role == MSBAK_ROLE
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -173,6 +176,37 @@ fun GitsawePassageScreen(
                 },
                 onBack = onBack,
                 actions = {
+                    if (isMisbakOrPsalm) {
+                        val gold = MaterialTheme.colorScheme.secondary
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(gold.copy(alpha = 0.12f))
+                                .border(1.dp, gold.copy(alpha = 0.45f), CircleShape)
+                                .clickable(
+                                    onClickLabel = "ቋንቋ ቀይር",
+                                    onClick = {
+                                        scope.launch {
+                                            SettingsRepository.setMisbakLanguage(
+                                                context,
+                                                if (misbakLanguage == MisbakLanguage.GEEZ) MisbakLanguage.AMHARIC else MisbakLanguage.GEEZ,
+                                            )
+                                        }
+                                    },
+                                )
+                                .heightIn(min = 36.dp)
+                                .padding(horizontal = 12.dp, vertical = 6.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = if (misbakLanguage == MisbakLanguage.GEEZ) s.wudaseLangGeez else s.wudaseLangAmharic,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = gold,
+                                maxLines = 1,
+                            )
+                        }
+                        Spacer(Modifier.width(Spacing.xs))
+                    }
                     com.sinq.app.ui.common.ReaderToolsMenu(
                         fontStep = fontStep,
                         maxFontStep = FONT_STEPS_SP.lastIndex,
@@ -189,10 +223,10 @@ fun GitsawePassageScreen(
                                 )
                             }
                         },
-                        secondaryActionLabel = if (isPsalm) {
+                        secondaryActionLabel = if (isMisbakOrPsalm) {
                             if (misbakLanguage == MisbakLanguage.GEEZ) s.wudaseLangAmharic else s.wudaseLangGeez
                         } else null,
-                        onSecondaryAction = if (isPsalm) ({
+                        onSecondaryAction = if (isMisbakOrPsalm) ({
                             scope.launch {
                                 SettingsRepository.setMisbakLanguage(
                                     context,
