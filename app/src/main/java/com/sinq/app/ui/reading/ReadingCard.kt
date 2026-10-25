@@ -81,6 +81,12 @@ data class ReadingCardPlan(
     },
 )
 
+// Flame color constants (independent of theme)
+private val FlameBodyOrange = Color(0xFFE8913A)
+private val FlameMidAmber = Color(0xFFF2B04A)
+private val FlameCoreYellow = Color(0xFFFFE9A8)
+private val FlameGlow = Color(0xFFE8913A).copy(alpha = 0.22f)
+
 /**
  * Animated candle progress bar featuring a 1dp muted track, 2dp gold fill,
  * and a 12dp wide x 20dp tall organic candle flame that flickers and sways at the fill end.
@@ -143,11 +149,6 @@ fun CandleProgress(
 
     val trackColor = sinq.onHeroMuted.copy(alpha = 0.25f)
     val fillColor = sinq.onHeroGold
-    val flameTip = Color(0xFFFFFDE7)
-    val flameGold = sinq.onHeroGold
-    val flameOrange = Color(0xFFFF9800)
-    val flameAmber = Color(0xFFE64A19)
-    val paleYellow = Color(0xFFFFF9C4)
 
     Canvas(
         modifier = modifier
@@ -191,30 +192,22 @@ fun CandleProgress(
             )
         }
 
-        // 3. Flame drawing (orange body, pale yellow core, soft orange glow)
+        // 3. Flame drawing (glow circle -> outer body Path -> inner core Path)
         val swayPx = swayAnim * 1.dp.toPx()
         val tipX = flameX + swayPx
         // scaleY 0.95 to 1.05 pivoted at baseline
         val tipY = baselineY - flameH * scaleYAnim
 
-        // 3a. Soft orange glow behind flame at ~0.22 alpha
+        // 3a. Glow circle behind flame at 0.22 alpha (default blend mode)
         val glowRadius = 14.dp.toPx()
         val flameMidY = (tipY + baselineY) / 2f
         drawCircle(
-            brush = Brush.radialGradient(
-                0.0f to flameOrange.copy(alpha = 0.22f),
-                0.45f to flameOrange.copy(alpha = 0.12f),
-                0.80f to flameOrange.copy(alpha = 0.03f),
-                1.0f to flameOrange.copy(alpha = 0f),
-                center = Offset(flameX, flameMidY),
-                radius = glowRadius,
-            ),
+            color = FlameGlow,
             radius = glowRadius,
             center = Offset(flameX, flameMidY),
-            blendMode = BlendMode.Plus,
         )
 
-        // 3b. Outer flame body: cubicTo teardrop with gold-orange-amber gradient
+        // 3b. Outer flame body: cubicTo teardrop with vertical gradient
         outerPath.reset()
         outerPath.moveTo(flameX, baselineY)
         outerPath.cubicTo(
@@ -238,13 +231,13 @@ fun CandleProgress(
         drawPath(
             path = outerPath,
             brush = Brush.verticalGradient(
-                colors = listOf(flameTip, flameGold, flameOrange, flameAmber),
+                colors = listOf(FlameMidAmber, FlameBodyOrange),
                 startY = tipY,
                 endY = baselineY,
             ),
         )
 
-        // 3c. Inner core: pale yellow core fading to edges
+        // 3c. Inner core: pale yellow core
         val coreW = flameW * 0.48f
         val coreTipY = baselineY - (baselineY - tipY) * 0.58f
         val coreTipX = flameX + swayPx * 0.7f
@@ -271,11 +264,7 @@ fun CandleProgress(
 
         drawPath(
             path = innerPath,
-            brush = Brush.radialGradient(
-                colors = listOf(Color.White, paleYellow, paleYellow.copy(alpha = 0f)),
-                center = Offset(flameX, baselineY - (baselineY - coreTipY) * 0.45f),
-                radius = (baselineY - coreTipY) * 0.75f,
-            ),
+            color = FlameCoreYellow,
         )
     }
 }
