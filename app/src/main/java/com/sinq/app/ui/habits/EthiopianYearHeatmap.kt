@@ -1,5 +1,12 @@
 package com.sinq.app.ui.habits
 
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -158,8 +165,9 @@ fun EthiopianYearHeatmap(
     selectedDay: LocalDate?,
     modifier: Modifier = Modifier,
     earliestYear: Int = APP_EPOCH_EC.year,
-    onYearChange: (Int) -> Unit,
-    onDaySelect: (LocalDate) -> Unit,
+    onInteracting: (Boolean) -> Unit = {},
+    onYearChange: (Int) -> Unit = {},
+    onDaySelect: (LocalDate) -> Unit = {},
 ) {
     val s = LocalStrings.current
     val earliest = remember(records) {
@@ -381,11 +389,38 @@ fun EthiopianYearHeatmap(
 
             val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
 
+            val stopParentScroll = remember {
+                object : NestedScrollConnection {
+                    override fun onPostScroll(
+                        consumed: Offset,
+                        available: Offset,
+                        source: NestedScrollSource,
+                    ): Offset = Offset(available.x, 0f)
+
+                    override suspend fun onPostFling(
+                        consumed: Velocity,
+                        available: Velocity,
+                    ): Velocity = Velocity(available.x, 0f)
+                }
+            }
+
             Surface(
                 shape = RoundedCornerShape(12.dp),
                 color = if (isDark) Color(0x28000000) else Color(0x08000000),
                 border = BorderStroke(1.dp, manuscriptBorder.copy(alpha = 0.45f)),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .pointerInput(onInteracting) {
+                        awaitEachGesture {
+                            awaitFirstDown(requireUnconsumed = false)
+                            onInteracting(true)
+                            do {
+                                val event = awaitPointerEvent()
+                            } while (event.changes.any { it.pressed })
+                            onInteracting(false)
+                        }
+                    }
+                    .nestedScroll(stopParentScroll),
             ) {
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Row(

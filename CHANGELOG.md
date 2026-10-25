@@ -5,6 +5,19 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.8.6] — 2026-10-25
+
+_versionCode 128 · Notched Bottom Bar Redesign, Organic Candle Flame Indicator, and Scoped Tab Swiping_
+
+### Added
+- **Organic 5-Layer Candle Flame Active Indicator.** Designed a realistic animated candle flame rendered entirely with Compose Paths and Canvas: cubic ease-out radial glow, asymmetric gold-to-amber teardrop body, bright white-yellow inner core, cool blue base, and curved wick.
+- **Dynamic Flame Physics.** Added multi-frequency sine wave flicker (2.1Hz, 3.7Hz, 5.3Hz), 14° directional travel lean during tab changes, damped spring upright settling, and arrival ignition pop. Full reduced-motion setting compliance with an instant, static flame.
+- **Eased Cubic Notched Bar Surface.** Crafted a custom `NotchedBarShape` with smooth cubic bezier shoulders that slide continuously with decelerating easing behind the active tab, perfectly cradling the candle flame within the preserved 72dp bar height.
+- **Scoped Horizontal Tab Swiping.** Re-enabled fluid horizontal gesture swiping across all primary tabs (`Home`, `Journey`, `Books`, `Settings`) while scoping touch interaction on the 13-month Ethiopian Year Heatmap to prevent accidental tab switching during heatmap exploration.
+
+### Changed
+- **Liturgical Tab Styling.** Replaced default tab selection indicators with a lit active icon state featuring subtle warm flame illumination, spring scale pop, and smooth icon crossfades.
+
 ## [1.8.5] — 2026-10-25
 
 _versionCode 127 · Ge'ez Scripture Reader, Cleaned Monastic Sayings, Mahlet & Zema Polish, and Dense Book Cards_

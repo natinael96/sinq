@@ -157,6 +157,7 @@ fun JourneyScreen(
     onOpenEntry: (String) -> Unit = {},
     onOpenManageHabits: () -> Unit = {},
     onOpenHour: (String) -> Unit = {},
+    onInteractingHeatmap: (Boolean) -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -370,6 +371,7 @@ fun JourneyScreen(
                         selectedDay = selectedDay,
                         earliestYear = earliestYear,
                         modifier = Modifier.fillMaxWidth(),
+                        onInteracting = onInteractingHeatmap,
                         onYearChange = { year ->
                             displayedEcYear = year
                             selectedEpochDay = null
