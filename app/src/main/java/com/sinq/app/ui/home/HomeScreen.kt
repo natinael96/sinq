@@ -358,6 +358,7 @@ fun HomeScreen(
                 onDismiss = { com.sinq.app.data.PlayUpdateRepository.dismiss() },
             )
         }
+        val bottomBarPadding = com.sinq.app.ui.common.LocalBottomBarPadding.current
         BoxWithConstraints(Modifier.fillMaxWidth().weight(1f)) {
             val fontScale = LocalDensity.current.fontScale
             val stackReadingCards = maxWidth < 360.dp || fontScale > 1.15f
@@ -372,9 +373,10 @@ fun HomeScreen(
                     // a large type size. At every other size there is nothing
                     // below the fold and nothing to scroll to.
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = Spacing.screen, vertical = Spacing.md),
+                    .padding(horizontal = Spacing.screen, vertical = Spacing.md)
+                    .padding(bottom = bottomBarPadding),
                 // What the page has to fill: the viewport, less its own margin.
-                targetHeight = maxHeight - Spacing.md * 2,
+                targetHeight = (maxHeight - Spacing.md * 2 - bottomBarPadding).coerceAtLeast(0.dp),
                 stackReadingCards = stackReadingCards,
                 onManageHours = onManageHours,
                 hoursLoading = hoursLoad.result == null,

@@ -391,133 +391,67 @@ private fun BookSheet(book: ReadingMapBook, onOpen: (Int) -> Unit) {
  * It is the one card cut from the hero's green, which is the whole of being
  * noticed on a page of seven.
  */
+/**
+ * The "continue reading" hero card at the top of the Books screen (LibraryScreen).
+ *
+ * Uses the redesigned [ReadingCard] with [CandleProgress] and state-driven CTA.
+ */
 @Composable
 fun ReadingHeroCard(onOpen: () -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val s = LocalStrings.current
-    val sinq = sinqColors
     val today = remember { java.time.LocalDate.now() }
     val content by produceState(com.sinq.app.model.ReadingPlanContent()) {
         value = ReadingPlanRepository.content(context)
     }
     val state by ReadingPlanRepository.state(context).collectAsState(initial = ReadingPlanState())
-    val habits by com.sinq.app.data.HabitsRepository.state(context)
-        .collectAsState(initial = com.sinq.app.model.HabitsState())
     val names by produceState(emptyMap<String, String>()) {
         value = runCatching { ScriptureRepository.bookNames(context) }.getOrDefault(emptyMap())
-    }
-    val books by produceState(emptyList<ReadingMapBook>(), state.readChapters) {
-        value = readingMapBooks(context, state.readChapters)
     }
     val kept = state.plansKept.mapNotNull { a ->
         content.plans.firstOrNull { it.id == a.planId }?.let { a to it }
     }
 
-    com.sinq.app.ui.common.HeroCard(
-        onClick = onOpen,
-        modifier = modifier,
-        contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.lg),
-    ) {
-        Column(Modifier.weight(1f)) {
-            if (kept.isEmpty()) {
-                val offer = content.plans.firstOrNull()
-                Text(s.readingTitle, style = MaterialTheme.typography.labelMedium, color = sinq.onHeroMuted)
-                Spacer(Modifier.height(Spacing.xxs))
-                Text(
-                    s.readingIntro,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = sinq.onHero,
-                )
-                offer?.let {
-                    Spacer(Modifier.height(Spacing.xs))
-                    Text(
-                        s.readingPerDay(geezNumeral(planMinutes(it))),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = sinq.onHeroGold,
-                    )
-                }
-                if (books.isNotEmpty()) {
-                    Spacer(Modifier.height(Spacing.sm))
-                    BookStrip(books)
-                }
-                return@Column
-            }
-            kept.forEachIndexed { index, (active, plan) ->
-                val days = ReadingPlanRepository.effectiveDays(plan, state)
-                val day = ReadingPlanRepository.dayOn(active.startedOn, today, plan.days)
-                val (read, total) = ReadingPlanRepository.chapterProgress(state, plan.id, days)
-                val complete = ReadingPlanRepository.isComplete(state, plan.id, days)
-                val line = days.firstOrNull { it.d == day }?.r.orEmpty().joinToString(" · ") { r ->
-                    val name = bookName(r.b, names)
-                    if (r.to > r.c) "$name ${geezNumeral(r.c)}–${geezNumeral(r.to)}"
-                    else "$name ${geezNumeral(r.c)}"
-                }
-                if (index > 0) {
-                    Spacer(Modifier.height(Spacing.sm))
-                    HorizontalDivider(thickness = 1.dp, color = sinq.onHeroMuted.copy(alpha = 0.25f))
-                    Spacer(Modifier.height(Spacing.sm))
-                }
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        if (kept.size > 1) plan.title else "${s.readingTitle} · ${plan.title}",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = sinq.onHeroMuted,
-                        modifier = Modifier.weight(1f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    if (index == 0) {
-                        Text(
-                            s.readingWeekDays(
-                                geezNumeral(ReadingPlanRepository.daysReadInWeek(habits.records, today)),
-                            ),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = sinq.onHeroGold,
-                        )
-                    }
-                }
-                Spacer(Modifier.height(Spacing.xxs))
-                Text(
-                    if (complete) s.readingCompleteTitle
-                    else line.ifBlank { s.readingNothingToday },
-                    style = if (index == 0) MaterialTheme.typography.titleMedium
-                    else MaterialTheme.typography.bodyMedium,
-                    color = sinq.onHero,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Spacer(Modifier.height(Spacing.sm))
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(5.dp)
-                        .clip(RoundedCornerShape(3.dp))
-                        .background(sinq.onHeroMuted.copy(alpha = 0.25f)),
-                ) {
-                    Box(
-                        Modifier
-                            .fillMaxWidth(if (total > 0) read.toFloat() / total else 0f)
-                            .height(5.dp)
-                            .clip(RoundedCornerShape(3.dp))
-                            .background(sinq.onHeroGold),
-                    )
-                }
-                Spacer(Modifier.height(Spacing.xxs))
-                Row(Modifier.fillMaxWidth()) {
-                    Text(
-                        "${s.readingDayLabel(geezNumeral(day))} / ${geezNumeral(plan.days)}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = sinq.onHeroMuted,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Text(
-                        s.readingChaptersOf(geezNumeral(read), geezNumeral(total)),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = sinq.onHeroMuted,
-                        maxLines = 1,
-                    )
-                }
-            }
+    val planData = if (kept.isEmpty()) {
+        val offer = content.plans.firstOrNull()
+        val chapterText = offer?.let { s.readingPerDay(geezNumeral(planMinutes(it))) }
+            ?: (if (s.isAmharic) "በቀን ፲፭ ደቂቃ" else "15 min a day")
+        ReadingCardPlan(
+            planLine = s.readingTitle,
+            title = s.readingIntro,
+            chapterLine = chapterText,
+            progress = 0f,
+            state = ReadingProgressState.NOT_STARTED,
+        )
+    } else {
+        val (active, plan) = kept.first()
+        val days = ReadingPlanRepository.effectiveDays(plan, state)
+        val day = ReadingPlanRepository.dayOn(active.startedOn, today, plan.days)
+        val (read, total) = ReadingPlanRepository.chapterProgress(state, plan.id, days)
+        val complete = ReadingPlanRepository.isComplete(state, plan.id, days)
+        val line = days.firstOrNull { it.d == day }?.r.orEmpty().joinToString(" · ") { r ->
+            val name = bookName(r.b, names)
+            if (r.to > r.c) "$name ${geezNumeral(r.c)}–${geezNumeral(r.to)}"
+            else "$name ${geezNumeral(r.c)}"
         }
+        val progressVal = if (total > 0) (read.toFloat() / total).coerceIn(0f, 1f) else 0f
+        val chapterText = if (complete) {
+            s.readingChaptersOf(geezNumeral(read), geezNumeral(total))
+        } else {
+            "${s.readingDayLabel(geezNumeral(day))} / ${geezNumeral(plan.days)} · ${s.readingChaptersOf(geezNumeral(read), geezNumeral(total))}"
+        }
+        ReadingCardPlan(
+            planLine = if (kept.size > 1) plan.title else "${s.readingTitle} · ${plan.title}",
+            title = if (complete) s.readingCompleteTitle else line.ifBlank { s.readingNothingToday },
+            chapterLine = chapterText,
+            progress = progressVal,
+            state = if (complete) ReadingProgressState.FINISHED else ReadingProgressState.IN_PROGRESS,
+        )
     }
+
+    ReadingCard(
+        plan = planData,
+        onContinue = onOpen,
+        modifier = modifier,
+    )
 }

@@ -135,9 +135,15 @@ fun SettingsScreen(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets.statusBars,
     ) { inner ->
+        val bottomBarPadding = com.sinq.app.ui.common.LocalBottomBarPadding.current
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(inner),
-            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.md),
+            contentPadding = PaddingValues(
+                start = Spacing.screen,
+                end = Spacing.screen,
+                top = Spacing.md,
+                bottom = Spacing.md + bottomBarPadding,
+            ),
         ) {
             item {
                 Text(

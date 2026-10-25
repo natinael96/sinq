@@ -209,12 +209,18 @@ fun JourneyScreen(
         // its own navigation-bar padding; this page only insets for the status bar.
         contentWindowInsets = WindowInsets.statusBars,
     ) { innerPadding ->
+        val bottomBarPadding = com.sinq.app.ui.common.LocalBottomBarPadding.current
         LazyColumn(
             state = listState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(start = Spacing.screen, end = Spacing.screen, top = Spacing.xs, bottom = Spacing.xxl),
+            contentPadding = PaddingValues(
+                start = Spacing.screen,
+                end = Spacing.screen,
+                top = Spacing.xs,
+                bottom = Spacing.xxl + bottomBarPadding,
+            ),
         ) {
             item {
                 Row(

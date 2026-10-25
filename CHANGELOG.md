@@ -5,6 +5,17 @@ All notable changes to Sinq (ስንቅ) are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows semantic-style releases.
 
+## [1.8.7] — 2026-10-25
+
+_versionCode 129 · Books Candle Reading Card, Floating Bottom Bar Cradle Polish, and Update Check Fix_
+
+### Added
+- **Liturgical Candle Reading Progress Card.** Redesigned the "continue reading" hero card at the top of the Books screen featuring an authentic animated `CandleProgress` indicator with a 12dp×20dp flickering flame, 1dp track with 2dp gold fill, 600ms intro animation, reduced-motion fallback, merged accessible semantics, and three distinct states ("Start reading", "Continue", "Read again").
+
+### Changed
+- **Refined Floating Bottom Bar Cradle.** Sunk the 5-layer candle flame base 2.5dp into a deeper 13dp × 52dp notch cradle with steeper eased shoulders, reduced flame-to-icon spacing, and removed opaque backgrounds to let content scroll behind the floating bar.
+- **Immediate Update Check on Resume.** Fixed app update checking to evaluate on every app launch and resume with session-scoped dismissal, ensuring update notices are not indefinitely hidden by legacy persistent cache.
+
 ## [1.8.6] — 2026-10-25
 
 _versionCode 128 · Notched Bottom Bar Redesign, Organic Candle Flame Indicator, and Scoped Tab Swiping_
