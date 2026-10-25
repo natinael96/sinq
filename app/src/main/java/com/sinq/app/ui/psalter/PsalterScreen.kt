@@ -5,15 +5,18 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,15 +24,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.AutoStories
 import androidx.compose.material.icons.outlined.LibraryMusic
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,6 +49,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -600,38 +610,193 @@ private fun SundayCanticles(
     }
     LazyColumn(
         modifier = modifier,
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(
-            horizontal = com.sinq.app.ui.theme.Spacing.screen,
-            vertical = com.sinq.app.ui.theme.Spacing.md,
+        contentPadding = PaddingValues(
+            horizontal = Spacing.screen,
+            vertical = Spacing.md,
         ),
     ) {
         item(key = "head") {
-            com.sinq.app.ui.common.SectionHeader(s.sundayCanticlesTitle)
-            Text(
-                s.sundayCanticlesBody,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = com.sinq.app.ui.theme.Spacing.sm),
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = Spacing.md)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainerLow,
+                        shape = RoundedCornerShape(16.dp),
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f),
+                        shape = RoundedCornerShape(16.dp),
+                    )
+                    .padding(Spacing.md),
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
+                                shape = CircleShape,
+                            ),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.AutoStories,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(16.dp),
+                        )
+                    }
+                    Text(
+                        text = s.sundayCanticlesTitle,
+                        style = MaterialTheme.typography.titleMedium.inReadingFont(),
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+                Spacer(Modifier.height(Spacing.xs))
+                Text(
+                    text = s.sundayCanticlesBody,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    lineHeight = 18.sp,
+                )
+            }
         }
-        items(found.chapters.size, key = { found.chapters[it].number }) { i ->
-            val chapter = found.chapters[i]
-            com.sinq.app.ui.common.ListRow(
-                title = chapter.title,
+        itemsIndexed(found.chapters, key = { _, ch -> ch.number }) { index, chapter ->
+            CanticleItemRow(
+                chapterNumber = chapter.number,
+                rawTitle = chapter.title,
                 onClick = { onOpen(found.id, chapter.number) },
             )
+            if (index < found.chapters.lastIndex) {
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                )
+            }
         }
         item(key = "whole") {
-            Spacer(Modifier.height(com.sinq.app.ui.theme.Spacing.lg))
-            Text(
-                s.wholePsalter,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.secondary,
+            Spacer(Modifier.height(Spacing.md))
+            Surface(
+                onClick = onWholePsalter,
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)),
                 modifier = Modifier
-                    .clickable(onClick = onWholePsalter)
-                    .padding(vertical = com.sinq.app.ui.theme.Spacing.sm),
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp),
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.LibraryMusic,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(Modifier.width(Spacing.sm))
+                    Text(
+                        text = s.wholePsalter,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+            }
+            Spacer(Modifier.height(Spacing.lg))
+        }
+    }
+}
+
+@Composable
+private fun CanticleItemRow(
+    chapterNumber: Int,
+    rawTitle: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val (title, reference) = remember(rawTitle) {
+        if (rawTitle.contains("(") && rawTitle.endsWith(")")) {
+            val main = rawTitle.substringBefore("(").trim()
+            val ref = rawTitle.substringAfter("(").removeSuffix(")").trim()
+            main to ref
+        } else {
+            rawTitle to null
+        }
+    }
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = Spacing.xs, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+                    shape = RoundedCornerShape(10.dp),
+                )
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.28f),
+                    shape = RoundedCornerShape(10.dp),
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = geezNumeral(chapterNumber),
+                style = MaterialTheme.typography.titleMedium.inReadingFont(),
+                color = MaterialTheme.colorScheme.secondary,
+                fontWeight = FontWeight.Bold,
             )
         }
+
+        Spacer(Modifier.width(Spacing.md))
+
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium.inReadingFont(),
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Medium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            if (reference != null) {
+                Text(
+                    text = reference,
+                    style = MaterialTheme.typography.bodySmall.inReadingFont(),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+
+        Spacer(Modifier.width(Spacing.sm))
+
+        Icon(
+            imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
+            modifier = Modifier.size(18.dp),
+        )
     }
 }
 

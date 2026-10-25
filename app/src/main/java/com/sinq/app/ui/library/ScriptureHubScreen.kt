@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.sinq.app.ui.common.SectionHeader
 import com.sinq.app.ui.common.SinqCard
@@ -222,7 +223,11 @@ private fun ScriptureCodexCard(
                         style = MaterialTheme.typography.titleMedium.inReadingFont(),
                         color = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f, fill = false),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
+                    Spacer(Modifier.width(Spacing.xs))
                     Text(
                         text = countLabel,
                         style = MaterialTheme.typography.labelSmall.inReadingFont(),

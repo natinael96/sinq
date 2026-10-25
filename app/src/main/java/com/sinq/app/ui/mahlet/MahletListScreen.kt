@@ -519,8 +519,9 @@ private fun TodayOrder(orders: List<MahletOrder>, onOpen: (String) -> Unit) {
             overflow = TextOverflow.Ellipsis,
         )
         Spacer(Modifier.height(Spacing.sm))
-        Row(
+        FlowRow(
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
             modifier = Modifier.fillMaxWidth(),
         ) {
             orders.forEach { o ->

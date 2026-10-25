@@ -11,19 +11,22 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -38,20 +41,24 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sinq.app.ui.strings.LocalStrings
 import com.sinq.app.ui.theme.AgpeyaTheme
 import com.sinq.app.ui.theme.LocalMotion
-import com.sinq.app.ui.theme.inReadingFont
+import com.sinq.app.ui.theme.LocalReadingFont
 import com.sinq.app.ui.theme.sinqColors
 
 /** State of progress for the [ReadingCard]. */
@@ -143,7 +150,7 @@ fun CandleProgress(
     Canvas(
         modifier = modifier
             .fillMaxWidth()
-            .height(26.dp)
+            .heightIn(min = 26.dp)
             .graphicsLayer { clip = false }
             .semantics { hideFromAccessibility() }, // flame marked decorative
     ) {
@@ -274,8 +281,9 @@ fun CandleProgress(
 /**
  * "Continue reading" card for the Books / Library screen.
  *
- * Dark green, 18dp corners, 16dp padding, max height 160dp, full width.
+ * Dark green, 18dp corners, 16dp padding, adaptively sized, full width.
  * Single merged semantics node, Role.Button, with flame marked decorative.
+ * Adapts to any screen size, density, and font scale without clipping.
  */
 @Composable
 fun ReadingCard(
@@ -285,6 +293,17 @@ fun ReadingCard(
 ) {
     val s = LocalStrings.current
     val sinq = sinqColors
+    val readingFont = LocalReadingFont.current
+
+    // Cap font scale inside this card at 1.3 so large system text cannot break the layout
+    val currentDensity = LocalDensity.current
+    val systemFontScale = currentDensity.fontScale
+    val cappedDensity = remember(currentDensity) {
+        Density(
+            density = currentDensity.density,
+            fontScale = systemFontScale.coerceAtMost(1.3f),
+        )
+    }
 
     val buttonText = when (plan.state) {
         ReadingProgressState.NOT_STARTED -> if (s.isAmharic) "ንባብ ጀምር" else "Start reading"
@@ -298,97 +317,178 @@ fun ReadingCard(
         ReadingProgressState.IN_PROGRESS -> plan.progress.coerceIn(0f, 1f)
     }
 
-    Surface(
-        onClick = onContinue,
-        shape = RoundedCornerShape(18.dp),
-        color = sinq.hero,
-        contentColor = sinq.onHero,
-        modifier = modifier
-            .fillMaxWidth()
-            .heightIn(max = 160.dp)
-            .semantics(mergeDescendants = true) {
-                role = Role.Button
-            },
-    ) {
-        Column(
-            modifier = Modifier
+    val baseTextStyle = remember(readingFont) {
+        TextStyle(
+            fontFamily = readingFont,
+            platformStyle = @Suppress("DEPRECATION") PlatformTextStyle(includeFontPadding = false),
+            lineHeightStyle = LineHeightStyle(
+                alignment = LineHeightStyle.Alignment.Center,
+                trim = LineHeightStyle.Trim.None,
+            ),
+        )
+    }
+
+    CompositionLocalProvider(LocalDensity provides cappedDensity) {
+        Surface(
+            onClick = onContinue,
+            shape = RoundedCornerShape(18.dp),
+            color = sinq.hero,
+            contentColor = sinq.onHero,
+            modifier = modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
+                .wrapContentHeight()
+                .heightIn(min = 140.dp)
+                .semantics(mergeDescendants = true) {
+                    role = Role.Button
+                },
         ) {
-            // Top: plan line (12sp, muted) and Ge'ez title (21sp serif, line height 1.35x)
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = plan.planLine,
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontSize = 12.sp,
-                        color = sinq.onHeroMuted,
-                    ),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    text = plan.title,
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontSize = 21.sp,
-                        fontFamily = FontFamily.Serif,
-                        lineHeight = 21.sp * 1.35f,
-                        fontWeight = FontWeight.Bold,
-                        color = sinq.onHero,
-                    ).inReadingFont(1.35f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            // Candle progress rule
-            CandleProgress(
-                progress = effectiveProgress,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            Spacer(Modifier.height(8.dp))
-
-            // Bottom row: chapter line (12sp, muted) on left and gold pill button on right
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
+            BoxWithConstraints(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
             ) {
-                Text(
-                    text = plan.chapterLine,
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontSize = 12.sp,
-                        color = sinq.onHeroMuted,
-                    ),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f, fill = false),
-                )
+                // If width is under 360dp or font scale is above 1.3, stack caption above full-width button
+                val isNarrow = maxWidth < 360.dp
+                val isLargeFont = systemFontScale > 1.3f
+                val stackBottomRow = isNarrow || isLargeFont
 
-                // Gold pill Continue button (high AA contrast with dark text on gold)
-                Surface(
-                    shape = CircleShape,
-                    color = sinq.onHeroGold,
-                    contentColor = sinq.hero,
-                    modifier = Modifier.heightIn(min = 36.dp),
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    // Top: plan line (12sp, muted) and Ge'ez title (21sp serif, explicit lineHeight)
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight(),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
                     ) {
                         Text(
-                            text = buttonText,
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = sinq.hero,
+                            text = plan.planLine,
+                            style = baseTextStyle.copy(
+                                fontSize = 12.sp,
+                                lineHeight = 16.sp,
+                                fontWeight = FontWeight.Normal,
+                                color = sinq.onHeroMuted,
                             ),
                             maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
+                        Text(
+                            text = plan.title,
+                            style = baseTextStyle.copy(
+                                fontSize = 21.sp,
+                                lineHeight = 28.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = sinq.onHero,
+                            ),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+
+                    // Candle progress rule
+                    CandleProgress(
+                        progress = effectiveProgress,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+
+                    // Bottom: caption (weight 1f, maxLines = 2) and gold pill button (heightIn(min = 44.dp))
+                    if (stackBottomRow) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight(),
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            Text(
+                                text = plan.chapterLine,
+                                style = baseTextStyle.copy(
+                                    fontSize = 12.sp,
+                                    lineHeight = 16.sp,
+                                    color = sinq.onHeroMuted,
+                                ),
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+
+                            Button(
+                                onClick = onContinue,
+                                shape = CircleShape,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = sinq.onHeroGold,
+                                    contentColor = sinq.hero,
+                                ),
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentHeight()
+                                    .heightIn(min = 44.dp),
+                            ) {
+                                Text(
+                                    text = buttonText,
+                                    style = baseTextStyle.copy(
+                                        fontSize = 13.sp,
+                                        lineHeight = 18.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = sinq.hero,
+                                    ),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            Text(
+                                text = plan.chapterLine,
+                                style = baseTextStyle.copy(
+                                    fontSize = 12.sp,
+                                    lineHeight = 16.sp,
+                                    color = sinq.onHeroMuted,
+                                ),
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f),
+                            )
+
+                            Button(
+                                onClick = onContinue,
+                                shape = CircleShape,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = sinq.onHeroGold,
+                                    contentColor = sinq.hero,
+                                ),
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
+                                modifier = Modifier
+                                    .wrapContentHeight()
+                                    .heightIn(min = 44.dp),
+                            ) {
+                                Text(
+                                    text = buttonText,
+                                    style = baseTextStyle.copy(
+                                        fontSize = 13.sp,
+                                        lineHeight = 18.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = sinq.hero,
+                                    ),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -396,19 +496,86 @@ fun ReadingCard(
     }
 }
 
-@Preview(name = "ReadingCard - In Progress", showBackground = true, backgroundColor = 0xFFEFEDE2)
+private val previewPlanInProgress = ReadingCardPlan(
+    planLine = "ዓመታዊ ንባብ",
+    title = "ኦሪት ዘፍጥረት ፩–፫ (የመጀመሪያው መጽሐፍ)",
+    chapterLine = "ምዕራፍ ፫ / ፶ · ፲፭ ደቂቃ በቀን",
+    progress = 0.42f,
+    state = ReadingProgressState.IN_PROGRESS,
+)
+
+@Preview(name = "ReadingCard - 320dp · fontScale 1.0", widthDp = 320, fontScale = 1.0f, showBackground = true, backgroundColor = 0xFFEFEDE2)
 @Composable
-fun ReadingCardInProgressPreview() {
+fun ReadingCardPreview320Scale10() {
     AgpeyaTheme {
         Box(modifier = Modifier.padding(16.dp)) {
             ReadingCard(
-                plan = ReadingCardPlan(
-                    planLine = "ዓመታዊ ንባብ",
-                    title = "ኦሪት ዘፍጥረት ፩–፫",
-                    chapterLine = "ምዕራፍ ፫ / ፶",
-                    progress = 0.42f,
-                    state = ReadingProgressState.IN_PROGRESS,
-                ),
+                plan = previewPlanInProgress,
+                onContinue = {},
+            )
+        }
+    }
+}
+
+@Preview(name = "ReadingCard - 320dp · fontScale 1.3", widthDp = 320, fontScale = 1.3f, showBackground = true, backgroundColor = 0xFFEFEDE2)
+@Composable
+fun ReadingCardPreview320Scale13() {
+    AgpeyaTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            ReadingCard(
+                plan = previewPlanInProgress,
+                onContinue = {},
+            )
+        }
+    }
+}
+
+@Preview(name = "ReadingCard - 320dp · fontScale 2.0", widthDp = 320, fontScale = 2.0f, showBackground = true, backgroundColor = 0xFFEFEDE2)
+@Composable
+fun ReadingCardPreview320Scale20() {
+    AgpeyaTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            ReadingCard(
+                plan = previewPlanInProgress,
+                onContinue = {},
+            )
+        }
+    }
+}
+
+@Preview(name = "ReadingCard - 411dp · fontScale 1.0", widthDp = 411, fontScale = 1.0f, showBackground = true, backgroundColor = 0xFFEFEDE2)
+@Composable
+fun ReadingCardPreview411Scale10() {
+    AgpeyaTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            ReadingCard(
+                plan = previewPlanInProgress,
+                onContinue = {},
+            )
+        }
+    }
+}
+
+@Preview(name = "ReadingCard - 411dp · fontScale 1.3", widthDp = 411, fontScale = 1.3f, showBackground = true, backgroundColor = 0xFFEFEDE2)
+@Composable
+fun ReadingCardPreview411Scale13() {
+    AgpeyaTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            ReadingCard(
+                plan = previewPlanInProgress,
+                onContinue = {},
+            )
+        }
+    }
+}
+
+@Preview(name = "ReadingCard - 411dp · fontScale 2.0", widthDp = 411, fontScale = 2.0f, showBackground = true, backgroundColor = 0xFFEFEDE2)
+@Composable
+fun ReadingCardPreview411Scale20() {
+    AgpeyaTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            ReadingCard(
+                plan = previewPlanInProgress,
                 onContinue = {},
             )
         }

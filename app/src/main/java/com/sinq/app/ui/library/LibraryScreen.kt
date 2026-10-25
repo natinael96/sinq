@@ -231,7 +231,7 @@ private fun LibraryCard(
                         fontStyle = if (enabled) FontStyle.Normal else FontStyle.Italic,
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
             }

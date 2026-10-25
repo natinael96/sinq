@@ -54,6 +54,23 @@ internal data class ReleaseNote(
 
 internal val releaseHistory = listOf(
     ReleaseNote(
+        version = "1.8.8",
+        title = "Sunday Canticles Liturgical Redesign, Typographic Corrections, and Adaptive Card Layouts",
+        titleAm = "የሰንበት የነቢያት ጸሎት ማደሻ፣ የጽሑፍ እርማቶች እና ተስማሚ የካርድ ቅርጾች",
+        changes = listOf(
+            "Elevated Sunday Canticles (ጸሎተ ነቢያት) with Ge'ez numeral badges (፩–፳), dual-line liturgical titles with scripture references, hairline dividers, and an elevated return card.",
+            "Corrected textual layout, split words, punctuation, and standardized chapter titles in Tselote Nebiyat across Amharic and Ge'ez editions.",
+            "Adaptive ReadingCard: responsive wrapContentHeight with heightIn, 1.3x font scale capping, unified Ethiopic serif font, and automatic layout stacking for small screens (<360dp) or large text.",
+            "Hardened card responsiveness across Mahlet chant orders, Reading study reflections, manuscript share preview, and scripture codex lists.",
+        ),
+        changesAm = listOf(
+            "የሰንበት የነቢያት ጸሎት በግእዝ ቁጥሮች (፩–፳)፣ የመጻሕፍት ጥቅስ ማብራሪያ፣ ስስ ከፋይ መስመሮች እና ባማረ ሥርዓተ ቤተክርስቲያን ገጽታ ታድሷል።",
+            "በጸሎተ ነቢያት ውስጥ የነበሩ የተቆራረጡ ቃላት፣ የክፍተቶችና ሥርዓተ ነጥብ ችግሮች ታርመው ምዕራፎች በግእዝ ቁጥሮች ተስተካክለዋል።",
+            "የንባብ ካርዱ በማንኛውም የስክሪን ስፋትና የፊደል መጠን ላይ እንዳይቆረጥ ተጣጥሞ እንዲታይ ተደርጓል።",
+            "በማኅሌት፣ በንባብ ማስታወሻዎች፣ በብራና ካርድ ማጋሪያ እና በመጻሕፍት መደርደሪያ ካርዶች ላይ የነበሩ የይዘት መቆረጥ ችግሮች ተፈትተዋል።",
+        ),
+    ),
+    ReleaseNote(
         version = "1.8.7",
         title = "Books Candle Reading Card, Floating Bottom Bar Cradle Polish, and Update Check Fix",
         titleAm = "የንባብ ካርድ በሻማ ሂደት ጠቋሚ፣ የተጣራ የታችኛው መቃኛ እና የቀጥታ ማዘመኛ ማስተካከያ",

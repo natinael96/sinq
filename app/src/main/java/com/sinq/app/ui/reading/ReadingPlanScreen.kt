@@ -610,9 +610,9 @@ private fun CatchUpBanner(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(Spacing.sm))
-            Row(
+            FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs),
             ) {
                 Box(
                     modifier = Modifier
@@ -679,9 +679,9 @@ private fun StudyCard(
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Spacer(Modifier.height(Spacing.sm))
-            Row(
+            FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs),
             ) {
                 if (hasCatena) {
                     DoorChip(
